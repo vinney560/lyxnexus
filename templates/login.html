@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | LyxNexus</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<style>
+    :root {
+        --bg-color: #111827;
+        --text-color: #F9FAFB;
+        --accent-color: #4A90E2;
+        --secondary-color: #8B5CF6;
+    }
+    
+    body {
+        font-family: 'Poppins', sans-serif;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .gradient-text {
+        background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        color: transparent;
+    }
+    
+    .glass-morph {
+        background: rgba(30, 30, 40, 0.6);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        box-shadow: 0 8px 32px rgba(0, 31, 135, 0.2);
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        transition: all 0.3s ease;
+    }
+    
+    .glass-morph:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 40px rgba(0, 31, 135, 0.3);
+    }
+    
+    .btn {
+        background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 50px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+        cursor: pointer;
+        width: 100%;
+    }
+    
+    .btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+    }
+    
+    .btn-outline {
+        background: transparent;
+        border: 2px solid #3B82F6;
+        color: #3B82F6;
+    }
+    
+    .btn-outline:hover {
+        background: #3B82F6;
+        color: white;
+    }
+    
+    .btn-admin {
+        background: linear-gradient(90deg, #8B5CF6, #EC4899);
+    }
+    
+    .logo-container {
+        background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+        border-radius: 20px;
+        padding: 15px;
+        display: inline-block;
+        margin-bottom: 10px;
+    }
+    
+    .form-input {
+        background: rgba(30, 30, 40, 0.8);
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        border-radius: 10px;
+        padding: 12px 15px;
+        color: white;
+        width: 100%;
+        margin-bottom: 15px;
+        transition: all 0.3s ease;
+    }
+    
+    .form-input:focus {
+        outline: none;
+        border-color: #3B82F6;
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+        color: #D1D5DB;
+    }
+    
+    .floating {
+        animation: floating 3s ease-in-out infinite;
+    }
+    
+    @keyframes floating {
+        0% { transform: translate(0, 0px); }
+        50% { transform: translate(0, 15px); }
+        100% { transform: translate(0, -0px); }
+    }
+    
+    .tab-content {
+        display: none;
+    }
+    
+    .tab-content.active {
+        display: block;
+    }
+    
+    .tab-button {
+        background: transparent;
+        border: none;
+        padding: 12px 20px;
+        color: #9CA3AF;
+        border-bottom: 2px solid transparent;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    
+    .tab-button.active {
+        color: #3B82F6;
+        border-bottom-color: #3B82F6;
+    }
+    
+    .alert {
+        padding: 12px 15px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+    }
+    
+    .alert-error {
+        background: rgba(239, 68, 68, 0.1);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        color: #FCA5A5;
+    }
+    
+    .alert-success {
+        background: rgba(16, 185, 129, 0.1);
+        border: 1px solid rgba(16, 185, 129, 0.3);
+        color: #6EE7B7;
+    }
+    
+    .alert-info {
+        background: rgba(59, 130, 246, 0.1);
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        color: #93C5FD;
+    }
+    
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    .modal-content {
+        background: var(--bg-color);
+        border-radius: 15px;
+        padding: 30px;
+        width: 90%;
+        max-width: 500px;
+        border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+    
+    .admin-badge {
+        background: linear-gradient(90deg, #8B5CF6, #EC4899);
+        color: white;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        display: inline-block;
+        margin-left: 10px;
+    }
+</style>
+<body>
+    <!-- Login Container -->
+    <div class="w-full max-w-md mx-4">
+        <div class="glass-morph rounded-2xl p-8">
+            <!-- Logo and Header -->
+            <div class="text-center mb-8">
+                <div class="logo-container floating">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                        <polyline points="7.5 4.21 12 6.81 16.5 4.21"></polyline>
+                        <polyline points="7.5 19.79 7.5 14.6 3 12"></polyline>
+                        <polyline points="21 12 16.5 14.6 16.5 19.79"></polyline>
+                        <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                        <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                    </svg>
+                </div>
+                <h1 class="text-3xl font-bold gradient-text">LyxNexus</h1>
+                <p class="text-gray-400 mt-2">Enter your credentials to continue</p>
+            </div>
+
+            <!-- Tabs -->
+            <div class="flex border-b border-gray-700 mb-6">
+                <button class="tab-button active" data-tab="student-tab">Student Login</button>
+                <button class="tab-button" data-tab="admin-tab">Admin Access</button>
+            </div>
+
+            <!-- Flash Messages -->
+            <div id="flash-messages">
+                <!-- Flash messages will be inserted here by JavaScript -->
+            </div>
+
+            <!-- Student Login Form -->
+            <div id="student-tab" class="tab-content active">
+                <form id="student-login-form" method="POST">
+                    <div class="form-group">
+                        <label class="form-label" for="username">Username</label>
+                        <input type="text" id="username" name="username" class="form-input" placeholder="Enter your username" maxlength="50" value="{{ username if username }}">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="mobile">Mobile Number</label>
+                        <input type="tel" id="mobile" name="mobile" class="form-input" placeholder="10-digit mobile number" pattern="[0-9]{10}" value="{{ mobile if mobile }}">
+                        <p class="text-gray-400 text-xs mt-1">Enter your 10-digit mobile number</p>
+                    </div>
+                    
+                    <button type="submit" class="btn mt-4">
+                        <i class="fas fa-sign-in-alt mr-2"></i> Login as Student
+                    </button>
+                </form>
+                
+                <div class="mt-6 text-center">
+                    <p class="text-gray-400">Need admin access?</p>
+                    <button class="btn-outline mt-2 text-sm" onclick="openTab('admin-tab')">
+                        <i class="fas fa-user-shield mr-2"></i> Switch to Admin
+                    </button>
+                </div>
+            </div>
+
+            <!-- Admin Access Form -->
+            <div id="admin-tab" class="tab-content">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle mr-2"></i>
+                    <span>Admin access requires special privileges</span>
+                </div>
+                
+                <form id="admin-login-form">
+                    <div class="form-group">
+                        <label class="form-label" for="admin-mobile">Mobile Number</label>
+                        <input type="tel" id="admin-mobile" name="mobile" class="form-input" placeholder="10-digit mobile number" pattern="[0-9]{10}">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="admin-secret">Admin Secret Key</label>
+                        <input type="password" id="admin-secret" name="secret" class="form-input" placeholder="Enter admin secret key">
+                    </div>
+                    
+                    <button type="submit" class="btn btn-admin mt-4">
+                        <i class="fas fa-key mr-2"></i> Access Admin Panel
+                    </button>
+                </form>
+                
+                <div class="mt-6 text-center">
+                    <p class="text-gray-400">Don't have admin access?</p>
+                    <button class="btn-outline mt-2 text-sm" onclick="openRegisterAdminModal()">
+                        <i class="fas fa-user-plus mr-2"></i> Register as Admin
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center mt-6 text-gray-500 text-sm">
+            <p>&copy; {{ year }} LyxNexus. All rights reserved.</p>
+        </div>
+    </div>
+
+    <!-- Register Admin Modal -->
+    <div id="register-admin-modal" class="modal">
+        <div class="modal-content">
+            <h3 class="text-xl font-bold mb-4 gradient-text">Register as Administrator</h3>
+            <div class="alert alert-info mb-4">
+                <i class="fas fa-shield-alt mr-2"></i>
+                <span>Admin registration requires master authorization</span>
+            </div>
+            
+            <form id="register-admin-form">
+                <div class="form-group">
+                    <label class="form-label" for="new-admin-mobile">Mobile Number</label>
+                    <input type="tel" id="new-admin-mobile" name="mobile" class="form-input" placeholder="10-digit mobile number" pattern="[0-9]{10}" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="new-admin-username">Username</label>
+                    <input type="text" id="new-admin-username" name="username" class="form-input" placeholder="Admin username" maxlength="50" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="master-key">Master Authorization Key</label>
+                    <input type="password" id="master-key" name="master_key" class="form-input" placeholder="Enter master key" required>
+                    <p class="text-gray-400 text-xs mt-1">Contact system administrator for the master key</p>
+                </div>
+                
+                <div class="flex justify-end space-x-3 mt-6">
+                    <button type="button" class="btn-outline" onclick="closeModal('register-admin-modal')">Cancel</button>
+                    <button type="submit" class="btn btn-admin">
+                        <i class="fas fa-user-shield mr-2"></i> Register Admin
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // API endpoints
+        const API_BASE = '/api';
+        const ENDPOINTS = {
+            REGISTER_ADMIN: `${API_BASE}/register-admin`,
+            PROMOTE_TO_ADMIN: `${API_BASE}/promote-to-admin`,
+            LOGIN: '/login'
+        };
+
+        // Tab management
+        function openTab(tabName) {
+            // Hide all tab content
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Remove active class from all tab buttons
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.classList.remove('active');
+            });
+            
+            // Show the specific tab content
+            document.getElementById(tabName).classList.add('active');
+            
+            // Add active class to the clicked button
+            event.target.classList.add('active');
+            
+            // Clear any existing flash messages
+            clearFlashMessages();
+        }
+
+        // Modal management
+        function openRegisterAdminModal() {
+            document.getElementById('register-admin-modal').style.display = 'flex';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        }
+
+        // Clear flash messages
+        function clearFlashMessages() {
+            document.getElementById('flash-messages').innerHTML = '';
+        }
+
+        // Show flash message
+        function showFlashMessage(message, type) {
+            const flashContainer = document.getElementById('flash-messages');
+            const alertClass = type === 'error' ? 'alert-error' : 
+                              type === 'success' ? 'alert-success' : 'alert-info';
+            
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert ${alertClass}`;
+            alertDiv.innerHTML = `
+                <i class="fas ${type === 'error' ? 'fa-exclamation-triangle' : 
+                              type === 'success' ? 'fa-check-circle' : 'fa-info-circle'} mr-2"></i>
+                <span>${message}</span>
+            `;
+            
+            flashContainer.appendChild(alertDiv);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.parentNode.removeChild(alertDiv);
+                }
+            }, 5000);
+        }
+
+        // Validate mobile number
+        function validateMobile(mobile) {
+            return /^\d{10}$/.test(mobile);
+        }
+
+        // Register admin via API
+        async function registerAdmin(formData) {
+            try {
+                const response = await fetch(ENDPOINTS.REGISTER_ADMIN, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.error || 'Registration failed');
+                }
+                
+                return data;
+            } catch (error) {
+                console.error('Error registering admin:', error);
+                throw error;
+            }
+        }
+
+        // Promote existing user to admin via API
+        async function promoteToAdmin(formData) {
+            try {
+                const response = await fetch(ENDPOINTS.PROMOTE_TO_ADMIN, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.error || 'Promotion failed');
+                }
+                
+                return data;
+            } catch (error) {
+                console.error('Error promoting to admin:', error);
+                throw error;
+            }
+        }
+
+        // Form submission handlers
+        document.getElementById('student-login-form').addEventListener('submit', function(e) {
+            const mobile = document.getElementById('mobile').value;
+            
+            if (!validateMobile(mobile)) {
+                e.preventDefault();
+                showFlashMessage('Please enter a valid 10-digit mobile number', 'error');
+                return;
+            }
+            
+            // Form will submit normally to Flask route
+        });
+
+        document.getElementById('admin-login-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const mobile = document.getElementById('admin-mobile').value;
+            const secret = document.getElementById('admin-secret').value;
+            
+            if (!validateMobile(mobile)) {
+                showFlashMessage('Please enter a valid 10-digit mobile number', 'error');
+                return;
+            }
+            
+            if (!secret) {
+                showFlashMessage('Please enter the admin secret key', 'error');
+                return;
+            }
+            
+            // For now, we'll use the same login endpoint but with additional data
+            // In a real implementation, you'd have a separate admin login endpoint
+            const formData = new FormData();
+            formData.append('mobile', mobile);
+            formData.append('admin_secret', secret);
+            
+            fetch(ENDPOINTS.LOGIN, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (response.redirected) {
+                    window.location.href = response.url;
+                } else {
+                    return response.text().then(html => {
+                        // If login failed, show error
+                        showFlashMessage('Invalid admin credentials', 'error');
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Login error:', error);
+                showFlashMessage('Login failed. Please try again.', 'error');
+            });
+        });
+
+        document.getElementById('register-admin-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const mobile = document.getElementById('new-admin-mobile').value;
+            const username = document.getElementById('new-admin-username').value;
+            const masterKey = document.getElementById('master-key').value;
+            
+            if (!validateMobile(mobile)) {
+                showFlashMessage('Please enter a valid 10-digit mobile number', 'error');
+                return;
+            }
+            
+            if (!username) {
+                showFlashMessage('Please enter a username', 'error');
+                return;
+            }
+            
+            if (!masterKey) {
+                showFlashMessage('Please enter the master authorization key', 'error');
+                return;
+            }
+            
+            const formData = {
+                mobile: mobile,
+                username: username,
+                master_key: masterKey
+            };
+            
+            try {
+                // Try to register as new admin
+                const result = await registerAdmin(formData);
+                showFlashMessage('Admin account created successfully! You can now login.', 'success');
+                closeModal('register-admin-modal');
+                
+                // Switch to admin tab and pre-fill mobile
+                openTab('admin-tab');
+                document.getElementById('admin-mobile').value = mobile;
+            } catch (error) {
+                // If registration fails, try to promote existing user
+                try {
+                    const result = await promoteToAdmin(formData);
+                    showFlashMessage('User promoted to admin successfully! You can now login.', 'success');
+                    closeModal('register-admin-modal');
+                    
+                    // Switch to admin tab and pre-fill mobile
+                    openTab('admin-tab');
+                    document.getElementById('admin-mobile').value = mobile;
+                } catch (promoteError) {
+                    showFlashMessage(promoteError.message || 'Admin registration failed', 'error');
+                }
+            }
+        });
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if there are any Flask flash messages
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        showFlashMessage("{{ message }}", "{{ 'error' if category == 'error' else 'info' }}");
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            
+            // Mobile number formatting
+            const mobileInputs = document.querySelectorAll('input[type="tel"]');
+            mobileInputs.forEach(input => {
+                input.addEventListener('input', function() {
+                    this.value = this.value.replace(/\D/g, '').slice(0, 10);
+                });
+            });
+        });
+        'serviceWorker'in navigator&&navigator.serviceWorker.register('/service-worker.js').then(r=>console.log("SW registered:",r)).catch(e=>console.error("SW failed:",e)),window.addEventListener("online",()=>location.reload()),window.addEventListener("offline",()=>location.href="/offline.html");
+    </script>
+</body>
+</html>
