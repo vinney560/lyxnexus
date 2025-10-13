@@ -245,6 +245,33 @@ def _year():
     """Return the current year in Nairobi time (UTC+3)."""
     return nairobi_time().year
 
+ALLOWED_KEYWORDS = [
+    "mozilla",      # Chrome, Firefox, Edge, Safari all contain this
+    "applewebkit",  # Chrome, Safari
+    "chrome",       
+    "safari",
+    "firefox",
+    "edge",
+]
+
+@app.before_request
+def allow_only_known_browsers():
+    ua = request.headers.get("User-Agent", "").lower()
+
+    # No User-Agent? Probably a script or bot
+    if not ua:
+        abort(403)
+
+    # If none of the allowed patterns appear → block
+    if not any(kw in ua for kw in ALLOWED_KEYWORDS):
+        abort(403)
+
+    # Optionally: require some common browser headers
+    required_headers = ["accept", "accept-language"]
+    for h in required_headers:
+        if h not in {k.lower() for k in request.headers.keys()}:
+            abort(403)
+
 def admin_required(f):
     @wraps(f)
     def decorator(*args, **kwargs):
@@ -331,29 +358,12 @@ def main_page():
 def admin_page():
     return render_template('admin.html', year=_year)
 
-#--------------------------------------------------------------------
-@app.route('/favicon.ico')
-def favicon():
-    return send_from_directory(app.config['UPLOAD_FOLDER'], 'favicon.ico')
-#--------------------------------------------------------------------
-@app.route('/manifest.json')
-def manifest():
-    return send_from_directory(os.path.dirname(os.path.abspath(__file__)), 'manifest.json', mimetype='application/manifest+json')
-#--------------------------------------------------------------------
-@app.route("/offline.html")
-def offline_html():
-    return render_template("offline.html")
-#-------------------------------------------------------------------
-@app.route('/service-worker.js')
-def sw():
-    return send_from_directory('static', 'service-worker.js', mimetype='application/javascript')
-#-------------------------------------------------------------------
-@app.route('/is_authenticated')
-def is_authenticated():
-    return jsonify({'authenticated': current_user.is_authenticated})
-#-------------------------------------------------------------------
-# Initialize SocketIO
-socketio = SocketIO(app, cors_allowed_origins="*")
+# User management route
+@app.route('/admin/users')
+def admin_users():
+    if not current_user.is_admin:
+        return redirect(url_for('index'))
+    return render_template('admin_users.html')
 
 @app.route('/messages')
 @login_required
@@ -376,7 +386,30 @@ def messages_page():
     return render_template('messages.html', 
                          messages=recent_messages,
                          unread_count=unread_count)
-
+#--------------------------------------------------------------------
+@app.route('/favicon.ico')
+def favicon():
+    return send_from_directory(app.config['UPLOAD_FOLDER'], 'favicon.ico')
+#--------------------------------------------------------------------
+@app.route('/manifest.json')
+def manifest():
+    return send_from_directory(os.path.dirname(os.path.abspath(__file__)), 'manifest.json', mimetype='application/manifest+json')
+#--------------------------------------------------------------------
+@app.route("/offline.html")
+def offline_html():
+    return render_template("offline.html")
+#-------------------------------------------------------------------
+@app.route('/service-worker.js')
+def sw():
+    return send_from_directory('static', 'service-worker.js', mimetype='application/javascript')
+#-------------------------------------------------------------------
+@app.route('/is_authenticated')
+def is_authenticated():
+    return jsonify({'authenticated': current_user.is_authenticated})
+#-------------------------------------------------------------------
+# =========================================
+# API MESSAGES DATA
+# =========================================
 @app.route('/api/messages')
 @login_required
 def get_messages():
@@ -511,6 +544,66 @@ def handle_leave_room(data):
             'user_id': current_user.id,
             'username': current_user.username
         })    
+# =========================================
+# API USERS DATA
+# =========================================
+@app.route('/api/users')
+def get_users():
+    if not current_user.is_admin:
+        return jsonify({'error': 'Unauthorized'}), 403
+    
+    users = User.query.all()
+    users_data = []
+    
+    for user in users:
+        users_data.append({
+            'id': user.id,
+            'username': user.username,
+            'mobile': user.mobile,
+            'created_at': user.created_at.isoformat() if user.created_at else None,
+            'is_admin': user.is_admin,
+            'announcements_count': len(user.announcements),
+            'assignments_count': len(user.assignments)
+        })
+    
+    return jsonify(users_data)
+
+# API endpoint to delete user
+@app.route('/api/users/<int:user_id>', methods=['DELETE'])
+def delete_user(user_id):
+    if not current_user.is_admin:
+        return jsonify({'error': 'Unauthorized'}), 403
+    
+    user = User.query.get_or_404(user_id)
+    
+    # Prevent deleting yourself
+    if user.id == current_user.id:
+        return jsonify({'error': 'Cannot delete your own account'}), 400
+    
+    db.session.delete(user)
+    db.session.commit()
+    
+    return jsonify({'message': 'User deleted successfully'})
+
+# API endpoint to toggle admin status
+@app.route('/api/users/<int:user_id>/toggle-admin', methods=['PUT'])
+def toggle_admin(user_id):
+    if not current_user.is_admin:
+        return jsonify({'error': 'Unauthorized'}), 403
+    
+    user = User.query.get_or_404(user_id)
+    
+    # Prevent modifying your own admin status
+    if user.id == current_user.id:
+        return jsonify({'error': 'Cannot modify your own admin status'}), 400
+    
+    user.is_admin = not user.is_admin
+    db.session.commit()
+    
+    return jsonify({
+        'message': 'Admin status updated successfully',
+        'is_admin': user.is_admin
+    })
 
 # =========================================
 # ANNOUNCEMENT API ROUTES
