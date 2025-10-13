@@ -210,8 +210,15 @@ def load_user(user_id):
     try:
         return User.query.get(int(user_id))
     except Exception as e:
-        print('Connection Lost on User Load')
+        print(f'⚠️ Error loading user {user_id}: {e}')
+        db.session.rollback()  # ✅ reset failed transaction
         return None
+@app.teardown_request
+def teardown_request(exception):
+    if exception:
+        db.session.rollback()
+    db.session.remove()
+
 
 def _year():
     """Return the current year in Nairobi time (UTC+3)."""
