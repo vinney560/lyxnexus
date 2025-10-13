@@ -354,15 +354,16 @@ def main_page():
     return render_template('main_page.html', year=_year)
 
 @app.route('/admin')
+@login_required
 @admin_required
 def admin_page():
     return render_template('admin.html', year=_year)
 
 # User management route
 @app.route('/admin/users')
+@login_required
+@admin_required
 def admin_users():
-    if not current_user.is_admin:
-        return redirect(url_for('index'))
     return render_template('admin_users.html')
 
 @app.route('/messages')
@@ -548,9 +549,9 @@ def handle_leave_room(data):
 # API USERS DATA
 # =========================================
 @app.route('/api/users')
+@login_manager
+@admin_required
 def get_users():
-    if not current_user.is_admin:
-        return jsonify({'error': 'Unauthorized'}), 403
     
     users = User.query.all()
     users_data = []
@@ -569,10 +570,10 @@ def get_users():
     return jsonify(users_data)
 
 # API endpoint to delete user
-@app.route('/api/users/<int:user_id>', methods=['DELETE'])
+@app.route('/api/users/<int:user_id>', methods=['DELETE', 'POST', 'GET'])
+@login_required
+@admin_required
 def delete_user(user_id):
-    if not current_user.is_admin:
-        return jsonify({'error': 'Unauthorized'}), 403
     
     user = User.query.get_or_404(user_id)
     
@@ -587,9 +588,9 @@ def delete_user(user_id):
 
 # API endpoint to toggle admin status
 @app.route('/api/users/<int:user_id>/toggle-admin', methods=['PUT'])
+@login_required
+@admin_required
 def toggle_admin(user_id):
-    if not current_user.is_admin:
-        return jsonify({'error': 'Unauthorized'}), 403
     
     user = User.query.get_or_404(user_id)
     
