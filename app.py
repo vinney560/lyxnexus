@@ -575,7 +575,7 @@ def get_users():
 @admin_required
 def delete_user(user_id):
     
-    user = User.query.get_or_404(user_id)
+    user = User.query.get(user_id)
     
     # Prevent deleting yourself
     if user.id == current_user.id:
