@@ -549,7 +549,7 @@ def handle_leave_room(data):
 # API USERS DATA
 # =========================================
 @app.route('/api/users')
-@login_manager
+@login_required
 @admin_required
 def get_users():
     
