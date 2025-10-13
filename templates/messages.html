@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Messages | LyxNexus</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<style>
+    :root {
+        --bg-color: #111827;
+        --text-color: #F9FAFB;
+        --accent-color: #4A90E2;
+        --secondary-color: #8B5CF6;
+    }
+    
+    body {
+        font-family: 'Poppins', sans-serif;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        overflow-x: hidden;
+    }
+    
+    .gradient-text {
+        background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        color: transparent;
+    }
+    
+    .glass-morph {
+        background: rgba(30, 30, 40, 0.6);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        box-shadow: 0 8px 32px rgba(0, 31, 135, 0.2);
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        transition: all 0.3s ease;
+    }
+    
+    .glass-morph:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 40px rgba(0, 31, 135, 0.3);
+    }
+    
+    .btn {
+        background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+        color: white;
+        border: none;
+        padding: 10px 24px;
+        border-radius: 50px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+        cursor: pointer;
+    }
+    
+    .btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+    }
+    
+    .btn-outline {
+        background: transparent;
+        border: 2px solid #3B82F6;
+        color: #3B82F6;
+    }
+    
+    .btn-outline:hover {
+        background: #3B82F6;
+        color: white;
+    }
+    
+    .logo-container {
+        background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+        border-radius: 20px;
+        padding: 12px;
+        display: inline-block;
+    }
+    
+    .message-container {
+        background: rgba(30, 30, 40, 0.7);
+        border-radius: 15px;
+        padding: 20px;
+        height: 70vh;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .messages-list {
+        flex: 1;
+        overflow-y: auto;
+        padding: 10px;
+        margin-bottom: 15px;
+    }
+    
+    .message {
+        padding: 12px 15px;
+        margin-bottom: 10px;
+        border-radius: 12px;
+        max-width: 80%;
+        word-wrap: break-word;
+    }
+    
+    .message.user-message {
+        background: rgba(59, 130, 246, 0.2);
+        margin-left: auto;
+        border-bottom-right-radius: 5px;
+    }
+    
+    .message.other-message {
+        background: rgba(55, 65, 81, 0.5);
+        margin-right: auto;
+        border-bottom-left-radius: 5px;
+    }
+    
+    .message.admin-message {
+        background: linear-gradient(135deg, rgba(139, 92, 246, 0.3), rgba(59, 130, 246, 0.3));
+        border: 2px solid rgba(139, 92, 246, 0.5);
+        margin: 15px auto;
+        max-width: 90%;
+        box-shadow: 0 4px 15px rgba(139, 92, 246, 0.2);
+        animation: pulse-admin 2s infinite;
+    }
+    
+    @keyframes pulse-admin {
+        0% { border-color: rgba(139, 92, 246, 0.5); }
+        50% { border-color: rgba(139, 92, 246, 0.8); }
+        100% { border-color: rgba(139, 92, 246, 0.5); }
+    }
+    
+    .message-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 5px;
+    }
+    
+    .username {
+        font-weight: 600;
+        font-size: 0.9em;
+    }
+    
+    .admin-badge {
+        background: linear-gradient(135deg, #8B5CF6, #3B82F6);
+        color: white;
+        padding: 2px 8px;
+        border-radius: 10px;
+        font-size: 0.7em;
+        margin-left: 8px;
+    }
+    
+    .timestamp {
+        font-size: 0.8em;
+        color: #9CA3AF;
+    }
+    
+    .message-content {
+        line-height: 1.4;
+    }
+    
+    .message-input-container {
+        display: flex;
+        gap: 10px;
+        padding: 15px;
+        background: rgba(30, 30, 40, 0.8);
+        border-radius: 12px;
+    }
+    
+    .message-input {
+        flex: 1;
+        background: rgba(55, 65, 81, 0.5);
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        border-radius: 25px;
+        padding: 12px 20px;
+        color: white;
+        font-family: 'Poppins', sans-serif;
+        resize: none;
+        max-height: 100px;
+    }
+    
+    .message-input:focus {
+        outline: none;
+        border-color: #3B82F6;
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+    }
+    
+    .send-btn {
+        background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+        border: none;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .send-btn:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+    }
+    
+    .send-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+    }
+    
+    .typing-indicator {
+        padding: 5px 15px;
+        font-style: italic;
+        color: #9CA3AF;
+        font-size: 0.9em;
+    }
+    
+    .online-users {
+        background: rgba(30, 30, 40, 0.7);
+        border-radius: 15px;
+        padding: 20px;
+        max-height: 300px;
+        overflow-y: auto;
+    }
+    
+    .user-item {
+        display: flex;
+        align-items: center;
+        padding: 8px 12px;
+        margin-bottom: 8px;
+        border-radius: 8px;
+        background: rgba(55, 65, 81, 0.3);
+    }
+    
+    .user-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 10px;
+        font-size: 0.8em;
+        font-weight: 600;
+    }
+    
+    .user-admin .user-avatar {
+        background: linear-gradient(135deg, #8B5CF6, #EC4899);
+    }
+    
+    .unread-badge {
+        background: #EF4444;
+        color: white;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.7em;
+        margin-left: auto;
+    }
+    
+    /* Scrollbar styling */
+    .messages-list::-webkit-scrollbar {
+        width: 6px;
+    }
+    
+    .messages-list::-webkit-scrollbar-track {
+        background: rgba(55, 65, 81, 0.3);
+        border-radius: 3px;
+    }
+    
+    .messages-list::-webkit-scrollbar-thumb {
+        background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+        border-radius: 3px;
+    }
+    
+    .messages-list::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(135deg, #8B5CF6, #3B82F6);
+    }
+    
+    @media (max-width: 768px) {
+        .message {
+            max-width: 90%;
+        }
+        
+        .message.admin-message {
+            max-width: 95%;
+        }
+        
+        .online-users {
+            max-height: 200px;
+        }
+    }
+</style>
+<body>
+    <!-- Header -->
+    <header class="glass-morph sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-4">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-3">
+                    <div class="logo-container">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                            <polyline points="7.5 4.21 12 6.81 16.5 4.21"></polyline>
+                            <polyline points="7.5 19.79 7.5 14.6 3 12"></polyline>
+                            <polyline points="21 12 16.5 14.6 16.5 19.79"></polyline>
+                            <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                            <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold gradient-text">LyxNexus</h1>
+                        <p class="text-sm text-gray-400">Live Messages</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-center space-x-4">
+                    {% if unread_count > 0 %}
+                    <span class="unread-badge">{{ unread_count }}</span>
+                    {% endif %}
+                    <button onclick="window.history.back()" class="btn-outline">
+                        <i class="fas fa-arrow-left mr-2"></i>Back
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 py-6">
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <!-- Messages Container -->
+            <div class="lg:col-span-3">
+                <div class="message-container">
+                    <div class="messages-list" id="messagesList">
+                        <!-- Messages will be loaded here -->
+                        {% for message in messages %}
+                        <div class="message {% if message.user_id == current_user.id %}user-message{% elif message.is_admin_message %}admin-message{% else %}other-message{% endif %}" 
+                             data-message-id="{{ message.id }}">
+                            <div class="message-header">
+                                <div class="flex items-center">
+                                    <span class="username">{{ message.user.username }}</span>
+                                    {% if message.is_admin_message %}
+                                    <span class="admin-badge">ADMIN</span>
+                                    {% endif %}
+                                </div>
+                                <span class="timestamp">{{ message.created_at.strftime('%H:%M') }}</span>
+                            </div>
+                            <div class="message-content">{{ message.content }}</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="typing-indicator" id="typingIndicator" style="display: none;"></div>
+                    
+                    <div class="message-input-container">
+                        <textarea 
+                            id="messageInput" 
+                            class="message-input" 
+                            placeholder="Type your message..." 
+                            rows="1"
+                            maxlength="1000"
+                        ></textarea>
+                        <button id="sendButton" class="send-btn">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Online Users -->
+            <div class="lg:col-span-1">
+                <div class="online-users">
+                    <h3 class="text-lg font-bold mb-4 gradient-text">Online Users</h3>
+                    <div id="onlineUsersList">
+                        <!-- Online users will be populated by JavaScript -->
+                    </div>
+                </div>
+                
+                <!-- Room Selection -->
+                <div class="online-users mt-6">
+                    <h3 class="text-lg font-bold mb-4 gradient-text">Chat Rooms</h3>
+                    <div class="space-y-2">
+                        <button class="room-btn active w-full text-left p-3 rounded-lg bg-blue-500 bg-opacity-20 border border-blue-500">
+                            <i class="fas fa-hashtag mr-2"></i>General
+                        </button>
+                        <button class="room-btn w-full text-left p-3 rounded-lg bg-gray-700 hover:bg-gray-600">
+                            <i class="fas fa-hashtag mr-2"></i>Help
+                        </button>
+                        <button class="room-btn w-full text-left p-3 rounded-lg bg-gray-700 hover:bg-gray-600">
+                            <i class="fas fa-hashtag mr-2"></i>Announcements
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Socket.IO connection
+        const socket = io();
+        
+        // DOM elements
+        const messagesList = document.getElementById('messagesList');
+        const messageInput = document.getElementById('messageInput');
+        const sendButton = document.getElementById('sendButton');
+        const typingIndicator = document.getElementById('typingIndicator');
+        const onlineUsersList = document.getElementById('onlineUsersList');
+        
+        // State
+        let currentRoom = 'general';
+        let onlineUsers = {};
+        let typingTimer;
+        
+        // Format time
+        function formatTime(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+        
+        // Scroll to bottom of messages
+        function scrollToBottom() {
+            messagesList.scrollTop = messagesList.scrollHeight;
+        }
+        
+        // Add message to UI
+        function addMessage(messageData) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${messageData.user_id === {{ current_user.id }} ? 'user-message' : messageData.is_admin_message ? 'admin-message' : 'other-message'}`;
+            messageDiv.setAttribute('data-message-id', messageData.id);
+            
+            messageDiv.innerHTML = `
+                <div class="message-header">
+                    <div class="flex items-center">
+                        <span class="username">${messageData.username}</span>
+                        ${messageData.is_admin_message ? '<span class="admin-badge">ADMIN</span>' : ''}
+                    </div>
+                    <span class="timestamp">${formatTime(messageData.created_at)}</span>
+                </div>
+                <div class="message-content">${messageData.content}</div>
+            `;
+            
+            messagesList.appendChild(messageDiv);
+            scrollToBottom();
+            
+            // Mark as read
+            markMessageAsRead(messageData.id);
+        }
+        
+        // Mark message as read
+        function markMessageAsRead(messageId) {
+            fetch('/api/messages/read', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ message_ids: [messageId] })
+            });
+        }
+        
+        // Send message
+        function sendMessage() {
+            const content = messageInput.value.trim();
+            if (!content) return;
+            
+            socket.emit('send_message', {
+                content: content,
+                room: currentRoom
+            });
+            
+            messageInput.value = '';
+            adjustTextareaHeight();
+        }
+        
+        // Adjust textarea height
+        function adjustTextareaHeight() {
+            messageInput.style.height = 'auto';
+            messageInput.style.height = Math.min(messageInput.scrollHeight, 100) + 'px';
+        }
+        
+        // Update online users list
+        function updateOnlineUsers() {
+            onlineUsersList.innerHTML = '';
+            
+            Object.values(onlineUsers).forEach(user => {
+                const userDiv = document.createElement('div');
+                userDiv.className = `user-item ${user.is_admin ? 'user-admin' : ''}`;
+                
+                userDiv.innerHTML = `
+                    <div class="user-avatar">
+                        ${user.username.charAt(0).toUpperCase()}
+                    </div>
+                    <span>${user.username}</span>
+                    ${user.is_admin ? '<span class="admin-badge ml-2">ADMIN</span>' : ''}
+                `;
+                
+                onlineUsersList.appendChild(userDiv);
+            });
+        }
+        
+        // Socket event listeners
+        socket.on('connect', () => {
+            console.log('Connected to server');
+        });
+        
+        socket.on('new_message', (messageData) => {
+            addMessage(messageData);
+        });
+        
+        socket.on('user_joined', (data) => {
+            onlineUsers[data.user_id] = {
+                username: data.username,
+                is_admin: data.is_admin
+            };
+            updateOnlineUsers();
+            
+            // Show join notification
+            const notificationDiv = document.createElement('div');
+            notificationDiv.className = 'text-center text-gray-400 text-sm py-2';
+            notificationDiv.textContent = data.message;
+            messagesList.appendChild(notificationDiv);
+            scrollToBottom();
+        });
+        
+        socket.on('user_left', (data) => {
+            delete onlineUsers[data.user_id];
+            updateOnlineUsers();
+            
+            // Show leave notification
+            const notificationDiv = document.createElement('div');
+            notificationDiv.className = 'text-center text-gray-400 text-sm py-2';
+            notificationDiv.textContent = data.message;
+            messagesList.appendChild(notificationDiv);
+            scrollToBottom();
+        });
+        
+        socket.on('user_typing', (data) => {
+            typingIndicator.textContent = `${data.username} is typing...`;
+            typingIndicator.style.display = 'block';
+            
+            clearTimeout(typingTimer);
+            typingTimer = setTimeout(() => {
+                typingIndicator.style.display = 'none';
+            }, 1000);
+        });
+        
+        // DOM event listeners
+        sendButton.addEventListener('click', sendMessage);
+        
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+        
+        messageInput.addEventListener('input', adjustTextareaHeight);
+        
+        messageInput.addEventListener('input', () => {
+            if (messageInput.value.trim()) {
+                socket.emit('typing', { room: currentRoom });
+            }
+        });
+        
+        // Room switching
+        document.querySelectorAll('.room-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.room-btn').forEach(b => {
+                    b.classList.remove('active', 'bg-blue-500', 'bg-opacity-20', 'border', 'border-blue-500');
+                    b.classList.add('bg-gray-700', 'hover:bg-gray-600');
+                });
+                
+                this.classList.add('active', 'bg-blue-500', 'bg-opacity-20', 'border', 'border-blue-500');
+                this.classList.remove('bg-gray-700', 'hover:bg-gray-600');
+                
+                const roomName = this.textContent.trim().split(' ')[1];
+                socket.emit('leave_room', { room: currentRoom });
+                currentRoom = roomName.toLowerCase();
+                socket.emit('join_room', { room: currentRoom });
+                
+                // Clear messages and load new room messages
+                messagesList.innerHTML = '<div class="text-center text-gray-400 py-4">Loading messages...</div>';
+                
+                fetch(`/api/messages?room=${currentRoom}`)
+                    .then(response => response.json())
+                    .then(messages => {
+                        messagesList.innerHTML = '';
+                        messages.forEach(addMessage);
+                    });
+            });
+        });
+        
+        // Initial setup
+        window.addEventListener('load', () => {
+            scrollToBottom();
+            adjustTextareaHeight();
+            
+            // Mark all visible messages as read
+            const messageIds = Array.from(messagesList.querySelectorAll('.message'))
+                .map(msg => parseInt(msg.getAttribute('data-message-id')))
+                .filter(id => !isNaN(id));
+            
+            if (messageIds.length > 0) {
+                fetch('/api/messages/read', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message_ids: messageIds })
+                });
+            }
+        });
+    </script>
+</body>
+</html>
