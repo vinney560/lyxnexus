@@ -580,10 +580,17 @@ def delete_user(user_id):
     # Prevent deleting yourself
     if user.id == current_user.id:
         return jsonify({'error': 'Cannot delete your own account'}), 400
-    
-    db.session.delete(user)
-    db.session.commit()
-    
+    try:
+        db.session.query(MessageRead).filter_by(user_id=user.id).delete()
+        db.session.query(Message).filter_by(user_id=user.id).delete()
+        db.session.query(Announcement).filter_by(user_id=user.id).delete()
+        db.session.query(Assignment).filter_by(user_id=user.id).delete()
+        db.session.delete(user)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
     return jsonify({'message': 'User deleted successfully'})
 
 # API endpoint to toggle admin status
