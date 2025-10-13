@@ -185,8 +185,8 @@ class Timetable(db.Model):
 #==========================================
 class Message(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    content = db.Column(db.Text, nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    content = db.Column(db.Text, nullable=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
     room = db.Column(db.String(100), default='general')  # For different chat rooms
     is_admin_message = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=nairobi_time)
@@ -196,8 +196,8 @@ class Message(db.Model):
 
 class MessageRead(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    message_id = db.Column(db.Integer, db.ForeignKey('message.id'), nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    message_id = db.Column(db.Integer, db.ForeignKey('message.id'), nullable=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
     read_at = db.Column(db.DateTime, default=nairobi_time)
     
     # Relationships
@@ -581,8 +581,8 @@ def delete_user(user_id):
     if user.id == current_user.id:
         return jsonify({'error': 'Cannot delete your own account'}), 400
     try:
-        db.session.query(MessageRead).filter_by(user_id=user.id).delete()
-        db.session.query(Message).filter_by(user_id=user.id).delete()
+        db.session.query(MessageRead).filter_by(user=user.id).delete()
+        db.session.query(Message).filter_by(user=user.id).delete()
         db.session.query(Announcement).filter_by(user_id=user.id).delete()
         db.session.query(Assignment).filter_by(user_id=user.id).delete()
         db.session.delete(user)
