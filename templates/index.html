@@ -168,6 +168,115 @@
         0% { transform: rotate(0deg); }
         100% { transform: rotate(360deg); }
     }
+    /* Mobile Navigation Styles */
+    @media (max-width: 768px) {
+        /* Make navigation buttons smaller on mobile */
+        .flex.space-x-4 {
+            flex-direction: column;
+            gap: 8px;
+            width: 100%;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            font-size: 0.875rem;
+            width: 100%;
+            text-align: center;
+        }
+
+        /* Adjust hero section buttons for mobile */
+        .flex.flex-col.sm\\:flex-row .btn {
+            width: 100%;
+            margin-bottom: 8px;
+        }
+
+        /* Reduce navigation padding */
+        nav .max-w-6xl.mx-auto.px-4.py-4 {
+            padding-top: 0.75rem;
+            padding-bottom: 0.75rem;
+        }
+
+        /* Make logo smaller on mobile */
+        .logo-container {
+            padding: 10px;
+            margin-bottom: 0;
+        }
+
+        .logo-container svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        /* Adjust brand text size */
+        .text-2xl.font-bold {
+            font-size: 1.25rem;
+        }
+
+        /* Stack navigation items vertically if needed */
+        .flex.justify-between.items-center {
+            flex-wrap: wrap;
+        }
+    }
+
+    /* Additional responsive improvements */
+    @media (max-width: 480px) {
+        /* Even smaller buttons on very small screens */
+        .btn {
+            padding: 6px 12px;
+            font-size: 0.8rem;
+        }
+
+        /* Reduce hero section padding */
+        header.py-16.md\\:py-24 {
+            padding-top: 3rem;
+            padding-bottom: 3rem;
+        }
+
+        /* Smaller hero text */
+        .text-4xl.md\\:text-6xl {
+            font-size: 2rem;
+        }
+
+        .text-xl {
+            font-size: 1rem;
+        }
+    }
+
+    /* Ensure buttons maintain good touch targets on mobile */
+    .btn {
+        min-height: 44px; /* Minimum touch target size */
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Improve button spacing in mobile view */
+    @media (max-width: 768px) {
+        .flex.space-x-4 .btn:not(:last-child) {
+            margin-bottom: 8px;
+        }
+    }
+    @media (max-width: 768px) {
+        /* Make entire navigation more compact */
+        nav {
+            padding: 0.5rem 0;
+        }
+        
+        /* Hide desktop navigation links on mobile */
+        .hidden.md\\:flex.space-x-8 {
+            display: none;
+        }
+        
+        /* Optional: Add mobile menu if you want navigation links accessible on mobile */
+        .mobile-nav-toggle {
+            display: block;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+    }        
 </style>
 <body>
     <!-- Navigation -->
