@@ -43,8 +43,7 @@ def database_url():
         if db_url:
             try:
                 engine = create_engine(db_url)
-                with engine.connect() as conn:
-                    conn.execute("SELECT 1;")
+                engine.connect().close()
                 print("=" * 70)
                 print(f"✅ Connected to {name}")
                 return db_url
