@@ -741,8 +741,8 @@
             try {
                 setButtonLoading(document.getElementById('confirm-action-btn'), true);
                 
-                const response = await fetch(`${USERS_ENDPOINT}/${currentUserId}`, {
-                    method: 'DELETE'
+                const response = await fetch(`${USERS_ENDPOINT}/${currentUserId}/delete`, {
+                    method: 'POST'
                 });
                 
                 if (!response.ok) {

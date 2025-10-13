@@ -570,7 +570,7 @@ def get_users():
     return jsonify(users_data)
 
 # API endpoint to delete user
-@app.route('/api/users/<int:user_id>', methods=['DELETE', 'POST', 'GET'])
+@app.route('/api/users/<int:user_id>/delete', methods=['POST'])
 @login_required
 @admin_required
 def delete_user(user_id):
