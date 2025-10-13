@@ -182,6 +182,29 @@ class Timetable(db.Model):
     # Relationship
     topic = db.relationship('Topic', backref='timetable_slots', lazy=True)
 #==========================================
+# MESSAGE MODEL (For future use)
+#==========================================
+class Message(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    content = db.Column(db.Text, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    room = db.Column(db.String(100), default='general')  # For different chat rooms
+    is_admin_message = db.Column(db.Boolean, default=False)
+    created_at = db.Column(db.DateTime, default=nairobi_time)
+    
+    # Relationship
+    user = db.relationship('User', backref=db.backref('messages', lazy=True))
+
+class MessageRead(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    message_id = db.Column(db.Integer, db.ForeignKey('message.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    read_at = db.Column(db.DateTime, default=nairobi_time)
+    
+    # Relationships
+    message = db.relationship('Message', backref=db.backref('read_by', lazy=True))
+    user = db.relationship('User', backref=db.backref('read_messages', lazy=True))
+#==========================================
 # User Loader Helper
 @login_manager.user_loader
 def load_user(user_id):
@@ -301,6 +324,170 @@ def sw():
 @app.route('/is_authenticated')
 def is_authenticated():
     return jsonify({'authenticated': current_user.is_authenticated})
+#-------------------------------------------------------------------
+from flask_socketio import SocketIO, emit, join_room, leave_room
+from flask_login import current_user, login_required
+
+# Initialize SocketIO
+socketio = SocketIO(app, cors_allowed_origins="*")
+
+@app.route('/messages')
+@login_required
+def messages_page():
+    """Serve the messaging page"""
+    # Get recent messages
+    recent_messages = Message.query.order_by(Message.created_at.desc()).limit(50).all()
+    recent_messages.reverse()  # Show oldest first
+    
+    # Get unread count
+    unread_count = Message.query.filter(
+        ~Message.id.in_(
+            db.session.query(MessageRead.message_id).filter(
+                MessageRead.user_id == current_user.id
+            )
+        ),
+        Message.user_id != current_user.id
+    ).count()
+    
+    return render_template('messages.html', 
+                         messages=recent_messages,
+                         unread_count=unread_count)
+
+@app.route('/api/messages')
+@login_required
+def get_messages():
+    """Get messages via API"""
+    room = request.args.get('room', 'general')
+    limit = request.args.get('limit', 50, type=int)
+    
+    messages = Message.query.filter_by(room=room)\
+        .order_by(Message.created_at.desc())\
+        .limit(limit)\
+        .all()
+    messages.reverse()
+    
+    result = []
+    for message in messages:
+        result.append({
+            'id': message.id,
+            'content': message.content,
+            'user_id': message.user_id,
+            'username': message.user.username,
+            'is_admin': message.user.is_admin,
+            'is_admin_message': message.is_admin_message,
+            'created_at': message.created_at.isoformat(),
+            'room': message.room
+        })
+    
+    return jsonify(result)
+
+@app.route('/api/messages/read', methods=['POST'])
+@login_required
+def mark_messages_read():
+    """Mark messages as read"""
+    data = request.get_json()
+    message_ids = data.get('message_ids', [])
+    
+    for msg_id in message_ids:
+        # Check if already read
+        existing = MessageRead.query.filter_by(
+            message_id=msg_id, 
+            user_id=current_user.id
+        ).first()
+        
+        if not existing:
+            read_record = MessageRead(
+                message_id=msg_id,
+                user_id=current_user.id
+            )
+            db.session.add(read_record)
+    
+    db.session.commit()
+    return jsonify({'success': True})
+
+@socketio.on('connect')
+def handle_connect():
+    """Handle user connection"""
+    if current_user.is_authenticated:
+        join_room('general')
+        emit('user_joined', {
+            'user_id': current_user.id,
+            'username': current_user.username,
+            'is_admin': current_user.is_admin,
+            'message': f'{current_user.username} joined the chat'
+        }, room='general', include_self=False)
+
+@socketio.on('disconnect')
+def handle_disconnect():
+    """Handle user disconnection"""
+    if current_user.is_authenticated:
+        emit('user_left', {
+            'user_id': current_user.id,
+            'username': current_user.username,
+            'message': f'{current_user.username} left the chat'
+        }, room='general', include_self=False)
+
+@socketio.on('send_message')
+def handle_send_message(data):
+    """Handle new message"""
+    if not current_user.is_authenticated:
+        return
+    
+    content = data.get('content', '').strip()
+    room = data.get('room', 'general')
+    
+    if not content:
+        return
+    
+    # Create message
+    message = Message(
+        content=content,
+        user_id=current_user.id,
+        room=room,
+        is_admin_message=current_user.is_admin
+    )
+    db.session.add(message)
+    db.session.commit()
+    
+    # Prepare response data
+    message_data = {
+        'id': message.id,
+        'content': message.content,
+        'user_id': message.user_id,
+        'username': current_user.username,
+        'is_admin': current_user.is_admin,
+        'is_admin_message': current_user.is_admin,
+        'created_at': message.created_at.isoformat(),
+        'room': room
+    }
+    
+    # Broadcast to room
+    emit('new_message', message_data, room=room)
+
+@socketio.on('join_room')
+def handle_join_room(data):
+    """Handle joining a room"""
+    if current_user.is_authenticated:
+        room = data.get('room', 'general')
+        join_room(room)
+        emit('room_joined', {
+            'room': room,
+            'user_id': current_user.id,
+            'username': current_user.username
+        })
+
+@socketio.on('leave_room')
+def handle_leave_room(data):
+    """Handle leaving a room"""
+    if current_user.is_authenticated:
+        room = data.get('room', 'general')
+        leave_room(room)
+        emit('room_left', {
+            'room': room,
+            'user_id': current_user.id,
+            'username': current_user.username
+        })    
+
 # =========================================
 # ANNOUNCEMENT API ROUTES
 # =========================================
