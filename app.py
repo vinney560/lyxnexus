@@ -234,6 +234,7 @@ def load_user(user_id):
         print(f'⚠️ Error loading user {user_id}: {e}')
         db.session.rollback()  # ✅ reset failed transaction
         return None
+
 @app.teardown_request
 def teardown_request(exception):
     if exception:
@@ -251,7 +252,7 @@ def admin_required(f):
             # If AJAX/API request, return JSON error
             if request.path.startswith('/api/') or request.is_json:
                 return jsonify({'error': 'Authentication required'}), 401
-            flash('Login first', 'error')
+            flash('Login first to access the page', 'error')
             return redirect(url_for('login'))
         if not current_user.is_admin:
             if request.path.startswith('/api/') or request.is_json:
