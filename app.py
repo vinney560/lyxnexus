@@ -243,7 +243,7 @@ def teardown_request(exception):
 
 def _year():
     """Return the current year in Nairobi time (UTC+3)."""
-    return (datetime.utcnow() + timedelta(hours=3)).year
+    return nairobi_time().year
 
 def admin_required(f):
     @wraps(f)
@@ -307,7 +307,7 @@ def login():
         else:
             return redirect(url_for('main_page'))
     
-    return render_template('login.html', year=datetime.utcnow().year)
+    return render_template('login.html', year=_year)
 
 @app.route('/logout')
 @login_required
@@ -352,9 +352,6 @@ def sw():
 def is_authenticated():
     return jsonify({'authenticated': current_user.is_authenticated})
 #-------------------------------------------------------------------
-from flask_socketio import SocketIO, emit, join_room, leave_room
-from flask_login import current_user, login_required
-
 # Initialize SocketIO
 socketio = SocketIO(app, cors_allowed_origins="*")
 
