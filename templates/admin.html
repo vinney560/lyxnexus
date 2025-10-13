@@ -219,53 +219,141 @@
         border-color: #3B82F6;
         color: #3B82F6;
     }
+
+    /* Responsive Styles */
+    @media (max-width: 768px) {
+        .btn {
+            padding: 10px 20px;
+            font-size: 14px;
+        }
+        
+        .modal-content {
+            margin: 20px;
+            padding: 20px;
+            width: calc(100% - 40px);
+        }
+        
+        .file-actions {
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .file-actions .btn {
+            width: 100%;
+            justify-content: center;
+        }
+        
+        .admin-card {
+            padding: 15px;
+        }
+        
+        .text-3xl {
+            font-size: 1.5rem;
+        }
+        
+        .text-2xl {
+            font-size: 1.25rem;
+        }
+    }
+
+    @media (max-width: 640px) {
+        .flex.justify-between.items-center {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 15px;
+        }
+        
+        .flex.justify-between.items-center .btn {
+            width: 100%;
+        }
+        
+        .grid.grid-cols-2 {
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+        
+        .flex.space-x-2 {
+            flex-wrap: wrap;
+        }
+        
+        .flex.space-x-2 .btn {
+            margin-bottom: 5px;
+        }
+    }
+
+    /* Hide scrollbar for tabs */
+    .scrollbar-hide {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+
+    .scrollbar-hide::-webkit-scrollbar {
+        display: none;
+    }
+
+    /* Make action buttons stack on mobile */
+    @media (max-width: 480px) {
+        .flex.space-x-2.ml-4 {
+            margin-left: 0;
+            margin-top: 10px;
+            width: 100%;
+            justify-content: space-between;
+        }
+        
+        .flex.space-x-2.ml-4 .btn {
+            flex: 1;
+            margin: 0 2px;
+        }
+    }
 </style>
 <body>
     <!-- Navigation -->
     <nav class="glass-morph sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-            <div class="flex items-center space-x-2">
-                <div class="logo-container">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-                        <polyline points="7.5 4.21 12 6.81 16.5 4.21"></polyline>
-                        <polyline points="7.5 19.79 7.5 14.6 3 12"></polyline>
-                        <polyline points="21 12 16.5 14.6 16.5 19.79"></polyline>
-                        <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
-                        <line x1="12" y1="22.08" x2="12" y2="12"></line>
-                    </svg>
+        <div class="max-w-7xl mx-auto px-4 py-4">
+            <div class="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
+                <div class="flex items-center space-x-2">
+                    <div class="logo-container">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                            <polyline points="7.5 4.21 12 6.81 16.5 4.21"></polyline>
+                            <polyline points="7.5 19.79 7.5 14.6 3 12"></polyline>
+                            <polyline points="21 12 16.5 14.6 16.5 19.79"></polyline>
+                            <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                            <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                        </svg>
+                    </div>
+                    <span class="text-xl sm:text-2xl font-bold gradient-text">LyxNexus Admin</span>
                 </div>
-                <span class="text-2xl font-bold gradient-text">LyxNexus Admin</span>
-            </div>
-            <div class="flex space-x-4">
-                <button class="btn bg-gray-600 hover:bg-gray-700" onclick="window.location.href='/'">Back to Site</button>
-                <button class="btn btn-danger" onclick="logout()">Logout</button>
+                <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4 w-full sm:w-auto">
+                    <button class="btn bg-gray-600 hover:bg-gray-700 text-sm sm:text-base" onclick="window.location.href='/'">Back to Site</button>
+                    <button class="btn btn-danger text-sm sm:text-base" onclick="logout()">Logout</button>
+                </div>
             </div>
         </div>
     </nav>
 
     <main class="max-w-7xl mx-auto px-4 py-8">
         <div class="mb-8">
-            <h1 class="text-3xl font-bold gradient-text mb-2">Admin Dashboard</h1>
+            <h1 class="text-2xl sm:text-3xl font-bold gradient-text mb-2">Admin Dashboard</h1>
             <p class="text-gray-400">Manage announcements, assignments, topics, and timetable</p>
         </div>
 
         <!-- Tabs -->
         <div class="glass-morph rounded-t-xl p-4">
-            <div class="flex space-x-4 border-b border-gray-700">
-                <button class="tab-button active" onclick="openTab('announcements-tab')">Announcements</button>
-                <button class="tab-button" onclick="openTab('assignments-tab')">Assignments</button>
-                <button class="tab-button" onclick="openTab('topics-tab')">Topics</button>
-                <button class="tab-button" onclick="openTab('timetable-tab')">Timetable</button>
+            <div class="flex overflow-x-auto space-x-4 border-b border-gray-700 pb-2 scrollbar-hide">
+                <button class="tab-button whitespace-nowrap active" onclick="openTab('announcements-tab')">Announcements</button>
+                <button class="tab-button whitespace-nowrap" onclick="openTab('assignments-tab')">Assignments</button>
+                <button class="tab-button whitespace-nowrap" onclick="openTab('topics-tab')">Topics</button>
+                <button class="tab-button whitespace-nowrap" onclick="openTab('timetable-tab')">Timetable</button>
             </div>
         </div>
 
         <!-- Announcements Tab -->
         <div id="announcements-tab" class="tab-content active">
-            <div class="glass-morph rounded-b-xl p-6">
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-2xl font-bold">Manage Announcements</h2>
-                    <button class="btn btn-success" onclick="openModal('announcement-modal')">
+            <div class="glass-morph rounded-b-xl p-4 sm:p-6">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4 sm:gap-0">
+                    <h2 class="text-xl sm:text-2xl font-bold">Manage Announcements</h2>
+                    <button class="btn btn-success w-full sm:w-auto text-sm sm:text-base" onclick="openModal('announcement-modal')">
                         <i class="fas fa-plus mr-2"></i> New Announcement
                     </button>
                 </div>
@@ -279,10 +367,10 @@
 
         <!-- Assignments Tab -->
         <div id="assignments-tab" class="tab-content">
-            <div class="glass-morph rounded-b-xl p-6">
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-2xl font-bold">Manage Assignments</h2>
-                    <button class="btn btn-success" onclick="openModal('assignment-modal')">
+            <div class="glass-morph rounded-b-xl p-4 sm:p-6">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4 sm:gap-0">
+                    <h2 class="text-xl sm:text-2xl font-bold">Manage Assignments</h2>
+                    <button class="btn btn-success w-full sm:w-auto text-sm sm:text-base" onclick="openModal('assignment-modal')">
                         <i class="fas fa-plus mr-2"></i> New Assignment
                     </button>
                 </div>
@@ -296,14 +384,14 @@
 
         <!-- Topics Tab -->
         <div id="topics-tab" class="tab-content">
-            <div class="glass-morph rounded-b-xl p-6">
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-2xl font-bold">Manage Topics</h2>
-                    <button class="btn btn-success" onclick="openModal('topic-modal')">
+            <div class="glass-morph rounded-b-xl p-4 sm:p-6">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4 sm:gap-0">
+                    <h2 class="text-xl sm:text-2xl font-bold">Manage Topics</h2>
+                    <button class="btn btn-success w-full sm:w-auto text-sm sm:text-base" onclick="openModal('topic-modal')">
                         <i class="fas fa-plus mr-2"></i> New Topic
                     </button>
                 </div>
-                <div id="topics-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div id="topics-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     <div class="loading">
                         <div class="spinner"></div>
                     </div>
@@ -313,10 +401,10 @@
 
         <!-- Timetable Tab -->
         <div id="timetable-tab" class="tab-content">
-            <div class="glass-morph rounded-b-xl p-6">
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-2xl font-bold">Manage Timetable</h2>
-                    <button class="btn btn-success" onclick="openModal('timetable-modal')">
+            <div class="glass-morph rounded-b-xl p-4 sm:p-6">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4 sm:gap-0">
+                    <h2 class="text-xl sm:text-2xl font-bold">Manage Timetable</h2>
+                    <button class="btn btn-success w-full sm:w-auto text-sm sm:text-base" onclick="openModal('timetable-modal')">
                         <i class="fas fa-plus mr-2"></i> New Timetable Slot
                     </button>
                 </div>
@@ -337,9 +425,9 @@
                 <input type="hidden" id="announcement-id">
                 <input type="text" id="announcement-title" class="form-input" placeholder="Title" required>
                 <textarea id="announcement-content" class="form-input" rows="5" placeholder="Content" required></textarea>
-                <div class="flex justify-end space-x-3 mt-4">
-                    <button type="button" class="btn bg-gray-600 hover:bg-gray-700" onclick="closeModal('announcement-modal')">Cancel</button>
-                    <button type="submit" class="btn btn-success">Save Announcement</button>
+                <div class="flex flex-col-reverse sm:flex-row justify-end space-y-4 sm:space-y-0 space-y-reverse sm:space-x-3 mt-4">
+                    <button type="button" class="btn bg-gray-600 hover:bg-gray-700 w-full sm:w-auto" onclick="closeModal('announcement-modal')">Cancel</button>
+                    <button type="submit" class="btn btn-success w-full sm:w-auto mb-4 sm:mb-0">Save Announcement</button>
                 </div>
             </form>
         </div>
@@ -378,9 +466,9 @@
                     </div>
                 </div>
                 
-                <div class="flex justify-end space-x-3 mt-4">
-                    <button type="button" class="btn bg-gray-600 hover:bg-gray-700" onclick="closeModal('assignment-modal')">Cancel</button>
-                    <button type="submit" class="btn btn-success">Save Assignment</button>
+                <div class="flex flex-col-reverse sm:flex-row justify-end space-y-4 sm:space-y-0 space-y-reverse sm:space-x-3 mt-4">
+                    <button type="button" class="btn bg-gray-600 hover:bg-gray-700 w-full sm:w-auto" onclick="closeModal('assignment-modal')">Cancel</button>
+                    <button type="submit" class="btn btn-success w-full sm:w-auto mb-4 sm:mb-0">Save Assignment</button>
                 </div>
             </form>
         </div>
@@ -394,9 +482,9 @@
                 <input type="hidden" id="topic-id">
                 <input type="text" id="topic-name" class="form-input" placeholder="Topic Name" required>
                 <textarea id="topic-description" class="form-input" rows="3" placeholder="Description" required></textarea>
-                <div class="flex justify-end space-x-3 mt-4">
-                    <button type="button" class="btn bg-gray-600 hover:bg-gray-700" onclick="closeModal('topic-modal')">Cancel</button>
-                    <button type="submit" class="btn btn-success">Save Topic</button>
+                <div class="flex flex-col-reverse sm:flex-row justify-end space-y-4 sm:space-y-0 space-y-reverse sm:space-x-3 mt-4">
+                    <button type="button" class="btn bg-gray-600 hover:bg-gray-700 w-full sm:w-auto" onclick="closeModal('topic-modal')">Cancel</button>
+                    <button type="submit" class="btn btn-success w-full sm:w-auto mb-4 sm:mb-0">Save Topic</button>
                 </div>
             </form>
         </div>
@@ -418,7 +506,7 @@
                     <option value="Saturday">Saturday</option>
                     <option value="Sunday">Sunday</option>
                 </select>
-                <div class="grid grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <input type="time" id="timetable-start" class="form-input" required>
                     <input type="time" id="timetable-end" class="form-input" required>
                 </div>
@@ -428,9 +516,9 @@
                 <select id="timetable-topic" class="form-input">
                     <option value="">Select Topic (Optional)</option>
                 </select>
-                <div class="flex justify-end space-x-3 mt-4">
-                    <button type="button" class="btn bg-gray-600 hover:bg-gray-700" onclick="closeModal('timetable-modal')">Cancel</button>
-                    <button type="submit" class="btn btn-success">Save Slot</button>
+                <div class="flex flex-col-reverse sm:flex-row justify-end space-y-4 sm:space-y-0 space-y-reverse sm:space-x-3 mt-4">
+                    <button type="button" class="btn bg-gray-600 hover:bg-gray-700 w-full sm:w-auto" onclick="closeModal('timetable-modal')">Cancel</button>
+                    <button type="submit" class="btn btn-success w-full sm:w-auto mb-4 sm:mb-0">Save Slot</button>
                 </div>
             </form>
         </div>
@@ -619,7 +707,7 @@
             
             container.innerHTML = announcements.map(announcement => `
                 <div class="admin-card">
-                    <div class="flex justify-between items-start">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-start">
                         <div class="flex-1">
                             <h3 class="text-lg font-bold">${announcement.title}</h3>
                             <p class="text-gray-400 mt-1">${announcement.content}</p>
@@ -629,12 +717,14 @@
                                 <span>${formatDate(announcement.created_at)}</span>
                             </div>
                         </div>
-                        <div class="flex space-x-2 ml-4">
-                            <button class="btn bg-yellow-600 hover:bg-yellow-700 text-sm" onclick="editAnnouncement(${announcement.id})">
+                        <div class="flex flex-col xs:flex-row space-y-2 xs:space-y-0 xs:space-x-2 ml-0 xs:ml-4 w-full xs:w-auto mt-4 sm:mt-0">
+                            <button class="btn bg-yellow-600 hover:bg-yellow-700 text-sm w-full xs:w-auto" onclick="editAnnouncement(${announcement.id})">
                                 <i class="fas fa-edit"></i>
+                                <span class="xs:hidden ml-2">Edit</span>
                             </button>
-                            <button class="btn btn-danger text-sm" onclick="deleteAnnouncement(${announcement.id})">
+                            <button class="btn btn-danger text-sm w-full xs:w-auto" onclick="deleteAnnouncement(${announcement.id})">
                                 <i class="fas fa-trash"></i>
+                                <span class="xs:hidden ml-2">Delete</span>
                             </button>
                         </div>
                     </div>
@@ -684,11 +774,11 @@
                 
                 return `
                 <div class="admin-card">
-                    <div class="flex justify-between items-start">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-start">
                         <div class="flex-1">
-                            <div class="flex items-center">
+                            <div class="flex flex-col sm:flex-row sm:items-center">
                                 <h3 class="text-lg font-bold">${assignment.title}</h3>
-                                <span class="${statusClass} text-white px-2 py-1 rounded-full text-xs ml-2">Due: ${formatDate(assignment.due_date)}</span>
+                                <span class="${statusClass} text-white px-2 py-1 rounded-full text-xs mt-2 sm:mt-0 sm:ml-2">Due: ${formatDate(assignment.due_date)}</span>
                             </div>
                             <p class="text-gray-400 mt-1">${assignment.description}</p>
                             ${fileSection}
@@ -698,12 +788,14 @@
                                 <span>By: ${assignment.creator?.username || 'Unknown'}</span>
                             </div>
                         </div>
-                        <div class="flex space-x-2 ml-4">
-                            <button class="btn bg-yellow-600 hover:bg-yellow-700 text-sm" onclick="editAssignment(${assignment.id})">
+                        <div class="flex flex-col xs:flex-row space-y-2 xs:space-y-0 xs:space-x-2 ml-0 xs:ml-4 w-full xs:w-auto mt-4 sm:mt-0">
+                            <button class="btn bg-yellow-600 hover:bg-yellow-700 text-sm w-full xs:w-auto" onclick="editAssignment(${assignment.id})">
                                 <i class="fas fa-edit"></i>
+                                <span class="xs:hidden ml-2">Edit</span>
                             </button>
-                            <button class="btn btn-danger text-sm" onclick="deleteAssignment(${assignment.id})">
+                            <button class="btn btn-danger text-sm w-full xs:w-auto" onclick="deleteAssignment(${assignment.id})">
                                 <i class="fas fa-trash"></i>
+                                <span class="xs:hidden ml-2">Delete</span>
                             </button>
                         </div>
                     </div>
@@ -724,7 +816,7 @@
             
             container.innerHTML = topics.map(topic => `
                 <div class="admin-card">
-                    <div class="flex justify-between items-start">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-start">
                         <div class="flex-1">
                             <h3 class="text-lg font-bold">${topic.name}</h3>
                             <p class="text-gray-400 mt-1">${topic.description}</p>
@@ -732,12 +824,14 @@
                                 Created: ${formatDate(topic.created_at)}
                             </div>
                         </div>
-                        <div class="flex space-x-2 ml-4">
-                            <button class="btn bg-yellow-600 hover:bg-yellow-700 text-sm" onclick="editTopic(${topic.id})">
+                        <div class="flex flex-col xs:flex-row space-y-2 xs:space-y-0 xs:space-x-2 ml-0 xs:ml-4 w-full xs:w-auto mt-4 sm:mt-0">
+                            <button class="btn bg-yellow-600 hover:bg-yellow-700 text-sm w-full xs:w-auto" onclick="editTopic(${topic.id})">
                                 <i class="fas fa-edit"></i>
+                                <span class="xs:hidden ml-2">Edit</span>
                             </button>
-                            <button class="btn btn-danger text-sm" onclick="deleteTopic(${topic.id})">
+                            <button class="btn btn-danger text-sm w-full xs:w-auto" onclick="deleteTopic(${topic.id})">
                                 <i class="fas fa-trash"></i>
+                                <span class="xs:hidden ml-2">Delete</span>
                             </button>
                         </div>
                     </div>
@@ -759,20 +853,22 @@
                 <div class="admin-card">
                     <h3 class="text-xl font-bold mb-4 border-b border-gray-700 pb-2">${daySchedule.day}</h3>
                     ${daySchedule.slots.map(slot => `
-                        <div class="flex justify-between items-center py-3 border-b border-gray-800 last:border-b-0">
-                            <div class="flex-1">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center py-3 border-b border-gray-800 last:border-b-0">
+                            <div class="flex-1 mb-2 sm:mb-0">
                                 <div class="font-semibold">${slot.subject}</div>
                                 <div class="text-sm text-gray-400">${slot.teacher || 'TBA'} • ${slot.room || 'TBA'}</div>
                             </div>
-                            <div class="text-right mr-4">
+                            <div class="text-left sm:text-right mr-0 sm:mr-4 mb-2 sm:mb-0">
                                 <div class="text-blue-400">${slot.time}</div>
                             </div>
-                            <div class="flex space-x-2">
-                                <button class="btn bg-yellow-600 hover:bg-yellow-700 text-sm" onclick="editTimetableSlot(${slot.id})">
+                            <div class="flex flex-col xs:flex-row space-y-2 xs:space-y-0 xs:space-x-2 w-full sm:w-auto">
+                                <button class="btn bg-yellow-600 hover:bg-yellow-700 text-sm w-full xs:w-auto" onclick="editTimetableSlot(${slot.id})">
                                     <i class="fas fa-edit"></i>
+                                    <span class="xs:hidden ml-2">Edit</span>
                                 </button>
-                                <button class="btn btn-danger text-sm" onclick="deleteTimetableSlot(${slot.id})">
+                                <button class="btn btn-danger text-sm w-full xs:w-auto" onclick="deleteTimetableSlot(${slot.id})">
                                     <i class="fas fa-trash"></i>
+                                    <span class="xs:hidden ml-2">Delete</span>
                                 </button>
                             </div>
                         </div>
