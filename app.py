@@ -204,6 +204,27 @@ class MessageRead(db.Model):
     message = db.relationship('Message', backref=db.backref('read_by', lazy=True))
     user = db.relationship('User', backref=db.backref('read_messages', lazy=True))
 #==========================================
+with app.app_context():
+    try:
+        db.create_all()
+
+        # Create admin user if not exists
+        admin = User.query.filter_by(mobile="0740694312").first()
+        if not admin:
+            admin = User(
+                username="Administrator",
+                mobile="0740694312",
+                is_admin=True
+            )
+            db.session.add(admin)
+            db.session.commit()
+            print("✅ Admin user created.")
+        else:
+            print("ℹ️ Admin already exists.")
+    except Exception as e:
+        db.session.rollback()
+        print(f"⚠️ Database initialization error: {e}")
+#==========================================
 # User Loader Helper
 @login_manager.user_loader
 def load_user(user_id):
@@ -218,7 +239,6 @@ def teardown_request(exception):
     if exception:
         db.session.rollback()
     db.session.remove()
-
 
 def _year():
     """Return the current year in Nairobi time (UTC+3)."""
@@ -1036,14 +1056,6 @@ def internal_error(error):
     else:
         return redirect(url_for('home')), 302
 
-#==========================================
+# ==========================================
 if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
-        # Create admin user if not exists
-        admin = User.query.get(1)
-        if not admin:
-            admin = User(id=1, mobile="0740694312", username="Administrator", is_admin=True)
-            db.session.add(admin)
-            db.session.commit()    
     socketio.run(app, host='0.0.0.0', port=47947, debug=True)
