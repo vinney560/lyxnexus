@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management | LyxNexus Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<style>
+    :root {
+        --bg-color: #111827;
+        --text-color: #F9FAFB;
+        --accent-color: #4A90E2;
+        --secondary-color: #8B5CF6;
+    }
+    
+    body {
+        font-family: 'Poppins', sans-serif;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+    }
+    
+    .gradient-text {
+        background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        color: transparent;
+    }
+    
+    .glass-morph {
+        background: rgba(30, 30, 40, 0.6);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        box-shadow: 0 8px 32px rgba(0, 31, 135, 0.2);
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .glass-morph:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 40px rgba(0, 31, 135, 0.3);
+    }
+    
+    .btn {
+        background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 50px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+        font-size: 14px;
+    }
+    
+    .btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+    }
+    
+    .btn-danger {
+        background: linear-gradient(90deg, #EF4444, #DC2626);
+    }
+    
+    .btn-warning {
+        background: linear-gradient(90deg, #F59E0B, #D97706);
+    }
+    
+    .btn-success {
+        background: linear-gradient(90deg, #10B981, #059669);
+    }
+    
+    .logo-container {
+        background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+        border-radius: 20px;
+        padding: 12px;
+        display: inline-block;
+        margin-bottom: 20px;
+    }
+    
+    .admin-card {
+        background: rgba(30, 30, 40, 0.7);
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    .modal-content {
+        background: var(--bg-color);
+        border-radius: 15px;
+        padding: 30px;
+        width: 90%;
+        max-width: 500px;
+        border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+    
+    .loading {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 40px;
+    }
+    
+    .spinner {
+        border: 4px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        border-top: 4px solid #3B82F6;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    .status-badge {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+    
+    .status-admin {
+        background: linear-gradient(90deg, #8B5CF6, #7C3AED);
+        color: white;
+    }
+    
+    .status-user {
+        background: rgba(59, 130, 246, 0.2);
+        color: #3B82F6;
+        border: 1px solid #3B82F6;
+    }
+    
+    .stats-card {
+        background: rgba(30, 30, 40, 0.7);
+        border-radius: 12px;
+        padding: 20px;
+        text-align: center;
+        border: 1px solid rgba(59, 130, 246, 0.2);
+    }
+    
+    .stats-number {
+        font-size: 2rem;
+        font-weight: bold;
+        background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        color: transparent;
+    }
+    
+    /* Responsive Styles */
+    @media (max-width: 768px) {
+        .btn {
+            padding: 8px 16px;
+            font-size: 12px;
+        }
+        
+        .modal-content {
+            margin: 20px;
+            padding: 20px;
+            width: calc(100% - 40px);
+        }
+        
+        .admin-card {
+            padding: 15px;
+        }
+        
+        .stats-card {
+            padding: 15px;
+        }
+        
+        .stats-number {
+            font-size: 1.5rem;
+        }
+    }
+
+    @media (max-width: 640px) {
+        .flex.justify-between.items-center {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 15px;
+        }
+        
+        .flex.justify-between.items-center .btn {
+            width: 100%;
+        }
+    }
+
+    .user-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+    
+    .user-table th,
+    .user-table td {
+        padding: 12px 15px;
+        text-align: left;
+        border-bottom: 1px solid rgba(59, 130, 246, 0.2);
+    }
+    
+    .user-table th {
+        background: rgba(30, 30, 40, 0.8);
+        color: #3B82F6;
+        font-weight: 600;
+    }
+    
+    .user-table tr:hover {
+        background: rgba(59, 130, 246, 0.1);
+    }
+    
+    .last-updated {
+        background: rgba(16, 185, 129, 0.2);
+        color: #10B981;
+        padding: 8px 15px;
+        border-radius: 20px;
+        font-size: 12px;
+        border: 1px solid #10B981;
+    }
+</style>
+<body>
+    <!-- Navigation -->
+    <nav class="glass-morph sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-4">
+            <div class="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
+                <div class="flex items-center space-x-2">
+                    <div class="logo-container">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                            <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                        </svg>
+                    </div>
+                    <span class="text-xl sm:text-2xl font-bold gradient-text">User Management</span>
+                </div>
+                <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4 w-full sm:w-auto">
+                    <button class="btn bg-gray-600 hover:bg-gray-700 text-sm sm:text-base" onclick="window.location.href='/admin'">
+                        <i class="fas fa-arrow-left mr-2"></i> Back to Dashboard
+                    </button>
+                    <button class="btn btn-danger text-sm sm:text-base" onclick="logout()">
+                        <i class="fas fa-sign-out-alt mr-2"></i> Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto px-4 py-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <h1 class="text-2xl sm:text-3xl font-bold gradient-text mb-2">User Management</h1>
+            <p class="text-gray-400">Manage system users and administrator privileges</p>
+            <div class="flex items-center space-x-4 mt-4">
+                <div class="last-updated">
+                    <i class="fas fa-sync-alt mr-2"></i>
+                    <span id="last-updated-text">Last updated: Just now</span>
+                </div>
+                <div class="text-sm text-gray-400">
+                    <i class="fas fa-clock mr-1"></i>
+                    Auto-refresh every 10 seconds
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            <div class="stats-card">
+                <div class="stats-number" id="total-users">0</div>
+                <div class="text-gray-400">Total Users</div>
+            </div>
+            <div class="stats-card">
+                <div class="stats-number" id="admin-users">0</div>
+                <div class="text-gray-400">Administrators</div>
+            </div>
+            <div class="stats-card">
+                <div class="stats-number" id="regular-users">0</div>
+                <div class="text-gray-400">Regular Users</div>
+            </div>
+            <div class="stats-card">
+                <div class="stats-number" id="today-users">0</div>
+                <div class="text-gray-400">Today's Registrations</div>
+            </div>
+        </div>
+
+        <!-- Users Table -->
+        <div class="glass-morph rounded-xl p-4 sm:p-6">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4 sm:gap-0">
+                <h2 class="text-xl sm:text-2xl font-bold">All Users</h2>
+                <div class="flex space-x-2 w-full sm:w-auto">
+                    <button class="btn bg-blue-600 hover:bg-blue-700 text-sm w-full sm:w-auto" onclick="refreshUsers()">
+                        <i class="fas fa-sync-alt mr-2"></i> Refresh Now
+                    </button>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="user-table">
+                    <thead>
+                        <tr>
+                            <th>User ID</th>
+                            <th>Username</th>
+                            <th>Mobile</th>
+                            <th>Role</th>
+                            <th>Created</th>
+                            <th>Activity</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="users-table-body">
+                        <tr>
+                            <td colspan="7" class="text-center py-8">
+                                <div class="loading">
+                                    <div class="spinner"></div>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- Confirmation Modal -->
+    <div id="confirm-modal" class="modal">
+        <div class="modal-content">
+            <h3 class="text-xl font-bold mb-4" id="confirm-title">Confirm Action</h3>
+            <p id="confirm-message" class="text-gray-300 mb-6">Are you sure you want to perform this action?</p>
+            <div class="flex flex-col-reverse sm:flex-row justify-end space-y-4 sm:space-y-0 space-y-reverse sm:space-x-3">
+                <button type="button" class="btn bg-gray-600 hover:bg-gray-700 w-full sm:w-auto" onclick="closeModal('confirm-modal')">Cancel</button>
+                <button type="button" class="btn btn-danger w-full sm:w-auto mb-4 sm:mb-0" id="confirm-action-btn">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // API endpoints
+        const API_BASE = '/api';
+        const USERS_ENDPOINT = `${API_BASE}/users`;
+        
+        let currentUserId = null;
+        let pollInterval;
+
+        // Format date for display
+        function formatDate(dateString) {
+            if (!dateString) return 'N/A';
+            const date = new Date(dateString);
+            return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        }
+
+        // Format relative time
+        function formatRelativeTime(dateString) {
+            if (!dateString) return 'N/A';
+            const date = new Date(dateString);
+            const now = new Date();
+            const diffMs = now - date;
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMs / 3600000);
+            const diffDays = Math.floor(diffMs / 86400000);
+
+            if (diffMins < 1) return 'Just now';
+            if (diffMins < 60) return `${diffMins}m ago`;
+            if (diffHours < 24) return `${diffHours}h ago`;
+            if (diffDays < 7) return `${diffDays}d ago`;
+            return formatDate(dateString);
+        }
+
+        // Update last updated timestamp
+        function updateLastUpdated() {
+            const now = new Date();
+            document.getElementById('last-updated-text').textContent = 
+                `Last updated: ${now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'})}`;
+        }
+
+        // Fetch users data
+        async function fetchUsers() {
+            try {
+                const response = await fetch(USERS_ENDPOINT);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return await response.json();
+            } catch (error) {
+                console.error('Error fetching users:', error);
+                throw error;
+            }
+        }
+
+        // Load and display users
+        async function loadUsers() {
+            try {
+                const users = await fetchUsers();
+                updateLastUpdated();
+                updateStatistics(users);
+                displayUsers(users);
+            } catch (error) {
+                document.getElementById('users-table-body').innerHTML = `
+                    <tr>
+                        <td colspan="7" class="text-center py-8 text-red-400">
+                            <i class="fas fa-exclamation-triangle mr-2"></i>
+                            Error loading users. Please try again.
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+
+        // Update statistics cards
+        function updateStatistics(users) {
+            const totalUsers = users.length;
+            const adminUsers = users.filter(user => user.is_admin).length;
+            const regularUsers = totalUsers - adminUsers;
+            
+            // Count today's registrations
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const todayUsers = users.filter(user => {
+                const userDate = new Date(user.created_at);
+                return userDate >= today;
+            }).length;
+
+            document.getElementById('total-users').textContent = totalUsers;
+            document.getElementById('admin-users').textContent = adminUsers;
+            document.getElementById('regular-users').textContent = regularUsers;
+            document.getElementById('today-users').textContent = todayUsers;
+        }
+
+        // Display users in table
+        function displayUsers(users) {
+            const container = document.getElementById('users-table-body');
+            
+            if (users.length === 0) {
+                container.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="text-center py-8 text-gray-400">
+                            <i class="fas fa-users mr-2"></i>
+                            No users found.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            container.innerHTML = users.map(user => `
+                <tr>
+                    <td class="font-mono text-sm">#${user.id}</td>
+                    <td>
+                        <div class="font-medium">${user.username || 'N/A'}</div>
+                    </td>
+                    <td>${user.mobile || 'N/A'}</td>
+                    <td>
+                        <span class="status-badge ${user.is_admin ? 'status-admin' : 'status-user'}">
+                            ${user.is_admin ? 'Admin' : 'User'}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="text-sm">${formatDate(user.created_at)}</div>
+                        <div class="text-xs text-gray-400">${formatRelativeTime(user.created_at)}</div>
+                    </td>
+                    <td>
+                        <div class="text-sm">
+                            <i class="fas fa-bullhorn mr-1 text-blue-400"></i> ${user.announcements_count}
+                            <i class="fas fa-tasks ml-3 mr-1 text-green-400"></i> ${user.assignments_count}
+                        </div>
+                    </td>
+                    <td>
+                        <div class="flex flex-col xs:flex-row space-y-1 xs:space-y-0 xs:space-x-2">
+                            ${user.is_admin ? 
+                                `<button class="btn bg-yellow-600 hover:bg-yellow-700 text-xs" onclick="toggleAdmin(${user.id})">
+                                    <i class="fas fa-user-minus mr-1"></i> Remove Admin
+                                </button>` :
+                                `<button class="btn btn-warning text-xs" onclick="toggleAdmin(${user.id})">
+                                    <i class="fas fa-user-shield mr-1"></i> Make Admin
+                                </button>`
+                            }
+                            ${!user.is_admin ? 
+                                `<button class="btn btn-danger text-xs" onclick="confirmDelete(${user.id})">
+                                    <i class="fas fa-trash mr-1"></i> Delete
+                                </button>` :
+                                `<button class="btn bg-gray-600 text-xs opacity-50 cursor-not-allowed" disabled>
+                                    <i class="fas fa-trash mr-1"></i> Delete
+                                </button>`
+                            }
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Toggle admin status
+        async function toggleAdmin(userId) {
+            try {
+                const response = await fetch(`${USERS_ENDPOINT}/${userId}/toggle-admin`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Failed to update admin status');
+                }
+                
+                await loadUsers(); // Refresh the list
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+
+        // Confirm delete
+        function confirmDelete(userId) {
+            currentUserId = userId;
+            document.getElementById('confirm-title').textContent = 'Confirm User Deletion';
+            document.getElementById('confirm-message').textContent = 
+                'Are you sure you want to delete this user? This action cannot be undone.';
+            document.getElementById('confirm-action-btn').onclick = deleteUser;
+            openModal('confirm-modal');
+        }
+
+        // Delete user
+        async function deleteUser() {
+            if (!currentUserId) return;
+            
+            try {
+                const response = await fetch(`${USERS_ENDPOINT}/${currentUserId}`, {
+                    method: 'DELETE'
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Failed to delete user');
+                }
+                
+                closeModal('confirm-modal');
+                await loadUsers(); // Refresh the list
+                currentUserId = null;
+            } catch (error) {
+                alert('Error: ' + error.message);
+                closeModal('confirm-modal');
+            }
+        }
+
+        // Refresh users manually
+        function refreshUsers() {
+            loadUsers();
+        }
+
+        // Modal management
+        function openModal(modalId) {
+            document.getElementById(modalId).style.display = 'flex';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        }
+
+        // Logout function
+        function logout() {
+            window.location.href = '/logout';
+        }
+
+        // Initialize the page and start polling
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load initial data
+            loadUsers();
+            
+            // Start polling every 10 seconds
+            pollInterval = setInterval(loadUsers, 10000);
+            
+            // Cleanup on page unload
+            window.addEventListener('beforeunload', function() {
+                if (pollInterval) {
+                    clearInterval(pollInterval);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
