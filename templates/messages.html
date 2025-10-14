@@ -274,20 +274,42 @@
     
     .message-input {
         flex: 1;
-        background: rgba(55, 65, 81, 0.5);
-        border: 1px solid rgba(59, 130, 246, 0.3);
+        background: rgba(55, 65, 81, 0.4); /* slightly softer background */
+        border: 1px solid rgba(59, 130, 246, 0.2); /* gentler border */
         border-radius: 25px;
-        padding: 12px 20px;
-        color: white;
+        padding: 12px 18px;
+        color: #f9fafb; /* softer white */
         font-family: 'Poppins', sans-serif;
         resize: none;
         max-height: 100px;
+        overflow-y: auto;
+        outline: none;
+        transition: border 0.2s ease, background 0.2s ease;
+    }
+
+    /* Hide scrollbar (Chrome, Edge, Safari) */
+    .message-input::-webkit-scrollbar {
+        display: none;
+    }
+
+    /* Hide scrollbar (Firefox) */
+    .message-input {
+        scrollbar-width: none;
+    }
+
+    /* Subtle focus effect */
+    .message-input:focus {
+        background: rgba(59, 130, 246, 0.1);
+        border-color: rgba(59, 130, 246, 0.5);
     }
     
-    .message-input:focus {
-        outline: none;
-        border-color: #3B82F6;
-        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+    .message-action-btn.reply:hover {
+        background: rgba(59, 130, 246, 0.3);
+        color: #3B82F6;
+    }
+    
+    .message-action-btn.reply:active {
+        transform: scale(0.95);
     }
     
     .send-btn {
@@ -599,15 +621,16 @@
                                 {{ message.content }}
                                 {% endif %}
                             </div>
-                            
-                            {% if not message.is_deleted and (message.user_id == current_user.id or current_user.is_admin) %}
+                            {% if not message.is_deleted %}
                             <div class="message-actions">
                                 <button class="message-action-btn reply" data-message-id="{{ message.id }}" title="Reply">
                                     <i class="fas fa-reply"></i>
                                 </button>
+                                {% if message.user_id == current_user.id or current_user.is_admin %}
                                 <button class="message-action-btn delete" data-message-id="{{ message.id }}" title="Delete">
                                     <i class="fas fa-trash"></i>
                                 </button>
+                                {% endif %}
                             </div>
                             {% endif %}
                             
@@ -866,15 +889,16 @@
             }
             
             let actionsSection = '';
-            if (!isDeleted && (isUserMessage || {{ 'true' if current_user.is_admin else 'false' }})) {
+            if (!isDeleted) {
+                const canDelete = isUserMessage || {{ 'true' if current_user.is_admin else 'false' }};
                 actionsSection = `
                     <div class="message-actions">
                         <button class="message-action-btn reply" data-message-id="${messageData.id}" title="Reply">
                             <i class="fas fa-reply"></i>
                         </button>
-                        <button class="message-action-btn delete" data-message-id="${messageData.id}" title="Delete">
+                        ${canDelete ? `<button class="message-action-btn delete" data-message-id="${messageData.id}" title="Delete">
                             <i class="fas fa-trash"></i>
-                        </button>
+                        </button>` : ''}
                     </div>
                 `;
             }
