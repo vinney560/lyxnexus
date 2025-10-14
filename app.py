@@ -1345,71 +1345,78 @@ def get_timetable():
 #==========================================
 #  TIMETABLE API ROUTES
 #==========================================
-@app.route('/api/timetable', methods=['GET'])
-def get_timetable():
-    """Get all timetable slots"""
-    timetable_slots = Timetable.query.order_by(
-        Timetable.day_of_week, 
-        Timetable.start_time
-    ).all()
-    
-    result = []
-    for slot in timetable_slots:
-        result.append({
-            'id': slot.id,
-            'day_of_week': slot.day_of_week,
-            'start_time': slot.start_time.strftime('%H:%M'),
-            'end_time': slot.end_time.strftime('%H:%M'),
-            'subject': slot.subject,
-            'room': slot.room,
-            'teacher': slot.teacher,
-            'topic': {
-                'id': slot.topic.id,
-                'name': slot.topic.name
-            } if slot.topic else None
-        })
-    
-    return jsonify(result)
+@app.route('/api/timetable', methods=['GET', 'POST'])
+def handle_timetable():
+    # ================================
+    # GET — Fetch all timetable slots
+    # ================================
+    if request.method == 'GET':
+        timetable_slots = Timetable.query.order_by(
+            Timetable.day_of_week,
+            Timetable.start_time
+        ).all()
+        
+        result = []
+        for slot in timetable_slots:
+            result.append({
+                'id': slot.id,
+                'day_of_week': slot.day_of_week,
+                'start_time': slot.start_time.strftime('%H:%M'),
+                'end_time': slot.end_time.strftime('%H:%M'),
+                'subject': slot.subject,
+                'room': slot.room,
+                'teacher': slot.teacher,
+                'topic': {
+                    'id': slot.topic.id,
+                    'name': slot.topic.name
+                } if slot.topic else None
+            })
+        return jsonify(result)
 
-@app.route('/api/timetable', methods=['POST'])
-def create_timetable_slot():
-    if not current_user.is_admin:
-        return jsonify({'error': 'Unauthorized'}), 403
-    
-    data = request.get_json()
-    
-    try:
-        # Handle time parsing more safely
-        start_time_str = data.get('start_time')
-        end_time_str = data.get('end_time')
-        
-        # Parse time strings to time objects
-        start_time = datetime.strptime(start_time_str, '%H:%M').time()
-        end_time = datetime.strptime(end_time_str, '%H:%M').time()
-        
-        # Validate that end time is after start time
-        if start_time >= end_time:
-            return jsonify({'error': 'End time must be after start time'}), 400
-            
-    except ValueError as e:
-        return jsonify({'error': 'Invalid time format. Use HH:MM format'}), 400
-    except Exception as e:
-        return jsonify({'error': f'Time parsing error: {str(e)}'}), 400
-    
-    timetable_slot = Timetable(
-        day_of_week=data.get('day_of_week'),
-        start_time=start_time,
-        end_time=end_time,
-        subject=data.get('subject'),
-        room=data.get('room'),
-        teacher=data.get('teacher'),
-        topic_id=data.get('topic_id')
-    )
-    
-    db.session.add(timetable_slot)
-    db.session.commit()
-    
-    return jsonify({'message': 'Timetable slot created successfully', 'id': timetable_slot.id}), 201
+    # ================================
+    # POST — Create new timetable slot
+    # ================================
+    if request.method == 'POST':
+        if not current_user.is_admin:
+            return jsonify({'error': 'Unauthorized'}), 403
+
+        data = request.get_json()
+
+        try:
+            start_time_str = data.get('start_time')
+            end_time_str = data.get('end_time')
+
+            # Parse times
+            start_time = datetime.strptime(start_time_str, '%H:%M').time()
+            end_time = datetime.strptime(end_time_str, '%H:%M').time()
+
+            # Validate time order
+            if start_time >= end_time:
+                return jsonify({'error': 'End time must be after start time'}), 400
+
+        except ValueError:
+            return jsonify({'error': 'Invalid time format. Use HH:MM format'}), 400
+        except Exception as e:
+            return jsonify({'error': f'Time parsing error: {str(e)}'}), 400
+
+        # Create new timetable slot
+        timetable_slot = Timetable(
+            day_of_week=data.get('day_of_week'),
+            start_time=start_time,
+            end_time=end_time,
+            subject=data.get('subject'),
+            room=data.get('room'),
+            teacher=data.get('teacher'),
+            topic_id=data.get('topic_id')
+        )
+
+        db.session.add(timetable_slot)
+        db.session.commit()
+
+        return jsonify({
+            'message': 'Timetable slot created successfully',
+            'id': timetable_slot.id
+        }), 201
 
 @app.route('/api/timetable/<int:id>', methods=['PUT'])
 def update_timetable_slot(id):
