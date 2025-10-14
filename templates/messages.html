@@ -334,6 +334,23 @@
             max-height: 200px;
         }
     }
+    @media (max-width: 768px) {
+        header .max-w-7xl {
+            overflow-x: auto;
+            white-space: nowrap;
+            -webkit-overflow-scrolling: touch; /* smooth scrolling on iOS */
+        }
+    
+        header .flex {
+            flex-wrap: nowrap !important;
+            min-width: max-content;
+        }
+    
+        header::-webkit-scrollbar {
+            display: none; /* optional: hide scrollbar */
+        }
+    }
+    
 </style>
 <body>
     <!-- Header -->
