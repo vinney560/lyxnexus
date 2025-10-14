@@ -449,8 +449,11 @@
                     <span class="text-xl sm:text-2xl font-bold gradient-text">LyxNexus Files</span>
                 </div>
                 <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4 w-full sm:w-auto">
+                    <button class="btn bg-red-600 hover:bg-gray-700 text-sm sm:text-base" onclick="window.location.href='https://lyxspace.onrender.com/files'">
+                        <i class="fas fa-file mr-2"></i> More Files
+                    </button>
                     <button class="btn bg-gray-600 hover:bg-gray-700 text-sm sm:text-base" onclick="window.location.href='/main-page'">
-                        <i class="fas fa-arrow-left mr-2"></i> Back to Dashboard
+                        <i class="fas fa-arrow-left mr-2"></i> Back
                     </button>
                     {% if current_user.is_admin %}
                     <button class="btn btn-success text-sm sm:text-base" onclick="openModal('upload-modal')">
@@ -468,7 +471,7 @@
     <main class="max-w-7xl mx-auto px-4 py-8">
         <div class="mb-8">
             <h1 class="text-2xl sm:text-3xl font-bold gradient-text mb-2">File Management</h1>
-            <p class="text-gray-400">Upload, download, and manage files</p>
+            <p class="text-gray-400">Scroll, download, and manage files</p>
         </div>
 
         <!-- Search and Filter -->
