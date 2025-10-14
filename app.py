@@ -20,6 +20,7 @@ from flask_compress import Compress
 from dotenv import load_dotenv
 import traceback
 import logging
+import re
 from flask_jwt_extended import JWTManager
 from functools import wraps
 
@@ -118,6 +119,19 @@ class User(db.Model, UserMixin):
     # Relationships
     announcements = db.relationship('Announcement', backref='author', lazy=True)
     assignments = db.relationship('Assignment', backref='creator', lazy=True)
+
+    def validate_mobile(self, mobile):
+        """Validate mobile number format"""
+        if not mobile:
+            return True
+        mobile_regex = r'^(07|01)[0-9]{8}$'
+        return re.match(mobile_regex, mobile) is not None
+
+    def set_mobile(self, mobile):
+        """Set mobile with validation"""
+        if mobile and not self.validate_mobile(mobile):
+            raise ValueError("Mobile number must be 10 digits starting with 07 or 01")
+        self.mobile = mobile
 
 # ========================================
 # ANNOUNCEMENT MODEL
@@ -387,6 +401,13 @@ def messages_page():
     return render_template('messages.html', 
                          messages=recent_messages,
                          unread_count=unread_count)
+
+@app.route('/profile')
+@login_required
+def profile():
+    """Render the profile edit page"""
+    return render_template('edit_profile.html')
+
 #--------------------------------------------------------------------
 @app.route('/favicon.ico')
 def favicon():
@@ -408,6 +429,73 @@ def sw():
 def is_authenticated():
     return jsonify({'authenticated': current_user.is_authenticated})
 #-------------------------------------------------------------------
+#==========================================
+#   UPDATE API ROUTES
+#==========================================
+@app.route('/api/user/profile', methods=['GET'])
+@login_required
+def get_user_profile():
+    """Get current user's profile data"""
+    user_data = {
+        'id': current_user.id,
+        'username': current_user.username,
+        'mobile': current_user.mobile,
+        'created_at': current_user.created_at.isoformat(),
+        'is_admin': current_user.is_admin,
+        'announcements_count': len(current_user.announcements),
+        'assignments_count': len(current_user.assignments)
+    }
+    return jsonify(user_data)
+
+@app.route('/api/user/profile', methods=['PUT'])
+@login_required
+def update_user_profile():
+    """Update current user's profile"""
+    data = request.get_json()
+    
+    # Validate input
+    if not data:
+        return jsonify({'error': 'No data provided'}), 400
+    
+    username = data.get('username', '').strip()
+    mobile = data.get('mobile', '').strip()
+    
+    # Validate username
+    if not username or len(username) > 200:
+        return jsonify({'error': 'Username must be between 1 and 200 characters'}), 400
+    
+    # Validate mobile format
+    mobile_regex = r'^(07|01)[0-9]{8}$'
+    if not re.match(mobile_regex, mobile):
+        return jsonify({'error': 'Mobile number must be 10 digits starting with 07 or 01'}), 400
+    
+    # Check if mobile is already taken by another user
+    existing_user = User.query.filter(
+        User.mobile == mobile, 
+        User.id != current_user.id
+    ).first()
+    
+    if existing_user:
+        return jsonify({'error': 'Mobile number is already registered'}), 400
+    
+    try:
+        # Update user data
+        current_user.username = username
+        current_user.mobile = mobile
+        db.session.commit()
+        
+        return jsonify({
+            'message': 'Profile updated successfully',
+            'user': {
+                'id': current_user.id,
+                'username': current_user.username,
+                'mobile': current_user.mobile
+            }
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': 'Failed to update profile'}), 500
 # =========================================
 # API MESSAGES DATA
 # =========================================
@@ -581,8 +669,8 @@ def delete_user(user_id):
     if user.id == current_user.id:
         return jsonify({'error': 'Cannot delete your own account'}), 400
     try:
-        db.session.query(MessageRead).filter_by(user=user.id).delete()
-        db.session.query(Message).filter_by(user=user.id).delete()
+        db.session.query(MessageRead).filter_by(user_id=user.id).delete()
+        db.session.query(Message).filter_by(user_id=user.id).delete()
         db.session.query(Announcement).filter_by(user_id=user.id).delete()
         db.session.query(Assignment).filter_by(user_id=user.id).delete()
         db.session.delete(user)
@@ -1121,13 +1209,6 @@ def current_user_info():
         'is_admin': current_user.is_admin,
         'created_at': current_user.created_at.isoformat()
     })
-# date_str = request.form.get("date_of_birth")  # e.g., "1990-05-12"
-# 
-# if date_str:
-#     dob = datetime.strptime(date_str, "%Y-%m-%d").date()  # convert string to datetime.date
-# else:
-#     dob = None  # leave as NULL if no input
-# 
 #==========================================
 # Error Handlers
 #==========================================
