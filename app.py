@@ -849,24 +849,28 @@ def get_users():
 @login_required
 @admin_required
 def delete_user(user_id):
-    
-    user = User.query.get(user_id)
-    
-    # Prevent deleting yourself
+    user = User.query.get_or_404(user_id)
+
     if user.id == current_user.id:
         return jsonify({'error': 'Cannot delete your own account'}), 400
+
     try:
-        db.session.query(MessageRead).filter_by(user_id=user.id).delete()
-        db.session.query(Message).filter_by(user_id=user.id).delete()
-        db.session.query(Announcement).filter_by(user_id=user.id).delete()
-        db.session.query(Assignment).filter_by(user_id=user.id).delete()
+        # Delete dependent records in correct order
+        message_ids = [m.id for m in Message.query.filter_by(user_id=user.id).all()]
+        if message_ids:
+            db.session.query(MessageRead).filter(MessageRead.message_id.in_(message_ids)).delete(synchronize_session=False)
+
+        db.session.query(Message).filter_by(user_id=user.id).delete(synchronize_session=False)
+        db.session.query(MessageRead).filter_by(user_id=user.id).delete(synchronize_session=False)
+        db.session.query(Announcement).filter_by(user_id=user.id).delete(synchronize_session=False)
+        db.session.query(Assignment).filter_by(user_id=user.id).delete(synchronize_session=False)
+
         db.session.delete(user)
         db.session.commit()
+        return jsonify({'message': 'User deleted successfully'})
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
-
-    return jsonify({'message': 'User deleted successfully'})
 
 # API endpoint to toggle admin status
 @app.route('/api/users/<int:user_id>/toggle-admin', methods=['PUT'])
