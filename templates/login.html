@@ -14,6 +14,9 @@
         --text-color: #F9FAFB;
         --accent-color: #4A90E2;
         --secondary-color: #8B5CF6;
+        --success-color: #10B981;
+        --warning-color: #F59E0B;
+        --error-color: #EF4444;
     }
     
     body {
@@ -24,6 +27,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
+        overflow-x: hidden;
     }
     
     .gradient-text {
@@ -59,6 +63,26 @@
         box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
         cursor: pointer;
         width: 100%;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .btn::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        transform: translate(-50%, -50%);
+        transition: width 0.3s, height 0.3s;
+    }
+    
+    .btn:active::after {
+        width: 300px;
+        height: 300px;
     }
     
     .btn:hover {
@@ -79,6 +103,11 @@
     
     .btn-admin {
         background: linear-gradient(90deg, #8B5CF6, #EC4899);
+        box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+    }
+    
+    .btn-admin:hover {
+        box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
     }
     
     .logo-container {
@@ -87,6 +116,13 @@
         padding: 15px;
         display: inline-block;
         margin-bottom: 10px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .logo-container:hover {
+        transform: scale(1.05);
+        box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
     }
     
     .form-input {
@@ -151,32 +187,6 @@
         border-bottom-color: #3B82F6;
     }
     
-    .alert {
-        padding: 12px 15px;
-        border-radius: 10px;
-        margin-bottom: 20px;
-        display: flex;
-        align-items: center;
-    }
-    
-    .alert-error {
-        background: rgba(239, 68, 68, 0.1);
-        border: 1px solid rgba(239, 68, 68, 0.3);
-        color: #FCA5A5;
-    }
-    
-    .alert-success {
-        background: rgba(16, 185, 129, 0.1);
-        border: 1px solid rgba(16, 185, 129, 0.3);
-        color: #6EE7B7;
-    }
-    
-    .alert-info {
-        background: rgba(59, 130, 246, 0.1);
-        border: 1px solid rgba(59, 130, 246, 0.3);
-        color: #93C5FD;
-    }
-    
     .modal {
         display: none;
         position: fixed;
@@ -188,6 +198,7 @@
         z-index: 1000;
         justify-content: center;
         align-items: center;
+        animation: fadeIn 0.3s ease;
     }
     
     .modal-content {
@@ -197,6 +208,23 @@
         width: 90%;
         max-width: 500px;
         border: 1px solid rgba(59, 130, 246, 0.3);
+        animation: slideUp 0.3s ease;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    
+    @keyframes slideUp {
+        from { 
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to { 
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
     
     .admin-badge {
@@ -209,14 +237,303 @@
         display: inline-block;
         margin-left: 10px;
     }
+    
+    /* Modern Toast Notifications */
+    .toast-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        max-width: 400px;
+    }
+    
+    .toast {
+        background: rgba(30, 30, 40, 0.95);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        border-radius: 12px;
+        padding: 16px 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        transform: translateX(400px);
+        opacity: 0;
+        transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        max-width: 400px;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .toast::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 100%;
+        width: 4px;
+    }
+    
+    .toast.show {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    
+    .toast.hide {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+    
+    .toast-success {
+        border-color: rgba(16, 185, 129, 0.4);
+    }
+    
+    .toast-success::before {
+        background: var(--success-color);
+    }
+    
+    .toast-error {
+        border-color: rgba(239, 68, 68, 0.4);
+    }
+    
+    .toast-error::before {
+        background: var(--error-color);
+    }
+    
+    .toast-warning {
+        border-color: rgba(245, 158, 11, 0.4);
+    }
+    
+    .toast-warning::before {
+        background: var(--warning-color);
+    }
+    
+    .toast-info {
+        border-color: rgba(59, 130, 246, 0.4);
+    }
+    
+    .toast-info::before {
+        background: var(--accent-color);
+    }
+    
+    .toast-icon {
+        font-size: 20px;
+        flex-shrink: 0;
+    }
+    
+    .toast-success .toast-icon {
+        color: var(--success-color);
+    }
+    
+    .toast-error .toast-icon {
+        color: var(--error-color);
+    }
+    
+    .toast-warning .toast-icon {
+        color: var(--warning-color);
+    }
+    
+    .toast-info .toast-icon {
+        color: var(--accent-color);
+    }
+    
+    .toast-content {
+        flex: 1;
+    }
+    
+    .toast-title {
+        font-weight: 600;
+        margin-bottom: 4px;
+        font-size: 14px;
+    }
+    
+    .toast-message {
+        font-size: 13px;
+        color: #D1D5DB;
+        line-height: 1.4;
+    }
+    
+    .toast-close {
+        background: none;
+        border: none;
+        color: #9CA3AF;
+        cursor: pointer;
+        font-size: 16px;
+        padding: 4px;
+        border-radius: 4px;
+        transition: all 0.2s ease;
+        flex-shrink: 0;
+    }
+    
+    .toast-close:hover {
+        color: white;
+        background: rgba(255, 255, 255, 0.1);
+    }
+    
+    .toast-progress {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        height: 3px;
+        background: rgba(255, 255, 255, 0.3);
+        width: 100%;
+        border-radius: 0 0 12px 12px;
+        overflow: hidden;
+    }
+    
+    .toast-progress-bar {
+        height: 100%;
+        border-radius: 0 0 12px 12px;
+        transition: width 0.1s linear;
+    }
+    
+    .toast-success .toast-progress-bar {
+        background: var(--success-color);
+    }
+    
+    .toast-error .toast-progress-bar {
+        background: var(--error-color);
+    }
+    
+    .toast-warning .toast-progress-bar {
+        background: var(--warning-color);
+    }
+    
+    .toast-info .toast-progress-bar {
+        background: var(--accent-color);
+    }
+    
+    /* Navigation Header */
+    .nav-header {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        padding: 20px;
+        z-index: 100;
+    }
+    
+    .nav-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+    
+    .nav-logo {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        padding: 8px 16px;
+        border-radius: 12px;
+    }
+    
+    .nav-logo:hover {
+        background: rgba(59, 130, 246, 0.1);
+    }
+    
+    .nav-logo-text {
+        font-size: 24px;
+        font-weight: 700;
+        background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        color: transparent;
+    }
+    
+    .nav-links {
+        display: flex;
+        gap: 20px;
+    }
+    
+    .nav-link {
+        color: #9CA3AF;
+        text-decoration: none;
+        font-weight: 500;
+        padding: 8px 16px;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+    
+    .nav-link:hover {
+        color: white;
+        background: rgba(59, 130, 246, 0.1);
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .toast-container {
+            right: 10px;
+            left: 10px;
+            max-width: none;
+        }
+        
+        .toast {
+            max-width: none;
+        }
+        
+        .nav-header {
+            padding: 15px;
+        }
+        
+        .nav-links {
+            display: none;
+        }
+        
+        .nav-logo-text {
+            font-size: 20px;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .modal-content {
+            margin: 20px;
+            padding: 20px;
+            width: calc(100% - 40px);
+        }
+        
+        .tab-button {
+            padding: 10px 15px;
+            font-size: 14px;
+        }
+    }
 </style>
 <body>
+    <!-- Navigation Header -->
+    <header class="nav-header">
+        <div class="nav-content">
+            <div class="nav-logo" onclick="goToHome()">
+            
+            <div class="nav-links">
+                <a href="#" class="nav-link" onclick="showToast('About page coming soon!', 'info')">
+                    <i class="fas fa-info-circle mr-2"></i>About
+                </a>
+                <a href="#" class="nav-link" onclick="showToast('Contact page coming soon!', 'info')">
+                    <i class="fas fa-envelope mr-2"></i>Contact
+                </a>
+                <a href="#" class="nav-link" onclick="showToast('Help page coming soon!', 'info')">
+                    <i class="fas fa-question-circle mr-2"></i>Help
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toast-container"></div>
+
     <!-- Login Container -->
     <div class="w-full max-w-md mx-4">
         <div class="glass-morph rounded-2xl p-8">
             <!-- Logo and Header -->
             <div class="text-center mb-8">
-                <div class="logo-container floating">
+                <div class="logo-container floating" onclick="goToHome()">
                     <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
                         <polyline points="7.5 4.21 12 6.81 16.5 4.21"></polyline>
@@ -234,11 +551,6 @@
             <div class="flex border-b border-gray-700 mb-6">
                 <button class="tab-button active" data-tab="student-tab">Student Login</button>
                 <button class="tab-button" data-tab="admin-tab">Admin Access</button>
-            </div>
-
-            <!-- Flash Messages -->
-            <div id="flash-messages">
-                <!-- Flash messages will be inserted here by JavaScript -->
             </div>
 
             <!-- Student Login Form -->
@@ -270,9 +582,11 @@
 
             <!-- Admin Access Form -->
             <div id="admin-tab" class="tab-content">
-                <div class="alert alert-info">
-                    <i class="fas fa-info-circle mr-2"></i>
-                    <span>Admin access requires special privileges</span>
+                <div class="glass-morph rounded-lg p-4 mb-4">
+                    <div class="flex items-center">
+                        <i class="fas fa-info-circle text-blue-400 mr-3"></i>
+                        <span class="text-sm">Admin access requires special privileges</span>
+                    </div>
                 </div>
                 
                 <form id="admin-login-form">
@@ -309,9 +623,11 @@
     <div id="register-admin-modal" class="modal">
         <div class="modal-content">
             <h3 class="text-xl font-bold mb-4 gradient-text">Register as Administrator</h3>
-            <div class="alert alert-info mb-4">
-                <i class="fas fa-shield-alt mr-2"></i>
-                <span>Admin registration requires master authorization</span>
+            <div class="glass-morph rounded-lg p-4 mb-4">
+                <div class="flex items-center">
+                    <i class="fas fa-shield-alt text-purple-400 mr-3"></i>
+                    <span class="text-sm">Admin registration requires master authorization</span>
+                </div>
             </div>
             
             <form id="register-admin-form">
@@ -350,6 +666,108 @@
             LOGIN: '/login'
         };
 
+        // Toast notification system
+        class ToastManager {
+            constructor() {
+                this.container = document.getElementById('toast-container');
+                this.toasts = new Set();
+            }
+            
+            show(title, message, type = 'info', duration = 5000) {
+                const toast = document.createElement('div');
+                toast.className = `toast toast-${type}`;
+                
+                const icons = {
+                    success: 'fa-check-circle',
+                    error: 'fa-exclamation-triangle',
+                    warning: 'fa-exclamation-circle',
+                    info: 'fa-info-circle'
+                };
+                
+                toast.innerHTML = `
+                    <div class="toast-icon">
+                        <i class="fas ${icons[type]}"></i>
+                    </div>
+                    <div class="toast-content">
+                        <div class="toast-title">${title}</div>
+                        <div class="toast-message">${message}</div>
+                    </div>
+                    <button class="toast-close" onclick="toastManager.close(this.parentElement)">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <div class="toast-progress">
+                        <div class="toast-progress-bar" style="width: 100%"></div>
+                    </div>
+                `;
+                
+                this.container.appendChild(toast);
+                this.toasts.add(toast);
+                
+                // Animate in
+                setTimeout(() => {
+                    toast.classList.add('show');
+                }, 10);
+                
+                // Progress bar animation
+                const progressBar = toast.querySelector('.toast-progress-bar');
+                let width = 100;
+                const interval = setInterval(() => {
+                    if (width <= 0) {
+                        clearInterval(interval);
+                        this.close(toast);
+                    } else {
+                        width -= (100 / (duration / 100));
+                        progressBar.style.width = `${width}%`;
+                    }
+                }, 100);
+                
+                // Auto close
+                setTimeout(() => {
+                    this.close(toast);
+                }, duration);
+                
+                return toast;
+            }
+            
+            close(toast) {
+                if (!this.toasts.has(toast)) return;
+                
+                toast.classList.remove('show');
+                toast.classList.add('hide');
+                
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.parentNode.removeChild(toast);
+                    }
+                    this.toasts.delete(toast);
+                }, 400);
+            }
+            
+            closeAll() {
+                this.toasts.forEach(toast => this.close(toast));
+            }
+        }
+        
+        // Initialize toast manager
+        const toastManager = new ToastManager();
+        
+        // Helper function to show toast
+        function showToast(message, type = 'info', title = null) {
+            const titles = {
+                success: 'Success',
+                error: 'Error',
+                warning: 'Warning',
+                info: 'Information'
+            };
+            
+            return toastManager.show(title || titles[type], message, type);
+        }
+
+        // Navigation function
+        function goToHome() {
+            window.location.href = '/';
+        }
+
         // Tab management
         function openTab(tabName) {
             // Hide all tab content
@@ -368,13 +786,18 @@
             // Add active class to the clicked button
             event.target.classList.add('active');
             
-            // Clear any existing flash messages
-            clearFlashMessages();
+            // Show a toast notification
+            if (tabName === 'student-tab') {
+                showToast('Switched to student login', 'info');
+            } else if (tabName === 'admin-tab') {
+                showToast('Switched to admin access', 'info');
+            }
         }
 
         // Modal management
         function openRegisterAdminModal() {
             document.getElementById('register-admin-modal').style.display = 'flex';
+            showToast('Opening admin registration', 'info');
         }
 
         function closeModal(modalId) {
@@ -386,35 +809,6 @@
             if (event.target.classList.contains('modal')) {
                 event.target.style.display = 'none';
             }
-        }
-
-        // Clear flash messages
-        function clearFlashMessages() {
-            document.getElementById('flash-messages').innerHTML = '';
-        }
-
-        // Show flash message
-        function showFlashMessage(message, type) {
-            const flashContainer = document.getElementById('flash-messages');
-            const alertClass = type === 'error' ? 'alert-error' : 
-                              type === 'success' ? 'alert-success' : 'alert-info';
-            
-            const alertDiv = document.createElement('div');
-            alertDiv.className = `alert ${alertClass}`;
-            alertDiv.innerHTML = `
-                <i class="fas ${type === 'error' ? 'fa-exclamation-triangle' : 
-                              type === 'success' ? 'fa-check-circle' : 'fa-info-circle'} mr-2"></i>
-                <span>${message}</span>
-            `;
-            
-            flashContainer.appendChild(alertDiv);
-            
-            // Auto remove after 5 seconds
-            setTimeout(() => {
-                if (alertDiv.parentNode) {
-                    alertDiv.parentNode.removeChild(alertDiv);
-                }
-            }, 5000);
         }
 
         // Validate mobile number
@@ -476,9 +870,12 @@
             
             if (!validateMobile(mobile)) {
                 e.preventDefault();
-                showFlashMessage('Please enter a valid 10-digit mobile number', 'error');
+                showToast('Please enter a valid 10-digit mobile number', 'error', 'Validation Error');
                 return;
             }
+            
+            // Show loading toast
+            const toast = showToast('Logging in...', 'info', 'Please Wait');
             
             // Form will submit normally to Flask route
         });
@@ -490,14 +887,17 @@
             const secret = document.getElementById('admin-secret').value;
             
             if (!validateMobile(mobile)) {
-                showFlashMessage('Please enter a valid 10-digit mobile number', 'error');
+                showToast('Please enter a valid 10-digit mobile number', 'error', 'Validation Error');
                 return;
             }
             
             if (!secret) {
-                showFlashMessage('Please enter the admin secret key', 'error');
+                showToast('Please enter the admin secret key', 'error', 'Validation Error');
                 return;
             }
+            
+            // Show loading toast
+            const toast = showToast('Authenticating admin access...', 'info', 'Please Wait');
             
             // For now, we'll use the same login endpoint but with additional data
             // In a real implementation, you'd have a separate admin login endpoint
@@ -511,17 +911,22 @@
             })
             .then(response => {
                 if (response.redirected) {
-                    window.location.href = response.url;
+                    toastManager.close(toast);
+                    showToast('Admin login successful!', 'success');
+                    setTimeout(() => {
+                        window.location.href = response.url;
+                    }, 1000);
                 } else {
                     return response.text().then(html => {
-                        // If login failed, show error
-                        showFlashMessage('Invalid admin credentials', 'error');
+                        toastManager.close(toast);
+                        showToast('Invalid admin credentials', 'error', 'Authentication Failed');
                     });
                 }
             })
             .catch(error => {
                 console.error('Login error:', error);
-                showFlashMessage('Login failed. Please try again.', 'error');
+                toastManager.close(toast);
+                showToast('Login failed. Please try again.', 'error', 'Login Error');
             });
         });
 
@@ -533,17 +938,17 @@
             const masterKey = document.getElementById('master-key').value;
             
             if (!validateMobile(mobile)) {
-                showFlashMessage('Please enter a valid 10-digit mobile number', 'error');
+                showToast('Please enter a valid 10-digit mobile number', 'error', 'Validation Error');
                 return;
             }
             
             if (!username) {
-                showFlashMessage('Please enter a username', 'error');
+                showToast('Please enter a username', 'error', 'Validation Error');
                 return;
             }
             
             if (!masterKey) {
-                showFlashMessage('Please enter the master authorization key', 'error');
+                showToast('Please enter the master authorization key', 'error', 'Validation Error');
                 return;
             }
             
@@ -553,10 +958,14 @@
                 master_key: masterKey
             };
             
+            // Show loading toast
+            const toast = showToast('Processing admin registration...', 'info', 'Please Wait');
+            
             try {
                 // Try to register as new admin
                 const result = await registerAdmin(formData);
-                showFlashMessage('Admin account created successfully! You can now login.', 'success');
+                toastManager.close(toast);
+                showToast('Admin account created successfully! You can now login.', 'success');
                 closeModal('register-admin-modal');
                 
                 // Switch to admin tab and pre-fill mobile
@@ -566,14 +975,16 @@
                 // If registration fails, try to promote existing user
                 try {
                     const result = await promoteToAdmin(formData);
-                    showFlashMessage('User promoted to admin successfully! You can now login.', 'success');
+                    toastManager.close(toast);
+                    showToast('User promoted to admin successfully! You can now login.', 'success');
                     closeModal('register-admin-modal');
                     
                     // Switch to admin tab and pre-fill mobile
                     openTab('admin-tab');
                     document.getElementById('admin-mobile').value = mobile;
                 } catch (promoteError) {
-                    showFlashMessage(promoteError.message || 'Admin registration failed', 'error');
+                    toastManager.close(toast);
+                    showToast(promoteError.message || 'Admin registration failed', 'error', 'Registration Failed');
                 }
             }
         });
@@ -584,7 +995,7 @@
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
                     {% for category, message in messages %}
-                        showFlashMessage("{{ message }}", "{{ 'error' if category == 'error' else 'info' }}");
+                        showToast("{{ message }}", "{{ 'error' if category == 'error' else 'info' }}");
                     {% endfor %}
                 {% endif %}
             {% endwith %}
@@ -596,8 +1007,20 @@
                     this.value = this.value.replace(/\D/g, '').slice(0, 10);
                 });
             });
+            
+            // Add click handlers to tab buttons
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.addEventListener('click', function() {
+                    const tabName = this.getAttribute('data-tab');
+                    openTab(tabName);
+                });
+            });
+            
+            // Show welcome toast
+            setTimeout(() => {
+                showToast('Welcome to LyxNexus! Please login to continue.', 'info', 'Welcome');
+            }, 1000);
         });
-        'serviceWorker'in navigator&&navigator.serviceWorker.register('/service-worker.js').then(r=>console.log("SW registered:",r)).catch(e=>console.error("SW failed:",e)),window.addEventListener("online",()=>location.reload()),window.addEventListener("offline",()=>location.href="/offline.html");
     </script>
 </body>
 </html>
