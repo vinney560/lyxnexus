@@ -695,3 +695,84 @@ TypeError: Object of type datetime is not JSON serializable
 2025-10-14 23:03:29,507 - apscheduler.executors.default - INFO - Job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-14 23:04:29 EAT)" executed successfully
 2025-10-14 23:03:56,241 - apscheduler.executors.default - INFO - Running job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-14 23:03:56 EAT)" (scheduled at 2025-10-14 23:03:56.238348+03:00)
 2025-10-14 23:03:56,245 - apscheduler.executors.default - INFO - Job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-14 23:03:56 EAT)" executed successfully
+2025-10-14 23:08:15,684 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-10-14 23:08:15,696 - apscheduler.scheduler - INFO - Added job "periodic_cleanup" to job store "default"
+2025-10-14 23:08:15,697 - apscheduler.scheduler - INFO - Scheduler started
+2025-10-14 23:08:15,720 - werkzeug - INFO -  * Restarting with stat
+2025-10-14 23:08:38,798 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-10-14 23:08:38,801 - apscheduler.scheduler - INFO - Added job "periodic_cleanup" to job store "default"
+2025-10-14 23:08:38,802 - apscheduler.scheduler - INFO - Scheduler started
+2025-10-14 23:08:38,827 - werkzeug - WARNING -  * Debugger is active!
+2025-10-14 23:08:38,966 - werkzeug - INFO -  * Debugger PIN: 292-054-809
+2025-10-14 23:09:15,686 - apscheduler.executors.default - INFO - Running job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-14 23:09:15 EAT)" (scheduled at 2025-10-14 23:09:15.684806+03:00)
+2025-10-14 23:09:15,690 - apscheduler.executors.default - INFO - Job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-14 23:09:15 EAT)" executed successfully
+2025-10-14 23:09:38,801 - apscheduler.executors.default - INFO - Running job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-14 23:09:38 EAT)" (scheduled at 2025-10-14 23:09:38.798816+03:00)
+2025-10-14 23:09:38,802 - apscheduler.executors.default - INFO - Job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-14 23:09:38 EAT)" executed successfully
+2025-10-14 23:10:15,685 - apscheduler.executors.default - INFO - Running job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-14 23:11:15 EAT)" (scheduled at 2025-10-14 23:10:15.684806+03:00)
+2025-10-14 23:10:15,687 - apscheduler.executors.default - INFO - Job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-14 23:11:15 EAT)" executed successfully
+2025-10-14 23:10:38,801 - apscheduler.executors.default - INFO - Running job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-14 23:11:38 EAT)" (scheduled at 2025-10-14 23:10:38.798816+03:00)
+2025-10-14 23:10:38,803 - apscheduler.executors.default - INFO - Job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-14 23:11:38 EAT)" executed successfully
+2025-10-14 23:11:15,704 - apscheduler.executors.default - INFO - Running job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-14 23:12:15 EAT)" (scheduled at 2025-10-14 23:11:15.684806+03:00)
+2025-10-14 23:11:15,711 - apscheduler.executors.default - INFO - Job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-14 23:12:15 EAT)" executed successfully
+2025-10-14 23:11:38,801 - apscheduler.executors.default - INFO - Running job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-14 23:12:38 EAT)" (scheduled at 2025-10-14 23:11:38.798816+03:00)
+2025-10-14 23:11:38,802 - apscheduler.executors.default - INFO - Job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-14 23:12:38 EAT)" executed successfully
+2025-10-14 23:12:15,688 - apscheduler.executors.default - INFO - Running job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-14 23:13:15 EAT)" (scheduled at 2025-10-14 23:12:15.684806+03:00)
+2025-10-14 23:12:15,692 - apscheduler.executors.default - INFO - Job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-14 23:13:15 EAT)" executed successfully
+2025-10-14 23:12:38,800 - apscheduler.executors.default - INFO - Running job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-14 23:13:38 EAT)" (scheduled at 2025-10-14 23:12:38.798816+03:00)
+2025-10-14 23:12:38,802 - apscheduler.executors.default - INFO - Job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-14 23:13:38 EAT)" executed successfully
+2025-10-14 23:13:15,685 - apscheduler.executors.default - INFO - Running job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-14 23:14:15 EAT)" (scheduled at 2025-10-14 23:13:15.684806+03:00)
+2025-10-14 23:13:15,689 - apscheduler.executors.default - INFO - Job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-14 23:14:15 EAT)" executed successfully
+2025-10-14 23:13:38,803 - apscheduler.executors.default - INFO - Running job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-14 23:14:38 EAT)" (scheduled at 2025-10-14 23:13:38.798816+03:00)
+2025-10-14 23:13:38,814 - apscheduler.executors.default - INFO - Job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-14 23:14:38 EAT)" executed successfully
+2025-10-14 23:13:42,573 - werkzeug - INFO -  * Detected change in '/mnt/c/Users/HP/LyxNexus/app.py', reloading
+2025-10-14 23:13:42,859 - werkzeug - INFO -  * Restarting with stat
+2025-10-14 23:14:08,447 - werkzeug - WARNING -  * Debugger is active!
+2025-10-14 23:14:08,466 - werkzeug - INFO -  * Debugger PIN: 292-054-809
+2025-10-14 23:14:15,686 - apscheduler.executors.default - INFO - Running job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-14 23:15:15 EAT)" (scheduled at 2025-10-14 23:14:15.684806+03:00)
+2025-10-14 23:14:15,686 - apscheduler.executors.default - INFO - Job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-14 23:15:15 EAT)" executed successfully
+2025-10-14 23:14:24,396 - werkzeug - INFO -  * Detected change in '/mnt/c/Users/HP/LyxNexus/app.py', reloading
+2025-10-14 23:14:24,728 - werkzeug - INFO -  * Restarting with stat
+2025-10-14 23:14:45,632 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-10-14 23:14:45,635 - apscheduler.scheduler - INFO - Added job "periodic_cleanup" to job store "default"
+2025-10-14 23:14:45,635 - apscheduler.scheduler - INFO - Scheduler started
+2025-10-14 23:14:45,663 - werkzeug - WARNING -  * Debugger is active!
+2025-10-14 23:14:45,705 - werkzeug - INFO -  * Debugger PIN: 292-054-809
+2025-10-14 23:15:15,685 - apscheduler.executors.default - INFO - Running job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-14 23:16:15 EAT)" (scheduled at 2025-10-14 23:15:15.684806+03:00)
+2025-10-14 23:15:15,686 - apscheduler.executors.default - INFO - Job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-14 23:16:15 EAT)" executed successfully
+2025-10-14 23:15:45,634 - apscheduler.executors.default - INFO - Running job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-14 23:15:45 EAT)" (scheduled at 2025-10-14 23:15:45.632294+03:00)
+2025-10-14 23:15:45,638 - apscheduler.executors.default - INFO - Job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-14 23:15:45 EAT)" executed successfully
+2025-10-14 23:16:15,685 - apscheduler.executors.default - INFO - Running job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-14 23:17:15 EAT)" (scheduled at 2025-10-14 23:16:15.684806+03:00)
+2025-10-14 23:16:15,686 - apscheduler.executors.default - INFO - Job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-14 23:17:15 EAT)" executed successfully
+2025-10-14 23:16:45,635 - apscheduler.executors.default - INFO - Running job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-14 23:17:45 EAT)" (scheduled at 2025-10-14 23:16:45.632294+03:00)
+2025-10-14 23:16:45,640 - apscheduler.executors.default - INFO - Job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-14 23:17:45 EAT)" executed successfully
+2025-10-14 23:17:15,686 - apscheduler.executors.default - INFO - Running job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-14 23:18:15 EAT)" (scheduled at 2025-10-14 23:17:15.684806+03:00)
+2025-10-14 23:17:15,688 - apscheduler.executors.default - INFO - Job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-14 23:18:15 EAT)" executed successfully
+2025-10-14 23:17:45,633 - apscheduler.executors.default - INFO - Running job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-14 23:18:45 EAT)" (scheduled at 2025-10-14 23:17:45.632294+03:00)
+2025-10-14 23:17:45,634 - apscheduler.executors.default - INFO - Job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-14 23:18:45 EAT)" executed successfully
+2025-10-14 23:18:15,685 - apscheduler.executors.default - INFO - Running job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-14 23:19:15 EAT)" (scheduled at 2025-10-14 23:18:15.684806+03:00)
+2025-10-14 23:18:15,686 - apscheduler.executors.default - INFO - Job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-14 23:19:15 EAT)" executed successfully
+2025-10-14 23:18:45,635 - apscheduler.executors.default - INFO - Running job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-14 23:19:45 EAT)" (scheduled at 2025-10-14 23:18:45.632294+03:00)
+2025-10-14 23:18:45,640 - apscheduler.executors.default - INFO - Job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-14 23:19:45 EAT)" executed successfully
+2025-10-14 23:19:15,702 - apscheduler.executors.default - INFO - Running job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-14 23:20:15 EAT)" (scheduled at 2025-10-14 23:19:15.684806+03:00)
+2025-10-14 23:19:15,790 - apscheduler.executors.default - INFO - Job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-14 23:20:15 EAT)" executed successfully
+2025-10-14 23:19:45,634 - apscheduler.executors.default - INFO - Running job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-14 23:20:45 EAT)" (scheduled at 2025-10-14 23:19:45.632294+03:00)
+2025-10-14 23:19:45,635 - apscheduler.executors.default - INFO - Job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-14 23:20:45 EAT)" executed successfully
+2025-10-14 23:20:15,687 - apscheduler.executors.default - INFO - Running job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-14 23:21:15 EAT)" (scheduled at 2025-10-14 23:20:15.684806+03:00)
+2025-10-14 23:20:15,690 - apscheduler.executors.default - INFO - Job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-14 23:21:15 EAT)" executed successfully
+2025-10-14 23:20:45,633 - apscheduler.executors.default - INFO - Running job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-14 23:21:45 EAT)" (scheduled at 2025-10-14 23:20:45.632294+03:00)
+2025-10-14 23:20:45,634 - apscheduler.executors.default - INFO - Job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-14 23:21:45 EAT)" executed successfully
+2025-10-14 23:21:09,337 - werkzeug - INFO -  * Detected change in '/mnt/c/Users/HP/LyxNexus/app.py', reloading
+2025-10-14 23:21:09,653 - werkzeug - INFO -  * Restarting with stat
+2025-10-14 23:21:15,691 - apscheduler.executors.default - INFO - Running job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-14 23:22:15 EAT)" (scheduled at 2025-10-14 23:21:15.684806+03:00)
+2025-10-14 23:21:15,735 - apscheduler.executors.default - INFO - Job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-14 23:22:15 EAT)" executed successfully
+2025-10-14 23:22:53,628 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-10-14 23:22:53,632 - apscheduler.scheduler - INFO - Added job "periodic_cleanup" to job store "default"
+2025-10-14 23:22:53,632 - apscheduler.scheduler - INFO - Scheduler started
+2025-10-14 23:22:53,652 - werkzeug - INFO -  * Restarting with stat
+2025-10-14 23:23:18,272 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-10-14 23:23:18,274 - apscheduler.scheduler - INFO - Added job "periodic_cleanup" to job store "default"
+2025-10-14 23:23:18,275 - apscheduler.scheduler - INFO - Scheduler started
+2025-10-14 23:23:18,291 - werkzeug - WARNING -  * Debugger is active!
+2025-10-14 23:23:18,331 - werkzeug - INFO -  * Debugger PIN: 292-054-809
+2025-10-14 23:23:53,631 - apscheduler.executors.default - INFO - Running job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-14 23:23:53 EAT)" (scheduled at 2025-10-14 23:23:53.628368+03:00)
+2025-10-14 23:23:53,639 - apscheduler.executors.default - INFO - Job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-14 23:23:53 EAT)" executed successfully
