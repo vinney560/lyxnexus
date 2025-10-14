@@ -1345,6 +1345,32 @@ def get_timetable():
 #==========================================
 #  TIMETABLE API ROUTES
 #==========================================
+@app.route('/api/timetable', methods=['GET'])
+def get_timetable():
+    """Get all timetable slots"""
+    timetable_slots = Timetable.query.order_by(
+        Timetable.day_of_week, 
+        Timetable.start_time
+    ).all()
+    
+    result = []
+    for slot in timetable_slots:
+        result.append({
+            'id': slot.id,
+            'day_of_week': slot.day_of_week,
+            'start_time': slot.start_time.strftime('%H:%M'),
+            'end_time': slot.end_time.strftime('%H:%M'),
+            'subject': slot.subject,
+            'room': slot.room,
+            'teacher': slot.teacher,
+            'topic': {
+                'id': slot.topic.id,
+                'name': slot.topic.name
+            } if slot.topic else None
+        })
+    
+    return jsonify(result)
+
 @app.route('/api/timetable', methods=['POST'])
 def create_timetable_slot():
     if not current_user.is_admin:
