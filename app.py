@@ -1636,24 +1636,28 @@ scheduler.start()
 import atexit
 import requests
 
-TARGET_URL = "https://lyxspace.onrender.com/files"  # URL to ping
+TARGET_URLS = [
+    "https://lyxspace.onrender.com/files",
+    "https://lyxnexus.onrender.com/"
+]
 
-def ping_url():
-    """Periodically ping the target URL to keep it awake"""
-    try:
-        response = requests.get(TARGET_URL, timeout=5)
-        print(f"Pinged {TARGET_URL} | Status: {response.status_code}")
-    except requests.RequestException as e:
-        print(f"Failed to ping {TARGET_URL}: {e}")
+def ping_urls():
+    for url in TARGET_URLS:
+        try:
+            response = requests.get(url, timeout=5)
+            print(f"Pinged {url} | Status: {response.status_code}")
+        except requests.RequestException as e:
+            print(f"Failed to ping {url}: {e}")
 
 # Setup scheduler
 scheduler = BackgroundScheduler()
-scheduler.add_job(func=ping_url, trigger="interval", minutes=5)  # ping every 5 minutes
+scheduler.add_job(func=ping_urls, trigger="interval", minutes=3)
 scheduler.start()
 
 # Ensure scheduler shuts down cleanly
 atexit.register(lambda: scheduler.shutdown())
 
+TARGET_URL = 'https://lyxspace.onrender.com/files'
 # Optional: manual ping route
 @app.route("/ping-lyx")
 def manual_ping():
