@@ -1324,6 +1324,54 @@ def delete_topic(id):
 #==========================================
 #  TIMETABLE API ROUTES
 #==========================================
+@app.route('/api/timetable/grouped', methods=['GET'])
+def get_timetable():
+    """Get timetable grouped by day"""
+    print("\n[DEBUG] Fetching grouped timetable...")
+
+    try:
+        # Fetch and order slots
+        timetable_slots = Timetable.query.order_by(
+            Timetable.day_of_week, 
+            Timetable.start_time
+        ).all()
+
+        print(f"[DEBUG] Retrieved {len(timetable_slots)} timetable slots from DB")
+
+        # Define day order
+        days_order = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+        timetable_by_day = {day: [] for day in days_order}
+
+        # Group by day
+        for slot in timetable_slots:
+            print(f"[DEBUG] Processing slot ID {slot.id} ({slot.subject}) on {slot.day_of_week}")
+            timetable_by_day[slot.day_of_week].append({
+                'id': slot.id,
+                'start_time': slot.start_time.strftime('%H:%M'),
+                'end_time': slot.end_time.strftime('%H:%M'),
+                'time': f"{slot.start_time.strftime('%H:%M')} - {slot.end_time.strftime('%H:%M')}",
+                'subject': slot.subject,
+                'room': slot.room,
+                'teacher': slot.teacher,
+                'topic': {
+                    'id': slot.topic.id,
+                    'name': slot.topic.name
+                } if slot.topic else None
+            })
+
+        # Convert to list format (only include days that have slots)
+        result = [
+            {'day': day, 'slots': timetable_by_day[day]}
+            for day in days_order if timetable_by_day[day]
+        ]
+
+        print(f"[DEBUG] Sending grouped timetable response with {len(result)} days")
+        return jsonify(result), 200
+
+    except Exception as e:
+        print("[ERROR] Failed to get timetable:", str(e))
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/api/timetable', methods=['GET', 'POST'])
 def handle_timetable():
     # ================================
