@@ -247,27 +247,26 @@ class File(db.Model):
     def __repr__(self):
         return f'<File {self.name}>'
 #==========================================    
-from sqlalchemy import text
-
 with app.app_context():
     try:
-        db.session.execute(text("ALTER TABLE message ADD COLUMN parent_id INTEGER REFERENCES message(id);"))
-    except Exception as e:
-        print("parent_id exists:", e)
-    
-    try:
-        db.session.execute(text("ALTER TABLE message ADD COLUMN is_deleted BOOLEAN DEFAULT FALSE;"))
-    except Exception as e:
-        print("is_deleted exists:", e)
+        db.create_all()
 
-    try:
-        db.session.execute(text("ALTER TABLE message ADD COLUMN deleted_at DATETIME;"))
+        # Create admin user if not exists
+        admin = User.query.filter_by(mobile="0740694312").first()
+        if not admin:
+            admin = User(
+                username="Administrator",
+                mobile="0740694312",
+                is_admin=True
+            )
+            db.session.add(admin)
+            db.session.commit()
+            print("✅ Admin user created.")
+        else:
+            print("ℹ️ Admin already exists.")
     except Exception as e:
-        print("deleted_at exists:", e)
-    
-    db.session.commit()
-    print("✅ Message table updated successfully")
-
+        db.session.rollback()
+        print(f"⚠️ Database initialization error: {e}")
 #==========================================
 # User Loader Helper
 @login_manager.user_loader
@@ -408,28 +407,6 @@ def admin_page():
 def admin_users():
     return render_template('admin_users.html')
 
-@app.route('/messages')
-@login_required
-def messages_page():
-    """Serve the messaging page"""
-    # Get recent messages
-    recent_messages = Message.query.order_by(Message.created_at.desc()).limit(50).all()
-    recent_messages.reverse()  # Show oldest first
-    
-    # Get unread count
-    unread_count = Message.query.filter(
-        ~Message.id.in_(
-            db.session.query(MessageRead.message_id).filter(
-                MessageRead.user_id == current_user.id
-            )
-        ),
-        Message.user_id != current_user.id
-    ).count()
-    
-    return render_template('messages.html', 
-                         messages=recent_messages,
-                         unread_count=unread_count)
-
 @app.route('/profile')
 @login_required
 def profile():
@@ -444,6 +421,79 @@ def files():
     """Render the file management page"""
     return render_template('files.html')
 
+@app.route('/messages')
+@login_required
+def messages_page():
+    """Serve the messaging page with enhanced room support"""
+    try:
+        # Get room from query parameter, default to 'general'
+        room = request.args.get('room', 'general')
+        
+        # Validate room
+        valid_rooms = ['general', 'help', 'announcements']
+        if room not in valid_rooms:
+            room = 'general'
+        
+        # Get recent messages for the specified room
+        recent_messages = Message.query.filter_by(
+            room=room,
+            is_deleted=False
+        ).join(User).add_entity(User).order_by(Message.created_at.asc()).limit(100).all()
+        
+        # Get all read message IDs for current user
+        read_message_ids = {r.message_id for r in MessageRead.query.filter_by(
+            user_id=current_user.id
+        ).all()}
+        
+        # Prepare messages data
+        messages_data = []
+        for message, user in recent_messages:
+            message_dict = {
+                'id': message.id,
+                'content': message.content,
+                'user_id': message.user_id,
+                'username': user.username,
+                'is_admin': user.is_admin,
+                'is_admin_message': message.is_admin_message,
+                'created_at': message.created_at,
+                'room': message.room,
+                'parent_id': message.parent_id,
+                'is_read': message.id in read_message_ids
+            }
+            
+            # Load parent message if this is a reply
+            if message.parent_id:
+                parent_message = Message.query.get(message.parent_id)
+                if parent_message and not parent_message.is_deleted:
+                    parent_user = User.query.get(parent_message.user_id)
+                    message_dict['parent'] = {
+                        'id': parent_message.id,
+                        'content': parent_message.content,
+                        'username': parent_user.username if parent_user else 'Unknown',
+                        'user_id': parent_message.user_id
+                    }
+            
+            messages_data.append(message_dict)
+        
+        # Get unread count
+        unread_count = Message.query.filter(
+            Message.user_id != current_user.id,
+            Message.is_deleted == False,
+            ~Message.id.in_([r.message_id for r in MessageRead.query.filter_by(user_id=current_user.id).all()])
+        ).count()
+        
+        return render_template('messages.html', 
+                             messages=messages_data,
+                             unread_count=unread_count,
+                             current_room=room)
+                             
+    except Exception as e:
+        app.logger.error(f"Error in messages_page: {str(e)}")
+        # Return a safe fallback
+        return render_template('messages.html', 
+                             messages=[],
+                             unread_count=0,
+                             current_room='general')
 #--------------------------------------------------------------------
 @app.route('/favicon.ico')
 def favicon():
@@ -697,7 +747,8 @@ def update_user_profile():
 # =========================================
 # MESSAGES BACKEND ROUTES & SOCKET HANDLERS
 # =========================================
-# Global dictionary to track online users
+# Global dictionary to track online user
+
 online_users = {}
 
 # =========================================
@@ -1122,62 +1173,72 @@ def broadcast_online_users():
 # =========================================
 # SOCKET.IO HANDLERS
 # =========================================
-
 @socketio.on('connect')
 def handle_connect():
     """Handle user connection"""
     if current_user.is_authenticated:
-        # Add user to online users
-        update_user_presence(
-            user_id=current_user.id,
-            username=current_user.username,
-            is_admin=current_user.is_admin,
-            room='general'
-        )
-        
-        # Join general room by default
-        join_room('general')
-        
-        # Notify others in the general room
-        emit('user_joined', {
-            'user_id': current_user.id,
-            'username': current_user.username,
-            'is_admin': current_user.is_admin,
-            'message': f'{current_user.username} joined the chat'
-        }, room='general', include_self=False)
-        
-        # Send current user their own user info
-        emit('user_info', {
-            'user_id': current_user.id,
-            'username': current_user.username,
-            'is_admin': current_user.is_admin
-        })
-        
-        print(f"User {current_user.username} connected. Online users: {len(online_users)}")
+        try:
+            # Add user to online users
+            update_user_presence(
+                user_id=current_user.id,
+                username=current_user.username,
+                is_admin=current_user.is_admin,
+                room='general'
+            )
+            
+            # Join general room by default
+            join_room('general')
+            
+            # Notify others in the general room
+            emit('user_joined', {
+                'user_id': current_user.id,
+                'username': current_user.username,
+                'is_admin': current_user.is_admin,
+                'message': f'{current_user.username} joined the chat'
+            }, room='general', include_self=False)
+            
+            # Send current user their own user info
+            emit('user_info', {
+                'user_id': current_user.id,
+                'username': current_user.username,
+                'is_admin': current_user.is_admin
+            })
+            
+            print(f"User {current_user.username} connected. Online users: {len(online_users)}")
+            return True
+        except Exception as e:
+            print(f"Error in handle_connect: {e}")
+            return False
+    else:
+        print("Unauthenticated connection attempt")
+        return False
 
 @socketio.on('disconnect')
 def handle_disconnect():
     """Handle user disconnection"""
-    if current_user.is_authenticated:
-        user_data = online_users.get(current_user.id)
-        
-        if user_data:
-            room = user_data.get('current_room', 'general')
+    try:
+        if current_user.is_authenticated:
+            user_data = online_users.get(current_user.id)
             
-            # Remove user from online users
-            online_users.pop(current_user.id, None)
+            if user_data:
+                room = user_data.get('current_room', 'general')
+                
+                # Remove user from online users
+                online_users.pop(current_user.id, None)
+                
+                # Notify others
+                emit('user_left', {
+                    'user_id': current_user.id,
+                    'username': current_user.username,
+                    'message': f'{current_user.username} left the chat'
+                }, room=room, include_self=False)
+                
+                # Broadcast updated online users list
+                broadcast_online_users()
             
-            # Notify others
-            emit('user_left', {
-                'user_id': current_user.id,
-                'username': current_user.username,
-                'message': f'{current_user.username} left the chat'
-            }, room=room, include_self=False)
-            
-            # Broadcast updated online users list
-            broadcast_online_users()
-        
-        print(f"User {current_user.username} disconnected. Online users: {len(online_users)}")
+            print(f"User {current_user.username} disconnected. Online users: {len(online_users)}")
+    except Exception as e:
+        print(f"Error in handle_disconnect: {e}")
 
 @socketio.on('join_room')
 def handle_join_room(data):
