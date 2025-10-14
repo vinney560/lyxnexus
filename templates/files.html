@@ -770,7 +770,7 @@
                                 <button class="btn" onclick="downloadFile(${file.id})">
                                     <i class="fas fa-download mr-1"></i> Download
                                 </button>
-                                {% if current_user.is_admin or file.can_delete %}
+                                {% if current_user.is_admin %}
                                 <button class="btn btn-danger" onclick="deleteFile(${file.id})">
                                     <i class="fas fa-trash mr-1"></i> Delete
                                 </button>
