@@ -709,9 +709,9 @@
                     <p class="mb-4 text-slate-300">${assignment.description}</p>
                     <div class="flex justify-between items-center">
                         <span class="text-slate-400 text-sm">Topic: ${assignment.topic?.name || 'General'}</span>
-                        <button class="btn btn-sm">
+                        <button onclick="window.location.href='/assignment/${assignment.id}'" class="btn btn-sm">
                             <i class="fas fa-paper-plane"></i>
-                            Submit Work
+                            View File
                         </button>
                     </div>
                 </div>
