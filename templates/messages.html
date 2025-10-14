@@ -269,6 +269,39 @@
         margin-left: auto;
     }
     
+    .connection-status {
+        display: flex;
+        align-items: center;
+        font-size: 0.8em;
+        margin-right: 15px;
+    }
+    
+    .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        margin-right: 5px;
+    }
+    
+    .status-connected {
+        background-color: #10B981;
+    }
+    
+    .status-connecting {
+        background-color: #F59E0B;
+        animation: pulse 1.5s infinite;
+    }
+    
+    .status-disconnected {
+        background-color: #EF4444;
+    }
+    
+    @keyframes pulse {
+        0% { opacity: 1; }
+        50% { opacity: 0.5; }
+        100% { opacity: 1; }
+    }
+    
     /* Scrollbar styling */
     .messages-list::-webkit-scrollbar {
         width: 6px;
@@ -325,6 +358,10 @@
                 </div>
                 
                 <div class="flex items-center space-x-4">
+                    <div class="connection-status" id="connectionStatus">
+                        <div class="status-dot status-connected" id="statusDot"></div>
+                        <span id="statusText">Connected</span>
+                    </div>
                     {% if unread_count > 0 %}
                     <span class="unread-badge">{{ unread_count }}</span>
                     {% endif %}
@@ -407,8 +444,14 @@
     </main>
 
     <script>
-        // Socket.IO connection
-        const socket = io();
+        // Socket.IO connection with reconnection logic
+        const socket = io({
+            reconnection: true,
+            reconnectionAttempts: 10,
+            reconnectionDelay: 1000,
+            reconnectionDelayMax: 5000,
+            timeout: 20000
+        });
         
         // DOM elements
         const messagesList = document.getElementById('messagesList');
@@ -416,16 +459,53 @@
         const sendButton = document.getElementById('sendButton');
         const typingIndicator = document.getElementById('typingIndicator');
         const onlineUsersList = document.getElementById('onlineUsersList');
+        const connectionStatus = document.getElementById('connectionStatus');
+        const statusDot = document.getElementById('statusDot');
+        const statusText = document.getElementById('statusText');
         
         // State
         let currentRoom = 'general';
         let onlineUsers = {};
         let typingTimer;
+        let reconnectAttempts = 0;
+        let isConnected = false;
         
         // Format time
         function formatTime(dateString) {
             const date = new Date(dateString);
             return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+        
+        // Update connection status
+        function updateConnectionStatus(status, message) {
+            statusDot.className = 'status-dot';
+            switch(status) {
+                case 'connected':
+                    statusDot.classList.add('status-connected');
+                    statusText.textContent = 'Connected';
+                    isConnected = true;
+                    reconnectAttempts = 0;
+                    break;
+                case 'connecting':
+                    statusDot.classList.add('status-connecting');
+                    statusText.textContent = 'Connecting...';
+                    isConnected = false;
+                    break;
+                case 'disconnected':
+                    statusDot.classList.add('status-disconnected');
+                    statusText.textContent = 'Disconnected';
+                    isConnected = false;
+                    break;
+                case 'reconnecting':
+                    statusDot.classList.add('status-connecting');
+                    statusText.textContent = `Reconnecting (${reconnectAttempts})`;
+                    isConnected = false;
+                    break;
+            }
+            
+            if (message) {
+                console.log('Connection status:', message);
+            }
         }
         
         // Scroll to bottom of messages
@@ -436,14 +516,17 @@
         // Add message to UI
         function addMessage(messageData) {
             const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${messageData.user_id === {{ current_user.id }} ? 'user-message' : messageData.is_admin_message ? 'admin-message' : 'other-message'}`;
+            const isUserMessage = messageData.user_id === {{ current_user.id }};
+            const isAdminMessage = messageData.is_admin_message;
+            
+            messageDiv.className = `message ${isUserMessage ? 'user-message' : isAdminMessage ? 'admin-message' : 'other-message'}`;
             messageDiv.setAttribute('data-message-id', messageData.id);
             
             messageDiv.innerHTML = `
                 <div class="message-header">
                     <div class="flex items-center">
                         <span class="username">${messageData.username}</span>
-                        ${messageData.is_admin_message ? '<span class="admin-badge">ADMIN</span>' : ''}
+                        ${isAdminMessage ? '<span class="admin-badge">ADMIN</span>' : ''}
                     </div>
                     <span class="timestamp">${formatTime(messageData.created_at)}</span>
                 </div>
@@ -471,7 +554,7 @@
         // Send message
         function sendMessage() {
             const content = messageInput.value.trim();
-            if (!content) return;
+            if (!content || !isConnected) return;
             
             socket.emit('send_message', {
                 content: content,
@@ -492,25 +575,96 @@
         function updateOnlineUsers() {
             onlineUsersList.innerHTML = '';
             
+            // Add current user first
+            const currentUserDiv = document.createElement('div');
+            currentUserDiv.className = 'user-item user-admin';
+            currentUserDiv.innerHTML = `
+                <div class="user-avatar">
+                    {{ current_user.username[0].upper() }}
+                </div>
+                <span>You ({{ current_user.username }})</span>
+                <span class="admin-badge ml-2">YOU</span>
+            `;
+            onlineUsersList.appendChild(currentUserDiv);
+            
+            // Add other online users
             Object.values(onlineUsers).forEach(user => {
-                const userDiv = document.createElement('div');
-                userDiv.className = `user-item ${user.is_admin ? 'user-admin' : ''}`;
-                
-                userDiv.innerHTML = `
-                    <div class="user-avatar">
-                        ${user.username.charAt(0).toUpperCase()}
-                    </div>
-                    <span>${user.username}</span>
-                    ${user.is_admin ? '<span class="admin-badge ml-2">ADMIN</span>' : ''}
-                `;
-                
-                onlineUsersList.appendChild(userDiv);
+                if (user.user_id !== {{ current_user.id }}) {
+                    const userDiv = document.createElement('div');
+                    userDiv.className = `user-item ${user.is_admin ? 'user-admin' : ''}`;
+                    
+                    userDiv.innerHTML = `
+                        <div class="user-avatar">
+                            ${user.username.charAt(0).toUpperCase()}
+                        </div>
+                        <span>${user.username}</span>
+                        ${user.is_admin ? '<span class="admin-badge ml-2">ADMIN</span>' : ''}
+                    `;
+                    
+                    onlineUsersList.appendChild(userDiv);
+                }
             });
+        }
+        
+        // Load initial online users
+        function loadInitialOnlineUsers() {
+            fetch('/api/online-users')
+                .then(response => response.json())
+                .then(users => {
+                    onlineUsers = {};
+                    users.forEach(user => {
+                        if (user.user_id !== {{ current_user.id }}) {
+                            onlineUsers[user.user_id] = user;
+                        }
+                    });
+                    updateOnlineUsers();
+                })
+                .catch(error => {
+                    console.error('Failed to load online users:', error);
+                });
         }
         
         // Socket event listeners
         socket.on('connect', () => {
             console.log('Connected to server');
+            updateConnectionStatus('connected');
+            
+            // Load initial online users after connection
+            loadInitialOnlineUsers();
+            
+            // Join the current room
+            socket.emit('join_room', { room: currentRoom });
+        });
+        
+        socket.on('disconnect', (reason) => {
+            console.log('Disconnected from server:', reason);
+            updateConnectionStatus('disconnected');
+        });
+        
+        socket.on('reconnect_attempt', (attempt) => {
+            reconnectAttempts = attempt;
+            updateConnectionStatus('reconnecting');
+        });
+        
+        socket.on('reconnect', (attempt) => {
+            console.log('Reconnected after', attempt, 'attempts');
+            updateConnectionStatus('connected');
+        });
+        
+        socket.on('reconnect_error', (error) => {
+            console.log('Reconnection error:', error);
+        });
+        
+        socket.on('reconnect_failed', () => {
+            console.log('Failed to reconnect');
+            updateConnectionStatus('disconnected');
+            
+            // Show reconnection failed message
+            const notificationDiv = document.createElement('div');
+            notificationDiv.className = 'text-center text-red-400 text-sm py-2';
+            notificationDiv.textContent = 'Connection lost. Please refresh the page.';
+            messagesList.appendChild(notificationDiv);
+            scrollToBottom();
         });
         
         socket.on('new_message', (messageData) => {
@@ -519,6 +673,7 @@
         
         socket.on('user_joined', (data) => {
             onlineUsers[data.user_id] = {
+                user_id: data.user_id,
                 username: data.username,
                 is_admin: data.is_admin
             };
@@ -544,6 +699,16 @@
             scrollToBottom();
         });
         
+        socket.on('online_users_update', (data) => {
+            onlineUsers = {};
+            data.users.forEach(user => {
+                if (user.user_id !== {{ current_user.id }}) {
+                    onlineUsers[user.user_id] = user;
+                }
+            });
+            updateOnlineUsers();
+        });
+        
         socket.on('user_typing', (data) => {
             typingIndicator.textContent = `${data.username} is typing...`;
             typingIndicator.style.display = 'block';
@@ -567,7 +732,7 @@
         messageInput.addEventListener('input', adjustTextareaHeight);
         
         messageInput.addEventListener('input', () => {
-            if (messageInput.value.trim()) {
+            if (messageInput.value.trim() && isConnected) {
                 socket.emit('typing', { room: currentRoom });
             }
         });
@@ -596,6 +761,10 @@
                     .then(messages => {
                         messagesList.innerHTML = '';
                         messages.forEach(addMessage);
+                    })
+                    .catch(error => {
+                        console.error('Failed to load messages:', error);
+                        messagesList.innerHTML = '<div class="text-center text-red-400 py-4">Failed to load messages</div>';
                     });
             });
         });
@@ -604,6 +773,9 @@
         window.addEventListener('load', () => {
             scrollToBottom();
             adjustTextareaHeight();
+            
+            // Load initial online users
+            loadInitialOnlineUsers();
             
             // Mark all visible messages as read
             const messageIds = Array.from(messagesList.querySelectorAll('.message'))
@@ -620,6 +792,21 @@
                 });
             }
         });
+
+        // Handle page visibility changes
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden && isConnected) {
+                // Page is visible again, refresh online users
+                loadInitialOnlineUsers();
+            }
+        });
+
+        // Periodic connection health check
+        setInterval(() => {
+            if (isConnected) {
+                socket.emit('ping');
+            }
+        }, 30000);
     </script>
 </body>
 </html>

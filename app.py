@@ -686,79 +686,228 @@ def update_user_profile():
 # =========================================
 # API MESSAGES DATA
 # =========================================
-@app.route('/api/messages')
+from flask import jsonify, request
+from flask_socketio import emit, join_room, leave_room
+from datetime import datetime, timedelta
+import json
+
+# Global dictionary to track online users (in production, use Redis instead)
+online_users = {}
+
+@app.route('/api/online-users')
 @login_required
-def get_messages():
-    """Get messages via API"""
-    room = request.args.get('room', 'general')
-    limit = request.args.get('limit', 50, type=int)
+def get_online_users():
+    """Get currently online users"""
+    # Clean up disconnected users (older than 30 seconds)
+    cleanup_disconnected_users()
     
-    messages = Message.query.filter_by(room=room)\
-        .order_by(Message.created_at.desc())\
-        .limit(limit)\
-        .all()
-    messages.reverse()
-    
-    result = []
-    for message in messages:
-        result.append({
-            'id': message.id,
-            'content': message.content,
-            'user_id': message.user_id,
-            'username': message.user.username,
-            'is_admin': message.user.is_admin,
-            'is_admin_message': message.is_admin_message,
-            'created_at': message.created_at.isoformat(),
-            'room': message.room
+    users = []
+    for user_id, user_data in online_users.items():
+        # Skip if user data is incomplete
+        if not user_data or 'user_id' not in user_data:
+            continue
+            
+        users.append({
+            'user_id': user_data['user_id'],
+            'username': user_data['username'],
+            'is_admin': user_data.get('is_admin', False),
+            'last_seen': user_data.get('last_seen'),
+            'room': user_data.get('current_room', 'general')
         })
     
-    return jsonify(result)
+    return jsonify(users)
 
-@app.route('/api/messages/read', methods=['POST'])
-@login_required
-def mark_messages_read():
-    """Mark messages as read"""
-    data = request.get_json()
-    message_ids = data.get('message_ids', [])
+def cleanup_disconnected_users():
+    """Remove users who haven't been seen for more than 30 seconds"""
+    current_time = datetime.utcnow()
+    disconnected_users = []
     
-    for msg_id in message_ids:
-        # Check if already read
-        existing = MessageRead.query.filter_by(
-            message_id=msg_id, 
-            user_id=current_user.id
-        ).first()
-        
-        if not existing:
-            read_record = MessageRead(
-                message_id=msg_id,
-                user_id=current_user.id
-            )
-            db.session.add(read_record)
+    for user_id, user_data in online_users.items():
+        if user_data and 'last_seen' in user_data:
+            last_seen = user_data['last_seen']
+            if isinstance(last_seen, str):
+                try:
+                    last_seen = datetime.fromisoformat(last_seen.replace('Z', '+00:00'))
+                except:
+                    continue
+            
+            if current_time - last_seen > timedelta(seconds=30):
+                disconnected_users.append(user_id)
     
-    db.session.commit()
-    return jsonify({'success': True})
+    for user_id in disconnected_users:
+        user_data = online_users.pop(user_id, None)
+        if user_data:
+            emit('user_left', {
+                'user_id': user_data['user_id'],
+                'username': user_data['username'],
+                'message': f'{user_data["username"]} left the chat'
+            }, room=user_data.get('current_room', 'general'), include_self=False)
+            
+            # Broadcast updated online users list
+            broadcast_online_users()
+
+def update_user_presence(user_id, username, is_admin=False, room='general'):
+    """Update user's last seen timestamp and room"""
+    online_users[user_id] = {
+        'user_id': user_id,
+        'username': username,
+        'is_admin': is_admin,
+        'last_seen': datetime.utcnow(),
+        'current_room': room,
+        'socket_id': request.sid
+    }
+
+def broadcast_online_users():
+    """Broadcast updated online users list to all clients"""
+    cleanup_disconnected_users()
+    
+    users = []
+    for user_id, user_data in online_users.items():
+        if user_data and 'user_id' in user_data:
+            users.append({
+                'user_id': user_data['user_id'],
+                'username': user_data['username'],
+                'is_admin': user_data.get('is_admin', False)
+            })
+    
+    emit('online_users_update', {'users': users}, broadcast=True)
 
 @socketio.on('connect')
 def handle_connect():
     """Handle user connection"""
     if current_user.is_authenticated:
+        # Add user to online users
+        update_user_presence(
+            user_id=current_user.id,
+            username=current_user.username,
+            is_admin=current_user.is_admin,
+            room='general'
+        )
+        
+        # Join general room by default
         join_room('general')
+        
+        # Notify others in the general room
         emit('user_joined', {
             'user_id': current_user.id,
             'username': current_user.username,
             'is_admin': current_user.is_admin,
             'message': f'{current_user.username} joined the chat'
         }, room='general', include_self=False)
+        
+        # Send current user their own user info
+        emit('user_info', {
+            'user_id': current_user.id,
+            'username': current_user.username,
+            'is_admin': current_user.is_admin
+        })
+        
+        # Broadcast updated online users list
+        broadcast_online_users()
+        
+        print(f"User {current_user.username} connected. Online users: {len(online_users)}")
 
 @socketio.on('disconnect')
 def handle_disconnect():
     """Handle user disconnection"""
     if current_user.is_authenticated:
+        user_data = online_users.get(current_user.id)
+        
+        if user_data:
+            room = user_data.get('current_room', 'general')
+            
+            # Remove user from online users
+            online_users.pop(current_user.id, None)
+            
+            # Notify others
+            emit('user_left', {
+                'user_id': current_user.id,
+                'username': current_user.username,
+                'message': f'{current_user.username} left the chat'
+            }, room=room, include_self=False)
+            
+            # Broadcast updated online users list
+            broadcast_online_users()
+        
+        print(f"User {current_user.username} disconnected. Online users: {len(online_users)}")
+
+@socketio.on('join_room')
+def handle_join_room(data):
+    """Handle joining a room"""
+    if current_user.is_authenticated:
+        room = data.get('room', 'general')
+        previous_room = online_users.get(current_user.id, {}).get('current_room', 'general')
+        
+        # Leave previous room if different
+        if previous_room != room:
+            leave_room(previous_room)
+            emit('user_left', {
+                'user_id': current_user.id,
+                'username': current_user.username,
+                'message': f'{current_user.username} left {previous_room}'
+            }, room=previous_room, include_self=False)
+        
+        # Join new room
+        join_room(room)
+        
+        # Update user presence
+        update_user_presence(
+            user_id=current_user.id,
+            username=current_user.username,
+            is_admin=current_user.is_admin,
+            room=room
+        )
+        
+        # Notify room
+        emit('user_joined', {
+            'user_id': current_user.id,
+            'username': current_user.username,
+            'is_admin': current_user.is_admin,
+            'message': f'{current_user.username} joined {room}'
+        }, room=room, include_self=False)
+        
+        # Broadcast updated online users list
+        broadcast_online_users()
+        
+        emit('room_joined', {
+            'room': room,
+            'user_id': current_user.id,
+            'username': current_user.username
+        })
+
+@socketio.on('leave_room')
+def handle_leave_room(data):
+    """Handle leaving a room"""
+    if current_user.is_authenticated:
+        room = data.get('room', 'general')
+        leave_room(room)
+        
+        # Update user presence (set to general room)
+        update_user_presence(
+            user_id=current_user.id,
+            username=current_user.username,
+            is_admin=current_user.is_admin,
+            room='general'
+        )
+        
+        # Notify room
         emit('user_left', {
             'user_id': current_user.id,
             'username': current_user.username,
-            'message': f'{current_user.username} left the chat'
-        }, room='general', include_self=False)
+            'message': f'{current_user.username} left {room}'
+        }, room=room, include_self=False)
+        
+        # Join general room
+        join_room('general')
+        
+        # Broadcast updated online users list
+        broadcast_online_users()
+        
+        emit('room_left', {
+            'room': room,
+            'user_id': current_user.id,
+            'username': current_user.username
+        })
 
 @socketio.on('send_message')
 def handle_send_message(data):
@@ -771,6 +920,14 @@ def handle_send_message(data):
     
     if not content:
         return
+    
+    # Update user presence (keep them in current room)
+    update_user_presence(
+        user_id=current_user.id,
+        username=current_user.username,
+        is_admin=current_user.is_admin,
+        room=room
+    )
     
     # Create message
     message = Message(
@@ -797,29 +954,36 @@ def handle_send_message(data):
     # Broadcast to room
     emit('new_message', message_data, room=room)
 
-@socketio.on('join_room')
-def handle_join_room(data):
-    """Handle joining a room"""
+@socketio.on('typing')
+def handle_typing(data):
+    """Handle typing indicator"""
     if current_user.is_authenticated:
         room = data.get('room', 'general')
-        join_room(room)
-        emit('room_joined', {
-            'room': room,
+        emit('user_typing', {
             'user_id': current_user.id,
-            'username': current_user.username
-        })
+            'username': current_user.username,
+            'room': room
+        }, room=room, include_self=False)
 
-@socketio.on('leave_room')
-def handle_leave_room(data):
-    """Handle leaving a room"""
+@socketio.on('ping')
+def handle_ping():
+    """Handle ping for connection health check"""
     if current_user.is_authenticated:
-        room = data.get('room', 'general')
-        leave_room(room)
-        emit('room_left', {
-            'room': room,
-            'user_id': current_user.id,
-            'username': current_user.username
-        })    
+        # Update user presence
+        update_user_presence(
+            user_id=current_user.id,
+            username=current_user.username,
+            is_admin=current_user.is_admin,
+            room=online_users.get(current_user.id, {}).get('current_room', 'general')
+        )
+        emit('pong')
+
+# Periodic cleanup task (run this every minute in production)
+def periodic_cleanup():
+    """Periodically clean up disconnected users"""
+    with app.app_context():
+        cleanup_disconnected_users()
+
 # =========================================
 # API USERS DATA
 # =========================================
