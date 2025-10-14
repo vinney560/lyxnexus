@@ -1321,48 +1321,6 @@ def delete_topic(id):
     
     return jsonify({'message': 'Topic deleted successfully'})
 
-# =========================================
-# TIMETABLE API ROUTES
-# =========================================
-
-@app.route('/api/timetable')
-def get_timetable():
-    """Get timetable grouped by day"""
-    timetable_slots = Timetable.query.order_by(
-        Timetable.day_of_week, 
-        Timetable.start_time
-    ).all()
-    
-    # Group by day
-    days_order = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
-    timetable_by_day = {day: [] for day in days_order}
-    
-    for slot in timetable_slots:
-        timetable_by_day[slot.day_of_week].append({
-            'id': slot.id,
-            'start_time': slot.start_time.strftime('%H:%M'),
-            'end_time': slot.end_time.strftime('%H:%M'),
-            'time': f"{slot.start_time.strftime('%H:%M')} - {slot.end_time.strftime('%H:%M')}",
-            'subject': slot.subject,
-            'room': slot.room,
-            'teacher': slot.teacher,
-            'topic': {
-                'id': slot.topic.id,
-                'name': slot.topic.name
-            } if slot.topic else None
-        })
-    
-    # Convert to list format expected by frontend
-    result = []
-    for day in days_order:
-        if timetable_by_day[day]:  # Only include days with slots
-            result.append({
-                'day': day,
-                'slots': timetable_by_day[day]
-            })
-    
-    return jsonify(result)
-
 #==========================================
 #  TIMETABLE API ROUTES
 #==========================================
