@@ -748,13 +748,13 @@
                     statusClass = 'bg-red-500';
                     statusText = 'Overdue';
                 } else if (daysUntilDue < 1) {
-                    statusClass = 'bg-yellow-500';
+                    statusClass = 'bg-yellow-400';
                     statusText = 'Due Today';
                 } else if (daysUntilDue === 1) {
-                    statusClass = 'bg-yellow-600';
+                    statusClass = 'bg-orange-400';
                     statusText = 'Due Tomorrow';    
                 } else if (daysUntilDue <= 3) {
-                    statusClass = 'bg-yellow-500';
+                    statusClass = 'bg-green-400';
                     statusText = 'Due Soon';
                 }
                 return `
