@@ -1345,18 +1345,30 @@ def get_timetable():
 #==========================================
 #  TIMETABLE API ROUTES
 #==========================================
-
 @app.route('/api/timetable', methods=['POST'])
 def create_timetable_slot():
-    """Create a new timetable slot (Admin only)"""
     if not current_user.is_admin:
         return jsonify({'error': 'Unauthorized'}), 403
     
     data = request.get_json()
     
-    # Convert time strings to time objects
-    start_time = datetime.strptime(data.get('start_time'), '%H:%M').time()
-    end_time = datetime.strptime(data.get('end_time'), '%H:%M').time()
+    try:
+        # Handle time parsing more safely
+        start_time_str = data.get('start_time')
+        end_time_str = data.get('end_time')
+        
+        # Parse time strings to time objects
+        start_time = datetime.strptime(start_time_str, '%H:%M').time()
+        end_time = datetime.strptime(end_time_str, '%H:%M').time()
+        
+        # Validate that end time is after start time
+        if start_time >= end_time:
+            return jsonify({'error': 'End time must be after start time'}), 400
+            
+    except ValueError as e:
+        return jsonify({'error': 'Invalid time format. Use HH:MM format'}), 400
+    except Exception as e:
+        return jsonify({'error': f'Time parsing error: {str(e)}'}), 400
     
     timetable_slot = Timetable(
         day_of_week=data.get('day_of_week'),
