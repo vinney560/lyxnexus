@@ -1179,6 +1179,10 @@ def get_timetable():
     
     return jsonify(result)
 
+#==========================================
+#  TIMETABLE API ROUTES
+#==========================================
+
 @app.route('/api/timetable', methods=['POST'])
 def create_timetable_slot():
     """Create a new timetable slot (Admin only)"""
@@ -1267,10 +1271,9 @@ def get_timetable_by_day(day):
     
     return jsonify(result)
 #==========================================
-#           Registering admins
-
-# Master key for admin registration (store this securely in environment variables in production)
-MASTER_ADMIN_KEY = "lyxspace_2025"
+#           REGISTERING ADMIN API
+#==========================================
+MASTER_ADMIN_KEY = "lyxnexus_2025"
 
 @app.route('/api/register-admin', methods=['POST'])
 def register_admin():
@@ -1292,7 +1295,7 @@ def register_admin():
     # Check if user already exists
     existing_user = User.query.filter_by(mobile=mobile).first()
     if existing_user:
-        return jsonify({'error': 'User with this mobile already exists'}), 409
+        return jsonify({'error': 'User exists'}), 409
     
     # Create new admin user
     new_admin = User(
@@ -1351,6 +1354,7 @@ def check_admin():
         'is_admin': user.is_admin,
         'username': user.username
     })
+
 # =========================================
 # USER API ROUTES (Basic)
 # =========================================
