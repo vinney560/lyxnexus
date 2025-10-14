@@ -531,9 +531,11 @@
         function setButtonLoading(button, isLoading) {
             if (isLoading) {
                 button.classList.add('btn-loading');
+                button.querySelector('.btn-spinner').style.display = 'inline-block';
                 button.disabled = true;
             } else {
                 button.classList.remove('btn-loading');
+                button.querySelector('.btn-spinner').style.display = 'none';
                 button.disabled = false;
             }
         }

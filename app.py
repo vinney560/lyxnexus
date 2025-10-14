@@ -331,8 +331,9 @@ def admin_required(f):
 #==========================================
 @app.route('/login', methods=['POST', 'GET'])
 def login():
+    next_page = request.args.get("next") or request.form.get("next")
     if current_user.is_authenticated:
-        return redirect(url_for('admin_page') if current_user.is_admin else url_for('main_page'))
+        return redirect(next_page or url_for('admin_page') if current_user.is_admin else url_for('main_page'))
     if request.method == 'POST':
         username = request.form.get('username', '')[:50]
         mobile = request.form.get('mobile')
@@ -350,8 +351,6 @@ def login():
             if not user or not user.is_admin:
                 flash('Invalid admin credentials')
                 return render_template('login.html', username=username, mobile=mobile, year=_year)
-            # For now, we're not checking the secret in this example
-            # In production, you'd verify against a stored hash
             login_user(user)
             return redirect(url_for('admin_page'))
         
@@ -368,9 +367,9 @@ def login():
             login_user(user)
         # Redirect to appropriate dashboard
         if user and user.is_admin:
-            return redirect(url_for('admin_page'))
+            return redirect(next_page or url_for('admin_page'))
         else:
-            return redirect(url_for('main_page'))
+            return redirect(next_page or url_for('main_page'))
     
     return render_template('login.html', year=_year)
 
@@ -686,10 +685,6 @@ def update_user_profile():
 # =========================================
 # API MESSAGES DATA
 # =========================================
-from flask import jsonify, request
-from flask_socketio import emit, join_room, leave_room
-from datetime import datetime, timedelta
-import json
 
 # Global dictionary to track online users (in production, use Redis instead)
 online_users = {}
