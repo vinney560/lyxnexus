@@ -1632,6 +1632,45 @@ def periodic_cleanup():
 scheduler = BackgroundScheduler()
 scheduler.add_job(func=periodic_cleanup, trigger="interval", seconds=60)
 scheduler.start()
+# https://lyxspace.onrender.com/files
+import atexit
+import requests
+
+TARGET_URL = "https://lyxspace.onrender.com/files"  # URL to ping
+
+def ping_url():
+    """Periodically ping the target URL to keep it awake"""
+    try:
+        response = requests.get(TARGET_URL, timeout=5)
+        print(f"Pinged {TARGET_URL} | Status: {response.status_code}")
+    except requests.RequestException as e:
+        print(f"Failed to ping {TARGET_URL}: {e}")
+
+# Setup scheduler
+scheduler = BackgroundScheduler()
+scheduler.add_job(func=ping_url, trigger="interval", minutes=5)  # ping every 5 minutes
+scheduler.start()
+
+# Ensure scheduler shuts down cleanly
+atexit.register(lambda: scheduler.shutdown())
+
+# Optional: manual ping route
+@app.route("/ping-lyx")
+def manual_ping():
+    try:
+        response = requests.get(TARGET_URL, timeout=5)
+        return {
+            "url": TARGET_URL,
+            "status_code": response.status_code,
+            "success": response.ok
+        }
+    except requests.RequestException as e:
+        return {
+            "url": TARGET_URL,
+            "error": str(e),
+            "success": False
+        }
+
 #===========================================
 @app.route('/api/users')
 @login_required
