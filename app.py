@@ -194,29 +194,35 @@ class Timetable(db.Model):
     
     # Relationship
     topic = db.relationship('Topic', backref='timetable_slots', lazy=True)
-#==========================================
-# MESSAGE MODEL (For future use)
-#==========================================
+
+# =========================================
+# MESSAGE MODELS
+# ========================================
+
 class Message(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    content = db.Column(db.Text, nullable=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
-    room = db.Column(db.String(100), default='general')  # For different chat rooms
+    content = db.Column(db.Text, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    room = db.Column(db.String(100), default='general')
     is_admin_message = db.Column(db.Boolean, default=False)
+    parent_id = db.Column(db.Integer, db.ForeignKey('message.id'), nullable=True)  # For replies
+    is_deleted = db.Column(db.Boolean, default=False)
+    deleted_at = db.Column(db.DateTime, nullable=True)
     created_at = db.Column(db.DateTime, default=nairobi_time)
     
-    # Relationship
+    # Relationships
     user = db.relationship('User', backref=db.backref('messages', lazy=True))
+    parent = db.relationship('Message', remote_side=[id], backref=db.backref('replies', lazy=True))
 
 class MessageRead(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    message_id = db.Column(db.Integer, db.ForeignKey('message.id'), nullable=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    message_id = db.Column(db.Integer, db.ForeignKey('message.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     read_at = db.Column(db.DateTime, default=nairobi_time)
     
     # Relationships
-    message = db.relationship('Message', backref=db.backref('read_by', lazy=True))
-    user = db.relationship('User', backref=db.backref('read_messages', lazy=True))
+    message = db.relationship('Message', backref=db.backref('read_records', lazy=True))
+    user = db.relationship('User', backref=db.backref('read_messages', lazy=True))    
 #==========================================
 # FILES MODEL
 #==========================================
@@ -241,27 +247,27 @@ class File(db.Model):
     def __repr__(self):
         return f'<File {self.name}>'
 #==========================================    
+from sqlalchemy import text
 
 with app.app_context():
     try:
-        db.create_all()
-
-        # Create admin user if not exists
-        admin = User.query.filter_by(mobile="0740694312").first()
-        if not admin:
-            admin = User(
-                username="Administrator",
-                mobile="0740694312",
-                is_admin=True
-            )
-            db.session.add(admin)
-            db.session.commit()
-            print("✅ Admin user created.")
-        else:
-            print("ℹ️ Admin already exists.")
+        db.session.execute(text("ALTER TABLE message ADD COLUMN parent_id INTEGER REFERENCES message(id);"))
     except Exception as e:
-        db.session.rollback()
-        print(f"⚠️ Database initialization error: {e}")
+        print("parent_id exists:", e)
+    
+    try:
+        db.session.execute(text("ALTER TABLE message ADD COLUMN is_deleted BOOLEAN DEFAULT FALSE;"))
+    except Exception as e:
+        print("is_deleted exists:", e)
+
+    try:
+        db.session.execute(text("ALTER TABLE message ADD COLUMN deleted_at DATETIME;"))
+    except Exception as e:
+        print("deleted_at exists:", e)
+    
+    db.session.commit()
+    print("✅ Message table updated successfully")
+
 #==========================================
 # User Loader Helper
 @login_manager.user_loader
@@ -687,12 +693,16 @@ def update_user_profile():
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': 'Failed to update profile'}), 500
-    
+
 # =========================================
-# API MESSAGES DATA
+# MESSAGES BACKEND ROUTES & SOCKET HANDLERS
 # =========================================
 # Global dictionary to track online users
 online_users = {}
+
+# =========================================
+# HTTP ROUTES
+# =========================================
 
 @app.route('/api/online-users')
 @login_required
@@ -719,68 +729,134 @@ def get_messages():
     """Get messages for a room with optional filtering"""
     room = request.args.get('room', 'general')
     since_id = request.args.get('since_id', 0, type=int)
+    limit = request.args.get('limit', 100, type=int)
     
-    # Base query
-    query = Message.query.filter_by(room=room)
-    
-    # Filter messages newer than since_id if provided
-    if since_id > 0:
-        query = query.filter(Message.id > since_id)
-    
-    # Get messages ordered by creation time
-    messages = query.order_by(Message.created_at.asc()).all()
-    
-    # Format response
-    messages_data = []
-    for message in messages:
-        messages_data.append({
-            'id': message.id,
-            'content': message.content,
-            'user_id': message.user_id,
-            'username': message.user.username,
-            'is_admin': current_user.is_admin,
-            'is_admin_message': message.is_admin_message,
-            'created_at': message.created_at.isoformat(),
-            'room': message.room
+    try:
+        # Base query - exclude deleted messages
+        query = Message.query.filter_by(room=room, is_deleted=False)
+        
+        # Filter messages newer than since_id if provided
+        if since_id > 0:
+            query = query.filter(Message.id > since_id)
+        
+        # Get messages ordered by creation time
+        messages = query.order_by(Message.created_at.asc()).limit(limit).all()
+        
+        # Get read status for current user
+        read_message_ids = set()
+        if current_user.is_authenticated:
+            read_records = MessageRead.query.filter_by(user_id=current_user.id).all()
+            read_message_ids = {record.message_id for record in read_records}
+        
+        # Format response
+        messages_data = []
+        for message in messages:
+            message_data = {
+                'id': message.id,
+                'content': message.content,
+                'user_id': message.user_id,
+                'username': message.user.username,
+                'is_admin': message.user.is_admin,
+                'is_admin_message': message.is_admin_message,
+                'created_at': message.created_at.isoformat(),
+                'room': message.room,
+                'is_read': message.id in read_message_ids,
+                'parent_id': message.parent_id,
+                'has_replies': len(message.replies) > 0 if message.replies else False
+            }
+            
+            # Include reply data if it's a reply
+            if message.parent_id:
+                parent_message = Message.query.get(message.parent_id)
+                if parent_message and not parent_message.is_deleted:
+                    message_data['parent'] = {
+                        'id': parent_message.id,
+                        'content': parent_message.content,
+                        'username': parent_message.user.username,
+                        'user_id': parent_message.user_id
+                    }
+            
+            messages_data.append(message_data)
+        
+        return jsonify({
+            'success': True,
+            'messages': messages_data,
+            'room': room,
+            'total': len(messages_data)
         })
-    
-    return jsonify(messages_data)
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
 
 @app.route('/api/messages/read', methods=['POST'])
 @login_required
 def mark_messages_read():
-    """Mark messages as read"""
-    data = request.get_json()
-    message_ids = data.get('message_ids', [])
-    
-    # In a real implementation, you'd update read status in database
-    # For now, we'll just acknowledge the request
-    
-    return jsonify({
-        'success': True,
-        'message': f'Marked {len(message_ids)} messages as read'
-    })
+    """Mark messages as read for current user"""
+    try:
+        data = request.get_json()
+        message_ids = data.get('message_ids', [])
+        
+        if not message_ids:
+            return jsonify({'success': False, 'error': 'No message IDs provided'}), 400
+        
+        # Mark each message as read
+        for message_id in message_ids:
+            # Check if already marked as read
+            existing_read = MessageRead.query.filter_by(
+                message_id=message_id, 
+                user_id=current_user.id
+            ).first()
+            
+            if not existing_read:
+                message_read = MessageRead(
+                    message_id=message_id,
+                    user_id=current_user.id
+                )
+                db.session.add(message_read)
+        
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': f'Marked {len(message_ids)} messages as read',
+            'read_count': len(message_ids)
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 @app.route('/api/messages/send', methods=['POST'])
 @login_required
 def send_message():
     """Send a message via HTTP API (fallback)"""
-    data = request.get_json()
-    content = data.get('content', '').strip()
-    room = data.get('room', 'general')
-    
-    if not content:
-        return jsonify({'success': False, 'error': 'Message content is required'}), 400
-    
-    # Create message
-    message = Message(
-        content=content,
-        user_id=current_user.id,
-        room=room,
-        is_admin_message=current_user.is_admin
-    )
-    
     try:
+        data = request.get_json()
+        content = data.get('content', '').strip()
+        room = data.get('room', 'general')
+        parent_id = data.get('parent_id')  # For replies
+        
+        if not content:
+            return jsonify({'success': False, 'error': 'Message content is required'}), 400
+        
+        # Validate parent message if replying
+        if parent_id:
+            parent_message = Message.query.get(parent_id)
+            if not parent_message or parent_message.is_deleted:
+                return jsonify({'success': False, 'error': 'Parent message not found'}), 404
+        
+        # Create message
+        message = Message(
+            content=content,
+            user_id=current_user.id,
+            room=room,
+            is_admin_message=current_user.is_admin,
+            parent_id=parent_id
+        )
+        
         db.session.add(message)
         db.session.commit()
         
@@ -793,8 +869,20 @@ def send_message():
             'is_admin': current_user.is_admin,
             'is_admin_message': current_user.is_admin,
             'created_at': message.created_at.isoformat(),
-            'room': room
+            'room': room,
+            'parent_id': parent_id,
+            'is_read': False
         }
+        
+        # Include parent data if it's a reply
+        if parent_id:
+            parent_message = Message.query.get(parent_id)
+            if parent_message and not parent_message.is_deleted:
+                message_data['parent'] = {
+                    'id': parent_message.id,
+                    'content': parent_message.content,
+                    'username': parent_message.user.username
+                }
         
         # Emit to Socket.IO clients in the room
         socketio.emit('new_message', message_data, room=room)
@@ -807,6 +895,158 @@ def send_message():
     except Exception as e:
         db.session.rollback()
         return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/messages/<int:message_id>/reply', methods=['POST'])
+@login_required
+def reply_to_message(message_id):
+    """Reply to a specific message"""
+    try:
+        data = request.get_json()
+        content = data.get('content', '').strip()
+        
+        if not content:
+            return jsonify({'success': False, 'error': 'Reply content is required'}), 400
+        
+        # Get parent message
+        parent_message = Message.query.get(message_id)
+        if not parent_message or parent_message.is_deleted:
+            return jsonify({'success': False, 'error': 'Message not found'}), 404
+        
+        # Create reply
+        reply = Message(
+            content=content,
+            user_id=current_user.id,
+            room=parent_message.room,
+            is_admin_message=current_user.is_admin,
+            parent_id=message_id
+        )
+        
+        db.session.add(reply)
+        db.session.commit()
+        
+        # Prepare response
+        reply_data = {
+            'id': reply.id,
+            'content': reply.content,
+            'user_id': reply.user_id,
+            'username': current_user.username,
+            'is_admin': current_user.is_admin,
+            'is_admin_message': current_user.is_admin,
+            'created_at': reply.created_at.isoformat(),
+            'room': parent_message.room,
+            'parent_id': message_id,
+            'is_read': False,
+            'parent': {
+                'id': parent_message.id,
+                'content': parent_message.content,
+                'username': parent_message.user.username
+            }
+        }
+        
+        # Emit to Socket.IO clients in the room
+        socketio.emit('new_message', reply_data, room=parent_message.room)
+        
+        return jsonify({
+            'success': True,
+            'message': reply_data
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/messages/<int:message_id>', methods=['DELETE'])
+@login_required
+def delete_message(message_id):
+    """Delete a message (soft delete)"""
+    try:
+        message = Message.query.get(message_id)
+        
+        if not message:
+            return jsonify({'success': False, 'error': 'Message not found'}), 404
+        
+        # Check permissions - user can delete their own messages or admin can delete any
+        if message.user_id != current_user.id and not current_user.is_admin:
+            return jsonify({'success': False, 'error': 'Permission denied'}), 403
+        
+        # Soft delete the message
+        message.is_deleted = True
+        message.deleted_at = nairobi_time()
+        message.content = "[This message was deleted]"
+        
+        db.session.commit()
+        
+        # Emit deletion event
+        socketio.emit('message_deleted', {
+            'message_id': message_id,
+            'room': message.room,
+            'deleted_by': current_user.id,
+            'is_admin_action': current_user.is_admin
+        }, room=message.room)
+        
+        return jsonify({
+            'success': True,
+            'message': 'Message deleted successfully'
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/messages/<int:message_id>/replies')
+@login_required
+def get_message_replies(message_id):
+    """Get replies for a specific message"""
+    try:
+        message = Message.query.get(message_id)
+        
+        if not message or message.is_deleted:
+            return jsonify({'success': False, 'error': 'Message not found'}), 404
+        
+        # Get replies
+        replies = Message.query.filter_by(
+            parent_id=message_id, 
+            is_deleted=False
+        ).order_by(Message.created_at.asc()).all()
+        
+        # Get read status for current user
+        read_message_ids = set()
+        if current_user.is_authenticated:
+            read_records = MessageRead.query.filter_by(user_id=current_user.id).all()
+            read_message_ids = {record.message_id for record in read_records}
+        
+        replies_data = []
+        for reply in replies:
+            reply_data = {
+                'id': reply.id,
+                'content': reply.content,
+                'user_id': reply.user_id,
+                'username': reply.user.username,
+                'is_admin': reply.user.is_admin,
+                'is_admin_message': reply.is_admin_message,
+                'created_at': reply.created_at.isoformat(),
+                'room': reply.room,
+                'parent_id': reply.parent_id,
+                'is_read': reply.id in read_message_ids
+            }
+            replies_data.append(reply_data)
+        
+        return jsonify({
+            'success': True,
+            'replies': replies_data,
+            'parent_message': {
+                'id': message.id,
+                'content': message.content,
+                'username': message.user.username
+            }
+        })
+        
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+# =========================================
+# UTILITY FUNCTIONS
+# =========================================
 
 def cleanup_disconnected_users():
     """Remove users who haven't been seen for more than 30 seconds"""
@@ -878,6 +1118,10 @@ def broadcast_online_users():
     # Emit to each room
     for room, users in room_users.items():
         emit('online_users_update', {'users': users}, room=room)
+
+# =========================================
+# SOCKET.IO HANDLERS
+# =========================================
 
 @socketio.on('connect')
 def handle_connect():
@@ -971,9 +1215,16 @@ def handle_join_room(data):
         }, room=room, include_self=False)
         
         # Send room history to the user
-        messages = Message.query.filter_by(room=room).order_by(Message.created_at.asc()).limit(50).all()
+        messages = Message.query.filter_by(room=room, is_deleted=False).order_by(Message.created_at.asc()).limit(50).all()
+        
+        # Get read status for current user
+        read_message_ids = set()
+        if current_user.is_authenticated:
+            read_records = MessageRead.query.filter_by(user_id=current_user.id).all()
+            read_message_ids = {record.message_id for record in read_records}
+        
         for message in messages:
-            emit('new_message', {
+            message_data = {
                 'id': message.id,
                 'content': message.content,
                 'user_id': message.user_id,
@@ -981,8 +1232,22 @@ def handle_join_room(data):
                 'is_admin': message.user.is_admin,
                 'is_admin_message': message.is_admin_message,
                 'created_at': message.created_at.isoformat(),
-                'room': room
-            })
+                'room': room,
+                'is_read': message.id in read_message_ids,
+                'parent_id': message.parent_id
+            }
+            
+            # Include parent data if it's a reply
+            if message.parent_id:
+                parent_message = Message.query.get(message.parent_id)
+                if parent_message and not parent_message.is_deleted:
+                    message_data['parent'] = {
+                        'id': parent_message.id,
+                        'content': parent_message.content,
+                        'username': parent_message.user.username
+                    }
+            
+            emit('new_message', message_data)
 
 @socketio.on('leave_room')
 def handle_leave_room(data):
@@ -1023,9 +1288,16 @@ def handle_send_message(data):
     
     content = data.get('content', '').strip()
     room = data.get('room', 'general')
+    parent_id = data.get('parent_id')
     
     if not content:
         return {'success': False, 'error': 'Empty message'}
+    
+    # Validate parent message if replying
+    if parent_id:
+        parent_message = Message.query.get(parent_id)
+        if not parent_message or parent_message.is_deleted:
+            return {'success': False, 'error': 'Parent message not found'}
     
     # Update user presence (keep them in current room)
     update_user_presence(
@@ -1040,7 +1312,8 @@ def handle_send_message(data):
         content=content,
         user_id=current_user.id,
         room=room,
-        is_admin_message=current_user.is_admin
+        is_admin_message=current_user.is_admin,
+        parent_id=parent_id
     )
     
     try:
@@ -1056,13 +1329,67 @@ def handle_send_message(data):
             'is_admin': current_user.is_admin,
             'is_admin_message': current_user.is_admin,
             'created_at': message.created_at.isoformat(),
-            'room': room
+            'room': room,
+            'parent_id': parent_id,
+            'is_read': False
         }
+        
+        # Include parent data if it's a reply
+        if parent_id:
+            parent_message = Message.query.get(parent_id)
+            if parent_message and not parent_message.is_deleted:
+                message_data['parent'] = {
+                    'id': parent_message.id,
+                    'content': parent_message.content,
+                    'username': parent_message.user.username
+                }
         
         # Broadcast to room
         emit('new_message', message_data, room=room)
         
         return {'success': True, 'message': message_data}
+        
+    except Exception as e:
+        db.session.rollback()
+        return {'success': False, 'error': str(e)}
+
+@socketio.on('delete_message')
+def handle_delete_message(data):
+    """Handle message deletion via WebSocket"""
+    if not current_user.is_authenticated:
+        return {'success': False, 'error': 'Not authenticated'}
+    
+    message_id = data.get('message_id')
+    
+    if not message_id:
+        return {'success': False, 'error': 'Message ID required'}
+    
+    try:
+        message = Message.query.get(message_id)
+        
+        if not message:
+            return {'success': False, 'error': 'Message not found'}
+        
+        # Check permissions
+        if message.user_id != current_user.id and not current_user.is_admin:
+            return {'success': False, 'error': 'Permission denied'}
+        
+        # Soft delete the message
+        message.is_deleted = True
+        message.deleted_at = nairobi_time()
+        message.content = "[This message was deleted]"
+        
+        db.session.commit()
+        
+        # Emit deletion event
+        emit('message_deleted', {
+            'message_id': message_id,
+            'room': message.room,
+            'deleted_by': current_user.id,
+            'is_admin_action': current_user.is_admin
+        }, room=message.room)
+        
+        return {'success': True, 'message': 'Message deleted successfully'}
         
     except Exception as e:
         db.session.rollback()
@@ -1099,45 +1426,114 @@ def handle_ping(data):
 
 @socketio.on('get_messages')
 def handle_get_messages(data):
-    """Handle request for messages"""
+    """Handle request for messages via WebSocket"""
     if current_user.is_authenticated:
         room = data.get('room', 'general')
         since_id = data.get('since_id', 0)
+        limit = data.get('limit', 100)
         
-        query = Message.query.filter_by(room=room)
-        if since_id > 0:
-            query = query.filter(Message.id > since_id)
-        
-        messages = query.order_by(Message.created_at.asc()).all()
-        
-        messages_data = []
-        for message in messages:
-            messages_data.append({
-                'id': message.id,
-                'content': message.content,
-                'user_id': message.user_id,
-                'username': message.user.username,
-                'is_admin': message.user.is_admin,
-                'is_admin_message': message.is_admin_message,
-                'created_at': message.created_at.isoformat(),
+        try:
+            query = Message.query.filter_by(room=room, is_deleted=False)
+            if since_id > 0:
+                query = query.filter(Message.id > since_id)
+            
+            messages = query.order_by(Message.created_at.asc()).limit(limit).all()
+            
+            # Get read status for current user
+            read_message_ids = set()
+            if current_user.is_authenticated:
+                read_records = MessageRead.query.filter_by(user_id=current_user.id).all()
+                read_message_ids = {record.message_id for record in read_records}
+            
+            messages_data = []
+            for message in messages:
+                message_data = {
+                    'id': message.id,
+                    'content': message.content,
+                    'user_id': message.user_id,
+                    'username': message.user.username,
+                    'is_admin': message.user.is_admin,
+                    'is_admin_message': message.is_admin_message,
+                    'created_at': message.created_at.isoformat(),
+                    'room': room,
+                    'is_read': message.id in read_message_ids,
+                    'parent_id': message.parent_id
+                }
+                
+                if message.parent_id:
+                    parent_message = Message.query.get(message.parent_id)
+                    if parent_message and not parent_message.is_deleted:
+                        message_data['parent'] = {
+                            'id': parent_message.id,
+                            'content': parent_message.content,
+                            'username': parent_message.user.username
+                        }
+                
+                messages_data.append(message_data)
+            
+            emit('messages_batch', {
+                'room': room,
+                'messages': messages_data,
+                'since_id': since_id,
+                'total': len(messages_data)
+            })
+            
+        except Exception as e:
+            emit('messages_error', {
+                'error': str(e),
                 'room': room
             })
-        
-        emit('messages_batch', {
-            'room': room,
-            'messages': messages_data,
-            'since_id': since_id
-        })
 
-# Periodic cleanup task
+@socketio.on('mark_read')
+def handle_mark_read(data):
+    """Handle marking messages as read via WebSocket"""
+    if not current_user.is_authenticated:
+        return
+    
+    message_ids = data.get('message_ids', [])
+    
+    if not message_ids:
+        return
+    
+    try:
+        for message_id in message_ids:
+            existing_read = MessageRead.query.filter_by(
+                message_id=message_id, 
+                user_id=current_user.id
+            ).first()
+            
+            if not existing_read:
+                message_read = MessageRead(
+                    message_id=message_id,
+                    user_id=current_user.id
+                )
+                db.session.add(message_read)
+        
+        db.session.commit()
+        
+        # Emit read receipt
+        emit('messages_read', {
+            'message_ids': message_ids,
+            'user_id': current_user.id,
+            'username': current_user.username
+        }, broadcast=True)
+        
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error marking messages as read: {e}")
+
+# =========================================
+# PERIODIC TASKS
+# =========================================
+
+from apscheduler.schedulers.background import BackgroundScheduler
+
 def periodic_cleanup():
     """Periodically clean up disconnected users"""
     with app.app_context():
         cleanup_disconnected_users()
 
 # Schedule periodic cleanup (run every minute)
-from apscheduler.schedulers.background import BackgroundScheduler
-
 scheduler = BackgroundScheduler()
 scheduler.add_job(func=periodic_cleanup, trigger="interval", seconds=60)
 scheduler.start()
