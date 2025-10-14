@@ -105,6 +105,7 @@
         border-radius: 12px;
         max-width: 80%;
         word-wrap: break-word;
+        transition: opacity 0.3s, transform 0.3s;
     }
     
     .message.user-message {
@@ -274,6 +275,29 @@
         align-items: center;
         font-size: 0.8em;
         margin-right: 15px;
+        padding: 5px 10px;
+        border-radius: 20px;
+        transition: all 0.3s ease;
+    }
+    
+    .connection-status.connected {
+        background: rgba(16, 185, 129, 0.2);
+        border: 1px solid rgba(16, 185, 129, 0.5);
+    }
+    
+    .connection-status.connecting {
+        background: rgba(245, 158, 11, 0.2);
+        border: 1px solid rgba(245, 158, 11, 0.5);
+    }
+    
+    .connection-status.disconnected {
+        background: rgba(239, 68, 68, 0.2);
+        border: 1px solid rgba(239, 68, 68, 0.5);
+    }
+    
+    .connection-status.error {
+        background: rgba(239, 68, 68, 0.2);
+        border: 1px solid rgba(239, 68, 68, 0.5);
     }
     
     .status-dot {
@@ -294,6 +318,48 @@
     
     .status-disconnected {
         background-color: #EF4444;
+    }
+    
+    .connection-quality {
+        font-size: 0.7em;
+        padding: 2px 8px;
+        border-radius: 10px;
+        margin-left: 8px;
+    }
+    
+    .connection-quality.good {
+        background: rgba(16, 185, 129, 0.3);
+        color: #10B981;
+    }
+    
+    .connection-quality.fair {
+        background: rgba(245, 158, 11, 0.3);
+        color: #F59E0B;
+    }
+    
+    .connection-quality.poor {
+        background: rgba(239, 68, 68, 0.3);
+        color: #EF4444;
+    }
+    
+    .offline-indicator {
+        background: rgba(239, 68, 68, 0.2);
+        color: #EF4444;
+        padding: 8px 15px;
+        border-radius: 8px;
+        text-align: center;
+        margin-bottom: 10px;
+        font-size: 0.9em;
+    }
+    
+    .message-queue-indicator {
+        background: rgba(245, 158, 11, 0.2);
+        color: #F59E0B;
+        padding: 8px 15px;
+        border-radius: 8px;
+        text-align: center;
+        margin-bottom: 10px;
+        font-size: 0.9em;
     }
     
     @keyframes pulse {
@@ -378,6 +444,7 @@
                     <div class="connection-status" id="connectionStatus">
                         <div class="status-dot status-connected" id="statusDot"></div>
                         <span id="statusText">Connected</span>
+                        <span class="connection-quality good" id="connectionQuality">Good</span>
                     </div>
                     {% if unread_count > 0 %}
                     <span class="unread-badge">{{ unread_count }}</span>
@@ -415,6 +482,14 @@
                         {% endfor %}
                     </div>
                     
+                    <div class="offline-indicator" id="offlineIndicator" style="display: none;">
+                        <i class="fas fa-wifi mr-2"></i>You are offline. Messages will be sent when connection is restored.
+                    </div>
+                    
+                    <div class="message-queue-indicator" id="messageQueueIndicator" style="display: none;">
+                        <i class="fas fa-clock mr-2"></i><span id="queuedMessagesCount">0</span> messages waiting to be sent
+                    </div>
+                    
                     <div class="typing-indicator" id="typingIndicator" style="display: none;"></div>
                     
                     <div class="message-input-container">
@@ -445,13 +520,13 @@
                 <div class="online-users mt-6">
                     <h3 class="text-lg font-bold mb-4 gradient-text">Chat Rooms</h3>
                     <div class="space-y-2">
-                        <button class="room-btn active w-full text-left p-3 rounded-lg bg-blue-500 bg-opacity-20 border border-blue-500">
+                        <button class="room-btn active w-full text-left p-3 rounded-lg bg-blue-500 bg-opacity-20 border border-blue-500" data-room="general">
                             <i class="fas fa-hashtag mr-2"></i>General
                         </button>
-                        <button class="room-btn w-full text-left p-3 rounded-lg bg-gray-700 hover:bg-gray-600">
+                        <button class="room-btn w-full text-left p-3 rounded-lg bg-gray-700 hover:bg-gray-600" data-room="help">
                             <i class="fas fa-hashtag mr-2"></i>Help
                         </button>
-                        <button class="room-btn w-full text-left p-3 rounded-lg bg-gray-700 hover:bg-gray-600">
+                        <button class="room-btn w-full text-left p-3 rounded-lg bg-gray-700 hover:bg-gray-600" data-room="announcements">
                             <i class="fas fa-hashtag mr-2"></i>Announcements
                         </button>
                     </div>
@@ -461,13 +536,14 @@
     </main>
 
     <script>
-        // Socket.IO connection with reconnection logic
+        // Enhanced Socket.IO connection with persistent features
         const socket = io({
             reconnection: true,
-            reconnectionAttempts: 10,
+            reconnectionAttempts: Infinity,
             reconnectionDelay: 1000,
-            reconnectionDelayMax: 5000,
-            timeout: 20000
+            reconnectionDelayMax: 10000,
+            timeout: 20000,
+            transports: ['websocket', 'polling'] // Fallback transport
         });
         
         // DOM elements
@@ -479,13 +555,25 @@
         const connectionStatus = document.getElementById('connectionStatus');
         const statusDot = document.getElementById('statusDot');
         const statusText = document.getElementById('statusText');
+        const connectionQuality = document.getElementById('connectionQuality');
+        const offlineIndicator = document.getElementById('offlineIndicator');
+        const messageQueueIndicator = document.getElementById('messageQueueIndicator');
+        const queuedMessagesCount = document.getElementById('queuedMessagesCount');
         
-        // State
+        // Enhanced State Management
         let currentRoom = 'general';
         let onlineUsers = {};
         let typingTimer;
         let reconnectAttempts = 0;
         let isConnected = false;
+        let messageQueue = [];
+        let messageCache = new Map(); // Cache for room messages
+        let lastMessageId = 0; // Track last message ID for incremental loading
+        let connectionHealth = {
+            latency: 0,
+            lastPing: 0,
+            quality: 'good' // good, fair, poor
+        };
         
         // Format time
         function formatTime(dateString) {
@@ -493,30 +581,48 @@
             return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         }
         
-        // Update connection status
+        // Enhanced Connection Status Management
         function updateConnectionStatus(status, message) {
+            // Clear all status classes
+            connectionStatus.className = 'connection-status';
             statusDot.className = 'status-dot';
+            
             switch(status) {
                 case 'connected':
+                    connectionStatus.classList.add('connected');
                     statusDot.classList.add('status-connected');
-                    statusText.textContent = 'Connected';
+                    statusText.textContent = message || 'Connected';
                     isConnected = true;
                     reconnectAttempts = 0;
+                    offlineIndicator.style.display = 'none';
                     break;
                 case 'connecting':
+                    connectionStatus.classList.add('connecting');
                     statusDot.classList.add('status-connecting');
-                    statusText.textContent = 'Connecting...';
+                    statusText.textContent = message || 'Connecting...';
                     isConnected = false;
+                    offlineIndicator.style.display = 'none';
                     break;
                 case 'disconnected':
+                    connectionStatus.classList.add('disconnected');
                     statusDot.classList.add('status-disconnected');
-                    statusText.textContent = 'Disconnected';
+                    statusText.textContent = message || 'Disconnected';
                     isConnected = false;
+                    offlineIndicator.style.display = 'block';
+                    break;
+                case 'error':
+                    connectionStatus.classList.add('error');
+                    statusDot.classList.add('status-disconnected');
+                    statusText.textContent = message || 'Connection Error';
+                    isConnected = false;
+                    offlineIndicator.style.display = 'block';
                     break;
                 case 'reconnecting':
+                    connectionStatus.classList.add('connecting');
                     statusDot.classList.add('status-connecting');
-                    statusText.textContent = `Reconnecting (${reconnectAttempts})`;
+                    statusText.textContent = message || `Reconnecting (${reconnectAttempts})`;
                     isConnected = false;
+                    offlineIndicator.style.display = 'block';
                     break;
             }
             
@@ -525,19 +631,69 @@
             }
         }
         
+        // Update connection quality indicator
+        function updateConnectionQuality() {
+            // Calculate quality based on latency and stability
+            if (connectionHealth.latency < 100) {
+                connectionHealth.quality = 'good';
+            } else if (connectionHealth.latency < 300) {
+                connectionHealth.quality = 'fair';
+            } else {
+                connectionHealth.quality = 'poor';
+            }
+            
+            // Update UI
+            connectionQuality.textContent = connectionHealth.quality.charAt(0).toUpperCase() + connectionHealth.quality.slice(1);
+            connectionQuality.className = `connection-quality ${connectionHealth.quality}`;
+        }
+        
+        // Advanced reconnection strategy
+        function handleReconnection() {
+            reconnectAttempts++;
+            
+            // Exponential backoff with jitter
+            const baseDelay = Math.min(1000 * Math.pow(2, reconnectAttempts), 30000);
+            const jitter = Math.random() * 1000;
+            const delay = baseDelay + jitter;
+            
+            console.log(`Reconnection attempt ${reconnectAttempts} in ${delay}ms`);
+            
+            setTimeout(() => {
+                if (!isConnected) {
+                    socket.connect();
+                }
+            }, delay);
+        }
+        
         // Scroll to bottom of messages
         function scrollToBottom() {
             messagesList.scrollTop = messagesList.scrollHeight;
         }
         
-        // Add message to UI
-        function addMessage(messageData) {
+        // Auto-scroll to bottom if user is near bottom
+        function autoScrollToBottom() {
+            const isNearBottom = messagesList.scrollHeight - messagesList.clientHeight - messagesList.scrollTop < 100;
+            
+            if (isNearBottom) {
+                setTimeout(() => {
+                    messagesList.scrollTop = messagesList.scrollHeight;
+                }, 100);
+            }
+        }
+        
+        // Add message to UI with animation
+        function addMessage(messageData, animate = true) {
             const messageDiv = document.createElement('div');
             const isUserMessage = messageData.user_id === {{ current_user.id }};
             const isAdminMessage = messageData.is_admin_message;
             
             messageDiv.className = `message ${isUserMessage ? 'user-message' : isAdminMessage ? 'admin-message' : 'other-message'}`;
             messageDiv.setAttribute('data-message-id', messageData.id);
+            
+            if (animate) {
+                messageDiv.style.opacity = '0';
+                messageDiv.style.transform = 'translateY(10px)';
+            }
             
             messageDiv.innerHTML = `
                 <div class="message-header">
@@ -551,7 +707,17 @@
             `;
             
             messagesList.appendChild(messageDiv);
-            scrollToBottom();
+            
+            if (animate) {
+                // Animate in
+                setTimeout(() => {
+                    messageDiv.style.transition = 'opacity 0.3s, transform 0.3s';
+                    messageDiv.style.opacity = '1';
+                    messageDiv.style.transform = 'translateY(0)';
+                }, 10);
+            }
+            
+            autoScrollToBottom();
             
             // Mark as read
             markMessageAsRead(messageData.id);
@@ -568,15 +734,166 @@
             });
         }
         
+        // Message queue for offline periods
+        function addToMessageQueue(message) {
+            messageQueue.push({
+                ...message,
+                timestamp: Date.now(),
+                queueId: Date.now() + Math.random() // Unique ID for tracking
+            });
+            
+            // Update queue indicator
+            updateQueueIndicator();
+            
+            // Persist queue to localStorage for recovery
+            localStorage.setItem('messageQueue', JSON.stringify(messageQueue));
+        }
+        
+        function processMessageQueue() {
+            if (messageQueue.length === 0 || !isConnected) return;
+            
+            const failedMessages = [];
+            let processedCount = 0;
+            
+            // Process each message in queue
+            messageQueue.forEach((message, index) => {
+                try {
+                    // Send message with retry logic
+                    socket.emit('send_message', {
+                        content: message.content,
+                        room: message.room
+                    }, (ack) => {
+                        if (ack && ack.success) {
+                            // Remove from queue on successful send
+                            messageQueue.splice(index - processedCount, 1);
+                            processedCount++;
+                            localStorage.setItem('messageQueue', JSON.stringify(messageQueue));
+                            updateQueueIndicator();
+                        } else {
+                            failedMessages.push(message);
+                        }
+                    });
+                } catch (error) {
+                    console.error('Failed to send queued message:', error);
+                    failedMessages.push(message);
+                }
+            });
+            
+            // Update queue with failed messages
+            messageQueue = failedMessages;
+            localStorage.setItem('messageQueue', JSON.stringify(messageQueue));
+            updateQueueIndicator();
+        }
+        
+        function updateQueueIndicator() {
+            if (messageQueue.length > 0) {
+                messageQueueIndicator.style.display = 'block';
+                queuedMessagesCount.textContent = messageQueue.length;
+            } else {
+                messageQueueIndicator.style.display = 'none';
+            }
+        }
+        
+        // Enhanced message caching system
+        function cacheMessages(room, messages) {
+            if (!messageCache.has(room)) {
+                messageCache.set(room, []);
+            }
+            
+            const cachedMessages = messageCache.get(room);
+            
+            // Merge new messages, avoiding duplicates
+            messages.forEach(newMessage => {
+                const exists = cachedMessages.some(msg => msg.id === newMessage.id);
+                if (!exists) {
+                    cachedMessages.push(newMessage);
+                }
+            });
+            
+            // Keep only last 100 messages per room to prevent memory bloat
+            if (cachedMessages.length > 100) {
+                messageCache.set(room, cachedMessages.slice(-100));
+            }
+        }
+        
+        function getCachedMessages(room) {
+            return messageCache.get(room) || [];
+        }
+        
+        // Optimized message loading
+        function loadMessages(room, sinceId = 0) {
+            // Show cached messages immediately for better UX
+            const cachedMessages = getCachedMessages(room);
+            if (cachedMessages.length > 0) {
+                displayMessages(cachedMessages, false);
+            }
+            
+            // Request updated messages from server
+            fetch(`/api/messages?room=${room}&since_id=${sinceId}`)
+                .then(response => response.json())
+                .then(messages => {
+                    // Update cache with new messages
+                    cacheMessages(room, messages);
+                    
+                    // Display only new messages to avoid duplication
+                    const allMessages = getCachedMessages(room);
+                    if (sinceId > 0) {
+                        // Only show messages newer than what we already have
+                        const newToDisplay = allMessages.filter(msg => msg.id > sinceId);
+                        displayMessages(newToDisplay, false); // Append, don't replace
+                    } else {
+                        displayMessages(allMessages, true);
+                    }
+                    
+                    // Update last message ID
+                    if (messages.length > 0) {
+                        lastMessageId = Math.max(...messages.map(msg => msg.id));
+                    }
+                })
+                .catch(error => {
+                    console.error('Failed to load messages:', error);
+                    // If fetch fails, use cached messages
+                    if (sinceId === 0) {
+                        displayMessages(getCachedMessages(room), true);
+                    }
+                });
+        }
+        
+        // Enhanced message display
+        function displayMessages(messages, clear = true) {
+            if (clear) {
+                messagesList.innerHTML = '';
+            }
+            
+            messages.forEach(message => {
+                addMessage(message, !clear); // Animate only new messages
+            });
+            
+            autoScrollToBottom();
+        }
+        
         // Send message
         function sendMessage() {
             const content = messageInput.value.trim();
-            if (!content || !isConnected) return;
+            if (!content) return;
             
-            socket.emit('send_message', {
+            const messageData = {
                 content: content,
                 room: currentRoom
-            });
+            };
+            
+            if (isConnected) {
+                // Send immediately if connected
+                socket.emit('send_message', messageData, (ack) => {
+                    if (!ack || !ack.success) {
+                        // If failed, add to queue
+                        addToMessageQueue(messageData);
+                    }
+                });
+            } else {
+                // Queue if offline
+                addToMessageQueue(messageData);
+            }
             
             messageInput.value = '';
             adjustTextareaHeight();
@@ -641,6 +958,41 @@
                 });
         }
         
+        // Connection health monitoring
+        function startHealthCheck() {
+            setInterval(() => {
+                if (isConnected) {
+                    connectionHealth.lastPing = Date.now();
+                    socket.emit('ping', { timestamp: connectionHealth.lastPing });
+                }
+            }, 15000); // Every 15 seconds
+        }
+        
+        // Enhanced room switching
+        function switchRoom(room) {
+            if (room === currentRoom) return;
+            
+            // Update current room
+            currentRoom = room;
+            
+            // Update UI to show active room
+            document.querySelectorAll('.room-btn').forEach(btn => {
+                btn.classList.remove('active', 'bg-blue-500', 'bg-opacity-20', 'border', 'border-blue-500');
+                btn.classList.add('bg-gray-700', 'hover:bg-gray-600');
+            });
+            
+            event.target.classList.add('active', 'bg-blue-500', 'bg-opacity-20', 'border', 'border-blue-500');
+            event.target.classList.remove('bg-gray-700', 'hover:bg-gray-600');
+            
+            // Join new room
+            socket.emit('leave_room', { room: currentRoom });
+            currentRoom = room.toLowerCase();
+            socket.emit('join_room', { room: currentRoom });
+            
+            // Load messages for new room
+            loadMessages(currentRoom);
+        }
+        
         // Socket event listeners
         socket.on('connect', () => {
             console.log('Connected to server');
@@ -651,11 +1003,21 @@
             
             // Join the current room
             socket.emit('join_room', { room: currentRoom });
+            
+            // Process any queued messages
+            processMessageQueue();
         });
         
         socket.on('disconnect', (reason) => {
             console.log('Disconnected from server:', reason);
             updateConnectionStatus('disconnected');
+            
+            if (reason === 'io server disconnect') {
+                // Server intentionally disconnected, need to manually reconnect
+                socket.connect();
+            } else {
+                handleReconnection();
+            }
         });
         
         socket.on('reconnect_attempt', (attempt) => {
@@ -665,16 +1027,17 @@
         
         socket.on('reconnect', (attempt) => {
             console.log('Reconnected after', attempt, 'attempts');
-            updateConnectionStatus('connected');
+            updateConnectionStatus('connected', 'Reconnected');
         });
         
         socket.on('reconnect_error', (error) => {
             console.log('Reconnection error:', error);
+            updateConnectionStatus('error', 'Connection error');
         });
         
         socket.on('reconnect_failed', () => {
             console.log('Failed to reconnect');
-            updateConnectionStatus('disconnected');
+            updateConnectionStatus('error', 'Failed to connect');
             
             // Show reconnection failed message
             const notificationDiv = document.createElement('div');
@@ -684,8 +1047,16 @@
             scrollToBottom();
         });
         
+        socket.on('pong', (data) => {
+            connectionHealth.latency = Date.now() - data.timestamp;
+            updateConnectionQuality();
+        });
+        
         socket.on('new_message', (messageData) => {
             addMessage(messageData);
+            
+            // Add to cache
+            cacheMessages(currentRoom, [messageData]);
         });
         
         socket.on('user_joined', (data) => {
@@ -757,32 +1128,7 @@
         // Room switching
         document.querySelectorAll('.room-btn').forEach(btn => {
             btn.addEventListener('click', function() {
-                document.querySelectorAll('.room-btn').forEach(b => {
-                    b.classList.remove('active', 'bg-blue-500', 'bg-opacity-20', 'border', 'border-blue-500');
-                    b.classList.add('bg-gray-700', 'hover:bg-gray-600');
-                });
-                
-                this.classList.add('active', 'bg-blue-500', 'bg-opacity-20', 'border', 'border-blue-500');
-                this.classList.remove('bg-gray-700', 'hover:bg-gray-600');
-                
-                const roomName = this.textContent.trim().split(' ')[1];
-                socket.emit('leave_room', { room: currentRoom });
-                currentRoom = roomName.toLowerCase();
-                socket.emit('join_room', { room: currentRoom });
-                
-                // Clear messages and load new room messages
-                messagesList.innerHTML = '<div class="text-center text-gray-400 py-4">Loading messages...</div>';
-                
-                fetch(`/api/messages?room=${currentRoom}`)
-                    .then(response => response.json())
-                    .then(messages => {
-                        messagesList.innerHTML = '';
-                        messages.forEach(addMessage);
-                    })
-                    .catch(error => {
-                        console.error('Failed to load messages:', error);
-                        messagesList.innerHTML = '<div class="text-center text-red-400 py-4">Failed to load messages</div>';
-                    });
+                switchRoom(this.dataset.room);
             });
         });
         
@@ -791,8 +1137,18 @@
             scrollToBottom();
             adjustTextareaHeight();
             
+            // Load any queued messages from localStorage
+            const savedQueue = localStorage.getItem('messageQueue');
+            if (savedQueue) {
+                messageQueue = JSON.parse(savedQueue);
+                updateQueueIndicator();
+            }
+            
             // Load initial online users
             loadInitialOnlineUsers();
+            
+            // Start health monitoring
+            startHealthCheck();
             
             // Mark all visible messages as read
             const messageIds = Array.from(messagesList.querySelectorAll('.message'))
@@ -817,13 +1173,6 @@
                 loadInitialOnlineUsers();
             }
         });
-
-        // Periodic connection health check
-        setInterval(() => {
-            if (isConnected) {
-                socket.emit('ping');
-            }
-        }, 30000);
     </script>
 </body>
 </html>

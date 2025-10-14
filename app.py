@@ -687,35 +687,126 @@ def update_user_profile():
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': 'Failed to update profile'}), 500
+    
 # =========================================
 # API MESSAGES DATA
 # =========================================
-
-# Global dictionary to track online users (in production, use Redis instead)
+# Global dictionary to track online users
 online_users = {}
 
 @app.route('/api/online-users')
 @login_required
 def get_online_users():
     """Get currently online users"""
-    # Clean up disconnected users (older than 30 seconds)
     cleanup_disconnected_users()
     
     users = []
     for user_id, user_data in online_users.items():
-        # Skip if user data is incomplete
-        if not user_data or 'user_id' not in user_data:
-            continue
-            
-        users.append({
-            'user_id': user_data['user_id'],
-            'username': user_data['username'],
-            'is_admin': user_data.get('is_admin', False),
-            'last_seen': user_data.get('last_seen'),
-            'room': user_data.get('current_room', 'general')
-        })
+        if user_data and 'user_id' in user_data:
+            users.append({
+                'user_id': user_data['user_id'],
+                'username': user_data['username'],
+                'is_admin': user_data.get('is_admin', False),
+                'last_seen': user_data.get('last_seen'),
+                'room': user_data.get('current_room', 'general')
+            })
     
     return jsonify(users)
+
+@app.route('/api/messages')
+@login_required
+def get_messages():
+    """Get messages for a room with optional filtering"""
+    room = request.args.get('room', 'general')
+    since_id = request.args.get('since_id', 0, type=int)
+    
+    # Base query
+    query = Message.query.filter_by(room=room)
+    
+    # Filter messages newer than since_id if provided
+    if since_id > 0:
+        query = query.filter(Message.id > since_id)
+    
+    # Get messages ordered by creation time
+    messages = query.order_by(Message.created_at.asc()).all()
+    
+    # Format response
+    messages_data = []
+    for message in messages:
+        messages_data.append({
+            'id': message.id,
+            'content': message.content,
+            'user_id': message.user_id,
+            'username': message.user.username,
+            'is_admin': current_user.is_admin,
+            'is_admin_message': message.is_admin_message,
+            'created_at': message.created_at.isoformat(),
+            'room': message.room
+        })
+    
+    return jsonify(messages_data)
+
+@app.route('/api/messages/read', methods=['POST'])
+@login_required
+def mark_messages_read():
+    """Mark messages as read"""
+    data = request.get_json()
+    message_ids = data.get('message_ids', [])
+    
+    # In a real implementation, you'd update read status in database
+    # For now, we'll just acknowledge the request
+    
+    return jsonify({
+        'success': True,
+        'message': f'Marked {len(message_ids)} messages as read'
+    })
+
+@app.route('/api/messages/send', methods=['POST'])
+@login_required
+def send_message():
+    """Send a message via HTTP API (fallback)"""
+    data = request.get_json()
+    content = data.get('content', '').strip()
+    room = data.get('room', 'general')
+    
+    if not content:
+        return jsonify({'success': False, 'error': 'Message content is required'}), 400
+    
+    # Create message
+    message = Message(
+        content=content,
+        user_id=current_user.id,
+        room=room,
+        is_admin_message=current_user.is_admin
+    )
+    
+    try:
+        db.session.add(message)
+        db.session.commit()
+        
+        # Prepare response
+        message_data = {
+            'id': message.id,
+            'content': message.content,
+            'user_id': message.user_id,
+            'username': current_user.username,
+            'is_admin': current_user.is_admin,
+            'is_admin_message': current_user.is_admin,
+            'created_at': message.created_at.isoformat(),
+            'room': room
+        }
+        
+        # Emit to Socket.IO clients in the room
+        socketio.emit('new_message', message_data, room=room)
+        
+        return jsonify({
+            'success': True,
+            'message': message_data
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 def cleanup_disconnected_users():
     """Remove users who haven't been seen for more than 30 seconds"""
@@ -737,40 +828,56 @@ def cleanup_disconnected_users():
     for user_id in disconnected_users:
         user_data = online_users.pop(user_id, None)
         if user_data:
+            room = user_data.get('current_room', 'general')
             emit('user_left', {
                 'user_id': user_data['user_id'],
                 'username': user_data['username'],
                 'message': f'{user_data["username"]} left the chat'
-            }, room=user_data.get('current_room', 'general'), include_self=False)
-            
-            # Broadcast updated online users list
-            broadcast_online_users()
+            }, room=room, include_self=False)
 
 def update_user_presence(user_id, username, is_admin=False, room='general'):
-    """Update user's last seen timestamp and room"""
+    """Update user's online status and room"""
     online_users[user_id] = {
         'user_id': user_id,
         'username': username,
         'is_admin': is_admin,
-        'last_seen': datetime.utcnow(),
         'current_room': room,
-        'socket_id': request.sid
+        'last_seen': datetime.utcnow().isoformat()
     }
-
-def broadcast_online_users():
-    """Broadcast updated online users list to all clients"""
-    cleanup_disconnected_users()
     
-    users = []
-    for user_id, user_data in online_users.items():
-        if user_data and 'user_id' in user_data:
-            users.append({
+    # Broadcast updated online users list to the room
+    room_users = []
+    for uid, user_data in online_users.items():
+        if user_data and user_data.get('current_room') == room:
+            room_users.append({
                 'user_id': user_data['user_id'],
                 'username': user_data['username'],
                 'is_admin': user_data.get('is_admin', False)
             })
     
-    emit('online_users_update', {'users': users}, broadcast=True)
+    emit('online_users_update', {'users': room_users}, room=room)
+
+def broadcast_online_users():
+    """Broadcast updated online users list to all rooms"""
+    cleanup_disconnected_users()
+    
+    # Group users by room
+    room_users = {}
+    for user_id, user_data in online_users.items():
+        if user_data and 'user_id' in user_data:
+            room = user_data.get('current_room', 'general')
+            if room not in room_users:
+                room_users[room] = []
+            
+            room_users[room].append({
+                'user_id': user_data['user_id'],
+                'username': user_data['username'],
+                'is_admin': user_data.get('is_admin', False)
+            })
+    
+    # Emit to each room
+    for room, users in room_users.items():
+        emit('online_users_update', {'users': users}, room=room)
 
 @socketio.on('connect')
 def handle_connect():
@@ -801,9 +908,6 @@ def handle_connect():
             'username': current_user.username,
             'is_admin': current_user.is_admin
         })
-        
-        # Broadcast updated online users list
-        broadcast_online_users()
         
         print(f"User {current_user.username} connected. Online users: {len(online_users)}")
 
@@ -866,14 +970,19 @@ def handle_join_room(data):
             'message': f'{current_user.username} joined {room}'
         }, room=room, include_self=False)
         
-        # Broadcast updated online users list
-        broadcast_online_users()
-        
-        emit('room_joined', {
-            'room': room,
-            'user_id': current_user.id,
-            'username': current_user.username
-        })
+        # Send room history to the user
+        messages = Message.query.filter_by(room=room).order_by(Message.created_at.asc()).limit(50).all()
+        for message in messages:
+            emit('new_message', {
+                'id': message.id,
+                'content': message.content,
+                'user_id': message.user_id,
+                'username': message.user.username,
+                'is_admin': message.user.is_admin,
+                'is_admin_message': message.is_admin_message,
+                'created_at': message.created_at.isoformat(),
+                'room': room
+            })
 
 @socketio.on('leave_room')
 def handle_leave_room(data):
@@ -900,9 +1009,6 @@ def handle_leave_room(data):
         # Join general room
         join_room('general')
         
-        # Broadcast updated online users list
-        broadcast_online_users()
-        
         emit('room_left', {
             'room': room,
             'user_id': current_user.id,
@@ -913,13 +1019,13 @@ def handle_leave_room(data):
 def handle_send_message(data):
     """Handle new message"""
     if not current_user.is_authenticated:
-        return
+        return {'success': False, 'error': 'Not authenticated'}
     
     content = data.get('content', '').strip()
     room = data.get('room', 'general')
     
     if not content:
-        return
+        return {'success': False, 'error': 'Empty message'}
     
     # Update user presence (keep them in current room)
     update_user_presence(
@@ -936,23 +1042,31 @@ def handle_send_message(data):
         room=room,
         is_admin_message=current_user.is_admin
     )
-    db.session.add(message)
-    db.session.commit()
     
-    # Prepare response data
-    message_data = {
-        'id': message.id,
-        'content': message.content,
-        'user_id': message.user_id,
-        'username': current_user.username,
-        'is_admin': current_user.is_admin,
-        'is_admin_message': current_user.is_admin,
-        'created_at': message.created_at.isoformat(),
-        'room': room
-    }
-    
-    # Broadcast to room
-    emit('new_message', message_data, room=room)
+    try:
+        db.session.add(message)
+        db.session.commit()
+        
+        # Prepare response data
+        message_data = {
+            'id': message.id,
+            'content': message.content,
+            'user_id': message.user_id,
+            'username': current_user.username,
+            'is_admin': current_user.is_admin,
+            'is_admin_message': current_user.is_admin,
+            'created_at': message.created_at.isoformat(),
+            'room': room
+        }
+        
+        # Broadcast to room
+        emit('new_message', message_data, room=room)
+        
+        return {'success': True, 'message': message_data}
+        
+    except Exception as e:
+        db.session.rollback()
+        return {'success': False, 'error': str(e)}
 
 @socketio.on('typing')
 def handle_typing(data):
@@ -966,27 +1080,69 @@ def handle_typing(data):
         }, room=room, include_self=False)
 
 @socketio.on('ping')
-def handle_ping():
+def handle_ping(data):
     """Handle ping for connection health check"""
     if current_user.is_authenticated:
+        # Get the current room from online_users or use default
+        user_room = online_users.get(current_user.id, {}).get('current_room', 'general')
+        
         # Update user presence
         update_user_presence(
             user_id=current_user.id,
             username=current_user.username,
             is_admin=current_user.is_admin,
-            room=online_users.get(current_user.id, {}).get('current_room', 'general')
+            room=user_room
         )
-        emit('pong')
+        
+        # Return the timestamp for latency calculation
+        emit('pong', {'timestamp': data.get('timestamp')})
 
-# Periodic cleanup task (run this every minute in production)
+@socketio.on('get_messages')
+def handle_get_messages(data):
+    """Handle request for messages"""
+    if current_user.is_authenticated:
+        room = data.get('room', 'general')
+        since_id = data.get('since_id', 0)
+        
+        query = Message.query.filter_by(room=room)
+        if since_id > 0:
+            query = query.filter(Message.id > since_id)
+        
+        messages = query.order_by(Message.created_at.asc()).all()
+        
+        messages_data = []
+        for message in messages:
+            messages_data.append({
+                'id': message.id,
+                'content': message.content,
+                'user_id': message.user_id,
+                'username': message.user.username,
+                'is_admin': message.user.is_admin,
+                'is_admin_message': message.is_admin_message,
+                'created_at': message.created_at.isoformat(),
+                'room': room
+            })
+        
+        emit('messages_batch', {
+            'room': room,
+            'messages': messages_data,
+            'since_id': since_id
+        })
+
+# Periodic cleanup task
 def periodic_cleanup():
     """Periodically clean up disconnected users"""
     with app.app_context():
         cleanup_disconnected_users()
 
-# =========================================
-# API USERS DATA
-# =========================================
+# Schedule periodic cleanup (run every minute)
+from apscheduler.schedulers.background import BackgroundScheduler
+
+scheduler = BackgroundScheduler()
+scheduler.add_job(func=periodic_cleanup, trigger="interval", seconds=60)
+scheduler.start()
+
+#===========================================
 @app.route('/api/users')
 @login_required
 @admin_required
@@ -1634,6 +1790,7 @@ def get_user(id):
         'is_admin': user.is_admin,
         'created_at': user.created_at.isoformat()
     })
+
 @app.route('/api/user')
 @login_required
 def current_user_info():

@@ -127,3 +127,421 @@
 2025-10-14 20:04:46,745 - werkzeug - INFO -  * Restarting with stat
 2025-10-14 20:05:06,044 - werkzeug - WARNING -  * Debugger is active!
 2025-10-14 20:05:06,061 - werkzeug - INFO -  * Debugger PIN: 292-054-809
+2025-10-14 20:55:06,662 - werkzeug - INFO -  * Restarting with stat
+2025-10-14 20:55:24,728 - werkzeug - WARNING -  * Debugger is active!
+2025-10-14 20:55:24,757 - werkzeug - INFO -  * Debugger PIN: 292-054-809
+2025-10-14 20:58:44,814 - werkzeug - INFO -  * Detected change in '/mnt/c/Users/HP/LyxNexus/app.py', reloading
+2025-10-14 20:58:45,595 - werkzeug - INFO -  * Restarting with stat
+2025-10-14 20:59:16,832 - werkzeug - INFO -  * Restarting with stat
+2025-10-14 20:59:39,723 - werkzeug - WARNING -  * Debugger is active!
+2025-10-14 20:59:39,775 - werkzeug - INFO -  * Debugger PIN: 292-054-809
+2025-10-14 21:00:39,584 - werkzeug - INFO -  * Detected change in '/mnt/c/Users/HP/LyxNexus/app.py', reloading
+2025-10-14 21:00:40,765 - werkzeug - INFO -  * Restarting with stat
+2025-10-14 21:01:07,410 - werkzeug - WARNING -  * Debugger is active!
+2025-10-14 21:01:07,459 - werkzeug - INFO -  * Debugger PIN: 292-054-809
+2025-10-14 21:02:03,137 - werkzeug - INFO -  * Detected change in '/mnt/c/Users/HP/LyxNexus/app.py', reloading
+2025-10-14 21:02:03,743 - werkzeug - INFO -  * Restarting with stat
+2025-10-14 21:02:29,932 - werkzeug - WARNING -  * Debugger is active!
+2025-10-14 21:02:30,050 - werkzeug - INFO -  * Debugger PIN: 292-054-809
+2025-10-14 21:02:40,555 - engineio.server - ERROR - message handler error
+Traceback (most recent call last):
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask_socketio/__init__.py", line 831, in _handle_event
+    ret = handler(auth)
+          ^^^^^^^^^^^^^
+TypeError: handle_connect() takes 0 positional arguments but 1 was given
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/socketio/server.py", line 538, in _handle_connect
+    success = self._trigger_event(
+              ^^^^^^^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/socketio/server.py", line 617, in _trigger_event
+    return handler(*args)
+           ^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask_socketio/__init__.py", line 292, in _handler
+    return self._handle_event(handler, message, real_ns, sid,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask_socketio/__init__.py", line 833, in _handle_event
+    ret = handler()
+          ^^^^^^^^^
+  File "/mnt/c/Users/HP/LyxNexus/app.py", line 786, in handle_connect
+    update_user_presence(
+  File "/mnt/c/Users/HP/LyxNexus/app.py", line 762, in update_user_presence
+    emit('online_users_update', {
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask_socketio/__init__.py", line 910, in emit
+    return socketio.emit(event, *args, namespace=namespace, to=to,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask_socketio/__init__.py", line 472, in emit
+    self.server.emit(event, *args, namespace=namespace, to=to,
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/socketio/server.py", line 166, in emit
+    self.manager.emit(event, data, namespace, room=room,
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/socketio/manager.py", line 44, in emit
+    encoded_packet = pkt.encode()
+                     ^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/socketio/packet.py", line 64, in encode
+    encoded_packet += self.json.dumps(data, separators=(',', ':'))
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/__init__.py", line 238, in dumps
+    **kw).encode(obj)
+          ^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/encoder.py", line 200, in encode
+    chunks = self.iterencode(o, _one_shot=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/encoder.py", line 258, in iterencode
+    return _iterencode(o, 0)
+           ^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/encoder.py", line 180, in default
+    raise TypeError(f'Object of type {o.__class__.__name__} '
+TypeError: Object of type datetime is not JSON serializable
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask_socketio/__init__.py", line 831, in _handle_event
+    ret = handler(auth)
+          ^^^^^^^^^^^^^
+TypeError: handle_connect() takes 0 positional arguments but 1 was given
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/engineio/server.py", line 450, in run_handler
+    return self.handlers[event](*args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/socketio/server.py", line 652, in _handle_eio_message
+    self._handle_connect(eio_sid, pkt.namespace, pkt.data)
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/socketio/server.py", line 541, in _handle_connect
+    success = self._trigger_event(
+              ^^^^^^^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/socketio/server.py", line 617, in _trigger_event
+    return handler(*args)
+           ^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask_socketio/__init__.py", line 292, in _handler
+    return self._handle_event(handler, message, real_ns, sid,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask_socketio/__init__.py", line 833, in _handle_event
+    ret = handler()
+          ^^^^^^^^^
+  File "/mnt/c/Users/HP/LyxNexus/app.py", line 786, in handle_connect
+    update_user_presence(
+  File "/mnt/c/Users/HP/LyxNexus/app.py", line 762, in update_user_presence
+    emit('online_users_update', {
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask_socketio/__init__.py", line 910, in emit
+    return socketio.emit(event, *args, namespace=namespace, to=to,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask_socketio/__init__.py", line 472, in emit
+    self.server.emit(event, *args, namespace=namespace, to=to,
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/socketio/server.py", line 166, in emit
+    self.manager.emit(event, data, namespace, room=room,
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/socketio/manager.py", line 44, in emit
+    encoded_packet = pkt.encode()
+                     ^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/socketio/packet.py", line 64, in encode
+    encoded_packet += self.json.dumps(data, separators=(',', ':'))
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/__init__.py", line 238, in dumps
+    **kw).encode(obj)
+          ^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/encoder.py", line 200, in encode
+    chunks = self.iterencode(o, _one_shot=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/encoder.py", line 258, in iterencode
+    return _iterencode(o, 0)
+           ^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/encoder.py", line 180, in default
+    raise TypeError(f'Object of type {o.__class__.__name__} '
+TypeError: Object of type datetime is not JSON serializable
+2025-10-14 21:02:42,941 - engineio.server - ERROR - message handler error
+Traceback (most recent call last):
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask_socketio/__init__.py", line 831, in _handle_event
+    ret = handler(auth)
+          ^^^^^^^^^^^^^
+TypeError: handle_connect() takes 0 positional arguments but 1 was given
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/socketio/server.py", line 538, in _handle_connect
+    success = self._trigger_event(
+              ^^^^^^^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/socketio/server.py", line 617, in _trigger_event
+    return handler(*args)
+           ^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask_socketio/__init__.py", line 292, in _handler
+    return self._handle_event(handler, message, real_ns, sid,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask_socketio/__init__.py", line 833, in _handle_event
+    ret = handler()
+          ^^^^^^^^^
+  File "/mnt/c/Users/HP/LyxNexus/app.py", line 786, in handle_connect
+    update_user_presence(
+  File "/mnt/c/Users/HP/LyxNexus/app.py", line 762, in update_user_presence
+    emit('online_users_update', {
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask_socketio/__init__.py", line 910, in emit
+    return socketio.emit(event, *args, namespace=namespace, to=to,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask_socketio/__init__.py", line 472, in emit
+    self.server.emit(event, *args, namespace=namespace, to=to,
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/socketio/server.py", line 166, in emit
+    self.manager.emit(event, data, namespace, room=room,
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/socketio/manager.py", line 44, in emit
+    encoded_packet = pkt.encode()
+                     ^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/socketio/packet.py", line 64, in encode
+    encoded_packet += self.json.dumps(data, separators=(',', ':'))
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/__init__.py", line 238, in dumps
+    **kw).encode(obj)
+          ^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/encoder.py", line 200, in encode
+    chunks = self.iterencode(o, _one_shot=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/encoder.py", line 258, in iterencode
+    return _iterencode(o, 0)
+           ^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/encoder.py", line 180, in default
+    raise TypeError(f'Object of type {o.__class__.__name__} '
+TypeError: Object of type datetime is not JSON serializable
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask_socketio/__init__.py", line 831, in _handle_event
+    ret = handler(auth)
+          ^^^^^^^^^^^^^
+TypeError: handle_connect() takes 0 positional arguments but 1 was given
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/engineio/server.py", line 450, in run_handler
+    return self.handlers[event](*args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/socketio/server.py", line 652, in _handle_eio_message
+    self._handle_connect(eio_sid, pkt.namespace, pkt.data)
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/socketio/server.py", line 541, in _handle_connect
+    success = self._trigger_event(
+              ^^^^^^^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/socketio/server.py", line 617, in _trigger_event
+    return handler(*args)
+           ^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask_socketio/__init__.py", line 292, in _handler
+    return self._handle_event(handler, message, real_ns, sid,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask_socketio/__init__.py", line 833, in _handle_event
+    ret = handler()
+          ^^^^^^^^^
+  File "/mnt/c/Users/HP/LyxNexus/app.py", line 786, in handle_connect
+    update_user_presence(
+  File "/mnt/c/Users/HP/LyxNexus/app.py", line 762, in update_user_presence
+    emit('online_users_update', {
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask_socketio/__init__.py", line 910, in emit
+    return socketio.emit(event, *args, namespace=namespace, to=to,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask_socketio/__init__.py", line 472, in emit
+    self.server.emit(event, *args, namespace=namespace, to=to,
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/socketio/server.py", line 166, in emit
+    self.manager.emit(event, data, namespace, room=room,
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/socketio/manager.py", line 44, in emit
+    encoded_packet = pkt.encode()
+                     ^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/socketio/packet.py", line 64, in encode
+    encoded_packet += self.json.dumps(data, separators=(',', ':'))
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/__init__.py", line 238, in dumps
+    **kw).encode(obj)
+          ^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/encoder.py", line 200, in encode
+    chunks = self.iterencode(o, _one_shot=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/encoder.py", line 258, in iterencode
+    return _iterencode(o, 0)
+           ^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/encoder.py", line 180, in default
+    raise TypeError(f'Object of type {o.__class__.__name__} '
+TypeError: Object of type datetime is not JSON serializable
+2025-10-14 21:03:26,662 - werkzeug - INFO -  * Detected change in '/mnt/c/Users/HP/LyxNexus/app.py', reloading
+2025-10-14 21:03:27,052 - werkzeug - INFO -  * Restarting with stat
+2025-10-14 21:04:00,798 - werkzeug - WARNING -  * Debugger is active!
+2025-10-14 21:04:01,042 - werkzeug - INFO -  * Debugger PIN: 292-054-809
+2025-10-14 21:04:15,069 - werkzeug - INFO -  * Detected change in '/mnt/c/Users/HP/LyxNexus/app.py', reloading
+2025-10-14 21:04:15,778 - werkzeug - INFO -  * Restarting with stat
+2025-10-14 21:04:48,474 - werkzeug - WARNING -  * Debugger is active!
+2025-10-14 21:04:48,494 - werkzeug - INFO -  * Debugger PIN: 292-054-809
+2025-10-14 21:05:25,559 - werkzeug - INFO -  * Detected change in '/mnt/c/Users/HP/LyxNexus/app.py', reloading
+2025-10-14 21:05:26,103 - werkzeug - INFO -  * Restarting with stat
+2025-10-14 21:05:50,671 - werkzeug - WARNING -  * Debugger is active!
+2025-10-14 21:05:50,706 - werkzeug - INFO -  * Debugger PIN: 292-054-809
+2025-10-14 21:05:58,418 - engineio.server - ERROR - message handler error
+Traceback (most recent call last):
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask_socketio/__init__.py", line 831, in _handle_event
+    ret = handler(auth)
+          ^^^^^^^^^^^^^
+TypeError: handle_connect() takes 0 positional arguments but 1 was given
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/socketio/server.py", line 538, in _handle_connect
+    success = self._trigger_event(
+              ^^^^^^^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/socketio/server.py", line 617, in _trigger_event
+    return handler(*args)
+           ^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask_socketio/__init__.py", line 292, in _handler
+    return self._handle_event(handler, message, real_ns, sid,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask_socketio/__init__.py", line 833, in _handle_event
+    ret = handler()
+          ^^^^^^^^^
+  File "/mnt/c/Users/HP/LyxNexus/app.py", line 786, in handle_connect
+    update_user_presence(
+  File "/mnt/c/Users/HP/LyxNexus/app.py", line 762, in update_user_presence
+    emit('online_users_update', {
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask_socketio/__init__.py", line 910, in emit
+    return socketio.emit(event, *args, namespace=namespace, to=to,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask_socketio/__init__.py", line 472, in emit
+    self.server.emit(event, *args, namespace=namespace, to=to,
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/socketio/server.py", line 166, in emit
+    self.manager.emit(event, data, namespace, room=room,
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/socketio/manager.py", line 44, in emit
+    encoded_packet = pkt.encode()
+                     ^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/socketio/packet.py", line 64, in encode
+    encoded_packet += self.json.dumps(data, separators=(',', ':'))
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/__init__.py", line 238, in dumps
+    **kw).encode(obj)
+          ^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/encoder.py", line 200, in encode
+    chunks = self.iterencode(o, _one_shot=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/encoder.py", line 258, in iterencode
+    return _iterencode(o, 0)
+           ^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/encoder.py", line 180, in default
+    raise TypeError(f'Object of type {o.__class__.__name__} '
+TypeError: Object of type datetime is not JSON serializable
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask_socketio/__init__.py", line 831, in _handle_event
+    ret = handler(auth)
+          ^^^^^^^^^^^^^
+TypeError: handle_connect() takes 0 positional arguments but 1 was given
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/engineio/server.py", line 450, in run_handler
+    return self.handlers[event](*args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/socketio/server.py", line 652, in _handle_eio_message
+    self._handle_connect(eio_sid, pkt.namespace, pkt.data)
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/socketio/server.py", line 541, in _handle_connect
+    success = self._trigger_event(
+              ^^^^^^^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/socketio/server.py", line 617, in _trigger_event
+    return handler(*args)
+           ^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask_socketio/__init__.py", line 292, in _handler
+    return self._handle_event(handler, message, real_ns, sid,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask_socketio/__init__.py", line 833, in _handle_event
+    ret = handler()
+          ^^^^^^^^^
+  File "/mnt/c/Users/HP/LyxNexus/app.py", line 786, in handle_connect
+    update_user_presence(
+  File "/mnt/c/Users/HP/LyxNexus/app.py", line 762, in update_user_presence
+    emit('online_users_update', {
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask_socketio/__init__.py", line 910, in emit
+    return socketio.emit(event, *args, namespace=namespace, to=to,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask_socketio/__init__.py", line 472, in emit
+    self.server.emit(event, *args, namespace=namespace, to=to,
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/socketio/server.py", line 166, in emit
+    self.manager.emit(event, data, namespace, room=room,
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/socketio/manager.py", line 44, in emit
+    encoded_packet = pkt.encode()
+                     ^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/socketio/packet.py", line 64, in encode
+    encoded_packet += self.json.dumps(data, separators=(',', ':'))
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/__init__.py", line 238, in dumps
+    **kw).encode(obj)
+          ^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/encoder.py", line 200, in encode
+    chunks = self.iterencode(o, _one_shot=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/encoder.py", line 258, in iterencode
+    return _iterencode(o, 0)
+           ^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/encoder.py", line 180, in default
+    raise TypeError(f'Object of type {o.__class__.__name__} '
+TypeError: Object of type datetime is not JSON serializable
+2025-10-14 21:06:52,247 - werkzeug - INFO -  * Detected change in '/mnt/c/Users/HP/LyxNexus/app.py', reloading
+2025-10-14 21:06:52,922 - werkzeug - INFO -  * Restarting with stat
+2025-10-14 21:07:12,144 - werkzeug - WARNING -  * Debugger is active!
+2025-10-14 21:07:12,418 - werkzeug - INFO -  * Debugger PIN: 292-054-809
+2025-10-14 21:07:17,574 - werkzeug - INFO -  * Detected change in '/mnt/c/Users/HP/LyxNexus/app.py', reloading
+2025-10-14 21:07:18,062 - werkzeug - INFO -  * Restarting with stat
+2025-10-14 21:07:38,462 - werkzeug - WARNING -  * Debugger is active!
+2025-10-14 21:07:38,540 - werkzeug - INFO -  * Debugger PIN: 292-054-809
+2025-10-14 21:07:59,337 - werkzeug - INFO -  * Detected change in '/mnt/c/Users/HP/LyxNexus/app.py', reloading
+2025-10-14 21:08:01,677 - werkzeug - INFO -  * Restarting with stat
+2025-10-14 21:12:06,045 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-10-14 21:12:06,094 - apscheduler.scheduler - INFO - Added job "periodic_cleanup" to job store "default"
+2025-10-14 21:12:06,096 - apscheduler.scheduler - INFO - Scheduler started
+2025-10-14 21:12:06,194 - werkzeug - INFO -  * Restarting with stat
+2025-10-14 21:12:30,270 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-10-14 21:12:30,365 - apscheduler.scheduler - INFO - Added job "periodic_cleanup" to job store "default"
+2025-10-14 21:12:30,373 - apscheduler.scheduler - INFO - Scheduler started
+2025-10-14 21:12:30,531 - werkzeug - WARNING -  * Debugger is active!
+2025-10-14 21:12:30,630 - werkzeug - INFO -  * Debugger PIN: 292-054-809
+2025-10-14 21:13:06,046 - apscheduler.executors.default - INFO - Running job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-14 21:13:06 EAT)" (scheduled at 2025-10-14 21:13:06.044817+03:00)
+2025-10-14 21:13:06,051 - apscheduler.executors.default - INFO - Job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-14 21:13:06 EAT)" executed successfully
+2025-10-14 21:13:30,275 - apscheduler.executors.default - INFO - Running job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-14 21:13:30 EAT)" (scheduled at 2025-10-14 21:13:30.270263+03:00)
+2025-10-14 21:13:30,283 - apscheduler.executors.default - INFO - Job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-14 21:13:30 EAT)" executed successfully
+2025-10-14 21:14:06,046 - apscheduler.executors.default - INFO - Running job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-14 21:15:06 EAT)" (scheduled at 2025-10-14 21:14:06.044817+03:00)
+2025-10-14 21:14:06,048 - apscheduler.executors.default - INFO - Job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-14 21:15:06 EAT)" executed successfully
+2025-10-14 21:14:30,273 - apscheduler.executors.default - INFO - Running job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-14 21:15:30 EAT)" (scheduled at 2025-10-14 21:14:30.270263+03:00)
+2025-10-14 21:14:30,276 - apscheduler.executors.default - INFO - Job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-14 21:15:30 EAT)" executed successfully
+2025-10-14 21:15:06,050 - apscheduler.executors.default - INFO - Running job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-14 21:16:06 EAT)" (scheduled at 2025-10-14 21:15:06.044817+03:00)
+2025-10-14 21:15:06,058 - apscheduler.executors.default - INFO - Job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-14 21:16:06 EAT)" executed successfully
+2025-10-14 21:15:29,325 - werkzeug - INFO -  * Detected change in '/mnt/c/Users/HP/LyxNexus/app.py', reloading
+2025-10-14 21:15:29,988 - werkzeug - INFO -  * Restarting with stat
+2025-10-14 21:15:48,173 - werkzeug - WARNING -  * Debugger is active!
+2025-10-14 21:15:48,212 - werkzeug - INFO -  * Debugger PIN: 292-054-809
+2025-10-14 21:15:57,778 - werkzeug - INFO -  * Detected change in '/mnt/c/Users/HP/LyxNexus/app.py', reloading
+2025-10-14 21:15:58,304 - werkzeug - INFO -  * Restarting with stat
+2025-10-14 21:16:06,045 - apscheduler.executors.default - INFO - Running job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-14 21:17:06 EAT)" (scheduled at 2025-10-14 21:16:06.044817+03:00)
+2025-10-14 21:16:06,047 - apscheduler.executors.default - INFO - Job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-14 21:17:06 EAT)" executed successfully
+2025-10-14 21:16:18,592 - werkzeug - WARNING -  * Debugger is active!
+2025-10-14 21:16:18,639 - werkzeug - INFO -  * Debugger PIN: 292-054-809
+2025-10-14 21:17:06,046 - apscheduler.executors.default - INFO - Running job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-14 21:18:06 EAT)" (scheduled at 2025-10-14 21:17:06.044817+03:00)
+2025-10-14 21:17:06,048 - apscheduler.executors.default - INFO - Job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-14 21:18:06 EAT)" executed successfully
+2025-10-14 21:17:50,730 - werkzeug - INFO -  * Detected change in '/mnt/c/Users/HP/LyxNexus/app.py', reloading
+2025-10-14 21:17:51,228 - werkzeug - INFO -  * Restarting with stat
+2025-10-14 21:18:06,046 - apscheduler.executors.default - INFO - Running job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-14 21:19:06 EAT)" (scheduled at 2025-10-14 21:18:06.044817+03:00)
+2025-10-14 21:18:06,047 - apscheduler.executors.default - INFO - Job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-14 21:19:06 EAT)" executed successfully
+2025-10-14 21:18:31,156 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-10-14 21:18:31,159 - apscheduler.scheduler - INFO - Added job "periodic_cleanup" to job store "default"
+2025-10-14 21:18:31,159 - apscheduler.scheduler - INFO - Scheduler started
+2025-10-14 21:19:03,724 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-10-14 21:19:03,727 - apscheduler.scheduler - INFO - Added job "periodic_cleanup" to job store "default"
+2025-10-14 21:19:03,728 - apscheduler.scheduler - INFO - Scheduler started
+2025-10-14 21:19:03,768 - werkzeug - INFO -  * Restarting with stat
+2025-10-14 21:19:25,300 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-10-14 21:19:25,302 - apscheduler.scheduler - INFO - Added job "periodic_cleanup" to job store "default"
+2025-10-14 21:19:25,303 - apscheduler.scheduler - INFO - Scheduler started
+2025-10-14 21:19:25,332 - werkzeug - WARNING -  * Debugger is active!
+2025-10-14 21:19:25,361 - werkzeug - INFO -  * Debugger PIN: 292-054-809
+2025-10-14 21:20:03,726 - apscheduler.executors.default - INFO - Running job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-14 21:20:03 EAT)" (scheduled at 2025-10-14 21:20:03.724068+03:00)
+2025-10-14 21:20:03,731 - apscheduler.executors.default - INFO - Job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-14 21:20:03 EAT)" executed successfully
+2025-10-14 21:20:25,306 - apscheduler.executors.default - INFO - Running job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-14 21:20:25 EAT)" (scheduled at 2025-10-14 21:20:25.300118+03:00)
+2025-10-14 21:20:25,309 - apscheduler.executors.default - INFO - Job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-14 21:20:25 EAT)" executed successfully
+2025-10-14 21:21:03,725 - apscheduler.executors.default - INFO - Running job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-14 21:22:03 EAT)" (scheduled at 2025-10-14 21:21:03.724068+03:00)
+2025-10-14 21:21:03,726 - apscheduler.executors.default - INFO - Job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-14 21:22:03 EAT)" executed successfully
