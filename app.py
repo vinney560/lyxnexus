@@ -516,6 +516,10 @@ def get_files():
         'has_prev': files_pagination.has_prev
     })
 
+def shorten_filename(filename, length=15):
+    name, ext = os.path.splitext(filename)
+    return f"{name[:length]}...{ext}" if len(name) > length else filename
+
 @app.route('/api/files/upload', methods=['POST'])
 @login_required
 def upload_file():
@@ -528,8 +532,9 @@ def upload_file():
         return jsonify({'error': 'No file selected'}), 400
     
     # Get form data
-    name = request.form.get('name', file.filename)
-    description = request.form.get('description', '')
+    name = request.form.get('name', file.filename)[:25]
+    filename = shorten_filename(file.filename)
+    description = request.form.get('description', '')[:100]
     category = request.form.get('category', 'general')
     
     # Validate file size (10MB limit)
@@ -545,7 +550,7 @@ def upload_file():
     try:
         new_file = File(
             name=name,
-            filename=file.filename,
+            filename=filename,
             file_type=file.content_type,
             file_size=len(file_data),
             file_data=file_data,
