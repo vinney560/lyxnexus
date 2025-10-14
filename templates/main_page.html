@@ -203,15 +203,15 @@
         header {
             display: none;
         }
-    
+
         .nav-buttons {
             display: none;
         }
-    
+
         .mobile-menu {
             display: block;
         }
-    
+
         .mobile-nav {
             position: fixed;
             bottom: 0;
@@ -228,11 +228,11 @@
             gap: 6px;
             scrollbar-width: none; /* hide scrollbar for Firefox */
         }
-    
+
         .mobile-nav::-webkit-scrollbar {
             display: none; /* hide scrollbar for WebKit browsers */
         }
-    
+
         .mobile-nav-btn {
             flex: 0 0 auto; /* prevents buttons from shrinking */
             display: flex;
@@ -244,23 +244,23 @@
             font-size: 12px;
             transition: all 0.3s ease;
         }
-    
+
         .mobile-nav-btn.active {
             color: #3B82F6;
             background: rgba(59, 130, 246, 0.1);
         }
-    
+
         .mobile-nav-btn i {
             font-size: 14px;
             margin-bottom: 4px;
         }
-    
+
         .content-container {
             padding-top: 20px;
             padding-bottom: 70px;
         }
     }
-    
+
     @media (min-width: 769px) {
         header .max-w-7xl.mx-auto.px-2 {
             padding-top: 0.5rem;
@@ -814,7 +814,7 @@
         // Load timetable
         async function loadTimetable() {
             const container = document.getElementById('timetable-container');
-            const timetableData = await fetchData(ENDPOINTS.TIMETABLE) || [];
+            const timetableData = await fetchData(`${ENDPOINTS.TIMETABLE}/grouped`) || [];
             timetable = timetableData;
             
             if (timetable.length === 0) {
