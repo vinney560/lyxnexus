@@ -1658,7 +1658,7 @@ scheduler.start()
 atexit.register(lambda: scheduler.shutdown())
 
 TARGET_URL = 'https://lyxspace.onrender.com/files'
-# Optional: manual ping route
+# manual ping route
 @app.route("/ping-lyx")
 def manual_ping():
     try:
