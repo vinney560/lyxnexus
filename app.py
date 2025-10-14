@@ -341,7 +341,7 @@ def login():
         # Validate mobile
         if not mobile or len(mobile) != 10:
             flash('Invalid mobile number')
-            return render_template('login.html', username=username, mobile=mobile, year=_year)
+            return render_template('login.html', username=username, mobile=mobile, year=_year())
         
         user = User.query.filter_by(mobile=mobile).first()
         
@@ -349,7 +349,7 @@ def login():
         if admin_secret:
             if not user or not user.is_admin:
                 flash('Invalid admin credentials')
-                return render_template('login.html', username=username, mobile=mobile, year=_year)
+                return render_template('login.html', username=username, mobile=mobile, year=_year())
             login_user(user)
             return redirect(url_for('admin_page'))
         
@@ -370,7 +370,7 @@ def login():
         else:
             return redirect(next_page or url_for('main_page'))
     
-    return render_template('login.html', year=_year)
+    return render_template('login.html', year=_year())
 
 @app.route('/logout')
 @login_required
@@ -382,18 +382,18 @@ def logout():
 #===================================================
 @app.route('/')
 def home():
-    return render_template('index.html', year=_year)
+    return render_template('index.html', year=_year())
 
 @app.route('/main-page')
 @login_required
 def main_page():
-    return render_template('main_page.html', year=_year)
+    return render_template('main_page.html', year=_year())
 
 @app.route('/admin')
 @login_required
 @admin_required
 def admin_page():
-    return render_template('admin.html', year=_year)
+    return render_template('admin.html', year=_year())
 
 # User management route
 @app.route('/admin/users')
