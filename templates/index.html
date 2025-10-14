@@ -760,7 +760,7 @@
         // Load timetable
         async function loadTimetable() {
             const container = document.getElementById('timetable-container');
-            const timetable = await fetchData(ENDPOINTS.TIMETABLE);
+            const timetable = await fetchData(`${ENDPOINTS.TIMETABLE}/grouped`);
             
             if (timetable.length === 0) {
                 container.innerHTML = '<p class="text-center text-slate-400 py-8">No timetable available.</p>';
