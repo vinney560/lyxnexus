@@ -280,8 +280,7 @@ def teardown_request(exception):
     db.session.remove()
 
 def _year():
-    """Return the current year in Nairobi time (UTC+3)."""
-    return nairobi_time().year
+    return datetime.now().strftime('%Y')
 
 ALLOWED_KEYWORDS = [
     "mozilla",      # Chrome, Firefox, Edge, Safari all contain this
