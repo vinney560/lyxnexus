@@ -218,6 +218,30 @@ class MessageRead(db.Model):
     message = db.relationship('Message', backref=db.backref('read_by', lazy=True))
     user = db.relationship('User', backref=db.backref('read_messages', lazy=True))
 #==========================================
+# FILES MODEL
+#==========================================
+class File(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(255), nullable=False)
+    filename = db.Column(db.String(255), nullable=False)
+    file_type = db.Column(db.String(100), nullable=False)
+    file_size = db.Column(db.Integer, nullable=False)  # Size in bytes
+    file_data = db.Column(db.LargeBinary, nullable=False)  # Actual file data
+    description = db.Column(db.Text)
+    category = db.Column(db.String(100), default='general')
+    uploaded_at = db.Column(db.DateTime, default=nairobi_time)
+    updated_at = db.Column(db.DateTime, default=nairobi_time, onupdate=nairobi_time)
+    
+    # Foreign Keys
+    uploaded_by = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    
+    # Relationships
+    uploader = db.relationship('User', backref=db.backref('uploaded_files', lazy=True))
+    
+    def __repr__(self):
+        return f'<File {self.name}>'
+#==========================================    
+
 with app.app_context():
     try:
         db.create_all()
@@ -408,6 +432,14 @@ def profile():
     """Render the profile edit page"""
     return render_template('edit_profile.html')
 
+# routes.py - Add these routes
+
+@app.route('/files')
+@login_required
+def files():
+    """Render the file management page"""
+    return render_template('files.html')
+
 #--------------------------------------------------------------------
 @app.route('/favicon.ico')
 def favicon():
@@ -430,7 +462,162 @@ def is_authenticated():
     return jsonify({'authenticated': current_user.is_authenticated})
 #-------------------------------------------------------------------
 #==========================================
-#   UPDATE API ROUTES
+# FILE API
+#==========================================
+@app.route('/api/files')
+@login_required
+def get_files():
+    """Get all files with pagination and filtering"""
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 10, type=int)
+    category = request.args.get('category', '')
+    search = request.args.get('search', '')
+    
+    # Build query
+    query = File.query
+    
+    if category:
+        query = query.filter(File.category == category)
+    
+    if search:
+        query = query.filter(
+            db.or_(
+                File.name.ilike(f'%{search}%'),
+                File.description.ilike(f'%{search}%'),
+                File.filename.ilike(f'%{search}%')
+            )
+        )
+    
+    # Get paginated results
+    files_pagination = query.order_by(File.uploaded_at.desc()).paginate(
+        page=page, per_page=per_page, error_out=False
+    )
+    
+    files_data = []
+    for file in files_pagination.items:
+        files_data.append({
+            'id': file.id,
+            'name': file.name,
+            'filename': file.filename,
+            'file_type': file.file_type,
+            'file_size': file.file_size,
+            'description': file.description,
+            'category': file.category,
+            'uploaded_at': file.uploaded_at.isoformat(),
+            'updated_at': file.updated_at.isoformat(),
+            'uploaded_by': file.uploader.username if file.uploader else 'Unknown',
+            'can_delete': current_user.is_admin or current_user.id == file.uploaded_by
+        })
+    
+    return jsonify({
+        'files': files_data,
+        'total': files_pagination.total,
+        'pages': files_pagination.pages,
+        'current_page': page,
+        'has_next': files_pagination.has_next,
+        'has_prev': files_pagination.has_prev
+    })
+
+@app.route('/api/files/upload', methods=['POST'])
+@login_required
+def upload_file():
+    """Upload a new file"""
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file provided'}), 400
+    
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({'error': 'No file selected'}), 400
+    
+    # Get form data
+    name = request.form.get('name', file.filename)
+    description = request.form.get('description', '')
+    category = request.form.get('category', 'general')
+    
+    # Validate file size (10MB limit)
+    file_data = file.read()
+    if len(file_data) > 10 * 1024 * 1024:  # 10MB
+        return jsonify({'error': 'File size exceeds 10MB limit'}), 400
+    
+    # Check if filename already exists
+    existing_file = File.query.filter_by(filename=file.filename).first()
+    if existing_file:
+        return jsonify({'error': 'A file with this name already exists'}), 400
+    
+    try:
+        new_file = File(
+            name=name,
+            filename=file.filename,
+            file_type=file.content_type,
+            file_size=len(file_data),
+            file_data=file_data,
+            description=description,
+            category=category,
+            uploaded_by=current_user.id
+        )
+        
+        db.session.add(new_file)
+        db.session.commit()
+        
+        return jsonify({
+            'message': 'File uploaded successfully',
+            'file': {
+                'id': new_file.id,
+                'name': new_file.name,
+                'filename': new_file.filename,
+                'file_type': new_file.file_type,
+                'file_size': new_file.file_size
+            }
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': 'Failed to upload file'}), 500
+
+@app.route('/api/files/<int:id>/download')
+@login_required
+def download_file(id):
+    """Download a file"""
+    file = File.query.get_or_404(id)
+    
+    return send_file(
+        BytesIO(file.file_data),
+        download_name=file.filename,
+        as_attachment=True,
+        mimetype=file.file_type
+    )
+
+@app.route('/api/files/<int:id>', methods=['DELETE'])
+@login_required
+def delete_file(id):
+    """Delete a file"""
+    file = File.query.get_or_404(id)
+    
+    # Check permissions (admin or uploader)
+    if not current_user.is_admin and current_user.id != file.uploaded_by:
+        return jsonify({'error': 'Unauthorized'}), 403
+    
+    try:
+        db.session.delete(file)
+        db.session.commit()
+        
+        return jsonify({'message': 'File deleted successfully'})
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': 'Failed to delete file'}), 500
+
+@app.route('/api/files/categories')
+@login_required
+def get_file_categories():
+    """Get all file categories"""
+    categories = db.session.query(File.category).distinct().all()
+    category_list = [cat[0] for cat in categories if cat[0]]
+    
+    return jsonify({'categories': category_list})
+
+#==========================================
+#   UPDATE USER API ROUTES
 #==========================================
 @app.route('/api/user/profile', methods=['GET'])
 @login_required
