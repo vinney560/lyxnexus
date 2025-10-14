@@ -106,6 +106,7 @@
         max-width: 80%;
         word-wrap: break-word;
         transition: opacity 0.3s, transform 0.3s;
+        position: relative;
     }
     
     .message.user-message {
@@ -127,6 +128,111 @@
         max-width: 90%;
         box-shadow: 0 4px 15px rgba(139, 92, 246, 0.2);
         animation: pulse-admin 2s infinite;
+    }
+    
+    .message.deleted-message {
+        background: rgba(75, 85, 99, 0.3);
+        color: #9CA3AF;
+        font-style: italic;
+    }
+    
+    .reply-indicator {
+        background: rgba(59, 130, 246, 0.1);
+        border-left: 3px solid #3B82F6;
+        padding: 8px 12px;
+        margin-bottom: 8px;
+        border-radius: 8px;
+        font-size: 0.85em;
+    }
+    
+    .reply-indicator .replying-to {
+        color: #3B82F6;
+        font-weight: 500;
+    }
+    
+    .message-actions {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        opacity: 0;
+        transition: opacity 0.3s;
+        display: flex;
+        gap: 5px;
+    }
+    
+    .message:hover .message-actions {
+        opacity: 1;
+    }
+    
+    .action-btn {
+        background: rgba(30, 30, 40, 0.8);
+        border: none;
+        border-radius: 50%;
+        width: 28px;
+        height: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #9CA3AF;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-size: 0.8em;
+    }
+    
+    .action-btn:hover {
+        background: rgba(59, 130, 246, 0.2);
+        color: #3B82F6;
+    }
+    
+    .action-btn.delete:hover {
+        background: rgba(239, 68, 68, 0.2);
+        color: #EF4444;
+    }
+    
+    .read-receipt {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 5px;
+        font-size: 0.7em;
+        color: #10B981;
+    }
+    
+    .replies-container {
+        margin-left: 20px;
+        margin-top: 5px;
+        border-left: 2px solid rgba(59, 130, 246, 0.3);
+        padding-left: 10px;
+    }
+    
+    .reply-btn {
+        background: transparent;
+        border: none;
+        color: #3B82F6;
+        font-size: 0.8em;
+        cursor: pointer;
+        padding: 2px 8px;
+        border-radius: 4px;
+        transition: background 0.3s;
+    }
+    
+    .reply-btn:hover {
+        background: rgba(59, 130, 246, 0.1);
+    }
+    
+    .view-replies-btn {
+        background: transparent;
+        border: none;
+        color: #8B5CF6;
+        font-size: 0.8em;
+        cursor: pointer;
+        padding: 4px 10px;
+        border-radius: 12px;
+        margin-top: 5px;
+        transition: all 0.3s;
+    }
+    
+    .view-replies-btn:hover {
+        background: rgba(139, 92, 246, 0.1);
     }
     
     @keyframes pulse-admin {
@@ -362,6 +468,30 @@
         font-size: 0.9em;
     }
     
+    .reply-preview {
+        background: rgba(59, 130, 246, 0.1);
+        border-left: 3px solid #3B82F6;
+        padding: 8px 12px;
+        margin-bottom: 10px;
+        border-radius: 8px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .reply-preview-content {
+        font-size: 0.85em;
+        color: #9CA3AF;
+    }
+    
+    .cancel-reply {
+        background: none;
+        border: none;
+        color: #EF4444;
+        cursor: pointer;
+        font-size: 1.2em;
+    }
+    
     @keyframes pulse {
         0% { opacity: 1; }
         50% { opacity: 0.5; }
@@ -387,6 +517,75 @@
         background: linear-gradient(135deg, #8B5CF6, #3B82F6);
     }
     
+    /* Modal styles */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.7);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s;
+    }
+    
+    .modal-overlay.active {
+        opacity: 1;
+        visibility: visible;
+    }
+    
+    .modal {
+        background: rgba(30, 30, 40, 0.95);
+        border-radius: 15px;
+        padding: 20px;
+        width: 90%;
+        max-width: 500px;
+        max-height: 80vh;
+        overflow-y: auto;
+        transform: translateY(20px);
+        transition: transform 0.3s;
+    }
+    
+    .modal-overlay.active .modal {
+        transform: translateY(0);
+    }
+    
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+    
+    .modal-title {
+        font-size: 1.2em;
+        font-weight: 600;
+    }
+    
+    .close-modal {
+        background: none;
+        border: none;
+        color: #9CA3AF;
+        font-size: 1.5em;
+        cursor: pointer;
+    }
+    
+    .replies-list {
+        max-height: 400px;
+        overflow-y: auto;
+        margin-bottom: 15px;
+    }
+    
+    .reply-input-container {
+        display: flex;
+        gap: 10px;
+    }
+    
     @media (max-width: 768px) {
         .message {
             max-width: 90%;
@@ -399,12 +598,17 @@
         .online-users {
             max-height: 200px;
         }
+        
+        .message-actions {
+            opacity: 1; /* Always show on mobile */
+        }
     }
+    
     @media (max-width: 768px) {
         header .max-w-7xl {
             overflow-x: auto;
             white-space: nowrap;
-            -webkit-overflow-scrolling: touch; /* smooth scrolling on iOS */
+            -webkit-overflow-scrolling: touch;
         }
     
         header .flex {
@@ -413,7 +617,7 @@
         }
     
         header::-webkit-scrollbar {
-            display: none; /* optional: hide scrollbar */
+            display: none;
         }
     }
     
@@ -482,6 +686,16 @@
                         {% endfor %}
                     </div>
                     
+                    <!-- Reply Preview -->
+                    <div class="reply-preview" id="replyPreview" style="display: none;">
+                        <div class="reply-preview-content">
+                            <strong>Replying to:</strong> <span id="replyPreviewText"></span>
+                        </div>
+                        <button class="cancel-reply" id="cancelReply">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    
                     <div class="offline-indicator" id="offlineIndicator" style="display: none;">
                         <i class="fas fa-wifi mr-2"></i>You are offline. Messages will be sent when connection is restored.
                     </div>
@@ -535,6 +749,32 @@
         </div>
     </main>
 
+    <!-- Replies Modal -->
+    <div class="modal-overlay" id="repliesModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title" id="repliesModalTitle">Replies</h3>
+                <button class="close-modal" id="closeRepliesModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="replies-list" id="repliesList">
+                <!-- Replies will be loaded here -->
+            </div>
+            <div class="reply-input-container">
+                <textarea 
+                    id="replyInput" 
+                    class="message-input" 
+                    placeholder="Type your reply..." 
+                    rows="2"
+                ></textarea>
+                <button id="sendReplyButton" class="send-btn">
+                    <i class="fas fa-reply"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Enhanced Socket.IO connection with persistent features
         const socket = io({
@@ -543,7 +783,7 @@
             reconnectionDelay: 1000,
             reconnectionDelayMax: 10000,
             timeout: 20000,
-            transports: ['websocket', 'polling'] // Fallback transport
+            transports: ['websocket', 'polling']
         });
         
         // DOM elements
@@ -559,6 +799,15 @@
         const offlineIndicator = document.getElementById('offlineIndicator');
         const messageQueueIndicator = document.getElementById('messageQueueIndicator');
         const queuedMessagesCount = document.getElementById('queuedMessagesCount');
+        const replyPreview = document.getElementById('replyPreview');
+        const replyPreviewText = document.getElementById('replyPreviewText');
+        const cancelReply = document.getElementById('cancelReply');
+        const repliesModal = document.getElementById('repliesModal');
+        const closeRepliesModal = document.getElementById('closeRepliesModal');
+        const repliesModalTitle = document.getElementById('repliesModalTitle');
+        const repliesList = document.getElementById('repliesList');
+        const replyInput = document.getElementById('replyInput');
+        const sendReplyButton = document.getElementById('sendReplyButton');
         
         // Enhanced State Management
         let currentRoom = 'general';
@@ -567,13 +816,15 @@
         let reconnectAttempts = 0;
         let isConnected = false;
         let messageQueue = [];
-        let messageCache = new Map(); // Cache for room messages
-        let lastMessageId = 0; // Track last message ID for incremental loading
+        let messageCache = new Map();
+        let lastMessageId = 0;
         let connectionHealth = {
             latency: 0,
             lastPing: 0,
-            quality: 'good' // good, fair, poor
+            quality: 'good'
         };
+        let replyingTo = null; // Track if we're replying to a message
+        let viewingRepliesFor = null; // Track which message's replies we're viewing
         
         // Format time
         function formatTime(dateString) {
@@ -583,7 +834,6 @@
         
         // Enhanced Connection Status Management
         function updateConnectionStatus(status, message) {
-            // Clear all status classes
             connectionStatus.className = 'connection-status';
             statusDot.className = 'status-dot';
             
@@ -625,15 +875,10 @@
                     offlineIndicator.style.display = 'block';
                     break;
             }
-            
-            if (message) {
-                console.log('Connection status:', message);
-            }
         }
         
         // Update connection quality indicator
         function updateConnectionQuality() {
-            // Calculate quality based on latency and stability
             if (connectionHealth.latency < 100) {
                 connectionHealth.quality = 'good';
             } else if (connectionHealth.latency < 300) {
@@ -642,7 +887,6 @@
                 connectionHealth.quality = 'poor';
             }
             
-            // Update UI
             connectionQuality.textContent = connectionHealth.quality.charAt(0).toUpperCase() + connectionHealth.quality.slice(1);
             connectionQuality.className = `connection-quality ${connectionHealth.quality}`;
         }
@@ -651,23 +895,15 @@
         function handleReconnection() {
             reconnectAttempts++;
             
-            // Exponential backoff with jitter
             const baseDelay = Math.min(1000 * Math.pow(2, reconnectAttempts), 30000);
             const jitter = Math.random() * 1000;
             const delay = baseDelay + jitter;
-            
-            console.log(`Reconnection attempt ${reconnectAttempts} in ${delay}ms`);
             
             setTimeout(() => {
                 if (!isConnected) {
                     socket.connect();
                 }
             }, delay);
-        }
-        
-        // Scroll to bottom of messages
-        function scrollToBottom() {
-            messagesList.scrollTop = messagesList.scrollHeight;
         }
         
         // Auto-scroll to bottom if user is near bottom
@@ -681,13 +917,14 @@
             }
         }
         
-        // Add message to UI with animation
-        function addMessage(messageData, animate = true) {
+        // Create message element with enhanced features
+        function createMessageElement(messageData, animate = true) {
             const messageDiv = document.createElement('div');
             const isUserMessage = messageData.user_id === {{ current_user.id }};
             const isAdminMessage = messageData.is_admin_message;
+            const isDeleted = messageData.content === "[This message was deleted]";
             
-            messageDiv.className = `message ${isUserMessage ? 'user-message' : isAdminMessage ? 'admin-message' : 'other-message'}`;
+            messageDiv.className = `message ${isUserMessage ? 'user-message' : isAdminMessage ? 'admin-message' : 'other-message'} ${isDeleted ? 'deleted-message' : ''}`;
             messageDiv.setAttribute('data-message-id', messageData.id);
             
             if (animate) {
@@ -695,21 +932,88 @@
                 messageDiv.style.transform = 'translateY(10px)';
             }
             
-            messageDiv.innerHTML = `
+            let messageContent = '';
+            
+            // Add reply indicator if this is a reply
+            if (messageData.parent_id && messageData.parent) {
+                messageContent += `
+                    <div class="reply-indicator">
+                        Replying to <span class="replying-to">${messageData.parent.username}</span>: ${messageData.parent.content}
+                    </div>
+                `;
+            }
+            
+            messageContent += `
                 <div class="message-header">
                     <div class="flex items-center">
-                        <span class="username">${messageData.username}</span>
+                        <span class="username">${escapeHtml(messageData.username)}</span>
                         ${isAdminMessage ? '<span class="admin-badge">ADMIN</span>' : ''}
                     </div>
                     <span class="timestamp">${formatTime(messageData.created_at)}</span>
                 </div>
-                <div class="message-content">${messageData.content}</div>
+                <div class="message-content">${escapeHtml(messageData.content)}</div>
             `;
+            
+            // Add read receipt for user's own messages
+            if (isUserMessage && messageData.is_read) {
+                messageContent += '<div class="read-receipt"><i class="fas fa-check-double mr-1"></i> Read</div>';
+            }
+            
+            // Add action buttons for non-deleted messages that the user can interact with
+            if (!isDeleted) {
+                messageContent += `
+                    <div class="message-actions">
+                        <button class="action-btn reply" data-message-id="${messageData.id}" title="Reply">
+                            <i class="fas fa-reply"></i>
+                        </button>
+                        ${isUserMessage || {{ 'true' if current_user.is_admin else 'false' }} ? `
+                            <button class="action-btn delete" data-message-id="${messageData.id}" title="Delete">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        ` : ''}
+                    </div>
+                `;
+            }
+            
+            // Add view replies button if the message has replies
+            if (messageData.has_replies && !isDeleted) {
+                messageContent += `
+                    <button class="view-replies-btn" data-message-id="${messageData.id}">
+                        <i class="fas fa-comments mr-1"></i> View replies (${messageData.replies_count || '...'})
+                    </button>
+                `;
+            }
+            
+            messageDiv.innerHTML = messageContent;
+            
+            // Add event listeners for action buttons
+            if (!isDeleted) {
+                const replyBtn = messageDiv.querySelector('.action-btn.reply');
+                if (replyBtn) {
+                    replyBtn.addEventListener('click', handleReply);
+                }
+                
+                const deleteBtn = messageDiv.querySelector('.action-btn.delete');
+                if (deleteBtn) {
+                    deleteBtn.addEventListener('click', handleDelete);
+                }
+                
+                const viewRepliesBtn = messageDiv.querySelector('.view-replies-btn');
+                if (viewRepliesBtn) {
+                    viewRepliesBtn.addEventListener('click', handleViewReplies);
+                }
+            }
+            
+            return messageDiv;
+        }
+        
+        // Add message to UI
+        function addMessage(messageData, animate = true) {
+            const messageDiv = createMessageElement(messageData, animate);
             
             messagesList.appendChild(messageDiv);
             
             if (animate) {
-                // Animate in
                 setTimeout(() => {
                     messageDiv.style.transition = 'opacity 0.3s, transform 0.3s';
                     messageDiv.style.opacity = '1';
@@ -719,19 +1023,140 @@
             
             autoScrollToBottom();
             
-            // Mark as read
-            markMessageAsRead(messageData.id);
+            // Mark as read if it's not the user's own message
+            if (messageData.user_id !== {{ current_user.id }}) {
+                markMessageAsRead(messageData.id);
+            }
         }
         
-        // Mark message as read
-        function markMessageAsRead(messageId) {
-            fetch('/api/messages/read', {
+        // Handle reply action
+        function handleReply(event) {
+            const messageId = event.currentTarget.getAttribute('data-message-id');
+            const messageElement = event.currentTarget.closest('.message');
+            const messageContent = messageElement.querySelector('.message-content').textContent;
+            const username = messageElement.querySelector('.username').textContent;
+            
+            replyingTo = messageId;
+            replyPreviewText.textContent = `${username}: ${messageContent.substring(0, 50)}${messageContent.length > 50 ? '...' : ''}`;
+            replyPreview.style.display = 'flex';
+            
+            // Focus on message input
+            messageInput.focus();
+        }
+        
+        // Handle delete action
+        function handleDelete(event) {
+            const messageId = event.currentTarget.getAttribute('data-message-id');
+            
+            if (confirm('Are you sure you want to delete this message?')) {
+                deleteMessage(messageId);
+            }
+        }
+        
+        // Handle view replies action
+        function handleViewReplies(event) {
+            const messageId = event.currentTarget.getAttribute('data-message-id');
+            viewingRepliesFor = messageId;
+            
+            // Load replies for this message
+            loadReplies(messageId);
+            
+            // Show modal
+            repliesModal.classList.add('active');
+        }
+        
+        // Load replies for a message
+        function loadReplies(messageId) {
+            fetch(`/api/messages/${messageId}/replies`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        repliesList.innerHTML = '';
+                        repliesModalTitle.textContent = `Replies to: ${data.parent_message.content.substring(0, 30)}${data.parent_message.content.length > 30 ? '...' : ''}`;
+                        
+                        if (data.replies.length === 0) {
+                            repliesList.innerHTML = '<div class="text-center text-gray-400 py-4">No replies yet</div>';
+                        } else {
+                            data.replies.forEach(reply => {
+                                const replyElement = createMessageElement(reply, false);
+                                repliesList.appendChild(replyElement);
+                            });
+                        }
+                    } else {
+                        repliesList.innerHTML = `<div class="text-center text-red-400 py-4">Error loading replies: ${data.error}</div>`;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading replies:', error);
+                    repliesList.innerHTML = '<div class="text-center text-red-400 py-4">Failed to load replies</div>';
+                });
+        }
+        
+        // Send reply in modal
+        function sendReply() {
+            const content = replyInput.value.trim();
+            if (!content || !viewingRepliesFor) return;
+            
+            fetch(`/api/messages/${viewingRepliesFor}/reply`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ message_ids: [messageId] })
+                body: JSON.stringify({ content: content })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    replyInput.value = '';
+                    // Close modal after successful reply
+                    closeRepliesModal.click();
+                } else {
+                    alert('Failed to send reply: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error sending reply:', error);
+                alert('Failed to send reply');
             });
+        }
+        
+        // Delete message
+        function deleteMessage(messageId) {
+            fetch(`/api/messages/${messageId}`, {
+                method: 'DELETE'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (!data.success) {
+                    alert('Failed to delete message: ' + data.error);
+                console.error('Delete error:', data.error);
+                if (data.error.includes('Permission denied')) {
+                    alert('You do not have permission to delete this message');
+                }
+            })
+            // Errors are handled by the catch below
+            })
+            .catch(error => {
+                console.error('Error deleting message:', error);
+                alert('Failed to delete message');
+            });
+        }
+        
+        // Mark message as read
+        function markMessageAsRead(messageId) {
+            // Use WebSocket if available
+            if (isConnected) {
+                socket.emit('mark_read', { message_ids: [messageId] });
+            } else {
+                // Fallback to HTTP
+                fetch('/api/messages/read', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message_ids: [messageId] })
+                });
+            }
         }
         
         // Message queue for offline periods
@@ -739,13 +1164,10 @@
             messageQueue.push({
                 ...message,
                 timestamp: Date.now(),
-                queueId: Date.now() + Math.random() // Unique ID for tracking
+                queueId: Date.now() + Math.random()
             });
             
-            // Update queue indicator
             updateQueueIndicator();
-            
-            // Persist queue to localStorage for recovery
             localStorage.setItem('messageQueue', JSON.stringify(messageQueue));
         }
         
@@ -755,16 +1177,14 @@
             const failedMessages = [];
             let processedCount = 0;
             
-            // Process each message in queue
             messageQueue.forEach((message, index) => {
                 try {
-                    // Send message with retry logic
                     socket.emit('send_message', {
                         content: message.content,
-                        room: message.room
+                        room: message.room,
+                        parent_id: message.parent_id
                     }, (ack) => {
                         if (ack && ack.success) {
-                            // Remove from queue on successful send
                             messageQueue.splice(index - processedCount, 1);
                             processedCount++;
                             localStorage.setItem('messageQueue', JSON.stringify(messageQueue));
@@ -779,7 +1199,6 @@
                 }
             });
             
-            // Update queue with failed messages
             messageQueue = failedMessages;
             localStorage.setItem('messageQueue', JSON.stringify(messageQueue));
             updateQueueIndicator();
@@ -802,7 +1221,6 @@
             
             const cachedMessages = messageCache.get(room);
             
-            // Merge new messages, avoiding duplicates
             messages.forEach(newMessage => {
                 const exists = cachedMessages.some(msg => msg.id === newMessage.id);
                 if (!exists) {
@@ -810,7 +1228,6 @@
                 }
             });
             
-            // Keep only last 100 messages per room to prevent memory bloat
             if (cachedMessages.length > 100) {
                 messageCache.set(room, cachedMessages.slice(-100));
             }
@@ -822,37 +1239,36 @@
         
         // Optimized message loading
         function loadMessages(room, sinceId = 0) {
-            // Show cached messages immediately for better UX
             const cachedMessages = getCachedMessages(room);
             if (cachedMessages.length > 0) {
                 displayMessages(cachedMessages, false);
             }
             
-            // Request updated messages from server
             fetch(`/api/messages?room=${room}&since_id=${sinceId}`)
                 .then(response => response.json())
-                .then(messages => {
-                    // Update cache with new messages
-                    cacheMessages(room, messages);
-                    
-                    // Display only new messages to avoid duplication
-                    const allMessages = getCachedMessages(room);
-                    if (sinceId > 0) {
-                        // Only show messages newer than what we already have
-                        const newToDisplay = allMessages.filter(msg => msg.id > sinceId);
-                        displayMessages(newToDisplay, false); // Append, don't replace
+                .then(data => {
+                    if (data.success) {
+                        const newMessages = data.messages || [];
+                        
+                        cacheMessages(room, newMessages);
+                        
+                        const allMessages = getCachedMessages(room);
+                        if (sinceId > 0) {
+                            const newToDisplay = allMessages.filter(msg => msg.id > sinceId);
+                            displayMessages(newToDisplay, false);
+                        } else {
+                            displayMessages(allMessages, true);
+                        }
+                        
+                        if (newMessages.length > 0) {
+                            lastMessageId = Math.max(...newMessages.map(msg => msg.id));
+                        }
                     } else {
-                        displayMessages(allMessages, true);
-                    }
-                    
-                    // Update last message ID
-                    if (messages.length > 0) {
-                        lastMessageId = Math.max(...messages.map(msg => msg.id));
+                        console.error('Failed to load messages:', data.error);
                     }
                 })
                 .catch(error => {
                     console.error('Failed to load messages:', error);
-                    // If fetch fails, use cached messages
                     if (sinceId === 0) {
                         displayMessages(getCachedMessages(room), true);
                     }
@@ -866,7 +1282,7 @@
             }
             
             messages.forEach(message => {
-                addMessage(message, !clear); // Animate only new messages
+                addMessage(message, !clear);
             });
             
             autoScrollToBottom();
@@ -879,24 +1295,33 @@
             
             const messageData = {
                 content: content,
-                room: currentRoom
+                room: currentRoom,
+                parent_id: replyingTo
             };
             
             if (isConnected) {
-                // Send immediately if connected
                 socket.emit('send_message', messageData, (ack) => {
                     if (!ack || !ack.success) {
-                        // If failed, add to queue
                         addToMessageQueue(messageData);
+                    } else {
+                        // Clear reply state if successful
+                        if (replyingTo) {
+                            cancelReplyAction();
+                        }
                     }
                 });
             } else {
-                // Queue if offline
                 addToMessageQueue(messageData);
             }
             
             messageInput.value = '';
             adjustTextareaHeight();
+        }
+        
+        // Cancel reply action
+        function cancelReplyAction() {
+            replyingTo = null;
+            replyPreview.style.display = 'none';
         }
         
         // Adjust textarea height
@@ -965,17 +1390,15 @@
                     connectionHealth.lastPing = Date.now();
                     socket.emit('ping', { timestamp: connectionHealth.lastPing });
                 }
-            }, 15000); // Every 15 seconds
+            }, 15000);
         }
         
         // Enhanced room switching
         function switchRoom(room) {
             if (room === currentRoom) return;
             
-            // Update current room
             currentRoom = room;
             
-            // Update UI to show active room
             document.querySelectorAll('.room-btn').forEach(btn => {
                 btn.classList.remove('active', 'bg-blue-500', 'bg-opacity-20', 'border', 'border-blue-500');
                 btn.classList.add('bg-gray-700', 'hover:bg-gray-600');
@@ -984,13 +1407,18 @@
             event.target.classList.add('active', 'bg-blue-500', 'bg-opacity-20', 'border', 'border-blue-500');
             event.target.classList.remove('bg-gray-700', 'hover:bg-gray-600');
             
-            // Join new room
             socket.emit('leave_room', { room: currentRoom });
             currentRoom = room.toLowerCase();
             socket.emit('join_room', { room: currentRoom });
             
-            // Load messages for new room
             loadMessages(currentRoom);
+        }
+        
+        // Utility function to escape HTML
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
         }
         
         // Socket event listeners
@@ -998,13 +1426,8 @@
             console.log('Connected to server');
             updateConnectionStatus('connected');
             
-            // Load initial online users after connection
             loadInitialOnlineUsers();
-            
-            // Join the current room
             socket.emit('join_room', { room: currentRoom });
-            
-            // Process any queued messages
             processMessageQueue();
         });
         
@@ -1013,7 +1436,6 @@
             updateConnectionStatus('disconnected');
             
             if (reason === 'io server disconnect') {
-                // Server intentionally disconnected, need to manually reconnect
                 socket.connect();
             } else {
                 handleReconnection();
@@ -1039,12 +1461,11 @@
             console.log('Failed to reconnect');
             updateConnectionStatus('error', 'Failed to connect');
             
-            // Show reconnection failed message
             const notificationDiv = document.createElement('div');
             notificationDiv.className = 'text-center text-red-400 text-sm py-2';
             notificationDiv.textContent = 'Connection lost. Please refresh the page.';
             messagesList.appendChild(notificationDiv);
-            scrollToBottom();
+            autoScrollToBottom();
         });
         
         socket.on('pong', (data) => {
@@ -1054,9 +1475,34 @@
         
         socket.on('new_message', (messageData) => {
             addMessage(messageData);
-            
-            // Add to cache
             cacheMessages(currentRoom, [messageData]);
+        });
+        
+        socket.on('message_deleted', (data) => {
+            const messageElement = document.querySelector(`[data-message-id="${data.message_id}"]`);
+            if (messageElement) {
+                messageElement.classList.add('deleted-message');
+                messageElement.querySelector('.message-content').textContent = '[This message was deleted]';
+                
+                // Remove action buttons
+                const actions = messageElement.querySelector('.message-actions');
+                if (actions) {
+                    actions.remove();
+                }
+            }
+        });
+        
+        socket.on('messages_read', (data) => {
+            // Update read status for messages
+            data.message_ids.forEach(messageId => {
+                const messageElement = document.querySelector(`[data-message-id="${messageId}"]`);
+                if (messageElement && !messageElement.querySelector('.read-receipt')) {
+                    const readReceipt = document.createElement('div');
+                    readReceipt.className = 'read-receipt';
+                    readReceipt.innerHTML = '<i class="fas fa-check-double mr-1"></i> Read';
+                    messageElement.appendChild(readReceipt);
+                }
+            });
         });
         
         socket.on('user_joined', (data) => {
@@ -1067,24 +1513,22 @@
             };
             updateOnlineUsers();
             
-            // Show join notification
             const notificationDiv = document.createElement('div');
             notificationDiv.className = 'text-center text-gray-400 text-sm py-2';
             notificationDiv.textContent = data.message;
             messagesList.appendChild(notificationDiv);
-            scrollToBottom();
+            autoScrollToBottom();
         });
         
         socket.on('user_left', (data) => {
             delete onlineUsers[data.user_id];
             updateOnlineUsers();
             
-            // Show leave notification
             const notificationDiv = document.createElement('div');
             notificationDiv.className = 'text-center text-gray-400 text-sm py-2';
             notificationDiv.textContent = data.message;
             messagesList.appendChild(notificationDiv);
-            scrollToBottom();
+            autoScrollToBottom();
         });
         
         socket.on('online_users_update', (data) => {
@@ -1125,6 +1569,21 @@
             }
         });
         
+        cancelReply.addEventListener('click', cancelReplyAction);
+        
+        closeRepliesModal.addEventListener('click', () => {
+            repliesModal.classList.remove('active');
+        });
+        
+        sendReplyButton.addEventListener('click', sendReply);
+        
+        replyInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendReply();
+            }
+        });
+        
         // Room switching
         document.querySelectorAll('.room-btn').forEach(btn => {
             btn.addEventListener('click', function() {
@@ -1132,44 +1591,39 @@
             });
         });
         
+        // Close modal when clicking outside
+        repliesModal.addEventListener('click', (e) => {
+            if (e.target === repliesModal) {
+                repliesModal.classList.remove('active');
+            }
+        });
+        
         // Initial setup
         window.addEventListener('load', () => {
-            scrollToBottom();
+            autoScrollToBottom();
             adjustTextareaHeight();
             
-            // Load any queued messages from localStorage
             const savedQueue = localStorage.getItem('messageQueue');
             if (savedQueue) {
                 messageQueue = JSON.parse(savedQueue);
                 updateQueueIndicator();
             }
             
-            // Load initial online users
             loadInitialOnlineUsers();
-            
-            // Start health monitoring
             startHealthCheck();
             
-            // Mark all visible messages as read
             const messageIds = Array.from(messagesList.querySelectorAll('.message'))
                 .map(msg => parseInt(msg.getAttribute('data-message-id')))
                 .filter(id => !isNaN(id));
             
             if (messageIds.length > 0) {
-                fetch('/api/messages/read', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ message_ids: messageIds })
-                });
+                markMessageAsRead(messageIds);
             }
         });
 
         // Handle page visibility changes
         document.addEventListener('visibilitychange', function() {
             if (!document.hidden && isConnected) {
-                // Page is visible again, refresh online users
                 loadInitialOnlineUsers();
             }
         });
