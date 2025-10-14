@@ -588,6 +588,7 @@ def download_file(id):
 
 @app.route('/api/files/<int:id>', methods=['DELETE'])
 @login_required
+@admin_required
 def delete_file(id):
     """Delete a file"""
     file = File.query.get_or_404(id)
@@ -1074,6 +1075,8 @@ def get_announcements():
     return jsonify(result)
 
 @app.route('/api/announcements', methods=['POST'])
+@login_required
+@admin_required
 def create_announcement():
     """Create a new announcement (Admin only)"""
     if not current_user.is_admin:
@@ -1091,6 +1094,8 @@ def create_announcement():
     return jsonify({'message': 'Announcement created successfully', 'id': announcement.id}), 201
 
 @app.route('/api/announcements/<int:id>', methods=['PUT'])
+@login_required
+@admin_required
 def update_announcement(id):
     """Update an announcement (Admin only)"""
     if not current_user.is_admin:
@@ -1106,6 +1111,8 @@ def update_announcement(id):
     return jsonify({'message': 'Announcement updated successfully'})
 
 @app.route('/api/announcements/<int:id>', methods=['DELETE'])
+@login_required
+@admin_required
 def delete_announcement(id):
     """Delete an announcement (Admin only)"""
     if not current_user.is_admin:
@@ -1147,6 +1154,8 @@ def get_assignments():
     return jsonify(result)
 
 @app.route('/api/assignments', methods=['POST'])
+@login_required
+@admin_required
 def create_assignment():
     """Create a new assignment (Admin/Teacher only)"""
     if not current_user.is_admin:
@@ -1166,6 +1175,8 @@ def create_assignment():
     return jsonify({'message': 'Assignment created successfully', 'id': assignment.id}), 201
 
 @app.route('/api/assignments/<int:id>', methods=['PUT'])
+@login_required
+@admin_required
 def update_assignment(id):
     """Update an assignment (Admin/Teacher only)"""
     if not current_user.is_admin:
@@ -1185,6 +1196,8 @@ def update_assignment(id):
     return jsonify({'message': 'Assignment updated successfully'})
 
 @app.route('/api/assignments/<int:id>', methods=['DELETE'])
+@login_required
+@admin_required
 def delete_assignment(id):
     """Delete an assignment (Admin/Teacher only)"""
     if not current_user.is_admin:
@@ -1197,6 +1210,8 @@ def delete_assignment(id):
     return jsonify({'message': 'Assignment deleted successfully'})
 
 @app.route('/api/assignments/<int:id>/upload', methods=['POST'])
+@login_required
+@admin_required
 def upload_assignment_file(id):
     """Upload file for assignment (Admin/Teacher only)"""
     if not current_user.is_admin:
@@ -1258,6 +1273,8 @@ def get_topics():
     return jsonify(result)
 
 @app.route('/api/topics', methods=['POST'])
+@login_required
+@admin_required
 def create_topic():
     """Create a new topic (Admin only)"""
     if not current_user.is_admin:
@@ -1274,6 +1291,8 @@ def create_topic():
     return jsonify({'message': 'Topic created successfully', 'id': topic.id}), 201
 
 @app.route('/api/topics/<int:id>', methods=['PUT'])
+@login_required
+@admin_required
 def update_topic(id):
     """Update a topic (Admin only)"""
     if not current_user.is_admin:
@@ -1289,6 +1308,8 @@ def update_topic(id):
     return jsonify({'message': 'Topic updated successfully'})
 
 @app.route('/api/topics/<int:id>', methods=['DELETE'])
+@login_required
+@admin_required
 def delete_topic(id):
     """Delete a topic (Admin only)"""
     if not current_user.is_admin:
@@ -1419,6 +1440,8 @@ def handle_timetable():
         }), 201
 
 @app.route('/api/timetable/<int:id>', methods=['PUT'])
+@login_required
+@admin_required
 def update_timetable_slot(id):
     """Update a timetable slot (Admin only)"""
     if not current_user.is_admin:
@@ -1444,6 +1467,8 @@ def update_timetable_slot(id):
     return jsonify({'message': 'Timetable slot updated successfully'})
 
 @app.route('/api/timetable/<int:id>', methods=['DELETE'])
+@login_required
+@admin_required
 def delete_timetable_slot(id):
     """Delete a timetable slot (Admin only)"""
     if not current_user.is_admin:
@@ -1522,6 +1547,8 @@ def register_admin():
     }), 201
 
 @app.route('/api/promote-to-admin', methods=['POST'])
+@login_required
+@admin_required
 def promote_to_admin():
     """Promote an existing user to admin via API"""
     data = request.get_json()
@@ -1568,6 +1595,7 @@ def check_admin():
 # =========================================
 
 @app.route('/api/users/me')
+@login_required
 def get_current_user():
     """Get current user info"""
     if not current_user.is_authenticated:
@@ -1582,6 +1610,7 @@ def get_current_user():
     })
 
 @app.route('/api/users/<int:id>')
+@login_required
 def get_user(id):
     """Get user by ID (Admin only)"""
     if not current_user.is_admin:
@@ -1596,6 +1625,7 @@ def get_user(id):
         'created_at': user.created_at.isoformat()
     })
 @app.route('/api/user')
+@login_required
 def current_user_info():
     """Get current user information"""
     if not current_user.is_authenticated:
