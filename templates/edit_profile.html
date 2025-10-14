@@ -329,7 +329,7 @@
         backBtn.addEventListener('click', function() {
             backBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i><span>Loading...</span>';
             window.location.href = '/main-page';
-            backBtn.disabled = true; // optional: prevent double clicks
+            backBtn.disabled = true; // prevent double clicks
 
             setTimeout(() => {
                 backBtn.innerHTML = '<i class="fas fa-arrow-left mr-2"></i><span>Back to Dashboard</span>';
@@ -460,7 +460,7 @@
             
             // Validate username
             if (!validateUsername(usernameInput.value)) {
-                showError(usernameInput, usernameError, 'Please enter a valid username (1-200 characters)');
+                showError(usernameInput, usernameError, 'Please enter a valid username (1-100 characters)');
                 isValid = false;
             } else {
                 hideError(usernameInput, usernameError);
