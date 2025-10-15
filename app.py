@@ -305,12 +305,14 @@ def _year():
     return datetime.now().strftime('%Y')
 
 ALLOWED_KEYWORDS = [
-    "mozilla",      # Chrome, Firefox, Edge, Safari all contain this
+    "mozilla",      # Chrome, Firefox, Edge, Safari
     "applewebkit",  # Chrome, Safari
     "chrome",       
     "safari",
     "firefox",
     "edge",
+    "android",      # Allow Android WebView
+    "linux",        # Allow WebView & native Android apps
 ]
 
 @app.before_request
