@@ -390,7 +390,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 import atexit
 
-BATCH_SIZE = 500  # Adjust batch size for memory/performance
+BATCH_SIZE = 500
 LOG_EVERY_BATCH = True  # Whether to log each batch
 
 # ------------------------------
@@ -459,7 +459,13 @@ def clone_database_robust():
 # ------------------------------
 # Flask route
 # ------------------------------
-@app.route("/admin/clone-db", methods=["POST"])
+@app.route("/admin/clone-db")
+@admin_required
+def clone_db_page():
+    """Render the database cloning page"""
+    return render_template("clone-db.html", year=_year())
+
+@app.route("/api/admin/clone-db", methods=["POST"])
 @admin_required
 def clone_db_route():
     try:
@@ -467,7 +473,6 @@ def clone_db_route():
         return jsonify({"message": "✅ Database cloned successfully"}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
 
 # ------------------------------
 # Scheduler: every 25 days
