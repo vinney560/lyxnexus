@@ -488,6 +488,50 @@ scheduler.start()
 print("🕒 APScheduler started: cloning every 25 days")
 atexit.register(lambda: scheduler.shutdown(wait=False))
 
+# =========================================
+# keep_alive_both_dbs
+# =========================================
+
+from sqlalchemy import create_engine, text
+from sqlalchemy.exc import OperationalError
+from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.triggers.interval import IntervalTrigger
+
+# Database URLs
+SRC_DB_URL = os.getenv("DATABASE_URL")
+TGT_DB_URL = os.getenv("DATABASE_URL_2")
+
+src_engine = create_engine(SRC_DB_URL, pool_pre_ping=True)
+tgt_engine = create_engine(TGT_DB_URL, pool_pre_ping=True)
+
+# ------------------------------
+# Keep-alive function
+# ------------------------------
+def keep_databases_alive():
+    for name, engine in [("Source", src_engine), ("Target", tgt_engine)]:
+        try:
+            with engine.connect() as conn:
+                conn.execute(text("SELECT 1"))
+            print(f"🟢 [{datetime.now()}] {name} DB keep-alive query succeeded")
+        except OperationalError as e:
+            print(f"⚠️ [{datetime.now()}] {name} DB connection failed: {e}")
+
+# ------------------------------
+# Scheduler: every 3 minutes
+# ------------------------------
+scheduler = BackgroundScheduler()
+scheduler.add_job(
+    func=keep_databases_alive,
+    trigger=IntervalTrigger(minutes=3),
+    id="db_keep_alive_both",
+    replace_existing=True
+)
+scheduler.start()
+print("🕒 Keep-alive scheduler started: pinging both DBs every 3 minutes")
+
+# Ensure scheduler stops gracefully on app shutdown
+atexit.register(lambda: scheduler.shutdown(wait=False))
+
 #==========================================
 #                   Routes
 #==========================================
