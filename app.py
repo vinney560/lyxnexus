@@ -23,6 +23,7 @@ import logging
 import re
 from flask_jwt_extended import JWTManager
 from functools import wraps
+from bs4 import BeautifulSoup
 
 #==========================================
 
@@ -381,7 +382,101 @@ def admin_required(f):
             abort(403)
         return f(*args, **kwargs)
     return decorator
-    
+
+#==========================================
+#       CLONE DATABASE    
+from sqlalchemy_utils import database_exists, create_database, drop_database
+import os
+import subprocess
+
+@app.route("/admin/clone-db", methods=["POST"])
+@admin_required
+def clone_full_database():
+    """Fully clone DATABASE_URL into DATABASE_URL_2 (schema + data)."""
+    source_url = os.getenv("DATABASE_URL")
+    target_url = os.getenv("DATABASE_URL_2")
+
+    if not source_url or not target_url:
+        return jsonify({"error": "DATABASE_URL or DATABASE_URL_2 not configured"}), 500
+
+    try:
+        # Drop and recreate target database
+        if database_exists(target_url):
+            drop_database(target_url)
+        create_database(target_url)
+
+        # --- Extract connection details ---
+        def parse_url(url):
+            from urllib.parse import urlparse
+            parsed = urlparse(url)
+            return {
+                "user": parsed.username,
+                "password": parsed.password,
+                "host": parsed.hostname,
+                "port": parsed.port or 5432,
+                "dbname": parsed.path.lstrip("/")
+            }
+
+        src = parse_url(source_url)
+        tgt = parse_url(target_url)
+
+        # --- Perform full clone using pg_dump + psql ---
+        dump_cmd = [
+            "pg_dump",
+            "-h", src["host"],
+            "-p", str(src["port"]),
+            "-U", src["user"],
+            "-d", src["dbname"],
+            "-Fc",  # custom format
+        ]
+        restore_cmd = [
+            "pg_restore",
+            "-h", tgt["host"],
+            "-p", str(tgt["port"]),
+            "-U", tgt["user"],
+            "-d", tgt["dbname"],
+            "--no-owner",
+            "--no-acl",
+        ]
+
+        env = os.environ.copy()
+        env["PGPASSWORD"] = src["password"] or ""
+        dump = subprocess.Popen(dump_cmd, stdout=subprocess.PIPE, env=env)
+        env["PGPASSWORD"] = tgt["password"] or ""
+        subprocess.run(restore_cmd, stdin=dump.stdout, check=True, env=env)
+
+        return jsonify({"message": "✅ Database cloned successfully (schema + data)."}), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.triggers.interval import IntervalTrigger
+import atexit
+
+def scheduled_db_clone():
+    print(f"🕒 [{datetime.now()}] Running scheduled DB clone...")
+    clone_full_database()
+
+# Initialize APScheduler
+scheduler = BackgroundScheduler()
+
+# Add job: every 25 days
+scheduler.add_job(
+    func=scheduled_db_clone,
+    trigger=IntervalTrigger(days=25),
+    id='db_clone_task',
+    replace_existing=True
+)
+
+# Start scheduler
+scheduler.start()
+print("✅ APScheduler started (runs every 25 days)")
+
+# Ensure it stops gracefully on app shutdown
+atexit.register(lambda: scheduler.shutdown(wait=False))
+
 #==========================================
 #                   Routes
 #==========================================
@@ -2107,8 +2202,6 @@ def assignment_page(id):
     """Serve the assignment file view and download page"""
     assignment = Assignment.query.get_or_404(id)
     return render_template('assignment.html', assignment=assignment)
-
-from bs4 import BeautifulSoup
 
 @app.route("/api/preview")
 def preview():
