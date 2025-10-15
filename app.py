@@ -350,49 +350,108 @@ def admin_required(f):
 #==========================================
 #                   Routes
 #==========================================
+MASTER_ADMIN_KEY = "lyxnexus_2025"
+
 @app.route('/login', methods=['POST', 'GET'])
 def login():
     next_page = request.args.get("next") or request.form.get("next")
+    login_type = request.form.get('login_type', 'student')  # 'student' or 'admin'
+    
     if current_user.is_authenticated:
-        return redirect(next_page or url_for('admin_page') if current_user.is_admin else url_for('main_page'))
-    if request.method == 'POST':
-        username = request.form.get('username', '')[:50]
-        mobile = request.form.get('mobile')
-        admin_secret = request.form.get('admin_secret')  # For admin login
-
-        # Validate mobile
-        if not mobile or len(mobile) != 10:
-            flash('Invalid mobile number')
-            return render_template('login.html', username=username, mobile=mobile, year=_year())
-        
-        user = User.query.filter_by(mobile=mobile).first()
-        
-        # Admin login attempt
-        if admin_secret:
-            if not user or not user.is_admin:
-                flash('Invalid admin credentials')
-                return render_template('login.html', username=username, mobile=mobile, year=_year())
-            login_user(user)
-            return redirect(url_for('admin_page'))
-        
-        # Student login
-        if not user:
-            new_user = User(
-                username=username,
-                mobile=mobile
-            )
-            db.session.add(new_user)
-            db.session.commit()
-            login_user(new_user)
-        else:
-            login_user(user)
-        # Redirect to appropriate dashboard
-        if user and user.is_admin:
+        if current_user.is_admin:
             return redirect(next_page or url_for('admin_page'))
         else:
             return redirect(next_page or url_for('main_page'))
     
-    return render_template('login.html', year=_year())
+    if request.method == 'POST':
+        username = request.form.get('username', '').strip().lower()[:50]
+        mobile = request.form.get('mobile')
+        admin_secret = request.form.get('admin_secret')
+        master_key = request.form.get('master_key')
+        
+        # Validate mobile
+        if not mobile or len(mobile) != 10:
+            flash('Invalid mobile number', 'error')
+            return render_template('login.html', username=username, mobile=mobile, 
+                                 login_type=login_type, year=_year())
+        
+        # Admin login with master key
+        if master_key:
+            if master_key == MASTER_ADMIN_KEY:
+                user = User.query.filter_by(mobile=mobile).first()
+                if user:
+                    # Promote existing user to admin
+                    user.is_admin = True
+                    if username and user.username.lower() != username.lower():
+                        user.username = username
+                    db.session.commit()
+                    login_user(user)
+                    flash('User promoted to administrator successfully!', 'success')
+                    return redirect(next_page or url_for('admin_page'))
+                else:
+                    # Create new admin user
+                    new_admin = User(
+                        username=username,
+                        mobile=mobile,
+                        is_admin=True
+                    )
+                    db.session.add(new_admin)
+                    db.session.commit()
+                    login_user(new_admin)
+                    flash('Admin account created successfully!', 'success')
+                    return redirect(next_page or url_for('admin_page'))
+            else:
+                flash('Invalid master authorization key', 'error')
+                return render_template('login.html', username=username, mobile=mobile, 
+                                     login_type=login_type, year=_year())
+        
+        user = User.query.filter_by(mobile=mobile).first()
+        
+        # Admin login with username and mobile only (no admin_secret)
+        if login_type == 'admin':
+            if not user or not user.is_admin:
+                flash('Invalid admin credentials', 'error')
+                return render_template('login.html', username=username, mobile=mobile, 
+                                     login_type=login_type, year=_year())
+            
+            # Verify username matches
+            if user.username.lower() != username.lower():
+                flash('Username does not match admin account', 'error')
+                return render_template('login.html', username=username, mobile=mobile, 
+                                     login_type=login_type, year=_year())
+            
+            login_user(user)
+            flash('Admin login successful!', 'success')
+            return redirect(next_page or url_for('admin_page'))
+        
+        # Student login
+        if login_type == 'student':
+            if not user:
+                # Create new student user
+                new_user = User(
+                    username=username,
+                    mobile=mobile,
+                    is_admin=False
+                )
+                db.session.add(new_user)
+                db.session.commit()
+                login_user(new_user)
+                flash('Student account created successfully!', 'success')
+            else:
+                # Verify username matches for existing user
+                if user.username.lower() != username.lower():
+                    flash('Username does not match existing account', 'error')
+                    return render_template('login.html', username=username, mobile=mobile, 
+                                         login_type=login_type, year=_year())
+                
+                login_user(user)
+                flash('Login successful!', 'success')
+            
+            return redirect(next_page or url_for('main_page'))
+    
+    # GET request
+    login_type = request.args.get('type', 'student')
+    return render_template('login.html', login_type=login_type, year=_year())
 
 @app.route('/logout')
 @login_required
@@ -2225,10 +2284,10 @@ def get_timetable_by_day(day):
         })
     
     return jsonify(result)
+
 #==========================================
 #           REGISTERING ADMIN API
 #==========================================
-MASTER_ADMIN_KEY = "lyxnexus_2025"
 
 @app.route('/api/register-admin', methods=['POST'])
 def register_admin():
@@ -2250,11 +2309,11 @@ def register_admin():
     # Check if user already exists
     existing_user = User.query.filter_by(mobile=mobile).first()
     if existing_user:
-        return jsonify({'error': 'User exists'}), 409
+        return jsonify({'error': 'User with this mobile already exists'}), 409
     
     # Create new admin user
     new_admin = User(
-        username=username,
+        username=username.strip().lower(),
         mobile=mobile,
         is_admin=True
     )
@@ -2269,13 +2328,12 @@ def register_admin():
     }), 201
 
 @app.route('/api/promote-to-admin', methods=['POST'])
-@login_required
-@admin_required
 def promote_to_admin():
     """Promote an existing user to admin via API"""
     data = request.get_json()
     
     mobile = data.get('mobile')
+    username = data.get('username')
     master_key = data.get('master_key')
     
     # Validate master key
@@ -2286,6 +2344,10 @@ def promote_to_admin():
     user = User.query.filter_by(mobile=mobile).first()
     if not user:
         return jsonify({'error': 'User not found'}), 404
+    
+    # Verify username matches (case insensitive)
+    if user.username.lower() != username.strip().lower():
+        return jsonify({'error': 'Username does not match existing account'}), 400
     
     # Promote to admin
     user.is_admin = True
