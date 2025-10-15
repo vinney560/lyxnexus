@@ -2107,6 +2107,40 @@ def assignment_page(id):
     """Serve the assignment file view and download page"""
     assignment = Assignment.query.get_or_404(id)
     return render_template('assignment.html', assignment=assignment)
+
+from bs4 import BeautifulSoup
+
+@app.route("/api/preview")
+def preview():
+    url = request.args.get("url", "")
+    if not url:
+        return jsonify({"error": "Missing URL"}), 400
+
+    try:
+        headers = {"User-Agent": "Mozilla/5.0"}
+        response = requests.get(url, headers=headers, timeout=4)
+        response.raise_for_status()
+
+        soup = BeautifulSoup(response.text, "html.parser")
+
+        def meta(prop):
+            tag = soup.find("meta", property=prop) or soup.find("meta", attrs={"name": prop})
+            return tag["content"].strip() if tag and tag.get("content") else None
+
+        title = meta("og:title") or (soup.title.string.strip() if soup.title else None)
+        description = meta("og:description") or meta("description")
+        image = meta("og:image")
+
+        return jsonify({
+            "title": title or "",
+            "description": description or "",
+            "image": image or ""
+        })
+
+    except requests.exceptions.RequestException as e:
+        print("OG fetch error:", e)
+        return jsonify({"title": "", "description": "", "image": ""})
+
 # =========================================
 # TOPIC API ROUTES
 # =========================================

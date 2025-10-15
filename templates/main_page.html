@@ -683,6 +683,15 @@
                 'font-medium bg-blue-500 text-white px-2 py-1 rounded-full text-xs';
         }
 
+        function linkify(text) {
+          const urlRegex = /(https?:\/\/[^\s]+)/g;
+          return text.replace(
+            urlRegex,
+            (url) =>
+              `<a href="${url}" target="_blank" rel="noopener noreferrer" class="text-blue-400 underline hover:text-blue-300">${url}</a>`
+          );
+        }
+
         // Load announcements
         async function loadAnnouncements() {
             const container = document.getElementById('announcements-container');
@@ -695,32 +704,70 @@
             }
             
             document.getElementById('announcements-count').textContent = `${announcements.length} announcements`;
-
-            container.innerHTML = announcements.map(announcement => `
-                <div class="announcement-card border-l-4 border-blue-500 bg-gray-800/50 p-4 sm:p-5 rounded-xl shadow-md hover:shadow-lg transition duration-200 ease-in-out">
-                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-3 gap-2">
-                        <h3 class="text-xl sm:text-2xl font-extrabold text-white underline underline-offset-4 decoration-blue-500 leading-snug break-words">
-                            ${announcement.title}
-                        </h3>
-                        <span class="text-blue-400 text-xs sm:text-sm whitespace-nowrap">
-                            ${formatDate(announcement.created_at)}
-                        </span>
+            container.innerHTML = announcements.map(announcement => {
+                const urlMatch = announcement.content.match(/https?:\/\/[^\s]+/);
+                const url = urlMatch ? urlMatch[0] : null;
+                const previewId = `og-preview-${announcement.id || Math.random().toString(36).slice(2)}`;
+                        
+                return `
+                    <div class="announcement-card border-l-4 border-blue-500 bg-gray-800/50 p-4 sm:p-5 rounded-xl shadow-md hover:shadow-lg transition duration-200 ease-in-out">
+                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-3 gap-2">
+                            <h3 class="text-xl sm:text-2xl font-extrabold text-white underline underline-offset-4 decoration-blue-500 leading-snug break-words">
+                                ${announcement.title}
+                            </h3>
+                            <span class="text-blue-400 text-xs sm:text-sm whitespace-nowrap">
+                                ${formatDate(announcement.created_at)}
+                            </span>
+                        </div>
+                    
+                        <p class="mb-4 text-gray-300 text-sm sm:text-base leading-relaxed break-words">
+                            ${linkify(announcement.content)}
+                        </p>
+                    
+                        <div id="${previewId}" class="mt-4 flex justify-center"></div>
+                    
+                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mt-3">
+                            <span class="text-gray-400 text-xs sm:text-sm">
+                                By: ${announcement.author?.username || 'Unknown'}
+                            </span>
+                        </div>
                     </div>
-                
-                    <p class="mb-4 text-gray-300 text-sm sm:text-base leading-relaxed break-words">
-                        ${announcement.content}
-                    </p>
-                
-                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
-                        <span class="text-gray-400 text-xs sm:text-sm">
-                            By: ${announcement.author?.username || 'Unknown'}
-                        </span>
-                        <button class="text-blue-400 hover:text-blue-300 text-sm font-medium transition-colors self-start sm:self-auto">
-                            View Details →
-                        </button>
-                    </div>
-                </div>
-            `).join(''); 
+                `;
+            }).join('');
+            
+            // Fetch OG previews asynchronously after rendering
+            announcements.forEach(announcement => {
+                const urlMatch = announcement.content.match(/https?:\/\/[^\s]+/);
+                if (!urlMatch) return;
+            
+                const url = urlMatch[0];
+                const previewId = `og-preview-${announcement.id || Math.random().toString(36).slice(2)}`;
+                const previewEl = document.getElementById(previewId);
+            
+                fetch(`/api/preview?url=${encodeURIComponent(url)}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        if (!data.title && !data.image) return;
+                    
+                        previewEl.innerHTML = `
+                            <a href="${url}" target="_blank" 
+                               class="block max-w-md w-full border border-gray-700 bg-gray-900/70 rounded-2xl overflow-hidden shadow-lg hover:shadow-blue-700/30 transition transform hover:-translate-y-1">
+                                <div class="flex flex-col items-center justify-center p-4">
+                                    ${data.image 
+                                        ? `<img src="${data.image}" alt="" class="w-auto h-56 object-contain rounded-lg mb-3 shadow-md" />`
+                                        : `<div class="w-full h-56 flex items-center justify-center text-gray-500 italic">No image</div>`
+                                    }
+                                    <div class="text-center">
+                                        <h3 class="font-bold text-white text-base sm:text-lg mb-1">${data.title || "Untitled"}</h3>
+                                        <p class="text-gray-400 text-xs sm:text-sm line-clamp-2">${data.description || ""}</p>
+                                    </div>
+                                </div>
+                            </a>
+                        `;
+                    })
+                    .catch(() => console.warn("No OG preview found for", url));
+            });
+            
         }
 
         // Load assignments
