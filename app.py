@@ -198,31 +198,64 @@ class Timetable(db.Model):
 # =========================================
 # MESSAGE MODELS
 # ========================================
-
 class Message(db.Model):
+
     id = db.Column(db.Integer, primary_key=True)
     content = db.Column(db.Text, nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey('user.id', ondelete='CASCADE'),
+        nullable=False
+    )
     room = db.Column(db.String(100), default='general')
     is_admin_message = db.Column(db.Boolean, default=False)
-    parent_id = db.Column(db.Integer, db.ForeignKey('message.id'), nullable=True)  # For replies
+    parent_id = db.Column(
+        db.Integer,
+        db.ForeignKey('message.id', ondelete='CASCADE'),
+        nullable=True
+    )  # For replies
     is_deleted = db.Column(db.Boolean, default=False)
     deleted_at = db.Column(db.DateTime, nullable=True)
     created_at = db.Column(db.DateTime, default=nairobi_time)
-    
+
     # Relationships
-    user = db.relationship('User', backref=db.backref('messages', lazy=True))
-    parent = db.relationship('Message', remote_side=[id], backref=db.backref('replies', lazy=True))
+    user = db.relationship(
+        'User',
+        backref=db.backref('messages', lazy=True, cascade='all, delete-orphan')
+    )
+
+    parent = db.relationship(
+        'Message',
+        remote_side=[id],
+        backref=db.backref('replies', lazy=True, cascade='all, delete-orphan')
+    )
+
 
 class MessageRead(db.Model):
+
     id = db.Column(db.Integer, primary_key=True)
-    message_id = db.Column(db.Integer, db.ForeignKey('message.id'), nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    message_id = db.Column(
+        db.Integer,
+        db.ForeignKey('message.id', ondelete='CASCADE'),
+        nullable=False
+    )
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey('user.id', ondelete='CASCADE'),
+        nullable=False
+    )
     read_at = db.Column(db.DateTime, default=nairobi_time)
-    
+
     # Relationships
-    message = db.relationship('Message', backref=db.backref('read_records', lazy=True))
-    user = db.relationship('User', backref=db.backref('read_messages', lazy=True))    
+    message = db.relationship(
+        'Message',
+        backref=db.backref('read_records', lazy=True, cascade='all, delete-orphan')
+    )
+    user = db.relationship(
+        'User',
+        backref=db.backref('read_messages', lazy=True, cascade='all, delete-orphan')
+    )
+
 #==========================================
 # FILES MODEL
 #==========================================
