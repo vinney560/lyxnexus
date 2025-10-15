@@ -189,6 +189,31 @@
         border-bottom-color: #3B82F6;
     }
     
+    .subtab-content {
+        display: none;
+    }
+    
+    .subtab-content.active {
+        display: block;
+    }
+    
+    .subtab-button {
+        background: transparent;
+        border: none;
+        padding: 10px 15px;
+        color: #9CA3AF;
+        border-bottom: 2px solid transparent;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        font-size: 14px;
+    }
+    
+    .subtab-button.active {
+        color: #8B5CF6;
+        border-bottom-color: #8B5CF6;
+    }
+    
     .modal {
         display: none;
         position: fixed;
@@ -505,6 +530,11 @@
             padding: 10px 15px;
             font-size: 14px;
         }
+        
+        .subtab-button {
+            padding: 8px 12px;
+            font-size: 12px;
+        }
     }
 </style>
 <body>
@@ -512,7 +542,16 @@
     <header class="nav-header">
         <div class="nav-content">
             <div class="nav-logo" onclick="goToHome()">
-            
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                    <polyline points="7.5 4.21 12 6.81 16.5 4.21"></polyline>
+                    <polyline points="7.5 19.79 7.5 14.6 3 12"></polyline>
+                    <polyline points="21 12 16.5 14.6 16.5 19.79"></polyline>
+                    <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                    <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                </svg>
+                <span class="nav-logo-text">LyxNexus</span>
+            </div>
             <div class="nav-links">
                 <a href="#" class="nav-link" onclick="showToast('About page coming soon!', 'info')">
                     <i class="fas fa-info-circle mr-2"></i>About
@@ -558,14 +597,15 @@
             <!-- Student Login Form -->
             <div id="student-tab" class="tab-content active">
                 <form id="student-login-form" method="POST">
+                    <input type="hidden" name="login_type" value="student">
                     <div class="form-group">
                         <label class="form-label" for="username">Username</label>
-                        <input type="text" id="username" name="username" class="form-input" placeholder="Enter your username" maxlength="50" value="{{ username if username }}">
+                        <input type="text" id="username" name="username" class="form-input" placeholder="Enter your username" maxlength="50" value="{{ username if username }}" required>
                     </div>
                     
                     <div class="form-group">
                         <label class="form-label" for="mobile">Mobile Number</label>
-                        <input type="tel" id="mobile" name="mobile" class="form-input" placeholder="10-digit mobile number" pattern="[0-9]{10}" value="{{ mobile if mobile }}">
+                        <input type="tel" id="mobile" name="mobile" class="form-input" placeholder="10-digit mobile number" pattern="[0-9]{10}" value="{{ mobile if mobile }}" required>
                         <p class="text-gray-400 text-xs mt-1">Enter your 10-digit mobile number</p>
                     </div>
                     
@@ -576,7 +616,7 @@
                 
                 <div class="mt-6 text-center">
                     <p class="text-gray-400">Need admin access?</p>
-                    <button class="btn-outline mt-2 text-sm" onclick="openTab('admin-tab')">
+                    <button class="btn-outline mt-2 text-sm" id="switch-to-admin-btn">
                         <i class="fas fa-user-shield mr-2"></i> Switch to Admin
                     </button>
                 </div>
@@ -591,25 +631,63 @@
                     </div>
                 </div>
                 
-                <form id="admin-login-form">
-                    <div class="form-group">
-                        <label class="form-label" for="admin-mobile">Mobile Number</label>
-                        <input type="tel" id="admin-mobile" name="mobile" class="form-input" placeholder="10-digit mobile number" pattern="[0-9]{10}">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label" for="admin-secret">Admin Secret Key</label>
-                        <input type="password" id="admin-secret" name="secret" class="form-input" placeholder="Enter admin secret key">
-                    </div>
-                    
-                    <button type="submit" class="btn btn-admin mt-4">
-                        <i class="fas fa-key mr-2"></i> Access Admin Panel
-                    </button>
-                </form>
+                <!-- Admin Login Tabs within Admin Tab -->
+                <div class="flex border-b border-gray-700 mb-4">
+                    <button class="subtab-button active" data-subtab="admin-login-tab">Admin Login</button>
+                    <button class="subtab-button" data-subtab="master-key-tab">Master Key Access</button>
+                </div>
+                
+                <!-- Normal Admin Login -->
+                <div id="admin-login-tab" class="subtab-content active">
+                    <form id="admin-login-form" method="POST">
+                        <input type="hidden" name="login_type" value="admin">
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="admin-username">Username</label>
+                            <input type="text" id="admin-username" name="username" class="form-input" placeholder="Enter admin username" maxlength="50" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="admin-mobile">Mobile Number</label>
+                            <input type="tel" id="admin-mobile" name="mobile" class="form-input" placeholder="10-digit mobile number" pattern="[0-9]{10}" required>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-admin mt-4">
+                            <i class="fas fa-key mr-2"></i> Login as Admin
+                        </button>
+                    </form>
+                </div>
+                
+                <!-- Master Key Admin Access -->
+                <div id="master-key-tab" class="subtab-content">
+                    <form id="master-key-form" method="POST">
+                        <input type="hidden" name="login_type" value="admin">
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="master-key-username">Username</label>
+                            <input type="text" id="master-key-username" name="username" class="form-input" placeholder="Enter username for admin account" maxlength="50" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="master-key-mobile">Mobile Number</label>
+                            <input type="tel" id="master-key-mobile" name="mobile" class="form-input" placeholder="10-digit mobile number" pattern="[0-9]{10}" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="master-key-input">Master Authorization Key</label>
+                            <input type="password" id="master-key-input" name="master_key" class="form-input" placeholder="Enter master key" required>
+                            <p class="text-gray-400 text-xs mt-1">This will create or promote to admin account</p>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-admin mt-4">
+                            <i class="fas fa-user-shield mr-2"></i> Access with Master Key
+                        </button>
+                    </form>
+                </div>
                 
                 <div class="mt-6 text-center">
                     <p class="text-gray-400">Don't have admin access?</p>
-                    <button class="btn-outline mt-2 text-sm" onclick="openRegisterAdminModal()">
+                    <button class="btn-outline mt-2 text-sm" id="register-admin-btn">
                         <i class="fas fa-user-plus mr-2"></i> Register as Admin
                     </button>
                 </div>
@@ -644,13 +722,13 @@
                 </div>
                 
                 <div class="form-group">
-                    <label class="form-label" for="master-key">Master Authorization Key</label>
-                    <input type="password" id="master-key" name="master_key" class="form-input" placeholder="Enter master key" required>
+                    <label class="form-label" for="register-master-key">Master Authorization Key</label>
+                    <input type="password" id="register-master-key" name="master_key" class="form-input" placeholder="Enter master key" required>
                     <p class="text-gray-400 text-xs mt-1">Contact system administrator for the master key</p>
                 </div>
                 
                 <div class="flex justify-end space-x-3 mt-6">
-                    <button type="button" class="btn-outline" onclick="closeModal('register-admin-modal')">Cancel</button>
+                    <button type="button" class="btn-outline" id="cancel-register-admin">Cancel</button>
                     <button type="submit" class="btn btn-admin">
                         <i class="fas fa-user-shield mr-2"></i> Register Admin
                     </button>
@@ -665,6 +743,7 @@
         const ENDPOINTS = {
             REGISTER_ADMIN: `${API_BASE}/register-admin`,
             PROMOTE_TO_ADMIN: `${API_BASE}/promote-to-admin`,
+            CHECK_ADMIN: `${API_BASE}/check-admin`,
             LOGIN: '/login'
         };
 
@@ -772,6 +851,8 @@
 
         // Tab management
         function openTab(tabName) {
+            console.log('Opening tab:', tabName);
+            
             // Hide all tab content
             document.querySelectorAll('.tab-content').forEach(tab => {
                 tab.classList.remove('active');
@@ -783,10 +864,20 @@
             });
             
             // Show the specific tab content
-            document.getElementById(tabName).classList.add('active');
+            const tabElement = document.getElementById(tabName);
+            if (tabElement) {
+                tabElement.classList.add('active');
+                console.log('Tab element found and activated');
+            } else {
+                console.error('Tab element not found:', tabName);
+            }
             
-            // Add active class to the clicked button
-            event.target.classList.add('active');
+            // Activate the corresponding tab button
+            document.querySelectorAll('.tab-button').forEach(button => {
+                if (button.getAttribute('data-tab') === tabName) {
+                    button.classList.add('active');
+                }
+            });
             
             // Show a toast notification
             if (tabName === 'student-tab') {
@@ -794,6 +885,37 @@
             } else if (tabName === 'admin-tab') {
                 showToast('Switched to admin access', 'info');
             }
+        }
+
+        // Subtabs management for admin tab
+        function openSubTab(subTabName) {
+            console.log('Opening subtab:', subTabName);
+            
+            // Hide all subtab content
+            document.querySelectorAll('.subtab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Remove active class from all subtab buttons
+            document.querySelectorAll('.subtab-button').forEach(button => {
+                button.classList.remove('active');
+            });
+            
+            // Show the specific subtab content
+            const subtabElement = document.getElementById(subTabName);
+            if (subtabElement) {
+                subtabElement.classList.add('active');
+                console.log('Subtab element found and activated');
+            } else {
+                console.error('Subtab element not found:', subTabName);
+            }
+            
+            // Activate the corresponding subtab button
+            document.querySelectorAll('.subtab-button').forEach(button => {
+                if (button.getAttribute('data-subtab') === subTabName) {
+                    button.classList.add('active');
+                }
+            });
         }
 
         // Modal management
@@ -804,13 +926,6 @@
 
         function closeModal(modalId) {
             document.getElementById(modalId).style.display = 'none';
-        }
-
-        // Close modal when clicking outside
-        window.onclick = function(event) {
-            if (event.target.classList.contains('modal')) {
-                event.target.style.display = 'none';
-            }
         }
 
         // Validate mobile number
@@ -866,138 +981,34 @@
             }
         }
 
-        // Form submission handlers
-        document.getElementById('student-login-form').addEventListener('submit', function(e) {
-            const mobile = document.getElementById('mobile').value;
-            
-            if (!validateMobile(mobile)) {
-                e.preventDefault();
-                showToast('Please enter a valid 10-digit mobile number', 'error', 'Validation Error');
-                return;
-            }
-            
-            // Show loading toast
-            const toast = showToast('Logging in...', 'info', 'Please Wait');
-            
-            // Form will submit normally to Flask route
-        });
-
-        document.getElementById('admin-login-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const mobile = document.getElementById('admin-mobile').value;
-            const secret = document.getElementById('admin-secret').value;
-            
-            if (!validateMobile(mobile)) {
-                showToast('Please enter a valid 10-digit mobile number', 'error', 'Validation Error');
-                return;
-            }
-            
-            if (!secret) {
-                showToast('Please enter the admin secret key', 'error', 'Validation Error');
-                return;
-            }
-            
-            // Show loading toast
-            const toast = showToast('Authenticating admin access...', 'info', 'Please Wait');
-            
-            // For now, we'll use the same login endpoint but with additional data
-            // In a real implementation, you'd have a separate admin login endpoint
-            const formData = new FormData();
-            formData.append('mobile', mobile);
-            formData.append('admin_secret', secret);
-            
-            fetch(ENDPOINTS.LOGIN, {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => {
-                if (response.redirected) {
-                    toastManager.close(toast);
-                    showToast('Admin login successful!', 'success');
-                    setTimeout(() => {
-                        window.location.href = response.url;
-                    }, 1000);
-                } else {
-                    return response.text().then(html => {
-                        toastManager.close(toast);
-                        showToast('Invalid admin credentials', 'error', 'Authentication Failed');
-                    });
-                }
-            })
-            .catch(error => {
-                console.error('Login error:', error);
-                toastManager.close(toast);
-                showToast('Login failed. Please try again.', 'error', 'Login Error');
-            });
-        });
-
-        document.getElementById('register-admin-form').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const mobile = document.getElementById('new-admin-mobile').value;
-            const username = document.getElementById('new-admin-username').value;
-            const masterKey = document.getElementById('master-key').value;
-            
-            if (!validateMobile(mobile)) {
-                showToast('Please enter a valid 10-digit mobile number', 'error', 'Validation Error');
-                return;
-            }
-            
-            if (!username) {
-                showToast('Please enter a username', 'error', 'Validation Error');
-                return;
-            }
-            
-            if (!masterKey) {
-                showToast('Please enter the master authorization key', 'error', 'Validation Error');
-                return;
-            }
-            
-            const formData = {
-                mobile: mobile,
-                username: username,
-                master_key: masterKey
-            };
-            
-            // Show loading toast
-            const toast = showToast('Processing admin registration...', 'info', 'Please Wait');
-            
+        // Check if user is admin
+        async function checkAdmin(mobile) {
             try {
-                // Try to register as new admin
-                const result = await registerAdmin(formData);
-                toastManager.close(toast);
-                showToast('Admin account created successfully! You can now login.', 'success');
-                closeModal('register-admin-modal');
+                const response = await fetch(ENDPOINTS.CHECK_ADMIN, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ mobile })
+                });
                 
-                // Switch to admin tab and pre-fill mobile
-                openTab('admin-tab');
-                document.getElementById('admin-mobile').value = mobile;
+                const data = await response.json();
+                return data;
             } catch (error) {
-                // If registration fails, try to promote existing user
-                try {
-                    const result = await promoteToAdmin(formData);
-                    toastManager.close(toast);
-                    showToast('User promoted to admin successfully! You can now login.', 'success');
-                    closeModal('register-admin-modal');
-                    
-                    // Switch to admin tab and pre-fill mobile
-                    openTab('admin-tab');
-                    document.getElementById('admin-mobile').value = mobile;
-                } catch (promoteError) {
-                    toastManager.close(toast);
-                    showToast(promoteError.message || 'Admin registration failed', 'error', 'Registration Failed');
-                }
+                console.error('Error checking admin status:', error);
+                return { is_admin: false };
             }
-        });
+        }
 
         // Initialize the page
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, initializing page...');
+            
             // Check if there are any Flask flash messages
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
                     {% for category, message in messages %}
-                        showToast("{{ message }}", "{{ 'error' if category == 'error' else 'info' }}");
+                        showToast("{{ message }}", "{{ category if category in ['success', 'error', 'warning', 'info'] else 'info' }}");
                     {% endfor %}
                 {% endif %}
             {% endwith %}
@@ -1010,7 +1021,7 @@
                 });
             });
             
-            // Add click handlers to tab buttons
+            // Tab button event listeners
             document.querySelectorAll('.tab-button').forEach(button => {
                 button.addEventListener('click', function() {
                     const tabName = this.getAttribute('data-tab');
@@ -1018,10 +1029,171 @@
                 });
             });
             
+            // Subtab button event listeners
+            document.querySelectorAll('.subtab-button').forEach(button => {
+                button.addEventListener('click', function() {
+                    const subTabName = this.getAttribute('data-subtab');
+                    openSubTab(subTabName);
+                });
+            });
+            
+            // Switch to admin button
+            document.getElementById('switch-to-admin-btn').addEventListener('click', function() {
+                openTab('admin-tab');
+            });
+            
+            // Register admin button
+            document.getElementById('register-admin-btn').addEventListener('click', function() {
+                openRegisterAdminModal();
+            });
+            
+            // Cancel register admin button
+            document.getElementById('cancel-register-admin').addEventListener('click', function() {
+                closeModal('register-admin-modal');
+            });
+            
+            // Close modal when clicking outside
+            document.addEventListener('click', function(event) {
+                if (event.target.classList.contains('modal')) {
+                    event.target.style.display = 'none';
+                }
+            });
+            
+            // Form submission handlers
+            document.getElementById('student-login-form').addEventListener('submit', function(e) {
+                const mobile = document.getElementById('mobile').value;
+                const username = document.getElementById('username').value;
+                
+                if (!validateMobile(mobile)) {
+                    e.preventDefault();
+                    showToast('Please enter a valid 10-digit mobile number', 'error', 'Validation Error');
+                    return;
+                }
+                
+                if (!username.trim()) {
+                    e.preventDefault();
+                    showToast('Please enter a username', 'error', 'Validation Error');
+                    return;
+                }
+                
+                // Show loading toast
+                showToast('Logging in...', 'info', 'Please Wait');
+            });
+
+            document.getElementById('admin-login-form').addEventListener('submit', function(e) {
+                const mobile = document.getElementById('admin-mobile').value;
+                const username = document.getElementById('admin-username').value;
+                
+                if (!validateMobile(mobile)) {
+                    e.preventDefault();
+                    showToast('Please enter a valid 10-digit mobile number', 'error', 'Validation Error');
+                    return;
+                }
+                
+                if (!username.trim()) {
+                    e.preventDefault();
+                    showToast('Please enter a username', 'error', 'Validation Error');
+                    return;
+                }
+                
+                // Show loading toast
+                showToast('Authenticating admin access...', 'info', 'Please Wait');
+            });
+
+            document.getElementById('master-key-form').addEventListener('submit', function(e) {
+                const mobile = document.getElementById('master-key-mobile').value;
+                const username = document.getElementById('master-key-username').value;
+                const masterKey = document.getElementById('master-key-input').value;
+                
+                if (!validateMobile(mobile)) {
+                    e.preventDefault();
+                    showToast('Please enter a valid 10-digit mobile number', 'error', 'Validation Error');
+                    return;
+                }
+                
+                if (!username.trim()) {
+                    e.preventDefault();
+                    showToast('Please enter a username', 'error', 'Validation Error');
+                    return;
+                }
+                
+                if (!masterKey) {
+                    e.preventDefault();
+                    showToast('Please enter the master authorization key', 'error', 'Validation Error');
+                    return;
+                }
+                
+                // Show loading toast
+                showToast('Processing master key access...', 'info', 'Please Wait');
+            });
+
+            document.getElementById('register-admin-form').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const mobile = document.getElementById('new-admin-mobile').value;
+                const username = document.getElementById('new-admin-username').value;
+                const masterKey = document.getElementById('register-master-key').value;
+                
+                if (!validateMobile(mobile)) {
+                    showToast('Please enter a valid 10-digit mobile number', 'error', 'Validation Error');
+                    return;
+                }
+                
+                if (!username.trim()) {
+                    showToast('Please enter a username', 'error', 'Validation Error');
+                    return;
+                }
+                
+                if (!masterKey) {
+                    showToast('Please enter the master authorization key', 'error', 'Validation Error');
+                    return;
+                }
+                
+                const formData = {
+                    mobile: mobile,
+                    username: username,
+                    master_key: masterKey
+                };
+                
+                // Show loading toast
+                const toast = showToast('Processing admin registration...', 'info', 'Please Wait');
+                
+                try {
+                    // Try to register as new admin
+                    const result = await registerAdmin(formData);
+                    toastManager.close(toast);
+                    showToast('Admin account created successfully! You can now login.', 'success');
+                    closeModal('register-admin-modal');
+                    
+                    // Switch to admin tab and pre-fill mobile
+                    openTab('admin-tab');
+                    document.getElementById('admin-mobile').value = mobile;
+                    document.getElementById('admin-username').value = username;
+                } catch (error) {
+                    // If registration fails, try to promote existing user
+                    try {
+                        const result = await promoteToAdmin(formData);
+                        toastManager.close(toast);
+                        showToast('User promoted to admin successfully! You can now login.', 'success');
+                        closeModal('register-admin-modal');
+                        
+                        // Switch to admin tab and pre-fill mobile
+                        openTab('admin-tab');
+                        document.getElementById('admin-mobile').value = mobile;
+                        document.getElementById('admin-username').value = username;
+                    } catch (promoteError) {
+                        toastManager.close(toast);
+                        showToast(promoteError.message || 'Admin registration failed', 'error', 'Registration Failed');
+                    }
+                }
+            });
+            
             // Show welcome toast
             setTimeout(() => {
                 showToast('Welcome to LyxNexus! Please login to continue.', 'info', 'Welcome');
             }, 1000);
+            
+            console.log('Page initialization complete');
         });
     </script>
 </body>
