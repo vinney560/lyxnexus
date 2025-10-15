@@ -246,6 +246,23 @@ class File(db.Model):
     
     def __repr__(self):
         return f'<File {self.name}>'
+
+
+class TopicMaterial(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    topic_id = db.Column(db.Integer, db.ForeignKey('topic.id'), nullable=False)
+    file_id = db.Column(db.Integer, db.ForeignKey('file.id'), nullable=False)
+    display_name = db.Column(db.String(255), nullable=True)  # Custom display name
+    description = db.Column(db.Text, nullable=True)  # Material-specific description
+    order_index = db.Column(db.Integer, default=0)  # For ordering materials
+    created_at = db.Column(db.DateTime, default=nairobi_time)
+    
+    # Relationships
+    topic = db.relationship('Topic', backref=db.backref('topic_materials', lazy=True))
+    file = db.relationship('File', backref=db.backref('material_references', lazy=True))
+    
+    def __repr__(self):
+        return f'<TopicMaterial {self.display_name or self.file.name}>'
 #==========================================    
 with app.app_context():
     try:
@@ -421,6 +438,12 @@ def files():
     """Render the file management page"""
     return render_template('files.html')
 
+@app.route('/material/<int:topic_id>')
+@login_required
+def topic_materials(topic_id):
+    """Render the topic materials page"""
+    topic = Topic.query.get_or_404(topic_id)
+    return render_template('material.html', topic_id=topic_id)
 # =========================================
 # MESSAGES ROUTES
 # =========================================
@@ -615,7 +638,7 @@ def get_files():
         'has_prev': files_pagination.has_prev
     })
 
-def shorten_filename(filename, length=15):
+def shorten_filename(filename, length=30):
     name, ext = os.path.splitext(filename)
     return f"{name[:length]}...{ext}" if len(name) > length else filename
 
@@ -631,7 +654,7 @@ def upload_file():
         return jsonify({'error': 'No file selected'}), 400
     
     # Get form data
-    name = request.form.get('name', file.filename)[:25]
+    name = request.form.get('name', file.filename)[:35]
     filename = shorten_filename(file.filename)
     description = request.form.get('description', '')[:100]
     category = request.form.get('category', 'general')
@@ -2338,6 +2361,201 @@ def current_user_info():
         'is_admin': current_user.is_admin,
         'created_at': current_user.created_at.isoformat()
     })
+
+#==========================================
+#  TOPIC API ROUTES
+# =========================================
+
+# Topic Materials API Routes
+@app.route('/api/topics/<int:topic_id>/materials')
+def get_topic_materials(topic_id):
+    """Get all materials for a specific topic"""
+    try:
+        topic = Topic.query.get_or_404(topic_id)
+        materials = TopicMaterial.query.filter_by(topic_id=topic_id)\
+            .order_by(TopicMaterial.order_index).all()
+        
+        materials_data = []
+        for material in materials:
+            materials_data.append({
+                'id': material.id,
+                'display_name': material.display_name or material.file.name,
+                'description': material.description or material.file.description,
+                'file_id': material.file_id,
+                'filename': material.file.filename,
+                'file_type': material.file.file_type,
+                'file_size': material.file.file_size,
+                'uploaded_at': material.file.uploaded_at.isoformat(),
+                'uploaded_by': material.file.uploader.username,
+                'order_index': material.order_index
+            })
+        
+        return jsonify({
+            'topic': {
+                'id': topic.id,
+                'name': topic.name,
+                'description': topic.description
+            },
+            'materials': materials_data
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/topics/<int:topic_id>/materials', methods=['POST'])
+@login_required
+def add_topic_material(topic_id):
+    """Add a material to a topic"""
+    try:
+        if not current_user.is_admin:
+            return jsonify({'error': 'Unauthorized'}), 403
+            
+        topic = Topic.query.get_or_404(topic_id)
+        data = request.get_json()
+        
+        file_id = data.get('file_id')
+        display_name = data.get('display_name')
+        description = data.get('description')
+        
+        if not file_id:
+            return jsonify({'error': 'File ID is required'}), 400
+            
+        # Check if file exists
+        file = File.query.get(file_id)
+        if not file:
+            return jsonify({'error': 'File not found'}), 404
+            
+        # Check if material already exists for this topic
+        existing_material = TopicMaterial.query.filter_by(
+            topic_id=topic_id, file_id=file_id
+        ).first()
+        
+        if existing_material:
+            return jsonify({'error': 'Material already exists for this topic'}), 400
+        
+        # Get the next order index
+        max_order = db.session.query(db.func.max(TopicMaterial.order_index))\
+            .filter_by(topic_id=topic_id).scalar() or 0
+        
+        material = TopicMaterial(
+            topic_id=topic_id,
+            file_id=file_id,
+            display_name=display_name,
+            description=description,
+            order_index=max_order + 1
+        )
+        
+        db.session.add(material)
+        db.session.commit()
+        
+        return jsonify({
+            'message': 'Material added successfully',
+            'material': {
+                'id': material.id,
+                'display_name': material.display_name or file.name,
+                'file_id': file.id
+            }
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/topics/<int:topic_id>/materials/<int:material_id>', methods=['DELETE'])
+@login_required
+def remove_topic_material(topic_id, material_id):
+    """Remove a material from a topic"""
+    try:
+        if not current_user.is_admin:
+            return jsonify({'error': 'Unauthorized'}), 403
+            
+        material = TopicMaterial.query.filter_by(
+            id=material_id, topic_id=topic_id
+        ).first_or_404()
+        
+        db.session.delete(material)
+        db.session.commit()
+        
+        return jsonify({'message': 'Material removed successfully'})
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/topics/<int:topic_id>/materials/reorder', methods=['POST'])
+@login_required
+def reorder_topic_materials(topic_id):
+    """Reorder materials in a topic"""
+    try:
+        if not current_user.is_admin:
+            return jsonify({'error': 'Unauthorized'}), 403
+            
+        data = request.get_json()
+        material_order = data.get('order', [])  # List of material IDs in new order
+        
+        for index, material_id in enumerate(material_order):
+            material = TopicMaterial.query.filter_by(
+                id=material_id, topic_id=topic_id
+            ).first()
+            if material:
+                material.order_index = index
+        
+        db.session.commit()
+        return jsonify({'message': 'Materials reordered successfully'})
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
+# Route to get available files for adding to topics
+@app.route('/api/files/available')
+@login_required
+def get_available_files():
+    """Get files that can be added to topics"""
+    try:
+        search = request.args.get('search', '')
+        page = request.args.get('page', 1, type=int)
+        per_page = 20
+        
+        query = File.query
+        
+        if search:
+            query = query.filter(
+                db.or_(
+                    File.name.ilike(f'%{search}%'),
+                    File.description.ilike(f'%{search}%'),
+                    File.filename.ilike(f'%{search}%')
+                )
+            )
+        
+        files = query.order_by(File.uploaded_at.desc())\
+            .paginate(page=page, per_page=per_page, error_out=False)
+        
+        files_data = []
+        for file in files.items:
+            files_data.append({
+                'id': file.id,
+                'name': file.name,
+                'filename': file.filename,
+                'file_type': file.file_type,
+                'file_size': file.file_size,
+                'description': file.description,
+                'category': file.category,
+                'uploaded_at': file.uploaded_at.isoformat(),
+                'uploaded_by': file.uploader.username
+            })
+        
+        return jsonify({
+            'files': files_data,
+            'has_next': files.has_next,
+            'has_prev': files.has_prev,
+            'current_page': files.page,
+            'pages': files.pages,
+            'total': files.total
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+ 
 #==========================================
 # Error Handlers
 #==========================================
