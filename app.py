@@ -1788,52 +1788,69 @@ def get_users():
 def delete_user(user_id):
     user = User.query.get_or_404(user_id)
 
-    # Prevent self-deletion
     if user.id == current_user.id:
         return jsonify({'error': 'Cannot delete your own account'}), 400
 
     try:
         # ===============================
-        # DELETE RELATED RECORDS SAFELY
+        # 1️⃣ Delete MessageReads for messages SENT BY this user
         # ===============================
-
-        # --- Delete message reads (by this user or on their messages)
         user_message_ids = [m.id for m in Message.query.filter_by(user_id=user.id).all()]
         if user_message_ids:
-            db.session.query(MessageRead).filter(MessageRead.message_id.in_(user_message_ids)).delete(synchronize_session=False)
+            db.session.query(MessageRead).filter(
+                MessageRead.message_id.in_(user_message_ids)
+            ).delete(synchronize_session=False)
+
+        # ===============================
+        # 2️⃣ Delete MessageReads BY this user (on others' messages)
+        # ===============================
         db.session.query(MessageRead).filter_by(user_id=user.id).delete(synchronize_session=False)
 
-        # --- Handle messages: delete replies first
-        all_user_messages = Message.query.filter_by(user_id=user.id).all()
-        for msg in all_user_messages:
-            # Delete replies to this user's messages
-            db.session.query(Message).filter_by(parent_id=msg.id).delete(synchronize_session=False)
-        # Delete the user's own messages
+        # ===============================
+        # 3️⃣ Delete Replies to user's messages FIRST
+        # ===============================
+        if user_message_ids:
+            db.session.query(Message).filter(
+                Message.parent_id.in_(user_message_ids)
+            ).delete(synchronize_session=False)
+
+        # ===============================
+        # 4️⃣ Delete messages CREATED BY user
+        # ===============================
         db.session.query(Message).filter_by(user_id=user.id).delete(synchronize_session=False)
 
-        # --- Announcements and assignments
+        # ===============================
+        # 5️⃣ Delete assignments & announcements
+        # ===============================
         db.session.query(Announcement).filter_by(user_id=user.id).delete(synchronize_session=False)
         db.session.query(Assignment).filter_by(user_id=user.id).delete(synchronize_session=False)
 
-        # --- Files uploaded by the user
+        # ===============================
+        # 6️⃣ Delete files uploaded by user (and linked materials)
+        # ===============================
         user_file_ids = [f.id for f in File.query.filter_by(uploaded_by=user.id).all()]
         if user_file_ids:
-            db.session.query(TopicMaterial).filter(TopicMaterial.file_id.in_(user_file_ids)).delete(synchronize_session=False)
+            db.session.query(TopicMaterial).filter(
+                TopicMaterial.file_id.in_(user_file_ids)
+            ).delete(synchronize_session=False)
             db.session.query(File).filter(File.id.in_(user_file_ids)).delete(synchronize_session=False)
 
-        # --- Clean up orphaned TopicMaterials
+        # ===============================
+        # 7️⃣ Delete orphaned TopicMaterials just in case
+        # ===============================
         db.session.query(TopicMaterial).filter_by(file_id=None).delete(synchronize_session=False)
 
-        # --- Finally, delete the user
+        # ===============================
+        # 8️⃣ Delete the user last
+        # ===============================
         db.session.delete(user)
         db.session.commit()
 
-        return jsonify({'message': f'User {user.username or user.id} and all related data deleted successfully'})
+        return jsonify({'message': f'User {user.username or user.id} deleted successfully with all related data.'})
 
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': f'Failed to delete user: {str(e)}'}), 500
-
 
 # API endpoint to toggle admin status
 @app.route('/api/users/<int:user_id>/toggle-admin', methods=['PUT'])
