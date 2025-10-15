@@ -710,26 +710,31 @@
                 const previewId = `og-preview-${announcement.id || Math.random().toString(36).slice(2)}`;
                         
                 return `
-                    <div class="announcement-card border-l-4 border-blue-500 bg-gray-800/50 p-4 sm:p-5 rounded-xl shadow-md hover:shadow-lg transition duration-200 ease-in-out">
-                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-3 gap-2">
-                            <h3 class="text-xl sm:text-2xl font-extrabold text-white underline underline-offset-4 decoration-blue-500 leading-snug break-words">
-                                ${announcement.title}
-                            </h3>
-                            <span class="text-blue-400 text-xs sm:text-sm whitespace-nowrap">
-                                ${formatDate(announcement.created_at)}
-                            </span>
-                        </div>
+                    <div class="announcement-card border border-gray-800 bg-gray-900/60 rounded-2xl shadow-md hover:shadow-lg transition duration-200 ease-in-out overflow-hidden mb-6">
+                        
+                        <!-- OG Preview -->
+                        <div id="${previewId}" class="w-full border-b border-gray-800"></div>
                     
-                        <p class="mb-4 text-gray-300 text-sm sm:text-base leading-relaxed break-words">
-                            ${linkify(announcement.content)}
-                        </p>
-                    
-                        <div id="${previewId}" class="mt-4 flex justify-center"></div>
-                    
-                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mt-3">
-                            <span class="text-gray-400 text-xs sm:text-sm">
-                                By: ${announcement.author?.username || 'Unknown'}
-                            </span>
+                        <!-- Announcement Body -->
+                        <div class="p-4 sm:p-5">
+                            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-3 gap-2">
+                                <h3 class="text-xl sm:text-2xl font-extrabold text-white leading-snug break-words">
+                                    ${announcement.title}
+                                </h3>
+                                <span class="text-blue-400 text-xs sm:text-sm whitespace-nowrap">
+                                    ${formatDate(announcement.created_at)}
+                                </span>
+                            </div>
+                        
+                            <p class="mb-4 text-gray-300 text-sm sm:text-base leading-relaxed break-words">
+                                ${linkify(announcement.content)}
+                            </p>
+                        
+                            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+                                <span class="text-gray-400 text-xs sm:text-sm">
+                                    By: ${announcement.author?.username || 'Unknown'}
+                                </span>
+                            </div>
                         </div>
                     </div>
                 `;
@@ -750,17 +755,19 @@
                         if (!data.title && !data.image) return;
                     
                         previewEl.innerHTML = `
-                            <a href="${url}" target="_blank" 
-                               class="block max-w-md w-full border border-gray-700 bg-gray-900/70 rounded-2xl overflow-hidden shadow-lg hover:shadow-blue-700/30 transition transform hover:-translate-y-1">
-                                <div class="flex flex-col items-center justify-center p-4">
-                                    ${data.image 
-                                        ? `<img src="${data.image}" alt="" class="w-auto h-56 object-contain rounded-lg mb-3 shadow-md" />`
-                                        : `<div class="w-full h-56 flex items-center justify-center text-gray-500 italic">No image</div>`
-                                    }
-                                    <div class="text-center">
-                                        <h3 class="font-bold text-white text-base sm:text-lg mb-1">${data.title || "Untitled"}</h3>
-                                        <p class="text-gray-400 text-xs sm:text-sm line-clamp-2">${data.description || ""}</p>
+                            <a href="${url}" target="_blank" class="flex items-center gap-3 p-3 sm:p-4 bg-gray-800/70 hover:bg-gray-800/90 transition duration-200 ease-in-out">
+                                ${data.image ? `
+                                    <div class="flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden bg-gray-700 flex items-center justify-center">
+                                        <img src="${data.image}" alt="" class="object-cover w-full h-full">
                                     </div>
+                                ` : `
+                                    <div class="flex-shrink-0 w-16 h-16 rounded-lg bg-gray-700 flex items-center justify-center text-gray-500 text-xs italic">
+                                        No image
+                                    </div>
+                                `}
+                                <div class="flex-1">
+                                    <h3 class="text-white font-semibold text-sm sm:text-base mb-1 line-clamp-1">${data.title || "Untitled"}</h3>
+                                    <p class="text-gray-400 text-xs sm:text-sm line-clamp-2">${data.description || ""}</p>
                                 </div>
                             </a>
                         `;
