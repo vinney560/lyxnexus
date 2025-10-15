@@ -874,6 +874,80 @@
             }, 1000);
         });
         'serviceWorker'in navigator&&navigator.serviceWorker.register('/service-worker.js').then(r=>console.log("SW registered:",r)).catch(e=>console.error("SW failed:",e)),window.addEventListener("online",()=>location.reload()),window.addEventListener("offline",()=>location.href="/offline.html");
+        document.addEventListener("DOMContentLoaded", () => {
+          let deferredPrompt = null;
+        
+          // Create the install container
+          const installContainer = document.createElement("div");
+          installContainer.id = "installContainer";
+          installContainer.style.position = "fixed";
+          installContainer.style.top = "20px";
+          installContainer.style.left = "20px";
+          installContainer.style.zIndex = "9999";
+          installContainer.style.display = "none";
+          installContainer.style.background = "#1e1e1e";
+          installContainer.style.color = "#fff";
+          installContainer.style.padding = "10px 16px";
+          installContainer.style.borderRadius = "12px";
+          installContainer.style.boxShadow = "0 2px 10px rgba(0,0,0,0.3)";
+          installContainer.style.display = "flex";
+          installContainer.style.alignItems = "center";
+          installContainer.style.gap = "10px";
+          installContainer.style.fontFamily = "system-ui, sans-serif";
+        
+          // Install button
+          const installBtn = document.createElement("button");
+          installBtn.textContent = "📲 Install App";
+          installBtn.style.background = "#0078ff";
+          installBtn.style.color = "#fff";
+          installBtn.style.border = "none";
+          installBtn.style.borderRadius = "8px";
+          installBtn.style.padding = "8px 12px";
+          installBtn.style.cursor = "pointer";
+          installBtn.style.fontWeight = "600";
+        
+          // Close button
+          const closeBtn = document.createElement("span");
+          closeBtn.textContent = "✖";
+          closeBtn.style.cursor = "pointer";
+          closeBtn.style.fontSize = "14px";
+          closeBtn.style.opacity = "0.7";
+          closeBtn.addEventListener("mouseenter", () => closeBtn.style.opacity = "1");
+          closeBtn.addEventListener("mouseleave", () => closeBtn.style.opacity = "0.7");
+        
+          // Append both
+          installContainer.appendChild(installBtn);
+          installContainer.appendChild(closeBtn);
+          document.body.appendChild(installContainer);
+        
+          // Listen for PWA install availability
+          window.addEventListener("beforeinstallprompt", (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            installContainer.style.display = "flex";
+          });
+      
+          // Handle install button click
+          installBtn.addEventListener("click", async () => {
+            installContainer.style.display = "none";
+            if (!deferredPrompt) return;
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            console.log(`User response: ${outcome}`);
+            deferredPrompt = null;
+          });
+      
+          // Handle close button click
+          closeBtn.addEventListener("click", () => {
+            installContainer.style.display = "none";
+          });
+      
+          // Hide if app gets installed
+          window.addEventListener("appinstalled", () => {
+            installContainer.style.display = "none";
+            console.log("PWA installed successfully!");
+          });
+        });
     </script>
 </body>
 </html>
