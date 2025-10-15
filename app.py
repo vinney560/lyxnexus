@@ -383,98 +383,104 @@ def admin_required(f):
         return f(*args, **kwargs)
     return decorator
 
-#==========================================
-#       CLONE DATABASE    
+#===================================
+from sqlalchemy import create_engine, MetaData, Table, select, text
 from sqlalchemy_utils import database_exists, create_database, drop_database
-import os
-import subprocess
-
-@app.route("/admin/clone-db", methods=["POST"])
-@admin_required
-def clone_full_database():
-    """Fully clone DATABASE_URL into DATABASE_URL_2 (schema + data)."""
-    source_url = os.getenv("DATABASE_URL")
-    target_url = os.getenv("DATABASE_URL_2")
-
-    if not source_url or not target_url:
-        return jsonify({"error": "DATABASE_URL or DATABASE_URL_2 not configured"}), 500
-
-    try:
-        # Drop and recreate target database
-        if database_exists(target_url):
-            drop_database(target_url)
-        create_database(target_url)
-
-        # --- Extract connection details ---
-        def parse_url(url):
-            from urllib.parse import urlparse
-            parsed = urlparse(url)
-            return {
-                "user": parsed.username,
-                "password": parsed.password,
-                "host": parsed.hostname,
-                "port": parsed.port or 5432,
-                "dbname": parsed.path.lstrip("/")
-            }
-
-        src = parse_url(source_url)
-        tgt = parse_url(target_url)
-
-        # --- Perform full clone using pg_dump + psql ---
-        dump_cmd = [
-            "pg_dump",
-            "-h", src["host"],
-            "-p", str(src["port"]),
-            "-U", src["user"],
-            "-d", src["dbname"],
-            "-Fc",  # custom format
-        ]
-        restore_cmd = [
-            "pg_restore",
-            "-h", tgt["host"],
-            "-p", str(tgt["port"]),
-            "-U", tgt["user"],
-            "-d", tgt["dbname"],
-            "--no-owner",
-            "--no-acl",
-        ]
-
-        env = os.environ.copy()
-        env["PGPASSWORD"] = src["password"] or ""
-        dump = subprocess.Popen(dump_cmd, stdout=subprocess.PIPE, env=env)
-        env["PGPASSWORD"] = tgt["password"] or ""
-        subprocess.run(restore_cmd, stdin=dump.stdout, check=True, env=env)
-
-        return jsonify({"message": "✅ Database cloned successfully (schema + data)."}), 200
-
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 import atexit
 
-def scheduled_db_clone():
-    print(f"🕒 [{datetime.now()}] Running scheduled DB clone...")
-    clone_full_database()
+BATCH_SIZE = 500  # Adjust batch size for memory/performance
+LOG_EVERY_BATCH = True  # Whether to log each batch
 
-# Initialize APScheduler
+# ------------------------------
+# Robust clone function
+# ------------------------------
+def clone_database_robust():
+    """Clone DATABASE_URL -> DATABASE_URL_2 with full robustness"""
+    src_url = os.getenv("DATABASE_URL")
+    tgt_url = os.getenv("DATABASE_URL_2")
+
+    if not src_url or not tgt_url:
+        raise ValueError("DATABASE_URL or DATABASE_URL_2 not set")
+
+    # Drop and recreate target DB
+    if database_exists(tgt_url):
+        drop_database(tgt_url)
+    create_database(tgt_url)
+
+    src_engine = create_engine(src_url)
+    tgt_engine = create_engine(tgt_url)
+
+    metadata = MetaData()
+    metadata.reflect(bind=src_engine)
+    metadata.create_all(bind=tgt_engine)
+
+    with src_engine.connect() as src_conn, tgt_engine.begin() as tgt_conn:
+        for table in metadata.sorted_tables:
+            print(f"🔹 Cloning table: {table.name}")
+            offset = 0
+            while True:
+                try:
+                    rows = src_conn.execute(
+                        select(table).offset(offset).limit(BATCH_SIZE)
+                    ).mappings().all()
+
+                    if not rows:
+                        break
+
+                    tgt_conn.execute(table.insert(), rows)
+
+                    if LOG_EVERY_BATCH:
+                        print(f"  - Inserted batch {offset//BATCH_SIZE + 1} for {table.name}")
+
+                    offset += BATCH_SIZE
+
+                except Exception as e:
+                    print(f"⚠️ Error copying table {table.name} at batch {offset//BATCH_SIZE + 1}: {e}")
+                    break  # Skip remaining rows in this table
+
+            # Fix sequences for serial/identity columns
+            for col in table.columns:
+                if col.autoincrement:
+                    try:
+                        max_id = tgt_conn.execute(
+                            text(f"SELECT MAX({col.name}) FROM {table.name}")
+                        ).scalar() or 0
+                        tgt_conn.execute(
+                            text(f"ALTER SEQUENCE {table.name}_{col.name}_seq RESTART WITH {max_id + 1}")
+                        )
+                    except Exception as e:
+                        print(f"⚠️ Could not reset sequence for {table.name}.{col.name}: {e}")
+
+    print(f"✅ Database cloned successfully at {datetime.now()}")
+
+
+# ------------------------------
+# Flask route
+# ------------------------------
+@app.route("/admin/clone-db", methods=["POST"])
+@admin_required
+def clone_db_route():
+    try:
+        clone_database_robust()
+        return jsonify({"message": "✅ Database cloned successfully"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+# ------------------------------
+# Scheduler: every 25 days
+# ------------------------------
 scheduler = BackgroundScheduler()
-
-# Add job: every 25 days
 scheduler.add_job(
-    func=scheduled_db_clone,
+    func=clone_database_robust,
     trigger=IntervalTrigger(days=25),
-    id='db_clone_task',
-    replace_existing=True
+    id="db_clone_task",
+    replace_existing=True,
 )
-
-# Start scheduler
 scheduler.start()
-print("✅ APScheduler started (runs every 25 days)")
-
-# Ensure it stops gracefully on app shutdown
+print("🕒 APScheduler started: cloning every 25 days")
 atexit.register(lambda: scheduler.shutdown(wait=False))
 
 #==========================================
