@@ -870,8 +870,8 @@
                   <div class="text-sm text-gray-500 mt-2">Created: ${formatDateSafe(t.created_at)}</div>
                 </div>
                 <div class="action-buttons">
+                  <button class="btn bg-blue-500 hover:bg-blue-600 text-white font-semibold flex items-center" onclick="window.location.href='/material/${t.id}'"><i class="fas fa-folder mr-2"></i> Material </button>
                   <button class="btn btn-warning" onclick="editTopic(${t.id})"><i class="fas fa-edit mr-1"></i> Edit</button>
-                  <button class="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-4 py-2 rounded-xl flex items-center" onclick="window.location.href='/material/${t.id}'"><i class="fas fa-folder mr-2"></i> Material</button>
                   <button class="btn btn-danger" onclick="deleteTopic(${t.id})"><i class="fas fa-trash mr-1"></i> Delete</button>
                 </div>
               </div>
@@ -1249,9 +1249,6 @@
             });
           });
         }
-          
-        /* ======= SIMPLE CRUD DELETE for topics/announcements assigned above ======= */
-        async function deleteTopic(id) { /* implemented above - safe to be referenced */ }
           
         /* ======= DOMContentLoaded ======= */
         document.addEventListener('DOMContentLoaded', () => {

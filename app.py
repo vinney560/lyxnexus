@@ -254,7 +254,7 @@ class MessageRead(db.Model):
     user = db.relationship(
         'User',
         backref=db.backref('read_messages', lazy=True, cascade='all, delete-orphan')
-    )
+    )    
 
 #==========================================
 # FILES MODEL
