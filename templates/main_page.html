@@ -386,7 +386,7 @@
           <span class="absolute top-4 right-6 text-white text-3xl cursor-pointer" onclick="closeImagePreview()">&times;</span>
           <img id="image-preview-img" src="" alt="Preview" class="max-h-[90%] max-w-[90%] rounded-lg shadow-lg">
         </div>
-        
+
         <section id="announcements" class="content-section active">
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-2xl md:text-3xl font-bold gradient-text">Latest Announcements</h2>
@@ -1017,20 +1017,33 @@
             }
             document.getElementById('stat-classes').textContent = classCount;
         }
-
-        // Initialize the application
         document.addEventListener('DOMContentLoaded', function() {
-            setupNavigation();
+            setupNavigation(); 
+
+            // Initial load
             loadUserData();
-            loadAnnouncements(); // Load default section
-            
-            // Preload other data in background
-            setTimeout(() => {
+            loadAnnouncements();
+            loadAssignments();
+            loadTopics();
+            loadTimetable();
+
+            // Lightweight functions every 10 seconds
+            setInterval(() => {
+                loadUserData();
+                loadAnnouncements();
+            }, 10 * 1000);
+        
+            // Heavier functions every 30 seconds
+            setInterval(() => {
                 loadAssignments();
                 loadTopics();
+            }, 30 * 1000);
+        
+            setInterval(() => {
                 loadTimetable();
-            }, 1000);
+            }, 60 * 1000); // 60 seconds
         });
+
         'serviceWorker'in navigator&&navigator.serviceWorker.register('/service-worker.js').then(r=>console.log("SW registered:",r)).catch(e=>console.error("SW failed:",e)),window.addEventListener("online",()=>location.reload()),window.addEventListener("offline",()=>location.href="/offline.html");
         document.addEventListener("DOMContentLoaded", () => {
           let deferredPrompt = null;
