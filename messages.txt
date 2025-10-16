@@ -1,0 +1,765 @@
+<script>
+    const socket = io({
+        reconnection: true,
+        reconnectionAttempts: Infinity,
+        reconnectionDelay: 1000,
+        reconnectionDelayMax: 10000,
+        timeout: 20000,
+        transports: ['websocket', 'polling']
+    });
+    
+    const messagesList = document.getElementById('messagesList');
+    const messageInput = document.getElementById('messageInput');
+    const sendButton = document.getElementById('sendButton');
+    const typingIndicator = document.getElementById('typingIndicator');
+    const onlineUsersList = document.getElementById('onlineUsersList');
+    const connectionStatus = document.getElementById('connectionStatus');
+    const statusDot = document.getElementById('statusDot');
+    const statusText = document.getElementById('statusText');
+    const connectionQuality = document.getElementById('connectionQuality');
+    const offlineIndicator = document.getElementById('offlineIndicator');
+    const messageQueueIndicator = document.getElementById('messageQueueIndicator');
+    const queuedMessagesCount = document.getElementById('queuedMessagesCount');
+    const replyIndicator = document.getElementById('replyIndicator');
+    const replyToUsername = document.getElementById('replyToUsername');
+    const replyToContent = document.getElementById('replyToContent');
+    const cancelReply = document.getElementById('cancelReply');
+    const backBtn = document.getElementById('backBtn');
+    
+    let currentRoom = 'general';
+    let onlineUsers = {};
+    let typingTimer;
+    let reconnectAttempts = 0;
+    let isConnected = false;
+    let messageQueue = [];
+    let messageCache = new Map();
+    let lastMessageId = 0;
+    let connectionHealth = {
+        latency: 0,
+        lastPing: 0,
+        quality: 'good'
+    };
+    let replyingToMessage = null;
+    // Back button haddler
+    const isAdmin = {{ 'true' if current_user.is_admin else 'false' }};
+    backBtn.addEventListener('click', function() {
+        backBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>';
+        const redirectUrl = isAdmin ? '/admin' : '/main-page';
+        window.location.href = redirectUrl;
+        backBtn.disabled = true;
+    
+        setTimeout(() => {
+            backBtn.innerHTML = '<i class="fas fa-arrow-left mr-2"></i>';
+            backBtn.disabled = false;
+        }, 1000);
+    });
+    
+    function formatTime(dateString) {
+        const date = new Date(dateString);
+        return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+    
+    function updateConnectionStatus(status, message) {
+        connectionStatus.className = 'connection-status';
+        statusDot.className = 'status-dot';
+        
+        switch(status) {
+            case 'connected':
+                connectionStatus.classList.add('connected');
+                statusDot.classList.add('status-connected');
+                statusText.textContent = message || 'Connected';
+                isConnected = true;
+                reconnectAttempts = 0;
+                offlineIndicator.style.display = 'none';
+                break;
+            case 'connecting':
+                connectionStatus.classList.add('connecting');
+                statusDot.classList.add('status-connecting');
+                statusText.textContent = message || 'Connecting...';
+                isConnected = false;
+                offlineIndicator.style.display = 'none';
+                break;
+            case 'disconnected':
+                connectionStatus.classList.add('disconnected');
+                statusDot.classList.add('status-disconnected');
+                statusText.textContent = message || 'Disconnected';
+                isConnected = false;
+                offlineIndicator.style.display = 'block';
+                break;
+            case 'error':
+                connectionStatus.classList.add('error');
+                statusDot.classList.add('status-disconnected');
+                statusText.textContent = message || 'Connection Error';
+                isConnected = false;
+                offlineIndicator.style.display = 'block';
+                break;
+            case 'reconnecting':
+                connectionStatus.classList.add('connecting');
+                statusDot.classList.add('status-connecting');
+                statusText.textContent = message || `Reconnecting (${reconnectAttempts})`;
+                isConnected = false;
+                offlineIndicator.style.display = 'block';
+                break;
+        }
+    }
+    
+    // Update connection quality indicator - still not that accurate, will update laiter
+    function updateConnectionQuality() {
+        if (connectionHealth.latency < 100) {
+            connectionHealth.quality = 'good';
+        } else if (connectionHealth.latency < 300) {
+            connectionHealth.quality = 'fair';
+        } else {
+            connectionHealth.quality = 'poor';
+        }
+        
+        connectionQuality.textContent = connectionHealth.quality.charAt(0).toUpperCase() + connectionHealth.quality.slice(1);
+        connectionQuality.className = `connection-quality ${connectionHealth.quality}`;
+    }
+    
+    function handleReconnection() {
+        reconnectAttempts++;
+        
+        const baseDelay = Math.min(1000 * Math.pow(2, reconnectAttempts), 30000);
+        const jitter = Math.random() * 1000;
+        const delay = baseDelay + jitter;
+        
+        console.log(`Reconnection attempt ${reconnectAttempts} in ${delay}ms`);
+        
+        setTimeout(() => {
+            if (!isConnected) {
+                socket.connect();
+            }
+        }, delay);
+    }
+    
+    // Scroll to bottom of messages
+    function scrollToBottom() {
+        messagesList.scrollTop = messagesList.scrollHeight;
+    }
+    
+    function autoScrollToBottom() {
+        const isNearBottom = messagesList.scrollHeight - messagesList.clientHeight - messagesList.scrollTop < 100;
+        
+        if (isNearBottom) {
+            setTimeout(() => {
+                messagesList.scrollTop = messagesList.scrollHeight;
+            }, 100);
+        }
+    }
+    
+    function addMessage(messageData, animate = true) {
+        const existingMessage = messagesList.querySelector(`[data-message-id="${messageData.id}"]`);
+        if (existingMessage) {
+            if (messageData.is_read) {
+                existingMessage.querySelector('.read-indicator')?.remove();
+                const readIndicator = document.createElement('div');
+                readIndicator.className = 'read-indicator';
+                readIndicator.innerHTML = '<i class="fas fa-check-double"></i>';
+                existingMessage.appendChild(readIndicator);
+            }
+            return;
+        }
+        
+        const messageDiv = document.createElement('div');
+        const isUserMessage = messageData.user_id === {{ current_user.id }};
+        const isAdminMessage = messageData.is_admin_message;
+        const isDeleted = messageData.content === "[This message was deleted]" || messageData.is_deleted;
+        
+        messageDiv.className = `message ${isUserMessage ? 'user-message' : isAdminMessage ? 'admin-message' : 'other-message'} ${isDeleted ? 'deleted' : ''}`;
+        messageDiv.setAttribute('data-message-id', messageData.id);
+        
+        if (animate) {
+            messageDiv.style.opacity = '0';
+            messageDiv.style.transform = 'translateY(10px)';
+        }
+        
+        let replySection = '';
+        if (messageData.parent_id && messageData.parent) {
+            replySection = `
+                <div class="reply-message">
+                    <div class="reply-author">Replying to ${messageData.parent.username}</div>
+                    <div class="reply-content">${messageData.parent.content}</div>
+                </div>
+            `;
+        }
+        
+        let actionsSection = '';
+        if (!isDeleted) {
+            const canDelete = isUserMessage || {{ 'true' if current_user.is_admin else 'false' }};
+            actionsSection = `
+                <div class="message-actions">
+                    <button class="message-action-btn reply" data-message-id="${messageData.id}" title="Reply">
+                        <i class="fas fa-reply"></i>
+                    </button>
+                    ${canDelete ? `<button class="message-action-btn delete" data-message-id="${messageData.id}" title="Delete">
+                        <i class="fas fa-trash"></i>
+                    </button>` : ''}
+                </div>
+            `;
+        }
+        
+        let readIndicator = '';
+        if (messageData.is_read) {
+            readIndicator = '<div class="read-indicator"><i class="fas fa-check-double"></i></div>';
+        }
+        
+        messageDiv.innerHTML = `
+            <div class="message-header">
+                <div class="flex items-center">
+                    <span class="username">${messageData.username}</span>
+                    ${isAdminMessage ? '<span class="admin-badge">ADMIN</span>' : ''}
+                </div>
+                <span class="timestamp">${formatTime(messageData.created_at)}</span>
+            </div>
+            ${replySection}
+            <div class="message-content">
+                ${isDeleted ? '<em>[This message was deleted]</em>' : messageData.content}
+            </div>
+            ${actionsSection}
+            ${readIndicator}
+        `;
+        
+        messagesList.appendChild(messageDiv);
+        
+        if (animate) {
+            setTimeout(() => {
+                messageDiv.style.transition = 'opacity 0.3s, transform 0.3s';
+                messageDiv.style.opacity = '1';
+                messageDiv.style.transform = 'translateY(0)';
+            }, 10);
+        }
+        
+        autoScrollToBottom();
+        
+        if (!isUserMessage && !messageData.is_read) {
+            markMessageAsRead(messageData.id);
+        }
+        
+        if (!isDeleted) {
+            const replyBtn = messageDiv.querySelector('.reply');
+            const deleteBtn = messageDiv.querySelector('.delete');
+            
+            if (replyBtn) {
+                replyBtn.addEventListener('click', () => startReply(messageData));
+            }
+            
+            if (deleteBtn) {
+                deleteBtn.addEventListener('click', () => deleteMessage(messageData.id));
+            }
+        }
+    }
+    
+    function startReply(messageData) {
+        replyingToMessage = messageData;
+        replyToUsername.textContent = messageData.username;
+        replyToContent.textContent = messageData.content.length > 100 
+            ? messageData.content.substring(0, 100) + '...' 
+            : messageData.content;
+        replyIndicator.style.display = 'flex';
+        messageInput.focus();
+    }
+    
+    function cancelReplyHandler() {
+        replyingToMessage = null;
+        replyIndicator.style.display = 'none';
+    }
+    
+    // Delete a message + all childrens and parents
+    function deleteMessage(messageId) {
+        if (!confirm('Are you sure you want to delete this message?')) {
+            return;
+        }
+        
+        if (isConnected) {
+            socket.emit('delete_message', { message_id: messageId }, (response) => {
+                if (response && response.success) {
+                    console.log('Message deleted successfully');
+                } else {
+                    alert('Failed to delete message: ' + (response?.error || 'Unknown error'));
+                }
+            });
+        } else {
+
+            fetch(`/api/messages/${messageId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log('Message deleted successfully');
+                } else {
+                    alert('Failed to delete message: ' + (data.error || 'Unknown error'));
+                }
+            })
+            .catch(error => {
+                alert('Failed to delete message: ' + error);
+            });
+        }
+    }
+    
+    function markMessageAsRead(messageId) {
+        if (isConnected) {
+            socket.emit('mark_read', { message_ids: [messageId] });
+        } else {
+            fetch('/api/messages/read', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ message_ids: [messageId] })
+            });
+        }
+    }
+    
+    // Message lining wher offline
+    function addToMessageQueue(message) {
+        messageQueue.push({
+            ...message,
+            timestamp: Date.now(),
+            queueId: Date.now() + Math.random()
+        });
+        
+        updateQueueIndicator();
+        localStorage.setItem('messageQueue', JSON.stringify(messageQueue));
+    }
+    
+    function processMessageQueue() {
+        if (messageQueue.length === 0 || !isConnected) return;
+        
+        const failedMessages = [];
+        let processedCount = 0;
+        
+        messageQueue.forEach((message, index) => {
+            try {
+                socket.emit('send_message', {
+                    content: message.content,
+                    room: message.room,
+                    parent_id: message.parent_id
+                }, (ack) => {
+                    if (ack && ack.success) {
+                        messageQueue.splice(index - processedCount, 1);
+                        processedCount++;
+                        localStorage.setItem('messageQueue', JSON.stringify(messageQueue));
+                        updateQueueIndicator();
+                    } else {
+                        failedMessages.push(message);
+                    }
+                });
+            } catch (error) {
+                console.error('Failed to send queued message:', error);
+                failedMessages.push(message);
+            }
+        });
+        
+        messageQueue = failedMessages;
+        localStorage.setItem('messageQueue', JSON.stringify(messageQueue));
+        updateQueueIndicator();
+    }
+    
+    function updateQueueIndicator() {
+        if (messageQueue.length > 0) {
+            messageQueueIndicator.style.display = 'block';
+            queuedMessagesCount.textContent = messageQueue.length;
+        } else {
+            messageQueueIndicator.style.display = 'none';
+        }
+    }
+    
+    function cacheMessages(room, messages) {
+        if (!messageCache.has(room)) {
+            messageCache.set(room, []);
+        }
+        
+        const cachedMessages = messageCache.get(room);
+        
+        messages.forEach(newMessage => {
+            const exists = cachedMessages.some(msg => msg.id === newMessage.id);
+            if (!exists) {
+                cachedMessages.push(newMessage);
+            }
+        });
+        
+        if (cachedMessages.length > 100) {
+            messageCache.set(room, cachedMessages.slice(-100));
+        }
+    }
+    
+    function getCachedMessages(room) {
+        return messageCache.get(room) || [];
+    }
+    
+    function loadMessages(room, sinceId = 0) {
+        const cachedMessages = getCachedMessages(room);
+        if (cachedMessages.length > 0) {
+            displayMessages(cachedMessages, false);
+        }
+        
+        fetch(`/api/messages?room=${room}&since_id=${sinceId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const messages = data.messages || [];
+                    
+                    cacheMessages(room, messages);
+                    
+                    const allMessages = getCachedMessages(room);
+                    if (sinceId > 0) {
+                        const newToDisplay = allMessages.filter(msg => msg.id > sinceId);
+                        displayMessages(newToDisplay, false);
+                    } else {
+                        displayMessages(allMessages, true);
+                    }
+                    
+                    if (messages.length > 0) {
+                        lastMessageId = Math.max(...messages.map(msg => msg.id));
+                    }
+                } else {
+                    console.error('Failed to load messages:', data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Failed to load messages:', error);
+                if (sinceId === 0) {
+                    displayMessages(getCachedMessages(room), true);
+                }
+            });
+    }
+    
+    function displayMessages(messages, clear = true) {
+        if (clear) {
+            messagesList.innerHTML = '';
+        }
+        
+        messages.forEach(message => {
+            addMessage(message, !clear);
+        });
+        
+        autoScrollToBottom();
+    }
+    
+    // Sends the message
+    function sendMessage() {
+        const content = messageInput.value.trim();
+        if (!content) return;
+        
+        const messageData = {
+            content: content,
+            room: currentRoom,
+            parent_id: replyingToMessage ? replyingToMessage.id : null
+        };
+        
+        if (isConnected) {
+            socket.emit('send_message', messageData, (ack) => {
+                if (!ack || !ack.success) {
+                    addToMessageQueue(messageData);
+                } else {
+                    
+                    cancelReplyHandler();
+                }
+            });
+        } else {
+            addToMessageQueue(messageData);
+        }
+        
+        messageInput.value = '';
+        adjustTextareaHeight();
+        
+        cancelReplyHandler();
+    }
+    
+    function adjustTextareaHeight() {
+        messageInput.style.height = 'auto';
+        messageInput.style.height = Math.min(messageInput.scrollHeight, 100) + 'px';
+    }
+    
+    function updateOnlineUsers() {
+        onlineUsersList.innerHTML = '';
+        
+        const currentUserDiv = document.createElement('div');
+        currentUserDiv.className = 'user-item user-admin';
+        currentUserDiv.innerHTML = `
+            <div class="user-avatar">
+                {{ current_user.username[0].upper() }}
+            </div>
+            <span>You ({{ current_user.username }})</span>
+            <span class="admin-badge ml-2">YOU</span>
+        `;
+        onlineUsersList.appendChild(currentUserDiv);
+        
+        Object.values(onlineUsers).forEach(user => {
+            if (user.user_id !== {{ current_user.id }}) {
+                const userDiv = document.createElement('div');
+                userDiv.className = `user-item ${user.is_admin ? 'user-admin' : ''}`;
+                
+                userDiv.innerHTML = `
+                    <div class="user-avatar">
+                        ${user.username.charAt(0).toUpperCase()}
+                    </div>
+                    <span>${user.username}</span>
+                    ${user.is_admin ? '<span class="admin-badge ml-2">ADMIN</span>' : ''}
+                `;
+                
+                onlineUsersList.appendChild(userDiv);
+            }
+        });
+    }
+    
+    function loadInitialOnlineUsers() {
+        fetch('/api/online-users')
+            .then(response => response.json())
+            .then(users => {
+                onlineUsers = {};
+                users.forEach(user => {
+                    if (user.user_id !== {{ current_user.id }}) {
+                        onlineUsers[user.user_id] = user;
+                    }
+                });
+                updateOnlineUsers();
+            })
+            .catch(error => {
+                console.error('Failed to load online users:', error);
+            });
+    }
+    
+    function startHealthCheck() {
+        setInterval(() => {
+            if (isConnected) {
+                connectionHealth.lastPing = Date.now();
+                socket.emit('ping', { timestamp: connectionHealth.lastPing });
+            }
+        }, 15000);
+    }
+    
+    function switchRoom(room) {
+        if (room === currentRoom) return;
+        
+        currentRoom = room;
+        
+        document.querySelectorAll('.room-btn').forEach(btn => {
+            btn.classList.remove('active', 'bg-blue-500', 'bg-opacity-20', 'border', 'border-blue-500');
+            btn.classList.add('bg-gray-700', 'hover:bg-gray-600');
+        });
+        
+        event.target.classList.add('active', 'bg-blue-500', 'bg-opacity-20', 'border', 'border-blue-500');
+        event.target.classList.remove('bg-gray-700', 'hover:bg-gray-600');
+        
+        socket.emit('leave_room', { room: currentRoom });
+        currentRoom = room.toLowerCase();
+        socket.emit('join_room', { room: currentRoom });
+        
+        loadMessages(currentRoom);
+        
+        cancelReplyHandler();
+    }
+    
+    // Socket event listeners
+    socket.on('connect', () => {
+        console.log('Connected to server');
+        updateConnectionStatus('connected');
+        
+        loadInitialOnlineUsers();
+        socket.emit('join_room', { room: currentRoom });
+        processMessageQueue();
+    });
+    
+    socket.on('disconnect', (reason) => {
+        console.log('Disconnected from server:', reason);
+        updateConnectionStatus('disconnected');
+        
+        if (reason === 'io server disconnect') {
+            socket.connect();
+        } else {
+            handleReconnection();
+        }
+    });
+    
+    socket.on('reconnect_attempt', (attempt) => {
+        reconnectAttempts = attempt;
+        updateConnectionStatus('reconnecting');
+    });
+    
+    socket.on('reconnect', (attempt) => {
+        console.log('Reconnected after', attempt, 'attempts');
+        updateConnectionStatus('connected', 'Reconnected');
+    });
+    
+    socket.on('reconnect_error', (error) => {
+        console.log('Reconnection error:', error);
+        updateConnectionStatus('error', 'Connection error');
+    });
+    
+    socket.on('reconnect_failed', () => {
+        console.log('Failed to reconnect');
+        updateConnectionStatus('error', 'Failed to connect');
+        
+        const notificationDiv = document.createElement('div');
+        notificationDiv.className = 'text-center text-red-400 text-sm py-2';
+        notificationDiv.textContent = 'Connection lost. Please refresh the page.';
+        messagesList.appendChild(notificationDiv);
+        scrollToBottom();
+    });
+    
+    socket.on('pong', (data) => {
+        connectionHealth.latency = Date.now() - data.timestamp;
+        updateConnectionQuality();
+    });
+    
+    socket.on('new_message', (messageData) => {
+        addMessage(messageData);
+        cacheMessages(currentRoom, [messageData]);
+    });
+    
+    socket.on('message_deleted', (data) => {
+        const messageElement = messagesList.querySelector(`[data-message-id="${data.message_id}"]`);
+        if (messageElement) {
+            messageElement.classList.add('deleted');
+            messageElement.querySelector('.message-content').innerHTML = '<em>[This message was deleted]</em>';
+            messageElement.querySelector('.message-actions')?.remove();
+        }
+    });
+    
+    socket.on('messages_read', (data) => {
+        data.message_ids.forEach(messageId => {
+            const messageElement = messagesList.querySelector(`[data-message-id="${messageId}"]`);
+            if (messageElement && !messageElement.querySelector('.read-indicator')) {
+                const readIndicator = document.createElement('div');
+                readIndicator.className = 'read-indicator';
+                readIndicator.innerHTML = '<i class="fas fa-check-double"></i>';
+                messageElement.appendChild(readIndicator);
+            }
+        });
+    });
+    
+    socket.on('user_joined', (data) => {
+        onlineUsers[data.user_id] = {
+            user_id: data.user_id,
+            username: data.username,
+            is_admin: data.is_admin
+        };
+        updateOnlineUsers();
+        
+        const notificationDiv = document.createElement('div');
+        notificationDiv.className = 'text-center text-gray-400 text-sm py-2';
+        notificationDiv.textContent = data.message;
+        messagesList.appendChild(notificationDiv);
+        scrollToBottom();
+    });
+    
+    socket.on('user_left', (data) => {
+        delete onlineUsers[data.user_id];
+        updateOnlineUsers();
+        
+        const notificationDiv = document.createElement('div');
+        notificationDiv.className = 'text-center text-gray-400 text-sm py-2';
+        notificationDiv.textContent = data.message;
+        messagesList.appendChild(notificationDiv);
+        scrollToBottom();
+    });
+    
+    socket.on('online_users_update', (data) => {
+        onlineUsers = {};
+        data.users.forEach(user => {
+            if (user.user_id !== {{ current_user.id }}) {
+                onlineUsers[user.user_id] = user;
+            }
+        });
+        updateOnlineUsers();
+    });
+    
+    socket.on('user_typing', (data) => {
+        typingIndicator.textContent = `${data.username} is typing...`;
+        typingIndicator.style.display = 'block';
+        
+        clearTimeout(typingTimer);
+        typingTimer = setTimeout(() => {
+            typingIndicator.style.display = 'none';
+        }, 1000);
+    });
+    
+    sendButton.addEventListener('click', sendMessage);
+    
+    messageInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage();
+        }
+    });
+    
+    messageInput.addEventListener('input', adjustTextareaHeight);
+    
+    messageInput.addEventListener('input', () => {
+        if (messageInput.value.trim() && isConnected) {
+            socket.emit('typing', { room: currentRoom });
+        }
+    });
+    
+    cancelReply.addEventListener('click', cancelReplyHandler);
+    
+    // Room switching
+    document.querySelectorAll('.room-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            switchRoom(this.dataset.room);
+        });
+    });
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.message-action-btn.reply').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const messageId = this.dataset.messageId;
+                const messageElement = this.closest('.message');
+                const username = messageElement.querySelector('.username').textContent;
+                const content = messageElement.querySelector('.message-content').textContent;
+                
+                startReply({
+                    id: parseInt(messageId),
+                    username: username,
+                    content: content
+                });
+            });
+        });
+        
+        document.querySelectorAll('.message-action-btn.delete').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const messageId = this.dataset.messageId;
+                deleteMessage(parseInt(messageId));
+            });
+        });
+    });
+    
+    window.addEventListener('load', () => {
+        scrollToBottom();
+        adjustTextareaHeight();
+        
+        const savedQueue = localStorage.getItem('messageQueue');
+        if (savedQueue) {
+            messageQueue = JSON.parse(savedQueue);
+            updateQueueIndicator();
+        }
+        
+        loadInitialOnlineUsers();
+        startHealthCheck();
+        
+        const messageIds = Array.from(messagesList.querySelectorAll('.message'))
+            .map(msg => parseInt(msg.getAttribute('data-message-id')))
+            .filter(id => !isNaN(id));
+        
+        if (messageIds.length > 0) {
+            fetch('/api/messages/read', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ message_ids: messageIds })
+            });
+        }
+    });
+    document.addEventListener('visibilitychange', function() {
+        if (!document.hidden && isConnected) {
+            loadInitialOnlineUsers();
+        }
+    });
+</script>
