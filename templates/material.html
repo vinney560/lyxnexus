@@ -429,9 +429,15 @@
                     <span class="text-xl sm:text-2xl font-bold gradient-text">Topic Materials</span>
                 </div>
                 <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4 w-full sm:w-auto">
+                    {% if current_user.is_admin %}
+                    <button class="btn bg-red-600 hover:bg-gray-700 text-sm sm:text-base" onclick="window.location.href='/admin'">
+                        <i class="fas fa-arrow-left mr-2"></i> Back 
+                    </button>
+                    {% else %}
                     <button class="btn bg-gray-600 hover:bg-gray-700 text-sm sm:text-base" onclick="window.location.href='/main-page'">
                         <i class="fas fa-arrow-left mr-2"></i> Back 
                     </button>
+                    {% endif %}
                     {% if current_user.is_admin %}
                     <button class="btn btn-success text-sm sm:text-base" onclick="openModal('add-material-modal')">
                         <i class="fas fa-plus mr-2"></i> Add Material
