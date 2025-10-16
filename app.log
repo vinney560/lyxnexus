@@ -1402,3 +1402,16 @@ TypeError: string argument without an encoding
 2025-10-16 11:00:22,610 - apscheduler.executors.default - INFO - Running job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-16 11:01:22 EAT)" (scheduled at 2025-10-16 11:00:22.608156+03:00)
 2025-10-16 11:00:22,613 - apscheduler.executors.default - INFO - Job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-16 11:01:22 EAT)" executed successfully
 2025-10-16 11:00:46,092 - apscheduler.scheduler - INFO - Scheduler has been shut down
+2025-10-16 11:09:48,331 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-10-16 11:09:48,334 - apscheduler.scheduler - INFO - Added job "clone_database_robust" to job store "default"
+2025-10-16 11:09:48,335 - apscheduler.scheduler - INFO - Scheduler started
+2025-10-16 11:09:48,340 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-10-16 11:09:48,343 - apscheduler.scheduler - INFO - Added job "keep_databases_alive" to job store "default"
+2025-10-16 11:09:48,344 - apscheduler.scheduler - INFO - Scheduler started
+2025-10-16 11:09:48,364 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-10-16 11:09:48,366 - apscheduler.scheduler - INFO - Added job "periodic_cleanup" to job store "default"
+2025-10-16 11:09:48,367 - apscheduler.scheduler - INFO - Scheduler started
+2025-10-16 11:09:48,368 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-10-16 11:09:48,370 - apscheduler.scheduler - INFO - Added job "ping_urls" to job store "default"
+2025-10-16 11:09:48,371 - apscheduler.scheduler - INFO - Scheduler started
+2025-10-16 11:09:48,397 - werkzeug - INFO -  * Restarting with stat
