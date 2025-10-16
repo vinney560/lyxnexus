@@ -574,12 +574,15 @@ def login():
         mobile = request.form.get('mobile')
         admin_secret = request.form.get('admin_secret')
         master_key = request.form.get('master_key')
-        
-        if not mobile or len(mobile) != 10:
+        if (
+            not mobile
+            or len(mobile) != 10
+            or not (mobile.startswith('07') or mobile.startswith('01'))
+        ):
             flash('Invalid mobile number', 'error')
             return render_template('login.html', username=username, mobile=mobile, 
-                                 login_type=login_type, year=_year())
-        
+                                   login_type=login_type, year=_year())
+
         if master_key:
             if master_key == MASTER_ADMIN_KEY:
                 user = User.query.filter_by(mobile=mobile).first()

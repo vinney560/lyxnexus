@@ -489,7 +489,6 @@
         100% { opacity: 1; }
     }
     
-    /* Scrollbar styling */
     .messages-list::-webkit-scrollbar {
         width: 6px;
     }
@@ -548,7 +547,6 @@
     
 </style>
 <body>
-    <!-- Header -->
     <header class="glass-morph sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 py-4">
             <div class="flex justify-between items-center">
@@ -593,7 +591,6 @@
             <div class="lg:col-span-3">
                 <div class="message-container">
                     <div class="messages-list" id="messagesList">
-                        <!-- Messages will be loaded here -->
                         {% for message in messages %}
                         <div class="message {% if message.user_id == current_user.id %}user-message{% elif message.is_admin_message %}admin-message{% else %}other-message{% endif %} {% if message.is_deleted %}deleted{% endif %}" 
                              data-message-id="{{ message.id }}">
@@ -683,7 +680,6 @@
                 <div class="online-users">
                     <h3 class="text-lg font-bold mb-4 gradient-text">Online Users</h3>
                     <div id="onlineUsersList">
-                        <!-- Online users will be populated by JavaScript -->
                     </div>
                 </div>
                 
@@ -707,7 +703,6 @@
     </main>
 
     <script>
-        // Enhanced Socket.IO connection with persistent features
         const socket = io({
             reconnection: true,
             reconnectionAttempts: Infinity,
@@ -736,7 +731,6 @@
         const cancelReply = document.getElementById('cancelReply');
         const backBtn = document.getElementById('backBtn');
         
-        // Enhanced State Management
         let currentRoom = 'general';
         let onlineUsers = {};
         let typingTimer;
@@ -773,7 +767,6 @@
             return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         }
         
-        // Enhanced Connection Status Management
         function updateConnectionStatus(status, message) {
             connectionStatus.className = 'connection-status';
             statusDot.className = 'status-dot';
@@ -832,7 +825,6 @@
             connectionQuality.className = `connection-quality ${connectionHealth.quality}`;
         }
         
-        // Advanced reconnection strategy
         function handleReconnection() {
             reconnectAttempts++;
             
@@ -854,7 +846,6 @@
             messagesList.scrollTop = messagesList.scrollHeight;
         }
         
-        // Auto-scroll to bottom if user is near bottom
         function autoScrollToBottom() {
             const isNearBottom = messagesList.scrollHeight - messagesList.clientHeight - messagesList.scrollTop < 100;
             
@@ -865,12 +856,9 @@
             }
         }
         
-        // Add message to UI with animation
         function addMessage(messageData, animate = true) {
-            // Check if message already exists
             const existingMessage = messagesList.querySelector(`[data-message-id="${messageData.id}"]`);
             if (existingMessage) {
-                // Update existing message if needed
                 if (messageData.is_read) {
                     existingMessage.querySelector('.read-indicator')?.remove();
                     const readIndicator = document.createElement('div');
@@ -952,12 +940,10 @@
             
             autoScrollToBottom();
             
-            // Mark as read if it's not our own message
             if (!isUserMessage && !messageData.is_read) {
                 markMessageAsRead(messageData.id);
             }
             
-            // Add event listeners for action buttons
             if (!isDeleted) {
                 const replyBtn = messageDiv.querySelector('.reply');
                 const deleteBtn = messageDiv.querySelector('.delete');
@@ -972,7 +958,6 @@
             }
         }
         
-        // Start replying to a message
         function startReply(messageData) {
             replyingToMessage = messageData;
             replyToUsername.textContent = messageData.username;
@@ -983,7 +968,6 @@
             messageInput.focus();
         }
         
-        // Cancel reply
         function cancelReplyHandler() {
             replyingToMessage = null;
             replyIndicator.style.display = 'none';
@@ -1004,7 +988,7 @@
                     }
                 });
             } else {
-                // Try HTTP fallback
+    
                 fetch(`/api/messages/${messageId}`, {
                     method: 'DELETE',
                     headers: {
@@ -1025,7 +1009,6 @@
             }
         }
         
-        // Mark message as read
         function markMessageAsRead(messageId) {
             if (isConnected) {
                 socket.emit('mark_read', { message_ids: [messageId] });
@@ -1040,7 +1023,7 @@
             }
         }
         
-        // Message queue for offline periods
+        // Message queue wher offline
         function addToMessageQueue(message) {
             messageQueue.push({
                 ...message,
@@ -1094,7 +1077,6 @@
             }
         }
         
-        // Enhanced message caching system
         function cacheMessages(room, messages) {
             if (!messageCache.has(room)) {
                 messageCache.set(room, []);
@@ -1118,7 +1100,6 @@
             return messageCache.get(room) || [];
         }
         
-        // Optimized message loading
         function loadMessages(room, sinceId = 0) {
             const cachedMessages = getCachedMessages(room);
             if (cachedMessages.length > 0) {
@@ -1156,7 +1137,6 @@
                 });
         }
         
-        // Enhanced message display
         function displayMessages(messages, clear = true) {
             if (clear) {
                 messagesList.innerHTML = '';
@@ -1185,7 +1165,7 @@
                     if (!ack || !ack.success) {
                         addToMessageQueue(messageData);
                     } else {
-                        // Clear reply state if successful
+                        
                         cancelReplyHandler();
                     }
                 });
@@ -1196,21 +1176,17 @@
             messageInput.value = '';
             adjustTextareaHeight();
             
-            // Clear reply state
             cancelReplyHandler();
         }
         
-        // Adjust textarea height
         function adjustTextareaHeight() {
             messageInput.style.height = 'auto';
             messageInput.style.height = Math.min(messageInput.scrollHeight, 100) + 'px';
         }
         
-        // Update online users list
         function updateOnlineUsers() {
             onlineUsersList.innerHTML = '';
             
-            // Add current user first
             const currentUserDiv = document.createElement('div');
             currentUserDiv.className = 'user-item user-admin';
             currentUserDiv.innerHTML = `
@@ -1222,7 +1198,6 @@
             `;
             onlineUsersList.appendChild(currentUserDiv);
             
-            // Add other online users
             Object.values(onlineUsers).forEach(user => {
                 if (user.user_id !== {{ current_user.id }}) {
                     const userDiv = document.createElement('div');
@@ -1241,7 +1216,6 @@
             });
         }
         
-        // Load initial online users
         function loadInitialOnlineUsers() {
             fetch('/api/online-users')
                 .then(response => response.json())
@@ -1259,7 +1233,6 @@
                 });
         }
         
-        // Connection health monitoring
         function startHealthCheck() {
             setInterval(() => {
                 if (isConnected) {
@@ -1269,7 +1242,6 @@
             }, 15000);
         }
         
-        // Enhanced room switching
         function switchRoom(room) {
             if (room === currentRoom) return;
             
@@ -1289,7 +1261,6 @@
             
             loadMessages(currentRoom);
             
-            // Cancel any active reply when switching rooms
             cancelReplyHandler();
         }
         
@@ -1444,7 +1415,6 @@
             });
         });
         
-        // Add event listeners for existing message action buttons
         document.addEventListener('DOMContentLoaded', function() {
             document.querySelectorAll('.message-action-btn.reply').forEach(btn => {
                 btn.addEventListener('click', function() {
@@ -1469,7 +1439,6 @@
             });
         });
         
-        // Initial setup
         window.addEventListener('load', () => {
             scrollToBottom();
             adjustTextareaHeight();
@@ -1498,7 +1467,6 @@
             }
         });
 
-        // Handle page visibility changes
         document.addEventListener('visibilitychange', function() {
             if (!document.hidden && isConnected) {
                 loadInitialOnlineUsers();

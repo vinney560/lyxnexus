@@ -210,7 +210,6 @@
         }
     }
     
-    /* Modern Toast Notifications */
     .toast-container {
         position: fixed;
         top: 20px;
@@ -378,7 +377,6 @@
         background: var(--accent-color);
     }
     
-    /* Navigation Header */
     .nav-header {
         position: fixed;
         top: 0;
@@ -446,7 +444,6 @@
         background: rgba(59, 130, 246, 0.1);
     }
     
-    /* Status Indicators */
     .status-indicator {
         display: inline-flex;
         align-items: center;
@@ -475,7 +472,6 @@
         border: 1px solid rgba(239, 68, 68, 0.3);
     }
     
-    /* Loading Animation */
     .loading-spinner {
         border: 3px solid rgba(59, 130, 246, 0.3);
         border-top: 3px solid #3B82F6;
@@ -491,7 +487,6 @@
         100% { transform: rotate(360deg); }
     }
     
-    /* Responsive Design */
     @media (max-width: 768px) {
         .toast-container {
             right: 10px;
@@ -530,7 +525,6 @@
     }
 </style>
 <body>
-    <!-- Navigation Header -->
     <header class="nav-header">
         <div class="nav-content">
             <div class="nav-logo" onclick="goToHome()">
@@ -558,13 +552,10 @@
         </div>
     </header>
 
-    <!-- Toast Container -->
     <div class="toast-container" id="toast-container"></div>
 
-    <!-- Main Content -->
     <div class="container mx-auto px-4 pt-32 pb-8">
         <div class="max-w-4xl mx-auto">
-            <!-- Header -->
             <div class="text-center mb-8">
                 <div class="logo-container floating mx-auto">
                     <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -599,7 +590,6 @@
                 </div>
             </div>
 
-            <!-- Clone Database Card -->
             <div class="glass-morph rounded-2xl p-8">
                 <div class="text-center">
                     <i class="fas fa-database text-6xl text-blue-400 mb-4"></i>
@@ -609,7 +599,6 @@
                         You will receive a notification when the process is complete.
                     </p>
 
-                    <!-- Action Buttons -->
                     <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
                         <button id="clone-db-btn" class="btn btn-success px-8 py-3">
                             <i class="fas fa-copy mr-2"></i> Clone Database Now
@@ -619,7 +608,6 @@
                         </a>
                     </div>
 
-                    <!-- Progress Indicator -->
                     <div id="progress-section" class="mt-8 hidden">
                         <div class="loading-spinner"></div>
                         <p class="text-gray-400 mt-4">Cloning database... Please wait</p>
@@ -629,7 +617,6 @@
                         </div>
                     </div>
 
-                    <!-- Result Section -->
                     <div id="result-section" class="mt-8 hidden">
                         <div class="p-4 rounded-lg bg-green-500 bg-opacity-10 border border-green-500">
                             <div class="flex items-center">
@@ -646,7 +633,6 @@
 
             <!-- Information Cards -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
-                <!-- What happens card -->
                 <div class="glass-morph rounded-2xl p-6">
                     <h3 class="text-lg font-semibold text-white mb-4 flex items-center">
                         <i class="fas fa-info-circle text-blue-400 mr-2"></i>

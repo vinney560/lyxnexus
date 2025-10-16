@@ -371,7 +371,6 @@
         background: rgba(255, 255, 255, 0.1);
     }
 
-    /* Responsive Styles */
     @media (max-width: 768px) {
         nav.glass-morph {
             position: static !important;
@@ -411,7 +410,6 @@
     }
 </style>
 <body>
-    <!-- Navigation -->
     <nav class="glass-morph sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 py-4">
             <div class="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
@@ -448,11 +446,9 @@
         </div>
     </nav>
 
-    <!-- Toast Container -->
     <div class="toast-container" id="toast-container"></div>
 
     <main class="max-w-7xl mx-auto px-4 py-8">
-        <!-- Topic Header -->
         <div class="glass-morph rounded-xl p-6 mb-6">
             <h1 class="text-2xl sm:text-3xl font-bold gradient-text mb-2" id="topic-name">Loading...</h1>
             <p class="text-gray-400" id="topic-description"></p>
@@ -462,7 +458,6 @@
             </div>
         </div>
 
-        <!-- Materials List -->
         <div id="materials-container">
             <div class="glass-morph rounded-xl p-8 text-center">
                 <div class="spinner"></div>
@@ -470,7 +465,6 @@
             </div>
         </div>
 
-        <!-- Empty State -->
         <div id="empty-state" class="hidden">
             <div class="glass-morph rounded-xl p-8 text-center">
                 <i class="fas fa-folder-open text-4xl text-gray-500 mb-4"></i>
@@ -485,7 +479,6 @@
         </div>
     </main>
 
-    <!-- Add Material Modal -->
     <div id="add-material-modal" class="modal">
         <div class="modal-content">
             <h3 class="text-xl font-bold mb-4">Add Material to Topic</h3>
@@ -495,7 +488,6 @@
                 <input type="text" id="file-search" class="form-input" placeholder="Search available files...">
             </div>
             
-            <!-- Files List -->
             <div id="available-files" class="max-h-96 overflow-y-auto mb-4">
                 <div class="text-center py-8">
                     <div class="spinner"></div>
@@ -503,7 +495,6 @@
                 </div>
             </div>
             
-            <!-- Customization Form (shown when a file is selected) -->
             <div id="customization-form" class="hidden">
                 <div class="form-group">
                     <label class="form-label" for="material-display-name">Display Name (Optional)</label>
@@ -526,7 +517,6 @@
     </div>
 
     <script>
-        // API endpoints
         const API_BASE = '/api';
         const TOPIC_ID = {{ topic_id }};
         
@@ -534,7 +524,6 @@
         let selectedFileId = null;
         let currentDragItem = null;
 
-        // Toast notification system (same as files.html)
         class ToastManager {
             constructor() {
                 this.container = document.getElementById('toast-container');
@@ -626,7 +615,6 @@
             return new Date(dateString).toLocaleDateString(undefined, options);
         }
 
-        // Get file icon
         function getFileIcon(fileType, filename) {
             if (fileType.includes('pdf')) {
                 return { icon: 'fa-file-pdf', class: 'file-icon-pdf' };
@@ -647,7 +635,6 @@
             }
         }
 
-        // Load topic materials
         async function loadTopicMaterials() {
             const container = document.getElementById('materials-container');
             const emptyState = document.getElementById('empty-state');
@@ -660,7 +647,6 @@
                 
                 const data = await response.json();
                 
-                // Update topic info
                 document.getElementById('topic-name').textContent = data.topic.name;
                 document.getElementById('topic-description').textContent = data.topic.description || 'No description available';
                 document.getElementById('materials-count').textContent = `${data.materials.length} material${data.materials.length !== 1 ? 's' : ''}`;
@@ -674,7 +660,6 @@
                 emptyState.classList.add('hidden');
                 container.classList.remove('hidden');
                 
-                // Render materials
                 container.innerHTML = data.materials.map((material, index) => {
                     const fileIcon = getFileIcon(material.file_type, material.filename);
                     
@@ -730,7 +715,6 @@
                     `;
                 }).join('');
                 
-                // Initialize drag and drop if admin
                 {% if current_user.is_admin %}
                 initializeDragAndDrop();
                 {% endif %}
@@ -749,7 +733,6 @@
             }
         }
 
-        // Load available files for adding
         async function loadAvailableFiles(search = '') {
             const container = document.getElementById('available-files');
             
@@ -807,11 +790,9 @@
             }
         }
 
-        // Select file for adding
         function selectFile(fileId, fileName, fileDescription) {
             selectedFileId = fileId;
             
-            // Update UI
             document.querySelectorAll('.file-card').forEach(card => {
                 card.classList.remove('border-2', 'border-green-500');
                 card.querySelector('.selected-indicator').classList.add('hidden');
@@ -821,16 +802,13 @@
             selectedCard.classList.add('border-2', 'border-green-500');
             selectedCard.querySelector('.selected-indicator').classList.remove('hidden');
             
-            // Show customization form
             document.getElementById('customization-form').classList.remove('hidden');
             document.getElementById('add-material-btn').classList.remove('hidden');
             
-            // Pre-fill form
             document.getElementById('material-display-name').value = fileName;
             document.getElementById('material-description').value = fileDescription || '';
         }
 
-        // Add material to topic
         async function addMaterial() {
             if (!selectedFileId) {
                 showToast('Please select a file', 'error');
@@ -863,7 +841,6 @@
                 closeModal('add-material-modal');
                 loadTopicMaterials();
                 
-                // Reset form
                 document.getElementById('customization-form').classList.add('hidden');
                 document.getElementById('add-material-btn').classList.add('hidden');
                 document.getElementById('material-display-name').value = '';
@@ -875,7 +852,6 @@
             }
         }
 
-        // Remove material from topic
         async function removeMaterial(materialId) {
             if (!confirm('Are you sure you want to remove this material from the topic?')) {
                 return;
@@ -904,7 +880,6 @@
             window.open(`/api/files/${fileId}/download`, '_blank');
         }
 
-        // Drag and drop functionality
         function initializeDragAndDrop() {
             const container = document.getElementById('materials-container');
             const materials = container.querySelectorAll('.material-card');
@@ -954,7 +929,6 @@
                     this.parentNode.insertBefore(currentDragItem, this);
                 }
                 
-                // Update order in backend
                 updateMaterialOrder();
             }
         }
@@ -989,12 +963,10 @@
                 
             } catch (error) {
                 showToast(error.message, 'error', 'Reorder Failed');
-                // Reload to reset order
                 loadTopicMaterials();
             }
         }
 
-        // Modal management
         function openModal(modalId) {
             document.getElementById(modalId).style.display = 'flex';
             if (modalId === 'add-material-modal') {
@@ -1012,7 +984,6 @@
             }
         }
 
-        // Close modal when clicking outside
         window.onclick = function(event) {
             if (event.target.classList.contains('modal')) {
                 event.target.style.display = 'none';
@@ -1032,7 +1003,6 @@
             }, 500);
         });
 
-        // Initialize the page
         document.addEventListener('DOMContentLoaded', function() {
             loadTopicMaterials();
         });

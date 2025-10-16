@@ -220,21 +220,21 @@
             background: rgba(30, 30, 40, 0.9);
             backdrop-filter: blur(10px);
             display: flex;
-            justify-content: flex-start; /* allow scroll movement */
-            overflow-x: auto; /* enable horizontal scroll */
-            -webkit-overflow-scrolling: touch; /* smooth iOS scroll */
+            justify-content: flex-start; 
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
             padding: 5px 8px;
             z-index: 100;
             gap: 6px;
-            scrollbar-width: none; /* hide scrollbar for Firefox */
+            scrollbar-width: none; 
         }
 
         .mobile-nav::-webkit-scrollbar {
-            display: none; /* hide scrollbar for WebKit browsers */
+            display: none; 
         }
 
         .mobile-nav-btn {
-            flex: 0 0 auto; /* prevents buttons from shrinking */
+            flex: 0 0 auto;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -267,7 +267,6 @@
             padding-bottom: 0.5rem;
         }
 
-        /* Reduce logo size */
         .logo-container {
             padding: 8px;
             border-radius: 15px;
@@ -278,7 +277,6 @@
             height: 24px;
         }
 
-        /* Reduce text sizes */
         header h1.text-2xl {
             font-size: 1.25rem;
             line-height: 1.75rem;
@@ -289,7 +287,6 @@
             line-height: 1rem;
         }
 
-        /* Reduce user card size */
         #user-info.user-card {
             padding: 12px;
             max-width: 200px;
@@ -309,7 +306,6 @@
             font-size: 0.75rem;
         }
 
-        /* Reduce navigation buttons */
         .nav-btn {
             padding: 6px 12px;
             font-size: 0.75rem;
@@ -322,7 +318,6 @@
     }
 </style>
 <body>
-    <!-- Header -->
     <header class="glass-morph sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-2 py-2">
             <div class="flex flex-col md:flex-row justify-between items-center">
@@ -350,7 +345,6 @@
                     </div>
                 </div>
                 
-                <!-- Navigation Buttons -->
                 <div class="nav-buttons flex flex-wrap justify-center gap-2">
                     <button class="nav-btn active" data-section="announcements">
                         <i class="fas fa-bullhorn mr-2"></i>Announcements
@@ -378,10 +372,11 @@
         </div>
     </header>
 
-    <!-- Main Content -->
     <main class="content-container max-w-7xl mx-auto px-4 py-6">
-        <!-- Announcements Section -->
-         <!-- Image Preview Modal -->
+                            <!-- Announcements Section -->
+         
+         
+                            <!-- Image Preview Modal -->
         <div id="image-preview-modal" class="hidden fixed inset-0 bg-black/70 items-center justify-center z-50">
           <span class="absolute top-4 right-6 text-white text-3xl cursor-pointer" onclick="closeImagePreview()">&times;</span>
           <img id="image-preview-img" src="" alt="Preview" class="max-h-[90%] max-w-[90%] rounded-lg shadow-lg">
@@ -546,7 +541,6 @@
     </div>
 
     <script>
-        // API endpoints
         const API_BASE = '/api';
         const ENDPOINTS = {
             USER: `${API_BASE}/user`,
@@ -563,7 +557,6 @@
         let topics = [];
         let timetable = [];
 
-        // Format date for display
         function formatDate(dateString) {
             const date = new Date(dateString);
             const options = { 
@@ -576,7 +569,6 @@
             };
             const formatted = date.toLocaleString(undefined, options);
 
-            // Split to rearrange if needed for clarity
             const [datePart, timePart] = formatted.split(', ');
             return `on ${datePart} at ${timePart}`;
         }
@@ -588,7 +580,6 @@
             return new Date(dateString).toLocaleTimeString(undefined, options);
         }
 
-        // Fetch data from API
         async function fetchData(endpoint) {
             try {
                 const response = await fetch(endpoint);
@@ -602,7 +593,6 @@
             }
         }
 
-        // Navigation functionality
         function setupNavigation() {
             const navButtons = document.querySelectorAll('.nav-btn, .mobile-nav-btn');
             
@@ -610,21 +600,17 @@
                 button.addEventListener('click', function() {
                     const targetSection = this.getAttribute('data-section');
                     
-                    // Update active states
                     navButtons.forEach(btn => {
                         btn.classList.remove('active');
                     });
                     this.classList.add('active');
                     
-                    // Hide all sections
                     document.querySelectorAll('.content-section').forEach(section => {
                         section.classList.remove('active');
                     });
                     
-                    // Show target section
                     document.getElementById(targetSection).classList.add('active');
                     
-                    // Load data for the section if needed
                     if (targetSection === 'announcements' && announcements.length === 0) {
                         loadAnnouncements();
                     } else if (targetSection === 'assignments' && assignments.length === 0) {
@@ -660,11 +646,10 @@
             }
         }
 
-        // Update user display
         function updateUserDisplay() {
             if (!currentUser) return;
             
-            // Update user info card
+            // Update user info
             document.getElementById('user-info').innerHTML = `
                 <div class="text-center">
                     <div class="feature-icon">
@@ -678,7 +663,6 @@
                 </div>
             `;
             
-            // Update profile section
             document.getElementById('profile-username').textContent = currentUser.username;
             document.getElementById('detail-username').textContent = currentUser.username;
             document.getElementById('detail-mobile').textContent = currentUser.mobile || 'Not provided';
@@ -711,7 +695,6 @@
       
           document.getElementById("announcements-count").textContent = `${announcements.length} announcements`;
       
-          // Load pinned announcement IDs from localStorage
           let pinnedIds = JSON.parse(localStorage.getItem("pinnedAnnouncements") || "[]");
       
           // Render announcements (pinned first)
@@ -1002,13 +985,12 @@
             `).join('');
         }
 
-        // Update profile statistics
+        // Update profile
         function updateProfileStats() {
             document.getElementById('stat-assignments').textContent = assignments.length;
             document.getElementById('stat-announcements').textContent = announcements.length;
             document.getElementById('stat-topics').textContent = topics.length;
             
-            // Calculate classes this week
             let classCount = 0;
             if (timetable.length > 0) {
                 timetable.forEach(day => {
@@ -1020,14 +1002,12 @@
         document.addEventListener('DOMContentLoaded', function() {
             setupNavigation(); 
 
-            // Initial load
             loadUserData();
             loadAnnouncements();
             loadAssignments();
             loadTopics();
             loadTimetable();
 
-            // Lightweight functions every 60 seconds
             setInterval(() => {
                 loadUserData();
                 loadAnnouncements();
@@ -1066,7 +1046,6 @@
           installContainer.style.gap = "10px";
           installContainer.style.fontFamily = "system-ui, sans-serif";
         
-          // Install button
           const installBtn = document.createElement("button");
           installBtn.textContent = "📲 Install App";
           installBtn.style.background = "#0078ff";
@@ -1086,19 +1065,16 @@
           closeBtn.addEventListener("mouseenter", () => closeBtn.style.opacity = "1");
           closeBtn.addEventListener("mouseleave", () => closeBtn.style.opacity = "0.7");
         
-          // Append both
           installContainer.appendChild(installBtn);
           installContainer.appendChild(closeBtn);
           document.body.appendChild(installContainer);
         
-          // Listen for PWA install availability
           window.addEventListener("beforeinstallprompt", (e) => {
             e.preventDefault();
             deferredPrompt = e;
             installContainer.style.display = "flex";
           });
       
-          // Handle install button click
           installBtn.addEventListener("click", async () => {
             installContainer.style.display = "none";
             if (!deferredPrompt) return;
@@ -1108,7 +1084,6 @@
             deferredPrompt = null;
           });
       
-          // Handle close button click
           closeBtn.addEventListener("click", () => {
             installContainer.style.display = "none";
           });

@@ -4,14 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Class Portal | LyxNexus</title>
-    <!-- Safe Meta Tags -->
+    
     <meta name="description" content="lyxnexus is a simple yet powerful class hub designed to keep everything in one place — from announcements and assignments to topics and class discussions." />
     <meta name="keywords" content="education, coding, programming, web development, technology, online courses, learn to code" />
     <meta name="author" content="Vincent Kipngetich" />
     <meta name="robots" content="index, follow" />
     <link rel="canonical" href="https://lyxnexus.onrender.com/" />
     <link rel="icon" href="https://lyxnexus.onrender.com/favicon.ico" />
-    <!-- Social Meta -->
+    
     <meta property="og:title" content="LyxNexus - Education Platform" />
     <meta property="og:description" content="lyxnexus is a simple yet powerful class hub designed to keep everything in one place — from announcements and assignments to topics and class discussions." />
     <meta property="og:image" content="https://lyxnexus.onrender.com/favicon.ico" />
@@ -211,7 +211,6 @@
         100% { transform: rotate(360deg); }
     }
     
-    /* Modern Navigation */
     .nav-link {
         color: #cbd5e1;
         font-weight: 500;
@@ -242,7 +241,6 @@
         border-radius: 2px;
     }
     
-    /* Modern Card Design */
     .modern-card {
         background: var(--card-bg);
         border-radius: 16px;
@@ -257,15 +255,12 @@
         border-color: rgba(59, 130, 246, 0.3);
     }
     
-    /* Enhanced Responsive Design */
     @media (max-width: 768px) {
-        /* Navigation adjustments */
         nav .max-w-6xl.mx-auto.px-4.py-4 {
             padding-top: 0.75rem;
             padding-bottom: 0.75rem;
         }
         
-        /* Make logo smaller on mobile */
         .logo-container {
             padding: 10px;
         }
@@ -275,12 +270,10 @@
             height: 24px;
         }
         
-        /* Adjust brand text size */
         .text-2xl.font-bold {
             font-size: 1.25rem;
         }
         
-        /* Navigation buttons adjustments */
         .flex.space-x-4 {
             flex-direction: column;
             gap: 8px;
@@ -292,7 +285,6 @@
             text-align: center;
         }
         
-        /* Hero section adjustments */
         header.py-16.md\:py-24 {
             padding-top: 3rem;
             padding-bottom: 3rem;
@@ -306,13 +298,11 @@
             font-size: 1rem;
         }
         
-        /* Hero buttons */
         .flex.flex-col.sm\:flex-row .btn {
             width: 100%;
             margin-bottom: 8px;
         }
         
-        /* Content sections */
         main .space-y-16 {
             gap: 2rem;
         }
@@ -321,11 +311,9 @@
             font-size: 1.75rem;
         }
         
-        /* Hide desktop navigation on mobile */
         .hidden.md\:flex {
             display: none !important;
         }
-        /* Mobile Navigation */
         .mobile-nav {
             position: fixed;
             bottom: 0;
@@ -355,7 +343,6 @@
             scrollbar-width: none;    
         }
 
-        /* Mobile Navigation Buttons */
         .mobile-nav-btn {
             display: inline-flex;        
             flex-direction: column;
@@ -385,10 +372,9 @@
         .content-container {
             padding-bottom: 90px;
         }
+    }
 
-    
     @media (max-width: 480px) {
-        /* Even smaller adjustments for very small screens */
         .btn {
             padding: 8px 16px;
             font-size: 0.8rem;
@@ -409,18 +395,15 @@
         }
     }
     
-    /* Smooth scrolling for anchor links */
     html {
         scroll-behavior: smooth;
     }
     
-    /* Improved focus states for accessibility */
     .btn:focus, a:focus {
         outline: 2px solid #3B82F6;
         outline-offset: 2px;
     }
     
-    /* Modern section styling */
     .section-title {
         position: relative;
         display: inline-block;
@@ -438,7 +421,6 @@
         border-radius: 2px;
     }
     
-    /* Status badges */
     .status-badge {
         padding: 4px 12px;
         border-radius: 20px;
@@ -642,19 +624,12 @@
             TOPICS: `${API_BASE}/topics`
         };
 
-        // Format date for display
+        // Format date 
         function formatDate(dateString) {
             const options = { year: 'numeric', month: 'long', day: 'numeric' };
             return new Date(dateString).toLocaleDateString(undefined, options);
         }
 
-        // Format time for display
-        function formatTime(dateString) {
-            const options = { hour: '2-digit', minute: '2-digit' };
-            return new Date(dateString).toLocaleTimeString(undefined, options);
-        }
-
-        // Fetch data from API
         async function fetchData(endpoint) {
             try {
                 const response = await fetch(endpoint);
@@ -800,21 +775,17 @@
             `).join('');
         }
 
-        // Mobile navigation functionality
         function setupMobileNav() {
             const mobileNavBtns = document.querySelectorAll('.mobile-nav-btn');
             
             mobileNavBtns.forEach(btn => {
                 btn.addEventListener('click', function() {
-                    // Remove active class from all buttons
                     mobileNavBtns.forEach(b => b.classList.remove('active'));
-                    // Add active class to clicked button
                     this.classList.add('active');
                 });
             });
         }
 
-        // Initialize the page
         document.addEventListener('DOMContentLoaded', function() {
             loadAnnouncements();
             loadAssignments();
