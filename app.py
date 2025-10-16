@@ -137,9 +137,6 @@ class User(db.Model, UserMixin):
 # ========================================
 # ANNOUNCEMENT MODEL
 # ========================================
-# =========================================
-# ANNOUNCEMENT MODEL (UPDATED)
-# =========================================
 class Announcement(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(200), nullable=True)
@@ -314,7 +311,6 @@ class TopicMaterial(db.Model):
 #==========================================    
 with app.app_context():
     try:
-        db.drop_all()
         db.create_all()
 
         # Create admin user if not exists
@@ -504,7 +500,7 @@ print("🕒 APScheduler started: cloning every 25 days")
 atexit.register(lambda: scheduler.shutdown(wait=False))
 
 # =========================================
-# keep_alive_both_dbs
+# keep_alive_both_dbs for future Merge
 # =========================================
 
 from sqlalchemy import create_engine, text
@@ -520,7 +516,7 @@ src_engine = create_engine(SRC_DB_URL, pool_pre_ping=True)
 tgt_engine = create_engine(TGT_DB_URL, pool_pre_ping=True)
 
 # ------------------------------
-# Keep-alive function
+# Keep-alive just for fast DB response
 # ------------------------------
 def keep_databases_alive():
     for name, engine in [("Source", src_engine), ("Target", tgt_engine)]:
@@ -545,6 +541,40 @@ scheduler.start()
 print("🕒 Keep-alive scheduler started: pinging both DBs every 3 minutes")
 
 # Ensure scheduler stops gracefully on app shutdown
+atexit.register(lambda: scheduler.shutdown(wait=False))
+#==========================================
+#      ANNOUNCEMENT CLEANER
+#==========================================
+def delete_old_announcements():
+    """Delete announcements older than 5 days to save storage"""
+    cutoff = datetime.utcnow() - timedelta(days=5)
+    old_announcements = Announcement.query.filter(Announcement.created_at < cutoff).all()
+    
+    if not old_announcements:
+        print("🗑️ No old announcements to delete.")
+        return
+    
+    for ann in old_announcements:
+        print(f"🗑️ Deleting announcement ID {ann.id} ({ann.title}) created on {ann.created_at}")
+        db.session.delete(ann)
+    
+    db.session.commit()
+    print(f"✅ Deleted {len(old_announcements)} old announcements.")
+
+scheduler = BackgroundScheduler()
+
+# Run the job every day
+scheduler.add_job(
+    func=delete_old_announcements,
+    trigger=IntervalTrigger(days=1),
+    id="delete_old_announcements_task",
+    replace_existing=True,
+)
+
+scheduler.start()
+print("🕒 APScheduler started: deleting announcements older than 5 days daily")
+
+# Shutdown scheduler gracefully on exit
 atexit.register(lambda: scheduler.shutdown(wait=False))
 
 #==========================================
