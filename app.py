@@ -137,6 +137,9 @@ class User(db.Model, UserMixin):
 # ========================================
 # ANNOUNCEMENT MODEL
 # ========================================
+# =========================================
+# ANNOUNCEMENT MODEL (UPDATED)
+# =========================================
 class Announcement(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(200), nullable=True)
@@ -145,6 +148,23 @@ class Announcement(db.Model):
     
     # Foreign key to user who posted
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+
+    # -----------------------
+    # New file fields
+    # -----------------------
+    file_name = db.Column(db.String(255), nullable=True)       # Original filename
+    file_type = db.Column(db.String(100), nullable=True)       # MIME type (image/pdf/etc)
+    file_data = db.Column(db.LargeBinary, nullable=True)       # Actual file content (bytes)
+
+    def has_file(self):
+        """Check if announcement has an attached file"""
+        return bool(self.file_data and self.file_name)
+
+    def get_file_url(self):
+        """Optional helper to serve file via Flask endpoint"""
+        if not self.has_file():
+            return None
+        return f"/announcement-file/{self.id}/{self.file_name}"
 
 # =========================================
 # TOPIC / THEME MODEL
@@ -300,6 +320,11 @@ class TopicMaterial(db.Model):
 #==========================================    
 with app.app_context():
     try:
+        from sqlalchemy import text
+        # Drop the Announcement table
+        with db.engine.begin() as conn:
+            conn.execute(text("DROP TABLE IF EXISTS announcement CASCADE"))
+
         db.create_all()
 
         # Create admin user if not exists
@@ -453,7 +478,7 @@ def clone_database_robust():
                     except Exception as e:
                         print(f"⚠️ Could not reset sequence for {table.name}.{col.name}: {e}")
 
-    print(f"✅ Database cloned successfully at {datetime.now()}")
+    print(f"✅ Database cloned successfully at {nairobi_time()}")
 
 
 # ------------------------------
@@ -2056,62 +2081,87 @@ def toggle_admin(user_id):
     })
 
 # =========================================
-# ANNOUNCEMENT API ROUTES
+# ANNOUNCEMENT API ROUTES (UPDATED)
 # =========================================
+import io
 
 @app.route('/api/announcements')
 def get_announcements():
-    """Get all announcements"""
-    announcements = Announcement.query.order_by(Announcement.created_at.desc()).all()
-    result = []
-    for announcement in announcements:
-        result.append({
-            'id': announcement.id,
-            'title': announcement.title,
-            'content': announcement.content,
-            'created_at': announcement.created_at.isoformat(),
-            'author': {
-                'id': announcement.author.id,
-                'username': announcement.author.username
-            } if announcement.author else None
-        })
-    return jsonify(result)
+    try:
+        announcements = Announcement.query.order_by(Announcement.created_at.desc()).all()
+        result = [{
+            'id': a.id,
+            'title': a.title,
+            'content': a.content,
+            'created_at': a.created_at.isoformat(),
+            'author': {'id': a.author.id, 'username': a.author.username} if a.author else None,
+            'has_file': a.has_file(),
+            'file_name': a.file_name,
+            'file_type': a.file_type,
+            'file_url': a.get_file_url()
+        } for a in announcements]
+        return jsonify(result)
+    except Exception as e:
+        app.logger.exception("Failed to fetch announcements")
+        return jsonify({'error': 'Failed to fetch announcements'}), 500
 
-@app.route('/api/announcements', methods=['POST'])
+# =========================================
+# ANNOUNCEMENT API ROUTES (multipart/form-data)
+# =========================================
+from werkzeug.utils import secure_filename
+
+@app.route('/api/announcements/create', methods=['POST'])
 @login_required
 @admin_required
 def create_announcement():
-    """Create a new announcement (Admin only)"""
     if not current_user.is_admin:
         return jsonify({'error': 'Unauthorized'}), 403
-    
-    data = request.get_json()
+
+    title = request.form.get('title')
+    content = request.form.get('content')
+
+    file = request.files.get('file')  # This is the uploaded file
+    file_name = secure_filename(file.filename) if file else None
+    file_type = file.mimetype if file else None
+    file_data = file.read() if file else None  # raw bytes
+
     announcement = Announcement(
-        title=data.get('title'),
-        content=data.get('content'),
-        user_id=current_user.id
+        title=title,
+        content=content,
+        user_id=current_user.id,
+        file_name=file_name,
+        file_type=file_type,
+        file_data=file_data
     )
     db.session.add(announcement)
     db.session.commit()
-    
+
     return jsonify({'message': 'Announcement created successfully', 'id': announcement.id}), 201
 
 @app.route('/api/announcements/<int:id>', methods=['PUT'])
 @login_required
 @admin_required
 def update_announcement(id):
-    """Update an announcement (Admin only)"""
+    """Update an announcement with optional file"""
     if not current_user.is_admin:
         return jsonify({'error': 'Unauthorized'}), 403
-    
+
     announcement = Announcement.query.get_or_404(id)
-    data = request.get_json()
-    
-    announcement.title = data.get('title', announcement.title)
-    announcement.content = data.get('content', announcement.content)
+    title = request.form.get('title', announcement.title)
+    content = request.form.get('content', announcement.content)
+    file = request.files.get('file')
+
+    announcement.title = title
+    announcement.content = content
+
+    if file:
+        announcement.file_name = secure_filename(file.filename)
+        announcement.file_type = file.mimetype
+        announcement.file_data = file.read()
+
     db.session.commit()
-    
     return jsonify({'message': 'Announcement updated successfully'})
+
 
 @app.route('/api/announcements/<int:id>', methods=['DELETE'])
 @login_required
@@ -2127,6 +2177,21 @@ def delete_announcement(id):
     
     return jsonify({'message': 'Announcement deleted successfully'})
 
+
+# -----------------------------------------
+# Route to serve announcement file/image
+# -----------------------------------------
+@app.route('/announcement-file/<int:id>/<filename>')
+def serve_announcement_file(id, filename):
+    announcement = Announcement.query.get_or_404(id)
+    if not announcement.has_file() or announcement.file_name != filename:
+        return jsonify({'error': 'File not found'}), 404
+
+    return send_file(
+        io.BytesIO(announcement.file_data),
+        download_name=announcement.file_name,
+        mimetype=announcement.file_type
+    )
 # =========================================
 # ASSIGNMENT API ROUTES
 # =========================================
