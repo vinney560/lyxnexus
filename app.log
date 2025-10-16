@@ -1415,3 +1415,185 @@ TypeError: string argument without an encoding
 2025-10-16 11:09:48,370 - apscheduler.scheduler - INFO - Added job "ping_urls" to job store "default"
 2025-10-16 11:09:48,371 - apscheduler.scheduler - INFO - Scheduler started
 2025-10-16 11:09:48,397 - werkzeug - INFO -  * Restarting with stat
+2025-10-16 11:10:19,555 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-10-16 11:10:19,557 - apscheduler.scheduler - INFO - Added job "clone_database_robust" to job store "default"
+2025-10-16 11:10:19,558 - apscheduler.scheduler - INFO - Scheduler started
+2025-10-16 11:10:19,561 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-10-16 11:10:19,562 - apscheduler.scheduler - INFO - Added job "keep_databases_alive" to job store "default"
+2025-10-16 11:10:19,564 - apscheduler.scheduler - INFO - Scheduler started
+2025-10-16 11:10:19,644 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-10-16 11:10:19,721 - apscheduler.scheduler - INFO - Added job "periodic_cleanup" to job store "default"
+2025-10-16 11:10:19,723 - apscheduler.scheduler - INFO - Scheduler started
+2025-10-16 11:10:19,724 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-10-16 11:10:19,725 - apscheduler.scheduler - INFO - Added job "ping_urls" to job store "default"
+2025-10-16 11:10:19,726 - apscheduler.scheduler - INFO - Scheduler started
+2025-10-16 11:10:19,785 - werkzeug - WARNING -  * Debugger is active!
+2025-10-16 11:10:19,805 - werkzeug - INFO -  * Debugger PIN: 292-054-809
+2025-10-16 11:10:48,367 - apscheduler.executors.default - INFO - Running job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-16 11:10:48 EAT)" (scheduled at 2025-10-16 11:10:48.364053+03:00)
+2025-10-16 11:10:48,371 - apscheduler.executors.default - INFO - Job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-16 11:10:48 EAT)" executed successfully
+2025-10-16 11:11:10,380 - werkzeug - INFO -  * Detected change in '/mnt/c/Users/HP/LyxNexus/app.py', reloading
+2025-10-16 11:11:10,382 - apscheduler.scheduler - INFO - Scheduler has been shut down
+2025-10-16 11:11:10,852 - werkzeug - INFO -  * Restarting with stat
+2025-10-16 11:11:34,705 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-10-16 11:11:34,707 - apscheduler.scheduler - INFO - Added job "clone_database_robust" to job store "default"
+2025-10-16 11:11:34,708 - apscheduler.scheduler - INFO - Scheduler started
+2025-10-16 11:11:34,711 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-10-16 11:11:34,712 - apscheduler.scheduler - INFO - Added job "keep_databases_alive" to job store "default"
+2025-10-16 11:11:34,713 - apscheduler.scheduler - INFO - Scheduler started
+2025-10-16 11:11:34,745 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-10-16 11:11:34,746 - apscheduler.scheduler - INFO - Added job "periodic_cleanup" to job store "default"
+2025-10-16 11:11:34,748 - apscheduler.scheduler - INFO - Scheduler started
+2025-10-16 11:11:34,751 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-10-16 11:11:34,753 - apscheduler.scheduler - INFO - Added job "ping_urls" to job store "default"
+2025-10-16 11:11:34,754 - apscheduler.scheduler - INFO - Scheduler started
+2025-10-16 11:11:34,784 - werkzeug - WARNING -  * Debugger is active!
+2025-10-16 11:11:34,806 - werkzeug - INFO -  * Debugger PIN: 292-054-809
+2025-10-16 11:11:48,364 - apscheduler.executors.default - INFO - Running job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-16 11:12:48 EAT)" (scheduled at 2025-10-16 11:11:48.364053+03:00)
+2025-10-16 11:11:48,365 - apscheduler.executors.default - INFO - Job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-16 11:12:48 EAT)" executed successfully
+2025-10-16 11:12:34,774 - apscheduler.executors.default - INFO - Running job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-16 11:12:34 EAT)" (scheduled at 2025-10-16 11:12:34.745570+03:00)
+2025-10-16 11:12:34,784 - apscheduler.executors.default - INFO - Job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-16 11:12:34 EAT)" executed successfully
+2025-10-16 11:12:48,343 - apscheduler.executors.default - INFO - Running job "keep_databases_alive (trigger: interval[0:03:00], next run at: 2025-10-16 11:12:48 EAT)" (scheduled at 2025-10-16 11:12:48.339788+03:00)
+2025-10-16 11:12:48,420 - apscheduler.executors.default - INFO - Running job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-16 11:13:48 EAT)" (scheduled at 2025-10-16 11:12:48.364053+03:00)
+2025-10-16 11:12:48,422 - apscheduler.executors.default - INFO - Job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-16 11:13:48 EAT)" executed successfully
+2025-10-16 11:12:48,423 - apscheduler.executors.default - INFO - Running job "ping_urls (trigger: interval[0:03:00], next run at: 2025-10-16 11:12:48 EAT)" (scheduled at 2025-10-16 11:12:48.368630+03:00)
+2025-10-16 11:12:53,552 - apscheduler.executors.default - INFO - Job "ping_urls (trigger: interval[0:03:00], next run at: 2025-10-16 11:15:48 EAT)" executed successfully
+2025-10-16 11:13:20,174 - apscheduler.executors.default - INFO - Job "keep_databases_alive (trigger: interval[0:03:00], next run at: 2025-10-16 11:15:48 EAT)" executed successfully
+2025-10-16 11:13:29,704 - app - ERROR - Failed to fetch announcements
+Traceback (most recent call last):
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/sqlalchemy/engine/default.py", line 951, in do_execute
+    cursor.execute(statement, parameters)
+psycopg2.errors.UndefinedTable: relation "announcement" does not exist
+LINE 2: FROM announcement ORDER BY announcement.created_at DESC
+             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/mnt/c/Users/HP/LyxNexus/app.py", line 2080, in get_announcements
+    announcements = Announcement.query.order_by(Announcement.created_at.desc()).all()
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/sqlalchemy/orm/query.py", line 2704, in all
+    return self._iter().all()  # type: ignore
+           ^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/sqlalchemy/orm/query.py", line 2857, in _iter
+    result: Union[ScalarResult[_T], Result[_T]] = self.session.execute(
+                                                  ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 2365, in execute
+    return self._execute_internal(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 2251, in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 306, in orm_execute_statement
+    result = conn.execute(
+             ^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1419, in execute
+    return meth(
+           ^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/sqlalchemy/sql/elements.py", line 526, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1641, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 2355, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/sqlalchemy/engine/default.py", line 951, in do_execute
+    cursor.execute(statement, parameters)
+sqlalchemy.exc.ProgrammingError: (psycopg2.errors.UndefinedTable) relation "announcement" does not exist
+LINE 2: FROM announcement ORDER BY announcement.created_at DESC
+             ^
+
+[SQL: SELECT announcement.id AS announcement_id, announcement.title AS announcement_title, announcement.content AS announcement_content, announcement.created_at AS announcement_created_at, announcement.user_id AS announcement_user_id, announcement.file_name AS announcement_file_name, announcement.file_type AS announcement_file_type, announcement.file_data AS announcement_file_data 
+FROM announcement ORDER BY announcement.created_at DESC]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+2025-10-16 11:13:30,712 - app - ERROR - Failed to fetch announcements
+Traceback (most recent call last):
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/sqlalchemy/engine/default.py", line 951, in do_execute
+    cursor.execute(statement, parameters)
+psycopg2.errors.UndefinedTable: relation "announcement" does not exist
+LINE 2: FROM announcement ORDER BY announcement.created_at DESC
+             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/mnt/c/Users/HP/LyxNexus/app.py", line 2080, in get_announcements
+    announcements = Announcement.query.order_by(Announcement.created_at.desc()).all()
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/sqlalchemy/orm/query.py", line 2704, in all
+    return self._iter().all()  # type: ignore
+           ^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/sqlalchemy/orm/query.py", line 2857, in _iter
+    result: Union[ScalarResult[_T], Result[_T]] = self.session.execute(
+                                                  ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 2365, in execute
+    return self._execute_internal(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 2251, in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 306, in orm_execute_statement
+    result = conn.execute(
+             ^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1419, in execute
+    return meth(
+           ^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/sqlalchemy/sql/elements.py", line 526, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1641, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 2355, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/sqlalchemy/engine/default.py", line 951, in do_execute
+    cursor.execute(statement, parameters)
+sqlalchemy.exc.ProgrammingError: (psycopg2.errors.UndefinedTable) relation "announcement" does not exist
+LINE 2: FROM announcement ORDER BY announcement.created_at DESC
+             ^
+
+[SQL: SELECT announcement.id AS announcement_id, announcement.title AS announcement_title, announcement.content AS announcement_content, announcement.created_at AS announcement_created_at, announcement.user_id AS announcement_user_id, announcement.file_name AS announcement_file_name, announcement.file_type AS announcement_file_type, announcement.file_data AS announcement_file_data 
+FROM announcement ORDER BY announcement.created_at DESC]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+2025-10-16 11:13:34,747 - apscheduler.executors.default - INFO - Running job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-16 11:14:34 EAT)" (scheduled at 2025-10-16 11:13:34.745570+03:00)
+2025-10-16 11:13:34,749 - apscheduler.executors.default - INFO - Job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-16 11:14:34 EAT)" executed successfully
+2025-10-16 11:13:48,368 - apscheduler.executors.default - INFO - Running job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-16 11:14:48 EAT)" (scheduled at 2025-10-16 11:13:48.364053+03:00)
+2025-10-16 11:13:48,378 - apscheduler.executors.default - INFO - Job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-16 11:14:48 EAT)" executed successfully
+2025-10-16 11:14:34,716 - apscheduler.executors.default - INFO - Running job "keep_databases_alive (trigger: interval[0:03:00], next run at: 2025-10-16 11:14:34 EAT)" (scheduled at 2025-10-16 11:14:34.711087+03:00)
+2025-10-16 11:14:34,817 - apscheduler.executors.default - INFO - Running job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-16 11:15:34 EAT)" (scheduled at 2025-10-16 11:14:34.745570+03:00)
+2025-10-16 11:14:34,819 - apscheduler.executors.default - INFO - Job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-16 11:15:34 EAT)" executed successfully
+2025-10-16 11:14:34,820 - apscheduler.executors.default - INFO - Running job "ping_urls (trigger: interval[0:03:00], next run at: 2025-10-16 11:14:34 EAT)" (scheduled at 2025-10-16 11:14:34.751773+03:00)
+2025-10-16 11:14:41,063 - apscheduler.executors.default - INFO - Job "ping_urls (trigger: interval[0:03:00], next run at: 2025-10-16 11:17:34 EAT)" executed successfully
+2025-10-16 11:14:47,509 - apscheduler.executors.default - INFO - Job "keep_databases_alive (trigger: interval[0:03:00], next run at: 2025-10-16 11:17:34 EAT)" executed successfully
+2025-10-16 11:14:48,365 - apscheduler.executors.default - INFO - Running job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-16 11:15:48 EAT)" (scheduled at 2025-10-16 11:14:48.364053+03:00)
+2025-10-16 11:14:48,366 - apscheduler.executors.default - INFO - Job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-16 11:15:48 EAT)" executed successfully
+2025-10-16 11:15:34,747 - apscheduler.executors.default - INFO - Running job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-16 11:16:34 EAT)" (scheduled at 2025-10-16 11:15:34.745570+03:00)
+2025-10-16 11:15:34,749 - apscheduler.executors.default - INFO - Job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-16 11:16:34 EAT)" executed successfully
+2025-10-16 11:15:48,341 - apscheduler.executors.default - INFO - Running job "keep_databases_alive (trigger: interval[0:03:00], next run at: 2025-10-16 11:18:48 EAT)" (scheduled at 2025-10-16 11:15:48.339788+03:00)
+2025-10-16 11:15:48,367 - apscheduler.executors.default - INFO - Running job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-16 11:16:48 EAT)" (scheduled at 2025-10-16 11:15:48.364053+03:00)
+2025-10-16 11:15:48,375 - apscheduler.executors.default - INFO - Job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-16 11:16:48 EAT)" executed successfully
+2025-10-16 11:15:48,391 - apscheduler.executors.default - INFO - Running job "ping_urls (trigger: interval[0:03:00], next run at: 2025-10-16 11:18:48 EAT)" (scheduled at 2025-10-16 11:15:48.368630+03:00)
+2025-10-16 11:15:51,407 - apscheduler.executors.default - INFO - Job "keep_databases_alive (trigger: interval[0:03:00], next run at: 2025-10-16 11:18:48 EAT)" executed successfully
+2025-10-16 11:15:51,834 - apscheduler.executors.default - INFO - Job "ping_urls (trigger: interval[0:03:00], next run at: 2025-10-16 11:18:48 EAT)" executed successfully
+2025-10-16 11:16:12,617 - apscheduler.scheduler - INFO - Scheduler has been shut down
