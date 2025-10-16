@@ -1,20 +1,2 @@
-container.innerHTML = announcements.map(announcement => `
-    <div class="announcement-card border-l-4 border-blue-500 bg-gray-800/50 p-4 sm:p-5 rounded-xl shadow-md hover:shadow-lg transition duration-200 ease-in-out">
-        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-3 gap-2">
-            <h3 class="text-xl sm:text-2xl font-extrabold text-white underline underline-offset-4 decoration-blue-500 leading-snug break-words">
-                ${announcement.title}
-            </h3>
-            <span class="text-blue-400 text-xs sm:text-sm whitespace-nowrap">
-                ${formatDate(announcement.created_at)}
-            </span>
-        </div>
-        
-        <p class="mb-4 text-gray-300 text-sm sm:text-base leading-relaxed break-words">${linkify(announcement.content)}</p>
-
-        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
-            <span class="text-gray-400 text-xs sm:text-sm">
-                By: ${announcement.author?.username || 'Unknown'}
-            </span>
-        </div>
-    </div>
-`).join(''); 
+DATABASE_URL = 'postgresql://vincent:TjXSOfUSl0FNX2jTIyzO8ec99C7JECcR@dpg-d3mldb8dl3ps73duf370-a.oregon-postgres.render.com/lyxnexusdb'
+DATABASE_URL_2 = 'postgresql://vincent:GuCY4QasTNxsnANEokWPsfisflyGzgv1@dpg-d3nu8dqli9vc73cgjpc0-a.oregon-postgres.render.com/lyxnexus'

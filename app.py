@@ -146,7 +146,6 @@ class Announcement(db.Model):
     content = db.Column(db.Text, nullable=True)
     created_at = db.Column(db.DateTime, default=nairobi_time)
     
-    # Foreign key to user who posted
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
 
     # -----------------------
@@ -161,7 +160,6 @@ class Announcement(db.Model):
         return bool(self.file_data and self.file_name)
 
     def get_file_url(self):
-        """Optional helper to serve file via Flask endpoint"""
         if not self.has_file():
             return None
         return f"/announcement-file/{self.id}/{self.file_name}"
@@ -220,7 +218,6 @@ class Timetable(db.Model):
 # MESSAGE MODELS
 # ========================================
 class Message(db.Model):
-
     id = db.Column(db.Integer, primary_key=True)
     content = db.Column(db.Text, nullable=False)
     user_id = db.Column(
@@ -251,9 +248,7 @@ class Message(db.Model):
         backref=db.backref('replies', lazy=True, cascade='all, delete-orphan')
     )
 
-
 class MessageRead(db.Model):
-
     id = db.Column(db.Integer, primary_key=True)
     message_id = db.Column(
         db.Integer,
@@ -301,7 +296,6 @@ class File(db.Model):
     def __repr__(self):
         return f'<File {self.name}>'
 
-
 class TopicMaterial(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     topic_id = db.Column(db.Integer, db.ForeignKey('topic.id'), nullable=False)
@@ -320,11 +314,7 @@ class TopicMaterial(db.Model):
 #==========================================    
 with app.app_context():
     try:
-        from sqlalchemy import text
-        # Drop the Announcement table
-        with db.engine.begin() as conn:
-            conn.execute(text("DROP TABLE IF EXISTS announcement CASCADE"))
-
+        db.drop_all()
         db.create_all()
 
         # Create admin user if not exists

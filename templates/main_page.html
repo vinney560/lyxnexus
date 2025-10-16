@@ -690,12 +690,11 @@
               `<a href="${url}" target="_blank" rel="noopener noreferrer" class="text-blue-400 underline hover:text-blue-300">${url}</a>`
           );
         }
-
         // Load announcements
         async function loadAnnouncements() {
           const container = document.getElementById("announcements-container");
           announcements = (await fetchData(ENDPOINTS.ANNOUNCEMENTS)) || [];
-
+        
           if (announcements.length === 0) {
             container.innerHTML =
               '<p class="text-center text-gray-400 py-8">No announcements available.</p>';
@@ -710,131 +709,157 @@
           let pinnedIds = JSON.parse(localStorage.getItem("pinnedAnnouncements") || "[]");
       
           // Render announcements (pinned first)
-          function renderAnnouncements() {
-            const sorted = [...announcements].sort((a, b) => {
-              const aPinned = pinnedIds.includes(a.id);
-              const bPinned = pinnedIds.includes(b.id);
-              return aPinned === bPinned ? 0 : aPinned ? -1 : 1;
-            });
-        
-            container.innerHTML = sorted
-              .map((announcement) => {
-                const urlMatch = announcement.content.match(/https?:\/\/[^\s]+/);
-                const url = urlMatch ? urlMatch[0] : null;
-                const previewId = `og-preview-${announcement.id || Math.random().toString(36).slice(2)}`;
-                const isPinned = pinnedIds.includes(announcement.id);
+          const sorted = [...announcements].sort((a, b) => {
+            const aPinned = pinnedIds.includes(a.id);
+            const bPinned = pinnedIds.includes(b.id);
+            return aPinned === bPinned ? 0 : aPinned ? -1 : 1;
+          });
+      
+          container.innerHTML = sorted
+            .map((announcement) => {
+              const urlMatch = announcement.content.match(/https?:\/\/[^\s]+/);
+              const url = urlMatch ? urlMatch[0] : null;
+              const previewId = `og-preview-${announcement.id || Math.random().toString(36).slice(2)}`;
+              const isPinned = pinnedIds.includes(announcement.id);
             
-                // File preview (image or link)
-                let filePreview = "";
-                if (announcement.has_file && announcement.file_type?.startsWith("image/")) {
-                  filePreview = `
-                    <div class="mb-3 w-24 h-24 rounded-lg overflow-hidden bg-gray-700 flex items-center justify-center">
-                      <img src="${announcement.file_url}" alt="${announcement.file_name}" class="object-cover w-full h-full">
-                    </div>
-                  `;
-                } else if (announcement.has_file) {
-                  filePreview = `
-                    <div class="mb-3">
-                      <a href="${announcement.file_url}" target="_blank" class="text-blue-400 underline hover:text-blue-300 text-sm sm:text-base">
-                        📎 ${announcement.file_name}
-                      </a>
-                    </div>
-                  `;
-                }
-            
-                return `
-                  <div class="announcement-card border border-gray-800 bg-gray-900/60 rounded-2xl shadow-md hover:shadow-lg transition duration-200 ease-in-out overflow-hidden mb-6 relative">
-                
-                    <!-- Pin button -->
-                    <button 
-                        onclick="togglePin(${announcement.id})"
-                        class="absolute top-3 right-3 p-1 rounded-full transition duration-200 ${
-                          isPinned
-                            ? "bg-yellow-400/20 text-yellow-400 hover:bg-yellow-400/30"
-                            : "text-gray-500 hover:text-yellow-400 hover:bg-gray-800/40"
-                        }"
-                        title="${isPinned ? "Unpin" : "Pin"}"
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" 
-                            viewBox="0 0 24 24" 
-                            fill="${isPinned ? 'currentColor' : 'none'}" 
-                            stroke="currentColor" 
-                            stroke-width="1.9" 
-                            class="w-8 h-8 drop-shadow-sm">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 2c.8 0 1.5.7 1.5 1.5V9l3 3v1.5h-3l-.25 6.5a.75.75 0 01-1.5 0L11 13.5H8V12l3-3V3.5C11 2.7 11.7 2 12 2z" />
-                        </svg>
-                    </button>
-                
-                    <!-- OG Preview -->
-                    <div id="${previewId}" class="w-full border-b border-gray-800"></div>
-                
-                    <!-- File/Image Preview -->
-                    ${filePreview}
-                
-                    <!-- Announcement Body -->
-                    <div class="p-4 sm:p-5">
-                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-3 gap-2">
-                            <h3 class="text-xl sm:text-2xl font-extrabold text-white leading-snug break-words">
-                                ${announcement.title}
-                            </h3>
-                            <span class="text-blue-400 text-xs sm:text-sm whitespace-nowrap">
-                                ${formatDate(announcement.created_at)}
-                            </span>
-                        </div>
-                    
-                        <p class="mb-4 text-gray-300 text-sm sm:text-base leading-relaxed break-words">
-                            ${linkify(announcement.content)}
-                        </p>
-                    
-                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
-                            <span class="text-gray-400 text-xs sm:text-sm">
-                                By: ${announcement.author?.username || "Unknown"}
-                            </span>
-                        </div>
-                    </div>
+              // File preview (image or link)
+              let filePreview = "";
+              if (announcement.has_file && announcement.file_type?.startsWith("image/")) {
+                filePreview = `
+                  <div class="mb-3 w-24 h-24 rounded-lg overflow-hidden bg-gray-700 flex items-center justify-center cursor-pointer"
+                       onclick="openImagePreview('${announcement.file_url}')">
+                    <img src="${announcement.file_url}" alt="${announcement.file_name}" class="object-cover w-full h-full">
                   </div>
                 `;
-              })
-              .join("");
-          
-            sorted.forEach((announcement) => {
-              const urlMatch = announcement.content.match(/https?:\/\/[^\s]+/);
-              if (!urlMatch) return;
-            
-              const url = urlMatch[0];
-              const previewId = `og-preview-${announcement.id || Math.random().toString(36).slice(2)}`;
-              const previewEl = document.getElementById(previewId);
-            
-              fetch(`/api/preview?url=${encodeURIComponent(url)}`)
-                .then((res) => res.json())
-                .then((data) => {
-                  if (!data.title && !data.image) return;
-                
-                  previewEl.innerHTML = `
-                    <a href="${url}" target="_blank" class="flex items-center gap-3 p-3 sm:p-4 bg-gray-800/70 hover:bg-gray-800/90 transition duration-200 ease-in-out">
-                        ${
-                          data.image
-                            ? `<div class="flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden bg-gray-700 flex items-center justify-center">
-                                 <img src="${data.image}" alt="" class="object-cover w-full h-full">
-                               </div>`
-                            : `<div class="flex-shrink-0 w-16 h-16 rounded-lg bg-gray-700 flex items-center justify-center text-gray-500 text-xs italic">
-                                 No image
-                               </div>`
-                        }
-                        <div class="flex-1">
-                            <h3 class="text-white font-semibold text-sm sm:text-base mb-1 line-clamp-1">
-                                ${data.title || "Untitled"}
-                            </h3>
-                            <p class="text-gray-400 text-xs sm:text-sm line-clamp-2">
-                                ${data.description || ""}
-                            </p>
-                        </div>
+              } else if (announcement.has_file) {
+                filePreview = `
+                  <div class="mb-3">
+                    <a href="${announcement.file_url}" target="_blank" class="text-blue-400 underline hover:text-blue-300 text-sm sm:text-base">
+                      📎 ${announcement.file_name}
                     </a>
-                  `;
-                })
-                .catch(() => console.warn("No OG preview found for", url));
-            });
-          }
+                  </div>
+                `;
+              }
+          
+              return `
+                <div class="announcement-card border border-gray-800 bg-gray-900/60 rounded-2xl shadow-md hover:shadow-lg transition duration-200 ease-in-out overflow-hidden mb-6 relative">
+                
+                  <!-- Pin button -->
+                  <button 
+                      onclick="togglePin(${announcement.id})"
+                      class="absolute top-3 right-3 p-1 rounded-full transition duration-200 ${
+                        isPinned
+                          ? "bg-yellow-400/20 text-yellow-400 hover:bg-yellow-400/30"
+                          : "text-gray-500 hover:text-yellow-400 hover:bg-gray-800/40"
+                      }"
+                      title="${isPinned ? "Unpin" : "Pin"}"
+                  >
+                      <svg xmlns="http://www.w3.org/2000/svg" 
+                          viewBox="0 0 24 24" 
+                          fill="${isPinned ? 'currentColor' : 'none'}" 
+                          stroke="currentColor" 
+                          stroke-width="1.9" 
+                          class="w-8 h-8 drop-shadow-sm">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M12 2c.8 0 1.5.7 1.5 1.5V9l3 3v1.5h-3l-.25 6.5a.75.75 0 01-1.5 0L11 13.5H8V12l3-3V3.5C11 2.7 11.7 2 12 2z" />
+                      </svg>
+                  </button>
+              
+                  <!-- OG Preview -->
+                  <div id="${previewId}" class="w-full border-b border-gray-800"></div>
+              
+                  <!-- File/Image Preview -->
+                  ${filePreview}
+              
+                  <!-- Announcement Body -->
+                  <div class="p-4 sm:p-5">
+                      <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-3 gap-2">
+                          <h3 class="text-xl sm:text-2xl font-extrabold text-white leading-snug break-words">
+                              ${announcement.title}
+                          </h3>
+                          <span class="text-blue-400 text-xs sm:text-sm whitespace-nowrap">
+                              ${formatDate(announcement.created_at)}
+                          </span>
+                      </div>
+                  
+                      <p class="mb-4 text-gray-300 text-sm sm:text-base leading-relaxed break-words">
+                          ${linkify(announcement.content)}
+                      </p>
+                  
+                      <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+                          <span class="text-gray-400 text-xs sm:text-sm">
+                              By: ${announcement.author?.username || "Unknown"}
+                          </span>
+                      </div>
+                  </div>
+                </div>
+              `;
+            })
+            .join("");
+        
+          // OG previews for URLs
+          sorted.forEach((announcement) => {
+            const urlMatch = announcement.content.match(/https?:\/\/[^\s]+/);
+            if (!urlMatch) return;
+        
+            const url = urlMatch[0];
+            const previewId = `og-preview-${announcement.id || Math.random().toString(36).slice(2)}`;
+            const previewEl = document.getElementById(previewId);
+        
+            fetch(`/api/preview?url=${encodeURIComponent(url)}`)
+              .then((res) => res.json())
+              .then((data) => {
+                if (!data.title && !data.image) return;
+            
+                previewEl.innerHTML = `
+                  <a href="${url}" target="_blank" class="flex items-center gap-3 p-3 sm:p-4 bg-gray-800/70 hover:bg-gray-800/90 transition duration-200 ease-in-out">
+                      ${
+                        data.image
+                          ? `<div class="flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden bg-gray-700 flex items-center justify-center">
+                               <img src="${data.image}" alt="" class="object-cover w-full h-full">
+                             </div>`
+                          : `<div class="flex-shrink-0 w-16 h-16 rounded-lg bg-gray-700 flex items-center justify-center text-gray-500 text-xs italic">
+                               No image
+                             </div>`
+                      }
+                      <div class="flex-1">
+                          <h3 class="text-white font-semibold text-sm sm:text-base mb-1 line-clamp-1">
+                              ${data.title || "Untitled"}
+                          </h3>
+                          <p class="text-gray-400 text-xs sm:text-sm line-clamp-2">
+                              ${data.description || ""}
+                          </p>
+                      </div>
+                  </a>
+                `;
+              })
+              .catch(() => console.warn("No OG preview found for", url));
+          });
+        }
+        
+        // ============================
+        // Image preview modal handlers
+        // ============================
+        function openImagePreview(src) {
+          const modal = document.getElementById('image-preview-modal');
+          const img = document.getElementById('image-preview-img');
+          if (!modal || !img) return;
+          img.src = src;
+          modal.classList.remove('hidden');
+          modal.classList.add('flex');
+        }
+        
+        function closeImagePreview() {
+          const modal = document.getElementById('image-preview-modal');
+          const img = document.getElementById('image-preview-img');
+          if (!modal || !img) return;
+          modal.classList.add('hidden');
+          modal.classList.remove('flex');
+          img.src = '';
+        }
+        
+        document.getElementById('image-preview-modal')?.addEventListener('click', e => {
+          if (e.target.id === 'image-preview-modal') closeImagePreview();
+        });
       
           // Toggle pin
           window.togglePin = function (id) {
