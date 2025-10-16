@@ -325,7 +325,6 @@
         .hidden.md\:flex {
             display: none !important;
         }
-        
         /* Mobile Navigation */
         .mobile-nav {
             position: fixed;
@@ -335,39 +334,58 @@
             background: rgba(15, 23, 42, 0.95);
             backdrop-filter: blur(10px);
             display: flex;
-            justify-content: space-around;
+            justify-content: flex-start;
+            align-items: center;
+            overflow-x: auto;    
+            overflow-y: hidden;
+            white-space: nowrap;      
             padding: 12px;
             z-index: 100;
             border-top: 1px solid rgba(255, 255, 255, 0.1);
+            scroll-behavior: smooth;   
+            -webkit-overflow-scrolling: touch; 
         }
+
         
+        .mobile-nav::-webkit-scrollbar {
+            display: none;
+        }
+        .mobile-nav {
+            -ms-overflow-style: none; 
+            scrollbar-width: none;    
+        }
+
+        /* Mobile Navigation Buttons */
         .mobile-nav-btn {
-            display: flex;
+            display: inline-flex;        
             flex-direction: column;
             align-items: center;
+            justify-content: center;
             padding: 8px 12px;
             border-radius: 12px;
             color: #94a3b8;
             font-size: 12px;
             transition: all 0.3s ease;
-            flex: 1;
-            max-width: 80px;
+            flex: 0 0 auto;               
+            width: 70px;                  
+            margin-right: 10px;
+            text-align: center;
         }
-        
+
         .mobile-nav-btn.active {
             color: #3B82F6;
             background: rgba(59, 130, 246, 0.1);
         }
-        
+
         .mobile-nav-btn i {
             font-size: 18px;
             margin-bottom: 4px;
         }
-        
+
         .content-container {
-            padding-bottom: 80px;
+            padding-bottom: 90px;
         }
-    }
+
     
     @media (max-width: 480px) {
         /* Even smaller adjustments for very small screens */
