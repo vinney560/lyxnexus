@@ -452,7 +452,7 @@
                     <button class="btn bg-red-600 hover:bg-gray-700 text-sm sm:text-base" onclick="window.location.href='https://lyxspace.onrender.com/files'">
                         <i class="fas fa-file mr-2"></i> More Files
                     </button>
-                    <button class="btn bg-gray-600 hover:bg-gray-700 text-sm sm:text-base" onclick="window.location.href='/main-page'">
+                    <button class="btn bg-gray-600 hover:bg-gray-700 text-sm sm:text-base" id="backBtn">
                         <i class="fas fa-arrow-left mr-2"></i> Back
                     </button>
                     {% if current_user.is_admin %}
@@ -562,6 +562,7 @@
         const FILES_ENDPOINT = `${API_BASE}/files`;
         const UPLOAD_ENDPOINT = `${API_BASE}/files/upload`;
         const CATEGORIES_ENDPOINT = `${API_BASE}/files/categories`;
+        const backBtn = document.getElementById('backBtn');
 
         // Global variables
         let currentPage = 1;
@@ -569,7 +570,22 @@
         let currentSearch = '';
         const itemsPerPage = 10;
 
-        // Toast notification system
+        
+        // Back button handler
+        const isAdmin = {{ 'true' if current_user.is_admin else 'false' }};
+
+        backBtn.addEventListener('click', function() {
+            backBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>';
+            const redirectUrl = isAdmin ? '/admin' : '/main-page';
+            window.location.href = redirectUrl;
+            backBtn.disabled = true; // prevent double clicks
+
+            setTimeout(() => {
+                backBtn.innerHTML = '<i class="fas fa-arrow-left mr-2"></i><span> Back</span>';
+                backBtn.disabled = false;
+            }, 2000); // simulate loading
+        });
+          // Toast notification system
         class ToastManager {
             constructor() {
                 this.container = document.getElementById('toast-container');
