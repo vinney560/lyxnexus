@@ -578,7 +578,7 @@
                     {% if unread_count > 0 %}
                     <span class="unread-badge">{{ unread_count }}</span>
                     {% endif %}
-                    <button onclick="window.history.back()" class="btn-outline">
+                    <button id="backBtn" class="btn-outline">
                         <i class="fas fa-arrow-left mr-2"></i>
                     </button>
                 </div>
@@ -734,6 +734,7 @@
         const replyToUsername = document.getElementById('replyToUsername');
         const replyToContent = document.getElementById('replyToContent');
         const cancelReply = document.getElementById('cancelReply');
+        const backBtn = document.getElementById('backBtn');
         
         // Enhanced State Management
         let currentRoom = 'general';
@@ -751,6 +752,21 @@
         };
         let replyingToMessage = null;
 
+        // Back button handler
+        const isAdmin = {{ 'true' if current_user.is_admin else 'false' }};
+
+        backBtn.addEventListener('click', function() {
+            backBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>';
+            const redirectUrl = isAdmin ? '/admin' : '/main-page';
+            window.location.href = redirectUrl;
+            backBtn.disabled = true; // prevent double clicks
+        
+            setTimeout(() => {
+                backBtn.innerHTML = '<i class="fas fa-arrow-left mr-2"></i>';
+                backBtn.disabled = false;
+            }, 1000); // simulate loading delay
+        });
+        
         // Format time
         function formatTime(dateString) {
             const date = new Date(dateString);

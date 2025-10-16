@@ -326,9 +326,12 @@
         const cancelEdit = document.getElementById('cancelEdit');
 
         // Back button handler
+        const isAdmin = {{ 'true' if current_user.is_admin else 'false' }};
+
         backBtn.addEventListener('click', function() {
             backBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i><span>Loading...</span>';
-            window.location.href = '/main-page';
+            const redirectUrl = isAdmin ? '/admin' : '/main-page';
+            window.location.href = redirectUrl;
             backBtn.disabled = true; // prevent double clicks
 
             setTimeout(() => {
