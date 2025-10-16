@@ -265,7 +265,6 @@
         margin-left: 10px;
     }
     
-    /* Modern Toast Notifications */
     .toast-container {
         position: fixed;
         top: 20px;
@@ -433,7 +432,6 @@
         background: var(--accent-color);
     }
     
-    /* Navigation Header */
     .nav-header {
         position: absolute;
         top: 0;
@@ -494,7 +492,6 @@
         background: rgba(59, 130, 246, 0.1);
     }
     
-    /* Responsive Design */
     @media (max-width: 768px) {
         .toast-container {
             right: 10px;
@@ -538,7 +535,6 @@
     }
 </style>
 <body>
-    <!-- Navigation Header -->
     <header class="nav-header">
         <div class="nav-content">
             <div class="nav-logo" onclick="goToHome()">
@@ -566,13 +562,10 @@
         </div>
     </header>
 
-    <!-- Toast Container -->
     <div class="toast-container" id="toast-container"></div>
 
-    <!-- Login Container -->
     <div class="w-full max-w-md mx-4">
         <div class="glass-morph rounded-2xl p-8">
-            <!-- Logo and Header -->
             <div class="text-center mb-8">
                 <div class="logo-container floating" onclick="goToHome()">
                     <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -588,7 +581,6 @@
                 <p class="text-gray-400 mt-2">Enter your credentials to continue</p>
             </div>
 
-            <!-- Tabs -->
             <div class="flex border-b border-gray-700 mb-6">
                 <button class="tab-button active" data-tab="student-tab">Student Login</button>
                 <button class="tab-button" data-tab="admin-tab">Admin Access</button>
@@ -622,7 +614,6 @@
                 </div>
             </div>
 
-            <!-- Admin Access Form -->
             <div id="admin-tab" class="tab-content">
                 <div class="glass-morph rounded-lg p-4 mb-4">
                     <div class="flex items-center">
@@ -631,7 +622,6 @@
                     </div>
                 </div>
                 
-                <!-- Admin Login Tabs within Admin Tab -->
                 <div class="flex border-b border-gray-700 mb-4">
                     <button class="subtab-button active" data-subtab="admin-login-tab">Admin Login</button>
                     <button class="subtab-button" data-subtab="master-key-tab">Master Key Access</button>
@@ -738,7 +728,6 @@
     </div>
 
     <script>
-        // API endpoints
         const API_BASE = '/api';
         const ENDPOINTS = {
             REGISTER_ADMIN: `${API_BASE}/register-admin`,
@@ -747,7 +736,6 @@
             LOGIN: '/login'
         };
 
-        // Toast notification system
         class ToastManager {
             constructor() {
                 this.container = document.getElementById('toast-container');
@@ -784,12 +772,10 @@
                 this.container.appendChild(toast);
                 this.toasts.add(toast);
                 
-                // Animate in
                 setTimeout(() => {
                     toast.classList.add('show');
                 }, 10);
                 
-                // Progress bar animation
                 const progressBar = toast.querySelector('.toast-progress-bar');
                 let width = 100;
                 const interval = setInterval(() => {
@@ -829,10 +815,8 @@
             }
         }
         
-        // Initialize toast manager
         const toastManager = new ToastManager();
         
-        // Helper function to show toast
         function showToast(message, type = 'info', title = null) {
             const titles = {
                 success: 'Success',
@@ -844,7 +828,6 @@
             return toastManager.show(title || titles[type], message, type);
         }
 
-        // Navigation function
         function goToHome() {
             window.location.href = '/';
         }
@@ -853,17 +836,14 @@
         function openTab(tabName) {
             console.log('Opening tab:', tabName);
             
-            // Hide all tab content
             document.querySelectorAll('.tab-content').forEach(tab => {
                 tab.classList.remove('active');
             });
             
-            // Remove active class from all tab buttons
             document.querySelectorAll('.tab-button').forEach(button => {
                 button.classList.remove('active');
             });
             
-            // Show the specific tab content
             const tabElement = document.getElementById(tabName);
             if (tabElement) {
                 tabElement.classList.add('active');
@@ -872,14 +852,12 @@
                 console.error('Tab element not found:', tabName);
             }
             
-            // Activate the corresponding tab button
             document.querySelectorAll('.tab-button').forEach(button => {
                 if (button.getAttribute('data-tab') === tabName) {
                     button.classList.add('active');
                 }
             });
             
-            // Show a toast notification
             if (tabName === 'student-tab') {
                 showToast('Switched to student login', 'info');
             } else if (tabName === 'admin-tab') {
@@ -887,21 +865,17 @@
             }
         }
 
-        // Subtabs management for admin tab
         function openSubTab(subTabName) {
             console.log('Opening subtab:', subTabName);
             
-            // Hide all subtab content
             document.querySelectorAll('.subtab-content').forEach(tab => {
                 tab.classList.remove('active');
             });
             
-            // Remove active class from all subtab buttons
             document.querySelectorAll('.subtab-button').forEach(button => {
                 button.classList.remove('active');
             });
             
-            // Show the specific subtab content
             const subtabElement = document.getElementById(subTabName);
             if (subtabElement) {
                 subtabElement.classList.add('active');
@@ -910,7 +884,6 @@
                 console.error('Subtab element not found:', subTabName);
             }
             
-            // Activate the corresponding subtab button
             document.querySelectorAll('.subtab-button').forEach(button => {
                 if (button.getAttribute('data-subtab') === subTabName) {
                     button.classList.add('active');
@@ -918,7 +891,6 @@
             });
         }
 
-        // Modal management
         function openRegisterAdminModal() {
             document.getElementById('register-admin-modal').style.display = 'flex';
             showToast('Opening admin registration', 'info');
@@ -928,12 +900,10 @@
             document.getElementById(modalId).style.display = 'none';
         }
 
-        // Validate mobile number
         function validateMobile(mobile) {
             return /^\d{10}$/.test(mobile);
         }
 
-        // Register admin via API
         async function registerAdmin(formData) {
             try {
                 const response = await fetch(ENDPOINTS.REGISTER_ADMIN, {
@@ -957,7 +927,7 @@
             }
         }
 
-        // Promote existing user to admin via API
+        // Promote existing user to admin
         async function promoteToAdmin(formData) {
             try {
                 const response = await fetch(ENDPOINTS.PROMOTE_TO_ADMIN, {
@@ -981,7 +951,6 @@
             }
         }
 
-        // Check if user is admin
         async function checkAdmin(mobile) {
             try {
                 const response = await fetch(ENDPOINTS.CHECK_ADMIN, {
@@ -1000,11 +969,9 @@
             }
         }
 
-        // Initialize the page
         document.addEventListener('DOMContentLoaded', function() {
             console.log('DOM loaded, initializing page...');
             
-            // Check if there are any Flask flash messages
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
                     {% for category, message in messages %}
@@ -1013,7 +980,6 @@
                 {% endif %}
             {% endwith %}
             
-            // Mobile number formatting
             const mobileInputs = document.querySelectorAll('input[type="tel"]');
             mobileInputs.forEach(input => {
                 input.addEventListener('input', function() {
@@ -1037,22 +1003,18 @@
                 });
             });
             
-            // Switch to admin button
             document.getElementById('switch-to-admin-btn').addEventListener('click', function() {
                 openTab('admin-tab');
             });
             
-            // Register admin button
             document.getElementById('register-admin-btn').addEventListener('click', function() {
                 openRegisterAdminModal();
             });
             
-            // Cancel register admin button
             document.getElementById('cancel-register-admin').addEventListener('click', function() {
                 closeModal('register-admin-modal');
             });
             
-            // Close modal when clicking outside
             document.addEventListener('click', function(event) {
                 if (event.target.classList.contains('modal')) {
                     event.target.style.display = 'none';
@@ -1123,7 +1085,6 @@
                     return;
                 }
                 
-                // Show loading toast
                 showToast('Processing master key access...', 'info', 'Please Wait');
             });
 
@@ -1159,25 +1120,21 @@
                 const toast = showToast('Processing admin registration...', 'info', 'Please Wait');
                 
                 try {
-                    // Try to register as new admin
                     const result = await registerAdmin(formData);
                     toastManager.close(toast);
                     showToast('Admin account created successfully! You can now login.', 'success');
                     closeModal('register-admin-modal');
                     
-                    // Switch to admin tab and pre-fill mobile
                     openTab('admin-tab');
                     document.getElementById('admin-mobile').value = mobile;
                     document.getElementById('admin-username').value = username;
                 } catch (error) {
-                    // If registration fails, try to promote existing user
                     try {
                         const result = await promoteToAdmin(formData);
                         toastManager.close(toast);
                         showToast('User promoted to admin successfully! You can now login.', 'success');
                         closeModal('register-admin-modal');
                         
-                        // Switch to admin tab and pre-fill mobile
                         openTab('admin-tab');
                         document.getElementById('admin-mobile').value = mobile;
                         document.getElementById('admin-username').value = username;
@@ -1188,7 +1145,6 @@
                 }
             });
             
-            // Show welcome toast
             setTimeout(() => {
                 showToast('Welcome to LyxNexus! Please login to continue.', 'info', 'Welcome');
             }, 1000);

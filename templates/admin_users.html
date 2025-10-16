@@ -337,10 +337,9 @@
     }
 </style>
 <body>
-    <!-- Toast Notifications -->
+
     <div id="toast-container"></div>
 
-    <!-- Navigation -->
     <nav class="glass-morph sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 py-4">
             <div class="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
@@ -368,7 +367,7 @@
     </nav>
 
     <main class="max-w-7xl mx-auto px-4 py-8">
-        <!-- Header -->
+
         <div class="mb-8">
             <h1 class="text-2xl sm:text-3xl font-bold gradient-text mb-2">User Management</h1>
             <p class="text-gray-400">Manage system users and administrator privileges</p>
@@ -384,7 +383,6 @@
             </div>
         </div>
 
-        <!-- Statistics Cards -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
             <div class="stats-card">
                 <div class="stats-number" id="total-users">0</div>
@@ -404,7 +402,6 @@
             </div>
         </div>
 
-        <!-- Users Table -->
         <div class="glass-morph rounded-xl p-4 sm:p-6">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4 sm:gap-0">
                 <h2 class="text-xl sm:text-2xl font-bold">All Users</h2>
@@ -442,7 +439,6 @@
         </div>
     </main>
 
-    <!-- Confirmation Modal -->
     <div id="confirm-modal" class="modal">
         <div class="modal-content">
             <h3 class="text-xl font-bold mb-4" id="confirm-title">Confirm Action</h3>
@@ -458,7 +454,6 @@
     </div>
 
     <script>
-        // API endpoints
         const API_BASE = '/api';
         const USERS_ENDPOINT = `${API_BASE}/users`;
         
@@ -466,14 +461,13 @@
         let pollInterval;
         let isRefreshing = false;
 
-        // Format date for display
+        // Format date
         function formatDate(dateString) {
             if (!dateString) return 'N/A';
             const date = new Date(dateString);
             return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
         }
 
-        // Format relative time
         function formatRelativeTime(dateString) {
             if (!dateString) return 'N/A';
             const date = new Date(dateString);
@@ -490,14 +484,12 @@
             return formatDate(dateString);
         }
 
-        // Update last updated timestamp
         function updateLastUpdated() {
             const now = new Date();
             document.getElementById('last-updated-text').textContent = 
                 `Last updated: ${now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'})}`;
         }
 
-        // Show toast notification
         function showToast(message, type = 'info', duration = 5000) {
             const toastContainer = document.getElementById('toast-container');
             const toastId = 'toast-' + Date.now();
@@ -514,12 +506,10 @@
             
             toastContainer.appendChild(toast);
             
-            // Show toast
             setTimeout(() => {
                 toast.classList.add('show');
             }, 100);
             
-            // Auto hide after duration
             setTimeout(() => {
                 toast.classList.remove('show');
                 setTimeout(() => {
@@ -532,7 +522,6 @@
             return toastId;
         }
 
-        // Set button loading state
         function setButtonLoading(button, isLoading) {
             if (isLoading) {
                 button.classList.add('btn-loading');
@@ -543,7 +532,6 @@
             }
         }
 
-        // Set multiple buttons loading state
         function setButtonsLoading(buttonSelectors, isLoading) {
             buttonSelectors.forEach(selector => {
                 const button = document.querySelector(selector);
@@ -553,7 +541,6 @@
             });
         }
 
-        // Fetch users data
         async function fetchUsers() {
             try {
                 const response = await fetch(USERS_ENDPOINT);
@@ -567,7 +554,6 @@
             }
         }
 
-        // Load and display users
         async function loadUsers() {
             if (isRefreshing) return;
             
@@ -597,13 +583,11 @@
             }
         }
 
-        // Update statistics cards
         function updateStatistics(users) {
             const totalUsers = users.length;
             const adminUsers = users.filter(user => user.is_admin).length;
             const regularUsers = totalUsers - adminUsers;
             
-            // Count today's registrations
             const today = new Date();
             today.setHours(0, 0, 0, 0);
             const todayUsers = users.filter(user => {
@@ -617,7 +601,6 @@
             document.getElementById('today-users').textContent = todayUsers;
         }
 
-        // Display users in table
         function displayUsers(users) {
             const container = document.getElementById('users-table-body');
             
@@ -681,7 +664,6 @@
                 </tr>
             `).join('');
             
-            // Add event listeners to the new buttons
             document.querySelectorAll('.toggle-admin-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
                     const userId = this.getAttribute('data-user-id');
@@ -697,7 +679,6 @@
             });
         }
 
-        // Toggle admin status
         async function toggleAdmin(userId, button) {
             if (!userId) return;
             
@@ -739,7 +720,6 @@
             openModal('confirm-modal');
         }
 
-        // Delete user
         async function deleteUser(button) {
             if (!currentUserId) return;
             
@@ -766,12 +746,10 @@
             }
         }
 
-        // Refresh users manually
         function refreshUsers() {
             loadUsers();
         }
 
-        // Modal management
         function openModal(modalId) {
             document.getElementById(modalId).style.display = 'flex';
         }
@@ -781,7 +759,6 @@
             setButtonLoading(document.getElementById('confirm-action-btn'), false);
         }
 
-        // Close modal when clicking outside
         window.onclick = function(event) {
             if (event.target.classList.contains('modal')) {
                 event.target.style.display = 'none';
@@ -789,20 +766,15 @@
             }
         }
 
-        // Logout function
         function logout() {
             window.location.href = '/logout';
         }
 
-        // Initialize the page and start polling
         document.addEventListener('DOMContentLoaded', function() {
-            // Load initial data
             loadUsers();
             
-            // Start polling every 10 seconds
-            pollInterval = setInterval(loadUsers, 10000);
+            pollInterval = setInterval(loadUsers, 120000);
             
-            // Cleanup on page unload
             window.addEventListener('beforeunload', function() {
                 if (pollInterval) {
                     clearInterval(pollInterval);

@@ -296,7 +296,6 @@
         flex-shrink: 0;
     }
 
-    /* Responsive Styles */
     @media (max-width: 768px) {
         nav.glass-morph {
           position: static !important;
@@ -367,7 +366,6 @@
         }
     }
 
-    /* Hide scrollbar for tabs */
     .scrollbar-hide {
         -ms-overflow-style: none;
         scrollbar-width: none;
@@ -377,7 +375,6 @@
         display: none;
     }
 
-    /* Make action buttons stack on mobile */
     @media (max-width: 480px) {
         .flex.space-x-2.ml-4 {
             margin-left: 0;
@@ -393,7 +390,6 @@
     }
 </style>
 <body>
-    <!-- Navigation -->
     <nav class="glass-morph sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 py-4">
             <div class="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
@@ -991,13 +987,11 @@
         }
           
         /* ======= EDIT / DELETE / SUBMIT HANDLERS ======= */
-        // Grab elements
         const announcementFileInput = document.getElementById('announcement-file');
         const fileInfoContainer = document.getElementById('announcement-file-info');
         const fileNameEl = document.getElementById('announcement-file-name');
         const fileSizeEl = document.getElementById('announcement-file-size');
 
-        // Show file info when a file is selected
         if (announcementFileInput) {
           announcementFileInput.addEventListener('change', () => {
             const file = announcementFileInput.files[0];
@@ -1013,7 +1007,6 @@
           });
         }
 
-        // Clear file input
         function clearAnnouncementFile() {
           announcementFileInput.value = '';
           fileInfoContainer.style.display = 'none';
@@ -1021,14 +1014,12 @@
           fileSizeEl.textContent = '';
         }
 
-        /* Announcements */
         async function editAnnouncement(id) {
           console.log('[editAnnouncement]', id);
           const list = await fetchData(ENDPOINTS.ANNOUNCEMENTS);
           const item = list.find(x => x.id == id);
           if (!item) return alert('Announcement not found');
 
-          // Populate form
           const idEl = document.getElementById('announcement-id');
           if (idEl) idEl.value = item.id;
 
@@ -1037,7 +1028,6 @@
           if (t) t.value = item.title || '';
           if (c) c.value = item.content || '';
 
-          // Handle file display
           const fileSection = document.getElementById('announcement-file-info');
           const fileNameEl = document.getElementById('announcement-file-name');
           const fileSizeEl = document.getElementById('announcement-file-size');
@@ -1047,7 +1037,7 @@
             fileSection.style.display = 'flex';
             fileNameEl.textContent = item.file_name;
             fileSizeEl.textContent = item.file_size ? `${(item.file_size / 1024).toFixed(1)} KB` : '';
-            // Optional: reset file input so new file can replace
+
             if (fileInput) fileInput.value = '';
           } else if (fileSection) {
             fileSection.style.display = 'none';
@@ -1122,7 +1112,6 @@
           });
         }
 
-        /* Assignments */
         async function editAssignment(id) {
           console.log('[editAssignment]', id);
           const list = await fetchData(ENDPOINTS.ASSIGNMENTS);
@@ -1133,9 +1122,7 @@
           document.getElementById('assignment-title') && (document.getElementById('assignment-title').value = item.title || '');
           document.getElementById('assignment-description') && (document.getElementById('assignment-description').value = item.description || '');
           if (item.due_date) {
-            // make compatible with datetime-local
             const dt = new Date(item.due_date);
-            // pad to yyyy-mm-ddThh:mm
             const iso = new Date(dt.getTime() - dt.getTimezoneOffset()*60000).toISOString().slice(0,16);
             document.getElementById('assignment-due-date') && (document.getElementById('assignment-due-date').value = iso);
           }
@@ -1264,10 +1251,8 @@
           console.log('[editTimetableSlot]', id);
           const raw = await fetchData(ENDPOINTS.TIMETABLE);
           if (!raw) return alert('No timetable data');
-          // raw might be grouped or flat
           let flat = [];
           if (Array.isArray(raw) && raw.length && raw[0].day && raw[0].slots) {
-            // grouped -> flatten and attach day
             raw.forEach(d => {
               d.slots.forEach(s => flat.push(Object.assign({}, s, { day: d.day })));
             });
@@ -1339,12 +1324,11 @@
           window.open(`${ENDPOINTS.ASSIGNMENTS}/${id}/download`, '_blank');
         }
           
-        /* ======= INITIALIZE / DROPDOWNS ======= */
         async function loadTopicDropdowns() {
           const topics = await fetchData(ENDPOINTS.TOPICS);
           const selects = document.querySelectorAll('select[id$="topic"]');
           selects.forEach(s => {
-            // keep first option, remove others
+      
             while (s.children.length > 1) s.removeChild(s.lastChild);
             topics.forEach(t => {
               const opt = document.createElement('option');
@@ -1355,17 +1339,13 @@
           });
         }
           
-        /* ======= DOMContentLoaded ======= */
         document.addEventListener('DOMContentLoaded', () => {
-          // Initialize the announcements tab as active by default
           openTab('announcements-tab');
           
-          // assignment file input listener (if not attached earlier)
           const fileInput = document.getElementById('assignment-file');
           if (fileInput) fileInput.addEventListener('change', handleAssignmentFileSelect);
         });
 
-        // Logout function
         function logout() {
             if (confirm('Are you sure you want to logout?')) {
                 window.location.href = '/logout';
