@@ -763,7 +763,7 @@
                     <!-- Announcement Body -->
                     <div class="p-4 sm:p-5">
                         <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-3 gap-2">
-                            <h3 class="text-xl sm:text-2xl font-extrabold text-white leading-snug break-words">
+                            <h3 class="text-xl uppercase break-all underline underline-offset-8 decoration-red-500 decoration-double sm:text-2xl font-extrabold text-white leading-snug break-words">
                                 ${announcement.title}
                             </h3>
                             <span class="text-blue-400 text-xs sm:text-sm whitespace-nowrap">
@@ -771,7 +771,7 @@
                             </span>
                         </div>
                     
-                        <p class="mb-4 text-gray-300 text-sm sm:text-base leading-relaxed break-words">
+                        <p class="mb-4 break-all text-gray-300 hyphens-auto text-sm sm:text-base indent-4 leading-relaxed break-words">
                             ${linkify(announcement.content)}
                         </p>
                     

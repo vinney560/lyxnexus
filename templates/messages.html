@@ -84,7 +84,7 @@
     }
     
     .message-container {
-        background: rgba(30, 30, 40, 0.7);
+        /*background: rgba(30, 30, 40, 0.7);*/
         border-radius: 15px;
         padding: 20px;
         height: 85vh;
@@ -274,11 +274,11 @@
     
     .message-input {
         flex: 1;
-        background: rgba(55, 65, 81, 0.4); /* slightly softer background */
-        border: 1px solid rgba(59, 130, 246, 0.2); /* gentler border */
+        background: rgba(55, 65, 81, 0.4); 
+        border: 1px solid rgba(59, 130, 246, 0.2); 
         border-radius: 25px;
         padding: 12px 18px;
-        color: #f9fafb; /* softer white */
+        color: #f9fafb; 
         font-family: 'Poppins', sans-serif;
         resize: none;
         max-height: 100px;
@@ -287,17 +287,14 @@
         transition: border 0.2s ease, background 0.2s ease;
     }
 
-    /* Hide scrollbar (Chrome, Edge, Safari) */
     .message-input::-webkit-scrollbar {
         display: none;
     }
 
-    /* Hide scrollbar (Firefox) */
     .message-input {
         scrollbar-width: none;
     }
 
-    /* Subtle focus effect */
     .message-input:focus {
         background: rgba(59, 130, 246, 0.1);
         border-color: rgba(59, 130, 246, 0.5);
@@ -589,7 +586,7 @@
         <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
             <!-- Messages Container -->
             <div class="lg:col-span-3">
-                <div class="message-container">
+                <div class="message-container bg-[url('/uploads/OIP11.jpg')] bg-fixed bg-center bg-cover filter brightness-10">
                     <div class="messages-list" id="messagesList">
                         {% for message in messages %}
                         <div class="message {% if message.user_id == current_user.id %}user-message{% elif message.is_admin_message %}admin-message{% else %}other-message{% endif %} {% if message.is_deleted %}deleted{% endif %}" 
@@ -712,7 +709,6 @@
             transports: ['websocket', 'polling']
         });
         
-        // DOM elements
         const messagesList = document.getElementById('messagesList');
         const messageInput = document.getElementById('messageInput');
         const sendButton = document.getElementById('sendButton');
@@ -746,22 +742,22 @@
         };
         let replyingToMessage = null;
 
-        // Back button handler
+        // Back button haddler
         const isAdmin = {{ 'true' if current_user.is_admin else 'false' }};
 
         backBtn.addEventListener('click', function() {
             backBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>';
             const redirectUrl = isAdmin ? '/admin' : '/main-page';
             window.location.href = redirectUrl;
-            backBtn.disabled = true; // prevent double clicks
+            backBtn.disabled = true;
         
             setTimeout(() => {
                 backBtn.innerHTML = '<i class="fas fa-arrow-left mr-2"></i>';
                 backBtn.disabled = false;
-            }, 1000); // simulate loading delay
+            }, 1000);
         });
         
-        // Format time
+
         function formatTime(dateString) {
             const date = new Date(dateString);
             return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -811,7 +807,7 @@
             }
         }
         
-        // Update connection quality indicator
+        // Update connection quality indicator - still not that accurate, will update laiter
         function updateConnectionQuality() {
             if (connectionHealth.latency < 100) {
                 connectionHealth.quality = 'good';
@@ -973,7 +969,7 @@
             replyIndicator.style.display = 'none';
         }
         
-        // Delete a message
+        // Delete a message + all childrens and parents
         function deleteMessage(messageId) {
             if (!confirm('Are you sure you want to delete this message?')) {
                 return;
@@ -1023,7 +1019,7 @@
             }
         }
         
-        // Message queue wher offline
+        // Message lining wher offline
         function addToMessageQueue(message) {
             messageQueue.push({
                 ...message,
@@ -1149,7 +1145,7 @@
             autoScrollToBottom();
         }
         
-        // Send message
+        // Sends the message
         function sendMessage() {
             const content = messageInput.value.trim();
             if (!content) return;
@@ -1388,7 +1384,6 @@
             }, 1000);
         });
         
-        // DOM event listeners
         sendButton.addEventListener('click', sendMessage);
         
         messageInput.addEventListener('keypress', (e) => {

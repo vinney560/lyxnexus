@@ -572,7 +572,6 @@ def login():
     if request.method == 'POST':
         username = request.form.get('username', '').strip().lower()[:50]
         mobile = request.form.get('mobile')
-        admin_secret = request.form.get('admin_secret')
         master_key = request.form.get('master_key')
         if (
             not mobile
@@ -704,6 +703,17 @@ def topic_materials(topic_id):
 @app.route('/favicon.ico')
 def favicon():
     return send_from_directory(app.config['UPLOAD_FOLDER'], 'favicon.ico')
+#--------------------------------------------------------------------
+@app.route('/uploads/<filename>')
+def uploaded_file(filename):
+    if '..' in filename or filename.startswith('/'):
+        abort(400, "Invalid filename")
+    
+    file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    if os.path.exists(file_path):
+        return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+    else:
+        abort(404, "File not found")
 #--------------------------------------------------------------------
 @app.route('/manifest.json')
 def manifest():
@@ -1584,7 +1594,6 @@ def handle_leave_room(data):
             'message': f'{current_user.username} left {room}'
         }, room=room, include_self=False)
         
-        # Join general room
         join_room('general')
         
         emit('room_left', {
@@ -1595,7 +1604,6 @@ def handle_leave_room(data):
 
 @socketio.on('send_message')
 def handle_send_message(data):
-    """Handle new message"""
     if not current_user.is_authenticated:
         return {'success': False, 'error': 'Not authenticated'}
     
@@ -1729,7 +1737,6 @@ def handle_ping(data):
 
 @socketio.on('get_messages')
 def handle_get_messages(data):
-    """Handle request for messages via WebSocket"""
     if current_user.is_authenticated:
         room = data.get('room', 'general')
         since_id = data.get('since_id', 0)
@@ -1788,7 +1795,6 @@ def handle_get_messages(data):
 
 @socketio.on('mark_read')
 def handle_mark_read(data):
-    """Handle marking messages as read via WebSocket"""
     if not current_user.is_authenticated:
         return
     
