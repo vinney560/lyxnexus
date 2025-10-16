@@ -54,12 +54,11 @@ def database_url():
             except ArgumentError as e:
                 print(f"⚠️ Invalid {name} URL: {e}")
 
-    # Fallback to SQLite
+    # Fallback to SQLite to prevent Runtime errors
     if db_3:
         if db_3.startswith("sqlite:///"):
             print("=" * 70)
             print("✅ Using local SQLite fallback database.")
-            # No need to connect immediately; SQLAlchemy will create file if missing
             return db_3
         else:
             print("⚠️ Fallback DB URL invalid (should start with sqlite:///).")
@@ -143,13 +142,11 @@ class Announcement(db.Model):
     content = db.Column(db.Text, nullable=True)
     created_at = db.Column(db.DateTime, default=nairobi_time)
     
+    #Relationships
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
 
-    # -----------------------
-    # New file fields
-    # -----------------------
     file_name = db.Column(db.String(255), nullable=True)       # Original filename
-    file_type = db.Column(db.String(100), nullable=True)       # MIME type (image/pdf/etc)
+    file_type = db.Column(db.String(100), nullable=True)       # MIME type
     file_data = db.Column(db.LargeBinary, nullable=True)       # Actual file content (bytes)
 
     def has_file(self):
@@ -170,7 +167,7 @@ class Topic(db.Model):
     description = db.Column(db.Text, nullable=True)
     created_at = db.Column(db.DateTime, default=nairobi_time)
 
-    # Relationship: a topic can have many assignments
+    # Relationship
     assignments = db.relationship('Assignment', backref='topic', lazy=True)
 
 # =========================================
@@ -178,25 +175,25 @@ class Topic(db.Model):
 # =========================================
 class Assignment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(200), nullable=True) # Short title(e.g. "Math 112")
+    title = db.Column(db.String(200), nullable=True)
     description = db.Column(db.Text, nullable=True)
-    due_date = db.Column(db.DateTime, nullable=True) # When to submit
+    due_date = db.Column(db.DateTime, nullable=True)
     created_at = db.Column(db.DateTime, default=nairobi_time)
 
     # Store the actual uploaded file
     file_data = db.Column(db.LargeBinary, nullable=True)   # actual file content (bytes)
     file_name = db.Column(db.String(1255), nullable=True)   # original filename
-    file_type = db.Column(db.String(100), nullable=True)   # MIME type (e.g. 'application/pdf')
+    file_type = db.Column(db.String(100), nullable=True)   # MIME type
 
     # Foreign keys
     topic_id = db.Column(db.Integer, db.ForeignKey('topic.id'), nullable=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)  # creator
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
 # =========================================
 # TIMETABLE MODEL
 # =========================================
 class Timetable(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    day_of_week = db.Column(db.String(20), nullable=False)  # Monday, Tuesday, etc.
+    day_of_week = db.Column(db.String(20), nullable=False)
     start_time = db.Column(db.Time, nullable=False)
     end_time = db.Column(db.Time, nullable=False)
     subject = db.Column(db.String(200), nullable=False)
@@ -205,7 +202,6 @@ class Timetable(db.Model):
     created_at = db.Column(db.DateTime, default=nairobi_time)
     updated_at = db.Column(db.DateTime, default=nairobi_time, onupdate=nairobi_time)
 
-    # Foreign key to topic (optional)
     topic_id = db.Column(db.Integer, db.ForeignKey('topic.id'), nullable=True)
     
     # Relationship
@@ -228,7 +224,7 @@ class Message(db.Model):
         db.Integer,
         db.ForeignKey('message.id', ondelete='CASCADE'),
         nullable=True
-    )  # For replies
+    )
     is_deleted = db.Column(db.Boolean, default=False)
     deleted_at = db.Column(db.DateTime, nullable=True)
     created_at = db.Column(db.DateTime, default=nairobi_time)
@@ -277,8 +273,8 @@ class File(db.Model):
     name = db.Column(db.String(255), nullable=False)
     filename = db.Column(db.String(255), nullable=False)
     file_type = db.Column(db.String(100), nullable=False)
-    file_size = db.Column(db.Integer, nullable=False)  # Size in bytes
-    file_data = db.Column(db.LargeBinary, nullable=False)  # Actual file data
+    file_size = db.Column(db.Integer, nullable=False)
+    file_data = db.Column(db.LargeBinary, nullable=False)
     description = db.Column(db.Text)
     category = db.Column(db.String(100), default='general')
     uploaded_at = db.Column(db.DateTime, default=nairobi_time)
@@ -297,9 +293,9 @@ class TopicMaterial(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     topic_id = db.Column(db.Integer, db.ForeignKey('topic.id'), nullable=False)
     file_id = db.Column(db.Integer, db.ForeignKey('file.id'), nullable=False)
-    display_name = db.Column(db.String(255), nullable=True)  # Custom display name
-    description = db.Column(db.Text, nullable=True)  # Material-specific description
-    order_index = db.Column(db.Integer, default=0)  # For ordering materials
+    display_name = db.Column(db.String(255), nullable=True)
+    description = db.Column(db.Text, nullable=True)
+    order_index = db.Column(db.Integer, default=0)
     created_at = db.Column(db.DateTime, default=nairobi_time)
     
     # Relationships
@@ -313,7 +309,7 @@ with app.app_context():
     try:
         db.create_all()
 
-        # Create admin user if not exists
+        # Create admin user if not exists (For easy access and testing)
         admin = User.query.filter_by(mobile="0740694312").first()
         if not admin:
             admin = User(
@@ -329,6 +325,8 @@ with app.app_context():
     except Exception as e:
         db.session.rollback()
         print(f"⚠️ Database initialization error: {e}")
+#========================================
+#          HELPERS && BACKGROUND WORKERS
 #==========================================
 # User Loader Helper
 @login_manager.user_loader
@@ -337,7 +335,7 @@ def load_user(user_id):
         return User.query.get(int(user_id))
     except Exception as e:
         print(f'⚠️ Error loading user {user_id}: {e}')
-        db.session.rollback()  # ✅ reset failed transaction
+        db.session.rollback()
         return None
 
 @app.teardown_request
@@ -350,29 +348,28 @@ def _year():
     return datetime.now().strftime('%Y')
 
 ALLOWED_KEYWORDS = [
-    "mozilla",      # Chrome, Firefox, Edge, Safari
-    "applewebkit",  # Chrome, Safari
+    "mozilla",      
+    "applewebkit",  
     "chrome",       
     "safari",
     "firefox",
     "edge",
-    "android",      # Allow Android WebView
-    "linux",        # Allow WebView & native Android apps
+    "android", 
+    "linux",   
 ]
 
 @app.before_request
 def allow_only_known_browsers():
     ua = request.headers.get("User-Agent", "").lower()
 
-    # No User-Agent? Probably a script or bot
+    # No User-Agent(_TelegramBot_Blocker)
     if not ua:
         abort(403)
 
-    # If none of the allowed patterns appear → block
+    # Block invalid User Agents or Bots
     if not any(kw in ua for kw in ALLOWED_KEYWORDS):
         abort(403)
 
-    # Optionally: require some common browser headers
     required_headers = ["accept", "accept-language"]
     for h in required_headers:
         if h not in {k.lower() for k in request.headers.keys()}:
@@ -382,7 +379,7 @@ def admin_required(f):
     @wraps(f)
     def decorator(*args, **kwargs):
         if not current_user.is_authenticated:
-            # If AJAX/API request, return JSON error
+            # for AJAX/API
             if request.path.startswith('/api/') or request.is_json:
                 return jsonify({'error': 'Authentication required'}), 401
             flash('Login first to access the page', 'error')
@@ -393,8 +390,9 @@ def admin_required(f):
             abort(403)
         return f(*args, **kwargs)
     return decorator
+#------------------------------------------------------------------------------
+                                 # BACKGROUND WORKERS
 
-#===================================
 from sqlalchemy import create_engine, MetaData, Table, select, text
 from sqlalchemy_utils import database_exists, create_database, drop_database
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -402,11 +400,8 @@ from apscheduler.triggers.interval import IntervalTrigger
 import atexit
 
 BATCH_SIZE = 500
-LOG_EVERY_BATCH = True  # Whether to log each batch
+LOG_EVERY_BATCH = True
 
-# ------------------------------
-# Robust clone function
-# ------------------------------
 def clone_database_robust():
     """Clone DATABASE_URL -> DATABASE_URL_2 with full robustness"""
     src_url = os.getenv("DATABASE_URL")
@@ -451,7 +446,7 @@ def clone_database_robust():
                     print(f"⚠️ Error copying table {table.name} at batch {offset//BATCH_SIZE + 1}: {e}")
                     break  # Skip remaining rows in this table
 
-            # Fix sequences for serial/identity columns
+            # TO fix sequences for identity columns
             for col in table.columns:
                 if col.autoincrement:
                     try:
@@ -466,10 +461,6 @@ def clone_database_robust():
 
     print(f"✅ Database cloned successfully at {nairobi_time()}")
 
-
-# ------------------------------
-# Flask route
-# ------------------------------
 @app.route("/admin/clone-db")
 @admin_required
 def clone_db_page():
@@ -485,9 +476,7 @@ def clone_db_route():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# ------------------------------
-# Scheduler: every 25 days
-# ------------------------------
+# Clone every 25 days
 scheduler = BackgroundScheduler()
 scheduler.add_job(
     func=clone_database_robust,
@@ -499,14 +488,9 @@ scheduler.start()
 print("🕒 APScheduler started: cloning every 25 days")
 atexit.register(lambda: scheduler.shutdown(wait=False))
 
-# =========================================
-# keep_alive_both_dbs for future Merge
-# =========================================
-
-from sqlalchemy import create_engine, text
-from sqlalchemy.exc import OperationalError
-from apscheduler.schedulers.background import BackgroundScheduler
-from apscheduler.triggers.interval import IntervalTrigger
+                # =========================================
+                # keep_alive_both_dbs for future Merge
+                # =========================================
 
 # Database URLs
 SRC_DB_URL = os.getenv("DATABASE_URL")
@@ -515,9 +499,7 @@ TGT_DB_URL = os.getenv("DATABASE_URL_2")
 src_engine = create_engine(SRC_DB_URL, pool_pre_ping=True)
 tgt_engine = create_engine(TGT_DB_URL, pool_pre_ping=True)
 
-# ------------------------------
 # Keep-alive just for fast DB response
-# ------------------------------
 def keep_databases_alive():
     for name, engine in [("Source", src_engine), ("Target", tgt_engine)]:
         try:
@@ -527,9 +509,7 @@ def keep_databases_alive():
         except OperationalError as e:
             print(f"⚠️ [{datetime.now()}] {name} DB connection failed: {e}")
 
-# ------------------------------
-# Scheduler: every 3 minutes
-# ------------------------------
+# Try ping every 3 minutes
 scheduler = BackgroundScheduler()
 scheduler.add_job(
     func=keep_databases_alive,
@@ -540,11 +520,9 @@ scheduler.add_job(
 scheduler.start()
 print("🕒 Keep-alive scheduler started: pinging both DBs every 3 minutes")
 
-# Ensure scheduler stops gracefully on app shutdown
 atexit.register(lambda: scheduler.shutdown(wait=False))
-#==========================================
+
 #      ANNOUNCEMENT CLEANER
-#==========================================
 def delete_old_announcements():
     """Delete announcements older than 5 days to save storage"""
     cutoff = datetime.utcnow() - timedelta(days=5)
@@ -573,19 +551,17 @@ scheduler.add_job(
 
 scheduler.start()
 print("🕒 APScheduler started: deleting announcements older than 5 days daily")
-
-# Shutdown scheduler gracefully on exit
 atexit.register(lambda: scheduler.shutdown(wait=False))
 
 #==========================================
-#                   Routes
+#                  Normal Routes
 #==========================================
 MASTER_ADMIN_KEY = "lyxnexus_2025"
 
 @app.route('/login', methods=['POST', 'GET'])
 def login():
     next_page = request.args.get("next") or request.form.get("next")
-    login_type = request.form.get('login_type', 'student')  # 'student' or 'admin'
+    login_type = request.form.get('login_type', 'student')  # 'student' or 'admin' - prevent login conflit
     
     if current_user.is_authenticated:
         if current_user.is_admin:
@@ -599,18 +575,15 @@ def login():
         admin_secret = request.form.get('admin_secret')
         master_key = request.form.get('master_key')
         
-        # Validate mobile
         if not mobile or len(mobile) != 10:
             flash('Invalid mobile number', 'error')
             return render_template('login.html', username=username, mobile=mobile, 
                                  login_type=login_type, year=_year())
         
-        # Admin login with master key
         if master_key:
             if master_key == MASTER_ADMIN_KEY:
                 user = User.query.filter_by(mobile=mobile).first()
                 if user:
-                    # Promote existing user to admin
                     user.is_admin = True
                     if username and user.username.lower() != username.lower():
                         user.username = username
@@ -619,7 +592,6 @@ def login():
                     flash('User promoted to administrator successfully!', 'success')
                     return redirect(next_page or url_for('admin_page'))
                 else:
-                    # Create new admin user
                     new_admin = User(
                         username=username,
                         mobile=mobile,
@@ -637,14 +609,12 @@ def login():
         
         user = User.query.filter_by(mobile=mobile).first()
         
-        # Admin login with username and mobile only (no admin_secret)
         if login_type == 'admin':
             if not user or not user.is_admin:
                 flash('Invalid admin credentials', 'error')
                 return render_template('login.html', username=username, mobile=mobile, 
                                      login_type=login_type, year=_year())
             
-            # Verify username matches
             if user.username.lower() != username.lower():
                 flash('Username does not match admin account', 'error')
                 return render_template('login.html', username=username, mobile=mobile, 
@@ -657,7 +627,6 @@ def login():
         # Student login
         if login_type == 'student':
             if not user:
-                # Create new student user
                 new_user = User(
                     username=username,
                     mobile=mobile,
@@ -668,7 +637,6 @@ def login():
                 login_user(new_user)
                 flash('Student account created successfully!', 'success')
             else:
-                # Verify username matches for existing user
                 if user.username.lower() != username.lower():
                     flash('Username does not match existing account', 'error')
                     return render_template('login.html', username=username, mobile=mobile, 
@@ -679,62 +647,82 @@ def login():
             
             return redirect(next_page or url_for('main_page'))
     
-    # GET request
     login_type = request.args.get('type', 'student')
     return render_template('login.html', login_type=login_type, year=_year())
 
+#===================================================================
+@app.route('/')
+def home():
+    return render_template('index.html', year=_year())
+#--------------------------------------------------------------------
 @app.route('/logout')
 @login_required
 def logout():
     logout_user()
     flash('Logout Successfully!', 'sucess')
     return redirect(url_for('home'))
-
-#===================================================
-@app.route('/')
-def home():
-    return render_template('index.html', year=_year())
-
+#--------------------------------------------------------------------
 @app.route('/main-page')
 @login_required
 def main_page():
     return render_template('main_page.html', year=_year())
-
+#--------------------------------------------------------------------
 @app.route('/admin')
 @login_required
 @admin_required
 def admin_page():
     return render_template('admin.html', year=_year())
-
-# User management route
+#--------------------------------------------------------------------
 @app.route('/admin/users')
 @login_required
 @admin_required
 def admin_users():
     return render_template('admin_users.html')
-
+#-----------------------------------------------------------------
 @app.route('/profile')
 @login_required
 def profile():
     """Render the profile edit page"""
     return render_template('edit_profile.html')
-
-# routes.py - Add these routes
-
+#--------------------------------------------------------------------
 @app.route('/files')
 @login_required
 def files():
     """Render the file management page"""
     return render_template('files.html')
-
+#--------------------------------------------------------------------
 @app.route('/material/<int:topic_id>')
 @login_required
 def topic_materials(topic_id):
     """Render the topic materials page"""
     topic = Topic.query.get_or_404(topic_id)
     return render_template('material.html', topic_id=topic_id)
+#--------------------------------------------------------------------
+@app.route('/favicon.ico')
+def favicon():
+    return send_from_directory(app.config['UPLOAD_FOLDER'], 'favicon.ico')
+#--------------------------------------------------------------------
+@app.route('/manifest.json')
+def manifest():
+    return send_from_directory(os.path.dirname(os.path.abspath(__file__)), 'manifest.json', mimetype='application/manifest+json')
+#--------------------------------------------------------------------
+@app.route("/offline.html")
+def offline_html():
+    return render_template("offline.html")
+#-------------------------------------------------------------------
+@app.route('/service-worker.js')
+def sw():
+    return send_from_directory('static', 'service-worker.js', mimetype='application/javascript')
+#-------------------------------------------------------------------
+@app.route('/is_authenticated')
+def is_authenticated():
+    return jsonify({'authenticated': current_user.is_authenticated})
+#-------------------------------------------------------------------
+
+#              SPECIFIED ROUTES
+
 # =========================================
-# MESSAGES ROUTES
+#              MESSAGES ROUTES
 # =========================================
 
 @app.route('/messages')
@@ -742,23 +730,18 @@ def topic_materials(topic_id):
 def messages():
     """Render the messages page with initial data"""
     try:
-        # Get the room from query parameter or default to 'general'
         room = request.args.get('room', 'general')
         
-        # Get recent messages for the room (last 50 messages)
+        # (last 50 messages)
         messages = Message.query.filter_by(
             room=room, 
             is_deleted=False
         ).order_by(Message.created_at.desc()).limit(50).all()
         
-        # Reverse to show oldest first in the UI
         messages.reverse()
         
-        # Get unread count for the current user
         unread_count = get_unread_count(current_user.id)
         
-        # Update user's current room in the database if you have that field
-        # This helps with reconnection and room persistence
         if hasattr(current_user, 'current_room'):
             current_user.current_room = room
             db.session.commit()
@@ -773,7 +756,7 @@ def messages():
         
     except Exception as e:
         print(f"Error loading messages page: {e}")
-        # Fallback: return basic page without messages
+        # Fallback: returns page without messages
         return render_template(
             'messages.html',
             messages=[],
@@ -787,12 +770,10 @@ def messages():
 def messages_room(room_name):
     """Render messages page for a specific room"""
     try:
-        # Validate room name
         valid_rooms = ['general', 'help', 'announcements']
         if room_name not in valid_rooms:
             room_name = 'general'
         
-        # Get recent messages for the room
         messages = Message.query.filter_by(
             room=room_name, 
             is_deleted=False
@@ -800,10 +781,9 @@ def messages_room(room_name):
         
         messages.reverse()
         
-        # Get unread count
+        # Get unread count - Still fixing
         unread_count = get_unread_count(current_user.id)
         
-        # Update user's current room
         if hasattr(current_user, 'current_room'):
             current_user.current_room = room_name
             db.session.commit()
@@ -829,10 +809,6 @@ def messages_room(room_name):
 def get_unread_count(user_id):
     """Get count of unread messages for a user"""
     try:
-        # Count messages that haven't been read by this user
-        # This is a simplified version - you might need to adjust based on your exact logic
-        
-        # Get all message IDs that the user has read
         read_message_ids = db.session.query(MessageRead.message_id).filter_by(
             user_id=user_id
         ).subquery()
@@ -841,7 +817,7 @@ def get_unread_count(user_id):
         unread_count = Message.query.filter(
             Message.id.notin_(read_message_ids),
             Message.is_deleted == False,
-            Message.user_id != user_id  # Don't count user's own messages
+            Message.user_id != user_id
         ).count()
         
         return unread_count
@@ -849,29 +825,9 @@ def get_unread_count(user_id):
     except Exception as e:
         print(f"Error getting unread count: {e}")
         return 0
-#--------------------------------------------------------------------
-@app.route('/favicon.ico')
-def favicon():
-    return send_from_directory(app.config['UPLOAD_FOLDER'], 'favicon.ico')
-#--------------------------------------------------------------------
-@app.route('/manifest.json')
-def manifest():
-    return send_from_directory(os.path.dirname(os.path.abspath(__file__)), 'manifest.json', mimetype='application/manifest+json')
-#--------------------------------------------------------------------
-@app.route("/offline.html")
-def offline_html():
-    return render_template("offline.html")
-#-------------------------------------------------------------------
-@app.route('/service-worker.js')
-def sw():
-    return send_from_directory('static', 'service-worker.js', mimetype='application/javascript')
-#-------------------------------------------------------------------
-@app.route('/is_authenticated')
-def is_authenticated():
-    return jsonify({'authenticated': current_user.is_authenticated})
-#-------------------------------------------------------------------
-#==========================================
-# FILE API
+
+#=================================================
+#                  FILE API
 #==========================================
 @app.route('/api/files')
 @login_required
@@ -882,7 +838,6 @@ def get_files():
     category = request.args.get('category', '')
     search = request.args.get('search', '')
     
-    # Build query
     query = File.query
     
     if category:
@@ -897,7 +852,7 @@ def get_files():
             )
         )
     
-    # Get paginated results
+    # pagination
     files_pagination = query.order_by(File.uploaded_at.desc()).paginate(
         page=page, per_page=per_page, error_out=False
     )
@@ -942,18 +897,17 @@ def upload_file():
     if file.filename == '':
         return jsonify({'error': 'No file selected'}), 400
     
-    # Get form data
     name = request.form.get('name', file.filename)[:35]
     filename = shorten_filename(file.filename)
     description = request.form.get('description', '')[:100]
     category = request.form.get('category', 'general')
     
-    # Validate file size (10MB limit)
+    # Validate file size (10MB limit) - Memory 1GB only
     file_data = file.read()
-    if len(file_data) > 10 * 1024 * 1024:  # 10MB
+    if len(file_data) > 10 * 1024 * 1024:
         return jsonify({'error': 'File size exceeds 10MB limit'}), 400
     
-    # Check if filename already exists
+    # Check if filename already exists - No duplicates Unique Key Constrains
     existing_file = File.query.filter_by(filename=file.filename).first()
     if existing_file:
         return jsonify({'error': 'A file with this name already exists'}), 400
@@ -1007,11 +961,7 @@ def download_file(id):
 def delete_file(id):
     """Delete a file"""
     file = File.query.get_or_404(id)
-    
-    # Check permissions (admin or uploader)
-    if not current_user.is_admin and current_user.id != file.uploaded_by:
-        return jsonify({'error': 'Unauthorized'}), 403
-    
+
     try:
         db.session.delete(file)
         db.session.commit()
@@ -1031,8 +981,8 @@ def get_file_categories():
     
     return jsonify({'categories': category_list})
 
-#==========================================
-#   UPDATE USER API ROUTES
+#================================================
+#            UPDATE USER API ROUTES
 #==========================================
 @app.route('/api/user/profile', methods=['GET'])
 @login_required
@@ -1055,23 +1005,20 @@ def update_user_profile():
     """Update current user's profile"""
     data = request.get_json()
     
-    # Validate input
     if not data:
         return jsonify({'error': 'No data provided'}), 400
     
     username = data.get('username', '').strip()
     mobile = data.get('mobile', '').strip()
     
-    # Validate username
     if not username or len(username) > 200:
         return jsonify({'error': 'Username must be between 1 and 200 characters'}), 400
     
-    # Validate mobile format
+    # Validate mobile format - For those enetering 08 ....
     mobile_regex = r'^(07|01)[0-9]{8}$'
     if not re.match(mobile_regex, mobile):
         return jsonify({'error': 'Mobile number must be 10 digits starting with 07 or 01'}), 400
     
-    # Check if mobile is already taken by another user
     existing_user = User.query.filter(
         User.mobile == mobile, 
         User.id != current_user.id
@@ -1081,7 +1028,6 @@ def update_user_profile():
         return jsonify({'error': 'Mobile number is already registered'}), 400
     
     try:
-        # Update user data
         current_user.username = username
         current_user.mobile = mobile
         db.session.commit()
@@ -1100,16 +1046,11 @@ def update_user_profile():
         return jsonify({'error': 'Failed to update profile'}), 500
 
 
-# =========================================
-# MESSAGES BACKEND ROUTES & SOCKET HANDLERS
-# =========================================
+# ===============================================================
+#          MESSAGES API ROUTES & SOCKET HANDLERS
+# ===========================================================
 
-# Global dictionary to track online users
 online_users = {}
-
-# =========================================
-# HTTP ROUTES
-# =========================================
 
 @app.route('/api/online-users')
 @login_required
@@ -1139,17 +1080,13 @@ def get_messages():
     limit = request.args.get('limit', 100, type=int)
     
     try:
-        # Base query - exclude deleted messages
         query = Message.query.filter_by(room=room, is_deleted=False)
         
-        # Filter messages newer than since_id if provided
         if since_id > 0:
             query = query.filter(Message.id > since_id)
         
-        # Get messages ordered by creation time
         messages = query.order_by(Message.created_at.asc()).limit(limit).all()
         
-        # Get read status for current user
         read_message_ids = set()
         if current_user.is_authenticated:
             read_records = MessageRead.query.filter_by(user_id=current_user.id).all()
@@ -1172,7 +1109,6 @@ def get_messages():
                 'has_replies': len(message.replies) > 0 if message.replies else False
             }
             
-            # Include reply data if it's a reply
             if message.parent_id:
                 parent_message = Message.query.get(message.parent_id)
                 if parent_message and not parent_message.is_deleted:
@@ -1209,9 +1145,7 @@ def mark_messages_read():
         if not message_ids:
             return jsonify({'success': False, 'error': 'No message IDs provided'}), 400
         
-        # Mark each message as read
         for message_id in message_ids:
-            # Check if already marked as read
             existing_read = MessageRead.query.filter_by(
                 message_id=message_id, 
                 user_id=current_user.id
@@ -1244,18 +1178,16 @@ def send_message():
         data = request.get_json()
         content = data.get('content', '').strip()
         room = data.get('room', 'general')
-        parent_id = data.get('parent_id')  # For replies
+        parent_id = data.get('parent_id')  # To track replies
         
         if not content:
             return jsonify({'success': False, 'error': 'Message content is required'}), 400
         
-        # Validate parent message if replying
         if parent_id:
             parent_message = Message.query.get(parent_id)
             if not parent_message or parent_message.is_deleted:
                 return jsonify({'success': False, 'error': 'Parent message not found'}), 404
         
-        # Create message
         message = Message(
             content=content,
             user_id=current_user.id,
@@ -1267,7 +1199,6 @@ def send_message():
         db.session.add(message)
         db.session.commit()
         
-        # Prepare response
         message_data = {
             'id': message.id,
             'content': message.content,
@@ -1281,7 +1212,6 @@ def send_message():
             'is_read': False
         }
         
-        # Include parent data if it's a reply
         if parent_id:
             parent_message = Message.query.get(parent_id)
             if parent_message and not parent_message.is_deleted:
@@ -1291,7 +1221,6 @@ def send_message():
                     'username': parent_message.user.username
                 }
         
-        # Emit to Socket.IO clients in the room
         socketio.emit('new_message', message_data, room=room)
         
         return jsonify({
@@ -1314,12 +1243,10 @@ def reply_to_message(message_id):
         if not content:
             return jsonify({'success': False, 'error': 'Reply content is required'}), 400
         
-        # Get parent message
         parent_message = Message.query.get(message_id)
         if not parent_message or parent_message.is_deleted:
             return jsonify({'success': False, 'error': 'Message not found'}), 404
         
-        # Create reply
         reply = Message(
             content=content,
             user_id=current_user.id,
@@ -1331,7 +1258,6 @@ def reply_to_message(message_id):
         db.session.add(reply)
         db.session.commit()
         
-        # Prepare response
         reply_data = {
             'id': reply.id,
             'content': reply.content,
@@ -1350,7 +1276,6 @@ def reply_to_message(message_id):
             }
         }
         
-        # Emit to Socket.IO clients in the room
         socketio.emit('new_message', reply_data, room=parent_message.room)
         
         return jsonify({
@@ -1372,18 +1297,16 @@ def delete_message(message_id):
         if not message:
             return jsonify({'success': False, 'error': 'Message not found'}), 404
         
-        # Check permissions - user can delete their own messages or admin can delete any
         if message.user_id != current_user.id and not current_user.is_admin:
             return jsonify({'success': False, 'error': 'Permission denied'}), 403
         
-        # Soft delete the message
+        # Soft delete
         message.is_deleted = True
         message.deleted_at = nairobi_time()
         message.content = "[This message was deleted]"
         
         db.session.commit()
         
-        # Emit deletion event
         socketio.emit('message_deleted', {
             'message_id': message_id,
             'room': message.room,
@@ -1410,13 +1333,11 @@ def get_message_replies(message_id):
         if not message or message.is_deleted:
             return jsonify({'success': False, 'error': 'Message not found'}), 404
         
-        # Get replies
         replies = Message.query.filter_by(
             parent_id=message_id, 
             is_deleted=False
         ).order_by(Message.created_at.asc()).all()
         
-        # Get read status for current user
         read_message_ids = set()
         if current_user.is_authenticated:
             read_records = MessageRead.query.filter_by(user_id=current_user.id).all()
@@ -1452,8 +1373,8 @@ def get_message_replies(message_id):
         return jsonify({'success': False, 'error': str(e)}), 500
 
 # =========================================
-# UTILITY FUNCTIONS
-# =========================================
+#          EXTRA FUNCTIONS CLEAN UP - MEMORY CONSTRAIN
+# ===========================================================
 
 def cleanup_disconnected_users():
     """Remove users who haven't been seen for more than 30 seconds"""
@@ -1492,7 +1413,6 @@ def update_user_presence(user_id, username, is_admin=False, room='general'):
         'last_seen': datetime.utcnow().isoformat()
     }
     
-    # Broadcast updated online users list to the room
     room_users = []
     for uid, user_data in online_users.items():
         if user_data and user_data.get('current_room') == room:
@@ -1508,7 +1428,6 @@ def broadcast_online_users():
     """Broadcast updated online users list to all rooms"""
     cleanup_disconnected_users()
     
-    # Group users by room
     room_users = {}
     for user_id, user_data in online_users.items():
         if user_data and 'user_id' in user_data:
@@ -1522,19 +1441,17 @@ def broadcast_online_users():
                 'is_admin': user_data.get('is_admin', False)
             })
     
-    # Emit to each room
     for room, users in room_users.items():
         emit('online_users_update', {'users': users}, room=room)
 
 # =========================================
-# SOCKET.IO HANDLERS
+#             SOCKET.IO HANDLERS
 # =========================================
 
 @socketio.on('connect')
 def handle_connect():
     """Handle user connection"""
     if current_user.is_authenticated:
-        # Add user to online users
         update_user_presence(
             user_id=current_user.id,
             username=current_user.username,
@@ -1542,10 +1459,8 @@ def handle_connect():
             room='general'
         )
         
-        # Join general room by default
         join_room('general')
         
-        # Notify others in the general room
         emit('user_joined', {
             'user_id': current_user.id,
             'username': current_user.username,
@@ -1553,7 +1468,6 @@ def handle_connect():
             'message': f'{current_user.username} joined the chat'
         }, room='general', include_self=False)
         
-        # Send current user their own user info
         emit('user_info', {
             'user_id': current_user.id,
             'username': current_user.username,
@@ -1571,21 +1485,19 @@ def handle_disconnect():
         if user_data:
             room = user_data.get('current_room', 'general')
             
-            # Remove user from online users
             online_users.pop(current_user.id, None)
             
-            # Notify others
             emit('user_left', {
                 'user_id': current_user.id,
                 'username': current_user.username,
                 'message': f'{current_user.username} left the chat'
             }, room=room, include_self=False)
             
-            # Broadcast updated online users list
             broadcast_online_users()
         
         print(f"User {current_user.username} disconnected. Online users: {len(online_users)}")
 
+# I'm not that good at this part
 @socketio.on('join_room')
 def handle_join_room(data):
     """Handle joining a room"""
@@ -1593,7 +1505,6 @@ def handle_join_room(data):
         room = data.get('room', 'general')
         previous_room = online_users.get(current_user.id, {}).get('current_room', 'general')
         
-        # Leave previous room if different
         if previous_room != room:
             leave_room(previous_room)
             emit('user_left', {
@@ -1602,10 +1513,8 @@ def handle_join_room(data):
                 'message': f'{current_user.username} left {previous_room}'
             }, room=previous_room, include_self=False)
         
-        # Join new room
         join_room(room)
         
-        # Update user presence
         update_user_presence(
             user_id=current_user.id,
             username=current_user.username,
@@ -1613,7 +1522,6 @@ def handle_join_room(data):
             room=room
         )
         
-        # Notify room
         emit('user_joined', {
             'user_id': current_user.id,
             'username': current_user.username,
@@ -1621,10 +1529,8 @@ def handle_join_room(data):
             'message': f'{current_user.username} joined {room}'
         }, room=room, include_self=False)
         
-        # Send room history to the user
         messages = Message.query.filter_by(room=room, is_deleted=False).order_by(Message.created_at.asc()).limit(50).all()
         
-        # Get read status for current user
         read_message_ids = set()
         if current_user.is_authenticated:
             read_records = MessageRead.query.filter_by(user_id=current_user.id).all()
@@ -1644,7 +1550,6 @@ def handle_join_room(data):
                 'parent_id': message.parent_id
             }
             
-            # Include parent data if it's a reply
             if message.parent_id:
                 parent_message = Message.query.get(message.parent_id)
                 if parent_message and not parent_message.is_deleted:
@@ -1662,8 +1567,7 @@ def handle_leave_room(data):
     if current_user.is_authenticated:
         room = data.get('room', 'general')
         leave_room(room)
-        
-        # Update user presence (set to general room)
+    
         update_user_presence(
             user_id=current_user.id,
             username=current_user.username,
@@ -1671,7 +1575,6 @@ def handle_leave_room(data):
             room='general'
         )
         
-        # Notify room
         emit('user_left', {
             'user_id': current_user.id,
             'username': current_user.username,
@@ -1700,13 +1603,11 @@ def handle_send_message(data):
     if not content:
         return {'success': False, 'error': 'Empty message'}
     
-    # Validate parent message if replying
     if parent_id:
         parent_message = Message.query.get(parent_id)
         if not parent_message or parent_message.is_deleted:
             return {'success': False, 'error': 'Parent message not found'}
     
-    # Update user presence (keep them in current room)
     update_user_presence(
         user_id=current_user.id,
         username=current_user.username,
@@ -1714,7 +1615,6 @@ def handle_send_message(data):
         room=room
     )
     
-    # Create message
     message = Message(
         content=content,
         user_id=current_user.id,
@@ -1727,7 +1627,6 @@ def handle_send_message(data):
         db.session.add(message)
         db.session.commit()
         
-        # Prepare response data
         message_data = {
             'id': message.id,
             'content': message.content,
@@ -1741,7 +1640,6 @@ def handle_send_message(data):
             'is_read': False
         }
         
-        # Include parent data if it's a reply
         if parent_id:
             parent_message = Message.query.get(parent_id)
             if parent_message and not parent_message.is_deleted:
@@ -1751,7 +1649,6 @@ def handle_send_message(data):
                     'username': parent_message.user.username
                 }
         
-        # Broadcast to room
         emit('new_message', message_data, room=room)
         
         return {'success': True, 'message': message_data}
@@ -1777,18 +1674,16 @@ def handle_delete_message(data):
         if not message:
             return {'success': False, 'error': 'Message not found'}
         
-        # Check permissions
         if message.user_id != current_user.id and not current_user.is_admin:
             return {'success': False, 'error': 'Permission denied'}
         
-        # Soft delete the message
+        # Soft delete message
         message.is_deleted = True
         message.deleted_at = nairobi_time()
         message.content = "[This message was deleted]"
         
         db.session.commit()
         
-        # Emit deletion event
         emit('message_deleted', {
             'message_id': message_id,
             'room': message.room,
@@ -1817,7 +1712,6 @@ def handle_typing(data):
 def handle_ping(data):
     """Handle ping for connection health check"""
     if current_user.is_authenticated:
-        # Get the current room from online_users or use default
         user_room = online_users.get(current_user.id, {}).get('current_room', 'general')
         
         # Update user presence
@@ -1828,7 +1722,6 @@ def handle_ping(data):
             room=user_room
         )
         
-        # Return the timestamp for latency calculation
         emit('pong', {'timestamp': data.get('timestamp')})
 
 @socketio.on('get_messages')
@@ -1846,7 +1739,6 @@ def handle_get_messages(data):
             
             messages = query.order_by(Message.created_at.asc()).limit(limit).all()
             
-            # Get read status for current user
             read_message_ids = set()
             if current_user.is_authenticated:
                 read_records = MessageRead.query.filter_by(user_id=current_user.id).all()
@@ -1918,7 +1810,6 @@ def handle_mark_read(data):
         
         db.session.commit()
         
-        # Emit read receipt
         emit('messages_read', {
             'message_ids': message_ids,
             'user_id': current_user.id,
@@ -1929,24 +1820,20 @@ def handle_mark_read(data):
         db.session.rollback()
         print(f"Error marking messages as read: {e}")
 
-# =========================================
-# PERIODIC TASKS
-# =========================================
-
-from apscheduler.schedulers.background import BackgroundScheduler
+# ================================================
+        # PERIODIC TASKS FOR KEEP ALIVE THE WEBS
+# ==================================================
+import requests
 
 def periodic_cleanup():
     """Periodically clean up disconnected users"""
     with app.app_context():
         cleanup_disconnected_users()
 
-# Schedule periodic cleanup (run every minute)
+# periodic cleanup (run every minute)
 scheduler = BackgroundScheduler()
 scheduler.add_job(func=periodic_cleanup, trigger="interval", seconds=60)
 scheduler.start()
-# https://lyxspace.onrender.com/files
-import atexit
-import requests
 
 TARGET_URLS = [
     "https://lyxspace.onrender.com/files",
@@ -1961,16 +1848,13 @@ def ping_urls():
         except requests.RequestException as e:
             print(f"Failed to ping {url}: {e}")
 
-# Setup scheduler
 scheduler = BackgroundScheduler()
 scheduler.add_job(func=ping_urls, trigger="interval", minutes=3)
 scheduler.start()
 
-# Ensure scheduler shuts down cleanly
 atexit.register(lambda: scheduler.shutdown())
 
 TARGET_URL = 'https://lyxspace.onrender.com/files'
-# manual ping route
 @app.route("/ping-lyx")
 def manual_ping():
     try:
@@ -1988,6 +1872,7 @@ def manual_ping():
         }
 
 #===========================================
+
 @app.route('/api/users')
 @login_required
 @admin_required
@@ -2009,7 +1894,6 @@ def get_users():
     
     return jsonify(users_data)
 
-# API endpoint to delete user
 @app.route('/api/users/<int:user_id>/delete', methods=['POST'])
 @login_required
 @admin_required
@@ -2020,42 +1904,42 @@ def delete_user(user_id):
         return jsonify({'error': 'Cannot delete your own account'}), 400
 
     try:
-        # ===============================
-        # 1️⃣ Delete MessageReads for messages SENT BY this user
-        # ===============================
+        # =====================================================
+        # 1️. Delete MessageReads for messages SENT BY this user
+        # =====================================================
         user_message_ids = [m.id for m in Message.query.filter_by(user_id=user.id).all()]
         if user_message_ids:
             db.session.query(MessageRead).filter(
                 MessageRead.message_id.in_(user_message_ids)
             ).delete(synchronize_session=False)
 
-        # ===============================
-        # 2️⃣ Delete MessageReads BY this user (on others' messages)
-        # ===============================
+        # =========================================================
+        # 2️. Delete MessageReads BY this user
+        # =========================================================
         db.session.query(MessageRead).filter_by(user_id=user.id).delete(synchronize_session=False)
 
-        # ===============================
-        # 3️⃣ Delete Replies to user's messages FIRST
-        # ===============================
+        # ==========================================
+        # 3️. Delete Replies to user's messages FIRST
+        # ==========================================
         if user_message_ids:
             db.session.query(Message).filter(
                 Message.parent_id.in_(user_message_ids)
             ).delete(synchronize_session=False)
 
-        # ===============================
-        # 4️⃣ Delete messages CREATED BY user
-        # ===============================
+        # ==================================
+        # 4️. Delete messages CREATED BY user
+        # ==================================
         db.session.query(Message).filter_by(user_id=user.id).delete(synchronize_session=False)
 
-        # ===============================
-        # 5️⃣ Delete assignments & announcements
-        # ===============================
+        # =====================================
+        # 5️. Delete assignments & announcements
+        # =====================================
         db.session.query(Announcement).filter_by(user_id=user.id).delete(synchronize_session=False)
         db.session.query(Assignment).filter_by(user_id=user.id).delete(synchronize_session=False)
 
-        # ===============================
-        # 6️⃣ Delete files uploaded by user (and linked materials)
-        # ===============================
+        # ================================
+        # 6️. Delete files uploaded by user
+        # =================================
         user_file_ids = [f.id for f in File.query.filter_by(uploaded_by=user.id).all()]
         if user_file_ids:
             db.session.query(TopicMaterial).filter(
@@ -2063,14 +1947,14 @@ def delete_user(user_id):
             ).delete(synchronize_session=False)
             db.session.query(File).filter(File.id.in_(user_file_ids)).delete(synchronize_session=False)
 
-        # ===============================
-        # 7️⃣ Delete orphaned TopicMaterials just in case
-        # ===============================
+        # ==================================
+        # 7️. Delete orphaned TopicMaterials
+        # ==================================
         db.session.query(TopicMaterial).filter_by(file_id=None).delete(synchronize_session=False)
 
-        # ===============================
-        # 8️⃣ Delete the user last
-        # ===============================
+        # =============================
+        # 8️. Finally delete the user 😤
+        # =============================
         db.session.delete(user)
         db.session.commit()
 
@@ -2080,7 +1964,6 @@ def delete_user(user_id):
         db.session.rollback()
         return jsonify({'error': f'Failed to delete user: {str(e)}'}), 500
 
-# API endpoint to toggle admin status
 @app.route('/api/users/<int:user_id>/toggle-admin', methods=['PUT'])
 @login_required
 @admin_required
@@ -2088,7 +1971,6 @@ def toggle_admin(user_id):
     
     user = User.query.get_or_404(user_id)
     
-    # Prevent modifying your own admin status
     if user.id == current_user.id:
         return jsonify({'error': 'Cannot modify your own admin status'}), 400
     
@@ -2101,7 +1983,7 @@ def toggle_admin(user_id):
     })
 
 # =========================================
-# ANNOUNCEMENT API ROUTES (UPDATED)
+# ANNOUNCEMENT API ROUTES
 # =========================================
 import io
 
@@ -2125,9 +2007,6 @@ def get_announcements():
         app.logger.exception("Failed to fetch announcements")
         return jsonify({'error': 'Failed to fetch announcements'}), 500
 
-# =========================================
-# ANNOUNCEMENT API ROUTES (multipart/form-data)
-# =========================================
 from werkzeug.utils import secure_filename
 
 @app.route('/api/announcements/create', methods=['POST'])
@@ -2140,10 +2019,10 @@ def create_announcement():
     title = request.form.get('title')
     content = request.form.get('content')
 
-    file = request.files.get('file')  # This is the uploaded file
+    file = request.files.get('file')
     file_name = secure_filename(file.filename) if file else None
     file_type = file.mimetype if file else None
-    file_data = file.read() if file else None  # raw bytes
+    file_data = file.read() if file else None
 
     announcement = Announcement(
         title=title,
@@ -2197,10 +2076,6 @@ def delete_announcement(id):
     
     return jsonify({'message': 'Announcement deleted successfully'})
 
-
-# -----------------------------------------
-# Route to serve announcement file/image
-# -----------------------------------------
 @app.route('/announcement-file/<int:id>/<filename>')
 def serve_announcement_file(id, filename):
     announcement = Announcement.query.get_or_404(id)
@@ -2375,7 +2250,7 @@ def preview():
         return jsonify({"title": "", "description": "", "image": ""})
 
 # =========================================
-# TOPIC API ROUTES
+#              TOPIC API ROUTES
 # =========================================
 
 @app.route('/api/topics')
@@ -2442,7 +2317,7 @@ def delete_topic(id):
     return jsonify({'message': 'Topic deleted successfully'})
 
 #==========================================
-#  TIMETABLE API ROUTES
+#            TIMETABLE API ROUTES
 #==========================================
 @app.route('/api/timetable/grouped', methods=['GET'])
 def get_timetable():
@@ -2450,7 +2325,6 @@ def get_timetable():
     print("\n[DEBUG] Fetching grouped timetable...")
 
     try:
-        # Fetch and order slots
         timetable_slots = Timetable.query.order_by(
             Timetable.day_of_week, 
             Timetable.start_time
@@ -2458,11 +2332,9 @@ def get_timetable():
 
         print(f"[DEBUG] Retrieved {len(timetable_slots)} timetable slots from DB")
 
-        # Define day order
         days_order = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
         timetable_by_day = {day: [] for day in days_order}
 
-        # Group by day
         for slot in timetable_slots:
             print(f"[DEBUG] Processing slot ID {slot.id} ({slot.subject}) on {slot.day_of_week}")
             timetable_by_day[slot.day_of_week].append({
@@ -2479,7 +2351,6 @@ def get_timetable():
                 } if slot.topic else None
             })
 
-        # Convert to list format (only include days that have slots)
         result = [
             {'day': day, 'slots': timetable_by_day[day]}
             for day in days_order if timetable_by_day[day]
@@ -2494,9 +2365,6 @@ def get_timetable():
 
 @app.route('/api/timetable', methods=['GET', 'POST'])
 def handle_timetable():
-    # ================================
-    # GET — Fetch all timetable slots
-    # ================================
     if request.method == 'GET':
         timetable_slots = Timetable.query.order_by(
             Timetable.day_of_week,
@@ -2520,9 +2388,6 @@ def handle_timetable():
             })
         return jsonify(result)
 
-    # ================================
-    # POST — Create new timetable slot
-    # ================================
     if request.method == 'POST':
         if not current_user.is_admin:
             return jsonify({'error': 'Unauthorized'}), 403
@@ -2533,11 +2398,9 @@ def handle_timetable():
             start_time_str = data.get('start_time')
             end_time_str = data.get('end_time')
 
-            # Parse times
             start_time = datetime.strptime(start_time_str, '%H:%M').time()
             end_time = datetime.strptime(end_time_str, '%H:%M').time()
 
-            # Validate time order
             if start_time >= end_time:
                 return jsonify({'error': 'End time must be after start time'}), 400
 
@@ -2546,7 +2409,6 @@ def handle_timetable():
         except Exception as e:
             return jsonify({'error': f'Time parsing error: {str(e)}'}), 400
 
-        # Create new timetable slot
         timetable_slot = Timetable(
             day_of_week=data.get('day_of_week'),
             start_time=start_time,
@@ -2643,20 +2505,16 @@ def register_admin():
     username = data.get('username')
     master_key = data.get('master_key')
     
-    # Validate master key
     if master_key != MASTER_ADMIN_KEY:
         return jsonify({'error': 'Invalid master authorization key'}), 403
     
-    # Validate mobile
     if not mobile or len(mobile) != 10:
         return jsonify({'error': 'Invalid mobile number'}), 400
     
-    # Check if user already exists
     existing_user = User.query.filter_by(mobile=mobile).first()
     if existing_user:
         return jsonify({'error': 'User with this mobile already exists'}), 409
     
-    # Create new admin user
     new_admin = User(
         username=username.strip().lower(),
         mobile=mobile,
@@ -2681,20 +2539,16 @@ def promote_to_admin():
     username = data.get('username')
     master_key = data.get('master_key')
     
-    # Validate master key
     if master_key != MASTER_ADMIN_KEY:
         return jsonify({'error': 'Invalid master authorization key'}), 403
     
-    # Find user
     user = User.query.filter_by(mobile=mobile).first()
     if not user:
         return jsonify({'error': 'User not found'}), 404
     
-    # Verify username matches (case insensitive)
     if user.username.lower() != username.strip().lower():
         return jsonify({'error': 'Username does not match existing account'}), 400
     
-    # Promote to admin
     user.is_admin = True
     db.session.commit()
     
@@ -2720,7 +2574,7 @@ def check_admin():
     })
 
 # =========================================
-# USER API ROUTES (Basic)
+# USER API ROUTES FOR PROFILE & ADMIN MNGMT
 # =========================================
 
 @app.route('/api/users/me')
@@ -2773,7 +2627,6 @@ def current_user_info():
 #  TOPIC API ROUTES
 # =========================================
 
-# Topic Materials API Routes
 @app.route('/api/topics/<int:topic_id>/materials')
 def get_topic_materials(topic_id):
     """Get all materials for a specific topic"""
@@ -2826,12 +2679,10 @@ def add_topic_material(topic_id):
         if not file_id:
             return jsonify({'error': 'File ID is required'}), 400
             
-        # Check if file exists
         file = File.query.get(file_id)
         if not file:
             return jsonify({'error': 'File not found'}), 404
             
-        # Check if material already exists for this topic
         existing_material = TopicMaterial.query.filter_by(
             topic_id=topic_id, file_id=file_id
         ).first()
@@ -2839,7 +2690,6 @@ def add_topic_material(topic_id):
         if existing_material:
             return jsonify({'error': 'Material already exists for this topic'}), 400
         
-        # Get the next order index
         max_order = db.session.query(db.func.max(TopicMaterial.order_index))\
             .filter_by(topic_id=topic_id).scalar() or 0
         
@@ -2897,7 +2747,7 @@ def reorder_topic_materials(topic_id):
             return jsonify({'error': 'Unauthorized'}), 403
             
         data = request.get_json()
-        material_order = data.get('order', [])  # List of material IDs in new order
+        material_order = data.get('order', [])
         
         for index, material_id in enumerate(material_order):
             material = TopicMaterial.query.filter_by(
@@ -2913,7 +2763,6 @@ def reorder_topic_materials(topic_id):
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
 
-# Route to get available files for adding to topics
 @app.route('/api/files/available')
 @login_required
 def get_available_files():
@@ -2983,7 +2832,6 @@ def internal_error(error):
     app.logger.error(f'Internal Server Error: {error}', exc_info=True)
     flash('Oops! Something went wrong. Try again.', 'error')
 
-    # Fallback to home if referrer is not available
     referrer = request.referrer
     if referrer:
         return redirect(referrer), 302
