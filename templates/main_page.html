@@ -1027,21 +1027,21 @@
             loadTopics();
             loadTimetable();
 
-            // Lightweight functions every 10 seconds
+            // Lightweight functions every 60 seconds
             setInterval(() => {
                 loadUserData();
                 loadAnnouncements();
-            }, 10 * 1000);
+            }, 60 * 1000);
         
-            // Heavier functions every 30 seconds
+            // Heavier functions every 300 seconds
             setInterval(() => {
                 loadAssignments();
-                loadTopics();
-            }, 30 * 1000);
+            }, 5 * 60 * 1000);
         
             setInterval(() => {
+                loadTopics();
                 loadTimetable();
-            }, 60 * 1000); // 60 seconds
+            }, 60 * 60 * 1000); // 60 mins
         });
 
         'serviceWorker'in navigator&&navigator.serviceWorker.register('/service-worker.js').then(r=>console.log("SW registered:",r)).catch(e=>console.error("SW failed:",e)),window.addEventListener("online",()=>location.reload()),window.addEventListener("offline",()=>location.href="/offline.html");
@@ -1113,7 +1113,6 @@
             installContainer.style.display = "none";
           });
       
-          // Hide if app gets installed
           window.addEventListener("appinstalled", () => {
             installContainer.style.display = "none";
             console.log("PWA installed successfully!");
