@@ -682,6 +682,7 @@
               `<a href="${url}" target="_blank" rel="noopener noreferrer" class="text-blue-400 underline hover:text-blue-300">${url}</a>`
           );
         }
+        
         // Load announcements
         async function loadAnnouncements() {
           const container = document.getElementById("announcements-container");
@@ -713,7 +714,16 @@
                 const url = urlMatch ? urlMatch[0] : null;
                 const previewId = `og-preview-${announcement.id || Math.random().toString(36).slice(2)}`;
                 const isPinned = pinnedIds.includes(announcement.id);
-            
+                // Check if the announcement is less than 1 hour
+                const createdAt = new Date(announcement.created_at);
+                const now = new Date();
+                const diffHours = (now - createdAt) / (1000 * 60 * 60);
+                const isRecent = diffHours < 1;
+
+                const neonBorderClass = isRecent
+                  ? "border-yellow-400 shadow-sm"
+                  : "border-gray-800 shadow-md";
+
                 // File preview (image or link)
                 let filePreview = "";
                 if (announcement.has_file && announcement.file_type?.startsWith("image/")) {
@@ -734,7 +744,7 @@
                 }
             
                 return `
-                  <div class="announcement-card border border-gray-800 bg-gray-900/60 rounded-2xl shadow-md hover:shadow-lg transition duration-200 ease-in-out overflow-hidden mb-6 relative">
+                  <div class="announcement-card ${neonBorderClass} bg-gray-900/60 rounded-2xl transition duration-200 ease-in-out overflow-hidden mb-6 relative">
                 
                     <!-- Pin button -->
                     <button 
@@ -793,7 +803,7 @@
                   </div>
                 `;
               })
-              .join("");
+              .join("");  
           
             // Render OG previews
             sorted.forEach((announcement) => {
