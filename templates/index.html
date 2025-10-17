@@ -255,6 +255,161 @@
         border-color: rgba(59, 130, 246, 0.3);
     }
     
+    /* Toast System Styles */
+    .toast-container {
+        position: fixed;
+        top: 100px;
+        right: 20px;
+        z-index: 1000;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        max-width: 400px;
+        pointer-events: none;
+    }
+    
+    .toast {
+        background: rgba(30, 41, 59, 0.95);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        border-radius: 12px;
+        padding: 16px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        transform: translateX(400px);
+        opacity: 0;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        pointer-events: all;
+        max-width: 100%;
+    }
+    
+    .toast.show {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    
+    .toast.hide {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+    
+    .toast-icon {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        margin-top: 2px;
+    }
+    
+    .toast-success .toast-icon {
+        background: rgba(34, 197, 94, 0.2);
+        color: #22c55e;
+    }
+    
+    .toast-error .toast-icon {
+        background: rgba(239, 68, 68, 0.2);
+        color: #ef4444;
+    }
+    
+    .toast-warning .toast-icon {
+        background: rgba(245, 158, 11, 0.2);
+        color: #f59e0b;
+    }
+    
+    .toast-info .toast-icon {
+        background: rgba(59, 130, 246, 0.2);
+        color: #3b82f6;
+    }
+    
+    .toast-content {
+        flex: 1;
+        min-width: 0;
+    }
+    
+    .toast-title {
+        font-weight: 600;
+        margin-bottom: 4px;
+        font-size: 0.95rem;
+    }
+    
+    .toast-message {
+        color: #cbd5e1;
+        font-size: 0.875rem;
+        line-height: 1.4;
+        word-wrap: break-word;
+    }
+    
+    .toast-close {
+        background: none;
+        border: none;
+        color: #94a3b8;
+        cursor: pointer;
+        padding: 4px;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        transition: all 0.2s ease;
+    }
+    
+    .toast-close:hover {
+        color: #f1f5f9;
+        background: rgba(255, 255, 255, 0.1);
+    }
+    
+    .toast-progress {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+        border-radius: 0 0 0 12px;
+        width: 100%;
+        transform-origin: left;
+        animation: toastProgress 5s linear forwards;
+    }
+    
+    @keyframes toastProgress {
+        from { transform: scaleX(1); }
+        to { transform: scaleX(0); }
+    }
+    
+    /* Announcement Optimizations */
+    .announcement-skeleton {
+        background: var(--card-bg);
+        border-radius: 16px;
+        padding: 20px;
+        margin-bottom: 20px;
+        border-left: 4px solid #3B82F6;
+        animation: pulse 2s infinite;
+    }
+    
+    .skeleton-title {
+        height: 24px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 4px;
+        margin-bottom: 12px;
+        width: 70%;
+    }
+    
+    .skeleton-text {
+        height: 16px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 4px;
+        margin-bottom: 8px;
+    }
+    
+    .skeleton-text.short {
+        width: 40%;
+    }
+    
     @media (max-width: 768px) {
         nav .max-w-6xl.mx-auto.px-4.py-4 {
             padding-top: 0.75rem;
@@ -314,6 +469,18 @@
         .hidden.md\:flex {
             display: none !important;
         }
+        
+        .toast-container {
+            top: 80px;
+            right: 10px;
+            left: 10px;
+            max-width: none;
+        }
+        
+        .toast {
+            max-width: 100%;
+        }
+        
         .mobile-nav {
             position: fixed;
             bottom: 0;
@@ -444,6 +611,9 @@
     }
 </style>
 <body class="bg-[url(/uploads/OIP3.jpg)] bg-fixed bg-center bg-cover filter brightness-2">
+    <!-- Toast Container -->
+    <div id="toast-container" class="toast-container"></div>
+    
     <!-- Navigation -->
     <nav class="glass-morph sticky top-0 z-50">
         <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
@@ -520,8 +690,17 @@
         <section id="announcements">
             <h2 class="text-3xl md:text-4xl font-bold text-center section-title">Latest Announcements</h2>
             <div id="announcements-container" class="space-y-6">
-                <div class="loading">
-                    <div class="spinner"></div>
+                <!-- Skeleton loader for announcements -->
+                <div class="announcement-skeleton">
+                    <div class="skeleton-title"></div>
+                    <div class="skeleton-text"></div>
+                    <div class="skeleton-text"></div>
+                    <div class="skeleton-text short"></div>
+                </div>
+                <div class="announcement-skeleton">
+                    <div class="skeleton-title"></div>
+                    <div class="skeleton-text"></div>
+                    <div class="skeleton-text short"></div>
                 </div>
             </div>
         </section>
@@ -585,7 +764,7 @@
                 </div>
             </div>
             <div class="mt-8 pt-8 border-t border-slate-800 text-center text-slate-500 text-sm">
-                <p>© {{ year }} LyxNexus. All rights reserved.</p>
+                <p>© 2024 LyxNexus. All rights reserved.</p>
             </div>
         </div>
     </footer>
@@ -615,7 +794,92 @@
     </div>
 
     <script>
-        // API endpoints
+        class ToastSystem {
+            constructor() {
+                this.container = document.getElementById('toast-container');
+                this.toasts = [];
+                this.nextId = 0;
+            }
+            
+            show(message, title = 'Notification', type = 'info', duration = 5000) {
+                const id = this.nextId++;
+                const toast = document.createElement('div');
+                toast.className = `toast toast-${type}`;
+                toast.id = `toast-${id}`;
+                
+                const icons = {
+                    success: 'fas fa-check-circle',
+                    error: 'fas fa-exclamation-circle',
+                    warning: 'fas fa-exclamation-triangle',
+                    info: 'fas fa-info-circle'
+                };
+                
+                toast.innerHTML = `
+                    <div class="toast-icon">
+                        <i class="${icons[type]}"></i>
+                    </div>
+                    <div class="toast-content">
+                        <div class="toast-title">${title}</div>
+                        <div class="toast-message">${message}</div>
+                    </div>
+                    <button class="toast-close" onclick="toastSystem.hide(${id})">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <div class="toast-progress"></div>
+                `;
+                
+                this.container.appendChild(toast);
+                
+
+                setTimeout(() => {
+                    toast.classList.add('show');
+                }, 10);
+                
+                if (duration > 0) {
+                    setTimeout(() => {
+                        this.hide(id);
+                    }, duration);
+                }
+                
+                this.toasts.push({ id, element: toast });
+                return id;
+            }
+            
+            hide(id) {
+                const toast = document.getElementById(`toast-${id}`);
+                if (toast) {
+                    toast.classList.remove('show');
+                    toast.classList.add('hide');
+                    
+                    setTimeout(() => {
+                        if (toast.parentNode) {
+                            toast.parentNode.removeChild(toast);
+                        }
+                    }, 400);
+                }
+                
+                this.toasts = this.toasts.filter(t => t.id !== id);
+            }
+            
+            success(message, title = 'Success') {
+                return this.show(message, title, 'success');
+            }
+            
+            error(message, title = 'Error') {
+                return this.show(message, title, 'error');
+            }
+            
+            warning(message, title = 'Warning') {
+                return this.show(message, title, 'warning');
+            }
+            
+            info(message, title = 'Information') {
+                return this.show(message, title, 'info');
+            }
+        }
+        
+        const toastSystem = new ToastSystem();
+        
         const API_BASE = '/api';
         const ENDPOINTS = {
             ANNOUNCEMENTS: `${API_BASE}/announcements`,
@@ -652,31 +916,61 @@
             }
         }
 
-        // Load announcements
+        // Load announcements with optimized loading
         async function loadAnnouncements() {
-            const container = document.getElementById('announcements-container');
-            const announcements = await fetchData(ENDPOINTS.ANNOUNCEMENTS);
-            
+          const container = document.getElementById('announcements-container');
+          
+          // Show skeleton while loading - ill update it so for mx speed.
+          container.innerHTML = `
+            <div class="announcement-skeleton">
+                <div class="skeleton-title"></div>
+                <div class="skeleton-text"></div>
+                <div class="skeleton-text"></div>
+                <div class="skeleton-text short"></div>
+            </div>
+            <div class="announcement-skeleton">
+                <div class="skeleton-title"></div>
+                <div class="skeleton-text"></div>
+                <div class="skeleton-text short"></div>
+            </div>
+          `;
+          
+          try {
+            const announcements = await fetchData(ENDPOINTS.ANNOUNCEMENTS) || [];
+        
             if (announcements.length === 0) {
-                container.innerHTML = '<p class="text-center text-slate-400 py-8">No announcements available.</p>';
-                return;
+              container.innerHTML = '<p class="text-center text-slate-400 py-8">No announcements available.</p>';
+              return;
             }
-            
+        
             container.innerHTML = announcements.map(announcement => `
-                <div class="announcement-card">
-                    <div class="flex justify-between items-start mb-3">
-                        <h3 class="text-xl underline underline-offset-8 decoration-sky-500 decoration-double font-bold">${announcement.title}</h3>
-                        <span class="text-blue-400 text-sm">Posted: ${formatDate(announcement.created_at)}</span>
-                    </div>
-                    <p class="mb-3 break-all hyphens-auto text-slate-300">${announcement.content}</p>
-                    <div class="flex justify-between items-center">
-                        <span class="text-slate-400 text-sm">By: ${announcement.author?.username || 'Unknown'}</span>
-                        <button class="text-blue-400 hover:text-blue-300 text-sm flex items-center gap-1">
-                            View Details <i class="fas fa-arrow-right text-xs"></i>
-                        </button>
-                    </div>
+              <div class="announcement-card">
+                <div class="flex justify-between items-start mb-3">
+                  <h3 class="text-xl underline underline-offset-8 decoration-sky-500 decoration-double font-bold">
+                    ${announcement.title}
+                  </h3>
+                  <span class="text-blue-400 text-sm">Posted: ${formatDate(announcement.created_at)}</span>
                 </div>
+                <p class="mb-3 break-all hyphens-auto text-slate-300">${announcement.content}</p>
+                <div class="flex justify-between items-center">
+                  <span class="text-slate-400 text-sm">By: ${announcement.author?.username || 'Unknown'}</span>
+                  <button class="view-details-btn text-blue-400 hover:text-blue-300 text-sm flex items-center gap-1">
+                    View Details <i class="fas fa-arrow-right text-xs"></i>
+                  </button>
+                </div>
+              </div>
             `).join('');
+        
+            container.addEventListener('click', (e) => {
+              const btn = e.target.closest('.view-details-btn');
+              if (btn) {
+                window.location.href = '/login';
+              }
+            });
+          } catch (error) {
+            container.innerHTML = '<p class="text-center text-slate-400 py-8">Failed to load announcements.</p>';
+            toastSystem.error('Failed to load announcements. Please try again.', 'Connection Error');
+          }
         }
 
         // Load assignments
@@ -793,7 +1087,7 @@
                     this.classList.add('active');
                 });
             });
-        }
+        }        
 
         document.addEventListener('DOMContentLoaded', function() {
             loadAnnouncements();
@@ -801,6 +1095,10 @@
             loadTopics();
             loadTimetable();
             setupMobileNav();
+            
+            setTimeout(() => {
+                toastSystem.success('Welcome to LyxNexus! All content has been loaded successfully.', 'Welcome');
+            }, 1500);
         });
     </script>
 </body>
