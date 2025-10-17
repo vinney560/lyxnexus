@@ -768,9 +768,16 @@
                             <h3 class="text-xl uppercase break-all underline underline-offset-8 decoration-red-500 decoration-double sm:text-2xl font-extrabold text-white leading-snug break-words">
                                 ${announcement.title}
                             </h3>
-                            <span class="text-blue-400 underline  underline-offset-4 text-xs sm:text-sm whitespace-nowrap">
-                                >> ${formatDate(announcement.created_at)} <<
-                            </span>
+                            <i class="fa fa-clock mr-2">
+                              <span class="text-xs sm:text-sm whitespace-nowrap font-bold 
+                                           underline underline-offset-4 decoration-pink-400 
+                                           text-transparent bg-clip-text 
+                                           bg-gradient-to-r from-pink-400 via-purple-500 to-red-400 
+                                           drop-shadow-[0_0_10px_rgba(255,0,255,0.3)] 
+                                           animate-pulse font-neon">
+                                ${formatDate(announcement.created_at)}
+                              </span>
+                            </i>
                         </div>
                     
                         <p class="mb-4 break-all text-gray-300 hyphens-auto text-sm sm:text-base indent-4 leading-relaxed break-words">
