@@ -316,6 +316,34 @@
             margin-right: 4px;
         }
     }
+    /* Announcement Optimizations */
+    .announcement-skeleton {
+        background: var(--card-bg);
+        border-radius: 16px;
+        padding: 20px;
+        margin-bottom: 20px;
+        border-left: 4px solid #3B82F6;
+        animation: pulse 2s infinite;
+    }
+    
+    .skeleton-title {
+        height: 24px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 4px;
+        margin-bottom: 12px;
+        width: 70%;
+    }
+    
+    .skeleton-text {
+        height: 16px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 4px;
+        margin-bottom: 8px;
+    }
+    
+    .skeleton-text.short {
+        width: 40%;
+    }    
 </style>
 <body>
     <header class="glass-morph sticky top-0 z-50">
@@ -374,8 +402,6 @@
 
     <main class="content-container max-w-7xl mx-auto px-4 py-6">
                             <!-- Announcements Section -->
-         
-         
                             <!-- Image Preview Modal -->
         <div id="image-preview-modal" class="hidden fixed inset-0 bg-black/70 items-center justify-center z-50">
           <span class="absolute top-4 right-6 text-white text-3xl cursor-pointer" onclick="closeImagePreview()">&times;</span>
@@ -388,6 +414,20 @@
                 <span class="text-gray-400 text-sm" id="announcements-count">Loading...</span>
             </div>
             <div id="announcements-container">
+
+                <!-- Skeleton loader -->
+                <div class="announcement-skeleton">
+                    <div class="skeleton-title"></div>
+                    <div class="skeleton-text"></div>
+                    <div class="skeleton-text"></div>
+                    <div class="skeleton-text short"></div>
+                </div>
+                <div class="announcement-skeleton">
+                    <div class="skeleton-title"></div>
+                    <div class="skeleton-text"></div>
+                    <div class="skeleton-text short"></div>
+                </div>         
+
                 <div class="loading">
                     <div class="spinner"></div>
                 </div>
@@ -686,6 +726,22 @@
         // Load announcements
         async function loadAnnouncements() {
           const container = document.getElementById("announcements-container");
+
+          // Show skeleton while loading - ill update it son for mx speed.
+          container.innerHTML = `
+            <div class="announcement-skeleton">
+                <div class="skeleton-title"></div>
+                <div class="skeleton-text"></div>
+                <div class="skeleton-text"></div>
+                <div class="skeleton-text short"></div>
+            </div>
+            <div class="announcement-skeleton">
+                <div class="skeleton-title"></div>
+                <div class="skeleton-text"></div>
+                <div class="skeleton-text short"></div>
+            </div>
+          `;
+
           announcements = (await fetchData(ENDPOINTS.ANNOUNCEMENTS)) || [];
         
           if (announcements.length === 0) {
