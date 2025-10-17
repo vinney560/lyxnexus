@@ -634,7 +634,7 @@
                 <a href="#" class="nav-link active">Home</a>
                 <a href="#announcements" class="nav-link">Announcements</a>
                 <a href="#assignments" class="nav-link">Assignments</a>
-                <a href="#topics" class="nav-link">Topics</a>
+                <a href="#topics" class="nav-link">Units</a>
                 <a href="#timetable" class="nav-link">Timetable</a>
             </div>
             <div class="flex space-x-3">
@@ -785,11 +785,11 @@
         </a>
         <a href="#topics" class="mobile-nav-btn">
             <i class="fas fa-book"></i>
-            <span>Topics</span>
+            <span>Units</span>
         </a>
         <a href="#timetable" class="mobile-nav-btn">
             <i class="fas fa-calendar"></i>
-            <span>Schedule</span>
+            <span>Timetable</span>
         </a>
     </div>
 
@@ -920,7 +920,7 @@
         async function loadAnnouncements() {
           const container = document.getElementById('announcements-container');
           
-          // Show skeleton while loading - ill update it so for mx speed.
+          // Show skeleton while loading - ill update it son for mx speed.
           container.innerHTML = `
             <div class="announcement-skeleton">
                 <div class="skeleton-title"></div>
@@ -946,7 +946,7 @@
             container.innerHTML = announcements.map(announcement => `
               <div class="announcement-card">
                 <div class="flex justify-between items-start mb-3">
-                  <h3 class="text-xl underline underline-offset-8 decoration-sky-500 decoration-double font-bold">
+                  <h3 class="text-xl uppercase underline underline-offset-8 decoration-sky-500 decoration-double font-bold">
                     ${announcement.title}
                   </h3>
                   <span class="text-blue-400 text-sm">Posted: ${formatDate(announcement.created_at)}</span>
@@ -1097,7 +1097,7 @@
             setupMobileNav();
             
             setTimeout(() => {
-                toastSystem.success('Welcome to LyxNexus! All content has been loaded successfully.', 'Welcome');
+                toastSystem.success('Welcome to LyxNexus! Please wait as All Content Loads.', 'Welcome');
             }, 1500);
         });
     </script>

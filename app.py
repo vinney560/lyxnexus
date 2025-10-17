@@ -347,33 +347,33 @@ def teardown_request(exception):
 def _year():
     return datetime.now().strftime('%Y')
 
-ALLOWED_KEYWORDS = [
-    "mozilla",      
-    "applewebkit",  
-    "chrome",       
-    "safari",
-    "firefox",
-    "edge",
-    "android", 
-    "linux",   
-]
-
-@app.before_request
-def allow_only_known_browsers():
-    ua = request.headers.get("User-Agent", "").lower()
-
-    # No User-Agent(_TelegramBot_Blocker)
-    if not ua:
-        abort(403)
-
-    # Block invalid User Agents or Bots
-    if not any(kw in ua for kw in ALLOWED_KEYWORDS):
-        abort(403)
-
-    required_headers = ["accept", "accept-language"]
-    for h in required_headers:
-        if h not in {k.lower() for k in request.headers.keys()}:
-            abort(403)
+#ALLOWED_KEYWORDS = [
+#    "mozilla",      
+#    "applewebkit",  
+#    "chrome",       
+#    "safari",
+#    "firefox",
+#    "edge",
+#    "android", 
+#    "linux",   
+#]
+#
+#@app.before_request
+#def allow_only_known_browsers():
+#    ua = request.headers.get("User-Agent", "").lower()
+#
+#    # No User-Agent(_TelegramBot_Blocker)
+#    if not ua:
+#        abort(403)
+#
+#    # Block invalid User Agents or Bots
+#    if not any(kw in ua for kw in ALLOWED_KEYWORDS):
+#        abort(403)
+#
+#    required_headers = ["accept", "accept-language"]
+#    for h in required_headers:
+#        if h not in {k.lower() for k in request.headers.keys()}:
+#            abort(403)
 
 def admin_required(f):
     @wraps(f)
