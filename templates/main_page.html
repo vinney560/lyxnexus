@@ -556,23 +556,25 @@
         let assignments = [];
         let topics = [];
         let timetable = [];
-
         function formatDate(dateString) {
             const date = new Date(dateString);
-            const options = { 
+        
+            const optionsDate = { 
                 year: 'numeric', 
                 month: 'long', 
-                day: 'numeric', 
-                hour: '2-digit', 
-                minute: '2-digit', 
-                hour12: true 
+                day: 'numeric'
             };
-            const formatted = date.toLocaleString(undefined, options);
-
-            const [datePart, timePart] = formatted.split(', ');
-            return `on ${datePart} at ${timePart}`;
+            const optionsTime = {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true
+            };
+        
+            const formattedDate = date.toLocaleDateString(undefined, optionsDate);
+            const formattedTime = date.toLocaleTimeString(undefined, optionsTime);
+        
+            return `${formattedDate} at ${formattedTime}`;
         }
-
 
         // Format time for display
         function formatTime(dateString) {
@@ -766,8 +768,8 @@
                             <h3 class="text-xl uppercase break-all underline underline-offset-8 decoration-red-500 decoration-double sm:text-2xl font-extrabold text-white leading-snug break-words">
                                 ${announcement.title}
                             </h3>
-                            <span class="text-blue-400 text-xs sm:text-sm whitespace-nowrap">
-                                ${formatDate(announcement.created_at)}
+                            <span class="text-blue-400 underline  underline-offset-4 text-xs sm:text-sm whitespace-nowrap">
+                                >> ${formatDate(announcement.created_at)} <<
                             </span>
                         </div>
                     
