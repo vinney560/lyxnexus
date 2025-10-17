@@ -493,7 +493,7 @@
                             </div>
                             <div class="text-center p-4 bg-green-500 bg-opacity-10 rounded-xl">
                                 <div class="text-2xl font-bold text-green-400" id="stat-topics">0</div>
-                                <div class="text-sm text-gray-400">Topics</div>
+                                <div class="text-sm text-gray-400">Units</div>
                             </div>
                             <div class="text-center p-4 bg-yellow-500 bg-opacity-10 rounded-xl">
                                 <div class="text-2xl font-bold text-yellow-400" id="stat-classes">0</div>
@@ -519,11 +519,11 @@
             </button>
             <button class="mobile-nav-btn" data-section="topics">
                 <i class="fas fa-book"></i>
-                <span>Topics</span>
+                <span>Units</span>
             </button>
             <button class="mobile-nav-btn" data-section="timetable">
                 <i class="fas fa-calendar-alt"></i>
-                <span>Schedule</span>
+                <span>Timetable</span>
             </button>
             <button class="mobile-nav-btn" data-section="profile">
                 <i class="fas fa-user"></i>
@@ -947,7 +947,7 @@
             }).join('');
         }
 
-        // Load topics
+        // Load topics || Units
         async function loadTopics() {
             const container = document.getElementById('topics-container');
             topics = await fetchData(ENDPOINTS.TOPICS) || [];
