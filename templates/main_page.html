@@ -736,9 +736,9 @@
                 } else if (announcement.has_file) {
                   filePreview = `
                     <div class="mb-3">
-                      <a href="${announcement.file_url}" target="_blank" class="text-blue-400 underline hover:text-blue-300 text-sm sm:text-base">
-                        📎 ${announcement.file_name}
-                      </a>
+                        <a style="color:#60a5fa; text-decoration: underline; font-size:0.875rem;" href="${announcement.file_url}" target="_blank">
+                          📎 ${announcement.file_name} ↗
+                        </a> 
                     </div>
                   `;
                 }
