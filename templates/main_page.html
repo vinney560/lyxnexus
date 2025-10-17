@@ -718,7 +718,7 @@
                 const createdAt = new Date(announcement.created_at);
                 const now = new Date();
                 const diffHours = (now - createdAt) / (1000 * 60 * 60);
-                const isRecent = diffHours < 1;
+                const isRecent = diffHours < 3;
 
                 const neonBorderClass = isRecent
                   ? "border-l-4 border-l-yellow-400 border-t border-t-blue-700 border-r border-r-blue-700 border-b border-b-blue-700 shadow-sm"
