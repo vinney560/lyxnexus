@@ -910,9 +910,9 @@ def upload_file():
     if file.filename == '':
         return jsonify({'error': 'No file selected'}), 400
     
-    name = request.form.get('name', file.filename)[:35]
+    name = request.form.get('name', file.filename)[:100]
     filename = shorten_filename(file.filename)
-    description = request.form.get('description', '')[:100]
+    description = request.form.get('description', '')[:12000]
     category = request.form.get('category', 'general')
     
     # Validate file size (10MB limit) - Memory 1GB only
