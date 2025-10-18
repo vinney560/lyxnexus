@@ -2814,9 +2814,9 @@ def internal_error(error):
 
     referrer = request.referrer
     if referrer:
-        return redirect(referrer), 302
+        return redirect(referrer, message='Oops! Something went wrong. Try again.', message_type='error'), 302
     else:
-        return redirect(url_for('home')), 302
+        return redirect(url_for('main_page', message='Oops! Something went wrong. Try again.', message_type='error')), 302
 
 # ==========================================
 if __name__ == '__main__':
