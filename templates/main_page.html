@@ -127,18 +127,53 @@
         margin-bottom: 20px;
         border-left: 4px solid #8B5CF6;
     }
-    
     .topic-card {
-        background: rgba(30, 30, 40, 0.7);
-        border-radius: 15px;
-        padding: 20px;
-        margin-bottom: 20px;
-        text-align: center;
+      position: relative;
+      background: rgba(30, 30, 40, 0.7);
+      border-radius: 15px;
+      padding: 20px;
+      margin-bottom: 20px;
+      text-align: center;
+      color: white;
+      z-index: 1;
+      overflow: hidden;
     }
+
+    .topic-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 15px;
+      padding: 2px;
+      background: linear-gradient(90deg, 
+        #3b82f6, #06b6d4, #22c55e, #eab308, #ef4444, #3b82f6);
+      background-size: 400% 400%;
+      animation: lightning-border 3s linear infinite;
+      -webkit-mask:
+        linear-gradient(#fff 0 0) content-box, 
+        linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    @keyframes lightning-border {
+      0% {
+        background-position: 0% 50%;
+      }
+      50% {
+        background-position: 100% 50%;
+      }
+      100% {
+        background-position: 0% 50%;
+      }
+    }    
     
     .timetable-day {
         background: rgba(30, 30, 40, 0.7);
         border-radius: 15px;
+        border: 1px solid #3b82f6; 
         padding: 20px;
         margin-bottom: 20px;
     }
