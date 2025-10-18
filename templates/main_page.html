@@ -61,6 +61,9 @@
     .btn:hover {
         transform: translateY(-3px);
         box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+        background: rgb(129, 129, 222);
+        background: linear-gradient(135deg, rgb(129, 129, 222), rgb(93, 227, 109), rgb(160, 51, 167));
+
     }
     
     .btn-outline {
@@ -582,7 +585,7 @@
         </div>
     </header>
 
-    <main class="content-container max-w-7xl mx-auto px-4 pt-5 pb-[30px] md:pb-[70px] animate-fadeIn">
+    <main class="content-container max-w-7xl mx-auto px-4 pt-5 pb-[40px] md:pb-[100px] animate-fadeIn">
                                  <!-- Announcements Section -->
         
                                  <!-- Image Preview Modal -->
@@ -1359,7 +1362,7 @@
                     </div>
                     <h3 class="text-xl font-bold mb-2">${topic.name}</h3>
                     <p class="text-gray-300 mb-4">${topic.description}</p>
-                    <button class="btn" onclick="window.location.href='/material/${topic.id}'" text-sm px-4 py-2 w-full">
+                    <button class="btn text-sm px-4 py-2 w-full" onclick="window.location.href='/material/${topic.id}'">
                         <i class="fas fa-folder-open mr-1"></i> View Materials
                     </button>
                 </div>
