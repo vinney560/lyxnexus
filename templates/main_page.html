@@ -680,6 +680,9 @@
                             <button id="logout" class="btn bg-green-600 hover:bg-green-700 text-sm">
                                 <i class="fas fa-key mr-1"></i> Logout
                             </button>
+                            <button id="logout" class="btn bg-green-600 hover:bg-green-700 text-sm">
+                                <i class="fas fa-download mr-1"></i> Install APP
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -1497,136 +1500,70 @@
         });
 
         document.addEventListener("DOMContentLoaded", () => {
+          const installBtn = document.getElementById("installAppBtn");
+        
+          if (!installBtn) return;
+        
+          // Detect if inside your custom LyxNexus WebView
           function isInLyxApp() {
             const ua = navigator.userAgent || navigator.vendor || window.opera;
-            if (/App\{\d+\}/i.test(ua)) return true; // Detect custom WebView UA that i set (App{VERSION_CODE})
-            const isAndroidWebView = /; wv/.test(ua) || (/Version\/[\d.]+/.test(ua) && !/Chrome/.test(ua));
-            const isIOSWebView = /iPhone|iPad|iPod/.test(ua) && !window.navigator.standalone && !/Safari/.test(ua);
-            return isAndroidWebView || isIOSWebView;
+            return /App\{\d+\}/i.test(ua);
           }
       
-          const isInstalledOrWebView =
+          const isInstalled =
             window.matchMedia("(display-mode: standalone)").matches || isInLyxApp();
-          if (isInstalledOrWebView) return; 
+      
+          if (isInstalled) {
+            installBtn.style.display = "none";
+            return;
+          }
       
           const isAndroid = /Android/i.test(navigator.userAgent);
           const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
       
-          const container = document.createElement("div");
-          Object.assign(container.style, {
-            position: "fixed",
-            bottom: "24px",
-            left: "50%",
-            transform: "translateX(-50%)",
-            zIndex: "99999",
-            display: "none",
-            alignItems: "center",
-            gap: "12px",
-            background: "linear-gradient(135deg, #1e1e1e, #2b2b2b)",
-            color: "#fff",
-            padding: "14px 18px",
-            borderRadius: "16px",
-            boxShadow: "0 4px 18px rgba(0,0,0,0.45)",
-            fontFamily: "system-ui, sans-serif",
-            animation: "fadeInUp 0.4s ease",
-            backdropFilter: "blur(8px)",
-            border: "1px solid rgba(255,255,255,0.1)",
-            maxWidth: "90%",
-          });
-      
-          const btn = document.createElement("button");
-          btn.textContent = "📲 Install LyxNexus";
-          Object.assign(btn.style, {
-            background: "linear-gradient(135deg, #0078ff, #00c6ff)",
-            color: "#fff",
-            border: "none",
-            borderRadius: "10px",
-            padding: "10px 16px",
-            cursor: "pointer",
-            fontWeight: "600",
-            transition: "background 0.3s ease",
-          });
-          btn.addEventListener("mouseenter", () => btn.style.background = "linear-gradient(135deg, #0090ff, #00d8ff)");
-          btn.addEventListener("mouseleave", () => btn.style.background = "linear-gradient(135deg, #0078ff, #00c6ff)");
-      
-          const closeBtn = document.createElement("span");
-          closeBtn.textContent = "✖";
-          Object.assign(closeBtn.style, {
-            cursor: "pointer",
-            fontSize: "18px",
-            opacity: "0.7",
-            transition: "opacity 0.3s",
-          });
-          closeBtn.addEventListener("mouseenter", () => (closeBtn.style.opacity = "1"));
-          closeBtn.addEventListener("mouseleave", () => (closeBtn.style.opacity = "0.7"));
-          closeBtn.addEventListener("click", () => (container.style.display = "none"));
-      
-          container.appendChild(btn);
-          container.appendChild(closeBtn);
-          document.body.appendChild(container);
-      
-          const style = document.createElement("style");
-          style.innerHTML = `
-            @keyframes fadeInUp {
-              from { opacity: 0; transform: translate(-50%, 20px); }
-              to { opacity: 1; transform: translate(-50%, 0); }
-            }
-          `;
-          document.head.appendChild(style);
-      
-          const showPrompt = () => {
-            container.style.display = "flex";
-          };
-      
-          if (isAndroid) {
-            showPrompt();
-            toastSystem.info("Download the LyxNexus app for the best experience!", "Install App");
-            btn.addEventListener("click", () => {
-              window.location.href =
-                "https://warehouse.appilix.com/uploads/app-apk-68f3aa49cd930-1760799305.apk";
-              container.style.display = "none";
-            });
-            return;
-          }
-    
-          if (isIOS) {
-            showPrompt();
-            toastSystem.info('Tap "Share" → "Add to Home Screen" to install LyxNexus', "Install App");
-            btn.textContent = "📖 How to Install";
-            btn.addEventListener("click", () => {
-              alert(
-                "To install LyxNexus on iOS:\n\n" +
-                  "1️⃣ Tap the Share icon in Safari\n" +
-                  "2️⃣ Select 'Add to Home Screen'\n" +
-                  "3️⃣ Confirm to add the app"
-              );
-              container.style.display = "none";
-            });
-            return;
-          }
-      
           let deferredPrompt = null;
+      
           window.addEventListener("beforeinstallprompt", (e) => {
             e.preventDefault();
             deferredPrompt = e;
-            showPrompt();
-            toastSystem.info("You can install LyxNexus for a better experience!", "Install App");
+            installBtn.style.display = "inline-flex";
           });
       
-          btn.addEventListener("click", async () => {
-            if (!deferredPrompt) return;
-            container.style.display = "none";
-            deferredPrompt.prompt();
-            const { outcome } = await deferredPrompt.userChoice;
-            console.log(`User response: ${outcome}`);
-            if (outcome === "accepted")
-              toastSystem.success("App installed successfully!", "Installation Complete");
-            deferredPrompt = null;
+          installBtn.addEventListener("click", async () => {
+            if (isAndroid) {
+              toastSystem.info("Downloading the LyxNexus App…", "Install App");
+              window.location.href = "https://warehouse.appilix.com/uploads/app-apk-68f3aa49cd930-1760799305.apk";
+              return;
+            }
+        
+            if (isIOS) {
+              toastSystem.info("To install LyxNexus, tap Share → Add to Home Screen", "Install App");
+              alert(
+                "To install LyxNexus on iOS:\n\n" +
+                "1️⃣ Tap the Share icon in Safari\n" +
+                "2️⃣ Choose 'Add to Home Screen'\n" +
+                "3️⃣ Confirm to add it"
+              );
+              return;
+            }
+        
+            if (deferredPrompt) {
+              deferredPrompt.prompt();
+              const { outcome } = await deferredPrompt.userChoice;
+              if (outcome === "accepted") {
+                toastSystem.success("LyxNexus installed successfully!", "Success");
+              } else {
+                toastSystem.info("Installation canceled", "Install App");
+              }
+              deferredPrompt = null;
+            } else {
+              toastSystem.info("Your browser already supports LyxNexus as a PWA!", "Install App");
+            }
           });
       
           window.addEventListener("appinstalled", () => {
-            container.style.display = "none";
-            console.log("✅ PWA installed successfully!");
+            installBtn.style.display = "none";
+            toastSystem.success("LyxNexus successfully installed!", "Done");
           });
         });
     </script>
