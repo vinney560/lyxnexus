@@ -1496,15 +1496,24 @@
           }
         });
         document.addEventListener("DOMContentLoaded", () => {
-          let isInApp = /LyxNexus/i.test(navigator.userAgent); // detect if inside WebView
-          if (isInApp) return; // no prompt
+          function isWebView() {
+            const ua = navigator.userAgent || navigator.vendor || window.opera;
         
+            const isAndroidWebView = /; wv/.test(ua) || (/Version\/[\d.]+/.test(ua) && !/Chrome/.test(ua));
+        
+            const isIOSWebView = /iPhone|iPad|iPod/.test(ua) && !window.navigator.standalone && !/Safari/.test(ua);
+        
+            return isAndroidWebView || isIOSWebView;
+          }
+      
+          const isInstalledOrWebView = window.matchMedia('(display-mode: standalone)').matches || isWebView();
+          if (isInstalledOrWebView) return; // no prompt
+      
           const isAndroid = /Android/i.test(navigator.userAgent);
           const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-        
-          const installContainer = document.createElement("div");
-          installContainer.id = "installContainer";
-          Object.assign(installContainer.style, {
+      
+          const container = document.createElement("div");
+          Object.assign(container.style, {
             position: "fixed",
             top: "20px",
             left: "20px",
@@ -1514,80 +1523,98 @@
             gap: "10px",
             background: "#1e1e1e",
             color: "#fff",
-            padding: "10px 16px",
+            padding: "12px 18px",
             borderRadius: "12px",
-            boxShadow: "0 2px 10px rgba(0,0,0,0.3)",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.35)",
             fontFamily: "system-ui, sans-serif",
             display: "none",
+            maxWidth: "90%",
+            flexWrap: "wrap"
           });
       
-          const installBtn = document.createElement("button");
-          installBtn.textContent = "📲 Install App";
-          Object.assign(installBtn.style, {
+          const btn = document.createElement("button");
+          btn.textContent = "📲 Install App";
+          Object.assign(btn.style, {
             background: "#0078ff",
             color: "#fff",
             border: "none",
             borderRadius: "8px",
-            padding: "8px 12px",
+            padding: "10px 14px",
             cursor: "pointer",
-            fontWeight: "600"
+            fontWeight: "600",
+            flex: "1 0 auto"
           });
       
           const closeBtn = document.createElement("span");
           closeBtn.textContent = "✖";
-          Object.assign(closeBtn.style, {
-            cursor: "pointer",
-            fontSize: "14px",
-            opacity: "0.7"
-          });
+          Object.assign(closeBtn.style, { cursor: "pointer", fontSize: "16px", opacity: "0.7" });
           closeBtn.addEventListener("mouseenter", () => closeBtn.style.opacity = "1");
           closeBtn.addEventListener("mouseleave", () => closeBtn.style.opacity = "0.7");
       
-          installContainer.appendChild(installBtn);
-          installContainer.appendChild(closeBtn);
-          document.body.appendChild(installContainer);
+          container.appendChild(btn);
+          container.appendChild(closeBtn);
+          document.body.appendChild(container);
       
-          closeBtn.addEventListener("click", () => {
-            installContainer.style.display = "none";
-          });
+          closeBtn.addEventListener("click", () => container.style.display = "none");
       
-          // Android APK install
+          let debounceTimer = null;
+          const showPrompt = () => {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+              container.style.display = "flex";
+            }, 500); // avoid flashing
+          };
+
           if (isAndroid) {
-            installContainer.style.display = "flex";
-            toastSystem.info('Download the LyxNexus APK for a better experience!', 'Install App');
-            installBtn.addEventListener("click", () => {
+            showPrompt();
+            toastSystem.info('Download the LyxNexus APK for the best experience!', 'Install App');
+            btn.addEventListener("click", () => {
               window.location.href = "https://warehouse.appilix.com/uploads/app-apk-68f3aa49cd930-1760799305.apk";
-              installContainer.style.display = "none";
+              container.style.display = "none";
             });
             return;
           }
-      
-          // PWA install
+
+          if (isIOS) {
+            showPrompt();
+            toastSystem.info('Tap Share → "Add to Home Screen" to install LyxNexus', 'Install App');
+            btn.textContent = "📲 How to Install";
+            btn.addEventListener("click", () => {
+              alert(
+                "To install LyxNexus on iOS:\n\n" +
+                "1️⃣ Tap the Share icon in Safari\n" +
+                "2️⃣ Select 'Add to Home Screen'\n" +
+                "3️⃣ Confirm to add the app"
+              );
+              container.style.display = "none";
+            });
+            return;
+          }
+
           let deferredPrompt = null;
           window.addEventListener("beforeinstallprompt", (e) => {
             e.preventDefault();
             deferredPrompt = e;
-            installContainer.style.display = "flex";
+            showPrompt();
             toastSystem.info('You can install this app for a better experience', 'Install App');
           });
-      
-          installBtn.addEventListener("click", async () => {
+
+          btn.addEventListener("click", async () => {
             if (!deferredPrompt) return;
-            installContainer.style.display = "none";
+            container.style.display = "none";
             deferredPrompt.prompt();
             const { outcome } = await deferredPrompt.userChoice;
             console.log(`User response: ${outcome}`);
-            if (outcome === 'accepted') {
-              toastSystem.success('App installed successfully!', 'Installation Complete');
-            }
+            if (outcome === 'accepted') toastSystem.success('App installed successfully!', 'Installation Complete');
             deferredPrompt = null;
           });
-      
+
           window.addEventListener("appinstalled", () => {
-            installContainer.style.display = "none";
+            container.style.display = "none";
             console.log("PWA installed successfully!");
           });
         });
+
     </script>
 </body>
 </html>
