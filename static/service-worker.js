@@ -6,7 +6,7 @@
 const CACHE_NAME = 'lyxnexus-static-v2';
 const DYNAMIC_CACHE = 'lyxnexus-dynamic-v1';
 const OFFLINE_URL = '/offline.html';
-const STATIC_ASSETS = ['/', '/main_page', OFFLINE_URL];
+const STATIC_ASSETS = ['/', '/main-page', OFFLINE_URL];
 const DEBOUNCE_DELAY = 2000;
 
 let onlineStatus = navigator.onLine;
