@@ -867,7 +867,7 @@
                       <h3 class="text-lg font-bold">${escapeHtml(assignment.title)}</h3>
                       <span class="bg-blue-500 text-white px-2 py-1 rounded-full text-xs mt-2 sm:mt-0 sm:ml-2">Due: ${due}</span>
                     </div>
-                    <p class="text-gray-400 mt-1">${escapeHtml(assignment.description || '')}</p>
+                    <p class="text-gray-400 break-all hyphens-auto mt-1">${escapeHtml(assignment.description || '')}</p>
                     ${fileSection}
                     <div class="flex items-center mt-2 text-sm text-gray-500">
                       <span>Topic: ${assignment.topic?.name || 'General'}</span>
@@ -900,7 +900,7 @@
               <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center">
                 <div class="flex-1 mb-4 lg:mb-0">
                   <h3 class="text-lg font-bold">${escapeHtml(t.name)}</h3>
-                  <p class="text-gray-400 mt-1">${escapeHtml(t.description || '')}</p>
+                  <p class="text-gray-400 break-all hyphens-auto mt-1">${escapeHtml(t.description || '')}</p>
                   <div class="text-sm text-gray-500 mt-2">Created: ${formatDateSafe(t.created_at)}</div>
                 </div>
                 <div class="action-buttons">
@@ -919,7 +919,6 @@
           container.innerHTML = `<div class="loading"><div class="spinner"></div></div>`;
           const raw = await fetchData(ENDPOINTS.TIMETABLE);
         
-          // Raw may be grouped (array of {day, slots}) or flat (array of slots)
           let grouped = {};
           if (!raw) {
             container.innerHTML = '<p class="text-center text-gray-400">No timetable available.</p>';
@@ -930,7 +929,6 @@
             // grouped response
             raw.forEach(d => grouped[d.day] = d.slots);
           } else if (Array.isArray(raw)) {
-            // flat response - group by day_of_week or day
             raw.forEach(s => {
               const day = s.day_of_week || s.day || 'Unsorted';
               grouped[day] = grouped[day] || [];
