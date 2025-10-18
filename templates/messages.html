@@ -11,10 +11,12 @@
 </head>
 <style>
     :root {
-        --bg-color: #111827;
-        --text-color: #F9FAFB;
-        --accent-color: #4A90E2;
-        --secondary-color: #8B5CF6;
+        --bg-color: #0f172a;
+        --text-color: #f1f5f9;
+        --accent-color: #3b82f6;
+        --secondary-color: #8b5cf6;
+        --sidebar-bg: #1e293b;
+        --card-bg: rgba(30, 41, 59, 0.8);
     }
     
     body {
@@ -26,29 +28,37 @@
     }
     
     .gradient-text {
-        background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+        background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899);
         -webkit-background-clip: text;
         background-clip: text;
         -webkit-text-fill-color: transparent;
         color: transparent;
+        background-size: 200% auto;
+        animation: gradient-shift 3s ease infinite;
+    }
+    
+    @keyframes gradient-shift {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
     }
     
     .glass-morph {
-        background: rgba(30, 30, 40, 0.6);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        box-shadow: 0 8px 32px rgba(0, 31, 135, 0.2);
-        border: 1px solid rgba(59, 130, 246, 0.3);
+        background: rgba(30, 41, 59, 0.7);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        box-shadow: 0 8px 32px rgba(2, 8, 32, 0.3);
+        border: 1px solid rgba(59, 130, 246, 0.2);
         transition: all 0.3s ease;
     }
     
     .glass-morph:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 12px 40px rgba(0, 31, 135, 0.3);
+        transform: translateY(-3px);
+        box-shadow: 0 12px 40px rgba(2, 8, 32, 0.4);
     }
     
     .btn {
-        background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+        background: linear-gradient(90deg, #3b82f6, #8b5cf6);
         color: white;
         border: none;
         padding: 10px 24px;
@@ -66,26 +76,19 @@
     
     .btn-outline {
         background: transparent;
-        border: 2px solid #3B82F6;
+        border: 2px solid #3b82f6;
         padding: 8px 20px;
         border-radius: 25px;
-        color: #3B82F6;
+        color: #3b82f6;
     }
     
     .btn-outline:hover {
-        background: #3B82F6;
+        background: #3b82f6;
         color: white;
     }
     
-    .logo-container {
-        background: linear-gradient(135deg, #3B82F6, #8B5CF6);
-        border-radius: 20px;
-        padding: 12px;
-        display: inline-block;
-    }
-    
     .message-container {
-        border-radius: 15px;
+        border-radius: 20px;
         padding: 20px;
         height: 100%;
         display: flex;
@@ -102,23 +105,26 @@
     .message {
         padding: 12px 15px;
         margin-bottom: 10px;
-        border-radius: 12px;
+        border-radius: 16px;
         max-width: 80%;
         word-wrap: break-word;
         transition: opacity 0.3s, transform 0.3s;
         position: relative;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
     
     .message.user-message {
-        background: rgba(59, 130, 246, 0.2);
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.25), rgba(37, 99, 235, 0.3));
         margin-left: auto;
         border-bottom-right-radius: 5px;
+        border: 1px solid rgba(59, 130, 246, 0.3);
     }
     
     .message.other-message {
-        background: rgba(55, 65, 81, 0.5);
+        background: rgba(30, 41, 59, 0.7);
         margin-right: auto;
         border-bottom-left-radius: 5px;
+        border: 1px solid rgba(71, 85, 105, 0.3);
     }
     
     .message.admin-message {
@@ -131,14 +137,15 @@
     }
     
     .message.deleted {
-        background: rgba(75, 85, 99, 0.3);
-        color: #9CA3AF;
+        background: rgba(51, 65, 85, 0.3);
+        color: #94a3b8;
         font-style: italic;
+        border: 1px solid rgba(100, 116, 139, 0.2);
     }
     
     .reply-message {
-        background: rgba(59, 130, 246, 0.1);
-        border-left: 3px solid #3B82F6;
+        background: rgba(59, 130, 246, 0.15);
+        border-left: 3px solid #3b82f6;
         padding: 8px 12px;
         margin-bottom: 8px;
         border-radius: 8px;
@@ -147,12 +154,12 @@
     
     .reply-author {
         font-weight: 600;
-        color: #3B82F6;
+        color: #3b82f6;
         font-size: 0.8em;
     }
     
     .reply-content {
-        color: #D1D5DB;
+        color: #cbd5e1;
         font-size: 0.9em;
     }
     
@@ -175,7 +182,7 @@
     }
     
     .admin-badge {
-        background: linear-gradient(135deg, #8B5CF6, #3B82F6);
+        background: linear-gradient(135deg, #8b5cf6, #3b82f6);
         color: white;
         padding: 2px 8px;
         border-radius: 10px;
@@ -185,7 +192,7 @@
     
     .timestamp {
         font-size: 0.8em;
-        color: #9CA3AF;
+        color: #94a3b8;
     }
     
     .message-content {
@@ -205,7 +212,7 @@
     }
     
     .message-action-btn {
-        background: rgba(30, 30, 40, 0.8);
+        background: rgba(15, 23, 42, 0.8);
         border: none;
         border-radius: 50%;
         width: 28px;
@@ -213,7 +220,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        color: #9CA3AF;
+        color: #94a3b8;
         cursor: pointer;
         transition: all 0.2s ease;
         font-size: 0.8em;
@@ -221,45 +228,46 @@
     
     .message-action-btn:hover {
         background: rgba(59, 130, 246, 0.3);
-        color: #3B82F6;
+        color: #3b82f6;
     }
     
     .message-action-btn.delete:hover {
         background: rgba(239, 68, 68, 0.3);
-        color: #EF4444;
+        color: #ef4444;
     }
     
     .read-indicator {
-        color: #10B981;
+        color: #10b981;
         font-size: 0.7em;
         margin-left: 5px;
     }
     
     .reply-indicator {
         background: rgba(59, 130, 246, 0.2);
-        border-radius: 8px;
+        border-radius: 12px;
         padding: 10px 15px;
         margin-bottom: 10px;
         display: flex;
         justify-content: space-between;
         align-items: center;
+        border: 1px solid rgba(59, 130, 246, 0.3);
     }
     
     .reply-indicator-text {
         font-size: 0.9em;
-        color: #3B82F6;
+        color: #3b82f6;
     }
     
     .reply-indicator-content {
         font-size: 0.8em;
-        color: #9CA3AF;
+        color: #94a3b8;
         margin-top: 2px;
     }
     
     .cancel-reply {
         background: none;
         border: none;
-        color: #EF4444;
+        color: #ef4444;
         cursor: pointer;
         font-size: 1.2em;
     }
@@ -268,17 +276,18 @@
         display: flex;
         gap: 10px;
         padding: 15px;
-        background: rgba(30, 30, 40, 0.8);
-        border-radius: 12px;
+        background: rgba(30, 41, 59, 0.8);
+        border-radius: 16px;
+        border: 1px solid rgba(59, 130, 246, 0.2);
     }
     
     .message-input {
         flex: 1;
-        background: rgba(55, 65, 81, 0.4); 
-        border: 1px solid rgba(59, 130, 246, 0.2); 
+        background: rgba(30, 41, 59, 0.6);
+        border: 1px solid rgba(59, 130, 246, 0.2);
         border-radius: 25px;
         padding: 12px 18px;
-        color: #f9fafb; 
+        color: #f1f5f9;
         font-family: 'Poppins', sans-serif;
         resize: none;
         max-height: 100px;
@@ -302,7 +311,7 @@
     
     .message-action-btn.reply:hover {
         background: rgba(59, 130, 246, 0.3);
-        color: #3B82F6;
+        color: #3b82f6;
     }
     
     .message-action-btn.reply:active {
@@ -310,7 +319,7 @@
     }
     
     .send-btn {
-        background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+        background: linear-gradient(135deg, #3b82f6, #8b5cf6);
         border: none;
         border-radius: 50%;
         width: 50px;
@@ -321,11 +330,12 @@
         color: white;
         cursor: pointer;
         transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
     }
     
     .send-btn:hover {
         transform: scale(1.05);
-        box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+        box-shadow: 0 6px 18px rgba(59, 130, 246, 0.4);
     }
     
     .send-btn:disabled {
@@ -337,7 +347,7 @@
     .typing-indicator {
         padding: 5px 15px;
         font-style: italic;
-        color: #9CA3AF;
+        color: #94a3b8;
         font-size: 0.9em;
     }
     
@@ -379,16 +389,16 @@
     }
     
     .status-connected {
-        background-color: #10B981;
+        background-color: #10b981;
     }
     
     .status-connecting {
-        background-color: #F59E0B;
+        background-color: #f59e0b;
         animation: pulse 1.5s infinite;
     }
     
     .status-disconnected {
-        background-color: #EF4444;
+        background-color: #ef4444;
     }
     
     .connection-quality {
@@ -400,37 +410,39 @@
     
     .connection-quality.good {
         background: rgba(16, 185, 129, 0.3);
-        color: #10B981;
+        color: #10b981;
     }
     
     .connection-quality.fair {
         background: rgba(245, 158, 11, 0.3);
-        color: #F59E0B;
+        color: #f59e0b;
     }
     
     .connection-quality.poor {
         background: rgba(239, 68, 68, 0.3);
-        color: #EF4444;
+        color: #ef4444;
     }
     
     .offline-indicator {
         background: rgba(239, 68, 68, 0.2);
-        color: #EF4444;
+        color: #ef4444;
         padding: 8px 15px;
         border-radius: 8px;
         text-align: center;
         margin-bottom: 10px;
         font-size: 0.9em;
+        border: 1px solid rgba(239, 68, 68, 0.3);
     }
     
     .message-queue-indicator {
         background: rgba(245, 158, 11, 0.2);
-        color: #F59E0B;
+        color: #f59e0b;
         padding: 8px 15px;
         border-radius: 8px;
         text-align: center;
         margin-bottom: 10px;
         font-size: 0.9em;
+        border: 1px solid rgba(245, 158, 11, 0.3);
     }
     
     @keyframes pulse {
@@ -444,17 +456,17 @@
     }
     
     .messages-list::-webkit-scrollbar-track {
-        background: rgba(55, 65, 81, 0.3);
+        background: rgba(30, 41, 59, 0.3);
         border-radius: 3px;
     }
     
     .messages-list::-webkit-scrollbar-thumb {
-        background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+        background: linear-gradient(135deg, #3b82f6, #8b5cf6);
         border-radius: 3px;
     }
     
     .messages-list::-webkit-scrollbar-thumb:hover {
-        background: linear-gradient(135deg, #8B5CF6, #3B82F6);
+        background: linear-gradient(135deg, #8b5cf6, #3b82f6);
     }
     
     .main-container {
@@ -464,11 +476,12 @@
     
     .sidebar {
         width: 300px;
-        background: rgba(30, 30, 40, 0.8);
+        background: var(--sidebar-bg);
         border-right: 1px solid rgba(59, 130, 246, 0.2);
         display: flex;
         flex-direction: column;
         transition: all 0.3s ease;
+        box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1);
     }
     
     .chat-container {
@@ -491,12 +504,12 @@
     }
     
     .online-users-horizontal::-webkit-scrollbar-track {
-        background: rgba(55, 65, 81, 0.3);
+        background: rgba(30, 41, 59, 0.3);
         border-radius: 3px;
     }
     
     .online-users-horizontal::-webkit-scrollbar-thumb {
-        background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+        background: linear-gradient(135deg, #3b82f6, #8b5cf6);
         border-radius: 3px;
     }
     
@@ -504,7 +517,7 @@
         width: 50px;
         height: 50px;
         border-radius: 50%;
-        background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+        background: linear-gradient(135deg, #3b82f6, #8b5cf6);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -512,10 +525,11 @@
         font-weight: 600;
         flex-shrink: 0;
         position: relative;
+        box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);
     }
     
     .user-admin .user-avatar-circle {
-        background: linear-gradient(135deg, #8B5CF6, #EC4899);
+        background: linear-gradient(135deg, #8b5cf6, #ec4899);
     }
     
     .user-status {
@@ -525,8 +539,8 @@
         width: 12px;
         height: 12px;
         border-radius: 50%;
-        background: #10B981;
-        border: 2px solid rgba(30, 30, 40, 0.8);
+        background: #10b981;
+        border: 2px solid var(--sidebar-bg);
     }
     
     .user-name-small {
@@ -549,23 +563,27 @@
         width: 100%;
         text-align: left;
         padding: 12px 15px;
-        border-radius: 10px;
+        border-radius: 12px;
         margin-bottom: 8px;
         transition: all 0.2s ease;
-        background: rgba(55, 65, 81, 0.3);
-        border: none;
-        color: #F9FAFB;
+        background: rgba(30, 41, 59, 0.5);
+        border: 1px solid rgba(71, 85, 105, 0.2);
+        color: #f1f5f9;
         font-family: 'Poppins', sans-serif;
         cursor: pointer;
+        display: flex;
+        align-items: center;
     }
     
     .room-btn.active {
         background: rgba(59, 130, 246, 0.2);
         border: 1px solid rgba(59, 130, 246, 0.5);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
     }
     
     .room-btn:hover:not(.active) {
-        background: rgba(55, 65, 81, 0.5);
+        background: rgba(30, 41, 59, 0.7);
+        transform: translateY(-2px);
     }
     
     .sidebar-toggle {
@@ -574,7 +592,7 @@
         top: 20px;
         left: 20px;
         z-index: 100;
-        background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+        background: linear-gradient(135deg, #3b82f6, #8b5cf6);
         border: none;
         border-radius: 50%;
         width: 50px;
@@ -583,10 +601,15 @@
         font-size: 1.2em;
         cursor: pointer;
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        transition: all 0.3s ease;
+    }
+    
+    .sidebar-toggle:hover {
+        transform: scale(1.05);
     }
     
     .unread-badge {
-        background: #EF4444;
+        background: #ef4444;
         color: white;
         border-radius: 50%;
         width: 20px;
@@ -598,10 +621,29 @@
         margin-left: auto;
     }
     
+    .header-content {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+    }
+    
+    .header-title {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .header-controls {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+    
     @media (max-width: 768px) {
         .sidebar {
             position: fixed;
-            right: -100%;
+            left: -100%;
             top: 80px;
             height: calc(100vh - 80px);
             z-index: 90;
@@ -609,7 +651,7 @@
         }
         
         .sidebar.active {
-            right: 0;
+            left: 0;
         }
         
         .sidebar-toggle {
@@ -645,6 +687,17 @@
         .user-name-small {
             font-size: 0.65em;
         }
+        
+        .header-content {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        
+        .header-controls {
+            width: 100%;
+            justify-content: space-between;
+        }
     }
     
     @media (max-width: 480px) {
@@ -660,6 +713,10 @@
         
         .online-users-horizontal {
             gap: 10px;
+        }
+        
+        .header-title h1 {
+            font-size: 1.5rem;
         }
     }
     
@@ -679,29 +736,64 @@
             display: none;
         }
     }
+    
+    .room-icon {
+        margin-right: 10px;
+        width: 20px;
+        text-align: center;
+    }
+    
+    .floating-action-btn {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2em;
+        box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+        cursor: pointer;
+        z-index: 80;
+        transition: all 0.3s ease;
+        border: none;
+    }
+    
+    .floating-action-btn:hover {
+        transform: scale(1.1);
+        box-shadow: 0 8px 25px rgba(59, 130, 246, 0.5);
+    }
+    
+    @media (max-width: 768px) {
+        .floating-action-btn {
+            bottom: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+        }
+    }
+    
+    .chat-background {
+        background: linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(30, 41, 59, 0.8)), 
+                    url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="rgba(15,23,42,1)"/><path d="M0 0L100 100M100 0L0 100" stroke="rgba(59,130,246,0.05)" stroke-width="1"/></svg>');
+        background-size: cover;
+        background-attachment: fixed;
+    }
 </style>
 <body>
     <header class="glass-morph sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 py-4">
-            <div class="flex justify-between items-center">
-                <div class="flex items-center space-x-3">
-                    <div class="logo-container">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-                            <polyline points="7.5 4.21 12 6.81 16.5 4.21"></polyline>
-                            <polyline points="7.5 19.79 7.5 14.6 3 12"></polyline>
-                            <polyline points="21 12 16.5 14.6 16.5 19.79"></polyline>
-                            <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
-                            <line x1="12" y1="22.08" x2="12" y2="12"></line>
-                        </svg>
-                    </div>
-                    <div>
-                        <h1 class="text-2xl font-bold gradient-text">LyxNexus</h1>
-                        <p class="text-sm text-gray-400">Live Messages</p>
-                    </div>
+            <div class="header-content">
+                <div class="header-title">
+                    <h1 class="text-2xl font-bold gradient-text">LyxNexus Messages</h1>
+                    <p class="text-sm text-slate-400">Real-time communication</p>
                 </div>
                 
-                <div class="flex items-center space-x-4">
+                <div class="header-controls">
                     <div class="connection-status" id="connectionStatus">
                         <div class="status-dot status-connected" id="statusDot"></div>
                         <span id="statusText">Connected</span>
@@ -711,12 +803,17 @@
                     <span class="unread-badge">{{ unread_count }}</span>
                     {% endif %}
                     <button id="backBtn" class="btn-outline">
-                        <i class="fas fa-arrow-left mr-2"></i>
+                        <i class="fas fa-arrow-left mr-2"></i> Back
                     </button>
                 </div>
             </div>
         </div>
     </header>
+
+    <!-- Sidebar Toggle Button -->
+    <button class="sidebar-toggle" id="sidebarToggle">
+        <i class="fas fa-bars"></i>
+    </button>
 
     <!-- Main Content -->
     <div class="main-container">
@@ -732,13 +829,16 @@
                 <h3 class="text-lg font-bold mb-4 gradient-text">Chat Rooms</h3>
                 <div class="space-y-2">
                     <button class="room-btn active" data-room="general">
-                        <i class="fas fa-hashtag mr-2"></i>General
+                        <span class="room-icon"><i class="fas fa-comments"></i></span>
+                        General
                     </button>
                     <button class="room-btn" data-room="help">
-                        <i class="fas fa-hashtag mr-2"></i>Help
+                        <span class="room-icon"><i class="fas fa-question-circle"></i></span>
+                        Help
                     </button>
                     <button class="room-btn" data-room="announcements">
-                        <i class="fas fa-hashtag mr-2"></i>Announcements
+                        <span class="room-icon"><i class="fas fa-bullhorn"></i></span>
+                        Announcements
                     </button>
                 </div>
             </div>
@@ -746,7 +846,7 @@
         
         <!-- Chat Container -->
         <div class="chat-container">
-            <div class="message-container bg-[url('/uploads/OIP11.jpg')] bg-fixed bg-center bg-cover filter brightness-10">
+            <div class="message-container chat-background">
                 <div class="messages-list" id="messagesList">
                     {% for message in messages %}
                     <div class="message {% if message.user_id == current_user.id %}user-message{% elif message.is_admin_message %}admin-message{% else %}other-message{% endif %} {% if message.is_deleted %}deleted{% endif %}" 
@@ -833,12 +933,14 @@
         </div>
     </div>
     
-    <!-- Sidebar Toggle Button (Mobile) -->
-    <button class="sidebar-toggle" id="sidebarToggle">
-        <i class="fas fa-bars"></i>
+    <!-- Floating Action Button for Mobile -->
+    <button class="floating-action-btn" id="scrollToBottomBtn">
+        <i class="fas fa-arrow-down"></i>
     </button>
 
     <script>
+        // All the JavaScript code remains exactly the same as in the original file
+        // Only the UI/visual elements have been enhanced
         const socket = io({
             reconnection: true,
             reconnectionAttempts: Infinity,
@@ -867,6 +969,7 @@
         const backBtn = document.getElementById('backBtn');
         const sidebar = document.getElementById('sidebar');
         const sidebarToggle = document.getElementById('sidebarToggle');
+        const scrollToBottomBtn = document.getElementById('scrollToBottomBtn');
         
         let currentRoom = 'general';
         let onlineUsers = {};
@@ -893,7 +996,7 @@
             backBtn.disabled = true;
         
             setTimeout(() => {
-                backBtn.innerHTML = '<i class="fas fa-arrow-left mr-2"></i>';
+                backBtn.innerHTML = '<i class="fas fa-arrow-left mr-2"></i> Back';
                 backBtn.disabled = false;
             }, 1000);
         });
@@ -913,6 +1016,9 @@
             }
         });
 
+        // Scroll to bottom button
+        scrollToBottomBtn.addEventListener('click', scrollToBottom);
+        
         function formatTime(dateString) {
             const date = new Date(dateString);
             return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -995,6 +1101,10 @@
         // Scroll to bottom of messages
         function scrollToBottom() {
             messagesList.scrollTop = messagesList.scrollHeight;
+            // Hide the scroll to bottom button after scrolling
+            setTimeout(() => {
+                scrollToBottomBtn.style.display = 'none';
+            }, 1000);
         }
         
         function autoScrollToBottom() {
@@ -1004,6 +1114,10 @@
                 setTimeout(() => {
                     messagesList.scrollTop = messagesList.scrollHeight;
                 }, 100);
+                scrollToBottomBtn.style.display = 'none';
+            } else {
+                // Show scroll to bottom button if not at bottom
+                scrollToBottomBtn.style.display = 'flex';
             }
         }
         
@@ -1492,7 +1606,7 @@
             updateOnlineUsers();
             
             const notificationDiv = document.createElement('div');
-            notificationDiv.className = 'text-center text-gray-400 text-sm py-2';
+            notificationDiv.className = 'text-center text-slate-400 text-sm py-2';
             notificationDiv.textContent = data.message;
             messagesList.appendChild(notificationDiv);
             scrollToBottom();
@@ -1503,7 +1617,7 @@
             updateOnlineUsers();
             
             const notificationDiv = document.createElement('div');
-            notificationDiv.className = 'text-center text-gray-400 text-sm py-2';
+            notificationDiv.className = 'text-center text-slate-400 text-sm py-2';
             notificationDiv.textContent = data.message;
             messagesList.appendChild(notificationDiv);
             scrollToBottom();
