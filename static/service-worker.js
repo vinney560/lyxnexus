@@ -1,7 +1,3 @@
-// =========================================================
-// 💠 LyxNexus Service Worker
-// Offline-first strategy with dynamic caching and live status updates
-// =========================================================
 
 const CACHE_NAME = 'lyxnexus-static-v2';
 const DYNAMIC_CACHE = 'lyxnexus-dynamic-v1';
@@ -12,9 +8,6 @@ const DEBOUNCE_DELAY = 2000;
 let onlineStatus = navigator.onLine;
 let debounceTimer = null;
 
-// ---------------------------------------------------------
-// 🛰️ Utility: Broadcast message to all connected clients
-// ---------------------------------------------------------
 async function broadcast(type) {
   const clients = await self.clients.matchAll();
   for (const client of clients) {
@@ -22,9 +15,6 @@ async function broadcast(type) {
   }
 }
 
-// ---------------------------------------------------------
-// ⚙️ INSTALL: Pre-cache essential static assets
-// ---------------------------------------------------------
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => cache.addAll(STATIC_ASSETS))
@@ -32,9 +22,6 @@ self.addEventListener('install', event => {
   self.skipWaiting(); // activate immediately
 });
 
-// ---------------------------------------------------------
-// 🧹 ACTIVATE: Clean up old caches & refresh clients
-// ---------------------------------------------------------
 self.addEventListener('activate', event => {
   event.waitUntil(
     (async () => {
@@ -45,7 +32,6 @@ self.addEventListener('activate', event => {
         }
       }
 
-      // Force all tabs to update to the new SW
       const clients = await self.clients.matchAll({ type: 'window' });
       for (const client of clients) {
         client.navigate(client.url);
@@ -55,16 +41,11 @@ self.addEventListener('activate', event => {
   self.clients.claim();
 });
 
-// ---------------------------------------------------------
-// 🌐 FETCH: Network-first with cache fallback
-// ---------------------------------------------------------
 self.addEventListener('fetch', event => {
-  // Only handle GET requests
   if (event.request.method !== 'GET') return;
 
   const reqUrl = new URL(event.request.url);
 
-  // Handle static pages (cache-first strategy)
   if (STATIC_ASSETS.includes(reqUrl.pathname)) {
     event.respondWith(
       caches.match(event.request).then(cachedResp => {
@@ -85,7 +66,6 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // Handle dynamic requests (network-first strategy)
   event.respondWith(
     fetch(event.request)
       .then(resp => {
@@ -107,9 +87,6 @@ self.addEventListener('fetch', event => {
   );
 });
 
-// ---------------------------------------------------------
-// 🔁 NETWORK STATUS: Debounced online/offline events
-// ---------------------------------------------------------
 function updateNetworkStatus(status) {
   if (status !== onlineStatus) {
     onlineStatus = status;
@@ -120,11 +97,7 @@ function updateNetworkStatus(status) {
   }
 }
 
-// ---------------------------------------------------------
-// 📩 MESSAGE HANDLER (optional future use)
-// ---------------------------------------------------------
 self.addEventListener('message', event => {
   if (event.data && event.data.type === 'SHOW_OFFLINE_OVERLAY') {
-    // Placeholder for future overlay logic
   }
 });
