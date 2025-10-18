@@ -293,7 +293,7 @@
     @media (max-width: 768px) {
         .content-container {
             padding-top: 20px;
-            padding-bottom: 150px;
+            padding-bottom: 180px; /* Increased bottom padding for mobile */
             animation: fadeIn 0.6s ease-in-out;
         }
     }   
@@ -383,9 +383,159 @@
     
     .skeleton-text.short {
         width: 40%;
-    }    
+    }
+
+    /* Modern Toast System */
+    .toast-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        max-width: 400px;
+    }
+
+    .toast {
+        background: rgba(30, 30, 40, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 12px;
+        padding: 16px 20px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        border-left: 4px solid;
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        transform: translateX(400px);
+        opacity: 0;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        max-width: 100%;
+    }
+
+    .toast.show {
+        transform: translateX(0);
+        opacity: 1;
+    }
+
+    .toast.hide {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+
+    .toast-icon {
+        font-size: 20px;
+        flex-shrink: 0;
+        margin-top: 2px;
+    }
+
+    .toast-content {
+        flex: 1;
+    }
+
+    .toast-title {
+        font-weight: 600;
+        margin-bottom: 4px;
+        font-size: 15px;
+    }
+
+    .toast-message {
+        font-size: 14px;
+        color: rgba(255, 255, 255, 0.8);
+        line-height: 1.4;
+    }
+
+    .toast-close {
+        background: none;
+        border: none;
+        color: rgba(255, 255, 255, 0.6);
+        cursor: pointer;
+        font-size: 16px;
+        padding: 0;
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        transition: all 0.2s ease;
+        flex-shrink: 0;
+    }
+
+    .toast-close:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+    }
+
+    /* Toast Types */
+    .toast-success {
+        border-left-color: #10B981;
+    }
+
+    .toast-success .toast-icon {
+        color: #10B981;
+    }
+
+    .toast-error {
+        border-left-color: #EF4444;
+    }
+
+    .toast-error .toast-icon {
+        color: #EF4444;
+    }
+
+    .toast-warning {
+        border-left-color: #F59E0B;
+    }
+
+    .toast-warning .toast-icon {
+        color: #F59E0B;
+    }
+
+    .toast-info {
+        border-left-color: #3B82F6;
+    }
+
+    .toast-info .toast-icon {
+        color: #3B82F6;
+    }
+
+    /* Toast Progress Bar */
+    .toast-progress {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        height: 3px;
+        background: currentColor;
+        opacity: 0.7;
+        width: 100%;
+        transform-origin: left;
+        animation: toastProgress linear forwards;
+    }
+
+    @keyframes toastProgress {
+        from { transform: scaleX(1); }
+        to { transform: scaleX(0); }
+    }
+
+    /* Mobile toast adjustments */
+    @media (max-width: 768px) {
+        .toast-container {
+            top: 10px;
+            right: 10px;
+            left: 10px;
+            max-width: none;
+        }
+
+        .toast {
+            padding: 14px 16px;
+        }
+    }
 </style>
 <body>
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
     <header class="glass-morph sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-2 py-2">
             <div class="flex flex-col md:flex-row justify-between items-center">
@@ -441,8 +591,8 @@
     </header>
 
     <main class="content-container max-w-7xl mx-auto px-4 py-6">
-                            <!-- Announcements Section -->
-                            <!-- Image Preview Modal -->
+        <!-- Announcements Section -->
+        <!-- Image Preview Modal -->
         <div id="image-preview-modal" class="hidden fixed inset-0 bg-black/70 items-center justify-center z-50">
           <span class="absolute top-4 right-6 text-white text-3xl cursor-pointer" onclick="closeImagePreview()">&times;</span>
           <img id="image-preview-img" src="" alt="Preview" class="max-h-[90%] max-w-[90%] rounded-lg shadow-lg">
@@ -636,6 +786,150 @@
         let assignments = [];
         let topics = [];
         let timetable = [];
+
+        // Modern Toast System
+        class ToastSystem {
+            constructor() {
+                this.container = document.getElementById('toastContainer');
+                this.toasts = new Map();
+                this.nextId = 0;
+            }
+
+            show(title, message, type = 'info', duration = 5000) {
+                const id = this.nextId++;
+                const toast = document.createElement('div');
+                toast.className = `toast toast-${type}`;
+                toast.setAttribute('data-toast-id', id);
+                
+                const icon = this.getIcon(type);
+                
+                toast.innerHTML = `
+                    <div class="toast-icon">${icon}</div>
+                    <div class="toast-content">
+                        <div class="toast-title">${title}</div>
+                        <div class="toast-message">${message}</div>
+                    </div>
+                    <button class="toast-close" onclick="toastSystem.close(${id})">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    ${duration > 0 ? `<div class="toast-progress" style="animation-duration: ${duration}ms"></div>` : ''}
+                `;
+
+                this.container.appendChild(toast);
+                this.toasts.set(id, toast);
+
+                // Trigger animation
+                setTimeout(() => toast.classList.add('show'), 10);
+
+                // Auto-remove if duration is set
+                if (duration > 0) {
+                    setTimeout(() => this.close(id), duration);
+                }
+
+                return id;
+            }
+
+            close(id) {
+                const toast = this.toasts.get(id);
+                if (!toast) return;
+
+                toast.classList.remove('show');
+                toast.classList.add('hide');
+
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.parentNode.removeChild(toast);
+                    }
+                    this.toasts.delete(id);
+                }, 400);
+            }
+
+            getIcon(type) {
+                const icons = {
+                    success: '<i class="fas fa-check-circle"></i>',
+                    error: '<i class="fas fa-exclamation-circle"></i>',
+                    warning: '<i class="fas fa-exclamation-triangle"></i>',
+                    info: '<i class="fas fa-info-circle"></i>'
+                };
+                return icons[type] || icons.info;
+            }
+
+            // Convenience methods
+            success(message, title = 'Success', duration = 5000) {
+                return this.show(title, message, 'success', duration);
+            }
+
+            error(message, title = 'Error', duration = 7000) {
+                return this.show(title, message, 'error', duration);
+            }
+
+            warning(message, title = 'Warning', duration = 6000) {
+                return this.show(title, message, 'warning', duration);
+            }
+
+            info(message, title = 'Info', duration = 5000) {
+                return this.show(title, message, 'info', duration);
+            }
+        }
+
+        // Initialize toast system
+        const toastSystem = new ToastSystem();
+
+        // Enhanced fetch with toast notifications
+        async function fetchDataWithToast(endpoint, options = {}) {
+            const showToast = options.showToast !== false;
+            const loadingToast = showToast ? toastSystem.info('Loading data...', 'Loading', 0) : null;
+
+            try {
+                const response = await fetch(endpoint, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...options.headers
+                    },
+                    ...options
+                });
+
+                if (loadingToast) toastSystem.close(loadingToast);
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    let errorData;
+                    try {
+                        errorData = JSON.parse(errorText);
+                    } catch {
+                        errorData = { message: errorText || 'Unknown error occurred' };
+                    }
+
+                    if (showToast) {
+                        toastSystem.error(
+                            errorData.message || `Request failed with status ${response.status}`,
+                            'Error'
+                        );
+                    }
+                    throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                // Show success toast for non-GET requests
+                if (options.method && options.method !== 'GET' && showToast) {
+                    toastSystem.success('Operation completed successfully', 'Success');
+                }
+
+                return data;
+            } catch (error) {
+                if (loadingToast) toastSystem.close(loadingToast);
+                
+                if (showToast && error.name !== 'AbortError') {
+                    toastSystem.error(
+                        error.message || 'Network error occurred',
+                        'Connection Error'
+                    );
+                }
+                throw error;
+            }
+        }
+
         function formatDate(dateString) {
             const date = new Date(dateString);
         
@@ -1114,8 +1408,43 @@
             }
             document.getElementById('stat-classes').textContent = classCount;
         }
+
+        // Check for Flask messages on page load
+        function checkForFlaskMessages() {
+            // Check for messages in the DOM (if Flask injected them)
+            const flashMessages = document.querySelectorAll('.flash-message, .alert, [data-flash]');
+            
+            flashMessages.forEach(messageEl => {
+                const text = messageEl.textContent.trim();
+                const type = messageEl.className.includes('success') ? 'success' :
+                           messageEl.className.includes('error') || messageEl.className.includes('danger') ? 'error' :
+                           messageEl.className.includes('warning') ? 'warning' : 'info';
+                
+                if (text) {
+                    toastSystem.show('Notification', text, type);
+                    messageEl.style.display = 'none'; // Hide original element
+                }
+            });
+
+            // Also check URL parameters for messages
+            const urlParams = new URLSearchParams(window.location.search);
+            const message = urlParams.get('message');
+            const messageType = urlParams.get('message_type') || 'info';
+            
+            if (message) {
+                toastSystem.show('Notification', decodeURIComponent(message), messageType);
+                
+                // Clean URL without page reload
+                const newUrl = window.location.pathname + window.location.search.replace(/[?&]message=[^&]+(&message_type=[^&]+)?/, '').replace(/^&/, '?');
+                window.history.replaceState({}, document.title, newUrl);
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             setupNavigation(); 
+
+            // Check for Flask messages first
+            checkForFlaskMessages();
 
             loadUserData();
             loadAnnouncements();
@@ -1143,14 +1472,24 @@
           window.addEventListener('load', () => {
             navigator.serviceWorker
               .register('/service-worker.js')
-              .then(reg => console.log('✅ SW registered:', reg.scope))
-              .catch(err => console.error('❌ SW registration failed:', err));
+              .then(reg => {
+                console.log('✅ SW registered:', reg.scope);
+                toastSystem.success('App is ready for offline use', 'Service Worker');
+              })
+              .catch(err => {
+                console.error('❌ SW registration failed:', err);
+                toastSystem.error('Offline features unavailable', 'Service Worker');
+              });
           });
         }
 
         // Refresh or redirect on connection changes
-        window.addEventListener('online', () => location.reload());
+        window.addEventListener('online', () => {
+          toastSystem.success('Connection restored', 'Network');
+          location.reload();
+        });
         window.addEventListener('offline', () => {
+          toastSystem.warning('You are currently offline', 'Network');
           if (location.pathname !== '/offline.html') {
             location.href = '/offline.html';
           }
@@ -1204,6 +1543,7 @@
             e.preventDefault();
             deferredPrompt = e;
             installContainer.style.display = "flex";
+            toastSystem.info('You can install this app for a better experience', 'Install App');
           });
       
           installBtn.addEventListener("click", async () => {
@@ -1212,6 +1552,9 @@
             deferredPrompt.prompt();
             const { outcome } = await deferredPrompt.userChoice;
             console.log(`User response: ${outcome}`);
+            if (outcome === 'accepted') {
+              toastSystem.success('App installed successfully!', 'Installation Complete');
+            }
             deferredPrompt = null;
           });
       
