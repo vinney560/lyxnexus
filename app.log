@@ -8334,3 +8334,41 @@ sqlalchemy.exc.OperationalError: (psycopg2.OperationalError) could not translate
 2025-10-18 14:27:24,767 - apscheduler.executors.default - INFO - Running job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-18 14:28:24 EAT)" (scheduled at 2025-10-18 14:27:24.764592+03:00)
 2025-10-18 14:27:24,783 - apscheduler.executors.default - INFO - Job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-18 14:28:24 EAT)" executed successfully
 2025-10-18 14:28:12,419 - apscheduler.scheduler - INFO - Scheduler has been shut down
+2025-10-18 14:37:47,401 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-10-18 14:37:47,413 - apscheduler.scheduler - INFO - Added job "clone_database_robust" to job store "default"
+2025-10-18 14:37:47,444 - apscheduler.scheduler - INFO - Scheduler started
+2025-10-18 14:37:47,467 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-10-18 14:37:47,475 - apscheduler.scheduler - INFO - Added job "keep_databases_alive" to job store "default"
+2025-10-18 14:37:47,478 - apscheduler.scheduler - INFO - Scheduler started
+2025-10-18 14:37:47,487 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-10-18 14:37:47,495 - apscheduler.scheduler - INFO - Added job "delete_old_announcements" to job store "default"
+2025-10-18 14:37:47,497 - apscheduler.scheduler - INFO - Scheduler started
+2025-10-18 14:37:47,534 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-10-18 14:37:47,538 - apscheduler.scheduler - INFO - Added job "periodic_cleanup" to job store "default"
+2025-10-18 14:37:47,539 - apscheduler.scheduler - INFO - Scheduler started
+2025-10-18 14:37:47,542 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-10-18 14:37:47,544 - apscheduler.scheduler - INFO - Added job "ping_urls" to job store "default"
+2025-10-18 14:37:47,545 - apscheduler.scheduler - INFO - Scheduler started
+2025-10-18 14:38:47,540 - apscheduler.executors.default - INFO - Running job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-18 14:38:47 EAT)" (scheduled at 2025-10-18 14:38:47.534796+03:00)
+2025-10-18 14:38:47,549 - apscheduler.executors.default - INFO - Job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-18 14:38:47 EAT)" executed successfully
+2025-10-18 14:39:47,538 - apscheduler.executors.default - INFO - Running job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-18 14:40:47 EAT)" (scheduled at 2025-10-18 14:39:47.534796+03:00)
+2025-10-18 14:39:47,548 - apscheduler.executors.default - INFO - Job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-18 14:40:47 EAT)" executed successfully
+2025-10-18 14:40:47,492 - apscheduler.executors.default - INFO - Running job "keep_databases_alive (trigger: interval[0:03:00], next run at: 2025-10-18 14:40:47 EAT)" (scheduled at 2025-10-18 14:40:47.466912+03:00)
+2025-10-18 14:40:47,647 - apscheduler.executors.default - INFO - Running job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-18 14:41:47 EAT)" (scheduled at 2025-10-18 14:40:47.534796+03:00)
+2025-10-18 14:40:47,650 - apscheduler.executors.default - INFO - Job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-18 14:41:47 EAT)" executed successfully
+2025-10-18 14:40:47,663 - apscheduler.executors.default - INFO - Running job "ping_urls (trigger: interval[0:03:00], next run at: 2025-10-18 14:40:47 EAT)" (scheduled at 2025-10-18 14:40:47.541575+03:00)
+2025-10-18 14:41:19,101 - apscheduler.executors.default - INFO - Job "ping_urls (trigger: interval[0:03:00], next run at: 2025-10-18 14:43:47 EAT)" executed successfully
+2025-10-18 14:41:47,539 - apscheduler.executors.default - INFO - Running job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-18 14:42:47 EAT)" (scheduled at 2025-10-18 14:41:47.534796+03:00)
+2025-10-18 14:41:47,543 - apscheduler.executors.default - INFO - Job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-18 14:42:47 EAT)" executed successfully
+2025-10-18 14:42:47,631 - apscheduler.executors.default - INFO - Running job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-18 14:43:47 EAT)" (scheduled at 2025-10-18 14:42:47.534796+03:00)
+2025-10-18 14:42:47,633 - apscheduler.executors.default - INFO - Job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-18 14:43:47 EAT)" executed successfully
+2025-10-18 14:43:06,876 - apscheduler.executors.default - INFO - Job "keep_databases_alive (trigger: interval[0:03:00], next run at: 2025-10-18 14:43:47 EAT)" executed successfully
+2025-10-18 14:43:47,491 - apscheduler.executors.default - INFO - Running job "keep_databases_alive (trigger: interval[0:03:00], next run at: 2025-10-18 14:46:47 EAT)" (scheduled at 2025-10-18 14:43:47.466912+03:00)
+2025-10-18 14:43:47,728 - apscheduler.executors.default - INFO - Running job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-18 14:44:47 EAT)" (scheduled at 2025-10-18 14:43:47.534796+03:00)
+2025-10-18 14:43:47,755 - apscheduler.executors.default - INFO - Job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-18 14:44:47 EAT)" executed successfully
+2025-10-18 14:43:47,757 - apscheduler.executors.default - INFO - Running job "ping_urls (trigger: interval[0:03:00], next run at: 2025-10-18 14:46:47 EAT)" (scheduled at 2025-10-18 14:43:47.541575+03:00)
+2025-10-18 14:43:56,457 - apscheduler.executors.default - INFO - Job "ping_urls (trigger: interval[0:03:00], next run at: 2025-10-18 14:46:47 EAT)" executed successfully
+2025-10-18 14:43:59,666 - apscheduler.executors.default - INFO - Job "keep_databases_alive (trigger: interval[0:03:00], next run at: 2025-10-18 14:46:47 EAT)" executed successfully
+2025-10-18 14:44:47,537 - apscheduler.executors.default - INFO - Running job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-18 14:45:47 EAT)" (scheduled at 2025-10-18 14:44:47.534796+03:00)
+2025-10-18 14:44:47,538 - apscheduler.executors.default - INFO - Job "periodic_cleanup (trigger: interval[0:01:00], next run at: 2025-10-18 14:45:47 EAT)" executed successfully
+2025-10-18 14:45:29,724 - apscheduler.scheduler - INFO - Scheduler has been shut down
