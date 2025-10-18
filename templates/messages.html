@@ -489,6 +489,7 @@
         display: flex;
         flex-direction: column;
         height: 100%;
+        width: 100%;
     }
     
     .online-users-horizontal {
@@ -640,7 +641,19 @@
         gap: 15px;
     }
     
+    /* Mobile-specific header fixes */
     @media (max-width: 768px) {
+        header {
+            padding-left: 0;
+            padding-right: 0;
+        }
+        
+        header .max-w-7xl {
+            max-width: 100% !important;
+            padding-left: 15px;
+            padding-right: 15px;
+        }
+        
         .sidebar {
             position: fixed;
             left: -100%;
@@ -692,11 +705,36 @@
             flex-direction: column;
             align-items: flex-start;
             gap: 10px;
+            width: 100%;
         }
         
         .header-controls {
             width: 100%;
             justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .connection-status {
+            margin-right: 0;
+            font-size: 0.75em;
+        }
+        
+        .header-title h1 {
+            font-size: 1.5rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 200px;
+        }
+        
+        .header-title p {
+            font-size: 0.8rem;
+        }
+        
+        .btn-outline {
+            padding: 6px 12px;
+            font-size: 0.85rem;
         }
     }
     
@@ -716,33 +754,57 @@
         }
         
         .header-title h1 {
-            font-size: 1.5rem;
+            font-size: 1.3rem;
+            max-width: 150px;
         }
-    }
-    @media (max-width: 768px) {
-        header {
-            width: 100vw;
-            overflow-x: hidden;
+        
+        .connection-status {
+            font-size: 0.7em;
+            padding: 4px 8px;
         }
-
-        header .max-w-7xl {
-            width: 100%;
-            overflow-x: auto;
-            white-space: nowrap;
-            -webkit-overflow-scrolling: touch;
-            box-sizing: border-box;
-        }
-
-        header .flex {
-            flex-wrap: nowrap !important;
-            min-width: max-content; 
-        }
-
-        header .max-w-7xl::-webkit-scrollbar {
+        
+        .connection-quality {
             display: none;
         }
+        
+        .header-controls {
+            gap: 8px;
+        }
+        
+        .unread-badge {
+            width: 18px;
+            height: 18px;
+            font-size: 0.65em;
+        }
     }
-
+    
+    @media (max-width: 768px) {
+        header .max-w-7xl {
+            overflow-x: visible;
+            white-space: normal;
+            -webkit-overflow-scrolling: touch;
+        }
+    
+        header .flex {
+            flex-wrap: wrap !important;
+            min-width: auto;
+        }
+    
+        header::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .chat-container {
+            width: 100vw;
+            margin-left: 0;
+            margin-right: 0;
+        }
+        
+        .message-container {
+            border-radius: 0;
+            padding: 15px;
+        }
+    }
     
     .room-icon {
         margin-right: 10px;
@@ -789,6 +851,57 @@
                     url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="rgba(15,23,42,1)"/><path d="M0 0L100 100M100 0L0 100" stroke="rgba(59,130,246,0.05)" stroke-width="1"/></svg>');
         background-size: cover;
         background-attachment: fixed;
+    }
+    
+    @media (max-width: 640px) {
+        .header-content {
+            flex-direction: row;
+            align-items: center;
+        }
+        
+        .header-title {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .header-controls {
+            flex: 0 0 auto;
+            justify-content: flex-end;
+        }
+        
+        .connection-status {
+            order: 2;
+        }
+        
+        .unread-badge {
+            order: 1;
+        }
+        
+        .btn-outline {
+            order: 3;
+        }
+    }
+    
+    @media (max-width: 400px) {
+        .header-title h1 {
+            font-size: 1.1rem;
+            max-width: 120px;
+        }
+        
+        .btn-outline span {
+            display: none;
+        }
+        
+        .btn-outline {
+            padding: 8px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+        }
+        
+        .btn-outline i {
+            margin-right: 0;
+        }
     }
 </style>
 <body>
