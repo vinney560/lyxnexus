@@ -262,6 +262,7 @@
             z-index: 100;
             gap: 6px;
             scrollbar-width: none; 
+            /*margin-top: 10px;*/
         }
 
         .mobile-nav::-webkit-scrollbar {
@@ -290,13 +291,7 @@
             margin-bottom: 4px;
         }
     }
-    @media (max-width: 768px) {
-        .content-container {
-            padding-top: 20px;
-            padding-bottom: 180px; /* Increased bottom padding for mobile */
-            animation: fadeIn 0.6s ease-in-out;
-        }
-    }   
+    
     @keyframes fadeIn {
         from { opacity: 0; transform: translateY(10px); }
         to { opacity: 1; transform: translateY(0); }
@@ -385,7 +380,6 @@
         width: 40%;
     }
 
-    /* Modern Toast System */
     .toast-container {
         position: fixed;
         top: 20px;
@@ -467,7 +461,6 @@
         color: white;
     }
 
-    /* Toast Types */
     .toast-success {
         border-left-color: #10B981;
     }
@@ -500,7 +493,6 @@
         color: #3B82F6;
     }
 
-    /* Toast Progress Bar */
     .toast-progress {
         position: absolute;
         bottom: 0;
@@ -518,7 +510,6 @@
         to { transform: scaleX(0); }
     }
 
-    /* Mobile toast adjustments */
     @media (max-width: 768px) {
         .toast-container {
             top: 10px;
@@ -590,9 +581,10 @@
         </div>
     </header>
 
-    <main class="content-container max-w-7xl mx-auto px-4 py-6">
-        <!-- Announcements Section -->
-        <!-- Image Preview Modal -->
+    <main class="content-container max-w-7xl mx-auto px-4 pt-5 pb-[70px] md:pb-[120px] animate-fadeIn">
+                                 <!-- Announcements Section -->
+        
+                                 <!-- Image Preview Modal -->
         <div id="image-preview-modal" class="hidden fixed inset-0 bg-black/70 items-center justify-center z-50">
           <span class="absolute top-4 right-6 text-white text-3xl cursor-pointer" onclick="closeImagePreview()">&times;</span>
           <img id="image-preview-img" src="" alt="Preview" class="max-h-[90%] max-w-[90%] rounded-lg shadow-lg">
