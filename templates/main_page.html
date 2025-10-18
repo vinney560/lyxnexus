@@ -291,16 +291,21 @@
         }
         .content-container {
             padding-top: 20px;
-            padding-bottom: 120px;
-            animation: fadeInOut 0.6s ease-in-out;
+            padding-bottom: 100px;
+            animation: fadeIn 0.6s ease-in-out;
         }
-
-        @keyframes fadeInOut {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
     }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 768px) {
+        .content-container {
+            padding-bottom: 100px;
+        }
+    }   
 
     @media (min-width: 769px) {
         header .max-w-7xl.mx-auto.px-2 {
@@ -1139,7 +1144,23 @@
             }, 60 * 60 * 1000); // 60 mins
         });
 
-        'serviceWorker'in navigator&&navigator.serviceWorker.register('/service-worker.js').then(r=>console.log("SW registered:",r)).catch(e=>console.error("SW failed:",e)),window.addEventListener("online",()=>location.reload()),window.addEventListener("offline",()=>location.href="/offline.html");
+        if ('serviceWorker' in navigator) {
+          window.addEventListener('load', () => {
+            navigator.serviceWorker
+              .register('/service-worker.js')
+              .then(reg => console.log('✅ SW registered:', reg.scope))
+              .catch(err => console.error('❌ SW registration failed:', err));
+          });
+        }
+
+        // Refresh or redirect on connection changes
+        window.addEventListener('online', () => location.reload());
+        window.addEventListener('offline', () => {
+          if (location.pathname !== '/offline.html') {
+            location.href = '/offline.html';
+          }
+        });
+
         document.addEventListener("DOMContentLoaded", () => {
           let deferredPrompt = null;
         

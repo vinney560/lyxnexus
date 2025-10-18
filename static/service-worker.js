@@ -1,86 +1,117 @@
-const CACHE_NAME = 'viewtv-cache-v2';
-const DYNAMIC_CACHE = 'viewtv-dynamic-v1';
+// =========================================================
+// 💠 LyxNexus Service Worker
+// Offline-first strategy with dynamic caching and live status updates
+// =========================================================
+
+const CACHE_NAME = 'lyxnexus-static-v2';
+const DYNAMIC_CACHE = 'lyxnexus-dynamic-v1';
 const OFFLINE_URL = '/offline.html';
-const STATIC_PAGES = ['/', '/home_2', OFFLINE_URL];
-const LOCAL_PLAYER = '/local-player';
+const STATIC_ASSETS = ['/', '/main_page', OFFLINE_URL];
 const DEBOUNCE_DELAY = 2000;
 
 let onlineStatus = navigator.onLine;
 let debounceTimer = null;
 
-// Utility: broadcast to all clients
+// ---------------------------------------------------------
+// 🛰️ Utility: Broadcast message to all connected clients
+// ---------------------------------------------------------
 async function broadcast(type) {
   const clients = await self.clients.matchAll();
-  clients.forEach(client => client.postMessage({ type }));
+  for (const client of clients) {
+    client.postMessage({ type });
+  }
 }
 
-// Install: cache static pages
+// ---------------------------------------------------------
+// ⚙️ INSTALL: Pre-cache essential static assets
+// ---------------------------------------------------------
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(STATIC_PAGES))
+    caches.open(CACHE_NAME).then(cache => cache.addAll(STATIC_ASSETS))
   );
-  self.skipWaiting();
+  self.skipWaiting(); // activate immediately
 });
 
-// Activate: cleanup old caches
+// ---------------------------------------------------------
+// 🧹 ACTIVATE: Clean up old caches & refresh clients
+// ---------------------------------------------------------
 self.addEventListener('activate', event => {
   event.waitUntil(
-    caches.keys().then(keys => Promise.all(
-      keys.map(key => {
-        if (![CACHE_NAME, DYNAMIC_CACHE].includes(key)) return caches.delete(key);
-      })
-    ))
+    (async () => {
+      const keys = await caches.keys();
+      for (const key of keys) {
+        if (![CACHE_NAME, DYNAMIC_CACHE].includes(key)) {
+          await caches.delete(key);
+        }
+      }
+
+      // Force all tabs to update to the new SW
+      const clients = await self.clients.matchAll({ type: 'window' });
+      for (const client of clients) {
+        client.navigate(client.url);
+      }
+    })()
   );
   self.clients.claim();
 });
 
-// Fetch handler
+// ---------------------------------------------------------
+// 🌐 FETCH: Network-first with cache fallback
+// ---------------------------------------------------------
 self.addEventListener('fetch', event => {
+  // Only handle GET requests
+  if (event.request.method !== 'GET') return;
+
   const reqUrl = new URL(event.request.url);
 
-  // Fully offline /local-player
-  if(reqUrl.pathname.startsWith(LOCAL_PLAYER)) {
-    event.respondWith(
-      caches.match(event.request).then(resp => resp || fetch(event.request).catch(() => new Response('', {status:200})))
-    );
-    return;
-  }
-
-  // Static pages: stale-while-revalidate
-  if(STATIC_PAGES.includes(reqUrl.pathname)) {
+  // Handle static pages (cache-first strategy)
+  if (STATIC_ASSETS.includes(reqUrl.pathname)) {
     event.respondWith(
       caches.match(event.request).then(cachedResp => {
-        const fetchPromise = fetch(event.request).then(networkResp => {
-          caches.open(CACHE_NAME).then(cache => cache.put(event.request, networkResp.clone()));
-          return networkResp;
-        }).catch(() => null);
+        const fetchPromise = fetch(event.request)
+          .then(networkResp => {
+            if (networkResp && networkResp.status === 200) {
+              caches.open(CACHE_NAME).then(cache =>
+                cache.put(event.request, networkResp.clone())
+              );
+            }
+            return networkResp;
+          })
+          .catch(() => null);
+
         return cachedResp || fetchPromise;
       })
     );
     return;
   }
 
-  // Other requests: dynamic cache with offline fallback
+  // Handle dynamic requests (network-first strategy)
   event.respondWith(
     fetch(event.request)
       .then(resp => {
-        if(resp && resp.status === 200) {
+        if (resp && resp.status === 200) {
           const respClone = resp.clone();
-          caches.open(DYNAMIC_CACHE).then(cache => cache.put(event.request, respClone));
+          caches.open(DYNAMIC_CACHE).then(cache =>
+            cache.put(event.request, respClone)
+          );
         }
         updateNetworkStatus(true);
         return resp;
       })
       .catch(() => {
         updateNetworkStatus(false);
-        return caches.match(event.request).then(resp => resp || caches.match(OFFLINE_URL));
+        return caches.match(event.request).then(
+          resp => resp || caches.match(OFFLINE_URL)
+        );
       })
   );
 });
 
-// Debounced network status update
+// ---------------------------------------------------------
+// 🔁 NETWORK STATUS: Debounced online/offline events
+// ---------------------------------------------------------
 function updateNetworkStatus(status) {
-  if(status !== onlineStatus) {
+  if (status !== onlineStatus) {
     onlineStatus = status;
     clearTimeout(debounceTimer);
     debounceTimer = setTimeout(() => {
@@ -89,9 +120,11 @@ function updateNetworkStatus(status) {
   }
 }
 
-// Optional: fallback offline overlay injection
+// ---------------------------------------------------------
+// 📩 MESSAGE HANDLER (optional future use)
+// ---------------------------------------------------------
 self.addEventListener('message', event => {
-  if(event.data && event.data.type === 'SHOW_OFFLINE_OVERLAY') {
-    // Could inject offline UI overlay dynamically here
+  if (event.data && event.data.type === 'SHOW_OFFLINE_OVERLAY') {
+    // Placeholder for future overlay logic
   }
 });
