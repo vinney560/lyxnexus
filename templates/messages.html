@@ -719,23 +719,30 @@
             font-size: 1.5rem;
         }
     }
-    
     @media (max-width: 768px) {
+        header {
+            width: 100vw;
+            overflow-x: hidden;
+        }
+
         header .max-w-7xl {
+            width: 100%;
             overflow-x: auto;
             white-space: nowrap;
             -webkit-overflow-scrolling: touch;
+            box-sizing: border-box;
         }
-    
+
         header .flex {
             flex-wrap: nowrap !important;
-            min-width: max-content;
+            min-width: max-content; 
         }
-    
-        header::-webkit-scrollbar {
+
+        header .max-w-7xl::-webkit-scrollbar {
             display: none;
         }
     }
+
     
     .room-icon {
         margin-right: 10px;
@@ -815,13 +822,10 @@
         <i class="fas fa-bars"></i>
     </button>
 
-    <!-- Main Content -->
     <div class="main-container">
         <!-- Sidebar -->
         <div class="sidebar" id="sidebar">
-            <!-- Online Users Horizontal -->
             <div class="online-users-horizontal" id="onlineUsersHorizontal">
-                <!-- Online users will be populated here -->
             </div>
             
             <!-- Room Selection -->
@@ -933,14 +937,11 @@
         </div>
     </div>
     
-    <!-- Floating Action Button for Mobile -->
     <button class="floating-action-btn" id="scrollToBottomBtn">
         <i class="fas fa-arrow-down"></i>
     </button>
 
     <script>
-        // All the JavaScript code remains exactly the same as in the original file
-        // Only the UI/visual elements have been enhanced
         const socket = io({
             reconnection: true,
             reconnectionAttempts: Infinity,
