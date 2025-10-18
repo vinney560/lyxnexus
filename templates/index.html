@@ -297,6 +297,7 @@
         transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         pointer-events: all;
         max-width: 100%;
+        overflow: hidden;
     }
     
     .toast.show {
@@ -394,7 +395,6 @@
         to { transform: scaleX(0); }
     }
     
-    /* Announcement Optimizations */
     .announcement-skeleton {
         background: var(--card-bg);
         border-radius: 16px;
@@ -624,10 +624,9 @@
     }
 </style>
 <body class="bg-[url(/uploads/OIP3.jpg)] bg-fixed bg-center bg-cover filter brightness-2">
-    <!-- Toast Container -->
+    
     <div id="toast-container" class="toast-container"></div>
     
-    <!-- Navigation -->
     <nav class="glass-morph sticky top-0 z-50">
         <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
             <div class="flex items-center space-x-3">
@@ -659,7 +658,6 @@
         </div>
     </nav>
 
-    <!-- Hero Section -->
     <header class="py-16 md:py-24 content-container">
         <div class="max-w-6xl mx-auto px-4 flex flex-col md:flex-row items-center">
             <div class="md:w-1/2 mb-10 md:mb-0">
@@ -749,7 +747,6 @@
         </section>
     </main>
 
-    <!-- Footer -->
     <footer class="mt-20 py-10 border-t border-slate-800">
         <div class="max-w-6xl mx-auto px-4">
             <div class="flex flex-col md:flex-row justify-between items-center">
@@ -782,7 +779,8 @@
         </div>
     </footer>
 
-    <!-- Mobile Navigation -->
+                              <!-- Mobile Navigation -->
+
     <div class="mobile-nav md:hidden">
         <a href="#" class="mobile-nav-btn active">
             <i class="fas fa-home"></i>
@@ -929,7 +927,7 @@
             }
         }
 
-        // Load announcements with optimized loading
+        // Load announcements with lazy load - ...server stuff
         async function loadAnnouncements() {
           const container = document.getElementById('announcements-container');
           
