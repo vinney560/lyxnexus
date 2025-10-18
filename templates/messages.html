@@ -590,7 +590,7 @@
     .sidebar-toggle {
         display: none;
         position: fixed;
-        top: 20px;
+        top: 12px;
         left: 20px;
         z-index: 100;
         background: linear-gradient(135deg, #3b82f6, #8b5cf6);
@@ -784,6 +784,10 @@
             justify-content: center;
             align-items: center;
         }
+
+        header h1 {
+            display: none;
+        }
     }
 
     @media (max-width: 768px) {
@@ -916,7 +920,7 @@
     <header class="glass-morph sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 py-4">
             <div class="header-content">
-                <div class="header-title">
+                <div class="hidden md:block header-title">
                     <h1 class="text-2xl font-bold gradient-text">LyxNexus Messages</h1>
                     <p class="text-sm text-slate-400">Real-time communication</p>
                 </div>
