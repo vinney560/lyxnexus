@@ -601,7 +601,7 @@
                         <p class="text-gray-400 text-xs mt-1">Enter your 10-digit mobile number</p>
                     </div>
                     
-                    <button type="submit" class="btn mt-4">
+                    <button type="submit" class="btn mt-4" id="login-student">
                         <i class="fas fa-sign-in-alt mr-2"></i> Login as Student
                     </button>
                 </form>
@@ -927,7 +927,7 @@
             }
         }
 
-        // Promote existing user to admin
+        // Promote existing user to admin --> Requested by Class Rep
         async function promoteToAdmin(formData) {
             try {
                 const response = await fetch(ENDPOINTS.PROMOTE_TO_ADMIN, {
@@ -1021,24 +1021,42 @@
                 }
             });
             
-            // Form submission handlers
+            // Student Form submit handlers
             document.getElementById('student-login-form').addEventListener('submit', function(e) {
                 const mobile = document.getElementById('mobile').value;
                 const username = document.getElementById('username').value;
-                
+                const loginButton = document.getElementById('login-student');
+            
+                loginButton.innerHTML = '<i class="fas fa-sign-in-alt mr-2"></i> Login as Student';
+                loginButton.disabled = false;
+            
                 if (!validateMobile(mobile)) {
                     e.preventDefault();
                     showToast('Please enter a valid 10-digit mobile number', 'error', 'Validation Error');
                     return;
                 }
-                
+            
                 if (!username.trim()) {
                     e.preventDefault();
                     showToast('Please enter a username', 'error', 'Validation Error');
                     return;
                 }
-                
-                // Show loading toast
+            
+                // Confirm mobile number --> Requested by Manuu
+                const confirmMobile = confirm(`Is this your mobile number? ${mobile}`);
+                if (!confirmMobile) {
+                    e.preventDefault();
+                    return;
+                }
+            
+                loginButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span> Logging in...</span>';
+                loginButton.disabled = true;
+            
+                setTimeout(() => {
+                    loginButton.innerHTML = '<i class="fas fa-sign-in-alt mr-2"></i> Login as Student';
+                    loginButton.disabled = false;
+                }, 3000);
+            
                 showToast('Logging in...', 'info', 'Please Wait');
             });
 
@@ -1058,7 +1076,6 @@
                     return;
                 }
                 
-                // Show loading toast
                 showToast('Authenticating admin access...', 'info', 'Please Wait');
             });
 

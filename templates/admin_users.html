@@ -699,7 +699,7 @@
                 
                 const result = await response.json();
                 showToast(`Admin status updated successfully`, 'success');
-                await loadUsers(); // Refresh the list
+                await loadUsers(); // Refresh list
             } catch (error) {
                 showToast('Error: ' + error.message, 'error');
                 setButtonLoading(button, false);
@@ -737,7 +737,7 @@
                 
                 closeModal('confirm-modal');
                 showToast('User deleted successfully', 'success');
-                await loadUsers(); // Refresh the list
+                await loadUsers(); // Refresh list
                 currentUserId = null;
             } catch (error) {
                 showToast('Error: ' + error.message, 'error');
