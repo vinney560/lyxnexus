@@ -409,6 +409,7 @@
         opacity: 0;
         transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         max-width: 100%;
+        overflow: hidden;
     }
 
     .toast.show {
@@ -504,7 +505,7 @@
         height: 3px;
         background: currentColor;
         opacity: 0.7;
-        width: 100%;
+        width: 99%;
         transform-origin: left;
         animation: toastProgress linear forwards;
     }
@@ -777,8 +778,8 @@
         };
         const logoutBtn = document.getElementById('logout');
         logoutBtn.addEventListener('click', (e) => {
-            e.preventDefault;
             logoutBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> logging out...';
+            window.location.href = '/logout';
             logoutBtn.disabled = true;
             setTimeout(() => {
                 logoutBtn.innerHTML = '<i class="fas fa-key mr-1"></i> Logout';
