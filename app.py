@@ -617,9 +617,8 @@ def login():
                                          login_type=login_type, year=_year())
                 
                 login_user(user)
-                flash('Login successful!', 'success')
             
-            return redirect(next_page or url_for('main_page'))
+            return redirect(next_page or url_for('main_page', message='Login succesfully!', message_type='success'))
     
     login_type = request.args.get('type', 'student')
     return render_template('login.html', login_type=login_type, year=_year())

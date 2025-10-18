@@ -581,7 +581,7 @@
         </div>
     </header>
 
-    <main class="content-container max-w-7xl mx-auto px-4 pt-5 pb-[70px] md:pb-[120px] animate-fadeIn">
+    <main class="content-container max-w-7xl mx-auto px-4 pt-5 pb-[30px] md:pb-[70px] animate-fadeIn">
                                  <!-- Announcements Section -->
         
                                  <!-- Image Preview Modal -->
@@ -1238,7 +1238,7 @@
             renderAnnouncements();
           };
       
-          // Image modal functions
+          // Image modal
           window.openImagePreview = function(src) {
             let modal = document.getElementById("image-preview-modal");
             let img = document.getElementById("image-preview-img");
@@ -1401,9 +1401,7 @@
             document.getElementById('stat-classes').textContent = classCount;
         }
 
-        // Check for Flask messages on page load
         function checkForFlaskMessages() {
-            // Check for messages in the DOM (if Flask injected them)
             const flashMessages = document.querySelectorAll('.flash-message, .alert, [data-flash]');
             
             flashMessages.forEach(messageEl => {
@@ -1414,11 +1412,10 @@
                 
                 if (text) {
                     toastSystem.show('Notification', text, type);
-                    messageEl.style.display = 'none'; // Hide original element
+                    messageEl.style.display = 'none'; 
                 }
             });
 
-            // Also check URL parameters for messages
             const urlParams = new URLSearchParams(window.location.search);
             const message = urlParams.get('message');
             const messageType = urlParams.get('message_type') || 'info';
@@ -1426,7 +1423,6 @@
             if (message) {
                 toastSystem.show('Notification', decodeURIComponent(message), messageType);
                 
-                // Clean URL without page reload
                 const newUrl = window.location.pathname + window.location.search.replace(/[?&]message=[^&]+(&message_type=[^&]+)?/, '').replace(/^&/, '?');
                 window.history.replaceState({}, document.title, newUrl);
             }
@@ -1435,7 +1431,6 @@
         document.addEventListener('DOMContentLoaded', function() {
             setupNavigation(); 
 
-            // Check for Flask messages first
             checkForFlaskMessages();
 
             loadUserData();
@@ -1449,7 +1444,7 @@
                 loadAnnouncements();
             }, 60 * 1000);
         
-            // Heavier functions every 300 seconds
+            // Heavy --> 300 seconds
             setInterval(() => {
                 loadAssignments();
             }, 5 * 60 * 1000);
@@ -1466,11 +1461,11 @@
               .register('/service-worker.js')
               .then(reg => {
                 console.log('✅ SW registered:', reg.scope);
-                toastSystem.success('App is ready for offline use', 'Service Worker');
+                toastSystem.success('App is ready for offline use', 'Offline Care');
               })
               .catch(err => {
                 console.error('❌ SW registration failed:', err);
-                toastSystem.error('Offline features unavailable', 'Service Worker');
+                toastSystem.error('Offline features unavailable', 'Offline Care');
               });
           });
         }
