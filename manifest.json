@@ -1,15 +1,10 @@
 {
   "name": "LyxNexus",
   "short_name": "LN",
-  "description": "A platform for students to view announcements, assignments, topics, and talks.",
-  "lang": "en-US",
-  "dir": "ltr",
   "start_url": "/",
-  "scope": "/",
   "display": "standalone",
   "background_color": "#000000",
   "theme_color": "#1e1e1e",
-
   "icons": [
     {
       "src": "/uploads/favicon-1.png",
@@ -20,51 +15,7 @@
       "src": "/uploads/favicon-1.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/uploads/favicon-1.png",
-      "sizes": "1024x1024",
-      "type": "image/png"
+      "purpose": "maskable any"
     }
-  ],
-
-  "screenshots": [
-    {
-      "src": "/uploads/screen-1.png",
-      "type": "image/png",
-      "sizes": "1280x720"
-    },
-    {
-      "src": "/uploads/screen-2.png",
-      "type": "image/png",
-      "sizes": "1280x720"
-    },
-    {
-      "src": "/uploads/screen-3.png",
-      "type": "image/png",
-      "sizes": "1280x720"
-    },
-    {
-      "src": "/uploads/screen-4.png",
-      "type": "image/png",
-      "sizes": "1280x720"
-    }
-  ],
-
-  "categories": [
-    "education",
-    "learning",
-    "productivity"
-  ],
-
-  "related_applications": [
-    {
-      "platform": "play",
-      "url": "https://play.google.com/store/apps/details?id=com.launcher.viewtv",
-      "id": "com.launcher.viewtv"
-    }
-  ],
-
-  "prefer_related_applications": false
+  ]
 }
