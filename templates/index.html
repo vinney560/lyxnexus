@@ -14,7 +14,6 @@
     <link rel="canonical" href="https://lyxnexus.onrender.com/" />
     <link rel="icon" href="https://lyxnexus.onrender.com/uploads/favicon.ico" type="image/x-icon" />
     
-    <!-- Open Graph (OG) Meta -->
     <meta property="og:type" content="website" />
     <meta property="og:title" content="LyxNexus - Education Platform" />
     <meta property="og:description" content="LyxNexus is a simple yet powerful class hub designed to keep everything in one place — from announcements and assignments to topics and class discussions." />
@@ -22,13 +21,11 @@
     <meta property="og:url" content="https://lyxnexus.onrender.com/" />
     <meta property="og:site_name" content="LyxNexus" />
 
-    <!-- Twitter Meta -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="LyxNexus - Education Platform" />
     <meta name="twitter:description" content="LyxNexus keeps your class organized — announcements, assignments, and discussions all in one hub." />
     <meta name="twitter:image" content="https://lyxnexus.onrender.com/uploads/favicon.ico" />
 
-    <!-- Fonts & Styles -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -697,7 +694,7 @@
     </header>
 
     <main class="max-w-6xl mx-auto px-4 py-10 space-y-16 content-container">
-        <!-- Announcements Section -->
+                                    <!-- Announcements Section -->
         <section id="announcements">
             <h2 class="text-3xl md:text-4xl font-bold text-center section-title">Latest Announcements</h2>
             <div id="announcements-container" class="space-y-6">
@@ -1108,7 +1105,7 @@
           });
         }
 
-        // Refresh or redirect on connection changes
+        // Refresh or redirect on conecton changes
         window.addEventListener('online', () => location.reload());
         window.addEventListener('offline', () => {
           if (location.pathname !== '/offline.html') {
@@ -1116,17 +1113,27 @@
           }
         });
 
-        document.addEventListener('DOMContentLoaded', function() {                                                                                    
+        const flashedMessages = {{ get_flashed_messages(with_categories=true) | tojson }};
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            if (flashedMessages && flashedMessages.length > 0) {
+                flashedMessages.forEach(([category, message]) => {
+                    const type = ['success', 'error', 'warning', 'info'].includes(category) ? category : 'info';
+                    toastSystem[type](message, category);
+                });
+            }
+        
             loadAnnouncements();
             loadAssignments();
             loadTopics();
             loadTimetable();
             setupMobileNav();
-            
+        
             setTimeout(() => {
                 toastSystem.success('Welcome to LyxNexus! Please wait as All Content Loads.', 'Welcome');
             }, 1500);
         });
+
     </script>
 </body>
 </html>

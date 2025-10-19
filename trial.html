@@ -1,0 +1,19 @@
+<script>
+    const flashedMessages = {{ flashed_message(with_categories=true) | tojson }}
+
+    document.addEventListener('DOMContentLoaded', function() {
+        if (flashedMessages && flashedMessages > 0) {
+            //message, category --> success, info, error, warning, danger, Authorised.
+            flashedMessages.foreach(([massege, category]) => {
+                const typeCategory = ['success', 'info', 'warning'].includes (category) ? category : 'warning';
+                //toast.success, toast.info, .error
+                toast[typeCategory] = (message, category);
+            })
+        }
+        const toastContainer = document.getElementById('tost-container');
+        setInterval(() => {
+            toastContainer.innerHTML = '';
+        }, 2000);
+
+    });
+</script>
