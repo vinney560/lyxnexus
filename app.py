@@ -347,6 +347,18 @@ def teardown_request(exception):
 def _year():
     return datetime.now().strftime('%Y')
 
+def send_notification(user_id, title, message):
+    notification_data = {
+        'title': title,
+        'message': message,
+        'type': 'info',
+        'timestamp': datetime.utcnow().isoformat()
+    }
+    
+    # Send to specific user
+
+    socketio.emit('push_notification', notification_data, room=f'user_{user_id}')
+
 def admin_required(f):
     @wraps(f)
     def decorator(*args, **kwargs):
@@ -2029,6 +2041,20 @@ def create_announcement():
     db.session.add(announcement)
     db.session.commit()
 
+    send_notification(
+        current_user.id,
+        'New Announcement Created',
+        f'You created: {announcement.title}'
+    )
+    
+    # Broadcast to all users
+    socketio.emit('push_notification', {
+        'title': 'New Announcement',
+        'message': f'New announcement: {announcement.title}',
+        'type': 'announcement',
+        'announcement_id': announcement.id,
+        'timestamp': datetime.utcnow().isoformat()
+    })
     return jsonify({'message': 'Announcement created successfully', 'id': announcement.id}), 201
 
 @app.route('/api/announcements/<int:id>', methods=['PUT'])
@@ -2053,6 +2079,21 @@ def update_announcement(id):
         announcement.file_data = file.read()
 
     db.session.commit()
+
+    send_notification(
+        current_user.id,
+        'Editted Announcement Created',
+        f'You created: {announcement.title}'
+    )
+    
+    # Broadcast to all users
+    socketio.emit('push_notification', {
+        'title': 'Announcement Editted',
+        'message': f'announcement eddited: {announcement.title}',
+        'type': 'announcement',
+        'announcement_id': announcement.id,
+        'timestamp': datetime.utcnow().isoformat()
+    })    
     return jsonify({'message': 'Announcement updated successfully'})
 
 
@@ -2065,6 +2106,19 @@ def delete_announcement(id):
         return jsonify({'error': 'Unauthorized'}), 403
     
     announcement = Announcement.query.get_or_404(id)
+    send_notification(
+        current_user.id,
+        'Deleted Announcement',
+        f'You Deleted: {announcement.title}'
+    )
+
+    socketio.emit('push_notification', {
+        'title': 'Announcement Deleted', 
+        'message': f'Announcement was deleted by {current_user.username}',
+        'type': 'announcement',
+        'announcement_id': announcement.id,
+        'timestamp': datetime.utcnow().isoformat()
+    })    
     db.session.delete(announcement)
     db.session.commit()
     
@@ -2128,6 +2182,19 @@ def create_assignment():
     )
     db.session.add(assignment)
     db.session.commit()
+    send_notification(
+        current_user.id,
+        'Assignment Given',
+        f'You Deleted: {assignment.title}'
+    )
+
+    socketio.emit('push_notification', {
+        'title': 'Assignment handed out', 
+        'message': f' Assignment on: {assignment.title}',
+        'type': 'assignment',
+        'assignment_id': assignment.id,
+        'timestamp': datetime.utcnow().isoformat()
+    })    
     
     return jsonify({'message': 'Assignment created successfully', 'id': assignment.id}), 201
 
@@ -2149,6 +2216,19 @@ def update_assignment(id):
     assignment.topic_id = data.get('topic_id', assignment.topic_id)
     
     db.session.commit()
+    send_notification(
+        current_user.id,
+        'Assignment Updated',
+        f'You updated: {assignment.title}'
+    )
+
+    socketio.emit('push_notification', {
+        'title': 'Assignment Updated', 
+        'message': f' Assignment {assignment.title} updated',
+        'type': 'assignment',
+        'assignment_id': assignment.id,
+        'timestamp': datetime.utcnow().isoformat()
+    })    
     
     return jsonify({'message': 'Assignment updated successfully'})
 
@@ -2161,6 +2241,19 @@ def delete_assignment(id):
         return jsonify({'error': 'Unauthorized'}), 403
     
     assignment = Assignment.query.get_or_404(id)
+    send_notification(
+        current_user.id,
+        'Assignment Deletd',
+        f'You Deleted: {assignment.title}'
+    )
+
+    socketio.emit('push_notification', {
+        'title': 'Assignment Deleted', 
+        'message': f' Assignment {assignment.title} deleted',
+        'type': 'assignment',
+        'assignment_id': assignment.id,
+        'timestamp': datetime.utcnow().isoformat()
+    })        
     db.session.delete(assignment)
     db.session.commit()
     

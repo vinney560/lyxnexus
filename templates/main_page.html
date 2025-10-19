@@ -8,6 +8,10 @@
     <link rel="manifest" href="/manifest.json">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
+
+    <script src="{{ url_for('static', filename='js/n-s.js') }}"></script>
 </head>
 <style>
     :root {
@@ -587,6 +591,7 @@
     </header>
 
     <main class="content-container max-w-7xl mx-auto px-4 pt-5 pb-[40px] md:pb-[100px] animate-fadeIn">
+
                                  <!-- Announcements Section -->
         
                                  <!-- Image Preview Modal -->
@@ -771,6 +776,8 @@
     </div>
 
     <script>
+        window.currentUserId = {{ current_user.id }};
+        console.log('User ID:', window.currentUserId);
         const API_BASE = '/api';
         const ENDPOINTS = {
             USER: `${API_BASE}/user`,
@@ -1524,7 +1531,7 @@
           let deferredPrompt = null;
       
           window.addEventListener("beforeinstallprompt", (e) => {
-            e.preventDefault();
+            
             deferredPrompt = e;
             installBtn.style.display = "inline-flex";
           });
