@@ -533,27 +533,29 @@ MASTER_ADMIN_KEY = "lyxnexus_2025"
 @app.route('/login', methods=['POST', 'GET'])
 def login():
     next_page = request.args.get("next") or request.form.get("next")
-    login_type = request.form.get('login_type', 'student')  # 'student' or 'admin' - prevent login conflit
-    
+    login_type = request.form.get('login_type', 'student')  # 'student' or 'admin' - prevent login conflict
+
     if current_user.is_authenticated:
         if current_user.is_admin:
             return redirect(next_page or url_for('admin_page'))
         else:
             return redirect(next_page or url_for('main_page'))
-    
+
     if request.method == 'POST':
         username = request.form.get('username', '').strip().lower()[:50]
         mobile = request.form.get('mobile')
         master_key = request.form.get('master_key')
+
         if (
             not mobile
             or len(mobile) != 10
             or not (mobile.startswith('07') or mobile.startswith('01'))
         ):
             flash('Invalid mobile number', 'error')
-            return render_template('login.html', username=username, mobile=mobile, 
+            return render_template('login.html', username=username, mobile=mobile,
                                    login_type=login_type, year=_year())
 
+        # Admin access using master key
         if master_key:
             if master_key == MASTER_ADMIN_KEY:
                 user = User.query.filter_by(mobile=mobile).first()
@@ -578,29 +580,35 @@ def login():
                     return redirect(next_page or url_for('admin_page'))
             else:
                 flash('Invalid master authorization key', 'error')
-                return render_template('login.html', username=username, mobile=mobile, 
-                                     login_type=login_type, year=_year())
-        
+                return render_template('login.html', username=username, mobile=mobile,
+                                       login_type=login_type, year=_year())
+
         user = User.query.filter_by(mobile=mobile).first()
-        
+
+        # ========================
+        #   ADMIN LOGIN SECTION
+        # ========================
         if login_type == 'admin':
             if not user or not user.is_admin:
                 flash('Invalid admin credentials', 'error')
-                return render_template('login.html', username=username, mobile=mobile, 
-                                     login_type=login_type, year=_year())
-            
+                return render_template('login.html', username=username, mobile=mobile,
+                                       login_type=login_type, year=_year())
+
             if user.username.lower() != username.lower():
                 flash('Username does not match admin account', 'error')
-                return render_template('login.html', username=username, mobile=mobile, 
-                                     login_type=login_type, year=_year())
-            
+                return render_template('login.html', username=username, mobile=mobile,
+                                       login_type=login_type, year=_year())
+
             login_user(user)
             flash('Admin login successful!', 'success')
             return redirect(next_page or url_for('admin_page'))
-        
-        # Student login
+
+        # ========================
+        #   STUDENT LOGIN SECTION
+        # ========================
         if login_type == 'student':
             if not user:
+                # New student -> Create account and send to navigation guide
                 new_user = User(
                     username=username,
                     mobile=mobile,
@@ -609,17 +617,19 @@ def login():
                 db.session.add(new_user)
                 db.session.commit()
                 login_user(new_user)
-                flash('Student account created successfully!', 'success')
+                flash('Welcome to LyxNexus! Let’s get you started.', 'success')
+                return redirect(url_for('nav_guide'))
+
             else:
+                # Returning student
                 if user.username.lower() != username.lower():
                     flash('Username does not match existing account', 'error')
-                    return render_template('login.html', username=username, mobile=mobile, 
-                                         login_type=login_type, year=_year())
-                
+                    return render_template('login.html', username=username, mobile=mobile,
+                                           login_type=login_type, year=_year())
+
                 login_user(user)
-            
-            return redirect(next_page or url_for('main_page', message='Login succesfully!', message_type='success'))
-    
+                return redirect(next_page or url_for('main_page', message='Login successfully!', message_type='success'))
+
     login_type = request.args.get('type', 'student')
     return render_template('login.html', login_type=login_type, year=_year())
 
@@ -639,6 +649,10 @@ def logout():
 @login_required
 def main_page():
     return render_template('main_page.html', year=_year())
+#-----------------------------------------------------------------
+@app.route('/navigation-guide')
+def nav_guide():
+    return render_template('navigation.html')
 #--------------------------------------------------------------------
 @app.route('/admin')
 @login_required
