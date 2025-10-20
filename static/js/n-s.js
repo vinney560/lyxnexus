@@ -4,7 +4,7 @@ class LyxNexusNotificationService {
         this.notificationPermission = Notification.permission;
         this.isInitialized = false;
         this.serviceName = 'LyxNexus-Notification-Service';
-        this.isWebView = /(wv|WebView|AndroidWebView|Appilix|Mozilla|Applekit)/i.test(navigator.userAgent);
+        this.isWebView = /(wv|WebView|AndroidWebView|Appilix|AppleWebKit)(?!.*Safari)/i.test(navigator.userAgent);
 
         this.audio = new Audio('/uploads/notify.mp3');
         this.audio.preload = 'auto';
@@ -40,7 +40,16 @@ class LyxNexusNotificationService {
 
     setupSocketConnection() {
         try {
-            this.socket = io();
+            
+            const baseUrl = window.location.origin.replace(/\/+$/, '');
+            this.socket = io(baseUrl, {
+              transports: ['websocket', 'polling'],
+              reconnection: true,
+              reconnectionAttempts: Infinity,
+              reconnectionDelay: 1000,
+              reconnectionDelayMax: 10000
+            });
+
             this.socket.on('connect', () => console.log(`${this.serviceName}: ✅ Connected to server`));
             this.socket.on('disconnect', () => console.log(`${this.serviceName}: ❌ Disconnected from server`));
 
