@@ -367,6 +367,15 @@ def ignore_bad_fd(record):
 
 logging.getLogger().addFilter(ignore_bad_fd)
 
+from apscheduler.triggers.interval import IntervalTrigger
+
+def auto_close_sessions():
+    print("🧹 Auto-cleaning stale DB sessions...")
+    db.session.remove()
+    db.engine.dispose()
+
+scheduler.add_job(auto_close_sessions, IntervalTrigger(minutes=10))
+
 
 def _year():
     return datetime.now().strftime('%Y')
