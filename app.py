@@ -495,6 +495,37 @@ log_status("🕒 Keep-alive scheduler started — pinging both DBs every 3 minut
 atexit.register(lambda: scheduler.shutdown(wait=False))
 #=============================================================================
 
+#      ANNOUNCEMENT CLEANER
+def delete_old_announcements():
+    """Delete announcements older than 5 days to save storage"""
+    cutoff = datetime.utcnow() - timedelta(days=5)
+    old_announcements = Announcement.query.filter(Announcement.created_at < cutoff).all()
+    
+    if not old_announcements:
+        print("🗑️ No old announcements to delete.")
+        return
+    
+    for ann in old_announcements:
+        print(f"🗑️ Deleting announcement ID {ann.id} ({ann.title}) created on {ann.created_at}")
+        db.session.delete(ann)
+    
+    db.session.commit()
+    print(f"✅ Deleted {len(old_announcements)} old announcements.")
+
+scheduler = BackgroundScheduler()
+
+# Run the job every day
+scheduler.add_job(
+    func=delete_old_announcements,
+    trigger=IntervalTrigger(days=1),
+    id="delete_old_announcements_task",
+    replace_existing=True,
+)
+
+scheduler.start()
+print("🕒 APScheduler started: deleting announcements older than 5 days daily")
+atexit.register(lambda: scheduler.shutdown(wait=False))
+
 #==========================================
 #                  Normal Routes
 #==========================================
@@ -2667,7 +2698,7 @@ def check_admin():
 
 
 @app.route("/api/users-sms/", methods=["GET"])
-def get_users():
+def get_users_sms():
     users = User.query.all()
     return jsonify([{"id": u.id, "username": u.username, "phone": u.mobile} for u in users])
 
