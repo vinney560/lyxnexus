@@ -1966,7 +1966,10 @@
                 messagesList.innerHTML = '';
             }
             
-            messages.forEach(message => {
+            // Filter messages to only show those from the current room
+            const roomMessages = messages.filter(message => message.room === currentRoom);
+            
+            roomMessages.forEach(message => {
                 addMessage(message, !clear);
             });
             
@@ -2057,20 +2060,28 @@
         function switchRoom(room) {
             if (room === currentRoom) return;
             
-            currentRoom = room;
+            // Leave current room
+            socket.emit('leave_room', { room: currentRoom });
             
+            // Update current room
+            currentRoom = room.toLowerCase();
+            
+            // Update active room button
             document.querySelectorAll('.room-btn').forEach(btn => {
-                btn.classList.remove('active');
+                if (btn.dataset.room === room) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
             });
             
-            event.target.classList.add('active');
-            
-            socket.emit('leave_room', { room: currentRoom });
-            currentRoom = room.toLowerCase();
+            // Join new room
             socket.emit('join_room', { room: currentRoom });
             
+            // Load messages for new room
             loadMessages(currentRoom);
             
+            // Cancel any active reply
             cancelReplyHandler();
             
             // Close sidebar on mobile after room selection
@@ -2254,6 +2265,8 @@
         });
         
         window.addEventListener('load', () => {
+            // Clear initial messages and load only current room messages
+            messagesList.innerHTML = '';
             scrollToBottom();
             adjustTextareaHeight();
             
@@ -2266,19 +2279,8 @@
             loadInitialOnlineUsers();
             startHealthCheck();
             
-            const messageIds = Array.from(messagesList.querySelectorAll('.message'))
-                .map(msg => parseInt(msg.getAttribute('data-message-id')))
-                .filter(id => !isNaN(id));
-            
-            if (messageIds.length > 0) {
-                fetch('/api/messages/read', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ message_ids: messageIds })
-                });
-            }
+            // Load messages for current room only
+            loadMessages(currentRoom);
         });
 
         document.addEventListener('visibilitychange', function() {
