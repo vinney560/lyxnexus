@@ -2064,7 +2064,7 @@
             socket.emit('leave_room', { room: currentRoom });
             
             // Update current room
-            currentRoom = room.toLowerCase();
+            currentRoom = room;
             
             // Update active room button
             document.querySelectorAll('.room-btn').forEach(btn => {
