@@ -6,10 +6,9 @@ class LyxNexusNotificationService {
         this.serviceName = 'LyxNexus-Notification-Service';
         this.isWebView = /(wv|WebView|AndroidWebView|Appilix)/i.test(navigator.userAgent);
 
-        // 🎵 Create reusable audio element for notification sound
         this.audio = new Audio('/uploads/notify.mp3');
         this.audio.preload = 'auto';
-        this.audio.volume = 0.4; // soft level
+        this.audio.volume = 0.7; 
 
         console.log(`${this.serviceName}: Created, waiting for dependencies...`);
         this.startInitialization();
@@ -143,15 +142,12 @@ class LyxNexusNotificationService {
     }
 
     showNotification(title, message, options = {}) {
-        // ✅ Always attempt to use real Notification API first
-        if (!('Notification' in window)) {
-            console.warn(`${this.serviceName}: ❌ Notification API not supported, using toast fallback`);
+        if (!('Notification' in window) || this.isWebView) {
             this.showInAppToast(title, message, options);
             return;
         }
 
         if (this.notificationPermission !== 'granted') {
-            console.warn(`${this.serviceName}: ❌ Notifications not allowed, using toast fallback`);
             this.showInAppToast(title, message, options);
             return;
         }
@@ -172,7 +168,6 @@ class LyxNexusNotificationService {
             console.log(`${this.serviceName}: ✅ Notification shown: ${title}`);
 
             notification.onclick = () => {
-                console.log(`${this.serviceName}: Notification clicked`);
                 window.focus();
                 notification.close();
                 this.redirectFromData(options.data);
@@ -191,7 +186,6 @@ class LyxNexusNotificationService {
         }
     }
 
-    // 🎵 Play sound safely
     playSound() {
         try {
             this.audio.currentTime = 0;
@@ -203,33 +197,51 @@ class LyxNexusNotificationService {
         }
     }
 
-    // ✅ Toast fallback
     showInAppToast(title, message, options = {}) {
         this.playSound();
+
+        if (this.isWebView || !('Notification' in window)) {
+            alert(`${title}\n\n${message}`);
+            return;
+        }
 
         const toast = document.createElement('div');
         toast.classList.add('lynx-toast');
         toast.innerHTML = `
-            <div class="lynx-toast-header">
-                <img src="${options.icon || '/uploads/favicon-1.png'}" class="lynx-toast-icon" alt="icon">
-                <span class="lynx-toast-title">${title}</span>
+            <div class="lynx-toast-header" style="display:flex; align-items:center;">
+                <img src="${options.icon || '/uploads/favicon-1.png'}" 
+                     class="lynx-toast-icon" 
+                     style="width:32px; height:32px; margin-right:10px; border-radius:6px;" 
+                     alt="icon">
+                <span class="lynx-toast-title" style="font-weight:600;">${title}</span>
             </div>
-            <div class="lynx-toast-message">${message}</div>
+            <div class="lynx-toast-message" style="margin-top:4px; font-size:0.875rem;">${message}</div>
+            <div class="lynx-toast-actions" style="margin-top:6px; display:flex; gap:8px;"></div>
         `;
 
-        const offset = 20 + document.querySelectorAll('.lynx-toast').length * 80;
+        // Optional SMS button
+        if (window.current_user?.number) {
+            const smsLink = document.createElement('a');
+            smsLink.href = `https://api.whatsapp.com/send?phone=${window.current_user.number}&text=${encodeURIComponent(message)}`;
+            smsLink.target = "_blank";
+            smsLink.textContent = "Send SMS";
+            smsLink.style.cssText = "color:#1DA1F2; font-size:0.8rem; text-decoration:underline; cursor:pointer;";
+            toast.querySelector('.lynx-toast-actions').appendChild(smsLink);
+        }
+
+        const offset = 20 + document.querySelectorAll('.lynx-toast').length * 70;
         Object.assign(toast.style, {
             position: 'fixed',
             bottom: `${offset}px`,
             right: '20px',
             background: 'rgba(25,25,25,0.95)',
             color: '#fff',
-            padding: '14px 18px',
-            borderRadius: '12px',
-            boxShadow: '0 6px 16px rgba(0,0,0,0.4)',
+            padding: '10px 14px',
+            borderRadius: '10px',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
             zIndex: 999999,
             width: '85%',
-            maxWidth: '380px',
+            maxWidth: '300px',
             fontFamily: 'system-ui, sans-serif',
             cursor: 'pointer',
             transform: 'translateX(40px)',
