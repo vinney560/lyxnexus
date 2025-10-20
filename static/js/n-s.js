@@ -40,15 +40,27 @@ class LyxNexusNotificationService {
 
     setupSocketConnection() {
         try {
-            
-            const baseUrl = window.location.origin.replace(/\/+$/, '');
+            let baseUrl;
+
+// 👇 Use fixed server in dev, else auto-detect origin
+if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
+  baseUrl = "https://lyxnexus.onrender.com";
+} else {
+  baseUrl = window.location.origin;
+}
+
+// 🚫 Strip ALL trailing slashes
+baseUrl = baseUrl.replace(/\/+$/, '');
+
             this.socket = io(baseUrl, {
-              transports: ['websocket', 'polling'],
+              path: "socket.io",
+              transports: ["websocket", "polling"],
               reconnection: true,
               reconnectionAttempts: Infinity,
               reconnectionDelay: 1000,
               reconnectionDelayMax: 10000
             });
+
 
             this.socket.on('connect', () => console.log(`${this.serviceName}: ✅ Connected to server`));
             this.socket.on('disconnect', () => console.log(`${this.serviceName}: ❌ Disconnected from server`));

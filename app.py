@@ -508,7 +508,7 @@ scheduler.start()
 
 log_status("🕒 Keep-alive scheduler started — pinging both DBs every 3 minutes")
 atexit.register(lambda: scheduler.shutdown(wait=False))
-
+#--------------------------------------Aiven max conn pool
 scheduler = BackgroundScheduler()
 def auto_close_sessions():
     print("🧹 Auto-cleaning stale DB sessions...")
@@ -3046,7 +3046,7 @@ def internal_error(error):
     if referrer:
         return redirect(referrer, message='Oops! Something went wrong. Try again.', message_type='error'), 302
     else:
-        return redirect(url_for('main_page', message='Oops! Something went wrong. Try again.', message_type='error')), 302
+        return redirect(url_for('main_page', message='Oops! Something went wrong. Try again.')), 302
 
 # ==========================================
 if __name__ == '__main__':
