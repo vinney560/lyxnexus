@@ -107,7 +107,8 @@ login_manager.init_app(app)
 jwt = JWTManager(app)
 login_manager.login_view = 'login'
 Compress(app)
-socketio = SocketIO(app, async_mode='eventlet', cors_allowed_origins="*")
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode="eventlet", ping_timeout=20, ping_interval=10)
+
 
 db = SQLAlchemy(app)
 
