@@ -353,6 +353,21 @@ def teardown_request(exception):
         db.session.rollback()
     db.session.remove()
 
+import logging
+
+# Reduce noisy disconnect warnings from Socket.IO / Engine.IO
+logging.getLogger('engineio').setLevel(logging.ERROR)
+logging.getLogger('socketio').setLevel(logging.ERROR)
+
+# Optional: ignore harmless "Bad file descriptor" errors globally
+import warnings
+def ignore_bad_fd(record):
+    msg = str(record.getMessage())
+    return 'Bad file descriptor' not in msg
+
+logging.getLogger().addFilter(ignore_bad_fd)
+
+
 def _year():
     return datetime.now().strftime('%Y')
 
@@ -1588,7 +1603,6 @@ def handle_disconnect():
                 raise
             print(f"Ignored closed socket emit for {user}")
 
-        # Re-broadcast remaining online users
         broadcast_online_users()
 
         print(f"User {user} disconnected. Online users: {len(online_users)}")
@@ -1774,7 +1788,7 @@ def handle_delete_message(data):
         if message.user_id != current_user.id and not current_user.is_admin:
             return {'success': False, 'error': 'Permission denied'}
         
-        # Soft delete message
+        # Soft delete message --> but still deletes from db .
         message.is_deleted = True
         message.deleted_at = nairobi_time()
         message.content = "[This message was deleted]"
