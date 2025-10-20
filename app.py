@@ -1374,45 +1374,79 @@ def get_message_replies(message_id):
 
 #=========Handle Private Room
 #=======================
+import hashlib
+import secrets
+
+# Simple in-memory storage for private rooms (replace with database in production)
 private_rooms = {}
 
-@socketio.on('create_private_room')
-def handle_create_private_room(data):
-    room_name = data.get('room_name')
-    room_key = data.get('room_key')
-    
-    if room_name in private_rooms:
-        emit('private_room_error', {'error': 'Room name already exists'})
-        return
-    
-    private_rooms[room_name] = {
-        'key': room_key,
-        'creator': current_user.id,
-        'members': [current_user.id],
-        'created_at': datetime.utcnow()
-    }
-    
-    emit('private_room_created', {'room_name': room_name})
-    emit('private_room_joined', {'room_name': room_name}, room=room_name)
+@app.route('/api/private-rooms/create', methods=['POST'])
+@login_required
+def create_private_room():
+    try:
+        data = request.get_json()
+        room_name = data.get('room_name', '').strip()
+        room_key = data.get('room_key', '').strip()
+        
+        # Validation
+        if not room_name or len(room_name) < 3 or len(room_name) > 5:
+            return jsonify({'success': False, 'error': 'Room name must be 3-5 characters'})
+        
+        if not room_key or len(room_key) != 6:
+            return jsonify({'success': False, 'error': 'Room key must be exactly 6 characters'})
+        
+        # Check if room already exists
+        if room_name in private_rooms:
+            return jsonify({'success': False, 'error': 'Room name already exists'})
+        
+        # Create room with hashed key
+        hashed_key = hashlib.sha256(room_key.encode()).hexdigest()
+        private_rooms[room_name] = {
+            'hashed_key': hashed_key,
+            'creator_id': current_user.id,
+            'members': [current_user.id],
+            'created_at': datetime.utcnow().isoformat()
+        }
+        
+        return jsonify({'success': True, 'room_name': room_name})
+        
+    except Exception as e:
+        return jsonify({'success': False, 'error': 'Server error: ' + str(e)})
 
-@socketio.on('join_private_room')
-def handle_join_private_room(data):
-    room_name = data.get('room_name')
-    room_key = data.get('room_key')
-    
-    if room_name not in private_rooms:
-        emit('private_room_error', {'error': 'Room does not exist'})
-        return
-    
-    if private_rooms[room_name]['key'] != room_key:
-        emit('private_room_error', {'error': 'Invalid room key'})
-        return
-    
-    if current_user.id not in private_rooms[room_name]['members']:
-        private_rooms[room_name]['members'].append(current_user.id)
-    
-    join_room(room_name)
-    emit('private_room_joined', {'room_name': room_name})
+@app.route('/api/private-rooms/join', methods=['POST'])
+@login_required
+def join_private_room():
+    try:
+        data = request.get_json()
+        room_name = data.get('room_name', '').strip()
+        room_key = data.get('room_key', '').strip()
+        
+        # Validation
+        if not room_name:
+            return jsonify({'success': False, 'error': 'Room name is required'})
+        
+        if not room_key:
+            return jsonify({'success': False, 'error': 'Room key is required'})
+        
+        # Check if room exists
+        if room_name not in private_rooms:
+            return jsonify({'success': False, 'error': 'Room does not exist'})
+        
+        # Verify room key
+        hashed_key = hashlib.sha256(room_key.encode()).hexdigest()
+        room = private_rooms[room_name]
+        
+        if room['hashed_key'] != hashed_key:
+            return jsonify({'success': False, 'error': 'Invalid room key'})
+        
+        # Add user to room members if not already there
+        if current_user.id not in room['members']:
+            room['members'].append(current_user.id)
+        
+        return jsonify({'success': True, 'room_name': room_name})
+        
+    except Exception as e:
+        return jsonify({'success': False, 'error': 'Server error: ' + str(e)})
 
 # =========================================
 #          EXTRA FUNCTIONS CLEAN UP - MEMORY CONSTRAIN
