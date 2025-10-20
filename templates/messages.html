@@ -18,7 +18,6 @@
         --secondary-color: #8b5cf6;
         --sidebar-bg: #1e293b;
         --card-bg: rgba(30, 41, 59, 0.8);
-        --submit-bg: rgb(38, 105, 240);
     }
     
     body {
@@ -904,11 +903,6 @@
             margin-right: 0;
         }
     }
-
-
-    /*New model for secrect room*/
-    
-    
     #privateLNM {
         display: none;
     }
@@ -916,80 +910,168 @@
         position: fixed;
         top: 50%;
         left: 50%;
-        width: 85vw;
-        height: 70vh;
+        transform: translate(-50%, -50%);
+        width: 90%;
+        max-width: 500px;
+        background: var(--sidebar-bg);
+        border: 2px solid var(--accent-color);
+        border-radius: 20px;
+        padding: 30px;
         z-index: 10000;
-        border: 1px solid var(--accent-color);
-        border-radius: 15px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(20px);
+        display: none;
+    }
+
+    .private-lnm-content {
+        position: relative;
+        text-align: center;
+    }
+
+    .close-model {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: var(--accent-color);
+        border: none;
+        color: white;
+        cursor: pointer;
+        display: flex;
         align-items: center;
         justify-content: center;
-        text-align: center;
-        padding: 10px;
-        transform: translate(-50%, -50%);
-        background-color: var(--bg-color);
-        display: flex;
+        transition: all 0.3s ease;
     }
-    .h1a {
-        color: var(--accent-color);
-        margin-bottom: 15px;
-    }
-    .btn-toggle {
-        position: fixed;
-        top: 20%;
-        left: 50%;
-        width: auto;
-        height: 40px;
-        font-size: 1.3rem;
-        display: flex;
-        border: 1px solid #1e293b;
-        border-radius: 12px;
-        background-color: var(--bg-color);
-        padding: 8px;
-        text-align: center;
-        color: #f1f5f9;
-    }
-    .model-input-container {
-        width: 70%;
-        height: auto;
-        border: 1px solid #3b82f6;
-        border-radius: 10px;
-        padding: 10px;
-        background-color: var(--sidebar-bg);
-        color: aliceblue;
-        font-size: 0.9rem;
-        text-align: left;
-        outline: #8b5cf6;
-        margin: 10px;
-    }
-    .btn-submit {
-        width: 70%;
-        height: auto;
-        border: 1px solid #98f69a;
-        border-radius: 10px;
-        padding: 10px;
-        background-color: var(--submit-bg);
-        color: aliceblue;
-        font-size: 0.8rem;
-        text-align: left;
-        text-align: center;
-    }
-    .btn-submit:hover {
-        background: #1e293b;
-        transform: scaleX(1.05);
-    }
-    .close-model {
-        position: fixed;
-        top: 10px;
-        right: 10px;
-        width: 25px;
-        height: 25px;
-        border-radius: 50%;
-        background-color: #3b82f6;
-        align-items: center;
-        text-align: center;
-        
-    }        
 
+    .close-model:hover {
+        background: #ef4444;
+        transform: rotate(90deg);
+    }
+
+    .model-section {
+        margin-bottom: 25px;
+    }
+
+    .section-title {
+        color: var(--text-color);
+        font-size: 1.1rem;
+        margin-bottom: 15px;
+        font-weight: 600;
+    }
+
+    .model-input {
+        width: 100%;
+        padding: 12px 16px;
+        margin: 8px 0;
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        border-radius: 12px;
+        background: rgba(15, 23, 42, 0.6);
+        color: var(--text-color);
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+        outline: none;
+    }
+
+    .model-input:focus {
+        border-color: var(--accent-color);
+        background: rgba(59, 130, 246, 0.1);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .btn-submit {
+        width: 100%;
+        padding: 12px;
+        border: none;
+        border-radius: 12px;
+        color: white;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-top: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .create-btn {
+        background: linear-gradient(135deg, #10b981, #059669);
+    }
+
+    .create-btn:hover {
+        background: linear-gradient(135deg, #059669, #047857);
+        transform: translateY(-2px);
+    }
+
+    .join-btn {
+        background: linear-gradient(135deg, #3b82f6, #2563eb);
+    }
+
+    .join-btn:hover {
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        transform: translateY(-2px);
+    }
+
+    .divider {
+        position: relative;
+        text-align: center;
+        margin: 25px 0;
+        color: #64748b;
+    }
+
+    .divider::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: rgba(59, 130, 246, 0.3);
+    }
+
+    .divider span {
+        background: var(--sidebar-bg);
+        padding: 0 15px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .status-message {
+        margin-top: 15px;
+        padding: 10px;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        display: none;
+    }
+
+    .status-message.success {
+        background: rgba(16, 185, 129, 0.2);
+        border: 1px solid rgba(16, 185, 129, 0.5);
+        color: #10b981;
+        display: block;
+    }
+
+    .status-message.error {
+        background: rgba(239, 68, 68, 0.2);
+        border: 1px solid rgba(239, 68, 68, 0.5);
+        color: #ef4444;
+        display: block;
+    }
+
+    /* Overlay */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(15, 23, 42, 0.8);
+        backdrop-filter: blur(5px);
+        z-index: 9999;
+        display: none;
+    }    
 </style>
 <body>
     <header class="glass-morph sticky top-0 z-50">
@@ -1023,6 +1105,48 @@
     </button>
 
     <div class="main-container">
+        
+        
+        <!-- Private Room Modal -->
+        <div class="private-lnm-container" id="privateLNM">
+            <div class="private-lnm-content">
+                <button class="close-model" id="closeModel">
+                    <i class="fas fa-times"></i>
+                </button>
+
+                <h1 class="h1a gradient-text">Private LN-Messages</h1>
+                <p class="text-slate-400 text-sm mb-6">Create or join secure private rooms</p>
+
+                <!-- Create Room Section -->
+                <div class="model-section">
+                    <h3 class="section-title">Create Private Room</h3>
+                    <input type="text" id="inputName" class="model-input" placeholder="Room name (3-5 chars)" minlength="3" maxlength="5" required>
+                    <input type="password" id="inputKey" class="model-input" placeholder="Room key (6 chars)" minlength="6" maxlength="6" required>
+                    <button class="btn-submit create-btn" id="createRoomBtn">
+                        <i class="fas fa-plus mr-2"></i>Create Room
+                    </button>
+                </div>
+
+                <div class="divider">
+                    <span>or</span>
+                </div>
+
+                <!-- Join Room Section -->
+                <div class="model-section">
+                    <h3 class="section-title">Join Private Room</h3>
+                    <input type="text" id="inputNameJoin" class="model-input" placeholder="Room name" required>
+                    <input type="password" id="inputKeyJoin" class="model-input" placeholder="Room key" required>
+                    <button class="btn-submit join-btn" id="joinRoomBtn">
+                        <i class="fas fa-sign-in-alt mr-2"></i>Join Room
+                    </button>
+                </div>
+
+                <!-- Status Message -->
+                <div class="status-message" id="privateRoomStatus"></div>
+            </div>
+        </div> 
+        
+        
         <!-- Sidebar -->
         <div class="sidebar" id="sidebar">
             <div class="online-users-horizontal" id="onlineUsersHorizontal">
@@ -1044,23 +1168,9 @@
                         <span class="room-icon"><i class="fas fa-bullhorn"></i></span>
                         Announcements
                     </button>
-                    <button class="room-btn" id="plnm-toggle">
-                        <span class="room-icon"><i class="fas fa-shield-halved"></i></span>
-                        Private LN-Msgs
-                    </button>
                 </div>
             </div>
         </div>
-        
-        <div class="private-lnm-container" id="privateLNM">
-            <button class="close-model">X</button>
-            <h1 class="h1a">Private LN-Msgs</h1>
-            <input type="text" id="inputName" class="model-input-container" placeholder="Enter Room name..." minlength="3" maxlength="5" required>
-            <input type="password" id="inputKey" class="model-input-container" placeholder="Enter Room Key..." minlength="6" maxlength="6" required>
-            <button class="btn-submit" id="submit" type="submit">Create Room</button>
-            <input type="password" id="inputKey2" class="model-input-container" placeholder="Enter Room Key..." minlength="6" maxlength="6" required>
-            <button class="btn-submit" id="submit-key" type="submit">Join Room</button>
-        </div>   
         
         <!-- Chat Container -->
         <div class="chat-container">
@@ -1185,12 +1295,6 @@
         const sidebar = document.getElementById('sidebar');
         const sidebarToggle = document.getElementById('sidebarToggle');
         const scrollToBottomBtn = document.getElementById('scrollToBottomBtn');
-
-        // Model Private msgs
-
-        const privateLNM = document.getElementById('privateLNM');
-        const closeModel = document.getElementById('close-model');
-        const pToggle = document.getElementById('plnm-toggle');
         
         let currentRoom = 'general';
         let onlineUsers = {};
@@ -1206,13 +1310,6 @@
             quality: 'good'
         };
         let replyingToMessage = null;
-        // privateLNM, close-model, plnm-toggle
-        pToggle.addEventListener('click', () => {
-            privateLNM.style.display = 'block';
-        });
-        closeModel.addEventListener('click', () => {
-            privateLNM.style.display = 'none';
-        });
 
         // Back button handler
         const isAdmin = {{ 'true' if current_user.is_admin else 'false' }};
@@ -1247,6 +1344,185 @@
         // Scroll to bottom button
         scrollToBottomBtn.addEventListener('click', scrollToBottom);
         
+        // Private Room Depenz
+        const privateLNM = document.getElementById('privateLNM');
+        const closeModel = document.getElementById('closeModel');
+        const pToggle = document.getElementById('plnm-toggle');
+        const modalOverlay = document.createElement('div');
+        modalOverlay.className = 'modal-overlay';
+        document.body.appendChild(modalOverlay);
+
+        // Private Room Elements
+        const createRoomBtn = document.getElementById('createRoomBtn');
+        const joinRoomBtn = document.getElementById('joinRoomBtn');
+        const inputName = document.getElementById('inputName');
+        const inputKey = document.getElementById('inputKey');
+        const inputNameJoin = document.getElementById('inputNameJoin');
+        const inputKeyJoin = document.getElementById('inputKeyJoin');
+        const privateRoomStatus = document.getElementById('privateRoomStatus');
+
+        // Private Room Event Listeners
+        pToggle.addEventListener('click', () => {
+            privateLNM.style.display = 'block';
+            modalOverlay.style.display = 'block';
+            inputName.focus();
+        });
+
+        closeModel.addEventListener('click', closePrivateModal);
+        modalOverlay.addEventListener('click', closePrivateModal);
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && privateLNM.style.display === 'block') {
+                closePrivateModal();
+            }
+        });
+
+        function closePrivateModal() {
+            privateLNM.style.display = 'none';
+            modalOverlay.style.display = 'none';
+            clearPrivateForm();
+        }
+
+        function clearPrivateForm() {
+            inputName.value = '';
+            inputKey.value = '';
+            inputNameJoin.value = '';
+            inputKeyJoin.value = '';
+            privateRoomStatus.style.display = 'none';
+        }
+
+        function showStatus(message, type) {
+            privateRoomStatus.textContent = message;
+            privateRoomStatus.className = `status-message ${type}`;
+            privateRoomStatus.style.display = 'block';
+
+            setTimeout(() => {
+                if (type === 'success') {
+                    closePrivateModal();
+                }
+            }, 2000);
+        }
+
+        // Create Private Room
+        createRoomBtn.addEventListener('click', () => {
+            const roomName = inputName.value.trim();
+            const roomKey = inputKey.value.trim();
+
+            if (!roomName || roomName.length < 3 || roomName.length > 5) {
+                showStatus('Room name must be 3-5 characters', 'error');
+                return;
+            }
+
+            if (!roomKey || roomKey.length !== 6) {
+                showStatus('Room key must be exactly 6 characters', 'error');
+                return;
+            }
+
+            // Emit socket event to create private room
+            socket.emit('create_private_room', {
+                room_name: roomName,
+                room_key: roomKey
+            }, (response) => {
+                if (response.success) {
+                    showStatus('Private room created successfully!', 'success');
+                    // Add room to sidebar and switch to it
+                    addPrivateRoomToSidebar(roomName);
+                    switchRoom(roomName);
+                } else {
+                    showStatus(response.error || 'Failed to create room', 'error');
+                }
+            });
+        });
+
+        // Join Private Room
+        joinRoomBtn.addEventListener('click', () => {
+            const roomName = inputNameJoin.value.trim();
+            const roomKey = inputKeyJoin.value.trim();
+
+            if (!roomName) {
+                showStatus('Please enter room name', 'error');
+                return;
+            }
+
+            if (!roomKey) {
+                showStatus('Please enter room key', 'error');
+                return;
+            }
+
+            // Emit socket event to join private room
+            socket.emit('join_private_room', {
+                room_name: roomName,
+                room_key: roomKey
+            }, (response) => {
+                if (response.success) {
+                    showStatus('Joined private room successfully!', 'success');
+                    // Add room to sidebar and switch to it
+                    addPrivateRoomToSidebar(roomName);
+                    switchRoom(roomName);
+                } else {
+                    showStatus(response.error || 'Failed to join room', 'error');
+                }
+            });
+        });
+
+        // Add private room to sidebar
+        function addPrivateRoomToSidebar(roomName) {
+            const roomsContainer = document.querySelector('.rooms-container .space-y-2');
+
+            // Check if room already exists in sidebar
+            const existingRoom = Array.from(roomsContainer.querySelectorAll('.room-btn'))
+                .find(btn => btn.dataset.room === roomName);
+
+            if (!existingRoom) {
+                const roomBtn = document.createElement('button');
+                roomBtn.className = 'room-btn';
+                roomBtn.dataset.room = roomName;
+                roomBtn.innerHTML = `
+                    <span class="room-icon"><i class="fas fa-lock"></i></span>
+                    ${roomName}
+                `;
+
+                roomBtn.addEventListener('click', function() {
+                    switchRoom(this.dataset.room);
+                });
+
+                roomsContainer.appendChild(roomBtn);
+            }
+        }
+
+        // Socket event handlers for private rooms
+        socket.on('private_room_created', (data) => {
+            console.log('Private room created:', data.room_name);
+        });
+
+        socket.on('private_room_joined', (data) => {
+            console.log('Joined private room:', data.room_name);
+        });
+
+        socket.on('private_room_error', (data) => {
+            showStatus(data.error, 'error');
+        });
+
+        // Enhanced input validation
+        [inputName, inputKey, inputNameJoin, inputKeyJoin].forEach(input => {
+            input.addEventListener('input', (e) => {
+                if (e.target.type === 'text') {
+                    e.target.value = e.target.value.replace(/[^a-zA-Z0-9]/g, '');
+                }
+            });
+
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    if (e.target.id.includes('Join')) {
+                        joinRoomBtn.click();
+                    } else {
+                        createRoomBtn.click();
+                    }
+                }
+            });
+        }); 
+               
         function formatTime(dateString) {
             const date = new Date(dateString);
             return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });

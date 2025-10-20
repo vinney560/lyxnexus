@@ -1371,6 +1371,49 @@ def get_message_replies(message_id):
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
+
+#=========Handle Private Room
+#=======================
+private_rooms = {}
+
+@socketio.on('create_private_room')
+def handle_create_private_room(data):
+    room_name = data.get('room_name')
+    room_key = data.get('room_key')
+    
+    if room_name in private_rooms:
+        emit('private_room_error', {'error': 'Room name already exists'})
+        return
+    
+    private_rooms[room_name] = {
+        'key': room_key,
+        'creator': current_user.id,
+        'members': [current_user.id],
+        'created_at': datetime.utcnow()
+    }
+    
+    emit('private_room_created', {'room_name': room_name})
+    emit('private_room_joined', {'room_name': room_name}, room=room_name)
+
+@socketio.on('join_private_room')
+def handle_join_private_room(data):
+    room_name = data.get('room_name')
+    room_key = data.get('room_key')
+    
+    if room_name not in private_rooms:
+        emit('private_room_error', {'error': 'Room does not exist'})
+        return
+    
+    if private_rooms[room_name]['key'] != room_key:
+        emit('private_room_error', {'error': 'Invalid room key'})
+        return
+    
+    if current_user.id not in private_rooms[room_name]['members']:
+        private_rooms[room_name]['members'].append(current_user.id)
+    
+    join_room(room_name)
+    emit('private_room_joined', {'room_name': room_name})
+
 # =========================================
 #          EXTRA FUNCTIONS CLEAN UP - MEMORY CONSTRAIN
 # ===========================================================
