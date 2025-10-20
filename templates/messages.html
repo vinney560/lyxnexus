@@ -930,8 +930,8 @@
 
     .close-model {
         position: absolute;
-        top: 15px;
-        right: 15px;
+        top: 10px;
+        right: 10px;
         width: 40px;
         height: 40px;
         border-radius: 50%;
@@ -1060,7 +1060,6 @@
         display: block;
     }
 
-    /* Overlay */
     .modal-overlay {
         position: fixed;
         top: 0;
@@ -1162,8 +1161,8 @@
                 <!-- Join Room Section -->
                 <div class="model-section">
                     <h3 class="section-title">Join Private Room</h3>
-                    <input type="text" id="inputNameJoin" class="model-input" placeholder="Room name" required>
-                    <input type="password" id="inputKeyJoin" class="model-input" placeholder="Room key" required>
+                    <input type="text" id="inputNameJoin" class="model-input" placeholder="Room name" maxlength="5" required>
+                    <input type="password" id="inputKeyJoin" class="model-input" placeholder="Room key" maxlength="6" required>
                     <button class="btn-submit join-btn" id="joinRoomBtn">
                         <i class="fas fa-sign-in-alt mr-2"></i>Join Room
                     </button>
@@ -1376,15 +1375,15 @@
         // Scroll to bottom button
         scrollToBottomBtn.addEventListener('click', scrollToBottom);
         
-        // Private Room Variables
+        // Private Room Elemnts
         const privateLNM = document.getElementById('privateLNM');
         const closeModel = document.getElementById('closeModel');
         const pToggle = document.getElementById('plnm-toggle');
         const modalOverlay = document.createElement('div');
         modalOverlay.className = 'modal-overlay';
         document.body.appendChild(modalOverlay);
-            
-        // Private Room Elements
+
+        // Private Room depz
         const createRoomBtn = document.getElementById('createRoomBtn');
         const joinRoomBtn = document.getElementById('joinRoomBtn');
         const inputName = document.getElementById('inputName');
@@ -1392,30 +1391,30 @@
         const inputNameJoin = document.getElementById('inputNameJoin');
         const inputKeyJoin = document.getElementById('inputKeyJoin');
         const privateRoomStatus = document.getElementById('privateRoomStatus');
-            
+
         // Private Room Event Listeners
         pToggle.addEventListener('click', () => {
             privateLNM.style.display = 'block';
             modalOverlay.style.display = 'block';
             inputName.focus();
         });
-        
+
         closeModel.addEventListener('click', closePrivateModal);
         modalOverlay.addEventListener('click', closePrivateModal);
-        
+
         // Close modal with Escape key
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && privateLNM.style.display === 'block') {
                 closePrivateModal();
             }
         });
-        
+
         function closePrivateModal() {
             privateLNM.style.display = 'none';
             modalOverlay.style.display = 'none';
             clearPrivateForm();
         }
-        
+
         function clearPrivateForm() {
             inputName.value = '';
             inputKey.value = '';
@@ -1423,32 +1422,31 @@
             inputKeyJoin.value = '';
             privateRoomStatus.style.display = 'none';
         }
-        
+
         function showStatus(message, type) {
             privateRoomStatus.textContent = message;
             privateRoomStatus.className = `status-message ${type}`;
             privateRoomStatus.style.display = 'block';
         }
-        
+
         // Create Private Room
         createRoomBtn.addEventListener('click', async () => {
             const roomName = inputName.value.trim();
             const roomKey = inputKey.value.trim();
-            
+
             if (!roomName || roomName.length < 3 || roomName.length > 5) {
                 showStatus('Room name must be 3-5 characters', 'error');
                 return;
             }
-            
+
             if (!roomKey || roomKey.length !== 6) {
                 showStatus('Room key must be exactly 6 characters', 'error');
                 return;
             }
-            
-            // Show loading state
+
             createRoomBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Creating...';
             createRoomBtn.disabled = true;
-            
+
             try {
                 const response = await fetch('/api/private-rooms/create', {
                     method: 'POST',
@@ -1460,15 +1458,15 @@
                         room_key: roomKey
                     })
                 });
-                
+
                 const data = await response.json();
-                
+
                 if (data.success) {
-                    showStatus('Private room created successfully!', 'success');
+                    showStatus('Private room created successfully! Check sidebar', 'success');
                     // Add room to sidebar and switch to it
                     addPrivateRoomToSidebar(roomName);
                     setTimeout(() => {
-                        switchRoom(roomName); // Fixed call
+                        switchRoom(roomName);
                         closePrivateModal();
                     }, 1500);
                 } else {
@@ -1483,26 +1481,25 @@
                 createRoomBtn.disabled = false;
             }
         });
-        
+
         // Join Private Room
         joinRoomBtn.addEventListener('click', async () => {
             const roomName = inputNameJoin.value.trim();
             const roomKey = inputKeyJoin.value.trim();
-            
+
             if (!roomName) {
                 showStatus('Please enter room name', 'error');
                 return;
             }
-            
+
             if (!roomKey) {
                 showStatus('Please enter room key', 'error');
                 return;
             }
-            
-            // Show loading state
+
             joinRoomBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Joining...';
             joinRoomBtn.disabled = true;
-            
+
             try {
                 const response = await fetch('/api/private-rooms/join', {
                     method: 'POST',
@@ -1514,15 +1511,15 @@
                         room_key: roomKey
                     })
                 });
-                
+
                 const data = await response.json();
-                
+
                 if (data.success) {
-                    showStatus('Joined private room successfully!', 'success');
+                    showStatus('Joined private room successfully! Check sidebar', 'success');
                     // Add room to sidebar and switch to it
                     addPrivateRoomToSidebar(roomName);
                     setTimeout(() => {
-                        switchRoom(roomName); // Fixed call
+                        switchRoom(roomName);
                         closePrivateModal();
                     }, 1500);
                 } else {
@@ -1537,15 +1534,15 @@
                 joinRoomBtn.disabled = false;
             }
         });
-        
-        // Add private room to sidebar
+
+        // Add private room to sidebar --> was ez than expected
         function addPrivateRoomToSidebar(roomName) {
             const roomsContainer = document.querySelector('.rooms-container .space-y-2');
-            
+
             // Check if room already exists in sidebar
             const existingRoom = Array.from(roomsContainer.querySelectorAll('.room-btn'))
                 .find(btn => btn.dataset.room === roomName);
-            
+
             if (!existingRoom) {
                 const roomBtn = document.createElement('button');
                 roomBtn.className = 'room-btn';
@@ -1554,23 +1551,23 @@
                     <span class="room-icon"><i class="fas fa-lock"></i></span>
                     ${roomName}
                 `;
-                
+
                 roomBtn.addEventListener('click', function() {
                     switchRoom(this.dataset.room);
                 });
-                
+
                 roomsContainer.appendChild(roomBtn);
             }
         }
-        
-        // Enhanced input validation
+
+        // input validation --> just incase of that 0888..... guy 
         [inputName, inputKey, inputNameJoin, inputKeyJoin].forEach(input => {
             input.addEventListener('input', (e) => {
                 if (e.target.type === 'text') {
                     e.target.value = e.target.value.replace(/[^a-zA-Z0-9]/g, '');
                 }
             });
-            
+
             input.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') {
                     if (e.target.id.includes('Join')) {
