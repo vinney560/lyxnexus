@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --text-color: #f1f5f9;
+            --accent-color: #3b82f6;
+            --submit-bg: rgb(38, 105, 240);
+            --secondary-color: #8b5cf6;
+            --sidebar-bg: #1e293b;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            overflow-x: hidden;
+            height: 100vh;
+        }
+        #privateLNM {
+            display: none;
+        }
+        .container {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            width: 85vw;
+            height: 70vh;
+            border: 1px solid var(--accent-color);
+            border-radius: 15px;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 10px;
+            transform: translate(-50%, -50%);
+            background-color: var(--bg-color);
+            display: flex;
+        }
+
+        h1 {
+            color: var(--accent-color);
+            margin-bottom: 15px;
+        }
+
+        .btn-toggle {
+            position: fixed;
+            top: 20%;
+            left: 50%;
+            width: auto;
+            height: 40px;
+            font-size: 1.3rem;
+            display: flex;
+            border: 1px solid #1e293b;
+            border-radius: 12px;
+            background-color: var(--bg-color);
+            padding: 8px;
+            text-align: center;
+            color: #f1f5f9;
+        }
+
+        .input-container {
+            width: 70%;
+            height: auto;
+            border: 1px solid #3b82f6;
+            border-radius: 10px;
+            padding: 10px;
+            background-color: var(--sidebar-bg);
+            color: aliceblue;
+            font-size: 0.9rem;
+            text-align: left;
+            outline: #8b5cf6;
+            margin: 10px;
+        }
+        .btn-submit {
+            width: 70%;
+            height: auto;
+            border: 1px solid #98f69a;
+            border-radius: 10px;
+            padding: 10px;
+            background-color: var(--submit-bg);
+            color: aliceblue;
+            font-size: 0.8rem;
+            text-align: left;
+            text-align: center;
+        }
+        .btn-submit:hover {
+            background: #1e293b;
+            transform: scaleX(1.05);
+        }
+        .close-model {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            background-color: #3b82f6;
+            align-items: center;
+            text-align: center;
+            
+        }
+    </style>
+</head>
+<body>
+    <button class="btn-toggle" id="button">Click me</button>
+    <div class="container" id="privateLNM">
+        <button class="close-model">X</button>
+        <h1>Private LN-Msgs</h1>
+        <input type="text" id="inputName" class="input-container" placeholder="Enter Room name..." minlength="3" maxlength="5" required>
+        <input type="password" id="inputKey" class="input-container" placeholder="Enter Room Key..." minlength="6" maxlength="6" required>
+        <button class="btn-submit" id="submit" type="submit">Create Room</button>
+        <input type="password" id="inputKey2" class="input-container" placeholder="Enter Room Key..." minlength="6" maxlength="6" required>
+        <button class="btn-submit" id="submit-key" type="submit">Join Room</button>
+    </div>
+    <script>
+        const btn = document.getElementById('button');
+        const submitBtn = document.getElementById('submit');
+        const container = document.getElementById('privateLNM');
+        const inputName = document.getElementById('inputName');
+        const inputKey = document.getElementById('inputKey');
+        btn.addEventListener('click', () => {
+            if (container) {
+                container.style.display = 'block';
+            }
+        });
+        submitBtn.addEventListener('click', () => {
+
+            if (inputName.value.length <= 2 || inputKey.value.length !== 6) {
+                alert('Use request pattern!');
+                
+            } else container.style.display = 'none';
+        });
+    </script>
+</body>
+</html>

@@ -18,6 +18,7 @@
         --secondary-color: #8b5cf6;
         --sidebar-bg: #1e293b;
         --card-bg: rgba(30, 41, 59, 0.8);
+        --submit-bg: rgb(38, 105, 240);
     }
     
     body {
@@ -903,6 +904,92 @@
             margin-right: 0;
         }
     }
+
+
+    /*New model for secrect room*/
+    
+    
+    #privateLNM {
+        display: none;
+    }
+    .private-lnm-container {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        width: 85vw;
+        height: 70vh;
+        z-index: 10000;
+        border: 1px solid var(--accent-color);
+        border-radius: 15px;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 10px;
+        transform: translate(-50%, -50%);
+        background-color: var(--bg-color);
+        display: flex;
+    }
+    .h1a {
+        color: var(--accent-color);
+        margin-bottom: 15px;
+    }
+    .btn-toggle {
+        position: fixed;
+        top: 20%;
+        left: 50%;
+        width: auto;
+        height: 40px;
+        font-size: 1.3rem;
+        display: flex;
+        border: 1px solid #1e293b;
+        border-radius: 12px;
+        background-color: var(--bg-color);
+        padding: 8px;
+        text-align: center;
+        color: #f1f5f9;
+    }
+    .model-input-container {
+        width: 70%;
+        height: auto;
+        border: 1px solid #3b82f6;
+        border-radius: 10px;
+        padding: 10px;
+        background-color: var(--sidebar-bg);
+        color: aliceblue;
+        font-size: 0.9rem;
+        text-align: left;
+        outline: #8b5cf6;
+        margin: 10px;
+    }
+    .btn-submit {
+        width: 70%;
+        height: auto;
+        border: 1px solid #98f69a;
+        border-radius: 10px;
+        padding: 10px;
+        background-color: var(--submit-bg);
+        color: aliceblue;
+        font-size: 0.8rem;
+        text-align: left;
+        text-align: center;
+    }
+    .btn-submit:hover {
+        background: #1e293b;
+        transform: scaleX(1.05);
+    }
+    .close-model {
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        width: 25px;
+        height: 25px;
+        border-radius: 50%;
+        background-color: #3b82f6;
+        align-items: center;
+        text-align: center;
+        
+    }        
+
 </style>
 <body>
     <header class="glass-morph sticky top-0 z-50">
@@ -957,9 +1044,23 @@
                         <span class="room-icon"><i class="fas fa-bullhorn"></i></span>
                         Announcements
                     </button>
+                    <button class="room-btn" id="plnm-toggle">
+                        <span class="room-icon"><i class="fas fa-shield-halved"></i></span>
+                        Private LN-Msgs
+                    </button>
                 </div>
             </div>
         </div>
+        
+        <div class="private-lnm-container" id="privateLNM">
+            <button class="close-model">X</button>
+            <h1 class="h1a">Private LN-Msgs</h1>
+            <input type="text" id="inputName" class="model-input-container" placeholder="Enter Room name..." minlength="3" maxlength="5" required>
+            <input type="password" id="inputKey" class="model-input-container" placeholder="Enter Room Key..." minlength="6" maxlength="6" required>
+            <button class="btn-submit" id="submit" type="submit">Create Room</button>
+            <input type="password" id="inputKey2" class="model-input-container" placeholder="Enter Room Key..." minlength="6" maxlength="6" required>
+            <button class="btn-submit" id="submit-key" type="submit">Join Room</button>
+        </div>   
         
         <!-- Chat Container -->
         <div class="chat-container">
@@ -1084,6 +1185,12 @@
         const sidebar = document.getElementById('sidebar');
         const sidebarToggle = document.getElementById('sidebarToggle');
         const scrollToBottomBtn = document.getElementById('scrollToBottomBtn');
+
+        // Model Private msgs
+
+        const privateLNM = document.getElementById('privateLNM');
+        const closeModel = document.getElementById('close-model');
+        const pToggle = document.getElementById('plnm-toggle');
         
         let currentRoom = 'general';
         let onlineUsers = {};
@@ -1099,6 +1206,13 @@
             quality: 'good'
         };
         let replyingToMessage = null;
+        // privateLNM, close-model, plnm-toggle
+        pToggle.addEventListener('click', () => {
+            privateLNM.style.display = 'block';
+        });
+        closeModel.addEventListener('click', () => {
+            privateLNM.style.display = 'none';
+        });
 
         // Back button handler
         const isAdmin = {{ 'true' if current_user.is_admin else 'false' }};
