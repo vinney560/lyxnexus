@@ -8,7 +8,7 @@ class LyxNexusNotificationService {
 
         this.audio = new Audio('/uploads/notify.mp3');
         this.audio.preload = 'auto';
-        this.audio.volume = 0.7; 
+        this.audio.volume = 0.4; 
 
         console.log(`${this.serviceName}: Created, waiting for dependencies...`);
         this.startInitialization();
