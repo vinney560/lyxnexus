@@ -1555,24 +1555,46 @@ def handle_connect():
 
 @socketio.on('disconnect')
 def handle_disconnect():
-    """Handle user disconnection"""
-    if current_user.is_authenticated:
-        user_data = online_users.get(current_user.id)
-        
-        if user_data:
-            room = user_data.get('current_room', 'general')
-            
-            online_users.pop(current_user.id, None)
-            
-            emit('user_left', {
-                'user_id': current_user.id,
-                'username': current_user.username,
-                'message': f'{current_user.username} left the chat'
-            }, room=room, include_self=False)
-            
-            broadcast_online_users()
-        
-        print(f"User {current_user.username} disconnected. Online users: {len(online_users)}")
+    """Handle user disconnection safely"""
+    try:
+        user = getattr(current_user, "username", None)
+        user_id = getattr(current_user, "id", None)
+
+        if not user_id:
+            print("Anonymous socket disconnected.")
+            return
+
+        user_data = online_users.pop(user_id, None)
+        if not user_data:
+            print(f"User {user or 'Unknown'} had no active session.")
+            return
+
+        room = user_data.get('current_room', 'general')
+
+        # Emit safely — may fail if socket already gone
+        try:
+            emit(
+                'user_left',
+                {
+                    'user_id': user_id,
+                    'username': user,
+                    'message': f'{user} left the chat',
+                },
+                room=room,
+                include_self=False
+            )
+        except OSError as e:
+            if e.errno != 9:  # ignore 'Bad file descriptor'
+                raise
+            print(f"Ignored closed socket emit for {user}")
+
+        # Re-broadcast remaining online users
+        broadcast_online_users()
+
+        print(f"User {user} disconnected. Online users: {len(online_users)}")
+
+    except Exception as e:
+        print(f"⚠️ Disconnect error: {e}")
 
 # I'm not that good at this part
 @socketio.on('join_room')
