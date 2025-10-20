@@ -367,15 +367,6 @@ def ignore_bad_fd(record):
 
 logging.getLogger().addFilter(ignore_bad_fd)
 
-from apscheduler.triggers.interval import IntervalTrigger
-
-def auto_close_sessions():
-    print("🧹 Auto-cleaning stale DB sessions...")
-    db.session.remove()
-    db.engine.dispose()
-
-scheduler.add_job(auto_close_sessions, IntervalTrigger(minutes=10))
-
 
 def _year():
     return datetime.now().strftime('%Y')
@@ -516,6 +507,15 @@ scheduler.add_job(
 scheduler.start()
 
 log_status("🕒 Keep-alive scheduler started — pinging both DBs every 3 minutes")
+atexit.register(lambda: scheduler.shutdown(wait=False))
+
+scheduler = BackgroundScheduler()
+def auto_close_sessions():
+    print("🧹 Auto-cleaning stale DB sessions...")
+    db.session.remove()
+    db.engine.dispose()
+
+scheduler.add_job(auto_close_sessions, IntervalTrigger(minutes=10))
 
 atexit.register(lambda: scheduler.shutdown(wait=False))
 #=============================================================================
@@ -1080,7 +1080,6 @@ online_users = {}
 @login_required
 def get_online_users():
     """Get currently online users"""
-    cleanup_disconnected_users()
     
     users = []
     for user_id, user_data in online_users.items():
@@ -1527,8 +1526,7 @@ def update_user_presence(user_id, username, is_admin=False, room='general'):
 
 def broadcast_online_users():
     """Broadcast updated online users list to all rooms"""
-    cleanup_disconnected_users()
-    
+
     room_users = {}
     for user_id, user_data in online_users.items():
         if user_data and 'user_id' in user_data:
@@ -1942,16 +1940,6 @@ def handle_mark_read(data):
         # PERIODIC TASKS FOR KEEP ALIVE THE WEBS
 # ==================================================
 import requests
-
-def periodic_cleanup():
-    """Periodically clean up disconnected users"""
-    with app.app_context():
-        cleanup_disconnected_users()
-
-# periodic cleanup (run every minute)
-scheduler = BackgroundScheduler()
-scheduler.add_job(func=periodic_cleanup, trigger="interval", seconds=60)
-scheduler.start()
 
 TARGET_URLS = [
     "https://lyxspace.onrender.com/files",
