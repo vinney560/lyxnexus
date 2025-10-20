@@ -2645,6 +2645,29 @@ def check_admin():
 # USER API ROUTES FOR PROFILE & ADMIN MNGMT
 # =========================================
 
+
+@app.route("/api/users-sms/", methods=["GET"])
+def get_users():
+    users = User.query.all()
+    return jsonify([{"id": u.id, "username": u.username, "phone": u.mobile} for u in users])
+
+@app.route("/api/send_sms", methods=["POST"])
+def send_sms():
+    data = request.json
+    phone = data.get("phone")
+    message = data.get("message")
+    if not phone or not message:
+        return jsonify({"success": False, "error": "phone and message required"}), 400
+    try:
+        res = requests.post("https://textbelt.com/text", json={
+            "phone": phone,
+            "message": message,
+            "key": "textbelt"  # free demo key
+        })
+        return jsonify(res.json())
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
 @app.route('/api/users/me')
 @login_required
 def get_current_user():
