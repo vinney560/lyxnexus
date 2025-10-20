@@ -41,7 +41,7 @@ def database_url():
     print(f"DB_2: {db_2}")
     print(f"DB_3: {db_3}")
 
-    for name, db_url in [("Render New DB", db_1), ("Render Old DB", db_2)]:
+    for name, db_url in [("Aiven DB", db_1), ("Render DB", db_2)]:
         if db_url:
             try:
                 engine = create_engine(db_url)
@@ -387,63 +387,35 @@ BATCH_SIZE = 500
 LOG_EVERY_BATCH = True
 
 def clone_database_robust():
-    """Clone DATABASE_URL -> DATABASE_URL_2 with full robustness"""
     src_url = os.getenv("DATABASE_URL")
     tgt_url = os.getenv("DATABASE_URL_2")
-
-    if not src_url or not tgt_url:
-        raise ValueError("DATABASE_URL or DATABASE_URL_2 not set")
-
-    # Drop and recreate target DB
-    if database_exists(tgt_url):
-        drop_database(tgt_url)
-    create_database(tgt_url)
 
     src_engine = create_engine(src_url)
     tgt_engine = create_engine(tgt_url)
 
-    metadata = MetaData()
-    metadata.reflect(bind=src_engine)
-    metadata.create_all(bind=tgt_engine)
+    # Drop target tables before clone
+    tgt_meta = MetaData()
+    tgt_meta.reflect(bind=tgt_engine)
+    tgt_meta.drop_all(bind=tgt_engine)
+
+    # Recreate schema
+    src_meta = MetaData()
+    src_meta.reflect(bind=src_engine)
+    src_meta.create_all(bind=tgt_engine)
 
     with src_engine.connect() as src_conn, tgt_engine.begin() as tgt_conn:
-        for table in metadata.sorted_tables:
+        for table in src_meta.sorted_tables:
             print(f"🔹 Cloning table: {table.name}")
             offset = 0
             while True:
-                try:
-                    rows = src_conn.execute(
-                        select(table).offset(offset).limit(BATCH_SIZE)
-                    ).mappings().all()
-
-                    if not rows:
-                        break
-
-                    tgt_conn.execute(table.insert(), rows)
-
-                    if LOG_EVERY_BATCH:
-                        print(f"  - Inserted batch {offset//BATCH_SIZE + 1} for {table.name}")
-
-                    offset += BATCH_SIZE
-
-                except Exception as e:
-                    print(f"⚠️ Error copying table {table.name} at batch {offset//BATCH_SIZE + 1}: {e}")
-                    break  # Skip remaining rows in this table
-
-            # TO fix sequences for identity columns
-            for col in table.columns:
-                if col.autoincrement:
-                    try:
-                        max_id = tgt_conn.execute(
-                            text(f"SELECT MAX({col.name}) FROM {table.name}")
-                        ).scalar() or 0
-                        tgt_conn.execute(
-                            text(f"ALTER SEQUENCE {table.name}_{col.name}_seq RESTART WITH {max_id + 1}")
-                        )
-                    except Exception as e:
-                        print(f"⚠️ Could not reset sequence for {table.name}.{col.name}: {e}")
-
-    print(f"✅ Database cloned successfully at {nairobi_time()}")
+                rows = src_conn.execute(
+                    select(table).offset(offset).limit(BATCH_SIZE)
+                ).mappings().all()
+                if not rows:
+                    break
+                tgt_conn.execute(table.insert(), rows)
+                offset += BATCH_SIZE
+            print(f"✅ Done: {table.name}")
 
 @app.route("/admin/clone-db")
 @admin_required
@@ -459,41 +431,48 @@ def clone_db_route():
         return jsonify({"message": "✅ Database cloned successfully"}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
+# ============================================================
+#  Database Keep-Alive 'n Status Logging
+# ============================================================
 
-# Clone every 25 days
-scheduler = BackgroundScheduler()
-scheduler.add_job(
-    func=clone_database_robust,
-    trigger=IntervalTrigger(days=25),
-    id="db_clone_task",
-    replace_existing=True,
-)
-scheduler.start()
-print("🕒 APScheduler started: cloning every 25 days")
-atexit.register(lambda: scheduler.shutdown(wait=False))
-
-                # =========================================
-                # keep_alive_both_dbs for future Merge
-                # =========================================
-
-# Database URLs
 SRC_DB_URL = os.getenv("DATABASE_URL")
 TGT_DB_URL = os.getenv("DATABASE_URL_2")
 
-src_engine = create_engine(SRC_DB_URL, pool_pre_ping=True)
-tgt_engine = create_engine(TGT_DB_URL, pool_pre_ping=True)
+src_engine = create_engine(
+    SRC_DB_URL,
+    pool_pre_ping=True,
+    connect_args={"connect_timeout": 5}
+)
+tgt_engine = create_engine(
+    TGT_DB_URL,
+    pool_pre_ping=True,
+    connect_args={"connect_timeout": 5}
+)
 
-# Keep-alive just for fast DB response
+LOG_FILE = "logs/db_health.log"
+os.makedirs("logs", exist_ok=True)
+
+def log_status(message: str):
+    """Append timestamped messages to a local log file"""
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    line = f"[{timestamp}] {message}\n"
+    print(line.strip()) 
+    with open(LOG_FILE, "a", encoding="utf-8") as f:
+        f.write(line)
+
 def keep_databases_alive():
     for name, engine in [("Source", src_engine), ("Target", tgt_engine)]:
         try:
             with engine.connect() as conn:
                 conn.execute(text("SELECT 1"))
-            print(f"🟢 [{datetime.now()}] {name} DB keep-alive query succeeded")
+            log_status(f"🟢 {name} DB keep-alive OK")
         except OperationalError as e:
-            print(f"⚠️ [{datetime.now()}] {name} DB connection failed: {e}")
+            log_status(f"⚠️ {name} DB unreachable: {e}")
+        except Exception as e:
+            log_status(f"❌ Unexpected error pinging {name} DB: {e}")
 
-# Try ping every 3 minutes
+# Scheduler setup
 scheduler = BackgroundScheduler()
 scheduler.add_job(
     func=keep_databases_alive,
@@ -502,9 +481,11 @@ scheduler.add_job(
     replace_existing=True
 )
 scheduler.start()
-print("🕒 Keep-alive scheduler started: pinging both DBs every 3 minutes")
+
+log_status("🕒 Keep-alive scheduler started — pinging both DBs every 3 minutes")
 
 atexit.register(lambda: scheduler.shutdown(wait=False))
+#=============================================================================
 
 #      ANNOUNCEMENT CLEANER
 def delete_old_announcements():
