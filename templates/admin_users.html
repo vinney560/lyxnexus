@@ -1565,11 +1565,15 @@
             document.getElementById('prev-page').addEventListener('click', function() {
                 if (currentPage > 1) {
                     loadUsers(currentPage - 1);
+                    updateUserTable();
+                    updatePagination();
                 }
             });
 
             document.getElementById('next-page').addEventListener('click', function() {
                 loadUsers(currentPage + 1);
+                updateUserTable();
+                updatePagination();
             });
 
             
