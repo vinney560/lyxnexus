@@ -509,14 +509,22 @@ scheduler.start()
 log_status("🕒 Keep-alive scheduler started — pinging both DBs every 3 minutes")
 atexit.register(lambda: scheduler.shutdown(wait=False))
 #--------------------------------------Aiven max conn pool
-scheduler = BackgroundScheduler()
+
 def auto_close_sessions():
     print("🧹 Auto-cleaning stale DB sessions...")
     db.session.remove()
     db.engine.dispose()
 
-scheduler.add_job(auto_close_sessions, IntervalTrigger(minutes=10))
+scheduler = BackgroundScheduler()
+scheduler.add_job(
+    func=auto_close_sessions,
+    trigger=IntervalTrigger(minutes=3),
+    id="Close Ideal Connection",
+    replace_existing=True
+)
 
+scheduler.start()
+log_status("🕒 Terminate DB Ideal connections")
 atexit.register(lambda: scheduler.shutdown(wait=False))
 #=============================================================================
 
