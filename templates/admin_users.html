@@ -484,6 +484,32 @@
         animation: pulse 2s infinite;
     }
     
+    /* Advanced filters panel */
+    .filters-panel {
+        background: rgba(30, 30, 40, 0.7);
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 20px;
+        border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+    
+    .filters-header {
+        display: flex;
+        justify-content: between;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+    
+    .filter-group {
+        margin-bottom: 15px;
+    }
+    
+    .filter-label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 500;
+    }
+    
     /* Activity progress bar */
     .activity-bar {
         width: 100%;
@@ -735,9 +761,6 @@
     </div>
 
     <script>
-        // Debug logging
-        console.log('Script loaded successfully');
-        
         const API_BASE = '/api';
         const USERS_ENDPOINT = `${API_BASE}/users`;
         const ONLINE_USERS_ENDPOINT = `${API_BASE}/online-users`;
@@ -752,267 +775,208 @@
         const usersPerPage = 10;
         let charts = {};
 
-        // Debug function to check API responses
-        async function debugAPI(endpoint) {
-            try {
-                console.log(`Testing endpoint: ${endpoint}`);
-                const response = await fetch(endpoint);
-                console.log(`Response status: ${response.status}`);
-                console.log(`Response headers:`, Object.fromEntries(response.headers.entries()));
-                
-                if (!response.ok) {
-                    console.error(`API Error: ${response.status} ${response.statusText}`);
-                    return null;
-                }
-                
-                const data = await response.json();
-                console.log(`API Response:`, data);
-                return data;
-            } catch (error) {
-                console.error(`Fetch error for ${endpoint}:`, error);
-                return null;
-            }
-        }
-
         // Initialize charts
         function initializeCharts() {
-            console.log('Initializing charts...');
-            try {
-                const registrationCtx = document.getElementById('registration-chart')?.getContext('2d');
-                const activityCtx = document.getElementById('activity-chart')?.getContext('2d');
-                const roleCtx = document.getElementById('role-chart')?.getContext('2d');
-                const timelineCtx = document.getElementById('timeline-chart')?.getContext('2d');
-                
-                if (!registrationCtx || !activityCtx || !roleCtx || !timelineCtx) {
-                    console.error('Chart canvases not found');
-                    return;
+            const registrationCtx = document.getElementById('registration-chart').getContext('2d');
+            const activityCtx = document.getElementById('activity-chart').getContext('2d');
+            const roleCtx = document.getElementById('role-chart').getContext('2d');
+            const timelineCtx = document.getElementById('timeline-chart').getContext('2d');
+            
+            // Registration Trend Chart
+            charts.registration = new Chart(registrationCtx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'User Registrations',
+                        data: [],
+                        borderColor: '#3B82F6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    }
                 }
-                
-                // Registration Trend Chart
-                charts.registration = new Chart(registrationCtx, {
-                    type: 'line',
-                    data: {
-                        labels: [],
-                        datasets: [{
-                            label: 'User Registrations',
-                            data: [],
-                            borderColor: '#3B82F6',
-                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                            tension: 0.4,
-                            fill: true
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        plugins: {
-                            legend: {
-                                display: false
-                            }
-                        },
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                ticks: {
-                                    stepSize: 1
-                                }
-                            }
+            });
+            
+            // Activity Distribution Chart
+            charts.activity = new Chart(activityCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['High Activity', 'Medium Activity', 'Low Activity'],
+                    datasets: [{
+                        data: [0, 0, 0],
+                        backgroundColor: [
+                            'rgba(16, 185, 129, 0.7)',
+                            'rgba(59, 130, 246, 0.7)',
+                            'rgba(107, 114, 128, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgba(16, 185, 129, 1)',
+                            'rgba(59, 130, 246, 1)',
+                            'rgba(107, 114, 128, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
                         }
                     }
-                });
-                
-                // Activity Distribution Chart
-                charts.activity = new Chart(activityCtx, {
-                    type: 'doughnut',
-                    data: {
-                        labels: ['High Activity', 'Medium Activity', 'Low Activity'],
-                        datasets: [{
-                            data: [0, 0, 0],
-                            backgroundColor: [
-                                'rgba(16, 185, 129, 0.7)',
-                                'rgba(59, 130, 246, 0.7)',
-                                'rgba(107, 114, 128, 0.7)'
-                            ],
-                            borderColor: [
-                                'rgba(16, 185, 129, 1)',
-                                'rgba(59, 130, 246, 1)',
-                                'rgba(107, 114, 128, 1)'
-                            ],
-                            borderWidth: 1
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        plugins: {
-                            legend: {
-                                position: 'bottom'
-                            }
+                }
+            });
+            
+            // Role Distribution Chart
+            charts.role = new Chart(roleCtx, {
+                type: 'pie',
+                data: {
+                    labels: ['Administrators', 'Regular Users'],
+                    datasets: [{
+                        data: [0, 0],
+                        backgroundColor: [
+                            'rgba(139, 92, 246, 0.7)',
+                            'rgba(59, 130, 246, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgba(139, 92, 246, 1)',
+                            'rgba(59, 130, 246, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
                         }
                     }
-                });
-                
-                // Role Distribution Chart
-                charts.role = new Chart(roleCtx, {
-                    type: 'pie',
-                    data: {
-                        labels: ['Administrators', 'Regular Users'],
-                        datasets: [{
-                            data: [0, 0],
-                            backgroundColor: [
-                                'rgba(139, 92, 246, 0.7)',
-                                'rgba(59, 130, 246, 0.7)'
-                            ],
-                            borderColor: [
-                                'rgba(139, 92, 246, 1)',
-                                'rgba(59, 130, 246, 1)'
-                            ],
-                            borderWidth: 1
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        plugins: {
-                            legend: {
-                                position: 'bottom'
-                            }
+                }
+            });
+            
+            // Activity Timeline Chart
+            charts.timeline = new Chart(timelineCtx, {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'User Activity',
+                        data: [],
+                        backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                        borderColor: 'rgba(59, 130, 246, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
                         }
                     }
-                });
-                
-                // Activity Timeline Chart
-                charts.timeline = new Chart(timelineCtx, {
-                    type: 'bar',
-                    data: {
-                        labels: [],
-                        datasets: [{
-                            label: 'User Activity',
-                            data: [],
-                            backgroundColor: 'rgba(59, 130, 246, 0.7)',
-                            borderColor: 'rgba(59, 130, 246, 1)',
-                            borderWidth: 1
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        scales: {
-                            y: {
-                                beginAtZero: true
-                            }
-                        }
-                    }
-                });
-                
-                console.log('Charts initialized successfully');
-            } catch (error) {
-                console.error('Error initializing charts:', error);
-            }
+                }
+            });
         }
         
         // Update charts with user data
         function updateCharts(users) {
-            if (!users || !Array.isArray(users)) {
-                console.error('Invalid users data for charts:', users);
-                return;
-            }
+            // Update registration trend (last 30 days)
+            const last30Days = [...Array(30)].map((_, i) => {
+                const d = new Date();
+                d.setDate(d.getDate() - i);
+                return d.toISOString().split('T')[0];
+            }).reverse();
             
-            try {
-                // Update registration trend (last 30 days)
-                const last30Days = [...Array(30)].map((_, i) => {
-                    const d = new Date();
-                    d.setDate(d.getDate() - i);
-                    return d.toISOString().split('T')[0];
-                }).reverse();
-                
-                const registrationData = last30Days.map(day => {
-                    return users.filter(user => {
-                        if (!user.created_at) return false;
-                        const userDate = user.created_at.split('T')[0];
-                        return userDate === day;
-                    }).length;
-                });
-                
-                if (charts.registration) {
-                    charts.registration.data.labels = last30Days.map(date => {
-                        const d = new Date(date);
-                        return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-                    });
-                    charts.registration.data.datasets[0].data = registrationData;
-                    charts.registration.update();
-                }
-                
-                // Update activity distribution
-                const highActivity = users.filter(user => (user.announcements_count + user.assignments_count) > 10).length;
-                const mediumActivity = users.filter(user => {
-                    const activity = user.announcements_count + user.assignments_count;
-                    return activity > 3 && activity <= 10;
+            const registrationData = last30Days.map(day => {
+                return users.filter(user => {
+                    const userDate = user.created_at.split('T')[0];
+                    return userDate === day;
                 }).length;
-                const lowActivity = users.filter(user => (user.announcements_count + user.assignments_count) <= 3).length;
-                
-                if (charts.activity) {
-                    charts.activity.data.datasets[0].data = [highActivity, mediumActivity, lowActivity];
-                    charts.activity.update();
-                }
-                
-                // Update role distribution
-                const adminCount = users.filter(user => user.is_admin).length;
-                const userCount = users.length - adminCount;
-                
-                if (charts.role) {
-                    charts.role.data.datasets[0].data = [adminCount, userCount];
-                    charts.role.update();
-                }
-                
-                // Update activity timeline (last 7 days)
-                const last7Days = [...Array(7)].map((_, i) => {
-                    const d = new Date();
-                    d.setDate(d.getDate() - i);
-                    return d.toISOString().split('T')[0];
-                }).reverse();
-                
-                // For demo purposes, we'll generate random activity data
-                const activityData = last7Days.map(() => Math.floor(Math.random() * 20) + 5);
-                
-                if (charts.timeline) {
-                    charts.timeline.data.labels = last7Days.map(date => {
-                        const d = new Date(date);
-                        return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-                    });
-                    charts.timeline.data.datasets[0].data = activityData;
-                    charts.timeline.update();
-                }
-            } catch (error) {
-                console.error('Error updating charts:', error);
-            }
+            });
+            
+            charts.registration.data.labels = last30Days.map(date => {
+                const d = new Date(date);
+                return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            });
+            charts.registration.data.datasets[0].data = registrationData;
+            charts.registration.update();
+            
+            // Update activity distribution
+            const highActivity = users.filter(user => (user.announcements_count + user.assignments_count) > 10).length;
+            const mediumActivity = users.filter(user => {
+                const activity = user.announcements_count + user.assignments_count;
+                return activity > 3 && activity <= 10;
+            }).length;
+            const lowActivity = users.filter(user => (user.announcements_count + user.assignments_count) <= 3).length;
+            
+            charts.activity.data.datasets[0].data = [highActivity, mediumActivity, lowActivity];
+            charts.activity.update();
+            
+            // Update role distribution
+            const adminCount = users.filter(user => user.is_admin).length;
+            const userCount = users.length - adminCount;
+            
+            charts.role.data.datasets[0].data = [adminCount, userCount];
+            charts.role.update();
+            
+            // Update activity timeline (last 7 days)
+            const last7Days = [...Array(7)].map((_, i) => {
+                const d = new Date();
+                d.setDate(d.getDate() - i);
+                return d.toISOString().split('T')[0];
+            }).reverse();
+            
+            // For demo purposes, we'll generate random activity data
+            // In a real app, you would get this from your backend
+            const activityData = last7Days.map(() => Math.floor(Math.random() * 20) + 5);
+            
+            charts.timeline.data.labels = last7Days.map(date => {
+                const d = new Date(date);
+                return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            });
+            charts.timeline.data.datasets[0].data = activityData;
+            charts.timeline.update();
         }
 
         // Format date
         function formatDate(dateString) {
             if (!dateString) return 'N/A';
-            try {
-                const date = new Date(dateString);
-                return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-            } catch (error) {
-                return 'Invalid Date';
-            }
+            const date = new Date(dateString);
+            return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
         }
 
         function formatRelativeTime(dateString) {
             if (!dateString) return 'N/A';
-            try {
-                const date = new Date(dateString);
-                const now = new Date();
-                const diffMs = now - date;
-                const diffMins = Math.floor(diffMs / 60000);
-                const diffHours = Math.floor(diffMs / 3600000);
-                const diffDays = Math.floor(diffMs / 86400000);
+            const date = new Date(dateString);
+            const now = new Date();
+            const diffMs = now - date;
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMs / 3600000);
+            const diffDays = Math.floor(diffMs / 86400000);
 
-                if (diffMins < 1) return 'Just now';
-                if (diffMins < 60) return `${diffMins}m ago`;
-                if (diffHours < 24) return `${diffHours}h ago`;
-                if (diffDays < 7) return `${diffDays}d ago`;
-                return formatDate(dateString);
-            } catch (error) {
-                return 'Invalid Date';
-            }
+            if (diffMins < 1) return 'Just now';
+            if (diffMins < 60) return `${diffMins}m ago`;
+            if (diffHours < 24) return `${diffHours}h ago`;
+            if (diffDays < 7) return `${diffDays}d ago`;
+            return formatDate(dateString);
         }
 
         function updateLastUpdated() {
@@ -1054,8 +1018,6 @@
         }
 
         function setButtonLoading(button, isLoading) {
-            if (!button) return;
-            
             if (isLoading) {
                 button.classList.add('btn-loading');
                 button.disabled = true;
@@ -1068,16 +1030,11 @@
         // Fetch online users
         async function fetchOnlineUsers() {
             try {
-                console.log('Fetching online users from:', ONLINE_USERS_ENDPOINT);
                 const response = await fetch(ONLINE_USERS_ENDPOINT);
-                
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
-                
-                const data = await response.json();
-                console.log('Online users response:', data);
-                return data;
+                return await response.json();
             } catch (error) {
                 console.error('Error fetching online users:', error);
                 return [];
@@ -1090,16 +1047,11 @@
             const countElement = document.getElementById('online-count');
             const quickStatElement = document.getElementById('online-users');
             
-            if (!container || !countElement || !quickStatElement) {
-                console.error('Online users elements not found');
-                return;
-            }
+            onlineUsers = users;
+            quickStatElement.textContent = users.length;
+            countElement.textContent = `(${users.length})`;
             
-            onlineUsers = Array.isArray(users) ? users : [];
-            quickStatElement.textContent = onlineUsers.length;
-            countElement.textContent = `(${onlineUsers.length})`;
-            
-            if (onlineUsers.length === 0) {
+            if (users.length === 0) {
                 container.innerHTML = `
                     <div class="text-center text-gray-400 py-4">
                         <i class="fas fa-users-slash text-2xl mb-2"></i>
@@ -1109,13 +1061,13 @@
                 return;
             }
             
-            container.innerHTML = onlineUsers.map(user => `
+            container.innerHTML = users.map(user => `
                 <div class="online-user-item">
                     <div class="online-indicator"></div>
                     <div class="flex-1">
                         <div class="font-medium">${user.username || 'Unknown User'}</div>
                         <div class="text-xs text-gray-400">
-                            ${user.is_admin ? 'Admin' : 'User'} • ${user.room || 'general'}
+                            ${user.is_admin ? 'Admin' : 'User'} • ${user.current_room || 'general'}
                         </div>
                     </div>
                     <div class="text-xs text-gray-400">
@@ -1138,11 +1090,11 @@
 
         // Enhanced user search and filtering
         function filterUsers() {
-            const searchTerm = document.getElementById('search-input')?.value.toLowerCase() || '';
-            const roleFilter = document.getElementById('role-filter')?.value || '';
-            const activityFilter = document.getElementById('activity-filter')?.value || '';
-            const statusFilter = document.getElementById('status-filter')?.value || '';
-            const dateFilter = document.getElementById('date-filter')?.value || '';
+            const searchTerm = document.getElementById('search-input').value.toLowerCase();
+            const roleFilter = document.getElementById('role-filter').value;
+            const activityFilter = document.getElementById('activity-filter').value;
+            const statusFilter = document.getElementById('status-filter').value;
+            const dateFilter = document.getElementById('date-filter').value;
             
             filteredUsers = allUsers.filter(user => {
                 // Text search
@@ -1159,7 +1111,7 @@
                 // Activity filter
                 let matchesActivity = true;
                 if (activityFilter) {
-                    const totalActivity = (user.announcements_count || 0) + (user.assignments_count || 0);
+                    const totalActivity = user.announcements_count + user.assignments_count;
                     if (activityFilter === 'high') {
                         matchesActivity = totalActivity > 10;
                     } else if (activityFilter === 'medium') {
@@ -1182,7 +1134,7 @@
                 
                 // Date filter
                 let matchesDate = true;
-                if (dateFilter && user.created_at) {
+                if (dateFilter) {
                     const userDate = new Date(user.created_at);
                     const now = new Date();
                     
@@ -1207,93 +1159,83 @@
 
         // Update pagination controls
         function updatePagination() {
+            const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
             const startIndex = (currentPage - 1) * usersPerPage;
             const endIndex = Math.min(startIndex + usersPerPage, filteredUsers.length);
-            const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
             
-            const showingStart = document.getElementById('showing-start');
-            const showingEnd = document.getElementById('showing-end');
-            const showingTotal = document.getElementById('showing-total');
-            const userCount = document.getElementById('user-count');
-            const prevPage = document.getElementById('prev-page');
-            const nextPage = document.getElementById('next-page');
+            document.getElementById('showing-start').textContent = filteredUsers.length > 0 ? startIndex + 1 : 0;
+            document.getElementById('showing-end').textContent = endIndex;
+            document.getElementById('showing-total').textContent = filteredUsers.length;
+            document.getElementById('user-count').textContent = `(${filteredUsers.length})`;
             
-            if (showingStart) showingStart.textContent = filteredUsers.length > 0 ? startIndex + 1 : 0;
-            if (showingEnd) showingEnd.textContent = endIndex;
-            if (showingTotal) showingTotal.textContent = filteredUsers.length;
-            if (userCount) userCount.textContent = `(${filteredUsers.length})`;
-            
-            if (prevPage) prevPage.disabled = currentPage === 1;
-            if (nextPage) nextPage.disabled = currentPage === totalPages || totalPages === 0;
+            document.getElementById('prev-page').disabled = currentPage === 1;
+            document.getElementById('next-page').disabled = currentPage === totalPages || totalPages === 0;
         }
 
-        // Enhanced statistics calculation
-        function updateStatistics(users) {
-            if (!users || !Array.isArray(users)) {
-                console.error('Invalid users data for statistics:', users);
-                return;
+        // Enhanced statistics calculation - FIXED to use backend stats
+        function updateStatistics(users, stats = null) {
+            if (stats) {
+                // Use backend statistics if provided
+                document.getElementById('total-users').textContent = stats.total_users || 0;
+                document.getElementById('admin-users').textContent = stats.admin_users || 0;
+                document.getElementById('regular-users').textContent = stats.regular_users || 0;
+                document.getElementById('today-users').textContent = stats.today_users || 0;
+                document.getElementById('active-today').textContent = stats.active_today || 0;
+                document.getElementById('online-users').textContent = stats.online_users || 0;
+                document.getElementById('avg-activity').textContent = stats.avg_activity || 0;
+                document.getElementById('total-activity').textContent = stats.total_activity || 0;
+            } else {
+                // Fallback to frontend calculation if no stats provided
+                const totalUsers = users.length;
+                const adminUsers = users.filter(user => user.is_admin).length;
+                const regularUsers = totalUsers - adminUsers;
+                
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                const todayUsers = users.filter(user => {
+                    const userDate = new Date(user.created_at);
+                    return userDate >= today;
+                }).length;
+                
+                // Calculate active users (today)
+                const activeToday = users.filter(user => {
+                    return Math.random() > 0.7; // 30% of users are "active today"
+                }).length;
+                
+                // Calculate average activity
+                const totalActivity = users.reduce((sum, user) => {
+                    return sum + user.announcements_count + user.assignments_count;
+                }, 0);
+                const avgActivity = totalUsers > 0 ? (totalActivity / totalUsers).toFixed(1) : 0;
+
+                document.getElementById('total-users').textContent = totalUsers;
+                document.getElementById('admin-users').textContent = adminUsers;
+                document.getElementById('regular-users').textContent = regularUsers;
+                document.getElementById('today-users').textContent = todayUsers;
+                document.getElementById('active-today').textContent = activeToday;
+                document.getElementById('avg-activity').textContent = avgActivity;
+                document.getElementById('total-activity').textContent = totalActivity;
             }
-            
-            const totalUsers = users.length;
-            const adminUsers = users.filter(user => user.is_admin).length;
-            const regularUsers = totalUsers - adminUsers;
-            
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            const todayUsers = users.filter(user => {
-                if (!user.created_at) return false;
-                const userDate = new Date(user.created_at);
-                return userDate >= today;
-            }).length;
-            
-            // Calculate active users (today) - simplified for demo
-            const activeToday = Math.floor(users.length * 0.3); // 30% of users
-            
-            // Calculate average activity
-            const totalActivity = users.reduce((sum, user) => {
-                return sum + (user.announcements_count || 0) + (user.assignments_count || 0);
-            }, 0);
-            const avgActivity = totalUsers > 0 ? (totalActivity / totalUsers).toFixed(1) : 0;
-
-            // Update DOM elements
-            const elements = {
-                'total-users': totalUsers,
-                'admin-users': adminUsers,
-                'regular-users': regularUsers,
-                'today-users': todayUsers,
-                'active-today': activeToday,
-                'avg-activity': avgActivity,
-                'total-activity': totalActivity
-            };
-            
-            Object.entries(elements).forEach(([id, value]) => {
-                const element = document.getElementById(id);
-                if (element) {
-                    element.textContent = value;
-                }
-            });
         }
 
+        // FIXED: Properly handle backend response structure
         async function fetchUsers() {
             try {
-                console.log('Fetching users from:', USERS_ENDPOINT);
                 const response = await fetch(USERS_ENDPOINT);
-                
                 if (!response.ok) {
-                    const errorText = await response.text();
-                    console.error('API Error Response:', errorText);
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
-                
                 const data = await response.json();
-                console.log('Users API response:', data);
+                console.log('API Response:', data); // Debug log
                 return data;
             } catch (error) {
                 console.error('Error fetching users:', error);
-                throw error;
+                showToast('Failed to load users: ' + error.message, 'error');
+                return { users: [], stats: null };
             }
         }
 
+        // FIXED: Properly extract users array from response
         async function loadUsers() {
             if (isRefreshing) return;
             
@@ -1301,46 +1243,44 @@
                 isRefreshing = true;
                 setButtonLoading(document.getElementById('refresh-btn'), true);
                 
-                const users = await fetchUsers();
-                allUsers = Array.isArray(users) ? users : [];
+                const data = await fetchUsers();
+                allUsers = data.users || []; // Extract users array from response
                 filteredUsers = [...allUsers];
                 
                 updateLastUpdated();
-                updateStatistics(allUsers);
+                updateStatistics(allUsers, data.stats); // Pass stats to update function
                 updateCharts(allUsers);
                 updateUserTable();
                 updatePagination();
                 
                 setButtonLoading(document.getElementById('refresh-btn'), false);
                 isRefreshing = false;
-                showToast('Users loaded successfully', 'success');
-            } catch (error) {
-                console.error('Error in loadUsers:', error);
-                const tableBody = document.getElementById('users-table-body');
-                if (tableBody) {
-                    tableBody.innerHTML = `
-                        <tr>
-                            <td colspan="8" class="text-center py-8 text-red-400">
-                                <i class="fas fa-exclamation-triangle mr-2"></i>
-                                Error loading users. Please check console for details.
-                            </td>
-                        </tr>
-                    `;
+                
+                if (allUsers.length === 0) {
+                    showToast('No users found in the system', 'info');
+                } else {
+                    showToast(`Loaded ${allUsers.length} users successfully`, 'success');
                 }
+            } catch (error) {
+                document.getElementById('users-table-body').innerHTML = `
+                    <tr>
+                        <td colspan="8" class="text-center py-8 text-red-400">
+                            <i class="fas fa-exclamation-triangle mr-2"></i>
+                            Error loading users. Please try again.
+                            <br><small class="text-gray-400">${error.message}</small>
+                        </td>
+                    </tr>
+                `;
                 setButtonLoading(document.getElementById('refresh-btn'), false);
                 isRefreshing = false;
-                showToast('Failed to load users: ' + error.message, 'error');
+                showToast('Failed to load users', 'error');
             }
         }
 
         function displayUsers(users) {
             const container = document.getElementById('users-table-body');
-            if (!container) {
-                console.error('Users table body not found');
-                return;
-            }
             
-            if (!users || !Array.isArray(users) || users.length === 0) {
+            if (users.length === 0) {
                 container.innerHTML = `
                     <tr>
                         <td colspan="8" class="text-center py-8 text-gray-400">
@@ -1359,7 +1299,7 @@
             
             container.innerHTML = usersToDisplay.map(user => {
                 const isOnline = onlineUsers.some(onlineUser => onlineUser.user_id === user.id);
-                const totalActivity = (user.announcements_count || 0) + (user.assignments_count || 0);
+                const totalActivity = user.announcements_count + user.assignments_count;
                 const activityPercentage = Math.min(totalActivity * 5, 100);
                 
                 return `
@@ -1386,8 +1326,8 @@
                     </td>
                     <td>
                         <div class="text-sm">
-                            <i class="fas fa-bullhorn mr-1 text-blue-400"></i> ${user.announcements_count || 0}
-                            <i class="fas fa-tasks ml-3 mr-1 text-green-400"></i> ${user.assignments_count || 0}
+                            <i class="fas fa-bullhorn mr-1 text-blue-400"></i> ${user.announcements_count}
+                            <i class="fas fa-tasks ml-3 mr-1 text-green-400"></i> ${user.assignments_count}
                         </div>
                         <div class="activity-bar">
                             <div class="activity-progress" style="width: ${activityPercentage}%"></div>
@@ -1419,7 +1359,6 @@
                 </tr>
             `}).join('');
             
-            // Add event listeners to buttons
             document.querySelectorAll('.toggle-admin-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
                     const userId = this.getAttribute('data-user-id');
@@ -1449,6 +1388,7 @@
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
+                    'X-CSRFToken': getCSRFToken()
                     }
                 });
                 
@@ -1466,9 +1406,15 @@
             }
         }
 
+        // Get CSRF token for Flask-WTF protection
+        function getCSRFToken() {
+            return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+        }
+
         // Confirm delete
         function confirmDelete(userId, button) {
             currentUserId = userId;
+            currentButton = button;
             document.getElementById('confirm-title').textContent = 'Confirm User Deletion';
             document.getElementById('confirm-message').textContent = 
                 'Are you sure you want to delete this user? This action cannot be undone.';
@@ -1486,7 +1432,10 @@
                 setButtonLoading(document.getElementById('confirm-action-btn'), true);
                 
                 const response = await fetch(`${USERS_ENDPOINT}/${currentUserId}/delete`, {
-                    method: 'POST'
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCSRFToken()
+                    }
                 });
                 
                 if (!response.ok) {
@@ -1510,21 +1459,17 @@
         }
 
         function openModal(modalId) {
-            const modal = document.getElementById(modalId);
-            if (modal) {
-                modal.style.display = 'flex';
-            }
+            document.getElementById(modalId).style.display = 'flex';
         }
 
         function closeModal(modalId) {
-            const modal = document.getElementById(modalId);
-            if (modal) {
-                modal.style.display = 'none';
-            }
+            document.getElementById(modalId).style.display = 'none';
             setButtonLoading(document.getElementById('confirm-action-btn'), false);
         }
 
         function exportUserData() {
+            // In a real app, you would generate a CSV or Excel file
+            // For this demo, we'll just show a toast
             showToast('User data export started. This may take a moment.', 'info');
             
             // Simulate export process
@@ -1533,21 +1478,18 @@
             }, 2000);
         }
 
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+                setButtonLoading(document.getElementById('confirm-action-btn'), false);
+            }
+        }
+
         function logout() {
             window.location.href = '/logout';
         }
 
-        // Debug function to test all endpoints
-        async function debugAllEndpoints() {
-            console.log('=== DEBUGGING ALL ENDPOINTS ===');
-            await debugAPI(USERS_ENDPOINT);
-            await debugAPI(ONLINE_USERS_ENDPOINT);
-            console.log('=== END DEBUGGING ===');
-        }
-
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM fully loaded, initializing...');
-            
             // Initialize charts
             initializeCharts();
             
@@ -1556,32 +1498,22 @@
             refreshOnlineUsers();
             
             // Set up event listeners for search and filters
-            const searchInput = document.getElementById('search-input');
-            const roleFilter = document.getElementById('role-filter');
-            const activityFilter = document.getElementById('activity-filter');
-            const statusFilter = document.getElementById('status-filter');
-            const dateFilter = document.getElementById('date-filter');
-            const clearFilters = document.getElementById('clear-filters');
-            
-            if (searchInput) searchInput.addEventListener('input', filterUsers);
-            if (roleFilter) roleFilter.addEventListener('change', filterUsers);
-            if (activityFilter) activityFilter.addEventListener('change', filterUsers);
-            if (statusFilter) statusFilter.addEventListener('change', filterUsers);
-            if (dateFilter) dateFilter.addEventListener('change', filterUsers);
-            if (clearFilters) clearFilters.addEventListener('click', function() {
-                if (searchInput) searchInput.value = '';
-                if (roleFilter) roleFilter.value = '';
-                if (activityFilter) activityFilter.value = '';
-                if (statusFilter) statusFilter.value = '';
-                if (dateFilter) dateFilter.value = '';
+            document.getElementById('search-input').addEventListener('input', filterUsers);
+            document.getElementById('role-filter').addEventListener('change', filterUsers);
+            document.getElementById('activity-filter').addEventListener('change', filterUsers);
+            document.getElementById('status-filter').addEventListener('change', filterUsers);
+            document.getElementById('date-filter').addEventListener('change', filterUsers);
+            document.getElementById('clear-filters').addEventListener('click', function() {
+                document.getElementById('search-input').value = '';
+                document.getElementById('role-filter').value = '';
+                document.getElementById('activity-filter').value = '';
+                document.getElementById('status-filter').value = '';
+                document.getElementById('date-filter').value = '';
                 filterUsers();
             });
             
             // Pagination controls
-            const prevPage = document.getElementById('prev-page');
-            const nextPage = document.getElementById('next-page');
-            
-            if (prevPage) prevPage.addEventListener('click', function() {
+            document.getElementById('prev-page').addEventListener('click', function() {
                 if (currentPage > 1) {
                     currentPage--;
                     updateUserTable();
@@ -1589,7 +1521,7 @@
                 }
             });
             
-            if (nextPage) nextPage.addEventListener('click', function() {
+            document.getElementById('next-page').addEventListener('click', function() {
                 const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
                 if (currentPage < totalPages) {
                     currentPage++;
@@ -1599,8 +1531,7 @@
             });
             
             // Export button
-            const exportBtn = document.getElementById('export-btn');
-            if (exportBtn) exportBtn.addEventListener('click', exportUserData);
+            document.getElementById('export-btn').addEventListener('click', exportUserData);
             
             // Auto-refresh
             pollInterval = setInterval(() => {
@@ -1608,27 +1539,11 @@
                 refreshOnlineUsers();
             }, 120000);
             
-            // Debug button (hidden)
-            const debugBtn = document.createElement('button');
-            debugBtn.textContent = 'Debug';
-            debugBtn.style.position = 'fixed';
-            debugBtn.style.bottom = '10px';
-            debugBtn.style.right = '10px';
-            debugBtn.style.zIndex = '10000';
-            debugBtn.style.background = 'red';
-            debugBtn.style.color = 'white';
-            debugBtn.style.padding = '5px';
-            debugBtn.style.borderRadius = '5px';
-            debugBtn.addEventListener('click', debugAllEndpoints);
-            document.body.appendChild(debugBtn);
-            
             window.addEventListener('beforeunload', function() {
                 if (pollInterval) {
                     clearInterval(pollInterval);
                 }
             });
-            
-            console.log('Initialization complete');
         });
     </script>
 </body>
