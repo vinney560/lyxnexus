@@ -86,6 +86,7 @@ CORS(app, resources={
         ]
     }
 })
+
 app.logger.setLevel(logging.INFO)
 
 # Setup logging
