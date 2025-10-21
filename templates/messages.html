@@ -1824,7 +1824,7 @@
             messageDiv.innerHTML = `
                 <div class="message-header">
                     <div class="flex items-center">
-                        <span class="username"><span class="username">${messageData.username.length > 7 ? messageData.username.slice(0, 7) + '...' : messageData.username}</span>
+                        <span class="username"><span class="username">${messageData.username.length > 7 ? messageData.username.slice(0, 7) + '~' : messageData.username}</span>
                         ${isAdminMessage ? '<span class="admin-badge">ADMIN</span>' : ''}
                     </div>
                     <span class="timestamp">${formatTime(messageData.created_at)}</span>
