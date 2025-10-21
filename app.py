@@ -2130,13 +2130,15 @@ def get_users():
             month_ago = today - timedelta(days=30)
             query = query.filter(User.created_at >= month_ago)
     
-    # Get online users for status filtering - do this BEFORE pagination
+    # Get total count BEFORE applying status/activity filters (for pagination)
+    total_users_after_filters = query.count()
+    
+    # Apply pagination
+    users = query.offset((page - 1) * per_page).limit(per_page).all()
+    
+    # Get online users for status filtering
     online_user_ids = [user_data.get('user_id') for user_data in online_users.values() 
                       if user_data and 'user_id' in user_data]
-    
-    # Apply pagination FIRST to get the paginated users
-    total_users = query.count()
-    users = query.offset((page - 1) * per_page).limit(per_page).all()
     
     # Enhanced user data with activity metrics
     users_data = []
@@ -2168,13 +2170,15 @@ def get_users():
             'last_activity': get_user_last_activity(user)
         })
     
-    # Apply status and activity filters AFTER getting the basic user data
+    # Apply status and activity level filters in memory (client-side style)
+    # This is needed because these filters can't be easily done in SQL
     filtered_users_data = users_data
     
-    if status == 'online':
-        filtered_users_data = [user for user in filtered_users_data if user['is_online']]
-    elif status == 'offline':
-        filtered_users_data = [user for user in filtered_users_data if not user['is_online']]
+    if status:
+        if status == 'online':
+            filtered_users_data = [user for user in filtered_users_data if user['is_online']]
+        elif status == 'offline':
+            filtered_users_data = [user for user in filtered_users_data if not user['is_online']]
     
     if activity_level:
         filtered_users_data = [user for user in filtered_users_data if user['activity_level'] == activity_level]
@@ -2182,7 +2186,7 @@ def get_users():
     # Get additional statistics for charts and quick stats
     stats = get_user_statistics()
     
-    # Calculate pagination info based on FINAL filtered results
+    # Calculate final counts
     final_count = len(filtered_users_data)
     
     return jsonify({
@@ -2190,9 +2194,10 @@ def get_users():
         'pagination': {
             'page': page,
             'per_page': per_page,
-            'total': total_users,  # Total users in database (before filtering)
-            'filtered_total': final_count,  # Total after client-side filtering
-            'pages': (total_users + per_page - 1) // per_page
+            'total': User.query.count(),  # Total users in database
+            'total_filtered': total_users_after_filters,  # Total after SQL filters
+            'final_count': final_count,  # Total after all filters
+            'pages': (total_users_after_filters + per_page - 1) // per_page
         },
         'stats': stats
     })

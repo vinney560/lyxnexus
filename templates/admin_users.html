@@ -1161,8 +1161,8 @@
             let totalUsers, totalPages;
 
             if (paginationData) {
-                // Use backend pagination data
-                totalUsers = paginationData.total || filteredUsers.length;
+                // Use backend pagination data - use total_filtered for accurate page count
+                totalUsers = paginationData.total_filtered || paginationData.total || filteredUsers.length;
                 totalPages = paginationData.pages || Math.ceil(totalUsers / usersPerPage);
             } else {
                 // Fallback to frontend calculation
@@ -1180,7 +1180,10 @@
 
             document.getElementById('prev-page').disabled = currentPage === 1;
             document.getElementById('next-page').disabled = currentPage === totalPages || totalPages === 0;
+
+            console.log(`Pagination: Page ${currentPage} of ${totalPages}, Total: ${totalUsers}`);
         }
+
 
         // Enhanced statistics calculation - FIXED to use backend stats
         function updateStatistics(users, stats = null) {
@@ -1571,17 +1574,11 @@
             document.getElementById('prev-page').addEventListener('click', function() {
                 if (currentPage > 1) {
                     loadUsers(currentPage - 1);
-                    currentPage--;
-                    updateUserTable();
-                    updatePagination();
                 }
             });
 
             document.getElementById('next-page').addEventListener('click', function() {
                 loadUsers(currentPage + 1);
-                currentPage++;
-                updateUserTable();
-                updatePagination();
             });
 
             
