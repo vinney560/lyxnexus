@@ -1157,16 +1157,26 @@
             updatePagination();
         }
 
-        // Update pagination controls
-        function updatePagination() {
-            const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
-            const startIndex = (currentPage - 1) * usersPerPage;
-            const endIndex = Math.min(startIndex + usersPerPage, filteredUsers.length);
+        function updatePagination(paginationData = null) {
+            let totalUsers, totalPages;
             
-            document.getElementById('showing-start').textContent = filteredUsers.length > 0 ? startIndex + 1 : 0;
+            if (paginationData) {
+                // Use backend pagination data
+                totalUsers = paginationData.total || filteredUsers.length;
+                totalPages = paginationData.pages || Math.ceil(totalUsers / usersPerPage);
+            } else {
+                // Fallback to frontend calculation
+                totalUsers = filteredUsers.length;
+                totalPages = Math.ceil(totalUsers / usersPerPage);
+            }
+            
+            const startIndex = (currentPage - 1) * usersPerPage + 1;
+            const endIndex = Math.min(currentPage * usersPerPage, totalUsers);
+            
+            document.getElementById('showing-start').textContent = totalUsers > 0 ? startIndex : 0;
             document.getElementById('showing-end').textContent = endIndex;
-            document.getElementById('showing-total').textContent = filteredUsers.length;
-            document.getElementById('user-count').textContent = `(${filteredUsers.length})`;
+            document.getElementById('showing-total').textContent = totalUsers;
+            document.getElementById('user-count').textContent = `(${totalUsers})`;
             
             document.getElementById('prev-page').disabled = currentPage === 1;
             document.getElementById('next-page').disabled = currentPage === totalPages || totalPages === 0;
@@ -1219,7 +1229,7 @@
         }
 
         // FIXED: Properly handle backend response structure
-        async function fetchUsers() {
+        async function fetchUsers(page = 1) {
             try {
                 const response = await fetch(USERS_ENDPOINT);
                 if (!response.ok) {
@@ -1236,7 +1246,7 @@
         }
 
         // FIXED: Properly extract users array from response
-        async function loadUsers() {
+        async function loadUsers(page = 1) {
             if (isRefreshing) return;
             
             try {
