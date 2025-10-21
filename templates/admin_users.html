@@ -359,7 +359,24 @@
     .user-table tr:hover {
         background: rgba(59, 130, 246, 0.1);
     }
-    
+    .overflow-x-auto::-webkit-scrollbar {
+        height: 8px;              /* horizontal scrollbar height */
+    }
+
+    .overflow-x-auto::-webkit-scrollbar-track {
+        background: var(--bg-color);      /* track color */
+        border-radius: 4px;
+    }
+
+    .overflow-x-auto::-webkit-scrollbar-thumb {
+        background: linear-gradient(135deg, rgb(72, 225, 72) #4f46e5, rgb(249, 84, 186));      /* thumb color */
+        border-radius: 4px;
+    }
+
+    .overflow-x-auto::-webkit-scrollbar-thumb:hover {
+        background: #3730a3;      /* hover color */
+    }
+
     .last-updated {
         background: rgba(16, 185, 129, 0.2);
         color: #10B981;
@@ -648,7 +665,7 @@
                 <canvas id="timeline-chart"></canvas>
             </div>
         </div>
-        
+
         <!-- Enhanced Search Engine -->
         <div class="glass-morph rounded-xl p-4 sm:p-6 mb-6">
             <div class="search-container">
