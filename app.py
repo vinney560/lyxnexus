@@ -2140,7 +2140,7 @@ def get_users():
     online_user_ids = [user_data.get('user_id') for user_data in online_users.values() 
                       if user_data and 'user_id' in user_data]
     
-    # Enhanced user data with activity metrics
+    # user data with activity metrics
     users_data = []
     for user in users:
         # Calculate total activity
@@ -2170,8 +2170,7 @@ def get_users():
             'last_activity': get_user_last_activity(user)
         })
     
-    # Apply status and activity level filters in memory (client-side style)
-    # This is needed because these filters can't be easily done in SQL
+    # needed filters can't be easily done in SQL
     filtered_users_data = users_data
     
     if status:

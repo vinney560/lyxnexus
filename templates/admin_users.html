@@ -1309,7 +1309,6 @@
                 showToast('Failed to load users', 'error');
             }
         }
-
         function displayUsers(users) {
             const container = document.getElementById('users-table-body');
             
@@ -1324,13 +1323,8 @@
                 `;
                 return;
             }
-            
-            // Calculate pagination
-            const startIndex = (currentPage - 1) * usersPerPage;
-            const endIndex = Math.min(startIndex + usersPerPage, users.length);
-            const usersToDisplay = users.slice(startIndex, endIndex);
-            
-            container.innerHTML = usersToDisplay.map(user => {
+
+            container.innerHTML = users.map(user => {
                 const isOnline = onlineUsers.some(onlineUser => onlineUser.user_id === user.id);
                 const totalActivity = user.announcements_count + user.assignments_count;
                 const activityPercentage = Math.min(totalActivity * 5, 100);
