@@ -31,51 +31,41 @@ app = Flask(__name__)
 load_dotenv()
 
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import create_engine
+from sqlalchemy.exc import OperationalError
+import os
 
-def database_url():
-    db_1 = os.getenv('DATABASE_URL')
-    db_2 = os.getenv('DATABASE_URL_2')
-    db_3 = os.getenv('DATABASE_FALLBACK_URL')
+active_db = {"current": "aiven"}  # global toggle tracker
 
-    print(f"DB_1: {db_1}")
-    print(f"DB_2: {db_2}")
-    print(f"DB_3: {db_3}")
+def setup_databases(app):
+    db_1 = os.getenv("DATABASE_URL")           # Aiven
+    db_2 = os.getenv("DATABASE_URL_2")         # Render
+    db_3 = os.getenv("DATABASE_FALLBACK_URL")  # Optional SQLite
 
-    for name, db_url in [("Aiven DB", db_1), ("Render DB", db_2)]:
-        if db_url:
-            try:
-                engine = create_engine(db_url)
-                engine.connect().close()
-                print("=" * 70)
-                print(f"✅ Connected to {name}")
-                return db_url
-            except OperationalError as e:
-                print(f"❌ Failed to connect to {name}: {e}")
-            except ArgumentError as e:
-                print(f"⚠️ Invalid {name} URL: {e}")
+    binds = {}
 
-    # Fallback to SQLite to prevent Runtime errors
-    if db_3:
-        if db_3.startswith("sqlite:///"):
-            print("=" * 70)
-            print("✅ Using local SQLite fallback database.")
-            return db_3
-        else:
-            print("⚠️ Fallback DB URL invalid (should start with sqlite:///).")
+    for name, url in [("aiven", db_1), ("render", db_2)]:
+        if not url:
+            continue
+        try:
+            engine = create_engine(url)
+            engine.connect().close()
+            print(f"✅ Connected to {name.capitalize()} database.")
+            binds[name] = url
+        except OperationalError as e:
+            print(f"❌ Failed to connect to {name}: {e}")
 
-    print("❌ All database connections failed!")
-    return None
+    if not binds and db_3 and db_3.startswith("sqlite:///"):
+        binds["local"] = db_3
+        print("⚙️ Using local fallback database.")
 
-    
-app.config['SQLALCHEMY_DATABASE_URI'] = database_url()
-# Read from Aiven connection max pooling for reuse pool
-app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
-    "pool_size": 5,     
-    "max_overflow": 5,   
-    "pool_timeout": 30,  
-    "pool_recycle": 1800 
-}
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.config["SQLALCHEMY_BINDS"] = binds
+    app.config["SQLALCHEMY_DATABASE_URI"] = binds.get("aiven") or db_3
+    db.init_app(app)
+
+    print(f"✅ Initial active database: {active_db['current']}")
+
 
 app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY", "4321REWQ")
 CORS(app, resources={
@@ -398,6 +388,46 @@ def admin_required(f):
             abort(403)
         return f(*args, **kwargs)
     return decorator
+
+
+from sqlalchemy.orm import Session
+
+class DynamicRoutingSession(Session):
+    def get_bind(self, mapper=None, clause=None, **kw):
+        from flask import current_app
+        bind_name = active_db.get("current", "aiven")
+        return db.get_engine(current_app, bind=bind_name)
+
+# Override the default session with our dynamic one
+db.session = db.create_scoped_session(options={"class_": DynamicRoutingSession})
+
+
+
+from flask import request, jsonify
+
+@app.route("/api/switch-db")
+def switch_database():
+    data = request.get_json() or {}
+    target = data.get("db")
+
+    valid_dbs = ["aiven", "render", "local"]
+
+    if target not in valid_dbs:
+        return jsonify({
+            "success": False,
+            "message": f"Invalid target. Use one of: {valid_dbs}"
+        }), 400
+
+    # Update the global active DB
+    active_db["current"] = target
+    print(f"🔄 Switched active DB to: {target}")
+
+    return jsonify({
+        "success": True,
+        "active_db": target
+    })
+
+
 #------------------------------------------------------------------------------
                                  # BACKGROUND WORKERS
 
