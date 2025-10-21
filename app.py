@@ -509,26 +509,30 @@ scheduler.start()
 log_status("🕒 Keep-alive scheduler started — pinging both DBs every 3 minutes")
 atexit.register(lambda: scheduler.shutdown(wait=False))
 #-------------------------------------- Aiven max conn pool
+with app.app_context():
+    try:
+        def auto_close_sessions():
+            print('=' * 70)
+            print("🧹 Auto-cleaning stale DB sessions...")
+            print("#" * 70)
+            db.session.remove()
+            db.engine.dispose()
 
-def auto_close_sessions():
-    print('=' * 70)
-    print("🧹 Auto-cleaning stale DB sessions...")
-    print("#" * 70)
-    db.session.remove()
-    db.engine.dispose()
+        scheduler = BackgroundScheduler()
+        scheduler.add_job(
+            func=auto_close_sessions,
+            trigger=IntervalTrigger(minutes=1),
+            id="Close_Ideal_Connection",
+            replace_existing=True
+        )
 
-scheduler = BackgroundScheduler()
-scheduler.add_job(
-    func=auto_close_sessions,
-    trigger=IntervalTrigger(minutes=1),
-    id="Close_Ideal_Connection",
-    replace_existing=True
-)
+        scheduler.start()
 
-scheduler.start()
-
-log_status("🕒 Terminate DB Ideal connections --> every 1 minute")
-atexit.register(lambda: scheduler.shutdown(wait=False))
+        log_status("🕒 Terminate DB Ideal connections --> every 1 minute")
+        atexit.register(lambda: scheduler.shutdown(wait=False))
+    except Exception as e:
+        print('X' * 70)
+        print(f'Error ==>> {e}')
 #=============================================================================
 
 #      ANNOUNCEMENT CLEANER
