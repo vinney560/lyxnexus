@@ -511,19 +511,22 @@ atexit.register(lambda: scheduler.shutdown(wait=False))
 #-------------------------------------- Aiven max conn pool
 
 def auto_close_sessions():
+    print('=' * 70)
     print("🧹 Auto-cleaning stale DB sessions...")
+    print("#" * 70)
     db.session.remove()
     db.engine.dispose()
 
 scheduler = BackgroundScheduler()
 scheduler.add_job(
     func=auto_close_sessions,
-    trigger=IntervalTrigger(minutes=3),
-    id="Close Ideal Connection",
+    trigger=IntervalTrigger(minutes=1),
+    id="Close_Ideal_Connection",
     replace_existing=True
 )
 
 scheduler.start()
+
 log_status("🕒 Terminate DB Ideal connections --> every 1 minute")
 atexit.register(lambda: scheduler.shutdown(wait=False))
 #=============================================================================
