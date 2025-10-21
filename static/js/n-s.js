@@ -52,8 +52,8 @@ class LyxNexusNotificationService {
             // remove all slashes
             baseUrl = baseUrl.replace(/\/+$/, '');
 
-            this.socket = io(baseUrl, {
-              path: "socket.io",
+            this.socket = io('https://lyxnexus.onrender.com', {
+              path: "/socket.io",
               transports: ["websocket", "polling"],
               reconnection: true,
               reconnectionAttempts: Infinity,
