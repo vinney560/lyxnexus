@@ -180,9 +180,21 @@
     }
     
     .username {
-        font-weight: 600;
-        font-size: 0.9em;
+      font-weight: 600;
+      font-size: 0.95em;
+      background: linear-gradient(90deg, #6a11cb, #2575fc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: 0.3px;
+      text-shadow: 0 0 12px rgba(106, 17, 203, 0.2);
+      transition: transform 0.2s ease, opacity 0.2s ease;
     }
+    
+    .username:hover {
+      transform: scale(1.05);
+      opacity: 0.9;
+    }
+    
     
     .admin-badge {
         background: linear-gradient(135deg, #8b5cf6, #3b82f6);
