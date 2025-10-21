@@ -359,7 +359,6 @@ import logging
 logging.getLogger('engineio').setLevel(logging.ERROR)
 logging.getLogger('socketio').setLevel(logging.ERROR)
 
-# Optional: ignore harmless "Bad file descriptor" errors globally
 import warnings
 def ignore_bad_fd(record):
     msg = str(record.getMessage())
@@ -928,25 +927,34 @@ def messages_room(room_name):
             unread_count=0,
             room=room_name
         )
+    
+
+from sqlalchemy import select
 
 def get_unread_count(user_id):
-    """Get count of unread messages for a user"""
+    """
+    Count unread messages for a given user safely.
+    Uses SQLAlchemy 2.x compatible select() for subqueries.
+    """
     try:
-        read_message_ids = db.session.query(MessageRead.message_id).filter_by(
-            user_id=user_id
-        ).subquery()
-        
-        # Count messages that are not in the read list and not deleted
-        unread_count = Message.query.filter(
-            Message.id.notin_(read_message_ids),
-            Message.is_deleted == False,
-            Message.user_id != user_id
-        ).count()
-        
+        # Select message IDs that user has already read
+        read_message_ids = select(MessageRead.message_id).filter_by(user_id=user_id)
+
+        # Count messages not in that list
+        unread_count = (
+            db.session.query(Message)
+            .filter(
+                Message.id.not_in(read_message_ids),
+                Message.is_deleted == False,
+                Message.user_id != user_id
+            )
+            .count()
+        )
+
         return unread_count
-        
+
     except Exception as e:
-        print(f"Error getting unread count: {e}")
+        print(f"⚠️ Error getting unread count for user {user_id}: {e}")
         return 0
 
 #=================================================
