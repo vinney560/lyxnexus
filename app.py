@@ -2134,7 +2134,12 @@ def get_users():
     total_users_after_filters = query.count()
     
     # Apply pagination
-    users = query.offset((page - 1) * per_page).limit(per_page).all()
+    users = (
+                query.order_by(User.username.asc())
+                .offset((page - 1) * per_page)
+                .limit(per_page)
+                .all()
+            )
     
     # Get online users for status filtering
     online_user_ids = [user_data.get('user_id') for user_data in online_users.values() 
