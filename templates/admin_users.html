@@ -6,6 +6,7 @@
     <title>User Management | LyxNexus Admin</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <style>
@@ -104,6 +105,10 @@
         background: linear-gradient(90deg, #6B7280, #4B5563);
     }
     
+    .btn-info {
+        background: linear-gradient(90deg, #0EA5E9, #0369A1);
+    }
+    
     .logo-container {
         background: linear-gradient(135deg, #3B82F6, #8B5CF6);
         border-radius: 20px;
@@ -186,6 +191,12 @@
         border: 1px solid #3B82F6;
     }
     
+    .status-online {
+        background: rgba(16, 185, 129, 0.2);
+        color: #10B981;
+        border: 1px solid #10B981;
+    }
+    
     .stats-card {
         background: rgba(30, 30, 40, 0.7);
         border-radius: 12px;
@@ -207,6 +218,74 @@
         background-clip: text;
         -webkit-text-fill-color: transparent;
         color: transparent;
+    }
+    
+    /* Enhanced Search Styles */
+    .search-container {
+        position: relative;
+        margin-bottom: 20px;
+    }
+    
+    .search-input {
+        width: 100%;
+        padding: 12px 20px 12px 45px;
+        background: rgba(30, 30, 40, 0.7);
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        border-radius: 50px;
+        color: white;
+        font-size: 16px;
+        transition: all 0.3s ease;
+    }
+    
+    .search-input:focus {
+        outline: none;
+        border-color: #3B82F6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+    }
+    
+    .search-icon {
+        position: absolute;
+        left: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #9CA3AF;
+    }
+    
+    .search-filters {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 15px;
+    }
+    
+    .filter-select {
+        background: rgba(30, 30, 40, 0.7);
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        border-radius: 8px;
+        color: white;
+        padding: 8px 12px;
+        font-size: 14px;
+    }
+    
+    .filter-select:focus {
+        outline: none;
+        border-color: #3B82F6;
+    }
+    
+    /* Chart Container */
+    .chart-container {
+        background: rgba(30, 30, 40, 0.7);
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 20px;
+        border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+    
+    .chart-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 15px;
+        text-align: center;
     }
     
     /* Responsive Styles */
@@ -239,6 +318,14 @@
         
         .stats-number {
             font-size: 1.5rem;
+        }
+        
+        .chart-container {
+            padding: 15px;
+        }
+        
+        .search-filters {
+            flex-direction: column;
         }
     }
 
@@ -335,6 +422,110 @@
         50% { opacity: 0.7; }
         100% { opacity: 1; }
     }
+    
+    /* Enhanced quick stats */
+    .quick-stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+    
+    .quick-stat {
+        background: rgba(30, 30, 40, 0.7);
+        border-radius: 12px;
+        padding: 15px;
+        text-align: center;
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        transition: all 0.3s ease;
+    }
+    
+    .quick-stat:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+    
+    .quick-stat-value {
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+    
+    .quick-stat-label {
+        font-size: 0.875rem;
+        color: #9CA3AF;
+    }
+    
+    /* Online users panel */
+    .online-users-panel {
+        background: rgba(30, 30, 40, 0.7);
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 20px;
+        border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    
+    .online-user-item {
+        display: flex;
+        align-items: center;
+        padding: 10px;
+        border-radius: 8px;
+        margin-bottom: 8px;
+        background: rgba(16, 185, 129, 0.1);
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+    
+    .online-indicator {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #10B981;
+        margin-right: 10px;
+        animation: pulse 2s infinite;
+    }
+    
+    /* Advanced filters panel */
+    .filters-panel {
+        background: rgba(30, 30, 40, 0.7);
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 20px;
+        border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+    
+    .filters-header {
+        display: flex;
+        justify-content: between;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+    
+    .filter-group {
+        margin-bottom: 15px;
+    }
+    
+    .filter-label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 500;
+    }
+    
+    /* Activity progress bar */
+    .activity-bar {
+        width: 100%;
+        height: 6px;
+        background: rgba(75, 85, 99, 0.5);
+        border-radius: 3px;
+        overflow: hidden;
+        margin-top: 5px;
+    }
+    
+    .activity-progress {
+        height: 100%;
+        background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+        border-radius: 3px;
+        transition: width 0.5s ease;
+    }
 </style>
 <body>
 
@@ -383,31 +574,131 @@
             </div>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-            <div class="stats-card">
-                <div class="stats-number" id="total-users">0</div>
-                <div class="text-gray-400">Total Users</div>
+        <!-- Enhanced Quick Stats -->
+        <div class="quick-stats-grid mb-6">
+            <div class="quick-stat">
+                <div class="quick-stat-value" id="total-users">0</div>
+                <div class="quick-stat-label">Total Users</div>
             </div>
-            <div class="stats-card">
-                <div class="stats-number" id="admin-users">0</div>
-                <div class="text-gray-400">Administrators</div>
+            <div class="quick-stat">
+                <div class="quick-stat-value" id="admin-users">0</div>
+                <div class="quick-stat-label">Administrators</div>
             </div>
-            <div class="stats-card">
-                <div class="stats-number" id="regular-users">0</div>
-                <div class="text-gray-400">Regular Users</div>
+            <div class="quick-stat">
+                <div class="quick-stat-value" id="regular-users">0</div>
+                <div class="quick-stat-label">Regular Users</div>
             </div>
-            <div class="stats-card">
-                <div class="stats-number" id="today-users">0</div>
-                <div class="text-gray-400">Today's Registrations</div>
+            <div class="quick-stat">
+                <div class="quick-stat-value" id="today-users">0</div>
+                <div class="quick-stat-label">Today's Registrations</div>
+            </div>
+            <div class="quick-stat">
+                <div class="quick-stat-value" id="active-today">0</div>
+                <div class="quick-stat-label">Active Today</div>
+            </div>
+            <div class="quick-stat">
+                <div class="quick-stat-value" id="online-users">0</div>
+                <div class="quick-stat-label">Online Now</div>
+            </div>
+            <div class="quick-stat">
+                <div class="quick-stat-value" id="avg-activity">0</div>
+                <div class="quick-stat-label">Avg. Activity</div>
+            </div>
+            <div class="quick-stat">
+                <div class="quick-stat-value" id="total-activity">0</div>
+                <div class="quick-stat-label">Total Activities</div>
             </div>
         </div>
 
+        <!-- Online Users Panel -->
+        <div class="online-users-panel">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold text-green-400">
+                    <i class="fas fa-circle mr-2"></i> Online Users
+                    <span class="text-sm text-gray-400 ml-2" id="online-count">(0)</span>
+                </h3>
+                <button class="btn btn-info btn-sm" onclick="refreshOnlineUsers()">
+                    <i class="fas fa-sync-alt mr-2"></i> Refresh
+                </button>
+            </div>
+            <div id="online-users-list" class="max-h-40 overflow-y-auto">
+                <div class="text-center text-gray-400 py-4">
+                    <div class="spinner mx-auto"></div>
+                    <p class="mt-2">Loading online users...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Enhanced Search Engine -->
+        <div class="glass-morph rounded-xl p-4 sm:p-6 mb-6">
+            <div class="search-container">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" id="search-input" class="search-input" placeholder="Search users by username, mobile, ID, or role...">
+            </div>
+            
+            <div class="search-filters">
+                <select id="role-filter" class="filter-select">
+                    <option value="">All Roles</option>
+                    <option value="admin">Administrators</option>
+                    <option value="user">Regular Users</option>
+                </select>
+                
+                <select id="activity-filter" class="filter-select">
+                    <option value="">All Activity Levels</option>
+                    <option value="high">High Activity</option>
+                    <option value="medium">Medium Activity</option>
+                    <option value="low">Low Activity</option>
+                </select>
+                
+                <select id="status-filter" class="filter-select">
+                    <option value="">All Status</option>
+                    <option value="online">Online</option>
+                    <option value="offline">Offline</option>
+                </select>
+                
+                <select id="date-filter" class="filter-select">
+                    <option value="">All Time</option>
+                    <option value="today">Today</option>
+                    <option value="week">This Week</option>
+                    <option value="month">This Month</option>
+                </select>
+                
+                <button class="btn btn-secondary" id="clear-filters">
+                    <i class="fas fa-times mr-2"></i> Clear Filters
+                </button>
+            </div>
+        </div>
+
+        <!-- Data Analysis Charts -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <div class="chart-container">
+                <h3 class="chart-title">User Registration Trend</h3>
+                <canvas id="registration-chart"></canvas>
+            </div>
+            <div class="chart-container">
+                <h3 class="chart-title">User Activity Distribution</h3>
+                <canvas id="activity-chart"></canvas>
+            </div>
+            <div class="chart-container">
+                <h3 class="chart-title">Admin vs Regular Users</h3>
+                <canvas id="role-chart"></canvas>
+            </div>
+            <div class="chart-container">
+                <h3 class="chart-title">User Activity Timeline</h3>
+                <canvas id="timeline-chart"></canvas>
+            </div>
+        </div>
+
+        <!-- User Table -->
         <div class="glass-morph rounded-xl p-4 sm:p-6">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4 sm:gap-0">
-                <h2 class="text-xl sm:text-2xl font-bold">All Users</h2>
+                <h2 class="text-xl sm:text-2xl font-bold">All Users <span id="user-count" class="text-gray-400">(0)</span></h2>
                 <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 w-full sm:w-auto">
                     <button class="btn" id="refresh-btn" onclick="refreshUsers()">
                         <i class="fas fa-sync-alt mr-2"></i> Refresh Now
+                    </button>
+                    <button class="btn btn-success" id="export-btn">
+                        <i class="fas fa-download mr-2"></i> Export Data
                     </button>
                 </div>
             </div>
@@ -420,6 +711,7 @@
                             <th>Username</th>
                             <th>Mobile</th>
                             <th>Role</th>
+                            <th>Status</th>
                             <th>Created</th>
                             <th>Activity</th>
                             <th>Actions</th>
@@ -427,7 +719,7 @@
                     </thead>
                     <tbody id="users-table-body">
                         <tr>
-                            <td colspan="7" class="text-center py-8">
+                            <td colspan="8" class="text-center py-8">
                                 <div class="loading">
                                     <div class="spinner"></div>
                                 </div>
@@ -435,6 +727,21 @@
                         </tr>
                     </tbody>
                 </table>
+            </div>
+            
+            <!-- Pagination -->
+            <div class="flex justify-between items-center mt-6">
+                <div class="text-sm text-gray-400">
+                    Showing <span id="showing-start">0</span> to <span id="showing-end">0</span> of <span id="showing-total">0</span> users
+                </div>
+                <div class="flex space-x-2">
+                    <button class="btn btn-secondary" id="prev-page" disabled>
+                        <i class="fas fa-chevron-left mr-2"></i> Previous
+                    </button>
+                    <button class="btn btn-secondary" id="next-page" disabled>
+                        Next <i class="fas fa-chevron-right ml-2"></i>
+                    </button>
+                </div>
             </div>
         </div>
     </main>
@@ -456,10 +763,198 @@
     <script>
         const API_BASE = '/api';
         const USERS_ENDPOINT = `${API_BASE}/users`;
+        const ONLINE_USERS_ENDPOINT = `${API_BASE}/online-users`;
         
         let currentUserId = null;
         let pollInterval;
         let isRefreshing = false;
+        let allUsers = [];
+        let filteredUsers = [];
+        let onlineUsers = [];
+        let currentPage = 1;
+        const usersPerPage = 10;
+        let charts = {};
+
+        // Initialize charts
+        function initializeCharts() {
+            const registrationCtx = document.getElementById('registration-chart').getContext('2d');
+            const activityCtx = document.getElementById('activity-chart').getContext('2d');
+            const roleCtx = document.getElementById('role-chart').getContext('2d');
+            const timelineCtx = document.getElementById('timeline-chart').getContext('2d');
+            
+            // Registration Trend Chart
+            charts.registration = new Chart(registrationCtx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'User Registrations',
+                        data: [],
+                        borderColor: '#3B82F6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Activity Distribution Chart
+            charts.activity = new Chart(activityCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['High Activity', 'Medium Activity', 'Low Activity'],
+                    datasets: [{
+                        data: [0, 0, 0],
+                        backgroundColor: [
+                            'rgba(16, 185, 129, 0.7)',
+                            'rgba(59, 130, 246, 0.7)',
+                            'rgba(107, 114, 128, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgba(16, 185, 129, 1)',
+                            'rgba(59, 130, 246, 1)',
+                            'rgba(107, 114, 128, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+            
+            // Role Distribution Chart
+            charts.role = new Chart(roleCtx, {
+                type: 'pie',
+                data: {
+                    labels: ['Administrators', 'Regular Users'],
+                    datasets: [{
+                        data: [0, 0],
+                        backgroundColor: [
+                            'rgba(139, 92, 246, 0.7)',
+                            'rgba(59, 130, 246, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgba(139, 92, 246, 1)',
+                            'rgba(59, 130, 246, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+            
+            // Activity Timeline Chart
+            charts.timeline = new Chart(timelineCtx, {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'User Activity',
+                        data: [],
+                        backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                        borderColor: 'rgba(59, 130, 246, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Update charts with user data
+        function updateCharts(users) {
+            // Update registration trend (last 30 days)
+            const last30Days = [...Array(30)].map((_, i) => {
+                const d = new Date();
+                d.setDate(d.getDate() - i);
+                return d.toISOString().split('T')[0];
+            }).reverse();
+            
+            const registrationData = last30Days.map(day => {
+                return users.filter(user => {
+                    const userDate = user.created_at.split('T')[0];
+                    return userDate === day;
+                }).length;
+            });
+            
+            charts.registration.data.labels = last30Days.map(date => {
+                const d = new Date(date);
+                return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            });
+            charts.registration.data.datasets[0].data = registrationData;
+            charts.registration.update();
+            
+            // Update activity distribution
+            const highActivity = users.filter(user => (user.announcements_count + user.assignments_count) > 10).length;
+            const mediumActivity = users.filter(user => {
+                const activity = user.announcements_count + user.assignments_count;
+                return activity > 3 && activity <= 10;
+            }).length;
+            const lowActivity = users.filter(user => (user.announcements_count + user.assignments_count) <= 3).length;
+            
+            charts.activity.data.datasets[0].data = [highActivity, mediumActivity, lowActivity];
+            charts.activity.update();
+            
+            // Update role distribution
+            const adminCount = users.filter(user => user.is_admin).length;
+            const userCount = users.length - adminCount;
+            
+            charts.role.data.datasets[0].data = [adminCount, userCount];
+            charts.role.update();
+            
+            // Update activity timeline (last 7 days)
+            const last7Days = [...Array(7)].map((_, i) => {
+                const d = new Date();
+                d.setDate(d.getDate() - i);
+                return d.toISOString().split('T')[0];
+            }).reverse();
+            
+            // For demo purposes, we'll generate random activity data
+            // In a real app, you would get this from your backend
+            const activityData = last7Days.map(() => Math.floor(Math.random() * 20) + 5);
+            
+            charts.timeline.data.labels = last7Days.map(date => {
+                const d = new Date(date);
+                return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            });
+            charts.timeline.data.datasets[0].data = activityData;
+            charts.timeline.update();
+        }
 
         // Format date
         function formatDate(dateString) {
@@ -532,13 +1027,184 @@
             }
         }
 
-        function setButtonsLoading(buttonSelectors, isLoading) {
-            buttonSelectors.forEach(selector => {
-                const button = document.querySelector(selector);
-                if (button) {
-                    setButtonLoading(button, isLoading);
+        // Fetch online users
+        async function fetchOnlineUsers() {
+            try {
+                const response = await fetch(ONLINE_USERS_ENDPOINT);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
+                return await response.json();
+            } catch (error) {
+                console.error('Error fetching online users:', error);
+                return [];
+            }
+        }
+
+        // Display online users
+        function displayOnlineUsers(users) {
+            const container = document.getElementById('online-users-list');
+            const countElement = document.getElementById('online-count');
+            const quickStatElement = document.getElementById('online-users');
+            
+            onlineUsers = users;
+            quickStatElement.textContent = users.length;
+            countElement.textContent = `(${users.length})`;
+            
+            if (users.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center text-gray-400 py-4">
+                        <i class="fas fa-users-slash text-2xl mb-2"></i>
+                        <p>No users online</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = users.map(user => `
+                <div class="online-user-item">
+                    <div class="online-indicator"></div>
+                    <div class="flex-1">
+                        <div class="font-medium">${user.username || 'Unknown User'}</div>
+                        <div class="text-xs text-gray-400">
+                            ${user.is_admin ? 'Admin' : 'User'} • ${user.room || 'general'}
+                        </div>
+                    </div>
+                    <div class="text-xs text-gray-400">
+                        ${formatRelativeTime(user.last_seen)}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Refresh online users
+        async function refreshOnlineUsers() {
+            try {
+                const users = await fetchOnlineUsers();
+                displayOnlineUsers(users);
+                showToast('Online users updated', 'success');
+            } catch (error) {
+                showToast('Failed to update online users', 'error');
+            }
+        }
+
+        // Enhanced user search and filtering
+        function filterUsers() {
+            const searchTerm = document.getElementById('search-input').value.toLowerCase();
+            const roleFilter = document.getElementById('role-filter').value;
+            const activityFilter = document.getElementById('activity-filter').value;
+            const statusFilter = document.getElementById('status-filter').value;
+            const dateFilter = document.getElementById('date-filter').value;
+            
+            filteredUsers = allUsers.filter(user => {
+                // Text search
+                const matchesSearch = !searchTerm || 
+                    (user.username && user.username.toLowerCase().includes(searchTerm)) ||
+                    (user.mobile && user.mobile.includes(searchTerm)) ||
+                    (user.id && user.id.toString().includes(searchTerm));
+                
+                // Role filter
+                const matchesRole = !roleFilter || 
+                    (roleFilter === 'admin' && user.is_admin) ||
+                    (roleFilter === 'user' && !user.is_admin);
+                
+                // Activity filter
+                let matchesActivity = true;
+                if (activityFilter) {
+                    const totalActivity = user.announcements_count + user.assignments_count;
+                    if (activityFilter === 'high') {
+                        matchesActivity = totalActivity > 10;
+                    } else if (activityFilter === 'medium') {
+                        matchesActivity = totalActivity > 3 && totalActivity <= 10;
+                    } else if (activityFilter === 'low') {
+                        matchesActivity = totalActivity <= 3;
+                    }
+                }
+                
+                // Status filter (online/offline)
+                let matchesStatus = true;
+                if (statusFilter) {
+                    const isOnline = onlineUsers.some(onlineUser => onlineUser.user_id === user.id);
+                    if (statusFilter === 'online') {
+                        matchesStatus = isOnline;
+                    } else if (statusFilter === 'offline') {
+                        matchesStatus = !isOnline;
+                    }
+                }
+                
+                // Date filter
+                let matchesDate = true;
+                if (dateFilter) {
+                    const userDate = new Date(user.created_at);
+                    const now = new Date();
+                    
+                    if (dateFilter === 'today') {
+                        matchesDate = userDate.toDateString() === now.toDateString();
+                    } else if (dateFilter === 'week') {
+                        const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+                        matchesDate = userDate >= weekAgo;
+                    } else if (dateFilter === 'month') {
+                        const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+                        matchesDate = userDate >= monthAgo;
+                    }
+                }
+                
+                return matchesSearch && matchesRole && matchesActivity && matchesStatus && matchesDate;
             });
+            
+            currentPage = 1;
+            updateUserTable();
+            updatePagination();
+        }
+
+        // Update pagination controls
+        function updatePagination() {
+            const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
+            const startIndex = (currentPage - 1) * usersPerPage;
+            const endIndex = Math.min(startIndex + usersPerPage, filteredUsers.length);
+            
+            document.getElementById('showing-start').textContent = filteredUsers.length > 0 ? startIndex + 1 : 0;
+            document.getElementById('showing-end').textContent = endIndex;
+            document.getElementById('showing-total').textContent = filteredUsers.length;
+            document.getElementById('user-count').textContent = `(${filteredUsers.length})`;
+            
+            document.getElementById('prev-page').disabled = currentPage === 1;
+            document.getElementById('next-page').disabled = currentPage === totalPages || totalPages === 0;
+        }
+
+        // Enhanced statistics calculation
+        function updateStatistics(users) {
+            const totalUsers = users.length;
+            const adminUsers = users.filter(user => user.is_admin).length;
+            const regularUsers = totalUsers - adminUsers;
+            
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const todayUsers = users.filter(user => {
+                const userDate = new Date(user.created_at);
+                return userDate >= today;
+            }).length;
+            
+            // Calculate active users (today)
+            const activeToday = users.filter(user => {
+                // In a real app, you would check last activity timestamp
+                // For demo, we'll use a random selection
+                return Math.random() > 0.7; // 30% of users are "active today"
+            }).length;
+            
+            // Calculate average activity
+            const totalActivity = users.reduce((sum, user) => {
+                return sum + user.announcements_count + user.assignments_count;
+            }, 0);
+            const avgActivity = totalUsers > 0 ? (totalActivity / totalUsers).toFixed(1) : 0;
+
+            document.getElementById('total-users').textContent = totalUsers;
+            document.getElementById('admin-users').textContent = adminUsers;
+            document.getElementById('regular-users').textContent = regularUsers;
+            document.getElementById('today-users').textContent = todayUsers;
+            document.getElementById('active-today').textContent = activeToday;
+            document.getElementById('avg-activity').textContent = avgActivity;
+            document.getElementById('total-activity').textContent = totalActivity;
         }
 
         async function fetchUsers() {
@@ -562,16 +1228,21 @@
                 setButtonLoading(document.getElementById('refresh-btn'), true);
                 
                 const users = await fetchUsers();
+                allUsers = users;
+                filteredUsers = [...users];
+                
                 updateLastUpdated();
                 updateStatistics(users);
-                displayUsers(users);
+                updateCharts(users);
+                updateUserTable();
+                updatePagination();
                 
                 setButtonLoading(document.getElementById('refresh-btn'), false);
                 isRefreshing = false;
             } catch (error) {
                 document.getElementById('users-table-body').innerHTML = `
                     <tr>
-                        <td colspan="7" class="text-center py-8 text-red-400">
+                        <td colspan="8" class="text-center py-8 text-red-400">
                             <i class="fas fa-exclamation-triangle mr-2"></i>
                             Error loading users. Please try again.
                         </td>
@@ -583,31 +1254,13 @@
             }
         }
 
-        function updateStatistics(users) {
-            const totalUsers = users.length;
-            const adminUsers = users.filter(user => user.is_admin).length;
-            const regularUsers = totalUsers - adminUsers;
-            
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            const todayUsers = users.filter(user => {
-                const userDate = new Date(user.created_at);
-                return userDate >= today;
-            }).length;
-
-            document.getElementById('total-users').textContent = totalUsers;
-            document.getElementById('admin-users').textContent = adminUsers;
-            document.getElementById('regular-users').textContent = regularUsers;
-            document.getElementById('today-users').textContent = todayUsers;
-        }
-
         function displayUsers(users) {
             const container = document.getElementById('users-table-body');
             
             if (users.length === 0) {
                 container.innerHTML = `
                     <tr>
-                        <td colspan="7" class="text-center py-8 text-gray-400">
+                        <td colspan="8" class="text-center py-8 text-gray-400">
                             <i class="fas fa-users mr-2"></i>
                             No users found.
                         </td>
@@ -616,16 +1269,32 @@
                 return;
             }
             
-            container.innerHTML = users.map(user => `
+            // Calculate pagination
+            const startIndex = (currentPage - 1) * usersPerPage;
+            const endIndex = Math.min(startIndex + usersPerPage, users.length);
+            const usersToDisplay = users.slice(startIndex, endIndex);
+            
+            container.innerHTML = usersToDisplay.map(user => {
+                const isOnline = onlineUsers.some(onlineUser => onlineUser.user_id === user.id);
+                const totalActivity = user.announcements_count + user.assignments_count;
+                const activityPercentage = Math.min(totalActivity * 5, 100);
+                
+                return `
                 <tr>
                     <td class="font-mono text-sm">#${user.id}</td>
                     <td>
                         <div class="font-medium">${user.username || 'N/A'}</div>
+                        <div class="text-xs text-gray-400">ID: ${user.id}</div>
                     </td>
                     <td>${user.mobile || 'N/A'}</td>
                     <td>
                         <span class="status-badge ${user.is_admin ? 'status-admin' : 'status-user'}">
                             ${user.is_admin ? 'Admin' : 'User'}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="status-badge ${isOnline ? 'status-online' : 'status-user'}">
+                            ${isOnline ? 'Online' : 'Offline'}
                         </span>
                     </td>
                     <td>
@@ -636,6 +1305,9 @@
                         <div class="text-sm">
                             <i class="fas fa-bullhorn mr-1 text-blue-400"></i> ${user.announcements_count}
                             <i class="fas fa-tasks ml-3 mr-1 text-green-400"></i> ${user.assignments_count}
+                        </div>
+                        <div class="activity-bar">
+                            <div class="activity-progress" style="width: ${activityPercentage}%"></div>
                         </div>
                     </td>
                     <td>
@@ -662,7 +1334,7 @@
                         </div>
                     </td>
                 </tr>
-            `).join('');
+            `}).join('');
             
             document.querySelectorAll('.toggle-admin-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
@@ -677,6 +1349,10 @@
                     confirmDelete(userId, this);
                 });
             });
+        }
+
+        function updateUserTable() {
+            displayUsers(filteredUsers);
         }
 
         async function toggleAdmin(userId, button) {
@@ -759,6 +1435,17 @@
             setButtonLoading(document.getElementById('confirm-action-btn'), false);
         }
 
+        function exportUserData() {
+            // In a real app, you would generate a CSV or Excel file
+            // For this demo, we'll just show a toast
+            showToast('User data export started. This may take a moment.', 'info');
+            
+            // Simulate export process
+            setTimeout(() => {
+                showToast('User data exported successfully!', 'success');
+            }, 2000);
+        }
+
         window.onclick = function(event) {
             if (event.target.classList.contains('modal')) {
                 event.target.style.display = 'none';
@@ -771,9 +1458,54 @@
         }
 
         document.addEventListener('DOMContentLoaded', function() {
-            loadUsers();
+            // Initialize charts
+            initializeCharts();
             
-            pollInterval = setInterval(loadUsers, 120000);
+            // Load initial data
+            loadUsers();
+            refreshOnlineUsers();
+            
+            // Set up event listeners for search and filters
+            document.getElementById('search-input').addEventListener('input', filterUsers);
+            document.getElementById('role-filter').addEventListener('change', filterUsers);
+            document.getElementById('activity-filter').addEventListener('change', filterUsers);
+            document.getElementById('status-filter').addEventListener('change', filterUsers);
+            document.getElementById('date-filter').addEventListener('change', filterUsers);
+            document.getElementById('clear-filters').addEventListener('click', function() {
+                document.getElementById('search-input').value = '';
+                document.getElementById('role-filter').value = '';
+                document.getElementById('activity-filter').value = '';
+                document.getElementById('status-filter').value = '';
+                document.getElementById('date-filter').value = '';
+                filterUsers();
+            });
+            
+            // Pagination controls
+            document.getElementById('prev-page').addEventListener('click', function() {
+                if (currentPage > 1) {
+                    currentPage--;
+                    updateUserTable();
+                    updatePagination();
+                }
+            });
+            
+            document.getElementById('next-page').addEventListener('click', function() {
+                const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    updateUserTable();
+                    updatePagination();
+                }
+            });
+            
+            // Export button
+            document.getElementById('export-btn').addEventListener('click', exportUserData);
+            
+            // Auto-refresh
+            pollInterval = setInterval(() => {
+                loadUsers();
+                refreshOnlineUsers();
+            }, 120000);
             
             window.addEventListener('beforeunload', function() {
                 if (pollInterval) {

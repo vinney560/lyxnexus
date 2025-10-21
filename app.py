@@ -2085,16 +2085,77 @@ def manual_ping():
         }
 
 #===========================================
-
 @app.route('/api/users')
 @login_required
 @admin_required
 def get_users():
+    # Get query parameters for filtering, search, and pagination
+    search = request.args.get('search', '')
+    role = request.args.get('role', '')
+    activity_level = request.args.get('activity_level', '')
+    status = request.args.get('status', '')
+    date_filter = request.args.get('date_filter', '')
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 10, type=int)
     
-    users = User.query.all()
+    # Base query
+    query = User.query
+    
+    # Apply search filter
+    if search:
+        search_term = f"%{search}%"
+        query = query.filter(
+            db.or_(
+                User.username.ilike(search_term),
+                User.mobile.ilike(search_term),
+                User.id.cast(db.String).ilike(search_term)
+            )
+        )
+    
+    # Apply role filter
+    if role == 'admin':
+        query = query.filter(User.is_admin == True)
+    elif role == 'user':
+        query = query.filter(User.is_admin == False)
+    
+    # Apply date filter
+    if date_filter:
+        today = datetime.now().date()
+        if date_filter == 'today':
+            query = query.filter(db.func.date(User.created_at) == today)
+        elif date_filter == 'week':
+            week_ago = today - timedelta(days=7)
+            query = query.filter(User.created_at >= week_ago)
+        elif date_filter == 'month':
+            month_ago = today - timedelta(days=30)
+            query = query.filter(User.created_at >= month_ago)
+    
+    # Get total count before pagination
+    total_users = query.count()
+    
+    # Apply pagination
+    users = query.offset((page - 1) * per_page).limit(per_page).all()
+    
+    # Get online users for status filtering
+    online_user_ids = [user_data.get('user_id') for user_data in online_users.values() 
+                      if user_data and 'user_id' in user_data]
+    
+    # Enhanced user data with activity metrics
     users_data = []
-    
     for user in users:
+        # Calculate total activity
+        total_activity = len(user.announcements) + len(user.assignments)
+        
+        # Determine activity level
+        user_activity_level = 'low'
+        if total_activity > 10:
+            user_activity_level = 'high'
+        elif total_activity > 3:
+            user_activity_level = 'medium'
+        
+        # Check if user is online
+        is_online = user.id in online_user_ids
+        
         users_data.append({
             'id': user.id,
             'username': user.username,
@@ -2102,10 +2163,140 @@ def get_users():
             'created_at': user.created_at.isoformat() if user.created_at else None,
             'is_admin': user.is_admin,
             'announcements_count': len(user.announcements),
-            'assignments_count': len(user.assignments)
+            'assignments_count': len(user.assignments),
+            'total_activity': total_activity,
+            'activity_level': user_activity_level,
+            'is_online': is_online,
+            'last_activity': get_user_last_activity(user)
         })
     
-    return jsonify(users_data)
+    # Apply status filter after getting online status
+    if status == 'online':
+        users_data = [user for user in users_data if user['is_online']]
+    elif status == 'offline':
+        users_data = [user for user in users_data if not user['is_online']]
+    
+    # Apply activity level filter
+    if activity_level:
+        users_data = [user for user in users_data if user['activity_level'] == activity_level]
+    
+    # Get additional statistics for charts and quick stats
+    stats = get_user_statistics()
+    
+    return jsonify({
+        'users': users_data,
+        'pagination': {
+            'page': page,
+            'per_page': per_page,
+            'total': total_users,
+            'pages': (total_users + per_page - 1) // per_page
+        },
+        'stats': stats
+    })
+
+
+def get_user_last_activity(user):
+    """Get the last activity timestamp for a user"""
+    last_announcement = db.session.query(db.func.max(Announcement.created_at)).filter(
+        Announcement.user_id == user.id
+    ).scalar()
+    
+    last_assignment = db.session.query(db.func.max(Assignment.created_at)).filter(
+        Assignment.user_id == user.id
+    ).scalar()
+    
+    last_message = db.session.query(db.func.max(Message.created_at)).filter(
+        Message.user_id == user.id
+    ).scalar()
+    
+    # Return the most recent activity
+    activities = [last_announcement, last_assignment, last_message]
+    valid_activities = [a for a in activities if a is not None]
+    
+    return max(valid_activities).isoformat() if valid_activities else user.created_at.isoformat()
+
+def get_user_statistics():
+    """Get comprehensive user statistics for charts and quick stats"""
+    total_users = User.query.count()
+    admin_users = User.query.filter_by(is_admin=True).count()
+    regular_users = total_users - admin_users
+    
+    # Today's registrations
+    today = datetime.now().date()
+    today_users = User.query.filter(db.func.date(User.created_at) == today).count()
+    
+    # Active today (users with any activity today)
+    active_today = User.query.filter(
+        db.or_(
+            db.func.date(User.created_at) == today,
+            User.id.in_(
+                db.session.query(Message.user_id).filter(
+                    db.func.date(Message.created_at) == today
+                ).union(
+                    db.session.query(Announcement.user_id).filter(
+                        db.func.date(Announcement.created_at) == today
+                    )
+                ).union(
+                    db.session.query(Assignment.user_id).filter(
+                        db.func.date(Assignment.created_at) == today
+                    )
+                )
+            )
+        )
+    ).distinct().count()
+    
+    # Online users count
+    online_count = len([uid for uid in online_users.keys() 
+                       if online_users[uid] and 'user_id' in online_users[uid]])
+    
+    # Average activity per user
+    total_announcements = db.session.query(db.func.count(Announcement.id)).scalar() or 0
+    total_assignments = db.session.query(db.func.count(Assignment.id)).scalar() or 0
+    total_activity = total_announcements + total_assignments
+    
+    avg_activity = round(total_activity / total_users, 1) if total_users > 0 else 0
+    
+    # Registration trend data (last 30 days)
+    registration_trend = []
+    for i in range(30):
+        date = today - timedelta(days=29 - i)
+        count = User.query.filter(db.func.date(User.created_at) == date).count()
+        registration_trend.append({
+            'date': date.isoformat(),
+            'count': count
+        })
+    
+    # Activity distribution
+    activity_distribution = {
+        'high': User.query.join(Announcement).join(Assignment).group_by(User.id).having(
+            (db.func.count(Announcement.id) + db.func.count(Assignment.id)) > 10
+        ).count(),
+        'medium': User.query.join(Announcement).join(Assignment).group_by(User.id).having(
+            (db.func.count(Announcement.id) + db.func.count(Assignment.id)) > 3,
+            (db.func.count(Announcement.id) + db.func.count(Assignment.id)) <= 10
+        ).count(),
+        'low': User.query.outerjoin(Announcement).outerjoin(Assignment).group_by(User.id).having(
+            (db.func.count(Announcement.id) + db.func.count(Assignment.id)) <= 3
+        ).count()
+    }
+    
+    return {
+        'total_users': total_users,
+        'admin_users': admin_users,
+        'regular_users': regular_users,
+        'today_users': today_users,
+        'active_today': active_today,
+        'online_users': online_count,
+        'total_activity': total_activity,
+        'avg_activity': avg_activity,
+        'registration_trend': registration_trend,
+        'activity_distribution': activity_distribution,
+        'role_distribution': {
+            'admins': admin_users,
+            'regular_users': regular_users
+        }
+    }
+
 
 @app.route('/api/users/<int:user_id>/delete', methods=['POST'])
 @login_required
