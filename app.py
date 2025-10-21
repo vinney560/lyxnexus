@@ -69,10 +69,10 @@ def database_url():
 app.config['SQLALCHEMY_DATABASE_URI'] = database_url()
 # Read from Aiven connection max pooling for reuse pool
 app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
-    "pool_size": 5,     
-    "max_overflow": 5,   
-    "pool_timeout": 30,  
-    "pool_recycle": 1000
+    'pool_recycle': 300,  
+    'pool_pre_ping': True,
+    'pool_size': 6,
+    'max_overflow': 5,
 }
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -516,27 +516,62 @@ def auto_close_sessions():
 
     try:
         total_before = total_after = None
+        killed_connections = 0
 
         with app.app_context():
+            # Count connections before
             try:
                 with db.engine.connect() as conn:
-                    result = conn.execute(text("SELECT count(*) FROM pg_stat_activity;"))
+                    # Get current database name
+                    db_result = conn.execute(text("SELECT current_database();"))
+                    db_name = db_result.scalar()
+                    
+                    # Count connections to current database only
+                    result = conn.execute(text("""
+                        SELECT count(*) FROM pg_stat_activity 
+                        WHERE datname = :db_name AND pid <> pg_backend_pid();
+                    """), {'db_name': db_name})
                     total_before = result.scalar()
-                    print(f"🔗 Active connections before cleanup: {total_before}")
-            except Exception:
-                print("ℹ️ Connection count skipped (non-PostgreSQL engine).")
+                    print(f"🔗 Active connections (excluding current): {total_before}")
+                    print(f"📊 Database: {db_name}")
+                    
+            except Exception as e:
+                print(f"ℹ️ Initial count failed: {e}")
 
+            # Kill idle connections (PostgreSQL specific)
+            try:
+                with db.engine.connect() as conn:
+                    # Kill idle connections that are older than 1 minute
+                    kill_result = conn.execute(text("""
+                        SELECT pg_terminate_backend(pid) FROM pg_stat_activity 
+                        WHERE datname = current_database() 
+                        AND state = 'idle' 
+                        AND state_change < now() - interval '1 minute'
+                        AND pid <> pg_backend_pid();
+                    """))
+                    killed_connections = kill_result.rowcount
+                    print(f"🔫 Killed {killed_connections} idle connections")
+                    
+            except Exception as e:
+                print(f"⚠️ Connection killing failed: {e}")
+
+            # Regular cleanup
             db.session.remove()
             db.engine.dispose()
 
+            # Count connections after
             try:
                 with db.engine.connect() as conn:
-                    result = conn.execute(text("SELECT count(*) FROM pg_stat_activity;"))
+                    result = conn.execute(text("""
+                        SELECT count(*) FROM pg_stat_activity 
+                        WHERE datname = current_database() AND pid <> pg_backend_pid();
+                    """))
                     total_after = result.scalar()
                     print(f"✅ Active connections after cleanup: {total_after}")
-            except Exception:
-                print("ℹ️ Skipping post-cleanup count (engine reset).")
+            except Exception as e:
+                print(f"ℹ️ Final count failed: {e}")
 
+        # Calculate duration
         end_time = datetime.utcnow()
         elapsed = (end_time - start_time).total_seconds()
 
@@ -544,6 +579,7 @@ def auto_close_sessions():
         print("-" * 70)
         print(f"🧾 [{end_time.strftime('%Y-%m-%d %H:%M:%S UTC')}] Cleanup summary:")
         print(f"   • Before: {total_before or 'N/A'} connections")
+        print(f"   • Killed: {killed_connections} idle connections")
         print(f"   • After:  {total_after or 'N/A'} connections")
         print(f"   • Duration: {elapsed:.2f}s")
         print("#" * 70)
