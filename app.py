@@ -509,30 +509,75 @@ scheduler.start()
 log_status("🕒 Keep-alive scheduler started — pinging both DBs every 3 minutes")
 atexit.register(lambda: scheduler.shutdown(wait=False))
 #-------------------------------------- Aiven max conn pool
+
 with app.app_context():
     try:
         def auto_close_sessions():
             print('=' * 70)
-            print("🧹 Auto-cleaning stale DB sessions...")
-            print("#" * 70)
-            db.session.remove()
-            db.engine.dispose()
+            start_time = datetime.utcnow()
+            print(f"🕒 [{start_time.strftime('%Y-%m-%d %H:%M:%S UTC')}] Starting database session cleanup...")
 
+            try:
+                total_before = total_after = None
+
+                # Count connections (PostgreSQL only)
+                try:
+                    with db.engine.connect() as conn:
+                        result = conn.execute(text("SELECT count(*) FROM pg_stat_activity;"))
+                        total_before = result.scalar()
+                        print(f"🔗 Active connections before cleanup: {total_before}")
+                except Exception:
+                    print("ℹ️ Connection count skipped (non-PostgreSQL engine).")
+
+                # Perform cleanup
+                db.session.remove()
+                db.engine.dispose()
+
+                # Count again
+                try:
+                    with db.engine.connect() as conn:
+                        result = conn.execute(text("SELECT count(*) FROM pg_stat_activity;"))
+                        total_after = result.scalar()
+                        print(f"✅ Active connections after cleanup: {total_after}")
+                except Exception:
+                    print("ℹ️ Skipping post-cleanup count (engine reset).")
+
+                # Calculate duration
+                end_time = datetime.utcnow()
+                elapsed = (end_time - start_time).total_seconds()
+
+                # Summary
+                print("-" * 70)
+                print(f"🧾 [{end_time.strftime('%Y-%m-%d %H:%M:%S UTC')}] Cleanup summary:")
+                print(f"   • Before: {total_before or 'N/A'} connections")
+                print(f"   • After:  {total_after or 'N/A'} connections")
+                print(f"   • Duration: {elapsed:.2f}s")
+                print("#" * 70)
+
+            except Exception as e:
+                now = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC')
+                print(f"❌ [{now}] Error during cleanup: {e}")
+                print("#" * 70)
+
+        # Scheduler setup
         scheduler = BackgroundScheduler()
         scheduler.add_job(
             func=auto_close_sessions,
-            trigger=IntervalTrigger(minutes=1),
-            id="Close_Ideal_Connection",
+            trigger=IntervalTrigger(minutes=3),
+            id="Close_Idle_Connections",
             replace_existing=True
         )
-
         scheduler.start()
 
-        log_status("🕒 Terminate DB Ideal connections --> every 1 minute")
+        now = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC')
+        print(f"🕒 [{now}] DB session auto-cleaner started (runs every 3 minutes).")
+
         atexit.register(lambda: scheduler.shutdown(wait=False))
+
     except Exception as e:
         print('X' * 70)
-        print(f'Error ==>> {e}')
+        print(f'Error initializing scheduler ==>> {e}')
+
 #=============================================================================
 
 #      ANNOUNCEMENT CLEANER
