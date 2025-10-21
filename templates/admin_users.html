@@ -1485,7 +1485,7 @@
         }
 
         function refreshUsers() {
-            loadUsers();
+            loadUsers(currentPage);
         }
 
         function openModal(modalId) {
@@ -1560,7 +1560,7 @@
             //        //updatePagination();
             //        loadUsers(currentPage + 1);
             //    }
-            });
+            //});
 
             document.getElementById('prev-page').addEventListener('click', function() {
                 if (currentPage > 1) {
@@ -1578,7 +1578,7 @@
             
             // Auto-refresh
             pollInterval = setInterval(() => {
-                loadUsers();
+                loadUsers(currentPage);
                 refreshOnlineUsers();
             }, 120000);
             
