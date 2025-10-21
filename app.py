@@ -843,6 +843,30 @@ def is_authenticated():
 
 #              SPECIFIED ROUTES
 
+def format_message_time(created_at):
+    now = datetime.now()
+    delta = now - created_at
+
+    if delta < timedelta(days=1):
+        # Less than a day: show time
+        return created_at.strftime('%H:%M')
+    elif delta < timedelta(days=7):
+        # Less than a week: show weekday
+        return created_at.strftime('%a')  # Mon, Tue, Wed, ...
+    elif delta < timedelta(days=30):
+        # Less than a month: show weeks ago
+        weeks = delta.days // 7
+        return f"{weeks} week{'s' if weeks > 1 else ''} ago"
+    elif delta < timedelta(days=365):
+        # Less than a year: show months ago
+        months = delta.days // 30
+        return f"{months} month{'s' if months > 1 else ''} ago"
+    else:
+        # A year or more: show years ago
+        years = delta.days // 365
+        return f"{years} year{'s' if years > 1 else ''} ago"
+
+app.jinja_env.filters['message_time'] = format_message_time
 # =========================================
 #              MESSAGES ROUTES
 # =========================================
@@ -873,7 +897,6 @@ def messages():
             messages=messages,
             current_user=current_user,
             unread_count=unread_count,
-            datetime=datetime,
             room=room
         )
         
@@ -885,7 +908,6 @@ def messages():
             messages=[],
             current_user=current_user,
             unread_count=0,
-            datetime=datetime,
             room='general'
         )
 
@@ -917,7 +939,6 @@ def messages_room(room_name):
             messages=messages,
             current_user=current_user,
             unread_count=unread_count,
-            datetime=datetime,
             room=room_name
         )
         
@@ -928,7 +949,6 @@ def messages_room(room_name):
             messages=[],
             current_user=current_user,
             unread_count=0,
-            datetime=datetime,
             room=room_name
         )
     

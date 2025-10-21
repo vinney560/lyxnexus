@@ -1275,20 +1275,11 @@
                                 <span class="admin-badge">ADMIN</span>
                                 {% endif %}
                             </div>
-                                <span class="timestamp">
-                                {% set delta = (datetime.utcnow() - message.created_at).days %}
-                                {{ 
-                                    delta == 0 
-                                        and message.created_at.strftime('%H:%M') 
-                                        or delta < 7 
-                                            and message.created_at.strftime('%a') 
-                                            or delta < 30 
-                                                and (delta // 7 ~ ' week' ~ ('s' if (delta // 7) > 1 else '') ~ ' ago') 
-                                                or delta < 365 
-                                                    and (delta // 30 ~ ' month' ~ ('s' if (delta // 30) > 1 else '') ~ ' ago') 
-                                                    or (delta // 365 ~ ' year' ~ ('s' if (delta // 365) > 1 else '') ~ ' ago')
-                                }}
-                                </span>
+                            
+                            <span class="timestamp">
+                                {{ message.created_at | message_time }}
+                            </span>
+
                         </div>
                         
                         {% if message.parent_id and message.parent %}
