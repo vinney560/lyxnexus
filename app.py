@@ -2194,7 +2194,6 @@ def get_users():
         'stats': stats
     })
 
-
 def get_user_last_activity(user):
     """Get the last activity timestamp for a user"""
     last_announcement = db.session.query(db.func.max(Announcement.created_at)).filter(
