@@ -873,6 +873,7 @@ def messages():
             messages=messages,
             current_user=current_user,
             unread_count=unread_count,
+            datetime=datetime,
             room=room
         )
         
@@ -884,6 +885,7 @@ def messages():
             messages=[],
             current_user=current_user,
             unread_count=0,
+            datetime=datetime,
             room='general'
         )
 
@@ -915,6 +917,7 @@ def messages_room(room_name):
             messages=messages,
             current_user=current_user,
             unread_count=unread_count,
+            datetime=datetime,
             room=room_name
         )
         
@@ -925,6 +928,7 @@ def messages_room(room_name):
             messages=[],
             current_user=current_user,
             unread_count=0,
+            datetime=datetime,
             room=room_name
         )
     
