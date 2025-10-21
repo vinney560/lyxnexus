@@ -49,10 +49,10 @@ class LyxNexusNotificationService {
               baseUrl = window.location.origin;
             }
 
-            // remove all slashes
+            // remove all ---> Still not working for Aiven DB
             baseUrl = baseUrl.replace(/\/+$/, '');
 
-            this.socket = io('https://lyxnexus.onrender.com', {
+            this.socket = io(baseUrl, {
               path: "/socket.io",
               transports: ["websocket", "polling"],
               reconnection: true,

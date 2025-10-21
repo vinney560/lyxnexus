@@ -509,57 +509,53 @@ scheduler.start()
 log_status("🕒 Keep-alive scheduler started — pinging both DBs every 3 minutes")
 atexit.register(lambda: scheduler.shutdown(wait=False))
 #-------------------------------------- Aiven max conn pool
+def auto_close_sessions():
+    print('=' * 70)
+    start_time = datetime.utcnow()
+    print(f"🕒 [{start_time.strftime('%Y-%m-%d %H:%M:%S UTC')}] Starting database session cleanup...")
 
-with app.app_context():
     try:
-        def auto_close_sessions():
-            print('=' * 70)
-            start_time = datetime.utcnow()
-            print(f"🕒 [{start_time.strftime('%Y-%m-%d %H:%M:%S UTC')}] Starting database session cleanup...")
+        total_before = total_after = None
+
+        with app.app_context():
+            try:
+                with db.engine.connect() as conn:
+                    result = conn.execute(text("SELECT count(*) FROM pg_stat_activity;"))
+                    total_before = result.scalar()
+                    print(f"🔗 Active connections before cleanup: {total_before}")
+            except Exception:
+                print("ℹ️ Connection count skipped (non-PostgreSQL engine).")
+
+            db.session.remove()
+            db.engine.dispose()
 
             try:
-                total_before = total_after = None
+                with db.engine.connect() as conn:
+                    result = conn.execute(text("SELECT count(*) FROM pg_stat_activity;"))
+                    total_after = result.scalar()
+                    print(f"✅ Active connections after cleanup: {total_after}")
+            except Exception:
+                print("ℹ️ Skipping post-cleanup count (engine reset).")
 
-                # Count connections (PostgreSQL only)
-                try:
-                    with db.engine.connect() as conn:
-                        result = conn.execute(text("SELECT count(*) FROM pg_stat_activity;"))
-                        total_before = result.scalar()
-                        print(f"🔗 Active connections before cleanup: {total_before}")
-                except Exception:
-                    print("ℹ️ Connection count skipped (non-PostgreSQL engine).")
+        end_time = datetime.utcnow()
+        elapsed = (end_time - start_time).total_seconds()
 
-                # Perform cleanup
-                db.session.remove()
-                db.engine.dispose()
+        # Summary
+        print("-" * 70)
+        print(f"🧾 [{end_time.strftime('%Y-%m-%d %H:%M:%S UTC')}] Cleanup summary:")
+        print(f"   • Before: {total_before or 'N/A'} connections")
+        print(f"   • After:  {total_after or 'N/A'} connections")
+        print(f"   • Duration: {elapsed:.2f}s")
+        print("#" * 70)
 
-                # Count again
-                try:
-                    with db.engine.connect() as conn:
-                        result = conn.execute(text("SELECT count(*) FROM pg_stat_activity;"))
-                        total_after = result.scalar()
-                        print(f"✅ Active connections after cleanup: {total_after}")
-                except Exception:
-                    print("ℹ️ Skipping post-cleanup count (engine reset).")
+    except Exception as e:
+        now = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC')
+        print(f"❌ [{now}] Error during cleanup: {e}")
+        print("#" * 70)
 
-                # Calculate duration
-                end_time = datetime.utcnow()
-                elapsed = (end_time - start_time).total_seconds()
-
-                # Summary
-                print("-" * 70)
-                print(f"🧾 [{end_time.strftime('%Y-%m-%d %H:%M:%S UTC')}] Cleanup summary:")
-                print(f"   • Before: {total_before or 'N/A'} connections")
-                print(f"   • After:  {total_after or 'N/A'} connections")
-                print(f"   • Duration: {elapsed:.2f}s")
-                print("#" * 70)
-
-            except Exception as e:
-                now = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC')
-                print(f"❌ [{now}] Error during cleanup: {e}")
-                print("#" * 70)
-
-        # Scheduler setup
+# to prevent using diff thread --> work with main thread
+with app.app_context():
+    try:
         scheduler = BackgroundScheduler()
         scheduler.add_job(
             func=auto_close_sessions,
@@ -572,8 +568,15 @@ with app.app_context():
         now = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC')
         print(f"🕒 [{now}] DB session auto-cleaner started (runs every 3 minutes).")
 
-        atexit.register(lambda: scheduler.shutdown(wait=False))
-
+        def safe_shutdown():
+            try:
+                if scheduler.running:
+                    scheduler.shutdown(wait=False)
+            except Exception:
+                pass  # Ignore harmless shutdown errors
+            
+        atexit.register(safe_shutdown)
+        
     except Exception as e:
         print('X' * 70)
         print(f'Error initializing scheduler ==>> {e}')
