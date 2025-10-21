@@ -1593,7 +1593,7 @@ def cleanup_disconnected_users():
             last_seen = user_data['last_seen']
             if isinstance(last_seen, str):
                 try:
-                    last_seen = datetime.fromisoformat(last_seen.replace('Z', '+00:00'))
+                    last_seen = datetime.fromisoformat(last_seen.replace('Z', '+00:00')) + timedelta(hours=3)
                 except:
                     continue
             
