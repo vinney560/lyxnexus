@@ -1159,7 +1159,7 @@
 
         function updatePagination(paginationData = null) {
             let totalUsers, totalPages;
-            
+
             if (paginationData) {
                 // Use backend pagination data
                 totalUsers = paginationData.total || filteredUsers.length;
@@ -1169,15 +1169,15 @@
                 totalUsers = filteredUsers.length;
                 totalPages = Math.ceil(totalUsers / usersPerPage);
             }
-            
+
             const startIndex = (currentPage - 1) * usersPerPage + 1;
             const endIndex = Math.min(currentPage * usersPerPage, totalUsers);
-            
+
             document.getElementById('showing-start').textContent = totalUsers > 0 ? startIndex : 0;
             document.getElementById('showing-end').textContent = endIndex;
             document.getElementById('showing-total').textContent = totalUsers;
             document.getElementById('user-count').textContent = `(${totalUsers})`;
-            
+
             document.getElementById('prev-page').disabled = currentPage === 1;
             document.getElementById('next-page').disabled = currentPage === totalPages || totalPages === 0;
         }
@@ -1228,10 +1228,29 @@
             }
         }
 
-        // FIXED: Properly handle backend response structure
+        // FIXED: Properly handle backend response structure with pagination
         async function fetchUsers(page = 1) {
             try {
-                const response = await fetch(USERS_ENDPOINT);
+                // Build query parameters for pagination and filtering
+                const params = new URLSearchParams({
+                    page: page,
+                    per_page: usersPerPage
+                });
+
+                // Add search and filter parameters if they exist
+                const searchTerm = document.getElementById('search-input').value;
+                const roleFilter = document.getElementById('role-filter').value;
+                const activityFilter = document.getElementById('activity-filter').value;
+                const statusFilter = document.getElementById('status-filter').value;
+                const dateFilter = document.getElementById('date-filter').value;
+
+                if (searchTerm) params.append('search', searchTerm);
+                if (roleFilter) params.append('role', roleFilter);
+                if (activityFilter) params.append('activity_level', activityFilter);
+                if (statusFilter) params.append('status', statusFilter);
+                if (dateFilter) params.append('date_filter', dateFilter);
+
+                const response = await fetch(`${USERS_ENDPOINT}?${params}`);
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
@@ -1241,33 +1260,34 @@
             } catch (error) {
                 console.error('Error fetching users:', error);
                 showToast('Failed to load users: ' + error.message, 'error');
-                return { users: [], stats: null };
+                return { users: [], pagination: null, stats: null };
             }
         }
-
-        // FIXED: Properly extract users array from response
+        
+        // FIXED: Properly extract users array from response and handle pagination
         async function loadUsers(page = 1) {
             if (isRefreshing) return;
-            
+
             try {
                 isRefreshing = true;
                 setButtonLoading(document.getElementById('refresh-btn'), true);
-                
-                const data = await fetchUsers();
+
+                const data = await fetchUsers(page);
                 allUsers = data.users || []; // Extract users array from response
                 filteredUsers = [...allUsers];
-                
+                currentPage = page;
+
                 updateLastUpdated();
                 updateStatistics(allUsers, data.stats); // Pass stats to update function
                 updateCharts(allUsers);
                 updateUserTable();
-                updatePagination();
-                
+                updatePagination(data.pagination);
+
                 setButtonLoading(document.getElementById('refresh-btn'), false);
                 isRefreshing = false;
-                
+
                 if (allUsers.length === 0) {
-                    showToast('No users found in the system', 'info');
+                    showToast('No users found matching your criteria', 'info');
                 } else {
                     showToast(`Loaded ${allUsers.length} users successfully`, 'success');
                 }
