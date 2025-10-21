@@ -1263,7 +1263,7 @@
                 return { users: [], pagination: null, stats: null };
             }
         }
-        
+
         // FIXED: Properly extract users array from response and handle pagination
         async function loadUsers(page = 1) {
             if (isRefreshing) return;
@@ -1542,23 +1542,36 @@
                 filterUsers();
             });
             
-            // Pagination controls
+            //// Pagination controls
+            //document.getElementById('prev-page').addEventListener('click', function() {
+            //    if (currentPage > 1) {
+            //        currentPage--;
+            //        updateUserTable();
+            //        updatePagination();
+            //        loadUsers(currentPage - 1);
+            //    }
+            //});
+            //
+            //document.getElementById('next-page').addEventListener('click', function() {
+            //    //const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
+            //    if (currentPage < totalPages) {
+            //        //currentPage++;
+            //        //updateUserTable();
+            //        //updatePagination();
+            //        loadUsers(currentPage + 1);
+            //    }
+            });
+
             document.getElementById('prev-page').addEventListener('click', function() {
                 if (currentPage > 1) {
-                    currentPage--;
-                    updateUserTable();
-                    updatePagination();
+                    loadUsers(currentPage - 1);
                 }
             });
-            
+
             document.getElementById('next-page').addEventListener('click', function() {
-                const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
-                if (currentPage < totalPages) {
-                    currentPage++;
-                    updateUserTable();
-                    updatePagination();
-                }
+                loadUsers(currentPage + 1);
             });
+
             
             // Export button
             document.getElementById('export-btn').addEventListener('click', exportUserData);
