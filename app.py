@@ -371,7 +371,7 @@ def _year():
     return datetime.now().strftime('%Y')
 
 @app.route('/test')
-def test_aoi():
+def test_ai():
     return render_template('test.html')
 
 def send_notification(user_id, title, message):
