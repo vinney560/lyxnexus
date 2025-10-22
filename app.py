@@ -599,7 +599,7 @@ with app.app_context():
             replace_existing=True
         )
         scheduler.start()
-
+        atexit.register(lambda: scheduler.shutdown(wait=False))
         now = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC')
         print(f"🕒 [{now}] DB session auto-cleaner started (runs every 1 minutes).")
         
