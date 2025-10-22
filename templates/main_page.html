@@ -1466,16 +1466,18 @@
             loadTopics();
             loadTimetable();
 
+            // light needed --> every 1 min
             setInterval(() => {
                 loadUserData();
                 loadAnnouncements();
             }, 60 * 1000);
         
-            // Heavy --> 300 seconds
+            // Heavy --> 300 seconds --> 5 min
             setInterval(() => {
                 loadAssignments();
             }, 5 * 60 * 1000);
-        
+            
+            // SUPER HEAVY ---> 1 hrs
             setInterval(() => {
                 loadTopics();
                 loadTimetable();
