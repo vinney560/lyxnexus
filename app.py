@@ -69,7 +69,7 @@ def database_url():
 app.config['SQLALCHEMY_DATABASE_URI'] = database_url()
 # Read from Aiven connection max pooling for reuse pool
 app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
-    'pool_recycle': 300,  
+    'pool_recycle': 40,  
     'pool_pre_ping': True,
     'pool_size': 6,
     'max_overflow': 5,
@@ -508,6 +508,11 @@ scheduler.start()
 log_status("🕒 Keep-alive scheduler started — pinging both DBs every 3 minutes")
 atexit.register(lambda: scheduler.shutdown(wait=False))
 #-------------------------------------- Aiven max conn pool
+from datetime import datetime
+from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.triggers.interval import IntervalTrigger
+from sqlalchemy import text
+
 def auto_close_sessions():
     print('=' * 70)
     start_time = datetime.utcnow()
@@ -518,67 +523,69 @@ def auto_close_sessions():
         killed_connections = 0
 
         with app.app_context():
-            # Count connections before
+            # --- Count connections before cleanup ---
             try:
                 with db.engine.connect() as conn:
-                    # Get current database name
                     db_result = conn.execute(text("SELECT current_database();"))
                     db_name = db_result.scalar()
-                    
-                    # Count connections to current database only
+
                     result = conn.execute(text("""
-                        SELECT count(*) FROM pg_stat_activity 
+                        SELECT count(*) 
+                        FROM pg_stat_activity 
                         WHERE datname = :db_name AND pid <> pg_backend_pid();
                     """), {'db_name': db_name})
                     total_before = result.scalar()
+
                     print(f"🔗 Active connections (excluding current): {total_before}")
                     print(f"📊 Database: {db_name}")
-                    
+
             except Exception as e:
                 print(f"ℹ️ Initial count failed: {e}")
 
-            # Kill idle connections (PostgreSQL specific)
+            # --- Kill idle connections older than 1 minute ---
             try:
                 with db.engine.connect() as conn:
-                    # Kill idle connections that are older than 1 minute
                     kill_result = conn.execute(text("""
-                        SELECT pg_terminate_backend(pid) FROM pg_stat_activity 
-                        WHERE datname = current_database() 
-                        AND state = 'idle' 
+                        SELECT pg_terminate_backend(pid)
+                        FROM pg_stat_activity
+                        WHERE datname = current_database()
+                        AND state = 'idle'
                         AND state_change < now() - interval '1 minute'
                         AND pid <> pg_backend_pid();
                     """))
-                    killed_connections = kill_result.rowcount
+                    killed_connections = kill_result.rowcount or 0
                     print(f"🔫 Killed {killed_connections} idle connections")
-                    
+
             except Exception as e:
                 print(f"⚠️ Connection killing failed: {e}")
 
-            # Regular cleanup
+            # --- Clear SQLAlchemy sessions ---
             db.session.remove()
             db.engine.dispose()
 
-            # Count connections after
+            # --- Count connections after cleanup ---
             try:
                 with db.engine.connect() as conn:
                     result = conn.execute(text("""
-                        SELECT count(*) FROM pg_stat_activity 
-                        WHERE datname = current_database() AND pid <> pg_backend_pid();
+                        SELECT count(*) 
+                        FROM pg_stat_activity 
+                        WHERE datname = current_database() 
+                        AND pid <> pg_backend_pid();
                     """))
                     total_after = result.scalar()
                     print(f"✅ Active connections after cleanup: {total_after}")
+
             except Exception as e:
                 print(f"ℹ️ Final count failed: {e}")
 
-        # Calculate duration
+        # --- Summary log ---
         end_time = datetime.utcnow()
         elapsed = (end_time - start_time).total_seconds()
 
-        # Summary
         print("-" * 70)
         print(f"🧾 [{end_time.strftime('%Y-%m-%d %H:%M:%S UTC')}] Cleanup summary:")
         print(f"   • Before: {total_before or 'N/A'} connections")
-        print(f"   • Killed: {killed_connections} idle connections")
+        print(f"   • Killed: {killed_connections}")
         print(f"   • After:  {total_after or 'N/A'} connections")
         print(f"   • Duration: {elapsed:.2f}s")
         print("#" * 70)
@@ -588,25 +595,28 @@ def auto_close_sessions():
         print(f"❌ [{now}] Error during cleanup: {e}")
         print("#" * 70)
 
+
+# ---------------- Scheduler Setup ----------------
 with app.app_context():
     try:
         scheduler = BackgroundScheduler()
         scheduler.add_job(
             func=auto_close_sessions,
-            trigger=IntervalTrigger(minutes=2),
+            trigger=IntervalTrigger(minutes=1),
             id="Close_Idle_Connections",
             replace_existing=True
         )
         scheduler.start()
 
         now = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC')
-        print(f"🕒 [{now}] DB session auto-cleaner started (runs every 2 minutes).")
+        print(f"🕒 [{now}] DB session auto-cleaner started (runs every 1 minute).")
+        print("=" * 70)
 
-        # 🚫 no atexit handler — let scheduler run until Flask stops
+        # No atexit handler — keep scheduler running until Flask stops
     except Exception as e:
         print('X' * 70)
         print(f'Error initializing scheduler ==>> {e}')
-
+        print('X' * 70)
 #=============================================================================
 
 #      ANNOUNCEMENT CLEANER
