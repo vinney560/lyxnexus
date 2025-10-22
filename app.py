@@ -518,47 +518,51 @@ def auto_close_sessions():
         killed_connections = 0
 
         with app.app_context():
-            # --- Count connections BEFORE ---
+            # Count connections before
             try:
                 with db.engine.connect() as conn:
-                    db_name = conn.execute(text("SELECT current_database();")).scalar()
+                    # Get current database name
+                    db_result = conn.execute(text("SELECT current_database();"))
+                    db_name = db_result.scalar()
+                    
+                    # Count connections to current database only
                     result = conn.execute(text("""
-                        SELECT count(*) 
-                        FROM pg_stat_activity 
+                        SELECT count(*) FROM pg_stat_activity 
                         WHERE datname = :db_name AND pid <> pg_backend_pid();
                     """), {'db_name': db_name})
                     total_before = result.scalar()
                     print(f"🔗 Active connections (excluding current): {total_before}")
                     print(f"📊 Database: {db_name}")
+                    
             except Exception as e:
                 print(f"ℹ️ Initial count failed: {e}")
 
-            # --- Kill idle connections FIRST ---
+            # Kill idle connections (PostgreSQL specific)
             try:
                 with db.engine.connect() as conn:
+                    # Kill idle connections that are older than 1 minute
                     kill_result = conn.execute(text("""
-                        SELECT pg_terminate_backend(pid)
-                        FROM pg_stat_activity
-                        WHERE datname = current_database()
-                        AND state = 'idle'
+                        SELECT pg_terminate_backend(pid) FROM pg_stat_activity 
+                        WHERE datname = current_database() 
+                        AND state = 'idle' 
                         AND state_change < now() - interval '1 minute'
                         AND pid <> pg_backend_pid();
                     """))
-                    killed_connections = kill_result.rowcount or 0
+                    killed_connections = kill_result.rowcount
                     print(f"🔫 Killed {killed_connections} idle connections")
+                    
             except Exception as e:
                 print(f"⚠️ Connection killing failed: {e}")
 
-            # --- THEN clear the SQLAlchemy pool ---
+            # Regular cleanup
             db.session.remove()
             db.engine.dispose()
 
-            # --- Count connections AFTER ---
+            # Count connections after
             try:
                 with db.engine.connect() as conn:
                     result = conn.execute(text("""
-                        SELECT count(*) 
-                        FROM pg_stat_activity 
+                        SELECT count(*) FROM pg_stat_activity 
                         WHERE datname = current_database() AND pid <> pg_backend_pid();
                     """))
                     total_after = result.scalar()
@@ -566,13 +570,15 @@ def auto_close_sessions():
             except Exception as e:
                 print(f"ℹ️ Final count failed: {e}")
 
-        # --- Summary ---
+        # Calculate duration
         end_time = datetime.utcnow()
         elapsed = (end_time - start_time).total_seconds()
+
+        # Summary
         print("-" * 70)
         print(f"🧾 [{end_time.strftime('%Y-%m-%d %H:%M:%S UTC')}] Cleanup summary:")
         print(f"   • Before: {total_before or 'N/A'} connections")
-        print(f"   • Killed: {killed_connections}")
+        print(f"   • Killed: {killed_connections} idle connections")
         print(f"   • After:  {total_after or 'N/A'} connections")
         print(f"   • Duration: {elapsed:.2f}s")
         print("#" * 70)
@@ -581,19 +587,26 @@ def auto_close_sessions():
         now = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC')
         print(f"❌ [{now}] Error during cleanup: {e}")
         print("#" * 70)
-# ---------------- Scheduler Setup ----------------
-with app.app_context():
-    scheduler = BackgroundScheduler()
-    scheduler.add_job(
-        func=auto_close_sessions,
-        trigger=IntervalTrigger(minutes=1),
-        id="Close_Idle_Connections",
-        replace_existing=True
-    )
-    scheduler.start()
 
-    now = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC')
-    print(f"🕒 [{now}] DB session auto-cleaner started (runs every 1 minute).")
+# to prevent using diff thread --> work with main thread
+with app.app_context():
+    try:
+        scheduler = BackgroundScheduler()
+        scheduler.add_job(
+            func=auto_close_sessions,
+            trigger=IntervalTrigger(minutes=1),
+            id="Close_Idle_Connections",
+            replace_existing=True
+        )
+        scheduler.start()
+
+        now = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC')
+        print(f"🕒 [{now}] DB session auto-cleaner started (runs every 1 minutes).")
+        
+    except Exception as e:
+        print('X' * 70)
+        print(f'Error initializing scheduler ==>> {e}')
+
 #=============================================================================
 
 #      ANNOUNCEMENT CLEANER
