@@ -1014,7 +1014,7 @@
         function updateLastUpdated() {
             // Show Nairobi time in the "Last updated" area
             const nowUTC = new Date();
-            const nowNairobi = new Date(nowUTC.getTime() + 3 * 60 * 60 * 1000);
+            const nowNairobi = new Date(nowUTC.getTime());
         
             document.getElementById('last-updated-text').textContent =
                 `Last updated: ${nowNairobi.toLocaleTimeString([], {
