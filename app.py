@@ -370,10 +370,6 @@ logging.getLogger().addFilter(ignore_bad_fd)
 def _year():
     return datetime.now().strftime('%Y')
 
-@app.route('/test')
-def test_ai():
-    return render_template('test.html')
-
 def send_notification(user_id, title, message):
     notification_data = {
         'title': title,
@@ -752,6 +748,352 @@ def login():
 
     login_type = request.args.get('type', 'student')
     return render_template('login.html', login_type=login_type, year=_year())
+
+#===================================================================
+
+
+# =========================================
+# AI CHAT ROUTES
+# =========================================
+
+@app.route('/ai-chat')
+@login_required
+def ai_chat():
+    """Render the AI chat page"""
+    return render_template('ai_chat.html', year=_year())
+
+@app.route('/api/ai-chat/send', methods=['POST'])
+@login_required
+def ai_chat_send():
+    """Send message to AI and get response with database context"""
+    try:
+        data = request.get_json()
+        user_message = data.get('message', '').strip()
+        
+        if not user_message:
+            return jsonify({'error': 'Message cannot be empty'}), 400
+
+        # Get database context based on the message
+        db_context = get_database_context(user_message, current_user)
+        
+        # Prepare the prompt with context
+        prompt = prepare_ai_prompt(user_message, db_context, current_user)
+        
+        # Call Gemini API
+        ai_response = call_gemini_api(prompt)
+        
+        # Save the conversation to database
+        save_ai_conversation(current_user.id, user_message, ai_response)
+        
+        return jsonify({
+            'success': True,
+            'response': ai_response,
+            'context_used': db_context.get('context_type', 'general')
+        })
+        
+    except Exception as e:
+        print(f"AI Chat Error: {e}")
+        return jsonify({
+            'success': False,
+            'error': 'Failed to get AI response. Please try again.'
+        }), 500
+
+def get_database_context(user_message, current_user):
+    """Extract relevant database information based on user query"""
+    message_lower = user_message.lower()
+    context = {'context_type': 'general', 'data': {}}
+    
+    try:
+        # User-related queries
+        if any(keyword in message_lower for keyword in ['user', 'profile', 'my account', 'about me']):
+            context['context_type'] = 'user_profile'
+            context['data']['current_user'] = {
+                'id': current_user.id,
+                'username': current_user.username,
+                'mobile': current_user.mobile,
+                'is_admin': current_user.is_admin,
+                'created_at': current_user.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+                'announcements_count': len(current_user.announcements),
+                'assignments_count': len(current_user.assignments)
+            }
+        
+        # Announcements queries
+        elif any(keyword in message_lower for keyword in ['announcement', 'news', 'update']):
+            context['context_type'] = 'announcements'
+            announcements = Announcement.query.order_by(Announcement.created_at.desc()).limit(10).all()
+            context['data']['announcements'] = [
+                {
+                    'id': a.id,
+                    'title': a.title,
+                    'content': a.content[:200] + '...' if len(a.content) > 200 else a.content,
+                    'created_at': a.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+                    'author': a.author.username if a.author else 'Unknown',
+                    'has_file': a.has_file()
+                } for a in announcements
+            ]
+        
+        # Assignments queries
+        elif any(keyword in message_lower for keyword in ['assignment', 'homework', 'task']):
+            context['context_type'] = 'assignments'
+            assignments = Assignment.query.order_by(Assignment.due_date.asc()).limit(10).all()
+            context['data']['assignments'] = [
+                {
+                    'id': a.id,
+                    'title': a.title,
+                    'description': a.description[:200] + '...' if a.description and len(a.description) > 200 else a.description,
+                    'due_date': a.due_date.strftime('%Y-%m-%d %H:%M:%S') if a.due_date else 'No due date',
+                    'topic': a.topic.name if a.topic else 'No topic',
+                    'creator': a.creator.username if a.creator else 'Unknown'
+                } for a in assignments
+            ]
+        
+        # Messages/queries
+        elif any(keyword in message_lower for keyword in ['message', 'chat', 'conversation']):
+            context['context_type'] = 'messages'
+            recent_messages = Message.query.filter_by(
+                user_id=current_user.id, 
+                is_deleted=False
+            ).order_by(Message.created_at.desc()).limit(5).all()
+            
+            context['data']['recent_messages'] = [
+                {
+                    'id': m.id,
+                    'content': m.content[:150] + '...' if len(m.content) > 150 else m.content,
+                    'room': m.room,
+                    'created_at': m.created_at.strftime('%Y-%m-%d %H:%M:%S')
+                } for m in recent_messages
+            ]
+        
+        # File queries
+        elif any(keyword in message_lower for keyword in ['file', 'document', 'material']):
+            context['context_type'] = 'files'
+            files = File.query.filter_by(uploaded_by=current_user.id).order_by(
+                File.uploaded_at.desc()
+            ).limit(10).all()
+            
+            context['data']['files'] = [
+                {
+                    'id': f.id,
+                    'name': f.name,
+                    'filename': f.filename,
+                    'file_type': f.file_type,
+                    'file_size': f.file_size,
+                    'category': f.category,
+                    'uploaded_at': f.uploaded_at.strftime('%Y-%m-%d %H:%M:%S')
+                } for f in files
+            ]
+        
+        # Timetable queries
+        elif any(keyword in message_lower for keyword in ['timetable', 'schedule', 'class']):
+            context['context_type'] = 'timetable'
+            today = datetime.now().strftime('%A')
+            timetable = Timetable.query.filter_by(day_of_week=today).order_by(
+                Timetable.start_time
+            ).all()
+            
+            context['data']['timetable'] = [
+                {
+                    'subject': t.subject,
+                    'start_time': t.start_time.strftime('%H:%M'),
+                    'end_time': t.end_time.strftime('%H:%M'),
+                    'room': t.room,
+                    'teacher': t.teacher
+                } for t in timetable
+            ]
+            context['data']['today'] = today
+        
+        # Admin-specific queries
+        elif any(keyword in message_lower for keyword in ['admin', 'users', 'statistics']) and current_user.is_admin:
+            context['context_type'] = 'admin_stats'
+            total_users = User.query.count()
+            total_announcements = Announcement.query.count()
+            total_assignments = Assignment.query.count()
+            online_users = len([uid for uid in online_users.keys() if online_users.get(uid)])
+            
+            context['data']['admin_stats'] = {
+                'total_users': total_users,
+                'total_announcements': total_announcements,
+                'total_assignments': total_assignments,
+                'online_users': online_users
+            }
+        
+        # Topic queries
+        elif any(keyword in message_lower for keyword in ['topic', 'subject', 'course']):
+            context['context_type'] = 'topics'
+            topics = Topic.query.all()
+            context['data']['topics'] = [
+                {
+                    'id': t.id,
+                    'name': t.name,
+                    'description': t.description
+                } for t in topics
+            ]
+    
+    except Exception as e:
+        print(f"Context extraction error: {e}")
+        # Continue with general context if there's an error
+    
+    return context
+
+def prepare_ai_prompt(user_message, db_context, current_user):
+    """Prepare the prompt for Gemini API with database context"""
+    
+    base_prompt = f"""You are an AI assistant for the LyxNexus educational platform. 
+Current user: {current_user.username} (ID: {current_user.id}, Admin: {current_user.is_admin})
+Current time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+
+Respond helpfully and concisely to the user's query. Use the provided database context when relevant.
+"""
+    
+    # Add context-specific information
+    if db_context['context_type'] == 'user_profile':
+        user_data = db_context['data']['current_user']
+        base_prompt += f"""
+USER PROFILE CONTEXT:
+- Username: {user_data['username']}
+- Mobile: {user_data['mobile']}
+- Account type: {'Administrator' if user_data['is_admin'] else 'Student'}
+- Member since: {user_data['created_at']}
+- Announcements created: {user_data['announcements_count']}
+- Assignments created: {user_data['assignments_count']}
+
+"""
+    
+    elif db_context['context_type'] == 'announcements':
+        announcements = db_context['data']['announcements']
+        base_prompt += f"""
+RECENT ANNOUNCEMENTS ({len(announcements)}):
+"""
+        for ann in announcements:
+            base_prompt += f"- {ann['title']} (by {ann['author']}, {ann['created_at']})\n"
+        base_prompt += "\n"
+    
+    elif db_context['context_type'] == 'assignments':
+        assignments = db_context['data']['assignments']
+        base_prompt += f"""
+UPCOMING ASSIGNMENTS ({len(assignments)}):
+"""
+        for assignment in assignments:
+            base_prompt += f"- {assignment['title']} (Due: {assignment['due_date']}, Topic: {assignment['topic']})\n"
+        base_prompt += "\n"
+    
+    elif db_context['context_type'] == 'messages':
+        messages = db_context['data']['recent_messages']
+        base_prompt += f"""
+YOUR RECENT MESSAGES ({len(messages)}):
+"""
+        for msg in messages:
+            base_prompt += f"- {msg['content']} (in {msg['room']}, {msg['created_at']})\n"
+        base_prompt += "\n"
+    
+    elif db_context['context_type'] == 'files':
+        files = db_context['data']['files']
+        base_prompt += f"""
+YOUR RECENT FILES ({len(files)}):
+"""
+        for file in files:
+            base_prompt += f"- {file['name']} ({file['file_type']}, {file['file_size']} bytes, {file['uploaded_at']})\n"
+        base_prompt += "\n"
+    
+    elif db_context['context_type'] == 'timetable':
+        timetable = db_context['data']['timetable']
+        today = db_context['data']['today']
+        base_prompt += f"""
+TODAY'S TIMETABLE ({today}):
+"""
+        for slot in timetable:
+            base_prompt += f"- {slot['subject']} ({slot['start_time']} - {slot['end_time']}) in {slot['room']} with {slot['teacher']}\n"
+        base_prompt += "\n"
+    
+    elif db_context['context_type'] == 'admin_stats' and current_user.is_admin:
+        stats = db_context['data']['admin_stats']
+        base_prompt += f"""
+PLATFORM STATISTICS:
+- Total users: {stats['total_users']}
+- Total announcements: {stats['total_announcements']}
+- Total assignments: {stats['total_assignments']}
+- Online users: {stats['online_users']}
+
+"""
+    
+    elif db_context['context_type'] == 'topics':
+        topics = db_context['data']['topics']
+        base_prompt += f"""
+AVAILABLE TOPICS ({len(topics)}):
+"""
+        for topic in topics:
+            base_prompt += f"- {topic['name']}: {topic['description']}\n"
+        base_prompt += "\n"
+    
+    base_prompt += f"""
+USER QUERY: {user_message}
+
+ASSISTANT RESPONSE:"""
+    
+    return base_prompt
+
+def call_gemini_api(prompt):
+    """Call the Gemini API with the prepared prompt"""
+    API_KEY = 'AIzaSyA3o8aKHTnVzuW9-qg10KjNy7Lcgn19N2I'
+    MODEL = "gemini-2.5-flash"
+    API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/{MODEL}:generateContent?key={API_KEY}"
+    
+    try:
+        response = requests.post(
+            API_URL,
+            headers={"Content-Type": "application/json"},
+            json={
+                "contents": [{
+                    "parts": [{"text": prompt}]
+                }],
+                "generationConfig": {
+                    "temperature": 0.7,
+                    "topK": 40,
+                    "topP": 0.95,
+                    "maxOutputTokens": 1024,
+                }
+            },
+            timeout=30
+        )
+        
+        if response.status_code == 200:
+            data = response.json()
+            return data['candidates'][0]['content']['parts'][0]['text']
+        else:
+            return "I apologize, but I'm having trouble processing your request right now. Please try again later."
+    
+    except Exception as e:
+        print(f"Gemini API Error: {e}")
+        return "I'm currently unavailable. Please check your connection and try again."
+
+def save_ai_conversation(user_id, user_message, ai_response):
+    """Save AI conversation to database"""
+    try:
+        # You might want to create a new table for AI conversations
+        # For now, we'll just log it
+        print(f"AI Conversation - User {user_id}: {user_message[:100]}...")
+        print(f"AI Response: {ai_response[:100]}...")
+        
+        # Optional: Create an AIConversation model later
+        # conversation = AIConversation(
+        #     user_id=user_id,
+        #     user_message=user_message,
+        #     ai_response=ai_response
+        # )
+        # db.session.add(conversation)
+        # db.session.commit()
+        
+    except Exception as e:
+        print(f"Error saving AI conversation: {e}")
+
+@app.route('/api/ai-chat/history')
+@login_required
+def get_ai_chat_history():
+    """Get AI chat history for the current user"""
+    # This would fetch from AIConversation table when implemented
+    # For now, return empty array
+    return jsonify({'conversations': []})
+
 
 #===================================================================
 @app.route('/')
