@@ -313,6 +313,18 @@ class TopicMaterial(db.Model):
     
     def __repr__(self):
         return f'<TopicMaterial {self.display_name or self.file.name}>'
+
+# Ai DB for conversation tracking
+class AIConversation(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user_message = db.Column(db.Text, nullable=False)
+    ai_response = db.Column(db.Text, nullable=False)
+    context_used = db.Column(db.String(50), default='general')
+    created_at = db.Column(db.DateTime, default=nairobi_time)
+    
+    # Relationships
+    user = db.relationship('User', backref=db.backref('ai_conversations', lazy=True))
 #==========================================    
 with app.app_context():
     try:
@@ -807,14 +819,19 @@ def get_database_context(user_message, current_user):
         # User-related queries
         if any(keyword in message_lower for keyword in ['user', 'profile', 'my account', 'about me']):
             context['context_type'] = 'user_profile'
+            
+            # Get accurate counts using database queries
+            announcements_count = db.session.query(Announcement).filter_by(user_id=current_user.id).count()
+            assignments_count = db.session.query(Assignment).filter_by(user_id=current_user.id).count()
+            
             context['data']['current_user'] = {
                 'id': current_user.id,
                 'username': current_user.username,
                 'mobile': current_user.mobile,
                 'is_admin': current_user.is_admin,
-                'created_at': current_user.created_at.strftime('%Y-%m-%d %H:%M:%S'),
-                'announcements_count': len(current_user.announcements),
-                'assignments_count': len(current_user.assignments)
+                'created_at': current_user.created_at.strftime('%Y-%m-%d %H:%M:%S') if current_user.created_at else 'Unknown',
+                'announcements_count': announcements_count,
+                'assignments_count': assignments_count
             }
         
         # Announcements queries
@@ -825,8 +842,8 @@ def get_database_context(user_message, current_user):
                 {
                     'id': a.id,
                     'title': a.title,
-                    'content': a.content[:200] + '...' if len(a.content) > 200 else a.content,
-                    'created_at': a.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+                    'content': a.content[:200] + '...' if a.content and len(a.content) > 200 else (a.content or 'No content'),
+                    'created_at': a.created_at.strftime('%Y-%m-%d %H:%M:%S') if a.created_at else 'Unknown',
                     'author': a.author.username if a.author else 'Unknown',
                     'has_file': a.has_file()
                 } for a in announcements
@@ -840,7 +857,7 @@ def get_database_context(user_message, current_user):
                 {
                     'id': a.id,
                     'title': a.title,
-                    'description': a.description[:200] + '...' if a.description and len(a.description) > 200 else a.description,
+                    'description': a.description[:200] + '...' if a.description and len(a.description) > 200 else (a.description or 'No description'),
                     'due_date': a.due_date.strftime('%Y-%m-%d %H:%M:%S') if a.due_date else 'No due date',
                     'topic': a.topic.name if a.topic else 'No topic',
                     'creator': a.creator.username if a.creator else 'Unknown'
@@ -858,9 +875,9 @@ def get_database_context(user_message, current_user):
             context['data']['recent_messages'] = [
                 {
                     'id': m.id,
-                    'content': m.content[:150] + '...' if len(m.content) > 150 else m.content,
+                    'content': m.content[:150] + '...' if m.content and len(m.content) > 150 else (m.content or 'No content'),
                     'room': m.room,
-                    'created_at': m.created_at.strftime('%Y-%m-%d %H:%M:%S')
+                    'created_at': m.created_at.strftime('%Y-%m-%d %H:%M:%S') if m.created_at else 'Unknown'
                 } for m in recent_messages
             ]
         
@@ -879,7 +896,7 @@ def get_database_context(user_message, current_user):
                     'file_type': f.file_type,
                     'file_size': f.file_size,
                     'category': f.category,
-                    'uploaded_at': f.uploaded_at.strftime('%Y-%m-%d %H:%M:%S')
+                    'uploaded_at': f.uploaded_at.strftime('%Y-%m-%d %H:%M:%S') if f.uploaded_at else 'Unknown'
                 } for f in files
             ]
         
@@ -894,10 +911,10 @@ def get_database_context(user_message, current_user):
             context['data']['timetable'] = [
                 {
                     'subject': t.subject,
-                    'start_time': t.start_time.strftime('%H:%M'),
-                    'end_time': t.end_time.strftime('%H:%M'),
-                    'room': t.room,
-                    'teacher': t.teacher
+                    'start_time': t.start_time.strftime('%H:%M') if t.start_time else 'Unknown',
+                    'end_time': t.end_time.strftime('%H:%M') if t.end_time else 'Unknown',
+                    'room': t.room or 'No room',
+                    'teacher': t.teacher or 'No teacher'
                 } for t in timetable
             ]
             context['data']['today'] = today
@@ -925,7 +942,7 @@ def get_database_context(user_message, current_user):
                 {
                     'id': t.id,
                     'name': t.name,
-                    'description': t.description
+                    'description': t.description or 'No description'
                 } for t in topics
             ]
     
@@ -1066,34 +1083,74 @@ def call_gemini_api(prompt):
         print(f"Gemini API Error: {e}")
         return "I'm currently unavailable. Please check your connection and try again."
 
-def save_ai_conversation(user_id, user_message, ai_response):
+# =========================================
+# AI CONVERSATION MODEL
+# =========================================
+
+def save_ai_conversation(user_id, user_message, ai_response, context_used='general'):
     """Save AI conversation to database"""
     try:
-        # You might want to create a new table for AI conversations
-        # For now, we'll just log it
-        print(f"AI Conversation - User {user_id}: {user_message[:100]}...")
-        print(f"AI Response: {ai_response[:100]}...")
+        conversation = AIConversation(
+            user_id=user_id,
+            user_message=user_message,
+            ai_response=ai_response,
+            context_used=context_used
+        )
+        db.session.add(conversation)
+        db.session.commit()
         
-        # Optional: Create an AIConversation model later
-        # conversation = AIConversation(
-        #     user_id=user_id,
-        #     user_message=user_message,
-        #     ai_response=ai_response
-        # )
-        # db.session.add(conversation)
-        # db.session.commit()
+        print(f"AI Conversation saved - User {user_id}: {user_message[:100]}...")
         
     except Exception as e:
+        db.session.rollback()
         print(f"Error saving AI conversation: {e}")
 
 @app.route('/api/ai-chat/history')
 @login_required
 def get_ai_chat_history():
     """Get AI chat history for the current user"""
-    # This would fetch from AIConversation table when implemented
-    # For now, return empty array
-    return jsonify({'conversations': []})
+    try:
+        conversations = AIConversation.query.filter_by(
+            user_id=current_user.id
+        ).order_by(AIConversation.created_at.desc()).limit(50).all()
+        
+        conversations_data = []
+        for conv in conversations:
+            conversations_data.append({
+                'id': conv.id,
+                'user_message': conv.user_message,
+                'ai_response': conv.ai_response,
+                'context_used': conv.context_used,
+                'created_at': conv.created_at.isoformat() if conv.created_at else None
+            })
+        
+        return jsonify({'conversations': conversations_data})
+        
+    except Exception as e:
+        print(f"Error fetching AI chat history: {e}")
+        return jsonify({'conversations': []})
 
+@app.route('/api/ai-chat/clear-history', methods=['DELETE'])
+@login_required
+def clear_ai_chat_history():
+    """Clear AI chat history for the current user"""
+    try:
+        # Delete all AI conversations for the current user
+        deleted_count = AIConversation.query.filter_by(user_id=current_user.id).delete()
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': f'Cleared {deleted_count} conversations from history'
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'success': False,
+            'error': 'Failed to clear chat history'
+        }), 500
+    
 
 #===================================================================
 @app.route('/')
