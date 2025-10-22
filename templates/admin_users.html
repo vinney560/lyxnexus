@@ -106,6 +106,10 @@
     .btn-secondary {
         background: linear-gradient(90deg, #6B7280, #4B5563);
     }
+
+    .btn-ai {
+        background: linear-gradient(90deg, #4fea7d, #6fa1e8);
+    }
     
     .btn-info {
         background: linear-gradient(90deg, #0EA5E9, #0369A1);
@@ -575,6 +579,9 @@
                     <span class="text-xl sm:text-2xl font-bold gradient-text">User Management</span>
                 </div>
                 <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4 w-full sm:w-auto">
+                    <button class="btn btn-ai" onclick="window.location.href='/ai-chat'">
+                        <i class="fas fa-robot mr-2"></i> User AI Help
+                    </button>
                     <button class="btn btn-secondary" onclick="window.location.href='/admin'">
                         <i class="fas fa-arrow-left mr-2"></i> Back to Dashboard
                     </button>
