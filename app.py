@@ -370,6 +370,10 @@ logging.getLogger().addFilter(ignore_bad_fd)
 def _year():
     return datetime.now().strftime('%Y')
 
+@app.route('/test')
+def test_aoi():
+    return render_template('test.html')
+
 def send_notification(user_id, title, message):
     notification_data = {
         'title': title,
