@@ -588,30 +588,21 @@ def auto_close_sessions():
         print(f"❌ [{now}] Error during cleanup: {e}")
         print("#" * 70)
 
-# to prevent using diff thread --> work with main thread
 with app.app_context():
     try:
         scheduler = BackgroundScheduler()
         scheduler.add_job(
             func=auto_close_sessions,
-            trigger=IntervalTrigger(minutes=3),
+            trigger=IntervalTrigger(minutes=2),
             id="Close_Idle_Connections",
             replace_existing=True
         )
         scheduler.start()
 
         now = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC')
-        print(f"🕒 [{now}] DB session auto-cleaner started (runs every 3 minutes).")
+        print(f"🕒 [{now}] DB session auto-cleaner started (runs every 2 minutes).")
 
-        def safe_shutdown():
-            try:
-                if scheduler.running:
-                    scheduler.shutdown(wait=False)
-            except Exception:
-                pass  # Ignore harmless shutdown errors
-            
-        atexit.register(safe_shutdown)
-        
+        # 🚫 no atexit handler — let scheduler run until Flask stops
     except Exception as e:
         print('X' * 70)
         print(f'Error initializing scheduler ==>> {e}')
