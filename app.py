@@ -770,6 +770,7 @@ def login():
 
 @app.route('/ai-chat')
 @login_required
+@admin_required
 def ai_chat():
     """Render the AI chat page"""
     return render_template('ai_chat.html', year=_year())
@@ -920,7 +921,7 @@ def get_database_context(user_message, current_user):
             context['data']['today'] = today
         
         # Admin-specific queries
-        elif any(keyword in message_lower for keyword in ['admin', 'users', 'statistics']) and current_user.is_admin:
+        elif any(keyword in message_lower for keyword in ['admin', 'users', 'statistics', 'user']) and current_user.is_admin:
             context['context_type'] = 'admin_stats'
             total_users = User.query.count()
             total_announcements = Announcement.query.count()
