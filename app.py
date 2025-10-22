@@ -503,15 +503,16 @@ scheduler.add_job(
     id="db_keep_alive_both",
     replace_existing=True
 )
+
 scheduler.start()
 
-log_status("🕒 Keep-alive scheduler started — pinging both DBs every 3 minutes")
+log_status("Keep-alive scheduler started — pinging both DBs every 3 minutes")
 atexit.register(lambda: scheduler.shutdown(wait=False))
 #-------------------------------------- Aiven max conn pool
 def auto_close_sessions():
     print('=' * 70)
     start_time = datetime.utcnow()
-    print(f"🕒 [{start_time.strftime('%Y-%m-%d %H:%M:%S UTC')}] Starting database session cleanup...")
+    print(f"[{start_time.strftime('%Y-%m-%d %H:%M:%S UTC')}] Starting database session cleanup...")
 
     try:
         total_before = total_after = None
@@ -532,15 +533,15 @@ def auto_close_sessions():
                     """), {'db_name': db_name})
                     total_before = result.scalar()
                     print(f"🔗 Active connections (excluding current): {total_before}")
-                    print(f"📊 Database: {db_name}")
+                    print(f"Database: {db_name}")
                     
             except Exception as e:
                 print(f"ℹ️ Initial count failed: {e}")
 
-            # Kill idle connections (PostgreSQL specific)
+            # Kill idle connections --> LImit 20
             try:
                 with db.engine.connect() as conn:
-                    # Kill idle connections that are older than 1 minute
+                    
                     kill_result = conn.execute(text("""
                         SELECT pg_terminate_backend(pid) FROM pg_stat_activity 
                         WHERE datname = current_database() 
@@ -576,7 +577,7 @@ def auto_close_sessions():
 
         # Summary
         print("-" * 70)
-        print(f"🧾 [{end_time.strftime('%Y-%m-%d %H:%M:%S UTC')}] Cleanup summary:")
+        print(f"[{end_time.strftime('%Y-%m-%d %H:%M:%S UTC')}] Cleanup summary:")
         print(f"   • Before: {total_before or 'N/A'} connections")
         print(f"   • Killed: {killed_connections} idle connections")
         print(f"   • After:  {total_after or 'N/A'} connections")
