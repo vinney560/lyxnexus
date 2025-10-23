@@ -783,6 +783,8 @@ def ai_chat():
 def ai_chat_send():
     """Send message to AI and get response with FULL database context and write operations"""
     try:
+        import json
+
         data = request.get_json()
         user_message = data.get('message', '').strip()
         
@@ -794,60 +796,75 @@ def ai_chat_send():
         
         # Prepare the prompt with FULL context and write capabilities
         prompt = prepare_comprehensive_ai_prompt(user_message, db_context, current_user)
-        # Start with a strict but flexible system rule
-        prompt = (
-            "Always respond in VALID JSON that matches the structure below.\n"
-            "After thinking about the user's request and the platform context, "
-            "fill the JSON with the correct operations that must be executed.\n"
-            "Never include markdown, explanations, or text outside JSON.\n"
-            "JSON format:\n"
+
+        # Add flexible JSON formatting rules
+        prompt += (
+            "\n\nIMPORTANT: You must ALWAYS respond in valid JSON that can be parsed by the system.\n"
+            "Your response can include write operations if needed, but they are optional.\n"
+            "Never include markdown, extra explanations, or text outside JSON.\n\n"
+            "The JSON must follow one of these two formats:\n\n"
+            "1️⃣ For normal answers (read-only or conversational):\n"
             "{\n"
-            '  "response": "<short description of what you did>",\n'
-            '  "operations": [\n'
+            '  \"response\": \"<your answer to the user>\"\n'
+            "}\n\n"
+            "2️⃣ For actions that modify data (admin operations):\n"
+            "{\n"
+            '  \"response\": \"<short summary of what you did>\",\n'
+            '  \"operations\": [\n'
             '    {\n'
-            '      "operation": "<create_announcement | update_assignment | delete_topic | etc>",\n'
-            '      "title": "<title or name if applicable>",\n'
-            '      "content": "<content or description if applicable>"\n'
+            '      \"operation\": \"<create_announcement | update_assignment | delete_topic | etc>\",\n'
+            '      \"title\": \"<title or name if applicable>\",\n'
+            '      \"content\": \"<content or description if applicable>\"\n'
             '    }\n'
             '  ]\n'
             "}\n\n"
-        )        
-        
+        )
+
         # Call Gemini API
         ai_response_text = call_gemini_api(prompt)
-        
-        # Parse AI response for operations
+        print("\n[DEBUG] AI Raw Response:\n", ai_response_text, "\n")
+
         operations_executed = []
+
         try:
-            # Try to parse as JSON for structured response
+            # Try to parse as JSON
             ai_response_data = json.loads(ai_response_text)
             ai_text_response = ai_response_data.get('response', ai_response_text)
             operations_requested = ai_response_data.get('operations', [])
-            
+
             # Execute requested operations (if user is admin)
             if operations_requested and current_user.is_admin:
+                print("[DEBUG] Operations received:", operations_requested)
                 for operation in operations_requested:
                     op_type = operation.get('operation')
                     op_data = operation.get('data', operation)  # Support both formats
-                    
+
+                    print(f"[DEBUG] Executing operation: {op_type} -> {op_data}")
+
                     success, message, result_data = execute_ai_database_operation(
                         op_type, op_data, current_user
                     )
-                    
+
                     operations_executed.append({
                         'type': op_type,
                         'success': success,
                         'message': message,
                         'data': result_data
                     })
-                    
+
         except json.JSONDecodeError:
-            # If not JSON, use as plain text response
+            # If not JSON, treat as plain text
             ai_text_response = ai_response_text
-        
-        # Save the conversation to database
-        save_ai_conversation(current_user.id, user_message, ai_text_response, db_context['context_type'])
-        
+            operations_requested = []
+
+        # Save the AI conversation
+        save_ai_conversation(
+            current_user.id,
+            user_message,
+            ai_text_response,
+            db_context.get('context_type', 'full_database')
+        )
+
         return jsonify({
             'success': True,
             'response': ai_text_response,
@@ -855,13 +872,14 @@ def ai_chat_send():
             'context_used': db_context.get('context_type', 'full_database'),
             'data_sources': list(db_context['data'].keys()),
             'is_admin': current_user.is_admin
-        })
-        
+        }), 200
+
     except Exception as e:
-        print(f"AI Chat Error: {e}")
+        print(f"[ERROR] AI Chat Route Exception: {e}")
         return jsonify({
             'success': False,
-            'error': 'Failed to get AI response. Please try again.'
+            'error': 'Failed to process AI response.',
+            'details': str(e)
         }), 500
 
 def execute_ai_database_operation(operation_type, operation_data, current_user):
