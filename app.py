@@ -776,34 +776,32 @@ import json
 def ai_chat():
     """Render the AI chat page"""
     return render_template('ai_chat.html', year=_year())
-
-from flask import Response, stream_with_context
-import requests, json
-
-# Update the AI chat send route to handle write operations + streaming
+# Update the AI chat send route to handle write operations
 @app.route('/api/ai-chat/send', methods=['POST'])
 @login_required
 def ai_chat_send():
-    """Send message to AI and stream response with FULL database context and write operations"""
+    """Send message to AI and get response with FULL database context and write operations"""
     try:
+        import json
+
         data = request.get_json()
         user_message = data.get('message', '').strip()
 
         if not user_message:
             return jsonify({'error': 'Message cannot be empty'}), 400
 
-        # Get COMPLETE database context
+        # Get COMPLETE database context without limits
         db_context = get_complete_database_context(user_message, current_user)
 
-        # Prepare prompt with full capabilities
+        # Prepare the prompt with FULL context and write capabilities
         prompt = prepare_comprehensive_ai_prompt(user_message, db_context, current_user)
 
         # Add flexible JSON formatting rules
         prompt += (
             "\n\nIMPORTANT: You must ALWAYS respond in valid JSON that can be parsed by the system.\n"
-            "NOTE: When performing delete_user or update_user_admin_status operations, always include the explicit 'user_id' number provided in the user's request. Do not guess or infer IDs.\n"
-            "Your response can include write operations if needed, but they are optional. You can access the internet and search related sites or data related to LyxNexus; the URL https://lyxnexus.onrender.com is for this platform.\n"
-            "Never include markdown, extra explanations, or text outside JSON if the request involves creation, deletion, modification, or any technical operation.\n\n"
+            "NOTE: When performing delete_user, update_user_admin_status operations, always include the explicit 'user_id' number provided in the user's request. Do not guess or infer IDs.\n"
+            "Your response can include write operations if needed, but they are optional. You can access the internet and search related sites, results and data related to LyxNexus, url https://lyxnexus.onrender.com is for this platform.\n"
+            "Never include markdown, extra explanations, or text outside JSON if request is to create, delete, modify or technical something.\n\n"
             "The JSON must follow one of these two formats:\n\n"
             "1️⃣ For normal answers (read-only or conversational):\n"
             "{\n"
@@ -814,87 +812,84 @@ def ai_chat_send():
             '  \"response\": \"<short summary of what you did>\",\n'
             '  \"operations\": [\n'
             '    {\n'
-            '      \"operation\": \"<create_announcement | update_assignment | delete_topic | delete_user | update_user_admin_status | etc>\",\n'
+            '      \"operation\": \"<create_announcement | update_assignment | delete_topic | etc>\",\n'
             '      \"title\": \"<title or name if applicable>\",\n'
-            '      \"content\": \"<content or description if applicable>\",\n'
-            '      \"user_id\": <id if applicable>,\n'
-            '      \"is_admin\": <true | false if applicable>\n'
+            '      \"content\": \"<content or description if applicable>\"\n'
             '    }\n'
             '  ]\n'
             "}\n\n"
         )
 
-        # Stream response from Gemini API
-        MODEL = "gemini-2.5-flash-live"
-        API_KEY = "YOUR_GEMINI_API_KEY"
-        API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/{MODEL}:streamGenerateContent?key={API_KEY}"
+        # Call Gemini API
+        ai_response_text = call_gemini_api(prompt)
+        print("\n[DEBUG] AI Raw Response:\n", ai_response_text, "\n")
 
-        payload = {
-            "contents": [{"parts": [{"text": prompt}]}],
-            "generationConfig": {"temperature": 0.7, "maxOutputTokens": 2048},
-        }
+        operations_executed = []
 
-        def stream_ai_response():
-            """Stream chunks of AI output as they arrive"""
-            try:
-                with requests.post(API_URL, json=payload, headers={"Content-Type": "application/json"}, stream=True) as r:
-                    buffer = ""
-                    for line in r.iter_lines():
-                        if line:
-                            try:
-                                chunk = json.loads(line.decode("utf-8"))
-                                text_piece = (
-                                    chunk.get("candidates", [{}])[0]
-                                    .get("content", {})
-                                    .get("parts", [{}])[0]
-                                    .get("text", "")
-                                )
-                                buffer += text_piece
-                                yield text_piece
-                            except Exception:
-                                continue
+        try:
+            # 🧹 Clean Markdown code fences if present (```json ... ```)
+            if ai_response_text.strip().startswith("```"):
+                ai_response_text = ai_response_text.strip().strip("`")
+                ai_response_text = ai_response_text.replace("json\n", "").replace("JSON\n", "")
+                ai_response_text = ai_response_text.strip()
 
-                    # After streaming completes, try to process operations
-                    try:
-                        ai_response_data = json.loads(buffer)
-                        ai_text_response = ai_response_data.get("response", buffer)
-                        operations_requested = ai_response_data.get("operations", [])
-                        operations_executed = []
+            # Try to parse as JSON
+            ai_response_data = json.loads(ai_response_text)
+            ai_text_response = ai_response_data.get('response', ai_response_text)
+            operations_requested = ai_response_data.get('operations', [])
 
-                        if operations_requested and current_user.is_admin:
-                            for operation in operations_requested:
-                                op_type = operation.get("operation")
-                                op_data = operation.get("data", operation)
-                                success, message, result_data = execute_ai_database_operation(
-                                    op_type, op_data, current_user
-                                )
-                                operations_executed.append({
-                                    "type": op_type,
-                                    "success": success,
-                                    "message": message,
-                                    "data": result_data
-                                })
-                        # Save chat after full completion
-                        save_ai_conversation(
-                            current_user.id, user_message, ai_text_response,
-                            db_context.get("context_type", "full_database")
-                        )
+            print("[DEBUG] Current user is admin:", current_user.is_admin)
+            print("[DEBUG] Operations requested:", operations_requested)
 
-                    except Exception as e:
-                        print(f"[DEBUG] Post-stream parse failed: {e}")
+            # Execute requested operations (if user is admin)
+            if operations_requested and current_user.is_admin:
+                print("[DEBUG] Operations received:", operations_requested)
+                for operation in operations_requested:
+                    op_type = operation.get('operation')
+                    op_data = operation.get('data', operation)  # Support both formats
 
-            except Exception as e:
-                print(f"[STREAM ERROR] {e}")
-                yield f"\n[ERROR] {str(e)}"
+                    print(f"[DEBUG] Executing operation: {op_type} -> {op_data}")
 
-        return Response(stream_with_context(stream_ai_response()), mimetype="text/plain")
+                    success, message, result_data = execute_ai_database_operation(
+                        op_type, op_data, current_user
+                    )
+
+                    operations_executed.append({
+                        'type': op_type,
+                        'success': success,
+                        'message': message,
+                        'data': result_data
+                    })
+
+        except json.JSONDecodeError:
+            # If not JSON, treat as plain text
+            print("[DEBUG] JSON parse failed, treating as plain text.")
+            ai_text_response = ai_response_text
+            operations_requested = []
+
+        # Save the AI conversation
+        save_ai_conversation(
+            current_user.id,
+            user_message,
+            ai_text_response,
+            db_context.get('context_type', 'full_database')
+        )
+
+        return jsonify({
+            'success': True,
+            'response': ai_text_response,
+            'operations_executed': operations_executed,
+            'context_used': db_context.get('context_type', 'full_database'),
+            'data_sources': list(db_context['data'].keys()),
+            'is_admin': current_user.is_admin
+        }), 200
 
     except Exception as e:
         print(f"[ERROR] AI Chat Route Exception: {e}")
         return jsonify({
-            "success": False,
-            "error": "Failed to process AI response.",
-            "details": str(e)
+            'success': False,
+            'error': 'Failed to process AI response.',
+            'details': str(e)
         }), 500
 
 def execute_ai_database_operation(operation_type, operation_data, current_user):
