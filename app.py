@@ -800,7 +800,7 @@ def ai_chat_send():
         prompt += (
             "\n\nIMPORTANT: You must ALWAYS respond in valid JSON that can be parsed by the system.\n"
             "NOTE: When performing delete_user, update_user_admin_status operations, always include the explicit 'user_id' number provided in the user's request. Do not guess or infer IDs.\n"
-            "Your response can include write operations if needed, but they are optional.\n"
+            "Your response can include write operations if needed, but they are optional. You can access the internet and search related sites, results and data related to LyxNexus, url https://lyxnexus.onrender.com is for this platform.\n"
             "Never include markdown, extra explanations, or text outside JSON if request is to create, delete, modify or technical something.\n\n"
             "The JSON must follow one of these two formats:\n\n"
             "1️⃣ For normal answers (read-only or conversational):\n"
@@ -818,9 +818,6 @@ def ai_chat_send():
             '    }\n'
             '  ]\n'
             "}\n\n"
-        )
-        prompt += (
-            "\n\nYou can access the internet and search related sites, results and data related to LyxNexus, url https://lyxnexus.onrender.com is for this platform, the pages are \main-page, \files, and similar.\n"
         )
 
         # Call Gemini API
