@@ -1516,12 +1516,12 @@
                         this.typeMessage(data.response, 'ai', data.context_used);
                         this.saveToHistory(message, data.response);
                     } else {
-                        this.addMessage("Sorry, I encountered an error. Please try again.", 'ai');
+                        this.typeMessage("Sorry, I encountered an error. Please try again.", 'ai');
                     }
                 } catch (error) {
                     console.error('Error sending message:', error);
                     this.removeTypingIndicator();
-                    this.addMessage("Sorry, I'm having trouble connecting. Please check your internet and try again.", 'ai');
+                    this.typeMessage("Sorry, I'm having trouble connecting. Please check your internet and try again.", 'ai');
                 } finally {
                     // Reset processing flag
                     this.isProcessing = false;
