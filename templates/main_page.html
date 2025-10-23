@@ -12,6 +12,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
 
     <script src="{{ url_for('static', filename='js/n-s.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/typed.js@2.0.12"></script>
 </head>
 <style>
     :root {
@@ -602,7 +603,7 @@
 
         <section id="announcements" class="content-section active">
             <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl md:text-3xl font-bold gradient-text">Latest Announcements</h2>
+                <h2 id="announceH" class="text-2xl md:text-3xl font-bold gradient-text"></h2>
                 <span class="text-gray-400 text-sm" id="announcements-count">Loading...</span>
             </div>
             <div id="announcements-container">
@@ -786,6 +787,13 @@
             TIMETABLE: `${API_BASE}/timetable`,
             TOPICS: `${API_BASE}/topics`
         };
+        new Typed('#announceH', {
+            strings: ['Latest Announcements', 'Latest Announcements'],
+            typeSpeed: 80,
+            backSpeed: 60,
+            backDelay: 40,
+            loop: true
+        });
         const logoutBtn = document.getElementById('logout');
         logoutBtn.addEventListener('click', (e) => {
             logoutBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> logging out...';
