@@ -776,6 +776,7 @@ import json
 def ai_chat():
     """Render the AI chat page"""
     return render_template('ai_chat.html', year=_year())
+
 # Update the AI chat send route to handle write operations
 @app.route('/api/ai-chat/send', methods=['POST'])
 @login_required
@@ -799,9 +800,9 @@ def ai_chat_send():
         # Add flexible JSON formatting rules
         prompt += (
             "\n\nIMPORTANT: You must ALWAYS respond in valid JSON that can be parsed by the system.\n"
-            "NOTE: When performing delete_user, update_user_admin_status operations, always include the explicit 'user_id' number provided in the user's request. Do not guess or infer IDs.\n"
-            "Your response can include write operations if needed, but they are optional. You can access the internet and search related sites, results and data related to LyxNexus, url https://lyxnexus.onrender.com is for this platform.\n"
-            "Never include markdown, extra explanations, or text outside JSON if request is to create, delete, modify or technical something.\n\n"
+            "NOTE: When performing delete_user or update_user_admin_status operations, always include the explicit 'user_id' number provided in the user's request. Do not guess or infer IDs.\n"
+            "Your response can include write operations if needed, but they are optional. You can access the internet and search related sites or data related to LyxNexus; the URL https://lyxnexus.onrender.com is for this platform.\n"
+            "Never include markdown, extra explanations, or text outside JSON if the request involves creation, deletion, modification, or any technical operation.\n\n"
             "The JSON must follow one of these two formats:\n\n"
             "1️⃣ For normal answers (read-only or conversational):\n"
             "{\n"
@@ -812,9 +813,11 @@ def ai_chat_send():
             '  \"response\": \"<short summary of what you did>\",\n'
             '  \"operations\": [\n'
             '    {\n'
-            '      \"operation\": \"<create_announcement | update_assignment | delete_topic | etc>\",\n'
+            '      \"operation\": \"<create_announcement | update_assignment | delete_topic | delete_user | update_user_admin_status | etc>\",\n'
             '      \"title\": \"<title or name if applicable>\",\n'
-            '      \"content\": \"<content or description if applicable>\"\n'
+            '      \"content\": \"<content or description if applicable>\",\n'
+            '      \"user_id\": <id if applicable>,\n'
+            '      \"is_admin\": <true | false if applicable>\n'
             '    }\n'
             '  ]\n'
             "}\n\n"
@@ -829,9 +832,8 @@ def ai_chat_send():
         try:
             # 🧹 Clean Markdown code fences if present (```json ... ```)
             if ai_response_text.strip().startswith("```"):
-                ai_response_text = ai_response_text.strip().strip("`")
-                ai_response_text = ai_response_text.replace("json\n", "").replace("JSON\n", "")
-                ai_response_text = ai_response_text.strip()
+                ai_response_text = ai_response_text.strip().lstrip("`").rstrip("`")
+                ai_response_text = ai_response_text.replace("json\n", "").replace("JSON\n", "").strip()
 
             # Try to parse as JSON
             ai_response_data = json.loads(ai_response_text)
@@ -843,7 +845,6 @@ def ai_chat_send():
 
             # Execute requested operations (if user is admin)
             if operations_requested and current_user.is_admin:
-                print("[DEBUG] Operations received:", operations_requested)
                 for operation in operations_requested:
                     op_type = operation.get('operation')
                     op_data = operation.get('data', operation)  # Support both formats
@@ -862,7 +863,6 @@ def ai_chat_send():
                     })
 
         except json.JSONDecodeError:
-            # If not JSON, treat as plain text
             print("[DEBUG] JSON parse failed, treating as plain text.")
             ai_text_response = ai_response_text
             operations_requested = []
