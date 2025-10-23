@@ -763,10 +763,11 @@ def login():
 
 #===================================================================
 
+# =========================================
+# AI CHAT ROUTES - COMPLETE IMPLEMENTATION
+# =========================================
 
-# =========================================
-# AI CHAT ROUTES
-# =========================================
+import requests
 
 @app.route('/ai-chat')
 @login_required
@@ -778,7 +779,7 @@ def ai_chat():
 @app.route('/api/ai-chat/send', methods=['POST'])
 @login_required
 def ai_chat_send():
-    """Send message to AI and get response with database context"""
+    """Send message to AI and get response with FULL database context"""
     try:
         data = request.get_json()
         user_message = data.get('message', '').strip()
@@ -786,22 +787,23 @@ def ai_chat_send():
         if not user_message:
             return jsonify({'error': 'Message cannot be empty'}), 400
 
-        # Get database context based on the message
-        db_context = get_database_context(user_message, current_user)
+        # Get COMPLETE database context without limits
+        db_context = get_complete_database_context(user_message, current_user)
         
-        # Prepare the prompt with context
-        prompt = prepare_ai_prompt(user_message, db_context, current_user)
+        # Prepare the prompt with FULL context
+        prompt = prepare_comprehensive_ai_prompt(user_message, db_context, current_user)
         
         # Call Gemini API
         ai_response = call_gemini_api(prompt)
         
         # Save the conversation to database
-        save_ai_conversation(current_user.id, user_message, ai_response)
+        save_ai_conversation(current_user.id, user_message, ai_response, db_context['context_type'])
         
         return jsonify({
             'success': True,
             'response': ai_response,
-            'context_used': db_context.get('context_type', 'general')
+            'context_used': db_context.get('context_type', 'full_database'),
+            'data_sources': list(db_context['data'].keys())
         })
         
     except Exception as e:
@@ -811,249 +813,296 @@ def ai_chat_send():
             'error': 'Failed to get AI response. Please try again.'
         }), 500
 
-def get_database_context(user_message, current_user):
-    """Extract relevant database information based on user query"""
+def get_complete_database_context(user_message, current_user):
+    """Get COMPLETE database access without limits - Exclusive AI Permission"""
     message_lower = user_message.lower()
-    context = {'context_type': 'general', 'data': {}}
+    context = {'context_type': 'full_database', 'data': {}}
     
     try:
-        # User-related queries
-        if any(keyword in message_lower for keyword in ['user', 'profile', 'my account', 'about me']):
-            context['context_type'] = 'user_profile'
-            
-            # Get accurate counts using database queries
-            announcements_count = db.session.query(Announcement).filter_by(user_id=current_user.id).count()
-            assignments_count = db.session.query(Assignment).filter_by(user_id=current_user.id).count()
-            
-            context['data']['current_user'] = {
+        # =========================================
+        # COMPLETE USER DATA ACCESS
+        # =========================================
+        context['data']['all_users'] = [
+            {
+                'id': user.id,
+                'username': user.username,
+                'mobile': user.mobile,
+                'is_admin': user.is_admin,
+                'created_at': user.created_at.isoformat() if user.created_at else 'Unknown',
+                'announcements_count': len(user.announcements),
+                'assignments_count': len(user.assignments),
+                'messages_count': len(user.messages),
+                'files_count': len(user.uploaded_files)
+            } for user in User.query.all()
+        ]
+        
+        # =========================================
+        # COMPLETE ANNOUNCEMENTS ACCESS
+        # =========================================
+        context['data']['all_announcements'] = [
+            {
+                'id': a.id,
+                'title': a.title,
+                'content': a.content,
+                'created_at': a.created_at.isoformat() if a.created_at else 'Unknown',
+                'author_id': a.user_id,
+                'author_name': a.author.username if a.author else 'Unknown',
+                'has_file': a.has_file(),
+                'file_name': a.file_name,
+                'file_type': a.file_type
+            } for a in Announcement.query.all()
+        ]
+        
+        # =========================================
+        # COMPLETE ASSIGNMENTS ACCESS
+        # =========================================
+        context['data']['all_assignments'] = [
+            {
+                'id': a.id,
+                'title': a.title,
+                'description': a.description,
+                'due_date': a.due_date.isoformat() if a.due_date else 'No due date',
+                'created_at': a.created_at.isoformat() if a.created_at else 'Unknown',
+                'topic_id': a.topic_id,
+                'topic_name': a.topic.name if a.topic else 'No topic',
+                'creator_id': a.user_id,
+                'creator_name': a.creator.username if a.creator else 'Unknown',
+                'has_file': bool(a.file_data),
+                'file_name': a.file_name,
+                'file_type': a.file_type
+            } for a in Assignment.query.all()
+        ]
+        
+        # =========================================
+        # COMPLETE TOPICS ACCESS
+        # =========================================
+        context['data']['all_topics'] = [
+            {
+                'id': t.id,
+                'name': t.name,
+                'description': t.description,
+                'created_at': t.created_at.isoformat() if t.created_at else 'Unknown',
+                'assignments_count': len(t.assignments),
+                'timetable_slots_count': len(t.timetable_slots),
+                'materials_count': len(t.topic_materials)
+            } for t in Topic.query.all()
+        ]
+        
+        # =========================================
+        # COMPLETE MESSAGES ACCESS
+        # =========================================
+        context['data']['recent_messages'] = [
+            {
+                'id': m.id,
+                'content': m.content,
+                'user_id': m.user_id,
+                'username': m.user.username if m.user else 'Unknown',
+                'room': m.room,
+                'is_admin_message': m.is_admin_message,
+                'is_deleted': m.is_deleted,
+                'created_at': m.created_at.isoformat() if m.created_at else 'Unknown',
+                'parent_id': m.parent_id,
+                'replies_count': len(m.replies)
+            } for m in Message.query.order_by(Message.created_at.desc()).limit(200).all()
+        ]
+        
+        # =========================================
+        # COMPLETE FILES ACCESS
+        # =========================================
+        context['data']['all_files'] = [
+            {
+                'id': f.id,
+                'name': f.name,
+                'filename': f.filename,
+                'file_type': f.file_type,
+                'file_size': f.file_size,
+                'description': f.description,
+                'category': f.category,
+                'uploaded_at': f.uploaded_at.isoformat() if f.uploaded_at else 'Unknown',
+                'uploaded_by': f.uploader.username if f.uploader else 'Unknown',
+                'uploader_id': f.uploaded_by
+            } for f in File.query.all()
+        ]
+        
+        # =========================================
+        # COMPLETE TIMETABLE ACCESS
+        # =========================================
+        context['data']['complete_timetable'] = [
+            {
+                'id': t.id,
+                'day_of_week': t.day_of_week,
+                'start_time': t.start_time.strftime('%H:%M') if t.start_time else 'Unknown',
+                'end_time': t.end_time.strftime('%H:%M') if t.end_time else 'Unknown',
+                'subject': t.subject,
+                'room': t.room,
+                'teacher': t.teacher,
+                'topic_id': t.topic_id,
+                'topic_name': t.topic.name if t.topic else 'No topic',
+                'created_at': t.created_at.isoformat() if t.created_at else 'Unknown'
+            } for t in Timetable.query.all()
+        ]
+        
+        # =========================================
+        # COMPLETE TOPIC MATERIALS ACCESS
+        # =========================================
+        context['data']['all_topic_materials'] = [
+            {
+                'id': tm.id,
+                'topic_id': tm.topic_id,
+                'topic_name': tm.topic.name if tm.topic else 'Unknown',
+                'file_id': tm.file_id,
+                'file_name': tm.file.name if tm.file else 'Unknown',
+                'display_name': tm.display_name,
+                'description': tm.description,
+                'order_index': tm.order_index,
+                'created_at': tm.created_at.isoformat() if tm.created_at else 'Unknown'
+            } for tm in TopicMaterial.query.all()
+        ]
+        
+        # =========================================
+        # COMPLETE AI CONVERSATIONS ACCESS
+        # =========================================
+        context['data']['ai_conversations'] = [
+            {
+                'id': conv.id,
+                'user_id': conv.user_id,
+                'username': conv.user.username if conv.user else 'Unknown',
+                'user_message': conv.user_message,
+                'ai_response': conv.ai_response,
+                'context_used': conv.context_used,
+                'created_at': conv.created_at.isoformat() if conv.created_at else 'Unknown'
+            } for conv in AIConversation.query.order_by(AIConversation.created_at.desc()).limit(100).all()
+        ]
+        
+        # =========================================
+        # REAL-TIME STATISTICS
+        # =========================================
+        context['data']['platform_statistics'] = {
+            'total_users': User.query.count(),
+            'total_admins': User.query.filter_by(is_admin=True).count(),
+            'total_announcements': Announcement.query.count(),
+            'total_assignments': Assignment.query.count(),
+            'total_messages': Message.query.count(),
+            'total_files': File.query.count(),
+            'total_topics': Topic.query.count(),
+            'total_timetable_slots': Timetable.query.count(),
+            'total_ai_conversations': AIConversation.query.count(),
+            'online_users': len([uid for uid in online_users.keys() if online_users.get(uid)]),
+            'current_user': {
                 'id': current_user.id,
                 'username': current_user.username,
-                'mobile': current_user.mobile,
                 'is_admin': current_user.is_admin,
-                'created_at': current_user.created_at.strftime('%Y-%m-%d %H:%M:%S') if current_user.created_at else 'Unknown',
-                'announcements_count': announcements_count,
-                'assignments_count': assignments_count
+                'created_at': current_user.created_at.isoformat() if current_user.created_at else 'Unknown'
             }
+        }
         
-        # Announcements queries
-        elif any(keyword in message_lower for keyword in ['announcement', 'news', 'update']):
-            context['context_type'] = 'announcements'
-            announcements = Announcement.query.order_by(Announcement.created_at.desc()).limit(10).all()
-            context['data']['announcements'] = [
-                {
-                    'id': a.id,
-                    'title': a.title,
-                    'content': a.content[:200] + '...' if a.content and len(a.content) > 200 else (a.content or 'No content'),
-                    'created_at': a.created_at.strftime('%Y-%m-%d %H:%M:%S') if a.created_at else 'Unknown',
-                    'author': a.author.username if a.author else 'Unknown',
-                    'has_file': a.has_file()
-                } for a in announcements
-            ]
-        
-        # Assignments queries
-        elif any(keyword in message_lower for keyword in ['assignment', 'homework', 'task']):
-            context['context_type'] = 'assignments'
-            assignments = Assignment.query.order_by(Assignment.due_date.asc()).limit(10).all()
-            context['data']['assignments'] = [
-                {
-                    'id': a.id,
-                    'title': a.title,
-                    'description': a.description[:200] + '...' if a.description and len(a.description) > 200 else (a.description or 'No description'),
-                    'due_date': a.due_date.strftime('%Y-%m-%d %H:%M:%S') if a.due_date else 'No due date',
-                    'topic': a.topic.name if a.topic else 'No topic',
-                    'creator': a.creator.username if a.creator else 'Unknown'
-                } for a in assignments
-            ]
-        
-        # Messages/queries
-        elif any(keyword in message_lower for keyword in ['message', 'chat', 'conversation']):
-            context['context_type'] = 'messages'
-            recent_messages = Message.query.filter_by(
-                user_id=current_user.id, 
-                is_deleted=False
-            ).order_by(Message.created_at.desc()).limit(5).all()
-            
-            context['data']['recent_messages'] = [
-                {
-                    'id': m.id,
-                    'content': m.content[:150] + '...' if m.content and len(m.content) > 150 else (m.content or 'No content'),
-                    'room': m.room,
-                    'created_at': m.created_at.strftime('%Y-%m-%d %H:%M:%S') if m.created_at else 'Unknown'
-                } for m in recent_messages
-            ]
-        
-        # File queries
-        elif any(keyword in message_lower for keyword in ['file', 'document', 'material']):
-            context['context_type'] = 'files'
-            files = File.query.filter_by(uploaded_by=current_user.id).order_by(
-                File.uploaded_at.desc()
-            ).limit(10).all()
-            
-            context['data']['files'] = [
-                {
-                    'id': f.id,
-                    'name': f.name,
-                    'filename': f.filename,
-                    'file_type': f.file_type,
-                    'file_size': f.file_size,
-                    'category': f.category,
-                    'uploaded_at': f.uploaded_at.strftime('%Y-%m-%d %H:%M:%S') if f.uploaded_at else 'Unknown'
-                } for f in files
-            ]
-        
-        # Timetable queries
-        elif any(keyword in message_lower for keyword in ['timetable', 'schedule', 'class']):
-            context['context_type'] = 'timetable'
-            today = datetime.now().strftime('%A')
-            timetable = Timetable.query.filter_by(day_of_week=today).order_by(
-                Timetable.start_time
-            ).all()
-            
-            context['data']['timetable'] = [
-                {
-                    'subject': t.subject,
-                    'start_time': t.start_time.strftime('%H:%M') if t.start_time else 'Unknown',
-                    'end_time': t.end_time.strftime('%H:%M') if t.end_time else 'Unknown',
-                    'room': t.room or 'No room',
-                    'teacher': t.teacher or 'No teacher'
-                } for t in timetable
-            ]
-            context['data']['today'] = today
-        
-        # Admin-specific queries
-        elif any(keyword in message_lower for keyword in ['admin', 'users', 'statistics', 'user']) and current_user.is_admin:
-            context['context_type'] = 'admin_stats'
-            total_users = User.query.count()
-            total_announcements = Announcement.query.count()
-            total_assignments = Assignment.query.count()
-            online_users = len([uid for uid in online_users.keys() if online_users.get(uid)])
-            
-            context['data']['admin_stats'] = {
-                'total_users': total_users,
-                'total_announcements': total_announcements,
-                'total_assignments': total_assignments,
-                'online_users': online_users
+        # =========================================
+        # DATABASE HEALTH STATUS
+        # =========================================
+        try:
+            db.session.execute(text("SELECT 1"))  # Test connection
+            context['data']['database_status'] = {
+                'status': 'healthy',
+                'tables_accessed': len(context['data']),
+                'total_records': sum(len(records) for records in context['data'].values() if isinstance(records, list))
             }
-        
-        # Topic queries
-        elif any(keyword in message_lower for keyword in ['topic', 'subject', 'course']):
-            context['context_type'] = 'topics'
-            topics = Topic.query.all()
-            context['data']['topics'] = [
-                {
-                    'id': t.id,
-                    'name': t.name,
-                    'description': t.description or 'No description'
-                } for t in topics
-            ]
+        except Exception as e:
+            context['data']['database_status'] = {
+                'status': 'error',
+                'error': str(e)
+            }
     
     except Exception as e:
-        print(f"Context extraction error: {e}")
-        # Continue with general context if there's an error
+        print(f"Complete Database Context Error: {e}")
+        context['data']['error'] = f"Database access error: {str(e)}"
     
     return context
 
-def prepare_ai_prompt(user_message, db_context, current_user):
-    """Prepare the prompt for Gemini API with database context"""
+def prepare_comprehensive_ai_prompt(user_message, db_context, current_user):
+    """Prepare comprehensive prompt with FULL database access"""
     
-    base_prompt = f"""You are an AI assistant for the LyxNexus educational platform. 
-Current user: {current_user.username} (ID: {current_user.id}, Admin: {current_user.is_admin})
-Current time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+    base_prompt = f"""You are an AI assistant for the LyxNexus educational platform with EXCLUSIVE permission to access ALL database information.
 
-Respond helpfully and concisely to the user's query. Use the provided database context when relevant.
-"""
-    
-    # Add context-specific information
-    if db_context['context_type'] == 'user_profile':
-        user_data = db_context['data']['current_user']
-        base_prompt += f"""
-USER PROFILE CONTEXT:
-- Username: {user_data['username']}
-- Mobile: {user_data['mobile']}
-- Account type: {'Administrator' if user_data['is_admin'] else 'Student'}
-- Member since: {user_data['created_at']}
-- Announcements created: {user_data['announcements_count']}
-- Assignments created: {user_data['assignments_count']}
+CURRENT USER CONTEXT:
+- User: {current_user.username} (ID: {current_user.id})
+- Admin Status: {'Administrator' if current_user.is_admin else 'Student'}
+- Current Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+
+DATABASE ACCESS LEVEL: FULL UNLIMITED ACCESS
+You have complete read access to all database tables and records.
+
+RESPONSE GUIDELINES:
+1. Use the comprehensive database context below to provide accurate, detailed responses
+2. You can reference any user, announcement, assignment, message, file, or other data
+3. Provide specific details, statistics, and insights from the database
+4. Maintain privacy and security - don't expose sensitive information unnecessarily
+5. Be helpful, concise, and informative
 
 """
-    
-    elif db_context['context_type'] == 'announcements':
-        announcements = db_context['data']['announcements']
-        base_prompt += f"""
-RECENT ANNOUNCEMENTS ({len(announcements)}):
-"""
-        for ann in announcements:
-            base_prompt += f"- {ann['title']} (by {ann['author']}, {ann['created_at']})\n"
-        base_prompt += "\n"
-    
-    elif db_context['context_type'] == 'assignments':
-        assignments = db_context['data']['assignments']
-        base_prompt += f"""
-UPCOMING ASSIGNMENTS ({len(assignments)}):
-"""
-        for assignment in assignments:
-            base_prompt += f"- {assignment['title']} (Due: {assignment['due_date']}, Topic: {assignment['topic']})\n"
-        base_prompt += "\n"
-    
-    elif db_context['context_type'] == 'messages':
-        messages = db_context['data']['recent_messages']
-        base_prompt += f"""
-YOUR RECENT MESSAGES ({len(messages)}):
-"""
-        for msg in messages:
-            base_prompt += f"- {msg['content']} (in {msg['room']}, {msg['created_at']})\n"
-        base_prompt += "\n"
-    
-    elif db_context['context_type'] == 'files':
-        files = db_context['data']['files']
-        base_prompt += f"""
-YOUR RECENT FILES ({len(files)}):
-"""
-        for file in files:
-            base_prompt += f"- {file['name']} ({file['file_type']}, {file['file_size']} bytes, {file['uploaded_at']})\n"
-        base_prompt += "\n"
-    
-    elif db_context['context_type'] == 'timetable':
-        timetable = db_context['data']['timetable']
-        today = db_context['data']['today']
-        base_prompt += f"""
-TODAY'S TIMETABLE ({today}):
-"""
-        for slot in timetable:
-            base_prompt += f"- {slot['subject']} ({slot['start_time']} - {slot['end_time']}) in {slot['room']} with {slot['teacher']}\n"
-        base_prompt += "\n"
-    
-    elif db_context['context_type'] == 'admin_stats' and current_user.is_admin:
-        stats = db_context['data']['admin_stats']
-        base_prompt += f"""
-PLATFORM STATISTICS:
-- Total users: {stats['total_users']}
-- Total announcements: {stats['total_announcements']}
-- Total assignments: {stats['total_assignments']}
-- Online users: {stats['online_users']}
 
-"""
+    # Add comprehensive database summary
+    base_prompt += "COMPLETE DATABASE OVERVIEW:\n"
+    base_prompt += "=" * 50 + "\n"
     
-    elif db_context['context_type'] == 'topics':
-        topics = db_context['data']['topics']
-        base_prompt += f"""
-AVAILABLE TOPICS ({len(topics)}):
-"""
-        for topic in topics:
-            base_prompt += f"- {topic['name']}: {topic['description']}\n"
-        base_prompt += "\n"
+    for category, data in db_context['data'].items():
+        if isinstance(data, list):
+            base_prompt += f"{category.upper()}: {len(data)} records\n"
+        elif isinstance(data, dict):
+            base_prompt += f"{category.upper()}: Available (see details below)\n"
     
-    base_prompt += f"""
-USER QUERY: {user_message}
-
-ASSISTANT RESPONSE:"""
+    base_prompt += "\n" + "=" * 50 + "\n\n"
+    
+    # Add detailed data for key categories
+    detailed_categories = ['platform_statistics', 'all_users', 'all_announcements', 'all_assignments']
+    
+    for category in detailed_categories:
+        if category in db_context['data']:
+            data = db_context['data'][category]
+            
+            if category == 'platform_statistics':
+                base_prompt += "PLATFORM STATISTICS:\n"
+                for key, value in data.items():
+                    if key != 'current_user':
+                        base_prompt += f"- {key}: {value}\n"
+                base_prompt += "\n"
+            
+            elif category == 'all_users' and len(data) > 0:
+                base_prompt += f"USER SUMMARY (Top 10 of {len(data)} users):\n"
+                for user in data[:10]:
+                    base_prompt += f"- {user['username']} (ID: {user['id']}, Admin: {user['is_admin']}, Created: {user['created_at'][:10]})\n"
+                base_prompt += f"... and {len(data) - 10} more users\n\n"
+            
+            elif category == 'all_announcements' and len(data) > 0:
+                base_prompt += f"RECENT ANNOUNCEMENTS (Top 5 of {len(data)}):\n"
+                for ann in data[:5]:
+                    base_prompt += f"- '{ann['title']}' by {ann['author_name']} ({ann['created_at'][:10]})\n"
+                base_prompt += "\n"
+            
+            elif category == 'all_assignments' and len(data) > 0:
+                base_prompt += f"RECENT ASSIGNMENTS (Top 5 of {len(data)}):\n"
+                for assignment in data[:5]:
+                    due_date = assignment['due_date'][:10] if assignment['due_date'] != 'No due date' else 'No due date'
+                    base_prompt += f"- '{assignment['title']}' due {due_date}\n"
+                base_prompt += "\n"
+    
+    # Add user-specific context if available
+    if 'current_user' in db_context['data'].get('platform_statistics', {}):
+        user_stats = db_context['data']['platform_statistics']['current_user']
+        base_prompt += f"CURRENT USER DETAILS:\n"
+        base_prompt += f"- Username: {user_stats['username']}\n"
+        base_prompt += f"- User ID: {user_stats['id']}\n"
+        base_prompt += f"- Admin: {user_stats['is_admin']}\n"
+        base_prompt += f"- Member since: {user_stats['created_at'][:10]}\n\n"
+    
+    base_prompt += f"USER QUERY: {user_message}\n\n"
+    base_prompt += "ASSISTANT RESPONSE (using full database context):"
     
     return base_prompt
 
 def call_gemini_api(prompt):
     """Call the Gemini API with the prepared prompt"""
     API_KEY = 'AIzaSyA3o8aKHTnVzuW9-qg10KjNy7Lcgn19N2I'
-    MODEL = "gemini-2.5-flash"
+    MODEL = "gemini-2.0-flash-exp"
     API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/{MODEL}:generateContent?key={API_KEY}"
     
     try:
@@ -1068,27 +1117,40 @@ def call_gemini_api(prompt):
                     "temperature": 0.7,
                     "topK": 40,
                     "topP": 0.95,
-                    "maxOutputTokens": 1024,
-                }
+                    "maxOutputTokens": 2048,  # Increased for comprehensive responses
+                },
+                "safetySettings": [
+                    {
+                        "category": "HARM_CATEGORY_HARASSMENT",
+                        "threshold": "BLOCK_MEDIUM_AND_ABOVE"
+                    },
+                    {
+                        "category": "HARM_CATEGORY_HATE_SPEECH", 
+                        "threshold": "BLOCK_MEDIUM_AND_ABOVE"
+                    }
+                ]
             },
-            timeout=30
+            timeout=45  # Increased timeout for complex queries
         )
         
         if response.status_code == 200:
             data = response.json()
-            return data['candidates'][0]['content']['parts'][0]['text']
+            if 'candidates' in data and len(data['candidates']) > 0:
+                return data['candidates'][0]['content']['parts'][0]['text']
+            else:
+                return "I received an unexpected response format from the AI service."
         else:
-            return "I apologize, but I'm having trouble processing your request right now. Please try again later."
+            error_detail = response.text
+            return f"I apologize, but I'm having trouble processing your request right now (HTTP {response.status_code}). Please try again later."
+    
+    except requests.exceptions.Timeout:
+        return "The request timed out. This might be due to the complexity of your query or high server load. Please try again with a more specific question."
     
     except Exception as e:
         print(f"Gemini API Error: {e}")
-        return "I'm currently unavailable. Please check your connection and try again."
+        return "I'm currently unavailable due to a technical issue. Please check your connection and try again later."
 
-# =========================================
-# AI CONVERSATION MODEL
-# =========================================
-
-def save_ai_conversation(user_id, user_message, ai_response, context_used='general'):
+def save_ai_conversation(user_id, user_message, ai_response, context_used='full_database'):
     """Save AI conversation to database"""
     try:
         conversation = AIConversation(
@@ -1151,9 +1213,45 @@ def clear_ai_chat_history():
             'success': False,
             'error': 'Failed to clear chat history'
         }), 500
-    
 
-#===================================================================
+@app.route('/api/ai-chat/statistics')
+@login_required
+@admin_required
+def get_ai_chat_statistics():
+    """Get AI chat usage statistics (Admin only)"""
+    try:
+        total_conversations = AIConversation.query.count()
+        total_users = db.session.query(db.func.count(db.distinct(AIConversation.user_id))).scalar()
+        
+        recent_conversations = AIConversation.query.filter(
+            AIConversation.created_at >= datetime.now() - timedelta(days=7)
+        ).count()
+        
+        context_usage = db.session.query(
+            AIConversation.context_used,
+            db.func.count(AIConversation.id)
+        ).group_by(AIConversation.context_used).all()
+        
+        top_users = db.session.query(
+            User.username,
+            db.func.count(AIConversation.id)
+        ).join(AIConversation).group_by(User.id, User.username).order_by(
+            db.func.count(AIConversation.id).desc()
+        ).limit(10).all()
+        
+        return jsonify({
+            'total_conversations': total_conversations,
+            'total_users': total_users,
+            'recent_conversations_7_days': recent_conversations,
+            'context_usage': {context: count for context, count in context_usage},
+            'top_users': [{'username': username, 'conversation_count': count} for username, count in top_users]
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+#=======================================================================================================
 @app.route('/')
 def home():
     return render_template('index.html', year=_year())
