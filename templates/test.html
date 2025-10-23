@@ -1,74 +1,597 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <script src="https://cdn.jsdelivr.net/npm/typed.js@2.0.12"></script>
-    <style>
-        :root {
-            --bg-color: #14566d;
-            --accent-color: rgb(45, 45, 237);
-            --sec-bg: linear-gradient(135deg, #498ee9, #4ed8e8, #67ca67);
-        }
-        body {
-            background: var(--bg-color);
-            align-items: center;
-            display: flex;
-            justify-content: center;
-            text-align: center;
-            font-size: 70px;
-            font-family: cursive;
-        }
-        .container {
-            background: var(--sec-bg);
-            text-align: center;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            color: aliceblue;
-            width: 90vw;
-            height: 80vh;
-            border: 1px solid blue;
-            border-radius: 24px;
-        }
-        .inner-container {
-            width: auto;
-            height: 70px;
-            align-items: center;
-            justify-content: center;
-            display: flex;
-            word-wrap: break-word;
-            overflow: hidden;
-            border-right: 7px solid #67ca67;
-            border-left: 2px solid #76ed1b;
-            border-top: 2px solid #67ca67;
-            border-bottom: 2px solid #67ca67;
-            border-radius: 14px;
-            padding: 10px;
-            font-size: 1.3rem;
-            background: #dadada;
-            color: #000000;
-            font-weight: 600px;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3D Classroom Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  :root {
+    --primary: #3b82f6;
+    --secondary: #6366f1;
+    --accent: #8b5cf6;
+    --dark: #0f172a;
+    --darker: #020617;
+    --light: #f8fafc;
+    --text: #e2e8f0;
+  }
+
+  body {
+    height: 100vh;
+    background: radial-gradient(circle at center, var(--dark), var(--darker));
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    perspective: 1500px;
+    overflow: hidden;
+    color: var(--text);
+    font-family: "Poppins", sans-serif;
+    position: relative;
+  }
+
+  /* Animated background elements */
+  .bg-element {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(59, 130, 246, 0.1);
+    filter: blur(40px);
+    z-index: -1;
+  }
+
+  .bg-element:nth-child(1) {
+    width: 300px;
+    height: 300px;
+    top: 10%;
+    left: 10%;
+    animation: float 15s infinite ease-in-out;
+  }
+
+  .bg-element:nth-child(2) {
+    width: 200px;
+    height: 200px;
+    bottom: 15%;
+    right: 15%;
+    animation: float 12s infinite ease-in-out reverse;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-20px) scale(1.05); }
+  }
+
+  .container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .circle {
+    position: relative;
+    width: 800px;
+    height: 800px;
+    transform-style: preserve-3d;
+    transition: transform 1s cubic-bezier(0.23, 1, 0.32, 1);
+  }
+
+  .page {
+    position: absolute;
+    width: 350px;
+    height: 220px;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    transform-style: preserve-3d;
+    backface-visibility: hidden;
+    cursor: pointer;
+    transition: all 0.5s ease;
+    overflow: hidden;
+  }
+
+  .page::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    transform: translateX(-100%);
+    transition: transform 0.6s;
+  }
+
+  .page:hover::before {
+    transform: translateX(100%);
+  }
+
+  .page:hover {
+    transform: translateZ(50px) scale(1.05) !important;
+    box-shadow: 0 25px 80px rgba(0, 0, 0, 0.7);
+  }
+
+  .page-icon {
+    font-size: 2.5rem;
+    margin-bottom: 15px;
+    color: rgba(255, 255, 255, 0.9);
+    transition: transform 0.3s ease;
+  }
+
+  .page:hover .page-icon {
+    transform: scale(1.2);
+  }
+
+  h2 {
+    margin-bottom: 10px;
+    font-weight: 600;
+    font-size: 1.5rem;
+    text-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  }
+
+  p {
+    font-size: 0.9em;
+    opacity: 0.9;
+    text-align: center;
+    width: 80%;
+    line-height: 1.5;
+  }
+
+  /* Individual page colors */
+  .page:nth-child(1) { 
+    background: linear-gradient(135deg, #3b82f6, #6366f1);
+    transform: rotateY(0deg) translateZ(400px);
+  }
+  .page:nth-child(2) { 
+    background: linear-gradient(135deg, #10b981, #059669);
+    transform: rotateY(60deg) translateZ(400px);
+  }
+  .page:nth-child(3) { 
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    transform: rotateY(120deg) translateZ(400px);
+  }
+  .page:nth-child(4) { 
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    transform: rotateY(180deg) translateZ(400px);
+  }
+  .page:nth-child(5) { 
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+    transform: rotateY(240deg) translateZ(400px);
+  }
+  .page:nth-child(6) { 
+    background: linear-gradient(135deg, #ec4899, #db2777);
+    transform: rotateY(300deg) translateZ(400px);
+  }
+
+  /* Navigation dots */
+  .nav-dots {
+    position: absolute;
+    bottom: 50px;
+    display: flex;
+    gap: 15px;
+    z-index: 10;
+  }
+
+  .dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .dot.active {
+    background: white;
+    transform: scale(1.3);
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+  }
+
+  /* Controls */
+  .controls {
+    position: absolute;
+    top: 50px;
+    display: flex;
+    gap: 20px;
+    z-index: 10;
+  }
+
+  .control-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: white;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    font-size: 1.2rem;
+    cursor: pointer;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .control-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.1);
+  }
+
+  /* Title */
+  .title {
+    position: absolute;
+    top: 30px;
+    text-align: center;
+    width: 100%;
+    z-index: 10;
+  }
+
+  .title h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    background: linear-gradient(to right, #3b82f6, #8b5cf6, #ec4899);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 5px;
+    text-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  }
+
+  .title p {
+    font-size: 1rem;
+    opacity: 0.7;
+    width: 100%;
+  }
+
+  /* Modal */
+  .modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.5s ease;
+  }
+
+  .modal.active {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .modal-content {
+    background: linear-gradient(135deg, var(--dark), var(--darker));
+    width: 80%;
+    max-width: 600px;
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    transform: translateY(50px);
+    transition: transform 0.5s ease;
+    position: relative;
+  }
+
+  .modal.active .modal-content {
+    transform: translateY(0);
+  }
+
+  .close-modal {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+  }
+
+  .modal h2 {
+    margin-bottom: 20px;
+    font-size: 2rem;
+  }
+
+  .modal p {
+    text-align: left;
+    width: 100%;
+    line-height: 1.6;
+    margin-bottom: 20px;
+  }
+
+  /* Responsive design */
+  @media (max-width: 900px) {
+    .circle {
+      width: 600px;
+      height: 600px;
+    }
+    
+    .page {
+      width: 280px;
+      height: 180px;
+    }
+    
+    .page:nth-child(1) { transform: rotateY(0deg) translateZ(300px); }
+    .page:nth-child(2) { transform: rotateY(60deg) translateZ(300px); }
+    .page:nth-child(3) { transform: rotateY(120deg) translateZ(300px); }
+    .page:nth-child(4) { transform: rotateY(180deg) translateZ(300px); }
+    .page:nth-child(5) { transform: rotateY(240deg) translateZ(300px); }
+    .page:nth-child(6) { transform: rotateY(300deg) translateZ(300px); }
+    
+    .title h1 {
+      font-size: 2rem;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .circle {
+      width: 500px;
+      height: 500px;
+    }
+    
+    .page {
+      width: 220px;
+      height: 150px;
+    }
+    
+    .page:nth-child(1) { transform: rotateY(0deg) translateZ(250px); }
+    .page:nth-child(2) { transform: rotateY(60deg) translateZ(250px); }
+    .page:nth-child(3) { transform: rotateY(120deg) translateZ(250px); }
+    .page:nth-child(4) { transform: rotateY(180deg) translateZ(250px); }
+    .page:nth-child(5) { transform: rotateY(240deg) translateZ(250px); }
+    .page:nth-child(6) { transform: rotateY(300deg) translateZ(250px); }
+    
+    .title h1 {
+      font-size: 1.5rem;
+    }
+    
+    .controls {
+      top: 100px;
+    }
+  }
+</style>
 </head>
 <body>
-    <div class="container">
-        <div class="inner-container">
-            <p id="p"></p>
-        </div>
+  <div class="bg-element"></div>
+  <div class="bg-element"></div>
+
+  <div class="container">
+    <div class="title">
+      <h1>3D Classroom Hub</h1>
+      <p>Navigate through your educational resources in a stunning 3D interface</p>
     </div>
-    <script>
-        new Typed('#p', {
-            strings: ['Hello Richard! Vincent here!', 'In HTML, learn on the basic elements like p, h, small, strong, ul, ol, del, div, nav, section, header & footer etc.', 'It\'s all about understanding the elements.', 'Happy coding'],
-            typeSpeed: 80,
-            backSpeed: 60,
-            backDelay: 40,
-            loop: true
-        });
-    </script>
+
+    <div class="controls">
+      <button class="control-btn" id="prev-btn"><i class="fas fa-chevron-left"></i></button>
+      <button class="control-btn" id="next-btn"><i class="fas fa-chevron-right"></i></button>
+      <button class="control-btn" id="reset-btn"><i class="fas fa-home"></i></button>
+    </div>
+
+    <div class="circle" id="circle">
+      <div class="page" data-index="0">
+        <i class="fas fa-home page-icon"></i>
+        <h2>Home</h2>
+        <p>Welcome to your 3D classroom hub.</p>
+      </div>
+      <div class="page" data-index="1">
+        <i class="fas fa-bullhorn page-icon"></i>
+        <h2>Announcements</h2>
+        <p>Stay up to date with the latest class news.</p>
+      </div>
+      <div class="page" data-index="2">
+        <i class="fas fa-tasks page-icon"></i>
+        <h2>Assignments</h2>
+        <p>Track upcoming and submitted tasks easily.</p>
+      </div>
+      <div class="page" data-index="3">
+        <i class="fas fa-calendar-alt page-icon"></i>
+        <h2>Timetable</h2>
+        <p>Check your daily and weekly class schedules.</p>
+      </div>
+      <div class="page" data-index="4">
+        <i class="fas fa-book page-icon"></i>
+        <h2>Resources</h2>
+        <p>Access study materials, notes, and more.</p>
+      </div>
+      <div class="page" data-index="5">
+        <i class="fas fa-user page-icon"></i>
+        <h2>Profile</h2>
+        <p>Manage your account and personal settings.</p>
+      </div>
+    </div>
+
+    <div class="nav-dots">
+      <div class="dot active" data-index="0"></div>
+      <div class="dot" data-index="1"></div>
+      <div class="dot" data-index="2"></div>
+      <div class="dot" data-index="3"></div>
+      <div class="dot" data-index="4"></div>
+      <div class="dot" data-index="5"></div>
+    </div>
+  </div>
+
+  <div class="modal" id="modal">
+    <div class="modal-content">
+      <button class="close-modal" id="close-modal"><i class="fas fa-times"></i></button>
+      <h2 id="modal-title">Modal Title</h2>
+      <p id="modal-content">Modal content will appear here.</p>
+    </div>
+  </div>
+
+  <script>
+    const circle = document.getElementById('circle');
+    const dots = document.querySelectorAll('.dot');
+    const pages = document.querySelectorAll('.page');
+    const prevBtn = document.getElementById('prev-btn');
+    const nextBtn = document.getElementById('next-btn');
+    const resetBtn = document.getElementById('reset-btn');
+    const modal = document.getElementById('modal');
+    const modalTitle = document.getElementById('modal-title');
+    const modalContent = document.getElementById('modal-content');
+    const closeModal = document.getElementById('close-modal');
+
+    let angle = 0;
+    let currentIndex = 0;
+    let isAnimating = false;
+    let mouseX = 0;
+    let mouseY = 0;
+
+    // Scroll rotates the circle
+    window.addEventListener('wheel', (e) => {
+      if (isAnimating) return;
+      
+      if (e.deltaY > 0) {
+        navigateTo(currentIndex + 1);
+      } else {
+        navigateTo(currentIndex - 1);
+      }
+    });
+
+    // Cursor tilt for 3D depth
+    document.addEventListener('mousemove', e => {
+      mouseX = (e.clientX / window.innerWidth - 0.5) * 20;
+      mouseY = (e.clientY / window.innerHeight - 0.5) * 20;
+      updateCircleTransform();
+    });
+
+    // Navigation with buttons
+    prevBtn.addEventListener('click', () => navigateTo(currentIndex - 1));
+    nextBtn.addEventListener('click', () => navigateTo(currentIndex + 1));
+    resetBtn.addEventListener('click', () => navigateTo(0));
+
+    // Navigation with dots
+    dots.forEach(dot => {
+      dot.addEventListener('click', () => {
+        const index = parseInt(dot.getAttribute('data-index'));
+        navigateTo(index);
+      });
+    });
+
+    // Page click to open modal
+    pages.forEach(page => {
+      page.addEventListener('click', () => {
+        const index = parseInt(page.getAttribute('data-index'));
+        openModal(index);
+      });
+    });
+
+    // Close modal
+    closeModal.addEventListener('click', () => {
+      modal.classList.remove('active');
+    });
+
+    // Navigate to specific page
+    function navigateTo(index) {
+      if (isAnimating) return;
+      
+      isAnimating = true;
+      
+      // Handle index bounds
+      if (index < 0) index = 5;
+      if (index > 5) index = 0;
+      
+      currentIndex = index;
+      angle = -index * 60;
+      
+      updateCircleTransform();
+      updateDots();
+      
+      // Reset animation flag after transition
+      setTimeout(() => {
+        isAnimating = false;
+      }, 1000);
+    }
+
+    // Update circle transform with current angle and mouse position
+    function updateCircleTransform() {
+      circle.style.transform = `rotateY(${angle}deg) rotateX(${-mouseY}deg) rotateY(${mouseX}deg)`;
+    }
+
+    // Update active dot
+    function updateDots() {
+      dots.forEach(dot => {
+        const index = parseInt(dot.getAttribute('data-index'));
+        dot.classList.toggle('active', index === currentIndex);
+      });
+    }
+
+    // Open modal with page content
+    function openModal(index) {
+      const pageTitles = [
+        "Home Dashboard",
+        "Class Announcements",
+        "Assignment Tracker",
+        "Class Schedule",
+        "Learning Resources",
+        "Student Profile"
+      ];
+      
+      const pageContents = [
+        "Welcome to your personalized classroom dashboard. Here you can quickly access all your important educational tools and resources in one place.",
+        "Latest announcements from your instructors: Class is canceled on Friday, Midterm exams scheduled for next month, New reading materials uploaded.",
+        "You have 3 pending assignments: Math problem set due tomorrow, History essay due next week, Science lab report in progress.",
+        "Your weekly schedule: Monday - Math 9:00 AM, Science 11:00 AM; Tuesday - History 10:00 AM, English 1:00 PM; Wednesday - Lab session 2:00 PM.",
+        "Available resources: Textbook PDFs, Lecture recordings, Practice quizzes, Supplementary videos, Research articles, Study guides.",
+        "Your profile information: Name: Student Name, Grade: 10th, GPA: 3.8, Courses: Math, Science, History, English, Extracurricular: Debate Club, Soccer."
+      ];
+      
+      modalTitle.textContent = pageTitles[index];
+      modalContent.textContent = pageContents[index];
+      modal.classList.add('active');
+    }
+
+    // Auto-rotate for demo purposes
+    let autoRotate = true;
+    let autoRotateInterval;
+    
+    function startAutoRotate() {
+      autoRotateInterval = setInterval(() => {
+        if (!isAnimating && autoRotate) {
+          navigateTo(currentIndex + 1);
+        }
+      }, 4000);
+    }
+    
+    function stopAutoRotate() {
+      clearInterval(autoRotateInterval);
+    }
+    
+    // Start auto-rotation
+    startAutoRotate();
+    
+    // Pause auto-rotation on interaction
+    document.addEventListener('mousedown', stopAutoRotate);
+    document.addEventListener('touchstart', stopAutoRotate);
+    document.addEventListener('wheel', stopAutoRotate);
+    
+    // Resume auto-rotation after 10 seconds of inactivity
+    let inactivityTimer;
+    function resetInactivityTimer() {
+      clearTimeout(inactivityTimer);
+      inactivityTimer = setTimeout(() => {
+        startAutoRotate();
+      }, 10000);
+    }
+    
+    document.addEventListener('mousemove', resetInactivityTimer);
+    document.addEventListener('mousedown', resetInactivityTimer);
+    document.addEventListener('touchstart', resetInactivityTimer);
+    document.addEventListener('wheel', resetInactivityTimer);
+  </script>
 </body>
 </html>

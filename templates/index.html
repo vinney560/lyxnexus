@@ -24,6 +24,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/typed.js@2.0.12"></script>
 </head>
 
 <style>
@@ -654,7 +655,7 @@
         <div class="max-w-6xl mx-auto px-4 flex flex-col md:flex-row items-center">
             <div class="md:w-1/2 mb-10 md:mb-0">
                 <h1 class="text-4xl md:text-6xl font-bold gradient-text mb-6 tracking-tight">Welcome to <span class="gradient-text font-bold">LyxNexus</span></h1>
-                <p class="text-xl mb-8 text-slate-300">Your central hub for class announcements, assignments, timetables and course materials.</p>
+                <p class="text-xl mb-8 text-slate-300" id="description"></p>
                 <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
                     <button class="btn pulse" onclick="window.location.href='#announcements'">
                         <i class="fas fa-bullhorn"></i>
@@ -797,6 +798,13 @@
     </div>
 
     <script>
+        new Typed('#description', {
+            strings: ['Your central hub for class announcements, assignments, timetables and course materials.', 'Your one-stop hub for announcements, assignments, schedules, and learning resources.', 'Stay organized with all your class updates, assignments, and materials in one place.', 'The central platform for course updates, study materials, timetables, and assignments.'],
+            typeSpeed: 80,
+            backSpeed: 70,
+            backDelay: 40,
+            loop: true
+        });
         class ToastSystem {
             constructor() {
                 this.container = document.getElementById('toast-container');
