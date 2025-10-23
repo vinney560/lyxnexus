@@ -783,6 +783,8 @@ def ai_chat():
 def ai_chat_send():
     """Send message to AI and get response with FULL database context and write operations"""
     try:
+        import json
+
         data = request.get_json()
         user_message = data.get('message', '').strip()
         
@@ -797,7 +799,8 @@ def ai_chat_send():
         
         # Call Gemini API
         ai_response_text = call_gemini_api(prompt)
-        
+        print("\n[DEBUG] AI Raw Response:\n", ai_response_text, "\n")  # Debug output
+
         # Parse AI response for operations
         operations_executed = []
         try:
@@ -822,28 +825,31 @@ def ai_chat_send():
                         'message': message,
                         'data': result_data
                     })
-                    
+
         except json.JSONDecodeError:
-            # If not JSON, use as plain text response
+            # If not JSON, treat as plain text response
             ai_text_response = ai_response_text
-        
-        # Save the conversation to database
-        save_ai_conversation(current_user.id, user_message, ai_text_response, db_context['context_type'])
-        
+            operations_requested = []
+
+        # Save the conversation (for recall/follow-up)
+        save_ai_conversation(
+            current_user.id,
+            user_message,
+            ai_text_response,
+            db_context.get('context_type', 'full_database')
+        )
+
+        # Return AI text and any executed operations
         return jsonify({
-            'success': True,
             'response': ai_text_response,
-            'operations_executed': operations_executed,
-            'context_used': db_context.get('context_type', 'full_database'),
-            'data_sources': list(db_context['data'].keys()),
-            'is_admin': current_user.is_admin
-        })
-        
+            'operations_executed': operations_executed
+        }), 200
+
     except Exception as e:
-        print(f"AI Chat Error: {e}")
+        print(f"[ERROR] AI Chat Route Exception: {e}")
         return jsonify({
-            'success': False,
-            'error': 'Failed to get AI response. Please try again.'
+            'error': 'An error occurred while processing your request.',
+            'details': str(e)
         }), 500
 
 def execute_ai_database_operation(operation_type, operation_data, current_user):
@@ -1207,7 +1213,6 @@ IMPORTANT RULES:
 
 """
 
-    # Add the existing database context summary
     base_prompt += "CURRENT DATABASE OVERVIEW:\n"
     
     base_prompt += (
