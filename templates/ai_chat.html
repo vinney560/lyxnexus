@@ -609,14 +609,14 @@
             flex: 1;
             background: var(--dark-light);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 50px;
-            padding: 16px 20px;
+            border-radius: 90px;
+            padding: 16px 16px;
             color: var(--light);
             resize: none;
-            min-height: 56px;
+            min-height: 30px;
             max-height: 120px;
             font-size: 15px;
-            line-height: 1.5;
+            line-height: 1.0;
             transition: var(--transition);
             font-family: inherit;
             box-shadow: 0 0 0 0 rgba(66, 133, 244, 0);
@@ -1395,6 +1395,7 @@
             constructor() {
                 this.currentUser = '{{ current_user.id }}';
                 this.dailyLimit = 150;
+                this.isProcessing = false; // Add flag to prevent multiple requests
                 this.initializeApp();
             }
 
@@ -1403,7 +1404,7 @@
                 this.initializeEventListeners();
                 this.loadChatHistory();
                 this.checkRequestLimit();
-                this.enableInput(); // Enable input by default
+                this.enableInput();
             }
 
             initializeRequestCounter() {
@@ -1411,7 +1412,6 @@
                 const storageKey = `ai_requests_${this.currentUser}`;
                 const requestData = JSON.parse(localStorage.getItem(storageKey)) || { date: today, count: 0 };
 
-                // Reset counter if it's a new day
                 if (requestData.date !== today) {
                     requestData.date = today;
                     requestData.count = 0;
@@ -1431,7 +1431,7 @@
                 const attachFileBtn = document.getElementById('attachFile');
                 const microphoneBtn = document.getElementById('microphone');
 
-                // Send message functionality
+                // Send message functionality - prevent multiple clicks
                 sendButton.addEventListener('click', () => this.sendMessage());
                 
                 messageInput.addEventListener('keydown', (e) => {
@@ -1445,7 +1445,7 @@
                     const hasText = messageInput.value.trim().length > 0;
                     const underLimit = this.requestCount < this.dailyLimit;
                     
-                    sendButton.disabled = !hasText || !underLimit;
+                    sendButton.disabled = !hasText || !underLimit || this.isProcessing;
                     
                     // Auto-resize textarea
                     messageInput.style.height = 'auto';
@@ -1458,12 +1458,10 @@
 
                 // Action buttons
                 attachFileBtn.addEventListener('click', () => {
-                    // File attachment functionality would go here
                     this.showToast('File attachment feature coming soon!', 'info');
                 });
 
                 microphoneBtn.addEventListener('click', () => {
-                    // Voice input functionality would go here
                     this.showToast('Voice input feature coming soon!', 'info');
                 });
 
@@ -1472,11 +1470,19 @@
             }
 
             async sendMessage() {
+                // Prevent multiple requests
+                if (this.isProcessing) {
+                    return;
+                }
+                
                 const messageInput = document.getElementById('messageInput');
                 const message = messageInput.value.trim();
                 
                 if (!message || this.requestCount >= this.dailyLimit) return;
 
+                // Set processing flag
+                this.isProcessing = true;
+                
                 // Hide welcome screen and show messages
                 this.showMessagesContainer();
 
@@ -1517,6 +1523,8 @@
                     this.removeTypingIndicator();
                     this.addMessage("Sorry, I'm having trouble connecting. Please check your internet and try again.", 'ai');
                 } finally {
+                    // Reset processing flag
+                    this.isProcessing = false;
                     this.enableInput();
                     messageInput.focus();
                 }
@@ -1575,7 +1583,7 @@
                 
                 // Create a container for the typing effect
                 const typingContent = document.createElement('div');
-                typingContent.id = 'typing-content';
+                typingContent.id = 'typing-content-' + Date.now();
                 
                 const messageTime = document.createElement('div');
                 messageTime.className = 'message-time';
@@ -1605,26 +1613,27 @@
             startTypingEffect(text, container, messageContent) {
                 let index = 0;
                 const speed = 20; // typing speed in milliseconds
+                const self = this; // Store reference to this
                 
                 function type() {
                     if (index < text.length) {
                         // Get the current text and format it
                         const currentText = text.substring(0, index + 1);
-                        container.innerHTML = this.formatMessageContent(currentText);
+                        container.innerHTML = self.formatMessageContent(currentText);
                         
                         // Initialize copy buttons for code blocks if any
-                        this.initializeCopyButtons(container);
+                        self.initializeCopyButtons(container);
                         
                         index++;
-                        setTimeout(type.bind(this), speed);
-                        this.scrollToBottom();
+                        setTimeout(type, speed);
+                        self.scrollToBottom();
                     } else {
                         // Typing complete, initialize all copy buttons in the message
-                        this.initializeCopyButtons(messageContent);
+                        self.initializeCopyButtons(messageContent);
                     }
                 }
                 
-                type.call(this);
+                type();
             }
 
             formatMessageContent(text) {
@@ -1738,7 +1747,7 @@
             enableInput() {
                 const underLimit = this.requestCount < this.dailyLimit;
                 const hasText = document.getElementById('messageInput').value.trim().length > 0;
-                document.getElementById('sendButton').disabled = !hasText || !underLimit;
+                document.getElementById('sendButton').disabled = !hasText || !underLimit || this.isProcessing;
             }
 
             incrementRequestCount() {
