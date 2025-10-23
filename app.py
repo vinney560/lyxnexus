@@ -1142,7 +1142,7 @@ def send_ai_notification(data, current_user):
     except Exception as e:
         return False, f"Failed to send notification: {str(e)}", None
 
-# Update the AI prompt to include write capabilities
+# Updated AI prompt to include write capabilities
 def prepare_comprehensive_ai_prompt(user_message, db_context, current_user):
     """Prepare comprehensive prompt with FULL database access AND write capabilities"""
     
@@ -1511,56 +1511,65 @@ RESPONSE GUIDELINES:
     
     return base_prompt
 
+import requests
+
 def call_gemini_api(prompt):
-    """Call the Gemini API with the prepared prompt"""
-    API_KEY = 'AIzaSyA3o8aKHTnVzuW9-qg10KjNy7Lcgn19N2I'
-    MODEL = "gemini-2.0-flash-exp"
-    API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/{MODEL}:generateContent?key={API_KEY}"
-    
-    try:
-        response = requests.post(
-            API_URL,
-            headers={"Content-Type": "application/json"},
-            json={
-                "contents": [{
-                    "parts": [{"text": prompt}]
-                }],
-                "generationConfig": {
-                    "temperature": 0.7,
-                    "topK": 40,
-                    "topP": 0.95,
-                    "maxOutputTokens": 2048,  # Increased for comprehensive responses
-                },
-                "safetySettings": [
-                    {
-                        "category": "HARM_CATEGORY_HARASSMENT",
-                        "threshold": "BLOCK_MEDIUM_AND_ABOVE"
-                    },
-                    {
-                        "category": "HARM_CATEGORY_HATE_SPEECH", 
-                        "threshold": "BLOCK_MEDIUM_AND_ABOVE"
-                    }
-                ]
-            },
-            timeout=45  # Increased timeout for complex queries
-        )
+    """Call the Gemini API with the prepared prompt and switch API keys if one fails"""
+    API_KEYS = [
+        'AIzaSyA3o8aKHTnVzuW9-qg10KjNy7Lcgn19N2I',  # Primary key
+        'AIzaSyCq8-xrPTC40k8E_i3vXZ_-PR6RiPsuOno'
+    ]
+    MODEL = "gemini-2.5-flash"
+
+    for API_KEY in API_KEYS:
+        API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/{MODEL}:generateContent?key={API_KEY}"
         
-        if response.status_code == 200:
-            data = response.json()
-            if 'candidates' in data and len(data['candidates']) > 0:
-                return data['candidates'][0]['content']['parts'][0]['text']
+        try:
+            response = requests.post(
+                API_URL,
+                headers={"Content-Type": "application/json"},
+                json={
+                    "contents": [{
+                        "parts": [{"text": prompt}]
+                    }],
+                    "generationConfig": {
+                        "temperature": 0.7,
+                        "topK": 40,
+                        "topP": 0.95,
+                        "maxOutputTokens": 2048,
+                    },
+                    "safetySettings": [
+                        {
+                            "category": "HARM_CATEGORY_HARASSMENT",
+                            "threshold": "BLOCK_MEDIUM_AND_ABOVE"
+                        },
+                        {
+                            "category": "HARM_CATEGORY_HATE_SPEECH", 
+                            "threshold": "BLOCK_MEDIUM_AND_ABOVE"
+                        }
+                    ]
+                },
+                timeout=45
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                if 'candidates' in data and len(data['candidates']) > 0:
+                    return data['candidates'][0]['content']['parts'][0]['text']
+                else:
+                    return "I received an unexpected response format from the AI service."
             else:
-                return "I received an unexpected response format from the AI service."
-        else:
-            error_detail = response.text
-            return f"I apologize, but I'm having trouble processing your request right now (HTTP {response.status_code}). Please try again later."
-    
-    except requests.exceptions.Timeout:
-        return "The request timed out. This might be due to the complexity of your query or high server load. Please try again with a more specific question."
-    
-    except Exception as e:
-        print(f"Gemini API Error: {e}")
-        return "I'm currently unavailable due to a technical issue. Please check your connection and try again later."
+                print(f"API key failed ({API_KEY[:10]}...): HTTP {response.status_code}")
+                continue  # try next key
+        
+        except requests.exceptions.Timeout:
+            return "The request timed out. This might be due to the complexity of your query or high server load. Please try again with a more specific question."
+        
+        except Exception as e:
+            print(f"Gemini API Error with {API_KEY[:10]}...: {e}")
+            continue  # try next key
+
+    return "I'm currently unavailable due to a technical issue. Please check your connection and try again later."
 
 def save_ai_conversation(user_id, user_message, ai_response, context_used='full_database'):
     """Save AI conversation to database"""
