@@ -801,7 +801,7 @@ def ai_chat_send():
         prompt += (
             "\n\nIMPORTANT: You must ALWAYS respond in valid JSON that can be parsed by the system.\n"
             "Your response can include write operations if needed, but they are optional.\n"
-            "Never include markdown, extra explanations, or text outside JSON.\n\n"
+            "Never include markdown, extra explanations, or text outside JSON if request is create something.\n\n"
             "The JSON must follow one of these two formats:\n\n"
             "1️⃣ For normal answers (read-only or conversational):\n"
             "{\n"
@@ -856,6 +856,9 @@ def ai_chat_send():
             # If not JSON, treat as plain text
             ai_text_response = ai_response_text
             operations_requested = []
+            print("[DEBUG] Current user is admin:", current_user.is_admin)
+            print("[DEBUG] Operations requested:", operations_requested)
+
 
         # Save the AI conversation
         save_ai_conversation(
