@@ -795,35 +795,28 @@ def ai_chat_send():
 
         # Prepare the prompt with FULL context and write capabilities
         prompt = prepare_comprehensive_ai_prompt(user_message, db_context, current_user)
-        # Add adaptive JSON or text response logic
+
+        # Add flexible JSON formatting rules
         prompt += (
-            "\n\nSYSTEM RULES:\n"
-            "You are the LyxNexus AI Assistant.\n"
-            "Your output format depends on the type of user request:\n\n"
-
-            "🧠 For normal conversation, explanations, or informational queries:\n"
-            "- Respond naturally using plain text or markdown.\n"
-            "- You may use bullet points, code blocks, or formatting if helpful.\n\n"
-
-            "⚙️ For administrative or data-changing requests (create, update, delete, modify):\n"
-            "- You must respond ONLY in valid JSON that can be parsed by the system.\n"
-            "- Do NOT include any markdown, comments, or extra text outside JSON.\n"
-            "- Use this exact structure:\n"
+            "\n\nIMPORTANT: You must ALWAYS respond in valid JSON that can be parsed by the system.\n"
+            "Your response can include write operations if needed, but they are optional.\n"
+            "Never include markdown, extra explanations, or text outside JSON if request is to create, delete, modify or technical something.\n\n"
+            "The JSON must follow one of these two formats:\n\n"
+            "1️⃣ For normal answers (read-only or conversational):\n"
+            "{\n"
+            '  \"response\": \"<your answer to the user>\"\n'
+            "}\n\n"
+            "2️⃣ For actions that modify data (admin operations):\n"
             "{\n"
             '  \"response\": \"<short summary of what you did>\",\n'
             '  \"operations\": [\n'
             '    {\n'
-            '      \"operation\": \"<create_announcement | create_assignment | create_timetable | update_assignment | delete_topic | etc>\",\n'
+            '      \"operation\": \"<create_announcement | update_assignment | delete_topic | etc>\",\n'
             '      \"title\": \"<title or name if applicable>\",\n'
             '      \"content\": \"<content or description if applicable>\"\n'
             '    }\n'
             '  ]\n'
             "}\n\n"
-
-            "💡 When deciding which format to use:\n"
-            "- If the user asks to *create, update, delete,* or *modify* something → use JSON.\n"
-            "- If the user is just asking, explaining, or chatting → use plain text or markdown.\n"
-            "- Do NOT mix formats.\n"
         )
 
         # Call Gemini API
@@ -930,7 +923,25 @@ def execute_ai_database_operation(operation_type, operation_data, current_user):
             
         elif operation_type == "send_notification":
             return send_ai_notification(operation_data, current_user)
-            
+        
+        elif operation_type == "delete_user":
+            user_id = operation_data.get("user_id") or operation_data.get("id")
+
+            if not user_id:
+                return False, "Missing user_id in operation data.", None
+
+            try:
+                # Construct full endpoint URL (assuming same domain)
+                delete_url = url_for('delete_user', user_id=user_id, _external=True)
+                response = requests.post(delete_url, headers={"Authorization": f"Bearer {current_user.id}"})
+
+                if response.status_code == 200:
+                    return True, f"User {user_id} deleted successfully.", response.json()
+                else:
+                    return False, f"Failed to delete user (HTTP {response.status_code}).", response.text
+            except Exception as e:
+                return False, f"Error calling delete route: {str(e)}", None
+        
         else:
             return False, f"Unknown operation type: {operation_type}", None
             
@@ -1230,7 +1241,10 @@ WRITE OPERATIONS AVAILABLE (Admin only):
 7. create_topic - Create new topics
    {{"operation": "create_topic", "name": "Topic Name", "description": "Topic Description"}}
 
-8. send_notification - Send notifications to users
+8. delete_user - Delete User
+   {"operation": "delete_user", "user_id": "user ID"}
+
+9. send_notification - Send notifications to users
    {{"operation": "send_notification", "title": "Title", "message": "Message"}} 
    {{"operation": "send_notification", "title": "Title", "message": "Message", "user_id": 123}}
 
@@ -1585,7 +1599,7 @@ def call_gemini_api(prompt):
         'AIzaSyA3o8aKHTnVzuW9-qg10KjNy7Lcgn19N2I',  # Primary key
         'AIzaSyCq8-xrPTC40k8E_i3vXZ_-PR6RiPsuOno'
     ]
-    MODEL = "gemini-2.5-flash"
+    MODEL = "gemini-2.5-flash-live"
 
     for API_KEY in API_KEYS:
         API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/{MODEL}:generateContent?key={API_KEY}"
