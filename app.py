@@ -1638,7 +1638,7 @@ def call_gemini_api(prompt):
         'AIzaSyA3o8aKHTnVzuW9-qg10KjNy7Lcgn19N2I',  # Primary key
         'AIzaSyCq8-xrPTC40k8E_i3vXZ_-PR6RiPsuOno'
     ]
-    MODEL = "gemini-2.5-flash-live"
+    MODEL = "gemini-2.0-flash-live"
 
     for API_KEY in API_KEYS:
         API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/{MODEL}:generateContent?key={API_KEY}"
