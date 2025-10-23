@@ -768,6 +768,7 @@ def login():
 # =========================================
 
 import requests
+import json
 
 @app.route('/ai-chat')
 @login_required
@@ -776,10 +777,11 @@ def ai_chat():
     """Render the AI chat page"""
     return render_template('ai_chat.html', year=_year())
 
+# Update the AI chat send route to handle write operations
 @app.route('/api/ai-chat/send', methods=['POST'])
 @login_required
 def ai_chat_send():
-    """Send message to AI and get response with FULL database context"""
+    """Send message to AI and get response with FULL database context and write operations"""
     try:
         data = request.get_json()
         user_message = data.get('message', '').strip()
@@ -790,20 +792,51 @@ def ai_chat_send():
         # Get COMPLETE database context without limits
         db_context = get_complete_database_context(user_message, current_user)
         
-        # Prepare the prompt with FULL context
+        # Prepare the prompt with FULL context and write capabilities
         prompt = prepare_comprehensive_ai_prompt(user_message, db_context, current_user)
         
         # Call Gemini API
-        ai_response = call_gemini_api(prompt)
+        ai_response_text = call_gemini_api(prompt)
+        
+        # Parse AI response for operations
+        operations_executed = []
+        try:
+            # Try to parse as JSON for structured response
+            ai_response_data = json.loads(ai_response_text)
+            ai_text_response = ai_response_data.get('response', ai_response_text)
+            operations_requested = ai_response_data.get('operations', [])
+            
+            # Execute requested operations (if user is admin)
+            if operations_requested and current_user.is_admin:
+                for operation in operations_requested:
+                    op_type = operation.get('operation')
+                    op_data = operation.get('data', operation)  # Support both formats
+                    
+                    success, message, result_data = execute_ai_database_operation(
+                        op_type, op_data, current_user
+                    )
+                    
+                    operations_executed.append({
+                        'type': op_type,
+                        'success': success,
+                        'message': message,
+                        'data': result_data
+                    })
+                    
+        except json.JSONDecodeError:
+            # If not JSON, use as plain text response
+            ai_text_response = ai_response_text
         
         # Save the conversation to database
-        save_ai_conversation(current_user.id, user_message, ai_response, db_context['context_type'])
+        save_ai_conversation(current_user.id, user_message, ai_text_response, db_context['context_type'])
         
         return jsonify({
             'success': True,
-            'response': ai_response,
+            'response': ai_text_response,
+            'operations_executed': operations_executed,
             'context_used': db_context.get('context_type', 'full_database'),
-            'data_sources': list(db_context['data'].keys())
+            'data_sources': list(db_context['data'].keys()),
+            'is_admin': current_user.is_admin
         })
         
     except Exception as e:
@@ -813,6 +846,385 @@ def ai_chat_send():
             'error': 'Failed to get AI response. Please try again.'
         }), 500
 
+def execute_ai_database_operation(operation_type, operation_data, current_user):
+    """
+    Execute database write operations requested by AI
+    Returns: (success, result_message, data)
+    """
+    try:
+        if not current_user.is_admin:
+            return False, "Permission denied: Admin access required for write operations", None
+
+        if operation_type == "create_announcement":
+            return create_ai_announcement(operation_data, current_user)
+        
+        elif operation_type == "update_announcement":
+            return update_ai_announcement(operation_data, current_user)
+            
+        elif operation_type == "delete_announcement":
+            return delete_ai_announcement(operation_data, current_user)
+            
+        elif operation_type == "create_assignment":
+            return create_ai_assignment(operation_data, current_user)
+            
+        elif operation_type == "update_assignment":
+            return update_ai_assignment(operation_data, current_user)
+            
+        elif operation_type == "delete_assignment":
+            return delete_ai_assignment(operation_data, current_user)
+            
+        elif operation_type == "create_topic":
+            return create_ai_topic(operation_data, current_user)
+            
+        elif operation_type == "send_notification":
+            return send_ai_notification(operation_data, current_user)
+            
+        else:
+            return False, f"Unknown operation type: {operation_type}", None
+            
+    except Exception as e:
+        return False, f"Operation failed: {str(e)}", None
+
+def create_ai_announcement(data, current_user):
+    """Create announcement via AI"""
+    try:
+        title = data.get('title', 'AI Generated Announcement')
+        content = data.get('content', '')
+        
+        if not content:
+            return False, "Announcement content is required", None
+            
+        announcement = Announcement(
+            title=title,
+            content=content,
+            user_id=current_user.id
+        )
+        
+        db.session.add(announcement)
+        db.session.commit()
+        
+        # Broadcast notification
+        socketio.emit('push_notification', {
+            'title': 'New Announcement (AI)',
+            'message': f'New announcement: {title}',
+            'type': 'announcement',
+            'announcement_id': announcement.id,
+            'timestamp': datetime.utcnow().isoformat()
+        })
+        
+        return True, f"Announcement '{title}' created successfully", {
+            'id': announcement.id,
+            'title': title,
+            'content': content
+        }
+        
+    except Exception as e:
+        db.session.rollback()
+        return False, f"Failed to create announcement: {str(e)}", None
+
+def update_ai_announcement(data, current_user):
+    """Update announcement via AI"""
+    try:
+        announcement_id = data.get('announcement_id')
+        title = data.get('title')
+        content = data.get('content')
+        
+        if not announcement_id:
+            return False, "Announcement ID is required", None
+            
+        announcement = Announcement.query.get(announcement_id)
+        if not announcement:
+            return False, "Announcement not found", None
+            
+        if title:
+            announcement.title = title
+        if content:
+            announcement.content = content
+            
+        db.session.commit()
+        
+        return True, f"Announcement ID {announcement_id} updated successfully", {
+            'id': announcement.id,
+            'title': announcement.title,
+            'content': announcement.content
+        }
+        
+    except Exception as e:
+        db.session.rollback()
+        return False, f"Failed to update announcement: {str(e)}", None
+
+def delete_ai_announcement(data, current_user):
+    """Delete announcement via AI"""
+    try:
+        announcement_id = data.get('announcement_id')
+        
+        if not announcement_id:
+            return False, "Announcement ID is required", None
+            
+        announcement = Announcement.query.get(announcement_id)
+        if not announcement:
+            return False, "Announcement not found", None
+            
+        title = announcement.title
+        db.session.delete(announcement)
+        db.session.commit()
+        
+        return True, f"Announcement '{title}' deleted successfully", None
+        
+    except Exception as e:
+        db.session.rollback()
+        return False, f"Failed to delete announcement: {str(e)}", None
+
+def create_ai_assignment(data, current_user):
+    """Create assignment via AI"""
+    try:
+        title = data.get('title', 'AI Generated Assignment')
+        description = data.get('description', '')
+        due_date_str = data.get('due_date')
+        topic_id = data.get('topic_id')
+        
+        if not description:
+            return False, "Assignment description is required", None
+            
+        due_date = None
+        if due_date_str:
+            try:
+                due_date = datetime.fromisoformat(due_date_str.replace('Z', '+00:00'))
+            except:
+                return False, "Invalid due date format. Use ISO format (YYYY-MM-DDTHH:MM:SS)", None
+        
+        assignment = Assignment(
+            title=title,
+            description=description,
+            due_date=due_date,
+            topic_id=topic_id,
+            user_id=current_user.id
+        )
+        
+        db.session.add(assignment)
+        db.session.commit()
+        
+        # Broadcast notification
+        socketio.emit('push_notification', {
+            'title': 'New Assignment (AI)',
+            'message': f'New assignment: {title}',
+            'type': 'assignment',
+            'assignment_id': assignment.id,
+            'timestamp': datetime.utcnow().isoformat()
+        })
+        
+        return True, f"Assignment '{title}' created successfully", {
+            'id': assignment.id,
+            'title': title,
+            'description': description,
+            'due_date': due_date.isoformat() if due_date else None
+        }
+        
+    except Exception as e:
+        db.session.rollback()
+        return False, f"Failed to create assignment: {str(e)}", None
+
+def update_ai_assignment(data, current_user):
+    """Update assignment via AI"""
+    try:
+        assignment_id = data.get('assignment_id')
+        title = data.get('title')
+        description = data.get('description')
+        due_date_str = data.get('due_date')
+        
+        if not assignment_id:
+            return False, "Assignment ID is required", None
+            
+        assignment = Assignment.query.get(assignment_id)
+        if not assignment:
+            return False, "Assignment not found", None
+            
+        if title:
+            assignment.title = title
+        if description:
+            assignment.description = description
+        if due_date_str:
+            try:
+                assignment.due_date = datetime.fromisoformat(due_date_str.replace('Z', '+00:00'))
+            except:
+                return False, "Invalid due date format", None
+            
+        db.session.commit()
+        
+        return True, f"Assignment ID {assignment_id} updated successfully", {
+            'id': assignment.id,
+            'title': assignment.title,
+            'description': assignment.description
+        }
+        
+    except Exception as e:
+        db.session.rollback()
+        return False, f"Failed to update assignment: {str(e)}", None
+
+def delete_ai_assignment(data, current_user):
+    """Delete assignment via AI"""
+    try:
+        assignment_id = data.get('assignment_id')
+        
+        if not assignment_id:
+            return False, "Assignment ID is required", None
+            
+        assignment = Assignment.query.get(assignment_id)
+        if not assignment:
+            return False, "Assignment not found", None
+            
+        title = assignment.title
+        db.session.delete(assignment)
+        db.session.commit()
+        
+        return True, f"Assignment '{title}' deleted successfully", None
+        
+    except Exception as e:
+        db.session.rollback()
+        return False, f"Failed to delete assignment: {str(e)}", None
+
+def create_ai_topic(data, current_user):
+    """Create topic via AI"""
+    try:
+        name = data.get('name', 'AI Generated Topic')
+        description = data.get('description', '')
+        
+        if not name:
+            return False, "Topic name is required", None
+            
+        # Check if topic already exists
+        existing_topic = Topic.query.filter_by(name=name).first()
+        if existing_topic:
+            return False, f"Topic '{name}' already exists", None
+            
+        topic = Topic(
+            name=name,
+            description=description
+        )
+        
+        db.session.add(topic)
+        db.session.commit()
+        
+        return True, f"Topic '{name}' created successfully", {
+            'id': topic.id,
+            'name': name,
+            'description': description
+        }
+        
+    except Exception as e:
+        db.session.rollback()
+        return False, f"Failed to create topic: {str(e)}", None
+
+def send_ai_notification(data, current_user):
+    """Send notification via AI"""
+    try:
+        title = data.get('title', 'AI Notification')
+        message = data.get('message', '')
+        user_id = data.get('user_id')  # Specific user or broadcast if None
+        
+        if not message:
+            return False, "Notification message is required", None
+            
+        if user_id:
+            # Send to specific user
+            send_notification(user_id, title, message)
+            return True, f"Notification sent to user {user_id}", None
+        else:
+            # Broadcast to all users
+            socketio.emit('push_notification', {
+                'title': title,
+                'message': message,
+                'type': 'info',
+                'timestamp': datetime.utcnow().isoformat()
+            })
+            return True, "Notification broadcast to all users", None
+            
+    except Exception as e:
+        return False, f"Failed to send notification: {str(e)}", None
+
+# Update the AI prompt to include write capabilities
+def prepare_comprehensive_ai_prompt(user_message, db_context, current_user):
+    """Prepare comprehensive prompt with FULL database access AND write capabilities"""
+    
+    base_prompt = f"""You are an AI assistant for the LyxNexus educational platform with EXCLUSIVE permission to access ALL database information AND perform write operations.
+
+CURRENT USER CONTEXT:
+- User: {current_user.username} (ID: {current_user.id})
+- Admin Status: {'✅ Administrator' if current_user.is_admin else 'Student'}
+- Current Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+
+DATABASE ACCESS LEVEL: FULL UNLIMITED ACCESS (READ + WRITE)
+You have complete read AND write access to all database tables and records.
+
+WRITE OPERATIONS AVAILABLE (Admin only):
+1. create_announcement - Create new announcements
+   {{"operation": "create_announcement", "title": "Title", "content": "Content"}}
+
+2. update_announcement - Update existing announcements  
+   {{"operation": "update_announcement", "announcement_id": 1, "title": "New Title", "content": "New Content"}}
+
+3. delete_announcement - Delete announcements
+   {{"operation": "delete_announcement", "announcement_id": 1}}
+
+4. create_assignment - Create new assignments
+   {{"operation": "create_assignment", "title": "Title", "description": "Description", "due_date": "2024-01-01T00:00:00"}}
+
+5. update_assignment - Update existing assignments
+   {{"operation": "update_assignment", "assignment_id": 1, "title": "New Title", "description": "New Desc"}}
+
+6. delete_assignment - Delete assignments
+   {{"operation": "delete_assignment", "assignment_id": 1}}
+
+7. create_topic - Create new topics
+   {{"operation": "create_topic", "name": "Topic Name", "description": "Topic Description"}}
+
+8. send_notification - Send notifications to users
+   {{"operation": "send_notification", "title": "Title", "message": "Message"}} 
+   {{"operation": "send_notification", "title": "Title", "message": "Message", "user_id": 123}}
+
+RESPONSE FORMAT:
+Return a JSON object with:
+- "response": "Your text response to the user"
+- "operations": [array of operations to execute]
+- "data_sources": [list of data sources used]
+
+EXAMPLE RESPONSE:
+{{
+  "response": "I've created a new announcement about the upcoming exam and notified all users.",
+  "operations": [
+    {{"operation": "create_announcement", "title": "Exam Schedule", "content": "The final exams will be held next week."}},
+    {{"operation": "send_notification", "title": "New Announcement", "message": "Check the new exam schedule announcement"}}
+  ],
+  "data_sources": ["announcements", "users"]
+}}
+
+IMPORTANT RULES:
+1. Only perform write operations if the user is an admin
+2. Always verify data exists before updating/deleting
+3. Include relevant IDs from the database context
+4. Be cautious with deletion operations
+5. Provide clear feedback about what operations were performed
+
+"""
+
+    # Add the existing database context summary
+    base_prompt += "CURRENT DATABASE OVERVIEW:\n"
+    base_prompt += "=" * 50 + "\n"
+    
+    stats = db_context['data'].get('platform_statistics', {})
+    base_prompt += f"Total Users: {stats.get('total_users', 0)} | "
+    base_prompt += f"Announcements: {stats.get('total_announcements', 0)} | "
+    base_prompt += f"Assignments: {stats.get('total_assignments', 0)}\n"
+    base_prompt += f"Topics: {stats.get('total_topics', 0)} | "
+    base_prompt += f"Files: {stats.get('total_files', 0)} | "
+    base_prompt += f"Online Users: {stats.get('online_users', 0)}\n\n"
+    
+    base_prompt += f"USER QUERY: {user_message}\n\n"
+    base_prompt += "ASSISTANT RESPONSE (using full database context with write capabilities):"
+    
+    return base_prompt
+
+    
 def get_complete_database_context(user_message, current_user):
     """Get COMPLETE database access without limits - Exclusive AI Permission"""
     message_lower = user_message.lower()
