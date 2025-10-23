@@ -819,6 +819,9 @@ def ai_chat_send():
             '  ]\n'
             "}\n\n"
         )
+        prompt += (
+            "\n\nYou can access the internet and search related sites, results and data related to LyxNexus, url https://lyxnexus.onrender.com is for this platform, the pages are \main-page, \files, and similar.\n"
+        )
 
         # Call Gemini API
         ai_response_text = call_gemini_api(prompt)
