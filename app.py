@@ -799,6 +799,7 @@ def ai_chat_send():
         # Add flexible JSON formatting rules
         prompt += (
             "\n\nIMPORTANT: You must ALWAYS respond in valid JSON that can be parsed by the system.\n"
+            "NOTE: When performing delete_user, update_user_admin_status operations, always include the explicit 'user_id' number provided in the user's request. Do not guess or infer IDs.\n"
             "Your response can include write operations if needed, but they are optional.\n"
             "Never include markdown, extra explanations, or text outside JSON if request is to create, delete, modify or technical something.\n\n"
             "The JSON must follow one of these two formats:\n\n"
@@ -923,6 +924,9 @@ def execute_ai_database_operation(operation_type, operation_data, current_user):
             
         elif operation_type == "send_notification":
             return send_ai_notification(operation_data, current_user)
+
+        elif operation_type == "update_user_admin_status":
+            return update_ai_user_admin_status(operation_data, current_user)
         
         elif operation_type == "delete_user":
             user_id = operation_data.get("user_id") or operation_data.get("id")
@@ -947,6 +951,38 @@ def execute_ai_database_operation(operation_type, operation_data, current_user):
             
     except Exception as e:
         return False, f"Operation failed: {str(e)}", None
+
+def update_ai_user_admin_status(data, user):
+    """Allow admin AI to update another user's admin status."""
+
+    if not user.is_admin:
+        return False, "Permission denied: only admins can change admin status.", None
+
+    target_id = data.get("user_id")
+    new_status = data.get("is_admin")
+
+    if target_id is None or new_status is None:
+        return False, "Missing required fields: 'user_id' and 'is_admin'.", None
+
+    target_user = User.query.get(target_id)
+    if not target_user:
+        return False, f"User with ID {target_id} not found.", None
+
+    if target_user.id == user.id:
+        return False, "You cannot change your own admin status.", None
+
+    try:
+        target_user.is_admin = bool(new_status)
+        db.session.commit()
+
+        status_text = "promoted to admin" if target_user.is_admin else "demoted to user"
+        return True, f"User {target_user.username} ({target_user.id}) was {status_text}.", {
+            "user_id": target_user.id,
+            "new_status": target_user.is_admin
+        }
+    except Exception as e:
+        db.session.rollback()
+        return False, f"Failed to update admin status: {str(e)}", None
 
 def create_ai_announcement(data, current_user):
     """Create announcement via AI"""
@@ -1242,9 +1278,12 @@ WRITE OPERATIONS AVAILABLE (Admin only):
    {{"operation": "create_topic", "name": "Topic Name", "description": "Topic Description"}}
 
 8. delete_user - Delete User
-   {"operation": "delete_user", "user_id": "user ID"}
+   {"operation": "delete_user", "user_id": 2}
 
-9. send_notification - Send notifications to users
+9. update_user_admin_status - Update a user’s admin privileges
+   {"operation": "update_user_admin_status", "user_id": 2, "is_admin": true}
+   
+10. send_notification - Send notifications to users
    {{"operation": "send_notification", "title": "Title", "message": "Message"}} 
    {{"operation": "send_notification", "title": "Title", "message": "Message", "user_id": 123}}
 
