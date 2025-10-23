@@ -1209,6 +1209,21 @@ IMPORTANT RULES:
 
     # Add the existing database context summary
     base_prompt += "CURRENT DATABASE OVERVIEW:\n"
+    
+    base_prompt += (
+        "\n\nIMPORTANT: Always respond in valid JSON format with the following structure:\n"
+        "{\n"
+        '  "response": "<summary of what you did>",\n'
+        '  "operations": [\n'
+        '    {\n'
+        '      "operation": "<create_announcement | update_assignment | etc>",\n'
+        '      "title": "<title>",\n'
+        '      "content": "<content or description>"\n'
+        '    }\n'
+        '  ]\n'
+        "}\n"
+    ) 
+
     base_prompt += "=" * 50 + "\n"
     
     stats = db_context['data'].get('platform_statistics', {})
