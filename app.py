@@ -794,13 +794,15 @@ def ai_chat_send():
         
         # Prepare the prompt with FULL context and write capabilities
         prompt = prepare_comprehensive_ai_prompt(user_message, db_context, current_user)
+        # Start with a strict but flexible system rule
         prompt = (
-            "You are LyxNexus AI Assistant.\n"
-            "You must always respond ONLY in valid JSON.\n"
-            "Never include explanations, markdown, or text outside JSON.\n"
-            "Use this exact format:\n"
+            "Always respond in VALID JSON that matches the structure below.\n"
+            "After thinking about the user's request and the platform context, "
+            "fill the JSON with the correct operations that must be executed.\n"
+            "Never include markdown, explanations, or text outside JSON.\n"
+            "JSON format:\n"
             "{\n"
-            '  "response": "<summary of what you did>",\n'
+            '  "response": "<short description of what you did>",\n'
             '  "operations": [\n'
             '    {\n'
             '      "operation": "<create_announcement | update_assignment | delete_topic | etc>",\n'
@@ -809,7 +811,7 @@ def ai_chat_send():
             '    }\n'
             '  ]\n'
             "}\n\n"
-        )
+        )        
         
         # Call Gemini API
         ai_response_text = call_gemini_api(prompt)
