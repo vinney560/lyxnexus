@@ -795,28 +795,35 @@ def ai_chat_send():
 
         # Prepare the prompt with FULL context and write capabilities
         prompt = prepare_comprehensive_ai_prompt(user_message, db_context, current_user)
-
-        # Add flexible JSON formatting rules
+        # Add adaptive JSON or text response logic
         prompt += (
-            "\n\nIMPORTANT: You must ALWAYS respond in valid JSON that can be parsed by the system.\n"
-            "Your response can include write operations if needed, but they are optional.\n"
-            "Never include markdown, extra explanations, or text outside JSON if request is to create something.\n\n"
-            "The JSON must follow one of these two formats:\n\n"
-            "1️⃣ For normal answers (read-only or conversational):\n"
-            "{\n"
-            '  \"response\": \"<your answer to the user>\"\n'
-            "}\n\n"
-            "2️⃣ For actions that modify data (admin operations):\n"
+            "\n\nSYSTEM RULES:\n"
+            "You are the LyxNexus AI Assistant.\n"
+            "Your output format depends on the type of user request:\n\n"
+
+            "🧠 For normal conversation, explanations, or informational queries:\n"
+            "- Respond naturally using plain text or markdown.\n"
+            "- You may use bullet points, code blocks, or formatting if helpful.\n\n"
+
+            "⚙️ For administrative or data-changing requests (create, update, delete, modify):\n"
+            "- You must respond ONLY in valid JSON that can be parsed by the system.\n"
+            "- Do NOT include any markdown, comments, or extra text outside JSON.\n"
+            "- Use this exact structure:\n"
             "{\n"
             '  \"response\": \"<short summary of what you did>\",\n'
             '  \"operations\": [\n'
             '    {\n'
-            '      \"operation\": \"<create_announcement | update_assignment | delete_topic | etc>\",\n'
+            '      \"operation\": \"<create_announcement | create_assignment | create_timetable | update_assignment | delete_topic | etc>\",\n'
             '      \"title\": \"<title or name if applicable>\",\n'
             '      \"content\": \"<content or description if applicable>\"\n'
             '    }\n'
             '  ]\n'
             "}\n\n"
+
+            "💡 When deciding which format to use:\n"
+            "- If the user asks to *create, update, delete,* or *modify* something → use JSON.\n"
+            "- If the user is just asking, explaining, or chatting → use plain text or markdown.\n"
+            "- Do NOT mix formats.\n"
         )
 
         # Call Gemini API
