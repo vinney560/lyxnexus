@@ -776,7 +776,6 @@ import json
 def ai_chat():
     """Render the AI chat page"""
     return render_template('ai_chat.html', year=_year())
-
 # Update the AI chat send route to handle write operations
 @app.route('/api/ai-chat/send', methods=['POST'])
 @login_required
@@ -787,13 +786,13 @@ def ai_chat_send():
 
         data = request.get_json()
         user_message = data.get('message', '').strip()
-        
+
         if not user_message:
             return jsonify({'error': 'Message cannot be empty'}), 400
 
         # Get COMPLETE database context without limits
         db_context = get_complete_database_context(user_message, current_user)
-        
+
         # Prepare the prompt with FULL context and write capabilities
         prompt = prepare_comprehensive_ai_prompt(user_message, db_context, current_user)
 
@@ -801,7 +800,7 @@ def ai_chat_send():
         prompt += (
             "\n\nIMPORTANT: You must ALWAYS respond in valid JSON that can be parsed by the system.\n"
             "Your response can include write operations if needed, but they are optional.\n"
-            "Never include markdown, extra explanations, or text outside JSON if request is create something.\n\n"
+            "Never include markdown, extra explanations, or text outside JSON if request is to create something.\n\n"
             "The JSON must follow one of these two formats:\n\n"
             "1️⃣ For normal answers (read-only or conversational):\n"
             "{\n"
@@ -827,10 +826,19 @@ def ai_chat_send():
         operations_executed = []
 
         try:
+            # 🧹 Clean Markdown code fences if present (```json ... ```)
+            if ai_response_text.strip().startswith("```"):
+                ai_response_text = ai_response_text.strip().strip("`")
+                ai_response_text = ai_response_text.replace("json\n", "").replace("JSON\n", "")
+                ai_response_text = ai_response_text.strip()
+
             # Try to parse as JSON
             ai_response_data = json.loads(ai_response_text)
             ai_text_response = ai_response_data.get('response', ai_response_text)
             operations_requested = ai_response_data.get('operations', [])
+
+            print("[DEBUG] Current user is admin:", current_user.is_admin)
+            print("[DEBUG] Operations requested:", operations_requested)
 
             # Execute requested operations (if user is admin)
             if operations_requested and current_user.is_admin:
@@ -854,11 +862,9 @@ def ai_chat_send():
 
         except json.JSONDecodeError:
             # If not JSON, treat as plain text
+            print("[DEBUG] JSON parse failed, treating as plain text.")
             ai_text_response = ai_response_text
             operations_requested = []
-            print("[DEBUG] Current user is admin:", current_user.is_admin)
-            print("[DEBUG] Operations requested:", operations_requested)
-
 
         # Save the AI conversation
         save_ai_conversation(
