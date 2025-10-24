@@ -113,7 +113,7 @@ socketio = SocketIO(app, cors_allowed_origins="*", async_mode="eventlet", ping_t
 db = SQLAlchemy(app)
 
 def nairobi_time():
-    return datetime.utcnow() + timedelta(hours=3)
+    return (datetime.utcnow() + timedelta(hours=3)).strftime('%Y-%m-%d %H:%M:%S')
 
 # =========================================
 # USER MODEL
@@ -1250,7 +1250,7 @@ def prepare_comprehensive_ai_prompt(user_message, db_context, current_user):
 CURRENT USER CONTEXT:
 - User: {current_user.username} (ID: {current_user.id})
 - Admin Status: {'✅ Administrator' if current_user.is_admin else 'Student'}
-- Current Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+- Current Time: {nairobi_time()}
 
 DATABASE ACCESS LEVEL: FULL UNLIMITED ACCESS (READ + WRITE)
 You have complete read AND write access to all database tables and records.
