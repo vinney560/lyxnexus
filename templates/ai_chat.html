@@ -434,6 +434,9 @@
             position: relative;
             border: 1px solid rgba(255, 255, 255, 0.05);
             transition: var(--transition);
+            width: fit-content;
+            max-width: 90%;
+            word-break: break-all;
         }
 
         .user .message-content {
@@ -1482,10 +1485,12 @@
                     
                     messageInput.style.height = 'auto';
                     messageInput.style.height = (messageInput.scrollHeight) + 'px';
-                    additionalPadding = hasText ? '50px' : '16px';
-                    messageInput.style.paddingRight = additionalPadding;
                     attachFileBtn.style.display = hasText ? 'none' : 'block';
                     microphoneBtn.style.display = hasText ? 'none' : 'block';
+                    messageInput.style.paddingRight = hasText ? '55px' : '40px';
+                    messageInput.style.transition = 'box-shadow 0.3s ease';
+                    messageInput.style.animation = hasText ? 'inputFocusGlow 2s infinite' : 'none';
+                    messageInput.style.borderRadius = hasText ? '12px' : '100px';
                 });
 
                 toggleSidebarBtn.addEventListener('click', () => this.toggleSidebar());
@@ -1678,7 +1683,7 @@
 
             startTypingEffect(text, container, messageContent) {
                 let index = 0;
-                const speed = 20;
+                const speed = 10;
                 const self = this;
                 
                 function type() {
