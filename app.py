@@ -781,75 +781,94 @@ def ai_chat():
 @app.route('/api/ai-chat/send', methods=['POST'])
 @login_required
 def ai_chat_send():
-    """Send message to AI and get response with FULL database context and write operations"""
+    """Send message to AI and get streaming response"""
     try:
-        import json
-
         data = request.get_json()
         user_message = data.get('message', '').strip()
 
         if not user_message:
             return jsonify({'error': 'Message cannot be empty'}), 400
 
-        # Get COMPLETE database context without limits
+        # Get database context
         db_context = get_complete_database_context(user_message, current_user)
-
-        # Prepare the prompt with FULL context and write capabilities
+        
+        # Prepare prompt
         prompt = prepare_comprehensive_ai_prompt(user_message, db_context, current_user)
-
-        # Add flexible JSON formatting rules
-        prompt += (
-            "\n\nIMPORTANT: You must ALWAYS respond in valid JSON that can be parsed by the system.\n"
-            "NOTE: When performing delete_user or update_user_admin_status operations, always include the explicit 'user_id' number provided in the user's request. Do not guess or infer IDs.\n"
-            "Your response can include write operations if needed, but they are optional. You can access the internet and search related sites or data related to LyxNexus; the URL https://lyxnexus.onrender.com is for this platform.\n"
-            "Never include markdown, extra explanations, or text outside JSON if the request involves creation, deletion, modification, or any technical operation.\n\n"
-            "The JSON must follow one of these two formats:\n\n"
-            "1️⃣ For normal answers (read-only or conversational):\n"
-            "{\n"
-            '  \"response\": \"<your answer to the user>\"\n'
-            "}\n\n"
-            "2️⃣ For actions that modify data (admin operations):\n"
-            "{\n"
-            '  \"response\": \"<short summary of what you did>\",\n'
-            '  \"operations\": [\n'
-            '    {\n'
-            '      \"operation\": \"<create_announcement | update_assignment | delete_topic | delete_user | update_user_admin_status | etc>\",\n'
-            '      \"title\": \"<title or name if applicable>\",\n'
-            '      \"content\": \"<content or description if applicable>\",\n'
-            '      \"user_id\": <id if applicable>,\n'
-            '      \"is_admin\": <true | false if applicable>\n'
-            '    }\n'
-            '  ]\n'
-            "}\n\n"
+        
+        # Add streaming-specific instructions
+        prompt += "\n\nIMPORTANT FOR STREAMING: Return your response as a single JSON object. Do not use markdown formatting."
+        
+        # Generate a unique ID for this streaming session
+        stream_id = f"ai_stream_{current_user.id}_{datetime.utcnow().strftime('%Y%m%d%H%M%S%f')}"
+        
+        # Start streaming in background
+        socketio.start_background_task(
+            stream_ai_response,
+            prompt, 
+            user_message,
+            current_user,
+            db_context,
+            stream_id
         )
+        
+        return jsonify({
+            'success': True,
+            'stream_id': stream_id,
+            'message': 'Streaming started'
+        }), 200
 
-        # Call Gemini API
-        ai_response_text = call_gemini_api(prompt)
-        print("\n[DEBUG] AI Raw Response:\n", ai_response_text, "\n")
+    except Exception as e:
+        print(f"[ERROR] AI Chat Route Exception: {e}")
+        return jsonify({
+            'success': False,
+            'error': 'Failed to process AI response.',
+            'details': str(e)
+        }), 500
 
+def stream_ai_response(prompt, user_message, current_user, db_context, stream_id):
+    """Stream AI response in chunks"""
+    try:
+        import json
+        
+        # Call Gemini API with streaming
+        full_response = ""
         operations_executed = []
-
+        
+        # Emit start event
+        socketio.emit('ai_stream_start', {
+            'stream_id': stream_id,
+            'user_message': user_message
+        }, room=request.sid)
+        
+        # Get streaming response from Gemini
+        for chunk in call_gemini_api_streaming(prompt):
+            if chunk:
+                full_response += chunk
+                
+                # Emit chunk to client
+                socketio.emit('ai_stream_chunk', {
+                    'stream_id': stream_id,
+                    'chunk': chunk,
+                    'is_complete': False
+                }, room=request.sid)
+        
+        # Process the complete response
         try:
-            # 🧹 Clean Markdown code fences if present (```json ... ```)
-            if ai_response_text.strip().startswith("```"):
-                ai_response_text = ai_response_text.strip().lstrip("`").rstrip("`")
-                ai_response_text = ai_response_text.replace("json\n", "").replace("JSON\n", "").strip()
+            # Clean and parse the response
+            cleaned_response = full_response.strip()
+            if cleaned_response.startswith("```"):
+                cleaned_response = cleaned_response.strip().lstrip("`").rstrip("`")
+                cleaned_response = cleaned_response.replace("json\n", "").replace("JSON\n", "").strip()
 
-            # Try to parse as JSON
-            ai_response_data = json.loads(ai_response_text)
-            ai_text_response = ai_response_data.get('response', ai_response_text)
+            ai_response_data = json.loads(cleaned_response)
+            ai_text_response = ai_response_data.get('response', full_response)
             operations_requested = ai_response_data.get('operations', [])
 
-            print("[DEBUG] Current user is admin:", current_user.is_admin)
-            print("[DEBUG] Operations requested:", operations_requested)
-
-            # Execute requested operations (if user is admin)
+            # Execute operations if user is admin
             if operations_requested and current_user.is_admin:
                 for operation in operations_requested:
                     op_type = operation.get('operation')
-                    op_data = operation.get('data', operation)  # Support both formats
-
-                    print(f"[DEBUG] Executing operation: {op_type} -> {op_data}")
+                    op_data = operation.get('data', operation)
 
                     success, message, result_data = execute_ai_database_operation(
                         op_type, op_data, current_user
@@ -863,11 +882,10 @@ def ai_chat_send():
                     })
 
         except json.JSONDecodeError:
-            print("[DEBUG] JSON parse failed, treating as plain text.")
-            ai_text_response = ai_response_text
+            ai_text_response = full_response
             operations_requested = []
 
-        # Save the AI conversation
+        # Save conversation
         save_ai_conversation(
             current_user.id,
             user_message,
@@ -875,22 +893,114 @@ def ai_chat_send():
             db_context.get('context_type', 'full_database')
         )
 
-        return jsonify({
-            'success': True,
-            'response': ai_text_response,
+        # Emit completion
+        socketio.emit('ai_stream_complete', {
+            'stream_id': stream_id,
+            'full_response': ai_text_response,
             'operations_executed': operations_executed,
             'context_used': db_context.get('context_type', 'full_database'),
             'data_sources': list(db_context['data'].keys()),
             'is_admin': current_user.is_admin
-        }), 200
+        }, room=request.sid)
 
     except Exception as e:
-        print(f"[ERROR] AI Chat Route Exception: {e}")
-        return jsonify({
-            'success': False,
-            'error': 'Failed to process AI response.',
-            'details': str(e)
-        }), 500
+        # Emit error
+        socketio.emit('ai_stream_error', {
+            'stream_id': stream_id,
+            'error': str(e)
+        }, room=request.sid)
+
+def call_gemini_api_streaming(prompt):
+    """Call Gemini API with streaming support"""
+    API_KEYS = [
+        'AIzaSyA3o8aKHTnVzuW9-qg10KjNy7Lcgn19N2I',
+        'AIzaSyCq8-xrPTC40k8E_i3vXZ_-PR6RiPsuOno'
+    ]
+    MODEL = "gemini-2.0-flash-lite"
+    
+    for API_KEY in API_KEYS:
+        API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/{MODEL}:streamGenerateContent?key={API_KEY}"
+        
+        try:
+            response = requests.post(
+                API_URL,
+                headers={"Content-Type": "application/json"},
+                json={
+                    "contents": [{
+                        "parts": [{"text": prompt}]
+                    }],
+                    "generationConfig": {
+                        "temperature": 0.7,
+                        "topK": 40,
+                        "topP": 0.95,
+                        "maxOutputTokens": 2048,
+                    }
+                },
+                stream=True,  # Enable streaming
+                timeout=60
+            )
+            
+            if response.status_code == 200:
+                for line in response.iter_lines():
+                    if line:
+                        line = line.decode('utf-8')
+                        if line.startswith('{"candidates"'):
+                            try:
+                                data = json.loads(line)
+                                if 'candidates' in data and len(data['candidates']) > 0:
+                                    text = data['candidates'][0]['content']['parts'][0]['text']
+                                    yield text
+                            except json.JSONDecodeError:
+                                continue
+                break  # Success, break out of API key loop
+            else:
+                print(f"API key failed ({API_KEY[:10]}...): HTTP {response.status_code}")
+                continue
+                
+        except Exception as e:
+            print(f"Gemini API Error with {API_KEY[:10]}...: {e}")
+            continue
+    
+    # Fallback: return empty if all keys fail
+    yield "I'm currently unavailable due to a technical issue. Please check your connection and try again later."
+
+@socketio.on('connect')
+def handle_connect():
+    """Handle user connection - enhanced for AI streaming"""
+    if current_user.is_authenticated:
+        update_user_presence(
+            user_id=current_user.id,
+            username=current_user.username,
+            is_admin=current_user.is_admin,
+            room='general'
+        )
+        
+        join_room('general')
+        
+        emit('user_joined', {
+            'user_id': current_user.id,
+            'username': current_user.username,
+            'is_admin': current_user.is_admin,
+            'message': f'{current_user.username} joined the chat'
+        }, room='general', include_self=False)
+        
+        emit('user_info', {
+            'user_id': current_user.id,
+            'username': current_user.username,
+            'is_admin': current_user.is_admin
+        })
+        
+        print(f"User {current_user.username} connected. Online users: {len(online_users)}")
+
+# Add this specific handler for AI streaming room
+@socketio.on('join_ai_stream')
+def handle_join_ai_stream(data):
+    """Join AI streaming room for current session"""
+    if current_user.is_authenticated:
+        stream_id = data.get('stream_id')
+        if stream_id:
+            join_room(stream_id)
+            emit('ai_stream_joined', {'stream_id': stream_id})    
 
 def execute_ai_database_operation(operation_type, operation_data, current_user):
     """
