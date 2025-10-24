@@ -1524,6 +1524,8 @@
                 this.addMessage(message, 'user');
                 messageInput.value = '';
                 messageInput.style.borderRadius = '100px';
+                messageInput.style.height = 'auto';
+                messageInput.style.height = (messageInput.scrollHeight) + 'px';
                 this.disableInput();
 
                 this.incrementRequestCount();
