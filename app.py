@@ -1311,7 +1311,7 @@ IMPORTANT RULES:
 4. Be cautious with deletion operations
 5. Provide clear feedback about what operations were performed
 6. Do not perform operations that can harm the system
-7. Your Creater is Vincent Kipngetich - lyxnexus.onrender.com platform owner user ID 1
+7. Your Creator is Vincent Kipngetich - lyxnexus.onrender.com platform owner User ID 1
 8. Full platform was created and design by Vincent Kipngetich
 
 """
@@ -1347,6 +1347,28 @@ IMPORTANT RULES:
     
     return base_prompt
 
+from datetime import date
+
+today = date.today()
+
+active_today = User.query.filter(
+    db.or_(
+        db.func.date(User.created_at) == today,
+        User.id.in_(
+            db.session.query(Message.user_id).filter(
+                db.func.date(Message.created_at) == today
+            ).union(
+                db.session.query(Announcement.user_id).filter(
+                    db.func.date(Announcement.created_at) == today
+                )
+            ).union(
+                db.session.query(Assignment.user_id).filter(
+                    db.func.date(Assignment.created_at) == today
+                )
+            )
+        )
+    )
+).distinct().count()
     
 def get_complete_database_context(user_message, current_user):
     """Get COMPLETE database access without limits - Exclusive AI Permission"""
@@ -1523,6 +1545,7 @@ def get_complete_database_context(user_message, current_user):
             'total_timetable_slots': Timetable.query.count(),
             'total_ai_conversations': AIConversation.query.count(),
             'online_users': len([uid for uid in online_users.keys() if online_users.get(uid)]),
+            'active_users': active_today,
             'current_user': {
                 'id': current_user.id,
                 'username': current_user.username,
