@@ -1348,27 +1348,21 @@ IMPORTANT RULES:
     return base_prompt
 
 from datetime import date
-
-today = date.today()
-
-active_today = User.query.filter(
-    db.or_(
-        db.func.date(User.created_at) == today,
-        User.id.in_(
-            db.session.query(Message.user_id).filter(
-                db.func.date(Message.created_at) == today
-            ).union(
-                db.session.query(Announcement.user_id).filter(
-                    db.func.date(Announcement.created_at) == today
-                )
-            ).union(
-                db.session.query(Assignment.user_id).filter(
-                    db.func.date(Assignment.created_at) == today
-                )
+from sqlalchemy import or_, func
+def get_active_users_today():
+    today = date.today()
+    active_today = User.query.filter(
+        or_(
+            func.date(User.created_at) == today,
+            User.id.in_(
+                db.session.query(Message.user_id).filter(func.date(Message.created_at) == today)
+                .union(db.session.query(Announcement.user_id).filter(func.date(Announcement.created_at) == today))
+                .union(db.session.query(Assignment.user_id).filter(func.date(Assignment.created_at) == today))
             )
         )
-    )
-).distinct().count()
+    ).distinct().count()
+    return active_today
+
     
 def get_complete_database_context(user_message, current_user):
     """Get COMPLETE database access without limits - Exclusive AI Permission"""
@@ -1545,7 +1539,7 @@ def get_complete_database_context(user_message, current_user):
             'total_timetable_slots': Timetable.query.count(),
             'total_ai_conversations': AIConversation.query.count(),
             'online_users': len([uid for uid in online_users.keys() if online_users.get(uid)]),
-            'active_users': active_today,
+            'active_users_today': get_active_users_today(),
             'current_user': {
                 'id': current_user.id,
                 'username': current_user.username,
