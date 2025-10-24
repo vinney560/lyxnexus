@@ -1340,6 +1340,7 @@ IMPORTANT RULES:
     base_prompt += f"Assignments: {stats.get('total_assignments', 0)}\n"
     base_prompt += f"Topics: {stats.get('total_topics', 0)} | "
     base_prompt += f"Files: {stats.get('total_files', 0)} | "
+    base_prompt += f"Active Users: {stats.get('active_users_today', 0)} | "
     base_prompt += f"Online Users: {stats.get('online_users', 0)}\n\n"
     
     base_prompt += f"USER QUERY: {user_message}\n\n"
