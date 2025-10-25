@@ -419,7 +419,6 @@
         .tab-container {
             display: flex;
             overflow-x: auto;
-            white-space: nowrap;
             padding-bottom: 10px;
             scroll-behavior: smooth;
             -webkit-overflow-scrolling: touch;
@@ -429,9 +428,14 @@
         .tab-container::-webkit-scrollbar {
             display: none;
         }
+
         .tab-container {
             -ms-overflow-style: none;
             scrollbar-width: none;   
+        }
+
+        .tab-container > * {
+            flex: 0 0 auto;
         }
 
         .tab-button {
@@ -746,7 +750,7 @@
 
         <!-- Tabs -->
         <div class="glass-morph rounded-t-xl p-4">
-            <div class="flex overflow-x-auto space-x-4 border-b border-gray-700 pb-2 scrollbar-hide tab-container">
+            <div class="border-b border-gray-700 pb-2 tab-container">
                 <button class="tab-button whitespace-nowrap active" onclick="openTab('announcements-tab')">Announcements</button>
                 <button class="tab-button whitespace-nowrap" onclick="openTab('assignments-tab')">Assignments</button>
                 <button class="tab-button whitespace-nowrap" onclick="openTab('topics-tab')">Units</button>
