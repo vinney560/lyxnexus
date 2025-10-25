@@ -2030,6 +2030,10 @@ def main_page():
 def nav_guide():
     return render_template('navigation.html')
 #--------------------------------------------------------------------
+@app.route('/test')
+def test_template():
+    return render_template('test.html')
+#--------------------------------------------------------------------
 @app.route('/admin')
 @login_required
 @admin_required
