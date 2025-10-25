@@ -159,11 +159,27 @@
             margin-bottom: 1.5rem;
             border: 1px solid rgba(59, 130, 246, 0.2);
             transition: all 0.3s ease;
+            position: relative;
         }
         
         .chart-container:hover {
             border-color: rgba(59, 130, 246, 0.4);
             box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* Fixed chart wrapper sizes */
+        .chart-wrapper {
+            position: relative;
+            width: 100%;
+            margin: 0 auto;
+        }
+        
+        .chart-wrapper-large {
+            height: 300px;
+        }
+        
+        .chart-wrapper-medium {
+            height: 280px;
         }
         
         .activity-feed {
@@ -196,6 +212,18 @@
             transition: all 0.3s ease;
             border-radius: 8px;
             margin-bottom: 0.5rem;
+            animation: slideInUp 0.5s ease-out;
+        }
+        
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
         
         .activity-item:hover {
@@ -226,6 +254,25 @@
             font-weight: bold;
             font-size: 1.1rem;
             box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+            animation: bounceIn 0.6s ease-out;
+        }
+        
+        @keyframes bounceIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.3);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.05);
+            }
+            70% {
+                transform: scale(0.9);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
         }
         
         .section-badge {
@@ -306,27 +353,91 @@
             100% { background-position: 200% 0; }
         }
         
-        .metric-card {
-            background: linear-gradient(135deg, rgba(30, 30, 40, 0.8), rgba(30, 30, 40, 0.6));
-            border-radius: 16px;
-            padding: 1.5rem;
-            border: 1px solid rgba(59, 130, 246, 0.2);
-            transition: all 0.3s ease;
+        .fade-in {
+            animation: fadeIn 0.8s ease-in;
         }
         
-        .metric-card:hover {
-            border-color: rgba(59, 130, 246, 0.4);
-            transform: translateY(-2px);
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .slide-in-left {
+            animation: slideInLeft 0.6s ease-out;
+        }
+        
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .slide-in-right {
+            animation: slideInRight 0.6s ease-out;
+        }
+        
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .count-up {
+            animation: countUp 1.5s ease-out;
+        }
+        
+        @keyframes countUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .glow {
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes glow {
+            from {
+                box-shadow: 0 0 5px rgba(59, 130, 246, 0.5);
+            }
+            to {
+                box-shadow: 0 0 20px rgba(59, 130, 246, 0.8);
+            }
+        }
+        
+        .floating {
+            animation: floating 3s ease-in-out infinite;
+        }
+        
+        @keyframes floating {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
         }
     </style>
 </head>
 <body class="bg-gray-900">
     <!-- Header -->
-    <header class="glass-morph sticky top-0 z-50 mb-8">
+    <header class="glass-morph sticky top-0 z-50 mb-8 floating">
         <div class="max-w-7xl mx-auto px-4 py-4">
             <div class="flex flex-col md:flex-row justify-between items-center">
-                <div class="flex items-center space-x-3 mb-4 md:mb-0">
-                    <div class="logo-container bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl p-2">
+                <div class="flex items-center space-x-3 mb-4 md:mb-0 slide-in-left">
+                    <div class="logo-container bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl p-2 glow">
                         <i class="fas fa-chart-line text-white text-xl"></i>
                     </div>
                     <div>
@@ -341,7 +452,7 @@
                     </div>
                 </div>
                 
-                <div class="flex items-center space-x-3">
+                <div class="flex items-center space-x-3 slide-in-right">
                     <span class="text-sm text-gray-400 hidden md:block">Last 24 hours</span>
                     <button onclick="refreshAnalytics()" class="btn flex items-center space-x-2">
                         <i class="fas fa-sync-alt"></i>
@@ -355,12 +466,12 @@
     <div class="max-w-7xl mx-auto px-4 pb-8">
         <!-- Stats Grid -->
         <div class="analytics-grid">
-            <div class="stat-card border-l-blue-500 card-hover-lift">
+            <div class="stat-card border-l-blue-500 card-hover-lift fade-in" style="animation-delay: 0.1s">
                 <div class="flex justify-between items-start">
                     <div>
-                        <div class="stat-number" id="total-visits">0</div>
+                        <div class="stat-number count-up" id="total-visits">0</div>
                         <div class="stat-label">Total Visits</div>
-                        <div class="stat-trend trend-up">↑ 12% from yesterday</div>
+                        <div class="stat-trend trend-up" id="visits-trend">↑ Loading...</div>
                     </div>
                     <div class="p-3 bg-blue-500/20 rounded-xl">
                         <i class="fas fa-users text-blue-400 text-xl"></i>
@@ -368,12 +479,12 @@
                 </div>
             </div>
             
-            <div class="stat-card border-l-green-500 card-hover-lift">
+            <div class="stat-card border-l-green-500 card-hover-lift fade-in" style="animation-delay: 0.2s">
                 <div class="flex justify-between items-start">
                     <div>
-                        <div class="stat-number" id="unique-visitors">0</div>
+                        <div class="stat-number count-up" id="unique-visitors">0</div>
                         <div class="stat-label">Unique Visitors</div>
-                        <div class="stat-trend trend-up">↑ 8% from yesterday</div>
+                        <div class="stat-trend trend-up" id="visitors-trend">↑ Loading...</div>
                     </div>
                     <div class="p-3 bg-green-500/20 rounded-xl">
                         <i class="fas fa-user-check text-green-400 text-xl"></i>
@@ -381,28 +492,28 @@
                 </div>
             </div>
             
-            <div class="stat-card border-l-purple-500 card-hover-lift">
+            <div class="stat-card border-l-purple-500 card-hover-lift fade-in" style="animation-delay: 0.3s">
                 <div class="flex justify-between items-start">
                     <div>
-                        <div class="stat-number" id="avg-session">0m</div>
-                        <div class="stat-label">Avg. Session Duration</div>
-                        <div class="stat-trend trend-up">↑ 2m 15s</div>
+                        <div class="stat-number count-up" id="active-sections">0</div>
+                        <div class="stat-label">Active Sections</div>
+                        <div class="stat-trend trend-up" id="sections-trend">↑ Loading...</div>
                     </div>
                     <div class="p-3 bg-purple-500/20 rounded-xl">
-                        <i class="fas fa-clock text-purple-400 text-xl"></i>
+                        <i class="fas fa-layer-group text-purple-400 text-xl"></i>
                     </div>
                 </div>
             </div>
             
-            <div class="stat-card border-l-yellow-500 card-hover-lift">
+            <div class="stat-card border-l-yellow-500 card-hover-lift fade-in" style="animation-delay: 0.4s">
                 <div class="flex justify-between items-start">
                     <div>
-                        <div class="stat-number" id="bounce-rate">0%</div>
-                        <div class="stat-label">Bounce Rate</div>
-                        <div class="stat-trend trend-down">↓ 5% improvement</div>
+                        <div class="stat-number count-up" id="peak-hour">--:--</div>
+                        <div class="stat-label">Peak Activity Hour</div>
+                        <div class="stat-trend trend-up" id="peak-trend">Most active</div>
                     </div>
                     <div class="p-3 bg-yellow-500/20 rounded-xl">
-                        <i class="fas fa-chart-pie text-yellow-400 text-xl"></i>
+                        <i class="fas fa-chart-line text-yellow-400 text-xl"></i>
                     </div>
                 </div>
             </div>
@@ -411,34 +522,37 @@
         <!-- Charts Section -->
         <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-6">
             <!-- Visits per Hour -->
-            <div class="chart-container xl:col-span-2 card-hover-lift">
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="text-xl font-bold text-shimmer">Visits per Hour</h3>
+            <div class="chart-container xl:col-span-2 card-hover-lift fade-in" style="animation-delay: 0.5s">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold text-shimmer">Visits per Hour (Last 24h)</h3>
                     <div class="flex space-x-2">
-                        <button class="text-xs px-3 py-1 bg-blue-500/20 text-blue-400 rounded-full font-medium">24H</button>
-                        <button class="text-xs px-3 py-1 bg-gray-700 text-gray-400 rounded-full font-medium">7D</button>
-                        <button class="text-xs px-3 py-1 bg-gray-700 text-gray-400 rounded-full font-medium">30D</button>
+                        <button class="text-xs px-3 py-1 bg-blue-500/20 text-blue-400 rounded-full font-medium transition-all hover:scale-105">24H</button>
+                        <button class="text-xs px-3 py-1 bg-gray-700 text-gray-400 rounded-full font-medium transition-all hover:scale-105" onclick="switchToWeeklyView()">7D</button>
                     </div>
                 </div>
-                <canvas id="visitsChart" height="280"></canvas>
+                <div class="chart-wrapper chart-wrapper-large">
+                    <canvas id="visitsChart"></canvas>
+                </div>
             </div>
             
             <!-- Section Popularity -->
-            <div class="chart-container card-hover-lift">
-                <div class="flex justify-between items-center mb-6">
+            <div class="chart-container card-hover-lift fade-in" style="animation-delay: 0.6s">
+                <div class="flex justify-between items-center mb-4">
                     <h3 class="text-xl font-bold text-shimmer">Section Popularity</h3>
-                    <i class="fas fa-chart-pie text-purple-400"></i>
+                    <i class="fas fa-chart-pie text-purple-400 floating"></i>
                 </div>
-                <canvas id="sectionsChart" height="280"></canvas>
+                <div class="chart-wrapper chart-wrapper-medium">
+                    <canvas id="sectionsChart"></canvas>
+                </div>
             </div>
         </div>
 
-        <!-- User Activity & Top Users -->
+        <!-- User Activity & Quick Stats -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <!-- Recent Activity Feed -->
-            <div class="chart-container lg:col-span-2 card-hover-lift">
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="text-xl font-bold text-shimmer">Recent Activity</h3>
+            <div class="chart-container lg:col-span-2 card-hover-lift fade-in" style="animation-delay: 0.7s">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold text-shimmer">Recent User Activity</h3>
                     <span class="text-sm text-gray-400" id="activity-count">0 activities</span>
                 </div>
                 <div class="activity-feed" id="activity-feed">
@@ -448,49 +562,34 @@
                 </div>
             </div>
             
-            <!-- Top Users & Quick Stats -->
+            <!-- Quick Stats & Top Sections -->
             <div class="space-y-6">
-                <div class="chart-container card-hover-lift">
-                    <h3 class="text-xl font-bold text-shimmer mb-6">Top Active Users</h3>
-                    <div id="top-users">
+                <div class="chart-container card-hover-lift fade-in" style="animation-delay: 0.8s">
+                    <h3 class="text-xl font-bold text-shimmer mb-4">Top Sections</h3>
+                    <div id="top-sections">
                         <div class="loading">
                             <div class="spinner"></div>
                         </div>
                     </div>
                 </div>
                 
-                <!-- Quick Stats -->
-                <div class="chart-container card-hover-lift">
-                    <h3 class="text-xl font-bold text-shimmer mb-6">Platform Overview</h3>
+                <!-- Platform Overview -->
+                <div class="chart-container card-hover-lift fade-in" style="animation-delay: 0.9s">
+                    <h3 class="text-xl font-bold text-shimmer mb-4">Platform Overview</h3>
                     <div class="space-y-4">
-                        <div class="flex justify-between items-center p-3 bg-gray-800/50 rounded-lg">
-                            <span class="text-gray-400">Peak Hour</span>
-                            <span class="font-semibold" id="peak-hour">--:--</span>
-                        </div>
-                        <div class="flex justify-between items-center p-3 bg-gray-800/50 rounded-lg">
+                        <div class="flex justify-between items-center p-3 bg-gray-800/50 rounded-lg transition-all hover:bg-gray-800/70">
                             <span class="text-gray-400">Most Popular</span>
                             <span class="font-semibold text-blue-400" id="popular-section">--</span>
                         </div>
-                        <div class="flex justify-between items-center p-3 bg-gray-800/50 rounded-lg">
-                            <span class="text-gray-400">Active Now</span>
-                            <span class="font-semibold text-green-400" id="active-now">0</span>
+                        <div class="flex justify-between items-center p-3 bg-gray-800/50 rounded-lg transition-all hover:bg-gray-800/70">
+                            <span class="text-gray-400">Avg. Visits/Hour</span>
+                            <span class="font-semibold text-green-400" id="avg-visits-hour">0</span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 bg-gray-800/50 rounded-lg transition-all hover:bg-gray-800/70">
+                            <span class="text-gray-400">Data Last Updated</span>
+                            <span class="font-semibold text-purple-400" id="last-updated">--:--</span>
                         </div>
                     </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- User Details Modal -->
-        <div id="user-modal" class="hidden fixed inset-0 bg-black/70 items-center justify-center z-50 p-4">
-            <div class="bg-gray-800 rounded-2xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto glass-morph">
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="text-2xl font-bold gradient-text" id="modal-username">User Details</h3>
-                    <button onclick="closeUserModal()" class="text-gray-400 hover:text-white transition-colors">
-                        <i class="fas fa-times text-2xl"></i>
-                    </button>
-                </div>
-                <div id="user-details-content">
-                    <!-- User details will be loaded here -->
                 </div>
             </div>
         </div>
@@ -499,56 +598,169 @@
     <script>
         let visitsChart, sectionsChart;
         let refreshInterval;
+        let currentView = '24h';
+        
+        // Enhanced chart configuration with animations
+        const chartConfig = {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: {
+                duration: 2000,
+                easing: 'easeOutQuart'
+            },
+            plugins: {
+                legend: { 
+                    display: true,
+                    position: 'bottom',
+                    labels: {
+                        color: '#e5e7eb',
+                        padding: 15,
+                        usePointStyle: true,
+                        pointStyle: 'circle',
+                        font: {
+                            size: 11
+                        }
+                    }
+                }
+            }
+        };
         
         async function loadAnalytics() {
             try {
-                // Show loading states
-                document.querySelectorAll('.loading').forEach(el => {
-                    el.style.display = 'flex';
-                });
+                showLoadingStates();
                 
                 const response = await fetch('/api/analytics/visits');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
                 const data = await response.json();
                 
-                updateStats(data);
+                console.log('Analytics Data:', data); // Debug log
+                
+                // Animate stats counting up
+                animateStats(data);
                 updateCharts(data);
                 updateActivityFeed(data);
+                updateTopSections(data);
                 updateQuickStats(data);
                 
-                // Hide loading states
-                document.querySelectorAll('.loading').forEach(el => {
-                    el.style.display = 'none';
-                });
+                document.getElementById('last-updated').textContent = new Date().toLocaleTimeString();
                 
             } catch (error) {
                 console.error('Failed to load analytics:', error);
-                // Show error states
-                document.getElementById('activity-feed').innerHTML = 
-                    '<p class="text-center text-gray-400 py-8">Failed to load analytics data</p>';
+                showErrorStates();
+            } finally {
+                hideLoadingStates();
             }
         }
         
-        function updateStats(data) {
-            document.getElementById('total-visits').textContent = data.total_visits?.toLocaleString() || '0';
-            document.getElementById('unique-visitors').textContent = data.unique_visitors?.toLocaleString() || '0';
+        function animateStats(data) {
+            // Animate total visits
+            animateValue('total-visits', 0, data.total_visits || 0, 1500);
+            // Animate unique visitors
+            animateValue('unique-visitors', 0, data.unique_visitors || 0, 1500);
+            // Update other stats
+            const activeSections = data.section_stats?.length || 0;
+            document.getElementById('active-sections').textContent = activeSections;
             
-            // Enhanced metrics with realistic calculations
-            const avgSession = data.avg_session_duration || Math.floor(Math.random() * 8) + 3;
-            document.getElementById('avg-session').textContent = `${avgSession}m`;
+            if (data.visits_per_hour && data.visits_per_hour.length > 0) {
+                const peak = data.visits_per_hour.reduce((max, curr) => curr.count > max.count ? curr : max, data.visits_per_hour[0]);
+                document.getElementById('peak-hour').textContent = `${peak.hour.toString().padStart(2, '0')}:00`;
+            }
             
-            const bounceRate = data.bounce_rate || Math.floor(Math.random() * 25) + 15;
-            document.getElementById('bounce-rate').textContent = `${bounceRate}%`;
+            updateTrends(data);
+        }
+        
+        function animateValue(elementId, start, end, duration) {
+            const element = document.getElementById(elementId);
+            const range = end - start;
+            const increment = end > start ? 1 : -1;
+            const stepTime = Math.abs(Math.floor(duration / range));
+            let current = start;
+            
+            const timer = setInterval(() => {
+                current += increment;
+                element.textContent = current.toLocaleString();
+                if (current === end) {
+                    clearInterval(timer);
+                }
+            }, stepTime);
+        }
+        
+        function showLoadingStates() {
+            document.querySelectorAll('.loading').forEach(el => {
+                el.style.display = 'flex';
+            });
+        }
+        
+        function hideLoadingStates() {
+            document.querySelectorAll('.loading').forEach(el => {
+                el.style.display = 'none';
+            });
+        }
+        
+        function showErrorStates() {
+            document.getElementById('activity-feed').innerHTML = `
+                <div class="text-center py-8">
+                    <i class="fas fa-exclamation-triangle text-4xl text-yellow-400 mb-4"></i>
+                    <p class="text-gray-400 mb-2">Failed to load analytics data</p>
+                    <button onclick="loadAnalytics()" class="text-blue-400 hover:text-blue-300 text-sm">
+                        <i class="fas fa-redo mr-1"></i> Retry
+                    </button>
+                </div>
+            `;
+        }
+        
+        function updateTrends(data) {
+            const visitsTrend = data.total_visits > 50 ? '↑ High traffic' : data.total_visits > 20 ? '↑ Normal traffic' : '↑ Low traffic';
+            const visitorsTrend = data.unique_visitors > 10 ? '↑ Many users' : data.unique_visitors > 5 ? '↑ Steady growth' : '↑ Starting up';
+            const sectionsTrend = data.section_stats?.length > 3 ? '↑ Good engagement' : data.section_stats?.length > 1 ? '↑ Balanced usage' : '↑ Focused usage';
+            
+            document.getElementById('visits-trend').textContent = visitsTrend;
+            document.getElementById('visitors-trend').textContent = visitorsTrend;
+            document.getElementById('sections-trend').textContent = sectionsTrend;
         }
         
         function updateCharts(data) {
-            // Visits per Hour Chart
+            updateVisitsChart(data);
+            updateSectionsChart(data);
+        }
+        
+        function updateVisitsChart(data) {
             const visitsCtx = document.getElementById('visitsChart').getContext('2d');
             if (visitsChart) visitsChart.destroy();
             
-            const visitsData = data.visits_per_hour || Array.from({length: 24}, (_, i) => ({
-                hour: i,
-                count: Math.floor(Math.random() * 50) + 10
-            }));
+            // Prepare visits data - ensure we have data for all 24 hours
+            let visitsData = [];
+            if (data.visits_per_hour && data.visits_per_hour.length > 0) {
+                console.log('Raw visits per hour:', data.visits_per_hour); // Debug log
+                
+                // Create a map for easier lookup - handle both string and number hours
+                const visitsMap = new Map();
+                data.visits_per_hour.forEach(v => {
+                    const hour = typeof v.hour === 'string' ? parseInt(v.hour) : v.hour;
+                    visitsMap.set(hour, v.count);
+                });
+                
+                // Fill in all 24 hours with proper data
+                for (let hour = 0; hour < 24; hour++) {
+                    visitsData.push({
+                        hour: hour,
+                        count: visitsMap.get(hour) || 0
+                    });
+                }
+            } else {
+                // Fallback to zero data for all hours
+                visitsData = Array.from({length: 24}, (_, i) => ({
+                    hour: i,
+                    count: 0
+                }));
+            }
+            
+            // Sort by hour to ensure correct order
+            visitsData.sort((a, b) => a.hour - b.hour);
+            
+            console.log('Processed visits data:', visitsData); // Debug log
             
             visitsChart = new Chart(visitsCtx, {
                 type: 'line',
@@ -570,16 +782,25 @@
                     }]
                 },
                 options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
+                    ...chartConfig,
                     plugins: {
+                        ...chartConfig.plugins,
                         legend: { display: false },
                         tooltip: {
                             backgroundColor: 'rgba(30, 30, 40, 0.9)',
                             titleColor: '#ffffff',
                             bodyColor: '#e5e7eb',
                             borderColor: '#3B82F6',
-                            borderWidth: 1
+                            borderWidth: 1,
+                            displayColors: false,
+                            callbacks: {
+                                title: function(tooltipItems) {
+                                    return `Hour: ${tooltipItems[0].label}`;
+                                },
+                                label: function(context) {
+                                    return `Visits: ${context.parsed.y}`;
+                                }
+                            }
                         }
                     },
                     scales: {
@@ -587,37 +808,63 @@
                             beginAtZero: true,
                             grid: { 
                                 color: 'rgba(255, 255, 255, 0.1)',
-                                borderDash: [5, 5]
+                                borderDash: [3, 3]
                             },
-                            ticks: { color: '#9CA3AF' }
+                            ticks: { 
+                                color: '#9CA3AF',
+                                font: { size: 10 },
+                                stepSize: 1
+                            }
                         },
                         x: {
                             grid: { 
                                 color: 'rgba(255, 255, 255, 0.1)',
-                                borderDash: [5, 5]
+                                borderDash: [3, 3]
                             },
-                            ticks: { color: '#9CA3AF' }
+                            ticks: { 
+                                color: '#9CA3AF',
+                                font: { size: 9 },
+                                maxTicksLimit: 12
+                            }
+                        }
+                    },
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    },
+                    elements: {
+                        line: {
+                            tension: 0.4
                         }
                     }
                 }
             });
-            
-            // Sections Chart
+        }
+        
+        function updateSectionsChart(data) {
             const sectionsCtx = document.getElementById('sectionsChart').getContext('2d');
             if (sectionsChart) sectionsChart.destroy();
             
-            const sectionsData = data.section_stats || [
-                { section: 'Announcements', count: 45 },
-                { section: 'Assignments', count: 32 },
-                { section: 'Units', count: 28 },
-                { section: 'Timetable', count: 22 },
-                { section: 'Profile', count: 18 }
-            ];
+            const sectionsData = data.section_stats || [];
+            
+            console.log('Section stats:', sectionsData); // Debug log
+            
+            // Format section names and ensure we have data
+            const formattedSections = sectionsData.map(s => {
+                const sectionName = s.section || 'unknown';
+                return sectionName.charAt(0).toUpperCase() + sectionName.slice(1);
+            });
+            
+            // If no section data, show a placeholder
+            if (sectionsData.length === 0) {
+                sectionsData.push({ section: 'No Data', count: 1 });
+                formattedSections.push('No Data');
+            }
             
             sectionsChart = new Chart(sectionsCtx, {
                 type: 'doughnut',
                 data: {
-                    labels: sectionsData.map(s => s.section || 'Unknown'),
+                    labels: formattedSections,
                     datasets: [{
                         data: sectionsData.map(s => s.count),
                         backgroundColor: [
@@ -629,23 +876,29 @@
                     }]
                 },
                 options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    cutout: '65%',
+                    ...chartConfig,
+                    cutout: '60%',
                     plugins: {
-                        legend: { 
-                            position: 'bottom',
-                            labels: {
-                                color: '#e5e7eb',
-                                padding: 20,
-                                usePointStyle: true,
-                                pointStyle: 'circle'
-                            }
-                        },
+                        ...chartConfig.plugins,
                         tooltip: {
                             backgroundColor: 'rgba(30, 30, 40, 0.9)',
                             titleColor: '#ffffff',
-                            bodyColor: '#e5e7eb'
+                            bodyColor: '#e5e7eb',
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.raw || 0;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = Math.round((value / total) * 100);
+                                    return `${label}: ${value} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    },
+                    layout: {
+                        padding: {
+                            top: 10,
+                            bottom: 10
                         }
                     }
                 }
@@ -654,7 +907,7 @@
         
         function updateActivityFeed(data) {
             const feed = document.getElementById('activity-feed');
-            const activities = data.recent_activity || generateMockActivities();
+            const activities = data.recent_activity || [];
             
             document.getElementById('activity-count').textContent = `${activities.length} activities`;
             
@@ -662,14 +915,14 @@
                 feed.innerHTML = `
                     <div class="text-center py-8">
                         <i class="fas fa-inbox text-4xl text-gray-600 mb-4"></i>
-                        <p class="text-gray-400">No recent activity</p>
+                        <p class="text-gray-400">No recent activity in the last 24 hours</p>
                     </div>
                 `;
                 return;
             }
             
-            feed.innerHTML = activities.map(activity => `
-                <div class="activity-item glass-morph">
+            feed.innerHTML = activities.map((activity, index) => `
+                <div class="activity-item glass-morph" style="animation-delay: ${index * 0.1}s">
                     <div class="flex items-center gap-4">
                         <div class="user-avatar">
                             ${activity.username ? activity.username.charAt(0).toUpperCase() : 'U'}
@@ -679,10 +932,10 @@
                                 <div class="font-semibold text-white truncate">${activity.username || 'Unknown User'}</div>
                                 <div class="activity-time">${formatActivityTime(activity.timestamp)}</div>
                             </div>
-                            <div class="text-sm text-gray-300 flex items-center">
+                            <div class="text-sm text-gray-300 flex items-center flex-wrap gap-1">
                                 <span>${getActionText(activity.action, activity.target)}</span>
-                                ${activity.target && activity.target !== 'main_page' ? 
-                                    `<span class="section-badge">${activity.target}</span>` : ''}
+                                ${activity.target && activity.target !== 'main_page' && activity.target !== 'null' ? 
+                                    `<span class="section-badge">${formatSectionName(activity.target)}</span>` : ''}
                             </div>
                         </div>
                     </div>
@@ -690,47 +943,73 @@
             `).join('');
         }
         
-        function updateQuickStats(data) {
-            const sectionsData = data.section_stats || [];
-            const visitsData = data.visits_per_hour || [];
+        function updateTopSections(data) {
+            const container = document.getElementById('top-sections');
+            const sections = data.section_stats || [];
             
-            // Find peak hour
-            if (visitsData.length > 0) {
-                const peak = visitsData.reduce((max, curr) => curr.count > max.count ? curr : max, visitsData[0]);
-                document.getElementById('peak-hour').textContent = `${peak.hour.toString().padStart(2, '0')}:00`;
+            if (sections.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-4">
+                        <i class="fas fa-chart-bar text-2xl text-gray-600 mb-2"></i>
+                        <p class="text-gray-400 text-sm">No section data available</p>
+                    </div>
+                `;
+                return;
             }
             
-            // Find most popular section
-            if (sectionsData.length > 0) {
-                const popular = sectionsData.reduce((max, curr) => curr.count > max.count ? curr : max, sectionsData[0]);
-                document.getElementById('popular-section').textContent = popular.section || '--';
-            }
+            // Sort by count and take top 5
+            const topSections = sections
+                .sort((a, b) => b.count - a.count)
+                .slice(0, 5);
             
-            // Active now (mock data)
-            document.getElementById('active-now').textContent = Math.floor(Math.random() * 15) + 5;
+            container.innerHTML = topSections.map((section, index) => `
+                <div class="flex items-center justify-between p-3 bg-gray-800/30 rounded-lg mb-2 last:mb-0 transition-all hover:bg-gray-800/50 hover:scale-105" style="animation-delay: ${index * 0.1}s">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center text-blue-400 text-sm font-bold">
+                            ${index + 1}
+                        </div>
+                        <span class="font-medium text-sm">${formatSectionName(section.section)}</span>
+                    </div>
+                    <span class="text-blue-400 font-semibold">${section.count}</span>
+                </div>
+            `).join('');
         }
         
-        function generateMockActivities() {
-            const actions = ['page_view', 'section_view', 'file_download'];
-            const sections = ['announcements', 'assignments', 'units', 'timetable', 'profile'];
-            const users = ['john_doe', 'jane_smith', 'admin', 'student_01', 'teacher_02'];
+        function updateQuickStats(data) {
+            const sections = data.section_stats || [];
+            const visits = data.visits_per_hour || [];
             
-            return Array.from({length: 8}, (_, i) => ({
-                action: actions[Math.floor(Math.random() * actions.length)],
-                target: sections[Math.floor(Math.random() * sections.length)],
-                username: users[Math.floor(Math.random() * users.length)],
-                timestamp: new Date(Date.now() - Math.random() * 24 * 60 * 60 * 1000).toISOString()
-            }));
+            // Most popular section
+            if (sections.length > 0) {
+                const popular = sections.reduce((max, curr) => curr.count > max.count ? curr : max, sections[0]);
+                document.getElementById('popular-section').textContent = formatSectionName(popular.section);
+            } else {
+                document.getElementById('popular-section').textContent = 'None';
+            }
+            
+            // Average visits per hour
+            if (visits.length > 0) {
+                const totalVisits = visits.reduce((sum, curr) => sum + curr.count, 0);
+                const avgVisits = Math.round((totalVisits / visits.length) * 10) / 10;
+                document.getElementById('avg-visits-hour').textContent = avgVisits;
+            } else {
+                document.getElementById('avg-visits-hour').textContent = '0';
+            }
+        }
+        
+        function formatSectionName(section) {
+            if (!section || section === 'null') return 'Unknown';
+            return section.charAt(0).toUpperCase() + section.slice(1);
         }
         
         function getActionText(action, target) {
             const actions = {
-                'page_view': `Viewed page`,
-                'section_view': `Navigated to`,
-                'file_download': `Downloaded file from`,
-                'page_exit': `Session ended after`
+                'page_view': `Viewed main page`,
+                'section_view': `Navigated to ${formatSectionName(target) || 'unknown section'}`,
+                'file_download': `Downloaded file`,
+                'page_exit': `Session ended`
             };
-            return actions[action] || `${action} ${target}`;
+            return actions[action] || `${action} ${target || ''}`;
         }
         
         function formatActivityTime(timestamp) {
@@ -752,6 +1031,12 @@
             btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Refreshing...';
             btn.disabled = true;
             
+            // Add refresh animation to stats
+            document.querySelectorAll('.stat-card').forEach(card => {
+                card.classList.add('glow');
+                setTimeout(() => card.classList.remove('glow'), 2000);
+            });
+            
             loadAnalytics().finally(() => {
                 setTimeout(() => {
                     btn.innerHTML = originalHtml;
@@ -760,13 +1045,17 @@
             });
         }
         
-        function closeUserModal() {
-            document.getElementById('user-modal').classList.add('hidden');
+        function switchToWeeklyView() {
+            // This would switch to weekly view - for future implementation
+            alert('Weekly view coming soon! Currently showing last 24 hours.');
         }
         
         // Initialize analytics
         document.addEventListener('DOMContentLoaded', function() {
-            loadAnalytics();
+            // Staggered loading animation
+            setTimeout(() => {
+                loadAnalytics();
+            }, 500);
             
             // Auto-refresh every 2 minutes
             refreshInterval = setInterval(loadAnalytics, 120000);
@@ -776,6 +1065,16 @@
         window.addEventListener('beforeunload', () => {
             if (refreshInterval) {
                 clearInterval(refreshInterval);
+            }
+        });
+        
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            if (visitsChart) {
+                visitsChart.resize();
+            }
+            if (sectionsChart) {
+                sectionsChart.resize();
             }
         });
     </script>

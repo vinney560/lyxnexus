@@ -1159,7 +1159,7 @@
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             user_id: window.currentUserId,
-                            page: 'main_page',
+                            page: window.location.pathname.split('/').filter(Boolean).pop() || 'main_page',
                             section: section,
                             session_id: this.sessionId,
                             timestamp: new Date().toISOString()

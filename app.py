@@ -331,7 +331,7 @@ class Visit(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     page = db.Column(db.String(100), default='main_page')
     section = db.Column(db.String(50))  # Which section was active
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    timestamp = db.Column(db.DateTime, default=nairobi_time)
     session_id = db.Column(db.String(100))
     user_agent = db.Column(db.Text)
     
@@ -342,7 +342,7 @@ class UserActivity(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     action = db.Column(db.String(50))  # 'page_view', 'section_click', etc.
     target = db.Column(db.String(100))  # 'announcements', 'assignments', etc.
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    timestamp = db.Column(db.DateTime, default=nairobi_time)
     duration = db.Column(db.Integer)  # Time spent in seconds
     
     user = db.relationship('User', backref=db.backref('activities', lazy=True))
@@ -4658,14 +4658,13 @@ def track_visit():
             section=data.get('section'),
             session_id=data.get('session_id'),
             user_agent=request.headers.get('User-Agent'),
-            timestamp=datetime.utcnow()
+            timestamp=nairobi_time()
         )
         db.session.add(visit)
         db.session.commit()
         
         # Cleanup old data periodically (every 10th visit)
         if visit.id % 10 == 0:
-            from your_app.models import cleanup_old_visits
             cleanup_old_visits()
         
         return jsonify({'status': 'success', 'visit_id': visit.id})
@@ -4682,7 +4681,7 @@ def track_activity():
             action=data.get('action'),
             target=data.get('target'),
             duration=data.get('duration'),
-            timestamp=datetime.utcnow()
+            timestamp=nairobi_time()
         )
         db.session.add(activity)
         db.session.commit()
@@ -4695,7 +4694,7 @@ def track_activity():
 @admin_required
 def get_visit_analytics():
     # Last 24 hours data
-    cutoff_time = datetime.utcnow() - timedelta(hours=24)
+    cutoff_time = (datetime.utcnow() + timedelta(hours=3)) - timedelta(hours=24)
     
     # Total visits
     total_visits = Visit.query.filter(Visit.timestamp >= cutoff_time).count()
@@ -4707,9 +4706,11 @@ def get_visit_analytics():
     
     # Visits per hour
     visits_per_hour = db.session.query(
-        extract('hour', Visit.timestamp).label('hour'),
+        func.extract('hour', Visit.timestamp).label('hour'),
         func.count(Visit.id).label('count')
-    ).filter(Visit.timestamp >= cutoff_time).group_by('hour').all()
+    ).filter(
+        Visit.timestamp >= cutoff_time
+    ).group_by(func.extract('hour', Visit.timestamp)).order_by(func.extract('hour', Visit.timestamp)).all()    
     
     # Section popularity
     section_stats = db.session.query(
@@ -4722,7 +4723,7 @@ def get_visit_analytics():
         UserActivity.action,
         UserActivity.target,
         UserActivity.timestamp,
-        User.user.username
+        User.username
     ).join(User).filter(
         UserActivity.timestamp >= cutoff_time
     ).order_by(UserActivity.timestamp.desc()).limit(50).all()
@@ -4743,7 +4744,7 @@ def get_visit_analytics():
 @app.route('/api/analytics/user/<int:user_id>')
 @admin_required
 def get_user_analytics(user_id):
-    cutoff_time = datetime.utcnow() - timedelta(hours=24)
+    cutoff_time = nairobi_time() - timedelta(hours=24)
     
     user_visits = Visit.query.filter(
         Visit.user_id == user_id,
