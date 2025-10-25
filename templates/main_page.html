@@ -196,262 +196,35 @@
         transform: translateY(0);
     }
     
-    /* Book Layout for Announcements */
-    .book-container {
-        perspective: 1500px;
-        margin: 0 auto;
-        max-width: 900px;
-        position: relative;
-        height: 600px;
-    }
-    
-    .book {
-        width: 100%;
-        height: 100%;
-        position: relative;
-        transform-style: preserve-3d;
-        transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    }
-    
-    .page {
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        top: 0;
-        left: 0;
-        background: rgba(30, 30, 40, 0.9);
+    .announcement-card {
+        background: rgba(30, 30, 40, 0.7);
         border-radius: 15px;
-        padding: 30px;
-        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-        backface-visibility: hidden;
-        transform-style: preserve-3d;
-        overflow-y: auto;
-        border: 1px solid rgba(59, 130, 246, 0.3);
-    }
-    
-    .page::-webkit-scrollbar {
-        width: 8px;
-    }
-    
-    .page::-webkit-scrollbar-track {
-        background: rgba(30, 30, 40, 0.5);
-        border-radius: 10px;
-    }
-    
-    .page::-webkit-scrollbar-thumb {
-        background: linear-gradient(90deg, #3B82F6, #8B5CF6);
-        border-radius: 10px;
-    }
-    
-    .page-left {
-        transform-origin: right center;
-        transform: rotateY(0deg);
-        z-index: 2;
-    }
-    
-    .page-right {
-        transform-origin: left center;
-        transform: rotateY(180deg);
-        z-index: 1;
-    }
-    
-    .page.active {
-        z-index: 3;
-    }
-    
-    .book-controls {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        margin-top: 30px;
-        gap: 20px;
-    }
-    
-    .page-indicator {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        font-size: 1.1rem;
-        color: #9CA3AF;
-    }
-    
-    .page-dots {
-        display: flex;
-        gap: 8px;
-    }
-    
-    .page-dot {
-        width: 10px;
-        height: 10px;
-        border-radius: 50%;
-        background: rgba(255, 255, 255, 0.2);
-        transition: all 0.3s ease;
-    }
-    
-    .page-dot.active {
-        background: linear-gradient(90deg, #3B82F6, #8B5CF6);
-        transform: scale(1.2);
-    }
-    
-    .book-nav-btn {
-        background: rgba(30, 30, 40, 0.7);
-        border: 1px solid rgba(59, 130, 246, 0.3);
-        color: #9CA3AF;
-        width: 50px;
-        height: 50px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.5rem;
-        cursor: pointer;
-        transition: all 0.3s ease;
-    }
-    
-    .book-nav-btn:hover {
-        background: linear-gradient(90deg, #3B82F6, #8B5CF6);
-        color: white;
-        transform: scale(1.1);
-    }
-    
-    .book-nav-btn:disabled {
-        opacity: 0.3;
-        cursor: not-allowed;
-    }
-    
-    .book-nav-btn:disabled:hover {
-        background: rgba(30, 30, 40, 0.7);
-        color: #9CA3AF;
-        transform: scale(1);
-    }
-    
-    .announcement-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        margin-bottom: 25px;
-        border-bottom: 2px solid rgba(59, 130, 246, 0.3);
-        padding-bottom: 15px;
-    }
-    
-    .announcement-title {
-        font-size: 1.8rem;
-        font-weight: 700;
-        color: white;
-        margin-bottom: 10px;
-        line-height: 1.3;
-    }
-    
-    .announcement-meta {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-end;
-        gap: 5px;
-    }
-    
-    .announcement-date {
-        color: #9CA3AF;
-        font-size: 0.9rem;
-    }
-    
-    .announcement-author {
-        color: #9CA3AF;
-        font-size: 0.9rem;
-    }
-    
-    .announcement-content {
-        line-height: 1.7;
-        font-size: 1.05rem;
-        color: rgba(255, 255, 255, 0.9);
-        margin-bottom: 25px;
-    }
-    
-    .announcement-attachments {
-        margin-top: 25px;
-        padding-top: 20px;
-        border-top: 1px solid rgba(255, 255, 255, 0.1);
-    }
-    
-    .attachment-item {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        padding: 10px;
-        border-radius: 8px;
-        background: rgba(59, 130, 246, 0.1);
-        margin-bottom: 10px;
-        transition: all 0.3s ease;
-    }
-    
-    .attachment-item:hover {
-        background: rgba(59, 130, 246, 0.2);
-        transform: translateX(5px);
-    }
-    
-    .pin-btn {
-        position: absolute;
-        top: 20px;
-        right: 20px;
-        background: transparent;
-        border: none;
-        color: #9CA3AF;
-        font-size: 1.2rem;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        z-index: 10;
-    }
-    
-    .pin-btn.pinned {
-        color: #F59E0B;
-    }
-    
-    .pin-btn:hover {
-        color: #F59E0B;
-        transform: scale(1.2);
-    }
-    
-    .empty-page {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        height: 100%;
-        color: #9CA3AF;
-        text-align: center;
-    }
-    
-    .empty-page i {
-        font-size: 4rem;
+        padding: 20px;
         margin-bottom: 20px;
-        opacity: 0.5;
+        border-left: 4px solid #3B82F6;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
     }
     
-    .empty-page h3 {
-        font-size: 1.5rem;
-        margin-bottom: 10px;
+    .announcement-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.1), transparent);
+        transition: left 0.5s;
     }
     
-    @media (max-width: 768px) {
-        .book-container {
-            height: 500px;
-        }
-        
-        .page {
-            padding: 20px;
-        }
-        
-        .announcement-header {
-            flex-direction: column;
-            gap: 15px;
-        }
-        
-        .announcement-meta {
-            align-items: flex-start;
-        }
-        
-        .announcement-title {
-            font-size: 1.5rem;
-        }
+    .announcement-card:hover::before {
+        left: 100%;
+    }
+    
+    .announcement-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
     }
     
     .assignment-card {
@@ -1084,45 +857,36 @@
 
     <main class="content-container max-w-7xl mx-auto px-4 pt-5 pb-[40px] md:pb-[100px] animate-fadeIn">
 
-        <!-- Image Preview Modal -->
+                                 <!-- Announcements Section -->
+        
+                                 <!-- Image Preview Modal -->
         <div id="image-preview-modal" class="hidden fixed inset-0 bg-black/70 items-center justify-center z-50">
           <span class="absolute top-4 right-6 text-white text-3xl cursor-pointer" onclick="closeImagePreview()">&times;</span>
           <img id="image-preview-img" src="" alt="Preview" class="max-h-[90%] max-w-[90%] rounded-lg shadow-lg">
         </div>
 
-        <!-- Announcements Section with Book Layout -->
         <section id="announcements" class="content-section active scroll-fade-in">
             <div class="flex justify-between items-center mb-6 section-header">
                 <h2 id="announceH" class="text-2xl md:text-3xl font-bold gradient-text"></h2>
                 <span class="text-gray-400 text-sm" id="announcements-count">Loading...</span>
             </div>
-            
             <div id="announcements-container">
-                <!-- Book Layout -->
-                <div class="book-container">
-                    <div class="book" id="announcement-book">
-                        <!-- Pages will be dynamically inserted here -->
-                    </div>
+
+                <!-- Skeleton loader -->
+                <div class="announcement-skeleton">
+                    <div class="skeleton-title"></div>
+                    <div class="skeleton-text"></div>
+                    <div class="skeleton-text"></div>
+                    <div class="skeleton-text short"></div>
                 </div>
-                
-                <!-- Book Controls -->
-                <div class="book-controls">
-                    <button class="book-nav-btn" id="prev-page" disabled>
-                        <i class="fas fa-chevron-left"></i>
-                    </button>
-                    
-                    <div class="page-indicator">
-                        <span id="current-page">1</span>
-                        <span>of</span>
-                        <span id="total-pages">1</span>
-                        <div class="page-dots" id="page-dots">
-                            <!-- Dots will be dynamically inserted here -->
-                        </div>
-                    </div>
-                    
-                    <button class="book-nav-btn" id="next-page">
-                        <i class="fas fa-chevron-right"></i>
-                    </button>
+                <div class="announcement-skeleton">
+                    <div class="skeleton-title"></div>
+                    <div class="skeleton-text"></div>
+                    <div class="skeleton-text short"></div>
+                </div>         
+
+                <div class="loading">
+                    <div class="spinner"></div>
                 </div>
             </div>
         </section>
@@ -1291,8 +1055,6 @@
             TIMETABLE: `${API_BASE}/timetable`,
             TOPICS: `${API_BASE}/topics`
         };
-        
-        // Typed.js for announcements header
         new Typed('#announceH', {
             strings: ['Latest Announcements', 'Latest Announcements'],
             typeSpeed: 80,
@@ -1300,16 +1062,6 @@
             backDelay: 40,
             loop: false
         });
-        
-        // Book state for announcements
-        let bookState = {
-            currentPage: 0,
-            totalPages: 0,
-            announcements: [],
-            pinnedIds: JSON.parse(localStorage.getItem("pinnedAnnouncements") || "[]")
-        };
-        
-        // Logout button handler
         const logoutBtn = document.getElementById('logout');
         logoutBtn.addEventListener('click', (e) => {
             logoutBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> logging out...';
@@ -1320,7 +1072,6 @@
                 logoutBtn.disabled = false;
             }, 2000);
         });
-        
         // Global state
         let currentUser = null;
         let announcements = [];
@@ -1610,7 +1361,6 @@
                 'font-medium bg-purple-500 text-white px-2 py-1 rounded-full text-xs' : 
                 'font-medium bg-blue-500 text-white px-2 py-1 rounded-full text-xs';
         }
-        
         function linkify(text) {
           const urlRegex = /(https?:\/\/[^\s]+)/g;
           return text.replace(
@@ -1620,240 +1370,221 @@
           );
         }
         
-        // Book functions for announcements
-        function renderBookPage(announcement, pageIndex) {
-            const isPinned = bookState.pinnedIds.includes(announcement.id);
-            
-            // Check if the announcement is recent
-            const createdAt = new Date(announcement.created_at);
-            const now = new Date();
-            const diffHours = (now - createdAt) / (1000 * 60 * 60);
-            const isRecent = diffHours < 3;
-            
-            // File preview (image or link)
-            let filePreview = "";
-            if (announcement.has_file && announcement.file_type?.startsWith("image/")) {
-              filePreview = `
-                <div class="mb-3 w-24 h-24 rounded-lg overflow-hidden bg-gray-700 flex items-center justify-center cursor-pointer card-hover-lift"
-                     onclick="openImagePreview('${announcement.file_url}')">
-                  <img src="${announcement.file_url}" alt="${announcement.file_name}" class="object-cover w-full h-full">
-                </div>
-              `;
-            } else if (announcement.has_file) {
-              filePreview = `
-                <div class="mb-3">
-                    <a style="color:#60a5fa; text-decoration: underline; font-size:0.875rem;" href="${announcement.file_url}" target="_blank" class="card-hover-lift">
-                      📎 ${announcement.file_name} ↗
-                    </a> 
-                </div>
-              `;
-            }
-            
-            return `
-                <div class="page ${pageIndex === bookState.currentPage ? 'active' : ''}" data-page="${pageIndex}">
-                    <button class="pin-btn ${isPinned ? 'pinned' : ''}" onclick="togglePin(${announcement.id})" title="${isPinned ? 'Unpin' : 'Pin'}">
-                        <i class="fas fa-thumbtack"></i>
-                    </button>
-                    
-                    <div class="announcement-header">
-                        <div class="flex-1">
-                            <h3 class="announcement-title">${announcement.title}</h3>
-                            ${isRecent ? '<span class="text-xs bg-yellow-500 text-white px-2 py-1 rounded-full">NEW</span>' : ''}
-                        </div>
-                        <div class="announcement-meta">
-                            <span class="announcement-date">${formatDate(announcement.created_at)}</span>
-                            <span class="announcement-author">By: ${announcement.author?.username || "Unknown"}</span>
-                        </div>
-                    </div>
-                    
-                    <div class="announcement-content">
-                        ${linkify(announcement.content)}
-                    </div>
-                    
-                    ${filePreview ? `
-                    <div class="announcement-attachments">
-                        <h4 class="text-lg font-semibold mb-2">Attachments</h4>
-                        ${filePreview}
-                    </div>
-                    ` : ''}
-                </div>
-            `;
-        }
-        
-        function renderEmptyBook() {
-            return `
-                <div class="page active">
-                    <div class="empty-page">
-                        <i class="fas fa-book-open"></i>
-                        <h3>No Announcements Yet</h3>
-                        <p>Check back later for new announcements from your instructors.</p>
-                    </div>
-                </div>
-            `;
-        }
-        
-        function updateBookControls() {
-            const prevBtn = document.getElementById('prev-page');
-            const nextBtn = document.getElementById('next-page');
-            const currentPageEl = document.getElementById('current-page');
-            const totalPagesEl = document.getElementById('total-pages');
-            const pageDotsEl = document.getElementById('page-dots');
-            
-            // Update buttons
-            prevBtn.disabled = bookState.currentPage === 0;
-            nextBtn.disabled = bookState.currentPage === bookState.totalPages - 1;
-            
-            // Update page indicator
-            currentPageEl.textContent = bookState.currentPage + 1;
-            totalPagesEl.textContent = bookState.totalPages;
-            
-            // Update dots
-            pageDotsEl.innerHTML = '';
-            for (let i = 0; i < bookState.totalPages; i++) {
-                const dot = document.createElement('div');
-                dot.className = `page-dot ${i === bookState.currentPage ? 'active' : ''}`;
-                dot.addEventListener('click', () => goToPage(i));
-                pageDotsEl.appendChild(dot);
-            }
-        }
-        
-        function goToPage(pageIndex) {
-            if (pageIndex < 0 || pageIndex >= bookState.totalPages) return;
-            
-            const book = document.getElementById('announcement-book');
-            const currentPage = document.querySelector(`.page[data-page="${bookState.currentPage}"]`);
-            const nextPage = document.querySelector(`.page[data-page="${pageIndex}"]`);
-            
-            // Update state
-            bookState.currentPage = pageIndex;
-            
-            // Update active classes
-            document.querySelectorAll('.page').forEach(page => {
-                page.classList.remove('active');
-            });
-            nextPage.classList.add('active');
-            
-            // Update controls
-            updateBookControls();
-        }
-        
-        function nextPage() {
-            if (bookState.currentPage < bookState.totalPages - 1) {
-                goToPage(bookState.currentPage + 1);
-            }
-        }
-        
-        function prevPage() {
-            if (bookState.currentPage > 0) {
-                goToPage(bookState.currentPage - 1);
-            }
-        }
-        
-        // Load announcements with book layout
+        // Load announcements
         async function loadAnnouncements() {
-            const container = document.getElementById('announcements-container');
-            const bookEl = document.getElementById('announcement-book');
-            
-            // Show loading state
-            bookEl.innerHTML = `
-                <div class="page active">
-                    <div class="loading">
-                        <div class="spinner"></div>
+          const container = document.getElementById("announcements-container");
+
+          // Show skeleton while loading - ill update it son for mx speed.
+          container.innerHTML = `
+            <div class="announcement-skeleton">
+                <div class="skeleton-title"></div>
+                <div class="skeleton-text"></div>
+                <div class="skeleton-text"></div>
+                <div class="skeleton-text short"></div>
+            </div>
+            <div class="announcement-skeleton">
+                <div class="skeleton-title"></div>
+                <div class="skeleton-text"></div>
+                <div class="skeleton-text short"></div>
+            </div>
+          `;
+
+          announcements = (await fetchData(ENDPOINTS.ANNOUNCEMENTS)) || [];
+        
+          if (announcements.length === 0) {
+            container.innerHTML =
+              '<p class="text-center text-gray-400 py-8">No announcements available.</p>';
+            document.getElementById("announcements-count").textContent =
+              "0 announcements";
+            return;
+          }
+      
+          document.getElementById("announcements-count").textContent = `${announcements.length} announcements`;
+      
+          let pinnedIds = JSON.parse(localStorage.getItem("pinnedAnnouncements") || "[]");
+      
+          // Render announcements (pinned first)
+          function renderAnnouncements() {
+            const sorted = [...announcements].sort((a, b) => {
+              const aPinned = pinnedIds.includes(a.id);
+              const bPinned = pinnedIds.includes(b.id);
+              return aPinned === bPinned ? 0 : aPinned ? -1 : 1;
+            });
+        
+            container.innerHTML = sorted
+              .map((announcement) => {
+                const urlMatch = announcement.content.match(/https?:\/\/[^\s]+/);
+                const url = urlMatch ? urlMatch[0] : null;
+                const previewId = `og-preview-${announcement.id || Math.random().toString(36).slice(2)}`;
+                const isPinned = pinnedIds.includes(announcement.id);
+                // Check if the announcement is less than 1 hour
+                const createdAt = new Date(announcement.created_at);
+                const now = new Date();
+                const diffHours = (now - createdAt) / (1000 * 60 * 60);
+                const isRecent = diffHours < 3;
+
+                const neonBorderClass = isRecent
+                  ? "border-l-4 border-l-yellow-400 border-t border-t-blue-700 border-r border-r-blue-700 border-b border-b-blue-700 shadow-sm"
+                  : "border border-blue-800 shadow-md";
+
+                // File preview (image or link)
+                let filePreview = "";
+                if (announcement.has_file && announcement.file_type?.startsWith("image/")) {
+                  filePreview = `
+                    <div class="mb-3 w-24 h-24 rounded-lg overflow-hidden bg-gray-700 flex items-center justify-center cursor-pointer card-hover-lift"
+                         onclick="openImagePreview('${announcement.file_url}')">
+                      <img src="${announcement.file_url}" alt="${announcement.file_name}" class="object-cover w-full h-full">
                     </div>
-                </div>
-            `;
+                  `;
+                } else if (announcement.has_file) {
+                  filePreview = `
+                    <div class="mb-3">
+                        <a style="color:#60a5fa; text-decoration: underline; font-size:0.875rem;" href="${announcement.file_url}" target="_blank" class="card-hover-lift">
+                          📎 ${announcement.file_name} ↗
+                        </a> 
+                    </div>
+                  `;
+                }
             
-            // Fetch announcements
-            announcements = (await fetchData(ENDPOINTS.ANNOUNCEMENTS)) || [];
-            bookState.announcements = [...announcements].sort((a, b) => {
-                const aPinned = bookState.pinnedIds.includes(a.id);
-                const bPinned = bookState.pinnedIds.includes(b.id);
-                return aPinned === bPinned ? 0 : aPinned ? -1 : 1;
-            });
-            
-            // Update count
-            document.getElementById("announcements-count").textContent = 
-                `${announcements.length} announcement${announcements.length !== 1 ? 's' : ''}`;
-            
-            // Render book
-            if (bookState.announcements.length === 0) {
-                bookEl.innerHTML = renderEmptyBook();
-                bookState.totalPages = 1;
-                bookState.currentPage = 0;
-            } else {
-                bookEl.innerHTML = '';
-                bookState.totalPages = bookState.announcements.length;
-                bookState.currentPage = 0;
+                return `
+                  <div class="announcement-card ${neonBorderClass} bg-gray-900/60 rounded-2xl transition duration-200 ease-in-out overflow-hidden mb-6 relative card-hover-lift">
                 
-                bookState.announcements.forEach((announcement, index) => {
-                    bookEl.innerHTML += renderBookPage(announcement, index);
-                });
-            }
+                    <!-- Pin button -->
+                    <button 
+                        onclick="togglePin(${announcement.id})"
+                        class="absolute top-3 right-3 p-1 rounded-full transition duration-200 ${
+                          isPinned
+                            ? "bg-yellow-400/20 text-yellow-400 hover:bg-yellow-400/30"
+                            : "text-gray-500 hover:text-yellow-400 hover:bg-gray-800/40"
+                        }"
+                        title="${isPinned ? "Unpin" : "Pin"}"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" 
+                            viewBox="0 0 24 24" 
+                            fill="${isPinned ? 'currentColor' : 'none'}" 
+                            stroke="currentColor" 
+                            stroke-width="1.9" 
+                            class="w-8 h-8 drop-shadow-sm">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 2c.8 0 1.5.7 1.5 1.5V9l3 3v1.5h-3l-.25 6.5a.75.75 0 01-1.5 0L11 13.5H8V12l3-3V3.5C11 2.7 11.7 2 12 2z" />
+                        </svg>
+                    </button>
+                
+                    <!-- OG Preview -->
+                    <div id="${previewId}" class="w-full border-b border-gray-800"></div>
+                
+                    <!-- File/Image Preview -->
+                    ${filePreview}
+                
+                    <!-- Announcement Body -->
+                    <div class="p-4 sm:p-5">
+                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-3 gap-2">
+                            <h3 class="text-xl uppercase break-all underline underline-offset-8 decoration-red-500 decoration-double sm:text-2xl font-extrabold text-white leading-snug break-words">
+                                ${announcement.title}
+                            </h3>
+                            
+                            <i class="fa fa-clock mr-2">
+                              <span class="text-xs sm:text-sm whitespace-nowrap font-bold 
+                                           underline underline-offset-2 decoration-blue-400 
+                                           text-transparent bg-clip-text 
+                                           bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400">
+                                ${formatDate(announcement.created_at)}
+                              </span>
+                            </i>
+
+                        </div>
+                    
+                        <p class="mb-4 break-all text-gray-300 hyphens-auto text-sm sm:text-base indent-4 leading-relaxed break-words whitespace-pre-line list-inside">
+                            ${linkify(announcement.content)}
+                        </p>
+                    
+                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+                            <span class="text-gray-400 text-xs sm:text-sm">
+                                By: ${announcement.author?.username || "Unknown"}
+                            </span>
+                        </div>
+                    </div>
+                  </div>
+                `;
+              })
+              .join("");  
+          
+            // Render OG previews
+            sorted.forEach((announcement) => {
+              const urlMatch = announcement.content.match(/https?:\/\/[^\s]+/);
+              if (!urlMatch) return;
             
-            // Update controls
-            updateBookControls();
+              const url = urlMatch[0];
+              const previewId = `og-preview-${announcement.id || Math.random().toString(36).slice(2)}`;
+              const previewEl = document.getElementById(previewId);
             
-            // Set up navigation
-            document.getElementById('next-page').addEventListener('click', nextPage);
-            document.getElementById('prev-page').addEventListener('click', prevPage);
-            
-            // Add keyboard navigation
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'ArrowRight') nextPage();
-                if (e.key === 'ArrowLeft') prevPage();
+              fetch(`/api/preview?url=${encodeURIComponent(url)}`)
+                .then((res) => res.json())
+                .then((data) => {
+                  if (!data.title && !data.image) return;
+                
+                  previewEl.innerHTML = `
+                    <a href="${url}" target="_blank" class="flex items-center gap-3 p-3 sm:p-4 bg-gray-800/70 hover:bg-gray-800/90 transition duration-200 ease-in-out card-hover-lift">
+                        ${
+                          data.image
+                            ? `<div class="flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden bg-gray-700 flex items-center justify-center">
+                                 <img src="${data.image}" alt="" class="object-cover w-full h-full cursor-pointer" onclick="openImagePreview('${data.image}')">
+                               </div>`
+                            : `<div class="flex-shrink-0 w-16 h-16 rounded-lg bg-gray-700 flex items-center justify-center text-gray-500 text-xs italic">
+                                 No image
+                               </div>`
+                        }
+                        <div class="flex-1">
+                            <h3 class="text-white font-semibold text-sm sm:text-base mb-1 line-clamp-1">
+                                ${data.title || "Untitled"}
+                            </h3>
+                            <p class="text-gray-400 text-xs sm:text-sm line-clamp-2">
+                                ${data.description || ""}
+                            </p>
+                        </div>
+                    </a>
+                  `;
+                })
+                .catch(() => console.warn("No OG preview found for", url));
             });
-        }
-        
-        // Toggle pin function
-        window.togglePin = function (id) {
-            if (bookState.pinnedIds.includes(id)) {
-                bookState.pinnedIds = bookState.pinnedIds.filter((x) => x !== id);
+          }
+      
+          // Toggle pin
+          window.togglePin = function (id) {
+            if (pinnedIds.includes(id)) {
+              pinnedIds = pinnedIds.filter((x) => x !== id);
             } else {
-                bookState.pinnedIds.push(id);
+              pinnedIds.push(id);
             }
-            localStorage.setItem("pinnedAnnouncements", JSON.stringify(bookState.pinnedIds));
-            
-            // Re-sort and re-render announcements
-            bookState.announcements = [...announcements].sort((a, b) => {
-                const aPinned = bookState.pinnedIds.includes(a.id);
-                const bPinned = bookState.pinnedIds.includes(b.id);
-                return aPinned === bPinned ? 0 : aPinned ? -1 : 1;
-            });
-            
-            // Re-render book
-            const bookEl = document.getElementById('announcement-book');
-            bookEl.innerHTML = '';
-            bookState.announcements.forEach((announcement, index) => {
-                bookEl.innerHTML += renderBookPage(announcement, index);
-            });
-            
-            // Update active page
-            goToPage(bookState.currentPage);
-        };
-        
-        // Image modal functions
-        window.openImagePreview = function(src) {
+            localStorage.setItem("pinnedAnnouncements", JSON.stringify(pinnedIds));
+            renderAnnouncements();
+          };
+      
+          // Image modal
+          window.openImagePreview = function(src) {
             let modal = document.getElementById("image-preview-modal");
             let img = document.getElementById("image-preview-img");
             if (!modal || !img) return;
             img.src = src;
             modal.classList.remove("hidden");
             modal.classList.add("flex");
-        };
-        
-        window.closeImagePreview = function() {
+          };
+      
+          window.closeImagePreview = function() {
             let modal = document.getElementById("image-preview-modal");
             let img = document.getElementById("image-preview-img");
             if (!modal || !img) return;
             modal.classList.add("hidden");
             modal.classList.remove("flex");
             img.src = "";
-        };
-        
-        // Close modal when clicking outside the image
-        document.getElementById("image-preview-modal")?.addEventListener("click", e => {
+          };
+      
+          // Close modal when clicking outside the image
+          document.getElementById("image-preview-modal")?.addEventListener("click", e => {
             if (e.target.id === "image-preview-modal") closeImagePreview();
-        });
+          });
+      
+          renderAnnouncements();
+        }
 
         // Load assignments
         async function loadAssignments() {
