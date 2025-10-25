@@ -38,6 +38,7 @@
         font-family: 'Poppins', sans-serif;
         background-color: var(--bg-color);
         color: var(--text-color);
+        min-height: 100vh;
     }
     
     .gradient-text {
@@ -49,17 +50,18 @@
     }
     
     .glass-morph {
-        background: rgba(30, 30, 40, 0.6);
+        background: rgba(30, 30, 40, 0.8);
         backdrop-filter: blur(12px);
         -webkit-backdrop-filter: blur(12px);
         box-shadow: 0 8px 32px rgba(0, 31, 135, 0.2);
-        border: 1px solid rgba(59, 130, 246, 0.3);
+        border: 1px solid rgba(59, 130, 246, 0.4);
         transition: all 0.3s ease;
     }
     
     .glass-morph:hover {
         transform: translateY(-5px);
         box-shadow: 0 12px 40px rgba(0, 31, 135, 0.3);
+        border-color: rgba(59, 130, 246, 0.6);
     }
     
     .btn {
@@ -67,7 +69,7 @@
         color: white;
         border: none;
         padding: 12px 30px;
-        border-radius: 50px;
+        border-radius: 10px;
         font-weight: 600;
         transition: all 0.3s ease;
         box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
@@ -135,21 +137,24 @@
     }
     
     .file-card {
-        background: rgba(30, 30, 40, 0.7);
+        background: rgba(30, 30, 40, 0.8);
         border-radius: 15px;
         padding: 20px;
         margin-bottom: 20px;
         transition: all 0.3s ease;
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
     }
     
     .file-card:hover {
-        transform: translateY(-2px);
+        transform: translateY(-5px);
         box-shadow: 0 8px 25px rgba(0, 31, 135, 0.3);
+        border-color: rgba(59, 130, 246, 0.6);
     }
     
     .form-input {
-        background: rgba(30, 30, 40, 0.8);
-        border: 1px solid rgba(59, 130, 246, 0.3);
+        background: rgba(30, 30, 40, 0.9);
+        border: 1px solid rgba(59, 130, 246, 0.4);
         border-radius: 10px;
         padding: 12px 15px;
         color: white;
@@ -161,7 +166,7 @@
     .form-input:focus {
         outline: none;
         border-color: #3B82F6;
-        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
     }
     
     .modal {
@@ -184,8 +189,9 @@
         padding: 30px;
         width: 90%;
         max-width: 500px;
-        border: 1px solid rgba(59, 130, 246, 0.3);
+        border: 1px solid rgba(59, 130, 246, 0.4);
         animation: slideUp 0.3s ease;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
     }
     
     @keyframes fadeIn {
@@ -256,8 +262,8 @@
     .file-input-label {
         display: block;
         padding: 12px 15px;
-        background: rgba(30, 30, 40, 0.8);
-        border: 1px solid rgba(59, 130, 246, 0.3);
+        background: rgba(30, 30, 40, 0.9);
+        border: 1px solid rgba(59, 130, 246, 0.4);
         border-radius: 10px;
         color: #9CA3AF;
         text-align: center;
@@ -266,7 +272,7 @@
     }
     
     .file-input-label:hover {
-        background: rgba(30, 30, 40, 0.9);
+        background: rgba(30, 30, 40, 1);
         border-color: #3B82F6;
         color: #3B82F6;
     }
@@ -298,7 +304,7 @@
     .toast {
         background: rgba(30, 30, 40, 0.95);
         backdrop-filter: blur(10px);
-        border: 1px solid rgba(59, 130, 246, 0.3);
+        border: 1px solid rgba(59, 130, 246, 0.4);
         border-radius: 12px;
         padding: 16px 20px;
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
@@ -406,6 +412,22 @@
         background: rgba(255, 255, 255, 0.1);
     }
 
+    .spinner {
+        border: 3px solid rgba(59, 130, 246, 0.3);
+        border-radius: 50%;
+        border-top: 3px solid #3B82F6;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    /* Enhanced responsive design */
     @media (max-width: 768px) {
         nav.glass-morph {
             position: static !important;
@@ -430,6 +452,7 @@
         .action-buttons {
             width: 100%;
             justify-content: space-between;
+            margin-top: 15px;
         }
         
         .toast-container {
@@ -441,6 +464,127 @@
         .toast {
             max-width: none;
         }
+
+        /* Improved mobile button layout */
+        .mobile-btn-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            width: 100%;
+        }
+        
+        .mobile-btn-container .btn {
+            flex: 1;
+            min-width: 120px;
+            max-width: 200px;
+        }
+        
+        /* Improved file card layout for mobile */
+        .file-card-content {
+            flex-direction: column;
+        }
+        
+        .file-info-mobile {
+            margin-bottom: 15px;
+        }
+        
+        .file-meta-mobile {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .file-meta-mobile span {
+            font-size: 12px;
+        }
+    }
+    
+    /* Desktop enhancements */
+    @media (min-width: 769px) {
+        .file-card-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .file-info-desktop {
+            display: flex;
+            align-items: center;
+            flex: 1;
+        }
+        
+        .file-meta-desktop {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 10px;
+        }
+    }
+    
+    /* Card border enhancements */
+    .enhanced-border {
+        border: 1px solid rgba(59, 130, 246, 0.4);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    }
+    
+    .enhanced-border:hover {
+        border-color: rgba(59, 130, 246, 0.7);
+        box-shadow: 0 8px 30px rgba(0, 31, 135, 0.3);
+    }
+    
+    /* Search and filter enhancements */
+    .search-filter-container {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    @media (min-width: 768px) {
+        .search-filter-container {
+            grid-template-columns: 2fr 1fr;
+        }
+    }
+    
+    /* Improved file name styling */
+    .file-name {
+        font-weight: 700;
+        font-size: 1.25rem;
+        background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 5px;
+        line-height: 1.3;
+    }
+    
+    /* Improved pagination */
+    .pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+        margin-top: 30px;
+        flex-wrap: wrap;
+    }
+    
+    .page-btn {
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+    
+    .page-btn.active {
+        background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+        color: white;
+    }
+    
+    .page-btn:not(.active):hover {
+        background: rgba(59, 130, 246, 0.1);
+        border-color: rgba(59, 130, 246, 0.5);
     }
 </style>
 <body>
@@ -461,7 +605,7 @@
                     </div>
                     <span class="text-xl sm:text-2xl font-bold gradient-text">LyxNexus Files</span>
                 </div>
-                <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4 w-full sm:w-auto">
+                <div class="mobile-btn-container">
                     <button class="btn bg-red-600 hover:bg-gray-700 text-sm sm:text-base" onclick="window.location.href='https://lyxspace.onrender.com/files'">
                         <i class="fas fa-file mr-2"></i> More Files
                     </button>
@@ -488,9 +632,9 @@
         </div>
 
         <!-- Search and Filter -->
-        <div class="glass-morph rounded-xl p-4 sm:p-6 mb-6">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div class="md:col-span-2">
+        <div class="glass-morph rounded-xl p-4 sm:p-6 mb-6 enhanced-border">
+            <div class="search-filter-container">
+                <div>
                     <input type="text" id="search-input" class="form-input" placeholder="Search files by name or description...">
                 </div>
                 <div>
@@ -507,16 +651,14 @@
 
         <!-- Files List -->
         <div id="files-container">
-            <div class="glass-morph rounded-xl p-8 text-center">
-                <div class="loading">
-                    <div class="spinner"></div>
-                </div>
+            <div class="glass-morph rounded-xl p-8 text-center enhanced-border">
+                <div class="spinner"></div>
                 <p class="text-gray-400 mt-4">Loading files...</p>
             </div>
         </div>
 
         <!-- Pagination -->
-        <div id="pagination-container" class="mt-6 text-center hidden">
+        <div id="pagination-container" class="pagination hidden">
             <!-- Pagination will be inserted here by JavaScript -->
         </div>
     </main>
@@ -588,12 +730,14 @@
 
         backBtn.addEventListener('click', function() {
             backBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>';
+            backBtn.style.backgroundColor = '#6B7280'; // Change to gray to indicate loading
             const redirectUrl = isAdmin ? '/admin' : '/main-page';
             window.location.href = redirectUrl;
             backBtn.disabled = true; // prevent double clicks
 
             setTimeout(() => {
                 backBtn.innerHTML = '<i class="fas fa-arrow-left mr-2"></i><span> Back</span>';
+                backBtn.style.backgroundColor = ''; // Reset to original color
                 backBtn.disabled = false;
             }, 2000); // simulate loading
         });
@@ -743,7 +887,7 @@
             
             // Show loading
             container.innerHTML = `
-                <div class="glass-morph rounded-xl p-8 text-center">
+                <div class="glass-morph rounded-xl p-8 text-center enhanced-border">
                     <div class="spinner"></div>
                     <p class="text-gray-400 mt-4">Loading files...</p>
                 </div>
@@ -754,7 +898,7 @@
                 
                 if (data.files.length === 0) {
                     container.innerHTML = `
-                        <div class="glass-morph rounded-xl p-8 text-center">
+                        <div class="glass-morph rounded-xl p-8 text-center enhanced-border">
                             <i class="fas fa-folder-open text-4xl text-gray-500 mb-4"></i>
                             <h3 class="text-xl font-bold text-gray-400 mb-2">No files found</h3>
                             <p class="text-gray-500">${search || category ? 'Try changing your search or filter criteria' : 'No files have been uploaded yet'}</p>
@@ -774,26 +918,26 @@
                     const fileIcon = getFileIcon(file.file_type, file.filename);
                     
                     return `
-                    <div class="file-card">
-                        <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center">
-                            <div class="flex items-start mb-4 lg:mb-0 flex-1">
+                    <div class="file-card enhanced-border">
+                        <div class="file-card-content">
+                            <div class="file-info-desktop">
                                 <div class="file-icon ${fileIcon.class}">
                                     <i class="fas ${fileIcon.icon}"></i>
                                 </div>
                                 <div class="flex-1">
-                                    <h3 class="text-lg sm:text-xl font-extrabold text-white underline underline-offset-4 decoration-blue-500 leading-snug break-words"> ${file.name}</h3>
+                                    <h3 class="file-name">${file.name}</h3>
                                     <p class="text-gray-400 text-sm">${file.description || 'No description'}</p>
-                                    <div class="flex flex-wrap items-center mt-2 text-sm text-gray-500">
-                                        <span class="mr-4">
+                                    <div class="file-meta-desktop">
+                                        <span class="text-sm text-gray-500">
                                             <i class="fas fa-file mr-1"></i> ${file.filename}
                                         </span>
-                                        <span class="mr-4">
+                                        <span class="text-sm text-gray-500">
                                             <i class="fas fa-database mr-1"></i> ${formatFileSize(file.file_size)}
                                         </span>
-                                        <span class="mr-4">
+                                        <span class="text-sm text-gray-500">
                                             <i class="fas fa-tag mr-1"></i> ${file.category}
                                         </span>
-                                        <span>
+                                        <span class="text-sm text-gray-500">
                                             <i class="fas fa-calendar mr-1"></i> ${formatDate(file.uploaded_at)}
                                         </span>
                                     </div>
@@ -823,7 +967,7 @@
                 
             } catch (error) {
                 container.innerHTML = `
-                    <div class="glass-morph rounded-xl p-8 text-center">
+                    <div class="glass-morph rounded-xl p-8 text-center enhanced-border">
                         <i class="fas fa-exclamation-triangle text-4xl text-red-500 mb-4"></i>
                         <h3 class="text-xl font-bold text-red-400 mb-2">Error Loading Files</h3>
                         <p class="text-gray-500">Failed to load files. Please try again.</p>
@@ -844,7 +988,7 @@
             
             if (data.has_prev) {
                 paginationHTML += `
-                    <button class="btn btn-secondary mx-1" onclick="changePage(${data.current_page - 1})">
+                    <button class="page-btn" onclick="changePage(${data.current_page - 1})">
                         <i class="fas fa-chevron-left mr-2"></i> Previous
                     </button>
                 `;
@@ -854,7 +998,7 @@
             for (let i = 1; i <= data.pages; i++) {
                 if (i === data.current_page) {
                     paginationHTML += `
-                        <button class="btn mx-1" disabled>${i}</button>
+                        <button class="page-btn active" disabled>${i}</button>
                     `;
                 } else if (
                     i === 1 || 
@@ -862,7 +1006,7 @@
                     (i >= data.current_page - 1 && i <= data.current_page + 1)
                 ) {
                     paginationHTML += `
-                        <button class="btn btn-secondary mx-1" onclick="changePage(${i})">${i}</button>
+                        <button class="page-btn" onclick="changePage(${i})">${i}</button>
                     `;
                 } else if (i === data.current_page - 2 || i === data.current_page + 2) {
                     paginationHTML += `<span class="mx-2 text-gray-400">...</span>`;
@@ -871,7 +1015,7 @@
             
             if (data.has_next) {
                 paginationHTML += `
-                    <button class="btn btn-secondary mx-1" onclick="changePage(${data.current_page + 1})">
+                    <button class="page-btn" onclick="changePage(${data.current_page + 1})">
                         Next <i class="fas fa-chevron-right ml-2"></i>
                     </button>
                 `;
