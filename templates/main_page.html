@@ -1323,20 +1323,28 @@
 
         function setupNavigation() {
             const navButtons = document.querySelectorAll('.nav-btn, .mobile-nav-btn');
-            
+
+            // Check if we're on the main page before setting up navigation
+            const hasContentSections = document.querySelector('.content-section') !== null;
+
+            if (!hasContentSections) {
+                console.log('Not on main page, skipping navigation setup');
+                return;
+            }
+
             // Set active section from localStorage
             setActiveSection(currentActiveSection);
-            
+
             navButtons.forEach(button => {
                 button.addEventListener('click', function() {
                     const targetSection = this.getAttribute('data-section');
-                    
+
                     // Save active section to localStorage
                     localStorage.setItem('activeSection', targetSection);
                     currentActiveSection = targetSection;
-                    
+
                     setActiveSection(targetSection);
-                    
+
                     if (targetSection === 'announcements' && announcements.length === 0) {
                         loadAnnouncements();
                     } else if (targetSection === 'assignments' && assignments.length === 0) {
@@ -1350,24 +1358,31 @@
                     }
                 });
             });
-        }
+        }        
         
         function setActiveSection(sectionId) {
             const navButtons = document.querySelectorAll('.nav-btn, .mobile-nav-btn');
-            
+            const sectionElement = document.getElementById(sectionId);
+
+            // Check if we're on the main page (has content sections)
+            if (!sectionElement) {
+                console.log('Not on main page, skipping section activation');
+                return;
+            }
+
             navButtons.forEach(btn => {
                 btn.classList.remove('active');
                 if (btn.getAttribute('data-section') === sectionId) {
                     btn.classList.add('active');
                 }
             });
-            
+
             document.querySelectorAll('.content-section').forEach(section => {
                 section.classList.remove('active');
             });
-            
-            document.getElementById(sectionId).classList.add('active');
-        }
+
+            sectionElement.classList.add('active');
+        }        
 
         // Scroll animation observer
         function setupScrollAnimations() {
@@ -1936,39 +1951,46 @@
         }
 
         document.addEventListener('DOMContentLoaded', function() {
-            setupNavigation(); 
-            setupScrollAnimations();
-
-            checkForFlaskMessages();
-
-            loadUserData();
-            loadAnnouncements();
-            loadAssignments();
-            loadTopics();
-            loadTimetable();
+            // Only run main page scripts if we're on the main page
+            const isMainPage = document.querySelector('.content-container') !== null;
             
-            // Mark initial load as complete
-            setTimeout(() => {
-                isInitialLoad = false;
-            }, 1000);
-
-            // Light refresh - every 1 min
-            setInterval(() => {
+            if (isMainPage) {
+                setupNavigation(); 
+                setupScrollAnimations();
+                checkForFlaskMessages();
                 loadUserData();
-                loadAnnouncements(true); // Pass true to indicate refresh
-            }, 60 * 1000);
-        
-            // Heavy refresh - 300 seconds --> 5 min
-            setInterval(() => {
-                loadAssignments(true);
-            }, 5 * 60 * 1000);
+                loadAnnouncements();
+                loadAssignments();
+                loadTopics();
+                loadTimetable();
+                
+                // Mark initial load as complete
+                setTimeout(() => {
+                    isInitialLoad = false;
+                }, 1000);
             
-            // SUPER HEAVY refresh ---> 1 hrs
-            setInterval(() => {
-                loadTopics(true);
-                loadTimetable(true);
-            }, 60 * 60 * 1000); // 60 mins
-        });
+                // Light refresh - every 1 min
+                setInterval(() => {
+                    loadUserData();
+                    loadAnnouncements(true);
+                }, 60 * 1000);
+            
+                // Heavy refresh - 300 seconds --> 5 min
+                setInterval(() => {
+                    loadAssignments(true);
+                }, 5 * 60 * 1000);
+                
+                // SUPER HEAVY refresh ---> 1 hrs
+                setInterval(() => {
+                    loadTopics(true);
+                    loadTimetable(true);
+                }, 60 * 60 * 1000);
+            } else {
+                // Run only global functions on other pages
+                checkForFlaskMessages();
+                loadUserData(); // Still load user data if needed
+            }
+        });        
 
         if ('serviceWorker' in navigator) {
           window.addEventListener('load', () => {
