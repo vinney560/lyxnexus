@@ -1551,3 +1551,264 @@ Traceback (most recent call last):
 RuntimeError: The session is unavailable because no secret key was set.  Set the secret_key on the application to something unique and secret.
 2025-10-25 17:37:56,418 - apscheduler.executors.default - INFO - Running job "auto_close_sessions (trigger: interval[0:01:00], next run at: 2025-10-25 17:38:56 EAT)" (scheduled at 2025-10-25 17:37:56.417865+03:00)
 2025-10-25 17:37:59,813 - apscheduler.scheduler - INFO - Scheduler has been shut down
+2025-10-25 19:07:32,829 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-10-25 19:07:32,834 - apscheduler.scheduler - INFO - Added job "keep_databases_alive" to job store "default"
+2025-10-25 19:07:32,835 - apscheduler.scheduler - INFO - Scheduler started
+2025-10-25 19:07:32,841 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-10-25 19:07:32,848 - apscheduler.scheduler - INFO - Added job "auto_close_sessions" to job store "default"
+2025-10-25 19:07:32,849 - apscheduler.scheduler - INFO - Scheduler started
+2025-10-25 19:07:32,867 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-10-25 19:07:32,868 - apscheduler.scheduler - INFO - Added job "delete_old_announcements" to job store "default"
+2025-10-25 19:07:32,873 - apscheduler.scheduler - INFO - Scheduler started
+2025-10-25 19:07:32,946 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-10-25 19:07:32,948 - apscheduler.scheduler - INFO - Added job "ping_urls" to job store "default"
+2025-10-25 19:07:32,949 - apscheduler.scheduler - INFO - Scheduler started
+2025-10-25 19:08:32,869 - apscheduler.executors.default - INFO - Running job "auto_close_sessions (trigger: interval[0:01:00], next run at: 2025-10-25 19:08:32 EAT)" (scheduled at 2025-10-25 19:08:32.841536+03:00)
+2025-10-25 19:08:40,172 - apscheduler.executors.default - INFO - Job "auto_close_sessions (trigger: interval[0:01:00], next run at: 2025-10-25 19:09:32 EAT)" executed successfully
+2025-10-25 19:09:32,844 - apscheduler.executors.default - INFO - Running job "auto_close_sessions (trigger: interval[0:01:00], next run at: 2025-10-25 19:10:32 EAT)" (scheduled at 2025-10-25 19:09:32.841536+03:00)
+2025-10-25 19:09:39,490 - apscheduler.executors.default - INFO - Job "auto_close_sessions (trigger: interval[0:01:00], next run at: 2025-10-25 19:10:32 EAT)" executed successfully
+2025-10-25 19:10:32,830 - apscheduler.executors.default - INFO - Running job "keep_databases_alive (trigger: interval[0:03:00], next run at: 2025-10-25 19:10:32 EAT)" (scheduled at 2025-10-25 19:10:32.828906+03:00)
+2025-10-25 19:10:32,858 - apscheduler.executors.default - INFO - Running job "auto_close_sessions (trigger: interval[0:01:00], next run at: 2025-10-25 19:11:32 EAT)" (scheduled at 2025-10-25 19:10:32.841536+03:00)
+2025-10-25 19:10:32,950 - apscheduler.executors.default - INFO - Running job "ping_urls (trigger: interval[0:03:00], next run at: 2025-10-25 19:10:32 EAT)" (scheduled at 2025-10-25 19:10:32.946183+03:00)
+2025-10-25 19:10:35,862 - apscheduler.executors.default - INFO - Job "ping_urls (trigger: interval[0:03:00], next run at: 2025-10-25 19:13:32 EAT)" executed successfully
+2025-10-25 19:10:40,318 - apscheduler.executors.default - INFO - Job "auto_close_sessions (trigger: interval[0:01:00], next run at: 2025-10-25 19:11:32 EAT)" executed successfully
+2025-10-25 19:10:44,261 - apscheduler.executors.default - INFO - Job "keep_databases_alive (trigger: interval[0:03:00], next run at: 2025-10-25 19:13:32 EAT)" executed successfully
+2025-10-25 19:11:14,279 - app - ERROR - Exception on /messages [GET]
+Traceback (most recent call last):
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask/app.py", line 2190, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask/app.py", line 1486, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask_cors/extension.py", line 176, in wrapped_function
+    return cors_after_request(app.make_response(f(*args, **kwargs)))
+                                                ^^^^^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask/app.py", line 1484, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask/app.py", line 1469, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask_login/utils.py", line 285, in decorated_view
+    return current_app.login_manager.unauthorized()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask_login/login_manager.py", line 187, in unauthorized
+    flash(self.login_message, category=self.login_message_category)
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask/helpers.py", line 328, in flash
+    session["_flashes"] = flashes
+    ~~~~~~~^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask/sessions.py", line 97, in _fail
+    raise RuntimeError(
+RuntimeError: The session is unavailable because no secret key was set.  Set the secret_key on the application to something unique and secret.
+2025-10-25 19:11:14,374 - app - ERROR - Internal Server Error: 500 Internal Server Error: The server encountered an internal error and was unable to complete your request. Either the server is overloaded or there is an error in the application.
+Traceback (most recent call last):
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask/app.py", line 2190, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask/app.py", line 1486, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask_cors/extension.py", line 176, in wrapped_function
+    return cors_after_request(app.make_response(f(*args, **kwargs)))
+                                                ^^^^^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask/app.py", line 1484, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask/app.py", line 1469, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask_login/utils.py", line 285, in decorated_view
+    return current_app.login_manager.unauthorized()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask_login/login_manager.py", line 187, in unauthorized
+    flash(self.login_message, category=self.login_message_category)
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask/helpers.py", line 328, in flash
+    session["_flashes"] = flashes
+    ~~~~~~~^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask/sessions.py", line 97, in _fail
+    raise RuntimeError(
+RuntimeError: The session is unavailable because no secret key was set.  Set the secret_key on the application to something unique and secret.
+2025-10-25 19:11:32,844 - apscheduler.executors.default - INFO - Running job "auto_close_sessions (trigger: interval[0:01:00], next run at: 2025-10-25 19:12:32 EAT)" (scheduled at 2025-10-25 19:11:32.841536+03:00)
+2025-10-25 19:11:38,089 - apscheduler.scheduler - INFO - Scheduler has been shut down
+2025-10-25 20:45:25,340 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-10-25 20:45:25,346 - apscheduler.scheduler - INFO - Added job "keep_databases_alive" to job store "default"
+2025-10-25 20:45:25,346 - apscheduler.scheduler - INFO - Scheduler started
+2025-10-25 20:45:25,352 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-10-25 20:45:25,356 - apscheduler.scheduler - INFO - Added job "auto_close_sessions" to job store "default"
+2025-10-25 20:45:25,359 - apscheduler.scheduler - INFO - Scheduler started
+2025-10-25 20:45:25,429 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-10-25 20:45:25,431 - apscheduler.scheduler - INFO - Added job "delete_old_announcements" to job store "default"
+2025-10-25 20:45:25,441 - apscheduler.scheduler - INFO - Scheduler started
+2025-10-25 20:45:25,520 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-10-25 20:45:25,522 - apscheduler.scheduler - INFO - Added job "ping_urls" to job store "default"
+2025-10-25 20:45:25,523 - apscheduler.scheduler - INFO - Scheduler started
+2025-10-25 20:45:32,251 - app - ERROR - Exception on /admin [GET]
+Traceback (most recent call last):
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask/app.py", line 2190, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask/app.py", line 1486, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask_cors/extension.py", line 176, in wrapped_function
+    return cors_after_request(app.make_response(f(*args, **kwargs)))
+                                                ^^^^^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask/app.py", line 1484, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask/app.py", line 1469, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask_login/utils.py", line 285, in decorated_view
+    return current_app.login_manager.unauthorized()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask_login/login_manager.py", line 187, in unauthorized
+    flash(self.login_message, category=self.login_message_category)
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask/helpers.py", line 328, in flash
+    session["_flashes"] = flashes
+    ~~~~~~~^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask/sessions.py", line 97, in _fail
+    raise RuntimeError(
+RuntimeError: The session is unavailable because no secret key was set.  Set the secret_key on the application to something unique and secret.
+2025-10-25 20:45:33,741 - app - ERROR - Internal Server Error: 500 Internal Server Error: The server encountered an internal error and was unable to complete your request. Either the server is overloaded or there is an error in the application.
+Traceback (most recent call last):
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask/app.py", line 2190, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask/app.py", line 1486, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask_cors/extension.py", line 176, in wrapped_function
+    return cors_after_request(app.make_response(f(*args, **kwargs)))
+                                                ^^^^^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask/app.py", line 1484, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask/app.py", line 1469, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask_login/utils.py", line 285, in decorated_view
+    return current_app.login_manager.unauthorized()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask_login/login_manager.py", line 187, in unauthorized
+    flash(self.login_message, category=self.login_message_category)
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask/helpers.py", line 328, in flash
+    session["_flashes"] = flashes
+    ~~~~~~~^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask/sessions.py", line 97, in _fail
+    raise RuntimeError(
+RuntimeError: The session is unavailable because no secret key was set.  Set the secret_key on the application to something unique and secret.
+2025-10-25 20:45:36,611 - app - ERROR - Exception on /admin [GET]
+Traceback (most recent call last):
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask/app.py", line 2190, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask/app.py", line 1486, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask_cors/extension.py", line 176, in wrapped_function
+    return cors_after_request(app.make_response(f(*args, **kwargs)))
+                                                ^^^^^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask/app.py", line 1484, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask/app.py", line 1469, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask_login/utils.py", line 285, in decorated_view
+    return current_app.login_manager.unauthorized()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask_login/login_manager.py", line 187, in unauthorized
+    flash(self.login_message, category=self.login_message_category)
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask/helpers.py", line 328, in flash
+    session["_flashes"] = flashes
+    ~~~~~~~^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask/sessions.py", line 97, in _fail
+    raise RuntimeError(
+RuntimeError: The session is unavailable because no secret key was set.  Set the secret_key on the application to something unique and secret.
+2025-10-25 20:45:36,783 - app - ERROR - Internal Server Error: 500 Internal Server Error: The server encountered an internal error and was unable to complete your request. Either the server is overloaded or there is an error in the application.
+Traceback (most recent call last):
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask/app.py", line 2190, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask/app.py", line 1486, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask_cors/extension.py", line 176, in wrapped_function
+    return cors_after_request(app.make_response(f(*args, **kwargs)))
+                                                ^^^^^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask/app.py", line 1484, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask/app.py", line 1469, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask_login/utils.py", line 285, in decorated_view
+    return current_app.login_manager.unauthorized()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask_login/login_manager.py", line 187, in unauthorized
+    flash(self.login_message, category=self.login_message_category)
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask/helpers.py", line 328, in flash
+    session["_flashes"] = flashes
+    ~~~~~~~^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask/sessions.py", line 97, in _fail
+    raise RuntimeError(
+RuntimeError: The session is unavailable because no secret key was set.  Set the secret_key on the application to something unique and secret.
+2025-10-25 20:45:37,850 - app - ERROR - Exception on /admin [GET]
+Traceback (most recent call last):
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask/app.py", line 2190, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask/app.py", line 1486, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask_cors/extension.py", line 176, in wrapped_function
+    return cors_after_request(app.make_response(f(*args, **kwargs)))
+                                                ^^^^^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask/app.py", line 1484, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask/app.py", line 1469, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask_login/utils.py", line 285, in decorated_view
+    return current_app.login_manager.unauthorized()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask_login/login_manager.py", line 187, in unauthorized
+    flash(self.login_message, category=self.login_message_category)
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask/helpers.py", line 328, in flash
+    session["_flashes"] = flashes
+    ~~~~~~~^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask/sessions.py", line 97, in _fail
+    raise RuntimeError(
+RuntimeError: The session is unavailable because no secret key was set.  Set the secret_key on the application to something unique and secret.
+2025-10-25 20:45:38,012 - app - ERROR - Internal Server Error: 500 Internal Server Error: The server encountered an internal error and was unable to complete your request. Either the server is overloaded or there is an error in the application.
+Traceback (most recent call last):
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask/app.py", line 2190, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask/app.py", line 1486, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask_cors/extension.py", line 176, in wrapped_function
+    return cors_after_request(app.make_response(f(*args, **kwargs)))
+                                                ^^^^^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask/app.py", line 1484, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask/app.py", line 1469, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask_login/utils.py", line 285, in decorated_view
+    return current_app.login_manager.unauthorized()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask_login/login_manager.py", line 187, in unauthorized
+    flash(self.login_message, category=self.login_message_category)
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask/helpers.py", line 328, in flash
+    session["_flashes"] = flashes
+    ~~~~~~~^^^^^^^^^^^^
+  File "/home/lyxin/.venv/lib/python3.12/site-packages/flask/sessions.py", line 97, in _fail
+    raise RuntimeError(
+RuntimeError: The session is unavailable because no secret key was set.  Set the secret_key on the application to something unique and secret.
+2025-10-25 20:45:48,074 - apscheduler.scheduler - INFO - Scheduler has been shut down

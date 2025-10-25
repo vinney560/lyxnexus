@@ -16,12 +16,16 @@
         --text-color: #F9FAFB;
         --accent-color: #4A90E2;
         --secondary-color: #8B5CF6;
+        --success-color: #10B981;
+        --warning-color: #F59E0B;
+        --error-color: #EF4444;
     }
     
     body {
         font-family: 'Poppins', sans-serif;
         background-color: var(--bg-color);
         color: var(--text-color);
+        min-height: 100vh;
     }
     
     .gradient-text {
@@ -33,17 +37,18 @@
     }
     
     .glass-morph {
-        background: rgba(30, 30, 40, 0.6);
+        background: rgba(30, 30, 40, 0.8);
         backdrop-filter: blur(12px);
         -webkit-backdrop-filter: blur(12px);
         box-shadow: 0 8px 32px rgba(0, 31, 135, 0.2);
-        border: 1px solid rgba(59, 130, 246, 0.3);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border: 1px solid rgba(59, 130, 246, 0.4);
+        transition: all 0.3s ease;
     }
     
     .glass-morph:hover {
         transform: translateY(-5px);
         box-shadow: 0 12px 40px rgba(0, 31, 135, 0.3);
+        border-color: rgba(59, 130, 246, 0.6);
     }
     
     .btn {
@@ -51,7 +56,7 @@
         color: white;
         border: none;
         padding: 12px 30px;
-        border-radius: 50px;
+        border-radius: 15px;
         font-weight: 600;
         transition: all 0.3s ease;
         box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
@@ -120,29 +125,57 @@
         padding: 15px;
         display: inline-block;
         margin-bottom: 20px;
+        animation: float 3s ease-in-out infinite;
+    }
+    
+    @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-5px); }
     }
     
     .admin-card {
-        background: rgba(30, 30, 40, 0.7);
+        background: rgba(30, 30, 40, 0.8);
         border-radius: 15px;
         padding: 20px;
         margin-bottom: 20px;
+        border: 1px solid rgba(59, 130, 246, 0.4);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s ease;
+        animation: fadeInUp 0.5s ease-out;
+    }
+    
+    .admin-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0, 31, 135, 0.3);
+        border-color: rgba(59, 130, 246, 0.7);
+    }
+    
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
     
     .form-input {
-        background: rgba(30, 30, 40, 0.8);
-        border: 1px solid rgba(59, 130, 246, 0.3);
+        background: rgba(30, 30, 40, 0.9);
+        border: 1px solid rgba(59, 130, 246, 0.4);
         border-radius: 10px;
         padding: 12px 15px;
         color: white;
         width: 100%;
         margin-bottom: 15px;
+        transition: all 0.3s ease;
     }
     
     .form-input:focus {
         outline: none;
         border-color: #3B82F6;
-        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
     }
     
     .modal {
@@ -165,8 +198,9 @@
         padding: 30px;
         width: 90%;
         max-width: 500px;
-        border: 1px solid rgba(59, 130, 246, 0.3);
+        border: 1px solid rgba(59, 130, 246, 0.4);
         animation: slideUp 0.3s ease;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
     }
     
     @keyframes fadeIn {
@@ -208,6 +242,7 @@
     
     .tab-content {
         display: none;
+        animation: fadeIn 0.5s ease;
     }
     
     .tab-content.active {
@@ -222,21 +257,48 @@
         border-bottom: 2px solid transparent;
         cursor: pointer;
         transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .tab-button::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        width: 0;
+        height: 2px;
+        background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+        transition: all 0.3s ease;
+        transform: translateX(-50%);
     }
     
     .tab-button.active {
         color: #3B82F6;
-        border-bottom-color: #3B82F6;
+    }
+    
+    .tab-button.active::after {
+        width: 100%;
+    }
+    
+    .tab-button:hover {
+        color: #3B82F6;
     }
     
     .file-info {
         display: flex;
         align-items: center;
-        background: rgba(30, 30, 40, 0.8);
+        background: rgba(30, 30, 40, 0.9);
         border-radius: 10px;
         padding: 10px 15px;
         margin-bottom: 15px;
-        border: 1px solid rgba(59, 130, 246, 0.3);
+        border: 1px solid rgba(59, 130, 246, 0.4);
+        transition: all 0.3s ease;
+    }
+    
+    .file-info:hover {
+        border-color: rgba(59, 130, 246, 0.7);
+        transform: translateY(-2px);
     }
     
     .file-info i {
@@ -270,8 +332,8 @@
     .file-input-label {
         display: block;
         padding: 12px 15px;
-        background: rgba(30, 30, 40, 0.8);
-        border: 1px solid rgba(59, 130, 246, 0.3);
+        background: rgba(30, 30, 40, 0.9);
+        border: 1px solid rgba(59, 130, 246, 0.4);
         border-radius: 10px;
         color: #9CA3AF;
         text-align: center;
@@ -280,9 +342,10 @@
     }
     
     .file-input-label:hover {
-        background: rgba(30, 30, 40, 0.9);
+        background: rgba(30, 30, 40, 1);
         border-color: #3B82F6;
         color: #3B82F6;
+        transform: translateY(-2px);
     }
     
     .action-buttons {
@@ -298,6 +361,7 @@
         flex-shrink: 0;
     }
 
+    /* Enhanced responsive design */
     @media (max-width: 768px) {
         nav.glass-morph {
           position: static !important;
@@ -336,6 +400,33 @@
         .text-2xl {
             font-size: 1.25rem;
         }
+        
+        /* Improved mobile button layout */
+        .mobile-btn-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            width: 100%;
+        }
+        
+        .mobile-btn-container .btn {
+            flex: 1;
+            min-width: 120px;
+            max-width: 200px;
+        }
+        
+        /* Improved tab layout for mobile */
+        .tab-container {
+            overflow-x: auto;
+            white-space: nowrap;
+            padding-bottom: 10px;
+        }
+        
+        .tab-button {
+            padding: 8px 16px;
+            font-size: 14px;
+        }
     }
 
     @media (max-width: 640px) {
@@ -365,6 +456,11 @@
         .action-buttons {
             width: 100%;
             justify-content: space-between;
+            margin-top: 15px;
+        }
+        
+        .admin-card-content {
+            flex-direction: column;
         }
     }
 
@@ -389,9 +485,221 @@
             flex: 1;
             margin: 0 2px;
         }
+        
+        .logo-container {
+            padding: 10px;
+        }
+        
+        .logo-container svg {
+            width: 24px;
+            height: 24px;
+        }
+    }
+
+    /* Enhanced card styling */
+    .enhanced-border {
+        border: 1px solid rgba(59, 130, 246, 0.4);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    }
+    
+    .enhanced-border:hover {
+        border-color: rgba(59, 130, 246, 0.7);
+        box-shadow: 0 8px 30px rgba(0, 31, 135, 0.3);
+    }
+    
+    /* Pulse animation for new items */
+    @keyframes pulse {
+        0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); }
+        70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+    }
+    
+    .pulse {
+        animation: pulse 2s infinite;
+    }
+    
+    /* Improved title styling */
+    .admin-title {
+        font-weight: 700;
+        font-size: 1.25rem;
+        background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 5px;
+        line-height: 1.3;
+    }
+    
+    /* Toast notifications */
+    .toast-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        max-width: 400px;
+    }
+    
+    .toast {
+        background: rgba(30, 30, 40, 0.95);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(59, 130, 246, 0.4);
+        border-radius: 12px;
+        padding: 16px 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        transform: translateX(400px);
+        opacity: 0;
+        transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        max-width: 400px;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .toast::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 100%;
+        width: 4px;
+    }
+    
+    .toast.show {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    
+    .toast.hide {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+    
+    .toast-success {
+        border-color: rgba(16, 185, 129, 0.4);
+    }
+    
+    .toast-success::before {
+        background: var(--success-color);
+    }
+    
+    .toast-error {
+        border-color: rgba(239, 68, 68, 0.4);
+    }
+    
+    .toast-error::before {
+        background: var(--error-color);
+    }
+    
+    .toast-info {
+        border-color: rgba(59, 130, 246, 0.4);
+    }
+    
+    .toast-info::before {
+        background: var(--accent-color);
+    }
+    
+    .toast-icon {
+        font-size: 20px;
+        flex-shrink: 0;
+    }
+    
+    .toast-success .toast-icon {
+        color: var(--success-color);
+    }
+    
+    .toast-error .toast-icon {
+        color: var(--error-color);
+    }
+    
+    .toast-info .toast-icon {
+        color: var(--accent-color);
+    }
+    
+    .toast-content {
+        flex: 1;
+    }
+    
+    .toast-title {
+        font-weight: 600;
+        margin-bottom: 4px;
+        font-size: 14px;
+    }
+    
+    .toast-message {
+        font-size: 13px;
+        color: #D1D5DB;
+        line-height: 1.4;
+    }
+    
+    .toast-close {
+        background: none;
+        border: none;
+        color: #9CA3AF;
+        cursor: pointer;
+        font-size: 16px;
+        padding: 4px;
+        border-radius: 4px;
+        transition: all 0.2s ease;
+        flex-shrink: 0;
+    }
+    
+    .toast-close:hover {
+        color: white;
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    /* Enhanced grid layouts */
+    .topics-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    @media (min-width: 640px) {
+        .topics-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+    
+    @media (min-width: 1024px) {
+        .topics-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+
+    /* Status indicators */
+    .status-indicator {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        margin-right: 8px;
+    }
+    
+    .status-active {
+        background-color: var(--success-color);
+        box-shadow: 0 0 6px var(--success-color);
+    }
+    
+    .status-pending {
+        background-color: var(--warning-color);
+        box-shadow: 0 0 6px var(--warning-color);
+    }
+    
+    .status-inactive {
+        background-color: var(--error-color);
+        box-shadow: 0 0 6px var(--error-color);
     }
 </style>
 <body>
+    <!-- Toast Container -->
+    <div class="toast-container" id="toast-container"></div>
+
     <nav class="glass-morph sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 py-4">
             <div class="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
@@ -408,7 +716,7 @@
                     </div>
                     <span class="text-xl sm:text-2xl font-bold gradient-text">LyxNexus Admin</span>
                 </div>
-                <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4 w-full sm:w-auto">
+                <div class="mobile-btn-container">
                     <button class="btn bg-gray-600 hover:bg-gray-700 text-sm sm:text-base" onclick="window.location.href='/admin/clone-db'"><i class="fas fa-database mr-2"></i>Database</button>
                     <button class="btn bg-gray-600 hover:bg-gray-700 text-sm sm:text-base" onclick="window.location.href='/profile'"><i class="fas fa-user mr-2"></i>Profile</button>
                     <button class="btn bg-gray-600 hover:bg-gray-700 text-sm sm:text-base" onclick="window.location.href='/messages'"><i class="fas fa-comments mr-2"></i>Messages</button>
@@ -427,7 +735,7 @@
 
         <!-- Tabs -->
         <div class="glass-morph rounded-t-xl p-4">
-            <div class="flex overflow-x-auto space-x-4 border-b border-gray-700 pb-2 scrollbar-hide">
+            <div class="flex overflow-x-auto space-x-4 border-b border-gray-700 pb-2 scrollbar-hide tab-container">
                 <button class="tab-button whitespace-nowrap active" onclick="openTab('announcements-tab')">Announcements</button>
                 <button class="tab-button whitespace-nowrap" onclick="openTab('assignments-tab')">Assignments</button>
                 <button class="tab-button whitespace-nowrap" onclick="openTab('topics-tab')">Units</button>
@@ -479,7 +787,7 @@
                         <i class="fas fa-plus mr-2"></i> New Topic
                     </button>
                 </div>
-                <div id="topics-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4">
+                <div id="topics-list" class="topics-grid">
                     <div class="loading">
                         <div class="spinner"></div>
                     </div>
@@ -634,6 +942,81 @@
     </div>
 
     <script>
+        // Toast notification system
+        class ToastManager {
+            constructor() {
+                this.container = document.getElementById('toast-container');
+                this.toasts = new Set();
+            }
+            
+            show(title, message, type = 'info', duration = 5000) {
+                const toast = document.createElement('div');
+                toast.className = `toast toast-${type}`;
+                
+                const icons = {
+                    success: 'fa-check-circle',
+                    error: 'fa-exclamation-triangle',
+                    info: 'fa-info-circle'
+                };
+                
+                toast.innerHTML = `
+                    <div class="toast-icon">
+                        <i class="fas ${icons[type]}"></i>
+                    </div>
+                    <div class="toast-content">
+                        <div class="toast-title">${title}</div>
+                        <div class="toast-message">${message}</div>
+                    </div>
+                    <button class="toast-close" onclick="toastManager.close(this.parentElement)">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                
+                this.container.appendChild(toast);
+                this.toasts.add(toast);
+                
+                // Animate in
+                setTimeout(() => {
+                    toast.classList.add('show');
+                }, 10);
+                
+                // Auto close
+                setTimeout(() => {
+                    this.close(toast);
+                }, duration);
+                
+                return toast;
+            }
+            
+            close(toast) {
+                if (!this.toasts.has(toast)) return;
+                
+                toast.classList.remove('show');
+                toast.classList.add('hide');
+                
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.parentNode.removeChild(toast);
+                    }
+                    this.toasts.delete(toast);
+                }, 400);
+            }
+        }
+        
+        // Initialize toast manager
+        const toastManager = new ToastManager();
+        
+        // Helper function to show toast
+        function showToast(message, type = 'info', title = null) {
+            const titles = {
+                success: 'Success',
+                error: 'Error',
+                info: 'Information'
+            };
+            
+            return toastManager.show(title || titles[type], message, type);
+        }
+
         /* ======= CONFIG ======= */
         const API_BASE = '/api';
         const ENDPOINTS = {
@@ -802,10 +1185,10 @@
           }
         
           container.innerHTML = items.map(a => `
-            <div class="admin-card border border-blue-500">
-              <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center">
+            <div class="admin-card enhanced-border">
+              <div class="admin-card-content">
                 <div class="flex-1 mb-4 lg:mb-0">
-                  <h3 class="text-lg hyphens-auto break-all font-bold">${escapeHtml(a.title || '')}</h3>
+                  <h3 class="admin-title">${escapeHtml(a.title || '')}</h3>
                   <p class="text-gray-400 hyphens-auto break-all mt-1">${escapeHtml(a.content || '')}</p>
                 
                   ${a.file_name ? `
@@ -862,11 +1245,11 @@
               </div>` : '';
           
             return `
-              <div class="admin-card">
-                <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center">
+              <div class="admin-card enhanced-border">
+                <div class="admin-card-content">
                   <div class="flex-1 mb-4 lg:mb-0">
                     <div class="flex flex-col sm:flex-row sm:items-center">
-                      <h3 class="text-lg font-bold">${escapeHtml(assignment.title)}</h3>
+                      <h3 class="admin-title">${escapeHtml(assignment.title)}</h3>
                       <span class="bg-blue-500 text-white px-2 py-1 rounded-full text-xs mt-2 sm:mt-0 sm:ml-2">Due: ${due}</span>
                     </div>
                     <p class="text-gray-400 break-all hyphens-auto mt-1">${escapeHtml(assignment.description || '')}</p>
@@ -898,10 +1281,10 @@
           }
           
           container.innerHTML = items.map(t => `
-            <div class="admin-card border border-blue-500">
-              <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center">
+            <div class="admin-card enhanced-border">
+              <div class="admin-card-content">
                 <div class="flex-1 mb-4 lg:mb-0">
-                  <h3 class="text-lg font-bold">${escapeHtml(t.name)}</h3>
+                  <h3 class="admin-title">${escapeHtml(t.name)}</h3>
                   <p class="text-gray-400 break-all hyphens-auto mt-1">${escapeHtml(t.description || '')}</p>
                   <div class="text-sm text-gray-500 mt-2">Created: ${formatDateSafe(t.created_at)}</div>
                 </div>
@@ -946,7 +1329,7 @@
             const slots = grouped[day];
             if (!slots || slots.length === 0) return '';
             return `
-              <div class="admin-card">
+              <div class="admin-card enhanced-border">
                 <h3 class="text-xl font-bold mb-4 border-b border-gray-700 pb-2">${day}</h3>
                 ${slots.map(slot => `
                   <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center py-3 border-b border-blue-500 last:border-b-0">
@@ -1056,10 +1439,11 @@
           if (!confirm('Delete this announcement?')) return;
           try {
             await deleteData(`${ENDPOINTS.ANNOUNCEMENTS}/${id}`);
+            showToast('Announcement deleted successfully', 'success');
             loadAnnouncements();
           } catch (e) {
             console.error(e);
-            alert('Delete failed');
+            showToast('Failed to delete announcement', 'error');
           }
         }
 
@@ -1090,11 +1474,13 @@
                   method: 'PUT',
                   body: formData
                 });
+                showToast('Announcement updated successfully', 'success');
               } else {
                 await fetch(`${ENDPOINTS.ANNOUNCEMENTS}/create`, {
                   method: 'POST',
                   body: formData
                 });
+                showToast('Announcement created successfully', 'success');
               }
             
               currentEditingId = null;
@@ -1102,7 +1488,7 @@
               loadAnnouncements();
             } catch (err) {
               console.error(err);
-              alert('Error saving announcement');
+              showToast('Error saving announcement', 'error');
             } finally {
               if (submitBtn) {
                 submitBtn.textContent = originalText;
@@ -1140,9 +1526,10 @@
           if (!confirm('Delete this assignment?')) return;
           try {
             await deleteData(`${ENDPOINTS.ASSIGNMENTS}/${id}`);
+            showToast('Assignment deleted successfully', 'success');
             loadAssignments();
           } catch (e) {
-            alert('Delete failed');
+            showToast('Failed to delete assignment', 'error');
           }
         }
         const assignmentForm = document.getElementById('assignment-form');
@@ -1170,9 +1557,11 @@
               if (currentEditingId) {
                 await sendData(`${ENDPOINTS.ASSIGNMENTS}/${currentEditingId}`, data, 'PUT');
                 id = currentEditingId;
+                showToast('Assignment updated successfully', 'success');
               } else {
                 const res = await sendData(ENDPOINTS.ASSIGNMENTS, data, 'POST');
                 id = res?.id;
+                showToast('Assignment created successfully', 'success');
               }
               if (currentAssignmentFile && id) {
                 try { await uploadFile(ENDPOINTS.ASSIGNMENTS, currentAssignmentFile, id); } catch(e){ console.warn('file upload failed', e); }
@@ -1183,7 +1572,7 @@
               loadAssignments();
             } catch (err) {
               console.error(err);
-              alert('Error saving assignment');
+              showToast('Error saving assignment', 'error');
             } finally {
               if (submitBtn) {
                 submitBtn.textContent = originalText;
@@ -1210,10 +1599,11 @@
           if (!confirm('Delete this topic?')) return;
           try {
             await deleteData(`${ENDPOINTS.TOPICS}/${id}`);
+            showToast('Topic deleted successfully', 'success');
             loadTopics();
             loadTopicDropdowns();
           } catch (e) {
-            alert('Delete failed');
+            showToast('Failed to delete topic', 'error');
           }
         }
         const topicForm = document.getElementById('topic-form');
@@ -1230,8 +1620,10 @@
               };
               if (currentEditingId) {
                 await sendData(`${ENDPOINTS.TOPICS}/${currentEditingId}`, data, 'PUT');
+                showToast('Topic updated successfully', 'success');
               } else {
                 await sendData(ENDPOINTS.TOPICS, data, 'POST');
+                showToast('Topic created successfully', 'success');
               }
               currentEditingId = null;
               closeModal('topic-modal');
@@ -1239,7 +1631,7 @@
               loadTopicDropdowns();
             } catch (err) {
               console.error(err);
-              alert('Error saving topic');
+              showToast('Error saving topic', 'error');
             } finally {
               if (submitBtn) { submitBtn.textContent = originalText; submitBtn.disabled = false; }
             }
@@ -1280,9 +1672,10 @@
           if (!confirm('Delete this timetable slot?')) return;
           try {
             await deleteData(`${ENDPOINTS.TIMETABLE}/${id}`);
+            showToast('Timetable slot deleted successfully', 'success');
             loadTimetable();
           } catch (e) {
-            alert('Delete failed');
+            showToast('Failed to delete timetable slot', 'error');
           }
         }
         const timetableForm = document.getElementById('timetable-form');
@@ -1304,15 +1697,17 @@
               };
               if (currentEditingId) {
                 await sendData(`${ENDPOINTS.TIMETABLE}/${currentEditingId}`, data, 'PUT');
+                showToast('Timetable slot updated successfully', 'success');
               } else {
                 await sendData(ENDPOINTS.TIMETABLE, data, 'POST');
+                showToast('Timetable slot created successfully', 'success');
               }
               currentEditingId = null;
               closeModal('timetable-modal');
               loadTimetable();
             } catch (err) {
               console.error(err);
-              alert('Error saving timetable slot');
+              showToast('Error saving timetable slot', 'error');
             } finally {
               if (submitBtn) { submitBtn.textContent = originalText; submitBtn.disabled = false; }
             }
