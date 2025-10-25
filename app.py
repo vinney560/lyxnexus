@@ -4774,7 +4774,6 @@ def get_user_analytics(user_id):
         } for ua in user_activities],
         'favorite_section': favorite_section[0] if favorite_section else None
     })
-# ========================================= 
 #==========================================
 # Error Handlers
 #==========================================
