@@ -3,144 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sidebar</title>
-    <style>
-        :root {
-            --bg-color: #32326e;
-            --body-bg: white;
-        }
-        body {
-            width: 100vw;
-            height: 100vh;
-            align-items: center;
-            justify-content: center;
-            background: var(--body-bg);
-            font-family: fantasy;
-            font-size: 1.0rem;
-            overflow: scroll;
-        }
-        .container-main {
-            width: 80%;
-            height: 90%;
-            background-color: var(--bg-color);
-            color: azure;
-            border: 2px solid goldenrod;
-            border-radius: 24px;
-            margin: auto;
-            font-weight: 200px;
-            display: flex;
-            overflow: hidden;
-        } 
-        header {
-            align-items: left;
-            position: static;
-            top: 0;
-            width: 100%;
-            display: flex;
-            height: 70px;
-            background: linear-gradient(135deg, #4539a3, rgb(83, 236, 126));
-            padding: 10px;
-        }
-        .sidebar-btn {
-            width: 50px;
-            height: 50px;
-            border: 1px solid blue;
-            background: rgb(62, 161, 222);
-            border-radius: 50%;
-            align-items: center;
-            justify-content: center;
-            padding: 5px;
-            display: flex;
-        }
-        .sidebar-btn:hover {
-            transform: scaleX(0.95);
-            background: linear-gradient(135deg, rgb(95, 240, 95), rgb(4, 124, 146));
-            border: 3px solid rgb(105, 237, 79);
-        }
-        .sidebar-content {
-            display: flex;
-            flex-direction: column;
-            width: 220px;
-            height: 70%;
-            padding: 20px;
-            position: absolute;
-            left: 20%;
-            top: 10%;
-            border: 1px solid #2ff01e;
-            border-radius: 24px;
-            background: linear-gradient(135deg, #424269, #474791);
-            align-items: center;
-            justify-content: center;
-        }
-        #content {
-            display: none;
-        }
-        .close-model {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: var(--accent-color);
-            border: none;
-            color: white;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-        }
-
-        .close-model:hover {
-            background: #ef4444;
-            transform: rotate(90deg);
-        } 
-        .content-btn {
-            width: 95%;
-            height: fit-content;
-            border: none;
-            border-radius: 15px;
-            background: #474791;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 10px;
-            margin: 10px;
-        } 
-        .content-btn:hover {
-            border: 1px solid #2ff01e;
-            transform: scale3d(1.24);
-            color: aliceblue;
-            background: linear-gradient(135deg, rgb(53, 252, 53), rgb(80, 80, 243));
-        }  
-        .p-large {
-            font-size: 1.7rem;
-            color: lightgreen;
-        }
-    </style>
+    <title>TailwindCSS Local Test</title>
+    <!-- Local TailwindCSS file -->
+    <link href="{{ url_for('static', filename='css/tailwind.min.css') }}" rel="stylesheet">
 </head>
-<body>
-    <div class="container-main">
-        <header>
-            <button class="sidebar-btn" id="toggleSidebar">=</button>
-        </header>
-        <div class="sidebar-content" id="content">
-            <button class="close-model" id="closeSidebar">X</button>
-            <p class="p-large">Content Menu</p>
-            <button class="content-btn">hello</button>
-            <button class="content-btn">hello</button>
-            <button class="content-btn">hello</button>
-        </div>    
+<body class="bg-gray-100 text-gray-800 min-h-screen flex flex-col items-center justify-center">
+
+    <div class="bg-white shadow-lg rounded-2xl p-8 w-full max-w-md text-center">
+        <h1 class="text-3xl font-bold text-indigo-600 mb-4">
+            🎨 TailwindCSS Local Test
+        </h1>
+        <p class="text-gray-600 mb-6">
+            If you can see colors, spacing, and rounded corners — your local Tailwind file is working!
+        </p>
+        <button class="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition">
+            Test Button
+        </button>
     </div>
-    <script>
-        document.getElementById('toggleSidebar').addEventListener('click', () => {
-            const display = document.getElementById('content');
-            display.style.display = 'block';
-        });
-        document.getElementById('closeSidebar').addEventListener('click', () => {
-            document.getElementById('content').style.display = 'none';
-        });
-    </script>
+
+    <footer class="mt-8 text-sm text-gray-500">
+        Powered by <span class="font-semibold text-indigo-500">TailwindCSS Local</span>
+    </footer>
+
 </body>
 </html>
