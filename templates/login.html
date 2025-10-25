@@ -1046,7 +1046,7 @@
                 }
             
                 // Confirm mobile number --> Requested by Manuu
-                const confirmMobile = confirm(`Is this your mobile number? ${mobile}`);
+                const confirmMobile = confirm(`Is this your mobile number? ${mobile}. By continuing, you agree to our terms and conditions.`);
                 if (!confirmMobile) {
                     e.preventDefault();
                     return;

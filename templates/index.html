@@ -761,6 +761,7 @@
                 <a href="#assignments" class="nav-link">Assignments</a>
                 <a href="#topics" class="nav-link">Units</a>
                 <a href="#timetable" class="nav-link">Timetable</a>
+                <a href="/terms" class="nav-link">Terms</a>
             </div>
             <div class="flex space-x-3">
                 <button class="btn btn-sm pulse" onclick="window.location.href='/login'">
@@ -1002,15 +1003,26 @@
             <i class="fas fa-calendar"></i>
             <span>Timetable</span>
         </a>
+        <a href="/terms" class="mobile-nav-btn">
+            <i class="fas fa-file-contract"></i>
+            <span>Terms</span>
+        </a>
     </div>
 
     <script>
         new Typed('#description', {
-            strings: ['Your central hub for class announcements, assignments, timetables and course materials.', 'Your one-stop hub for announcements, assignments, schedules, and learning resources.', 'Stay organized with all your class updates, assignments, and materials in one place.', 'The central platform for course updates, study materials, timetables, and assignments.'],
-            typeSpeed: 20,
-            backSpeed: 60,
-            backDelay: 100,
-            loop: true
+            strings: [
+                'Your central hub for class announcements, assignments, timetables and course materials.',
+                'Your one-stop hub for announcements, assignments, schedules, and learning resources.',
+                'Stay organized with all your class updates, assignments, and materials in one place.',
+                'The central platform for course updates, study materials, timetables, and assignments.'
+            ],
+            typeSpeed: 20,        // typing speed
+            backSpeed: 60,        // backspacing speed
+            startDelay: 500,      // delay before typing starts
+            backDelay: 3000,      // pause before deleting (so users can read)
+            smartBackspace: true, // only backspace what’s necessary
+            loop: true            // keep looping
         });
         
         class ToastSystem {

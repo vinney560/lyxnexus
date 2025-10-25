@@ -1739,6 +1739,10 @@ def get_ai_chat_statistics():
 def home():
     return render_template('index.html', year=_year())
 #--------------------------------------------------------------------
+@app.route('/terms')
+def terms():
+    return render_template('terms.html', year=_year())
+#--------------------------------------------------------------------
 @app.route('/logout')
 @login_required
 def logout():
