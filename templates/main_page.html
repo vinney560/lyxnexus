@@ -33,6 +33,9 @@
         --text-color: #F9FAFB;
         --accent-color: #4A90E2;
         --secondary-color: #8B5CF6;
+        --success-color: #10B981;
+        --warning-color: #F59E0B;
+        --danger-color: #EF4444;
     }
     
     body {
@@ -48,6 +51,14 @@
         background-clip: text;
         -webkit-text-fill-color: transparent;
         color: transparent;
+        background-size: 200% 200%;
+        animation: gradient-shift 3s ease infinite;
+    }
+    
+    @keyframes gradient-shift {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
     }
     
     .glass-morph {
@@ -74,14 +85,29 @@
         transition: all 0.3s ease;
         box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
         cursor: pointer;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s;
+    }
+    
+    .btn:hover::before {
+        left: 100%;
     }
     
     .btn:hover {
         transform: translateY(-3px);
         box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
-        background: rgb(129, 129, 222);
         background: linear-gradient(135deg, #8ec5fc, #e0c3fc);
-
     }
     
     .btn-outline {
@@ -100,6 +126,13 @@
         border-radius: 20px;
         padding: 12px;
         display: inline-block;
+        animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
     }
     
     .nav-btn {
@@ -112,6 +145,19 @@
         transition: all 0.3s ease;
         cursor: pointer;
         margin: 0 5px;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .nav-btn::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+        transition: width 0.3s ease;
     }
     
     .nav-btn:hover, .nav-btn.active {
@@ -121,11 +167,27 @@
         box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
     }
     
+    .nav-btn.active::after {
+        width: 100%;
+    }
+    
     .content-section {
         display: none;
         opacity: 0;
         transform: translateY(20px);
         transition: opacity 0.5s ease, transform 0.5s ease;
+        animation: fadeInUp 0.5s ease forwards;
+    }
+    
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
     
     .content-section.active {
@@ -140,6 +202,29 @@
         padding: 20px;
         margin-bottom: 20px;
         border-left: 4px solid #3B82F6;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .announcement-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.1), transparent);
+        transition: left 0.5s;
+    }
+    
+    .announcement-card:hover::before {
+        left: 100%;
+    }
+    
+    .announcement-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
     }
     
     .assignment-card {
@@ -148,48 +233,78 @@
         padding: 20px;
         margin-bottom: 20px;
         border-left: 4px solid #8B5CF6;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
     }
+    
+    .assignment-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(139, 92, 246, 0.1), transparent);
+        transition: left 0.5s;
+    }
+    
+    .assignment-card:hover::before {
+        left: 100%;
+    }
+    
+    .assignment-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    }
+    
     .topic-card {
-      position: relative;
-      background: rgba(30, 30, 40, 0.7);
-      border-radius: 15px;
-      padding: 20px;
-      margin-bottom: 20px;
-      text-align: center;
-      color: white;
-      z-index: 1;
-      overflow: hidden;
+        position: relative;
+        background: rgba(30, 30, 40, 0.7);
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 20px;
+        text-align: center;
+        color: white;
+        z-index: 1;
+        overflow: hidden;
+        transition: all 0.3s ease;
     }
 
     .topic-card::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      border-radius: 15px;
-      padding: 2px;
-      background: linear-gradient(90deg, 
-        #3b82f6, #06b6d4, #22c55e, #eab308, #ef4444, #3b82f6);
-      background-size: 400% 400%;
-      animation: lightning-border 3s linear infinite;
-      -webkit-mask:
-        linear-gradient(#fff 0 0) content-box, 
-        linear-gradient(#fff 0 0);
-      -webkit-mask-composite: xor;
-      mask-composite: exclude;
-      pointer-events: none;
-      z-index: -1;
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: 15px;
+        padding: 2px;
+        background: linear-gradient(90deg, 
+            #3b82f6, #06b6d4, #22c55e, #eab308, #ef4444, #3b82f6);
+        background-size: 400% 400%;
+        animation: lightning-border 3s linear infinite;
+        -webkit-mask:
+            linear-gradient(#fff 0 0) content-box, 
+            linear-gradient(#fff 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+        pointer-events: none;
+        z-index: -1;
+    }
+
+    .topic-card:hover {
+        transform: translateY(-5px) scale(1.02);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
     }
 
     @keyframes lightning-border {
-      0% {
-        background-position: 0% 50%;
-      }
-      50% {
-        background-position: 100% 50%;
-      }
-      100% {
-        background-position: 0% 50%;
-      }
+        0% {
+            background-position: 0% 50%;
+        }
+        50% {
+            background-position: 100% 50%;
+        }
+        100% {
+            background-position: 0% 50%;
+        }
     }    
     
     .timetable-day {
@@ -198,6 +313,12 @@
         border: 1px solid #3b82f6; 
         padding: 20px;
         margin-bottom: 20px;
+        transition: all 0.3s ease;
+    }
+    
+    .timetable-day:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
     }
     
     .timetable-slot {
@@ -205,6 +326,14 @@
         justify-content: space-between;
         padding: 10px 0;
         border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        transition: all 0.3s ease;
+    }
+    
+    .timetable-slot:hover {
+        background: rgba(59, 130, 246, 0.1);
+        border-radius: 8px;
+        padding-left: 10px;
+        padding-right: 10px;
     }
     
     .timetable-slot:last-child {
@@ -217,6 +346,12 @@
         padding: 20px;
         text-align: center;
         border-left: 4px solid #10B981;
+        transition: all 0.3s ease;
+    }
+    
+    .user-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
     }
     
     .feature-icon {
@@ -230,6 +365,12 @@
         margin: 0 auto 15px;
         color: #3B82F6;
         font-size: 24px;
+        transition: all 0.3s ease;
+    }
+    
+    .feature-icon:hover {
+        transform: rotate(15deg) scale(1.1);
+        background: rgba(59, 130, 246, 0.2);
     }
     
     .loading {
@@ -256,6 +397,7 @@
     .mobile-menu {
         display: none;
     }
+    
     @media (max-width: 768px) {
         header {
             display: none;
@@ -284,7 +426,6 @@
             z-index: 100;
             gap: 6px;
             scrollbar-width: none; 
-            /*margin-top: 10px;*/
         }
 
         .mobile-nav::-webkit-scrollbar {
@@ -301,6 +442,7 @@
             color: #9CA3AF;
             font-size: 12px;
             transition: all 0.3s ease;
+            position: relative;
         }
 
         .mobile-nav-btn.active {
@@ -308,9 +450,26 @@
             background: rgba(59, 130, 246, 0.1);
         }
 
+        .mobile-nav-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 3px;
+            background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+            border-radius: 2px;
+        }
+
         .mobile-nav-btn i {
             font-size: 14px;
             margin-bottom: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .mobile-nav-btn:hover i {
+            transform: scale(1.2);
         }
     }
     
@@ -374,6 +533,7 @@
             margin-right: 4px;
         }
     }
+    
     .announcement-skeleton {
         background: var(--card-bg);
         border-radius: 16px;
@@ -545,12 +705,100 @@
             padding: 14px 16px;
         }
     }
+
+    .section-header {
+        position: relative;
+        padding-bottom: 10px;
+        margin-bottom: 20px;
+    }
+
+    .section-header::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 60px;
+        height: 3px;
+        background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+        border-radius: 2px;
+    }
+
+    .floating-element {
+        animation: float 6s ease-in-out infinite;
+    }
+
+    @keyframes float {
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+        100% { transform: translateY(0px); }
+    }
+
+    .count-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+        color: white;
+        border-radius: 20px;
+        padding: 4px 12px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        margin-left: 10px;
+        animation: pulse 2s infinite;
+    }
+
+    .status-indicator {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        margin-right: 8px;
+        animation: pulse 2s infinite;
+    }
+
+    .online { background-color: #10B981; }
+    .offline { background-color: #EF4444; }
+    .idle { background-color: #F59E0B; }
+
+    .card-hover-lift {
+        transition: all 0.3s ease;
+    }
+
+    .card-hover-lift:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    }
+
+    .text-shimmer {
+        background: linear-gradient(90deg, #3B82F6, #8B5CF6, #3B82F6);
+        background-size: 200% 100%;
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        animation: shimmer 3s infinite linear;
+    }
+
+    @keyframes shimmer {
+        0% { background-position: -200% 0; }
+        100% { background-position: 200% 0; }
+    }
+
+    .scroll-fade-in {
+        opacity: 0;
+        transform: translateY(30px);
+        transition: all 0.6s ease;
+    }
+
+    .scroll-fade-in.visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
 </style>
 <body>
     <!-- Toast Container -->
     <div class="toast-container" id="toastContainer"></div>
 
-    <header class="glass-morph sticky top-0 z-50">
+    <header class="glass-morph sticky top-0 z-50 floating-element">
         <div class="max-w-7xl mx-auto px-2 py-2">
             <div class="flex flex-col md:flex-row justify-between items-center">
                 <div class="flex items-center space-x-3 mb-4 md:mb-0">
@@ -571,7 +819,7 @@
                 </div>
                 
                 <!-- User Info -->
-                <div id="user-info" class="user-card mb-4 md:mb-0 md:max-w-xs">
+                <div id="user-info" class="user-card mb-4 md:mb-0 md:max-w-xs card-hover-lift">
                     <div class="loading">
                         <div class="spinner"></div>
                     </div>
@@ -617,8 +865,8 @@
           <img id="image-preview-img" src="" alt="Preview" class="max-h-[90%] max-w-[90%] rounded-lg shadow-lg">
         </div>
 
-        <section id="announcements" class="content-section active">
-            <div class="flex justify-between items-center mb-6">
+        <section id="announcements" class="content-section active scroll-fade-in">
+            <div class="flex justify-between items-center mb-6 section-header">
                 <h2 id="announceH" class="text-2xl md:text-3xl font-bold gradient-text"></h2>
                 <span class="text-gray-400 text-sm" id="announcements-count">Loading...</span>
             </div>
@@ -644,8 +892,8 @@
         </section>
 
         <!-- Assignments Section -->
-        <section id="assignments" class="content-section">
-            <div class="flex justify-between items-center mb-6">
+        <section id="assignments" class="content-section scroll-fade-in">
+            <div class="flex justify-between items-center mb-6 section-header">
                 <h2 class="text-2xl md:text-3xl font-bold gradient-text">Your Assignments</h2>
                 <span class="text-gray-400 text-sm" id="assignments-count">Loading...</span>
             </div>
@@ -657,9 +905,9 @@
         </section>
 
         <!-- Topics Section -->
-        <section id="topics" class="content-section">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl md:text-3xl font-bold gradient-text">Course Topics</h2>
+        <section id="topics" class="content-section scroll-fade-in">
+            <div class="flex justify-between items-center mb-6 section-header">
+                <h2 class="text-2xl md:text-3xl font-bold gradient-text">Course Units</h2>
                 <span class="text-gray-400 text-sm" id="topics-count">Loading...</span>
             </div>
             <div id="topics-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -670,9 +918,9 @@
         </section>
 
         <!-- Timetable Section -->
-        <section id="timetable" class="content-section">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl md:text-3xl font-bold gradient-text">Class Timetable</h2>
+        <section id="timetable" class="content-section scroll-fade-in">
+            <div class="flex justify-between items-center mb-6 section-header">
+                <h2 class="text-2xl md:text-3xl font-bold gradient-text">Class Schedule</h2>
                 <span class="text-gray-400 text-sm">Current Week</span>
             </div>
             <div id="timetable-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -683,16 +931,16 @@
         </section>
 
         <!-- Profile Section -->
-        <section id="profile" class="content-section">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl md:text-3xl font-bold gradient-text">Your Profile</h2>
+        <section id="profile" class="content-section scroll-fade-in">
+            <div class="flex justify-between items-center mb-6 section-header">
+                <h2 class="text-2xl md:text-3xl font-bold gradient-text">Student Profile</h2>
                 <button onclick="window.location.href='/profile'" class="btn btn-outline text-sm">
                     <i class="fas fa-edit mr-2"></i>Edit Profile
                 </button>
             </div>
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div class="lg:col-span-1">
-                    <div class="user-card">
+                    <div class="user-card card-hover-lift">
                         <div class="feature-icon">
                             <i class="fas fa-user"></i>
                         </div>
@@ -710,8 +958,8 @@
                 </div>
                 
                 <div class="lg:col-span-2">
-                    <div class="glass-morph p-6 rounded-2xl">
-                        <h3 class="text-xl font-bold mb-4">Account Details</h3>
+                    <div class="glass-morph p-6 rounded-2xl card-hover-lift">
+                        <h3 class="text-xl font-bold mb-4 text-shimmer">Account Details</h3>
                         <div class="space-y-4">
                             <div class="flex justify-between py-3 border-b border-gray-700">
                                 <span class="text-gray-400">Username:</span>
@@ -732,22 +980,22 @@
                         </div>
                     </div>
                     
-                    <div class="glass-morph p-6 rounded-2xl mt-6 mb-10">
-                        <h3 class="text-xl font-bold mb-4">Quick Stats</h3>
+                    <div class="glass-morph p-6 rounded-2xl mt-6 mb-10 card-hover-lift">
+                        <h3 class="text-xl font-bold mb-4 text-shimmer">Academic Stats</h3>
                         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            <div class="text-center p-4 bg-blue-500 bg-opacity-10 rounded-xl">
+                            <div class="text-center p-4 bg-blue-500 bg-opacity-10 rounded-xl card-hover-lift">
                                 <div class="text-2xl font-bold text-blue-400" id="stat-assignments">0</div>
                                 <div class="text-sm text-gray-400">Assignments</div>
                             </div>
-                            <div class="text-center p-4 bg-purple-500 bg-opacity-10 rounded-xl">
+                            <div class="text-center p-4 bg-purple-500 bg-opacity-10 rounded-xl card-hover-lift">
                                 <div class="text-2xl font-bold text-purple-400" id="stat-announcements">0</div>
                                 <div class="text-sm text-gray-400">Announcements</div>
                             </div>
-                            <div class="text-center p-4 bg-green-500 bg-opacity-10 rounded-xl">
+                            <div class="text-center p-4 bg-green-500 bg-opacity-10 rounded-xl card-hover-lift">
                                 <div class="text-2xl font-bold text-green-400" id="stat-topics">0</div>
                                 <div class="text-sm text-gray-400">Units</div>
                             </div>
-                            <div class="text-center p-4 bg-yellow-500 bg-opacity-10 rounded-xl">
+                            <div class="text-center p-4 bg-yellow-500 bg-opacity-10 rounded-xl card-hover-lift">
                                 <div class="text-2xl font-bold text-yellow-400" id="stat-classes">0</div>
                                 <div class="text-sm text-gray-400">Classes This Week</div>
                             </div>
@@ -775,7 +1023,7 @@
             </button>
             <button class="mobile-nav-btn" data-section="timetable">
                 <i class="fas fa-calendar-alt"></i>
-                <span>Timetable</span>
+                <span>Schedule</span>
             </button>
             <button class="mobile-nav-btn" data-section="profile">
                 <i class="fas fa-user"></i>
@@ -1046,6 +1294,27 @@
             });
         }
 
+        // Scroll animation observer
+        function setupScrollAnimations() {
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, observerOptions);
+
+            // Observe all scroll-fade-in elements
+            document.querySelectorAll('.scroll-fade-in').forEach(el => {
+                observer.observe(el);
+            });
+        }
+
         // Load user data
         async function loadUserData() {
             const userData = await fetchData(ENDPOINTS.USER);
@@ -1162,7 +1431,7 @@
                 let filePreview = "";
                 if (announcement.has_file && announcement.file_type?.startsWith("image/")) {
                   filePreview = `
-                    <div class="mb-3 w-24 h-24 rounded-lg overflow-hidden bg-gray-700 flex items-center justify-center cursor-pointer"
+                    <div class="mb-3 w-24 h-24 rounded-lg overflow-hidden bg-gray-700 flex items-center justify-center cursor-pointer card-hover-lift"
                          onclick="openImagePreview('${announcement.file_url}')">
                       <img src="${announcement.file_url}" alt="${announcement.file_name}" class="object-cover w-full h-full">
                     </div>
@@ -1170,7 +1439,7 @@
                 } else if (announcement.has_file) {
                   filePreview = `
                     <div class="mb-3">
-                        <a style="color:#60a5fa; text-decoration: underline; font-size:0.875rem;" href="${announcement.file_url}" target="_blank">
+                        <a style="color:#60a5fa; text-decoration: underline; font-size:0.875rem;" href="${announcement.file_url}" target="_blank" class="card-hover-lift">
                           📎 ${announcement.file_name} ↗
                         </a> 
                     </div>
@@ -1178,7 +1447,7 @@
                 }
             
                 return `
-                  <div class="announcement-card ${neonBorderClass} bg-gray-900/60 rounded-2xl transition duration-200 ease-in-out overflow-hidden mb-6 relative">
+                  <div class="announcement-card ${neonBorderClass} bg-gray-900/60 rounded-2xl transition duration-200 ease-in-out overflow-hidden mb-6 relative card-hover-lift">
                 
                     <!-- Pin button -->
                     <button 
@@ -1254,7 +1523,7 @@
                   if (!data.title && !data.image) return;
                 
                   previewEl.innerHTML = `
-                    <a href="${url}" target="_blank" class="flex items-center gap-3 p-3 sm:p-4 bg-gray-800/70 hover:bg-gray-800/90 transition duration-200 ease-in-out">
+                    <a href="${url}" target="_blank" class="flex items-center gap-3 p-3 sm:p-4 bg-gray-800/70 hover:bg-gray-800/90 transition duration-200 ease-in-out card-hover-lift">
                         ${
                           data.image
                             ? `<div class="flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden bg-gray-700 flex items-center justify-center">
@@ -1352,7 +1621,7 @@
                     statusText = 'Due Soon';
                 }
                 return `
-                <div class="assignment-card border-l-4 border-blue-500 bg-gray-800/50 p-4 sm:p-5 rounded-xl shadow-md hover:shadow-lg transition duration-200 ease-in-out">
+                <div class="assignment-card border-l-4 border-blue-500 bg-gray-800/50 p-4 sm:p-5 rounded-xl shadow-md hover:shadow-lg transition duration-200 ease-in-out card-hover-lift">
                     <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-3 gap-2">
                         <h3 class="text-xl sm:text-2xl font-extrabold text-white underline underline-offset-4 decoration-blue-500 leading-snug break-words">
                             ${assignment.title}
@@ -1398,7 +1667,7 @@
             document.getElementById('topics-count').textContent = `${topics.length} topics`;
             
             container.innerHTML = topics.map(topic => `
-                <div class="topic-card">
+                <div class="topic-card card-hover-lift">
                     <div class="feature-icon">
                         <i class="fas fa-book"></i>
                     </div>
@@ -1423,7 +1692,7 @@
             }
             
             container.innerHTML = timetable.map(daySchedule => `
-                <div class="timetable-day">
+                <div class="timetable-day card-hover-lift">
                     <h3 class="text-xl font-bold mb-4 border-b border-gray-700 pb-2">${daySchedule.day}</h3>
                     ${daySchedule.slots.map(slot => `
                         <div class="timetable-slot">
@@ -1485,6 +1754,7 @@
 
         document.addEventListener('DOMContentLoaded', function() {
             setupNavigation(); 
+            setupScrollAnimations();
 
             checkForFlaskMessages();
 
