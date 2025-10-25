@@ -1139,6 +1139,104 @@
         let isInitialLoad = true;
         let scrollPositions = {};
 
+        // Analytics Tracking System
+        class AnalyticsTracker {
+            constructor() {
+                this.sessionId = this.generateSessionId();
+                this.pageLoadTime = Date.now();
+                this.currentSection = 'announcements';
+                this.trackedSections = new Set();
+            }
+        
+            generateSessionId() {
+                return 'session_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now().toString(36);
+            }
+        
+            async trackVisit(section = 'announcements') {
+                try {
+                    await fetch('/api/track-visit', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            user_id: window.currentUserId,
+                            page: 'main_page',
+                            section: section,
+                            session_id: this.sessionId,
+                            timestamp: new Date().toISOString()
+                        })
+                    });
+                } catch (error) {
+                    console.log('Visit tracking failed');
+                }
+            }
+        
+            async trackActivity(action, target, duration = null) {
+                try {
+                    await fetch('/api/track-activity', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            user_id: window.currentUserId,
+                            action: action,
+                            target: target,
+                            duration: duration,
+                            timestamp: new Date().toISOString()
+                        })
+                    });
+                } catch (error) {
+                    console.log('Activity tracking failed');
+                }
+            }
+        
+            trackSectionView(section) {
+                if (!this.trackedSections.has(section)) {
+                    this.trackActivity('section_view', section);
+                    this.trackedSections.add(section);
+                }
+                this.currentSection = section;
+            }
+        
+            trackPageExit() {
+                const timeSpent = Math.round((Date.now() - this.pageLoadTime) / 1000);
+                this.trackActivity('page_exit', 'main_page', timeSpent);
+            }
+        
+            initialize() {
+                // Track initial visit
+                this.trackVisit(this.currentSection);
+                this.trackActivity('page_view', 'main_page');
+            
+                // Track section changes
+                const originalSetupNavigation = window.setupNavigation;
+                window.setupNavigation = () => {
+                    originalSetupNavigation();
+                    
+                    const navButtons = document.querySelectorAll('.nav-btn, .mobile-nav-btn');
+                    navButtons.forEach(button => {
+                        button.addEventListener('click', () => {
+                            const section = button.getAttribute('data-section');
+                            this.trackSectionView(section);
+                        });
+                    });
+                };
+            
+                // Track page exit
+                window.addEventListener('beforeunload', () => {
+                    this.trackPageExit();
+                });
+            
+                // Track file downloads
+                document.addEventListener('click', (e) => {
+                    if (e.target.closest('a[href*="/files"]') || e.target.closest('a[download]')) {
+                        this.trackActivity('file_download', e.target.href || 'unknown_file');
+                    }
+                });
+            }
+        }
+        
+        // Initialize analytics
+        const analytics = new AnalyticsTracker();        
+
         // Modern Toast System
         class ToastSystem {
             constructor() {
@@ -1952,6 +2050,7 @@
 
         document.addEventListener('DOMContentLoaded', function() {
             // Only run main page scripts if we're on the main page
+            analytics.initialize();
             const isMainPage = document.querySelector('.content-container') !== null;
             
             if (isMainPage) {

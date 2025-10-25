@@ -325,6 +325,28 @@ class AIConversation(db.Model):
     
     # Relationships
     user = db.relationship('User', backref=db.backref('ai_conversations', lazy=True))
+#==========================================
+class Visit(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    page = db.Column(db.String(100), default='main_page')
+    section = db.Column(db.String(50))  # Which section was active
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    session_id = db.Column(db.String(100))
+    user_agent = db.Column(db.Text)
+    
+    user = db.relationship('User', backref=db.backref('visits', lazy=True))
+
+class UserActivity(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    action = db.Column(db.String(50))  # 'page_view', 'section_click', etc.
+    target = db.Column(db.String(100))  # 'announcements', 'assignments', etc.
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    duration = db.Column(db.Integer)  # Time spent in seconds
+    
+    user = db.relationship('User', backref=db.backref('activities', lazy=True))
+
 #==========================================    
 with app.app_context():
     try:
@@ -378,6 +400,14 @@ def ignore_bad_fd(record):
 
 logging.getLogger().addFilter(ignore_bad_fd)
 
+# Function to clean old data
+def cleanup_old_visits():
+    """Delete visits older than 24 hours"""
+    cutoff_time = datetime.utcnow() - timedelta(hours=24)
+    old_visits = Visit.query.filter(Visit.timestamp < cutoff_time).delete()
+    old_activities = UserActivity.query.filter(UserActivity.timestamp < cutoff_time).delete()
+    db.session.commit()
+    return old_visits, old_activities
 
 def _year():
     return datetime.now().strftime('%Y')
@@ -4610,7 +4640,140 @@ def get_available_files():
         
     except Exception as e:
         return jsonify({'error': str(e)}), 500
- 
+#==========================================
+from sqlalchemy import func, extract
+
+@app.route('/admin/analytics')
+def analytics_dashboard():
+    return render_template('analytics.html')
+
+@app.route('/api/track-visit', methods=['POST'])
+def track_visit():
+    try:
+        data = request.get_json()
+        
+        visit = Visit(
+            user_id=data.get('user_id'),
+            page=data.get('page', 'main_page'),
+            section=data.get('section'),
+            session_id=data.get('session_id'),
+            user_agent=request.headers.get('User-Agent'),
+            timestamp=datetime.utcnow()
+        )
+        db.session.add(visit)
+        db.session.commit()
+        
+        # Cleanup old data periodically (every 10th visit)
+        if visit.id % 10 == 0:
+            from your_app.models import cleanup_old_visits
+            cleanup_old_visits()
+        
+        return jsonify({'status': 'success', 'visit_id': visit.id})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+@app.route('/api/track-activity', methods=['POST'])
+def track_activity():
+    try:
+        data = request.get_json()
+        
+        activity = UserActivity(
+            user_id=data.get('user_id'),
+            action=data.get('action'),
+            target=data.get('target'),
+            duration=data.get('duration'),
+            timestamp=datetime.utcnow()
+        )
+        db.session.add(activity)
+        db.session.commit()
+        
+        return jsonify({'status': 'success'})
+    except Exception as e:
+        return jsonify({'status': 'error'}), 500
+
+@app.route('/api/analytics/visits')
+@admin_required
+def get_visit_analytics():
+    # Last 24 hours data
+    cutoff_time = datetime.utcnow() - timedelta(hours=24)
+    
+    # Total visits
+    total_visits = Visit.query.filter(Visit.timestamp >= cutoff_time).count()
+    
+    # Unique visitors
+    unique_visitors = db.session.query(Visit.user_id).filter(
+        Visit.timestamp >= cutoff_time
+    ).distinct().count()
+    
+    # Visits per hour
+    visits_per_hour = db.session.query(
+        extract('hour', Visit.timestamp).label('hour'),
+        func.count(Visit.id).label('count')
+    ).filter(Visit.timestamp >= cutoff_time).group_by('hour').all()
+    
+    # Section popularity
+    section_stats = db.session.query(
+        Visit.section,
+        func.count(Visit.id).label('count')
+    ).filter(Visit.timestamp >= cutoff_time).group_by(Visit.section).all()
+    
+    # User activity timeline
+    user_activity = db.session.query(
+        UserActivity.action,
+        UserActivity.target,
+        UserActivity.timestamp,
+        User.user.username
+    ).join(User).filter(
+        UserActivity.timestamp >= cutoff_time
+    ).order_by(UserActivity.timestamp.desc()).limit(50).all()
+    
+    return jsonify({
+        'total_visits': total_visits,
+        'unique_visitors': unique_visitors,
+        'visits_per_hour': [{'hour': v.hour, 'count': v.count} for v in visits_per_hour],
+        'section_stats': [{'section': s.section, 'count': s.count} for s in section_stats],
+        'recent_activity': [{
+            'action': ua.action,
+            'target': ua.target,
+            'timestamp': ua.timestamp.isoformat(),
+            'username': ua.username
+        } for ua in user_activity]
+    })
+
+@app.route('/api/analytics/user/<int:user_id>')
+@admin_required
+def get_user_analytics(user_id):
+    cutoff_time = datetime.utcnow() - timedelta(hours=24)
+    
+    user_visits = Visit.query.filter(
+        Visit.user_id == user_id,
+        Visit.timestamp >= cutoff_time
+    ).count()
+    
+    user_activities = UserActivity.query.filter(
+        UserActivity.user_id == user_id,
+        UserActivity.timestamp >= cutoff_time
+    ).order_by(UserActivity.timestamp.desc()).all()
+    
+    favorite_section = db.session.query(
+        Visit.section,
+        func.count(Visit.id).label('count')
+    ).filter(
+        Visit.user_id == user_id,
+        Visit.timestamp >= cutoff_time
+    ).group_by(Visit.section).order_by(func.count(Visit.id).desc()).first()
+    
+    return jsonify({
+        'visit_count': user_visits,
+        'activities': [{
+            'action': ua.action,
+            'target': ua.target,
+            'timestamp': ua.timestamp.isoformat(),
+            'duration': ua.duration
+        } for ua in user_activities],
+        'favorite_section': favorite_section[0] if favorite_section else None
+    })
+# ========================================= 
 #==========================================
 # Error Handlers
 #==========================================
