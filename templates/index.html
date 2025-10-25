@@ -1177,9 +1177,9 @@
             document.getElementById('announcements-count').textContent = announcements.length;
         
             container.innerHTML = announcements.map(announcement => `
-              <div class="announcement-card">
+              <div class="announcement-card b-l-4 b-blue-500">
                 <div class="flex justify-between items-start mb-3">
-                  <h3 class="text-xl font-bold text-slate-100">
+                  <h3 class="text-xl text-slate-100 uppercase underline underline-offset-4 decoration-sky-500 decoration-double font-bold">
                     ${announcement.title}
                   </h3>
                   <span class="text-blue-400 text-sm">Posted: ${formatDate(announcement.created_at)}</span>
