@@ -483,6 +483,8 @@ Never assume that each query is related to prior history; treat unrelated querie
 Never reveal that you have web access or database access; just use them as needed.
 Never repeat the same information multiple times in your response nor use the same history context.
 As an AI, you do not have long-term memory beyond the current session; rely on the provided history only to simulate short-term memory.
+Follow user instructions precisely and completely but be aware of potential biases and limitations in the data.
+If the user asks for platform navigation help, provide clear, step-by-step instructions. Do not provide instructions if not asked for or user context is unclear.
 
 --- Guide and Navigation Assistant for LyxNexus Platform ---
 - Provide clear instructions and guidance on using the platform's features.
@@ -515,29 +517,29 @@ ASSISTANT RESPONSE (Read-only mode):"""
             db_context += f"- Announcements: {stats.get('total_announcements', 'N/A')}\n"
             db_context += f"- Assignments: {stats.get('total_assignments', 'N/A')}\n"
             db_context += f"- Topics: {stats.get('total_topics', 'N/A')}\n\n"
-            # Recent announcements (titles + file info)
+
+            # Recent announcements (title + content + file info)
             db_context += "- Recent Announcements:\n"
             for a in stats.get('recent_announcements', []):
-                db_context += f"  * {a.get('title', 'No Title')} | Has file: {a.get('has_file', False)}\n"
+                db_context += f"  * {a.get('title', 'No Title')} | Content: {a.get('content', 'No Content')} | Has file: {a.get('has_file', False)}\n"
             db_context += "\n"
-            
-            # Recent assignments (title, topic, due date, file info)
+
+            # Recent assignments (title + description + topic + due date + file info)
             db_context += "- Recent Assignments:\n"
             for assn in stats.get('recent_assignments', []):
-                db_context += f"  * {assn.get('title', 'No Title')} | Topic: {assn.get('topic', 'N/A')} | Due: {assn.get('due_date', 'N/A')} | Has file: {assn.get('has_file', False)}\n"
+                db_context += f"  * {assn.get('title', 'No Title')} | Description: {assn.get('description', 'No Description')} | Topic: {assn.get('topic', 'N/A')} | Due: {assn.get('due_date', 'N/A')} | Has file: {assn.get('has_file', False)}\n"
             db_context += "\n"
-            
-            # Topics (name + assignment count)
+
+            # Topics (name + description + assignment count)
             db_context += "- Topics:\n"
             for t in stats.get('topics', []):
-                db_context += f"  * {t.get('name', 'No Name')} | Assignments: {t.get('assignments_count', 0)}\n"
+                db_context += f"  * {t.get('name', 'No Name')} | Description: {t.get('description', 'No Description')} | Assignments: {t.get('assignments_count', 0)}\n"
             db_context += "\n"
-            
+
             # Timetable entries (day, times, subject, teacher, topic)
             db_context += "- Timetable:\n"
             for tt in stats.get('timetable', []):
                 db_context += f"  * {tt.get('day_of_week', 'N/A')} | {tt.get('start_time', 'N/A')} - {tt.get('end_time', 'N/A')} | {tt.get('subject', 'N/A')} | Teacher: {tt.get('teacher', 'N/A')} | Topic: {tt.get('topic', 'N/A')}\n"
-            
             
             enhanced_prompt = db_context + basic_prompt
         else:
