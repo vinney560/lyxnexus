@@ -1,0 +1,539 @@
+<!-- edit_profile.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Profile | LyxNexus</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<style>
+    :root {
+        --bg-color: #111827;
+        --text-color: #F9FAFB;
+        --accent-color: #4A90E2;
+        --secondary-color: #8B5CF6;
+    }
+    
+    body {
+        font-family: 'Poppins', sans-serif;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+    }
+    
+    .gradient-text {
+        background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        color: transparent;
+    }
+    
+    .glass-morph {
+        background: rgba(30, 30, 40, 0.6);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        box-shadow: 0 8px 32px rgba(0, 31, 135, 0.2);
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .glass-morph:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 40px rgba(0, 31, 135, 0.3);
+    }
+    
+    .btn {
+        background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 50px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .btn::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        transform: translate(-50%, -50%);
+        transition: width 0.3s, height 0.3s;
+    }
+    
+    .btn:active::after {
+        width: 300px;
+        height: 300px;
+    }
+    
+    .btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+    }
+    
+    .btn-success {
+        background: linear-gradient(90deg, #10B981, #059669);
+        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+    }
+    
+    .btn-success:hover {
+        box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+    }
+    
+    .btn-secondary {
+        background: linear-gradient(90deg, #6B7280, #4B5563);
+        box-shadow: 0 4px 15px rgba(107, 114, 128, 0.3);
+    }
+    
+    .btn-secondary:hover {
+        box-shadow: 0 6px 20px rgba(107, 114, 128, 0.4);
+    }
+    
+    .logo-container {
+        background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+        border-radius: 20px;
+        padding: 15px;
+        display: inline-block;
+        margin-bottom: 20px;
+    }
+    
+    .profile-card {
+        background: rgba(30, 30, 40, 0.7);
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    
+    .form-input {
+        background: rgba(30, 30, 40, 0.8);
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        border-radius: 10px;
+        padding: 12px 15px;
+        color: white;
+        width: 100%;
+        margin-bottom: 15px;
+        transition: all 0.3s ease;
+    }
+    
+    .form-input:focus {
+        outline: none;
+        border-color: #3B82F6;
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+    }
+    
+    .form-input.error {
+        border-color: #EF4444;
+        box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2);
+    }
+    
+    .error-message {
+        color: #EF4444;
+        font-size: 0.875rem;
+        margin-top: -10px;
+        margin-bottom: 15px;
+        display: none;
+    }
+    
+    .info-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .info-item:last-child {
+        border-bottom: none;
+    }
+    
+    .info-label {
+        color: #9CA3AF;
+        font-weight: 500;
+    }
+    
+    .info-value {
+        color: #F9FAFB;
+        font-weight: 400;
+    }
+    
+    .success-message {
+        background: rgba(16, 185, 129, 0.2);
+        border: 1px solid rgba(16, 185, 129, 0.5);
+        color: #10B981;
+        padding: 12px 15px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        display: none;
+    }
+    
+    @media (max-width: 768px) {
+        .btn {
+            padding: 10px 20px;
+            font-size: 14px;
+        }
+        
+        .profile-card {
+            padding: 15px;
+        }
+    }
+</style>
+<body>
+    <!-- Navigation -->
+    <nav class="glass-morph sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-4">
+            <div class="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
+                <div class="flex items-center space-x-2">
+                    <div class="logo-container">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                            <polyline points="7.5 4.21 12 6.81 16.5 4.21"></polyline>
+                            <polyline points="7.5 19.79 7.5 14.6 3 12"></polyline>
+                            <polyline points="21 12 16.5 14.6 16.5 19.79"></polyline>
+                            <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                            <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                        </svg>
+                    </div>
+                    <span class="text-xl sm:text-2xl font-bold gradient-text">LyxNexus</span>
+                </div>
+                <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4 w-full sm:w-auto">
+                    <button class="btn btn-secondary text-sm sm:text-base" id="backBtn">
+                        <i class="fas fa-arrow-left mr-2"></i> Back to Dashboard
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-4xl mx-auto px-4 py-8">
+        <div class="mb-8">
+            <h1 class="text-2xl sm:text-3xl font-bold gradient-text mb-2">Edit Profile</h1>
+            <p class="text-gray-400">Update your personal information</p>
+        </div>
+
+        <div class="glass-morph rounded-xl p-4 sm:p-6">
+            <!-- Success Message -->
+            <div id="success-message" class="success-message">
+                <i class="fas fa-check-circle mr-2"></i>
+                <span id="success-text">Profile updated successfully!</span>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Profile Information (Read-only) -->
+                <div>
+                    <h2 class="text-xl font-bold mb-4">Profile Information</h2>
+                    <div class="profile-card">
+                        <div class="info-item">
+                            <span class="info-label">User ID:</span>
+                            <span class="info-value" id="user-id">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Account Created:</span>
+                            <span class="info-value" id="created-at">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Role:</span>
+                            <span class="info-value" id="user-role">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Announcements Created:</span>
+                            <span class="info-value" id="announcements-count">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Assignments Created:</span>
+                            <span class="info-value" id="assignments-count">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Editable Information -->
+                <div>
+                    <h2 class="text-xl font-bold mb-4">Edit Information</h2>
+                    <form id="profile-form">
+                        <div class="profile-card">
+                            <div class="mb-4">
+                                <label for="username" class="block text-gray-300 mb-2">Username</label>
+                                <input 
+                                    type="text" 
+                                    id="username" 
+                                    class="form-input" 
+                                    placeholder="Enter your username"
+                                    maxlength="200"
+                                    required
+                                >
+                                <div id="username-error" class="error-message">
+                                    Please enter a valid username
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="mobile" class="block text-gray-300 mb-2">Mobile Number</label>
+                                <input 
+                                    type="tel" 
+                                    id="mobile" 
+                                    class="form-input" 
+                                    placeholder="07XXXXXXXX or 01XXXXXXXX"
+                                    pattern="(07|01)[0-9]{8}"
+                                    maxlength="10"
+                                    required
+                                >
+                                <div id="mobile-error" class="error-message">
+                                    Mobile number must be 10 digits and start with 07 or 01
+                                </div>
+                                <p class="text-sm text-gray-400 mt-1">
+                                    Format: 10 digits starting with 07 or 01
+                                </p>
+                            </div>
+
+                            <div class="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3 mt-6">
+                                <button type="button" class="btn btn-secondary w-full sm:w-auto" id="cancelEdit">
+                                    <i class="fas fa-times mr-2"></i><span>Cancel</span>
+                                </button>
+                                <button type="submit" class="btn btn-success w-full sm:w-auto" id="submit-btn">
+                                    <i class="fas fa-save mr-2"></i> Save Changes
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // API endpoints
+        const API_BASE = '/api';
+        const PROFILE_ENDPOINT = `${API_BASE}/user/profile`;
+
+        // DOM elements
+        const profileForm = document.getElementById('profile-form');
+        const usernameInput = document.getElementById('username');
+        const mobileInput = document.getElementById('mobile');
+        const usernameError = document.getElementById('username-error');
+        const mobileError = document.getElementById('mobile-error');
+        const successMessage = document.getElementById('success-message');
+        const submitBtn = document.getElementById('submit-btn');
+        const backBtn = document.getElementById('backBtn');
+        const cancelEdit = document.getElementById('cancelEdit');
+
+        // Back button handler
+        const isAdmin = {{ 'true' if current_user.is_admin else 'false' }};
+
+        backBtn.addEventListener('click', function() {
+            backBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i><span>Loading...</span>';
+            const redirectUrl = isAdmin ? '/admin' : '/main-page';
+            window.location.href = redirectUrl;
+            backBtn.disabled = true; // prevent double clicks
+
+            setTimeout(() => {
+                backBtn.innerHTML = '<i class="fas fa-arrow-left mr-2"></i><span>Back to Dashboard</span>';
+                backBtn.disabled = false;
+            }, 2000); // simulate loading delay
+        });
+
+        // Cancel button handler
+        cancelEdit.addEventListener('click', function() {
+            cancelEdit.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i><span>...</span>';
+            window.location.href = '/main-page';
+            cancelEdit.disabled = true; // optional: prevent double clicks
+
+            setTimeout(() => {
+                cancelEdit.innerHTML = '<i class="fas fa-times mr-2"></i><span>Cancel</span>';
+                cancelEdit.disabled = false;
+            }, 1000); // simulate loading delay
+        });
+                
+        // Format date for display
+        function formatDate(dateString) {
+            const options = { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            };
+            return new Date(dateString).toLocaleDateString(undefined, options);
+        }
+
+        // Validate mobile number
+        function validateMobile(mobile) {
+            const mobileRegex = /^(07|01)[0-9]{8}$/;
+            return mobileRegex.test(mobile);
+        }
+
+        // Validate username
+        function validateUsername(username) {
+            return username && username.trim().length > 0 && username.length <= 200;
+        }
+
+        // Show error message
+        function showError(inputElement, errorElement, message) {
+            inputElement.classList.add('error');
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+        }
+
+        // Hide error message
+        function hideError(inputElement, errorElement) {
+            inputElement.classList.remove('error');
+            errorElement.style.display = 'none';
+        }
+
+        // Show success message
+        function showSuccess(message) {
+            document.getElementById('success-text').textContent = message;
+            successMessage.style.display = 'block';
+            
+            // Hide success message after 5 seconds
+            setTimeout(() => {
+                successMessage.style.display = 'none';
+            }, 5000);
+        }
+
+        // Fetch user profile data
+        async function fetchUserProfile() {
+            try {
+                const response = await fetch(PROFILE_ENDPOINT);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return await response.json();
+            } catch (error) {
+                console.error('Error fetching user profile:', error);
+                throw error;
+            }
+        }
+
+        // Update user profile
+        async function updateUserProfile(data) {
+            try {
+                const response = await fetch(PROFILE_ENDPOINT, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+                }
+                
+                return await response.json();
+            } catch (error) {
+                console.error('Error updating user profile:', error);
+                throw error;
+            }
+        }
+
+        // Load user profile data
+        async function loadUserProfile() {
+            try {
+                const userData = await fetchUserProfile();
+                
+                // Populate editable fields
+                usernameInput.value = userData.username || '';
+                mobileInput.value = userData.mobile || '';
+                
+                // Populate read-only fields
+                document.getElementById('user-id').textContent = userData.id;
+                document.getElementById('created-at').textContent = formatDate(userData.created_at);
+                document.getElementById('user-role').textContent = userData.is_admin ? 'Administrator' : 'User';
+                document.getElementById('announcements-count').textContent = userData.announcements_count || 0;
+                document.getElementById('assignments-count').textContent = userData.assignments_count || 0;
+                
+            } catch (error) {
+                alert('Error loading profile data. Please try again.');
+                console.error('Error loading profile:', error);
+            }
+        }
+
+        // Form validation
+        function validateForm() {
+            let isValid = true;
+            
+            // Validate username
+            if (!validateUsername(usernameInput.value)) {
+                showError(usernameInput, usernameError, 'Please enter a valid username (1-100 characters)');
+                isValid = false;
+            } else {
+                hideError(usernameInput, usernameError);
+            }
+            
+            // Validate mobile
+            if (!validateMobile(mobileInput.value)) {
+                showError(mobileInput, mobileError, 'Mobile number must be 10 digits and start with 07 or 01');
+                isValid = false;
+            } else {
+                hideError(mobileInput, mobileError);
+            }
+            
+            return isValid;
+        }
+
+        // Form submission handler
+        profileForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Validate form
+            if (!validateForm()) {
+                return;
+            }
+            
+            // Show loading state
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Saving...';
+            submitBtn.disabled = true;
+            
+            try {
+                const formData = {
+                    username: usernameInput.value.trim(),
+                    mobile: mobileInput.value
+                };
+                
+                await updateUserProfile(formData);
+                
+                // Show success message
+                showSuccess('Profile updated successfully!');
+                
+                // Reload profile data to ensure consistency
+                await loadUserProfile();
+                
+            } catch (error) {
+                alert('Error updating profile: ' + error.message);
+            } finally {
+                // Reset button state
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
+        });
+
+        // Real-time validation
+        usernameInput.addEventListener('input', function() {
+            if (validateUsername(this.value)) {
+                hideError(usernameInput, usernameError);
+            }
+        });
+        
+        mobileInput.addEventListener('input', function() {
+            if (validateMobile(this.value)) {
+                hideError(mobileInput, mobileError);
+            }
+        });
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            loadUserProfile();
+        });
+    </script>
+</body>
+</html>

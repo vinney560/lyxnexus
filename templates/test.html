@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Draggable Robot Button</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #robot-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #0f404d 0%, #0072ff 100%);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: grab;
+            box-shadow: 0 10px 25px rgba(0, 114, 255, 0.5);
+            transition: transform 0.3s, box-shadow 0.3s;
+            z-index: 1000;
+            user-select: none;
+            border: 3px solid rgba(255, 255, 255, 0.2);
+        }
+
+        #robot-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 15px 30px rgba(0, 114, 255, 0.7);
+        }
+
+        #robot-button:active {
+            cursor: grabbing;
+            transform: scale(0.95);
+        }
+
+        #robot-button i {
+            font-size: 32px;
+            color: white;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        .pulse {
+            animation: pulse 0.5s ease-out;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(0, 198, 255, 0.7);
+            }
+            50% {
+                transform: scale(1.2);
+                box-shadow: 0 0 0 15px rgba(0, 198, 255, 0);
+            }
+            100% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(0, 198, 255, 0);
+            }
+        }
+
+        .instructions {
+            position: absolute;
+            top: 20px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            color: white;
+            font-size: 18px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <div class="instructions">Drag the robot button and click to animate!</div>
+    <div id="robot-button">
+        <i class="fas fa-robot"></i>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const button = document.getElementById('robot-button');
+            let isDragging = false;
+            let currentX;
+            let currentY;
+            let initialX;
+            let initialY;
+            let xOffset = 0;
+            let yOffset = 0;
+
+            // Set initial position
+            button.style.left = (window.innerWidth - button.offsetWidth - 20) + 'px';
+            button.style.top = (window.innerHeight - button.offsetHeight - 20) + 'px';
+
+            button.addEventListener('mousedown', dragStart);
+            button.addEventListener('touchstart', dragStart);
+            document.addEventListener('mousemove', drag);
+            document.addEventListener('touchmove', drag);
+            document.addEventListener('mouseup', dragEnd);
+            document.addEventListener('touchend', dragEnd);
+            button.addEventListener('click', handleClick);
+
+            function dragStart(e) {
+                if (e.type === 'touchstart') {
+                    initialX = e.touches[0].clientX - xOffset;
+                    initialY = e.touches[0].clientY - yOffset;
+                } else {
+                    initialX = e.clientX - xOffset;
+                    initialY = e.clientY - yOffset;
+                }
+
+                if (e.target === button || e.target.parentNode === button) {
+                    isDragging = true;
+                    button.style.cursor = 'grabbing';
+                }
+            }
+
+            function drag(e) {
+                if (isDragging) {
+                    e.preventDefault();
+                    
+                    if (e.type === 'touchmove') {
+                        currentX = e.touches[0].clientX - initialX;
+                        currentY = e.touches[0].clientY - initialY;
+                    } else {
+                        currentX = e.clientX - initialX;
+                        currentY = e.clientY - initialY;
+                    }
+
+                    xOffset = currentX;
+                    yOffset = currentY;
+
+                    setTranslate(currentX, currentY, button);
+                }
+            }
+
+            function setTranslate(xPos, yPos, el) {
+                el.style.transform = `translate3d(${xPos}px, ${yPos}px, 0)`;
+            }
+
+            function dragEnd() {
+                initialX = currentX;
+                initialY = currentY;
+                isDragging = false;
+                button.style.cursor = 'grab';
+            }
+
+            function handleClick(e) {
+                // Only trigger if not dragging (to prevent click after drag)
+                if (!isDragging) {
+                    // Add animation class
+                    button.classList.add('pulse');
+                    
+                    // Remove animation class after animation completes
+                    setTimeout(() => {
+                        button.classList.remove('pulse');
+                    }, 500);
+                    
+                    // Navigate to /gemini after animation
+                    setTimeout(() => {
+                        window.location.href = '/gemini';
+                    }, 600);
+                }
+            }
+
+            // Make button responsive to window resize
+            window.addEventListener('resize', function() {
+                // Keep the button in view if window is resized
+                const rect = button.getBoundingClientRect();
+                
+                if (rect.right > window.innerWidth) {
+                    button.style.left = (window.innerWidth - button.offsetWidth - 20) + 'px';
+                }
+                
+                if (rect.bottom > window.innerHeight) {
+                    button.style.top = (window.innerHeight - button.offsetHeight - 20) + 'px';
+                }
+                
+                if (rect.left < 0) {
+                    button.style.left = '20px';
+                }
+                
+                if (rect.top < 0) {
+                    button.style.top = '20px';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

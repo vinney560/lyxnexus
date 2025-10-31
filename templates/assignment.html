@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if assignment %}{{ assignment.title }} - File{% else %}Assignment Not Found{% endif %} | LyxNexus</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <meta name="keywords" content="education, coding, programming, web development, technology, online courses, learn to code" />
+    <meta name="author" content="Vincent Kipngetich" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://lyxnexus.onrender.com/" />
+    <link rel="icon" href="https://lyxnexus.onrender.com/uploads/favicon-1.png"/>
+
+    <meta property="og:title" content="LyxNexus - Education Platform" />
+    <meta property="og:description" content="LyxNexus is a simple yet powerful class hub designed to keep everything in one place — from announcements and assignments to topics and class discussions." />
+    <meta property="og:image" content="https://lyxnexus.onrender.com/favicon.ico" />
+    <meta property="og:url" content="https://lyxnexus.onrender.com/" />
+
+    <meta name="twitter:card" content="summary" />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
+
+    <script src="{{ url_for('static', filename='js/n-s.js') }}"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<style>
+    :root {
+        --bg-color: #111827;
+        --text-color: #F9FAFB;
+        --accent-color: #4A90E2;
+        --secondary-color: #8B5CF6;
+    }
+    
+    body {
+        font-family: 'Poppins', sans-serif;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        overflow-x: hidden;
+    }
+    
+    .gradient-text {
+        background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        color: transparent;
+    }
+    
+    .glass-morph {
+        background: rgba(30, 30, 40, 0.6);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        box-shadow: 0 8px 32px rgba(0, 31, 135, 0.2);
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        transition: all 0.3s ease;
+    }
+    
+    .glass-morph:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 40px rgba(0, 31, 135, 0.3);
+    }
+    
+    .btn {
+        background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+        color: white;
+        border: none;
+        padding: 10px 24px;
+        border-radius: 10px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+        cursor: pointer;
+    }
+    
+    .btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+    }
+    
+    .btn-outline {
+        background: transparent;
+        border: 2px solid #3B82F6;
+        border-radius: 25px;
+        padding: 8px 14px;
+        color: #3B82F6;
+    }
+    
+    .btn-outline:hover {
+        background: #3B82F6;
+        color: white;
+    }
+    
+    .logo-container {
+        background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+        border-radius: 20px;
+        padding: 12px;
+        display: inline-block;
+    }
+    
+    .assignment-detail-card {
+        background: rgba(30, 30, 40, 0.7);
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 20px;
+        border-left: 4px solid #8B5CF6;
+    }
+    
+    .file-preview-container {
+        background: rgba(30, 30, 40, 0.7);
+        border-radius: 15px;
+        padding: 20px;
+        text-align: center;
+        min-height: 300px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    .file-icon {
+        font-size: 64px;
+        color: #3B82F6;
+        margin-bottom: 20px;
+    }
+    
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .info-row:last-child {
+        border-bottom: none;
+    }
+    
+    .info-label {
+        color: #9CA3AF;
+        font-weight: 500;
+    }
+    
+    .info-value {
+        font-weight: 600;
+        text-align: right;
+    }
+    
+    .status-badge {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 50px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+    
+    .status-overdue {
+        background-color: rgba(239, 68, 68, 0.2);
+        color: #EF4444;
+    }
+    
+    .status-due-soon {
+        background-color: rgba(245, 158, 11, 0.2);
+        color: #F59E0B;
+    }
+    
+    .status-upcoming {
+        background-color: rgba(59, 130, 246, 0.2);
+        color: #3B82F6;
+    }
+    
+    .status-completed {
+        background-color: rgba(16, 185, 129, 0.2);
+        color: #10B981;
+    }
+    
+    @media (max-width: 768px) {
+        .file-icon {
+            font-size: 48px;
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            font-size: 14px;
+        }
+    }
+</style>
+<body>
+    <header class="glass-morph sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-4">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-3">
+                    <div class="logo-container">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                            <polyline points="7.5 4.21 12 6.81 16.5 4.21"></polyline>
+                            <polyline points="7.5 19.79 7.5 14.6 3 12"></polyline>
+                            <polyline points="21 12 16.5 14.6 16.5 19.79"></polyline>
+                            <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                            <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold gradient-text">LyxNexus</h1>
+                        <p class="text-sm text-gray-400">Assignment Details</p>
+                    </div>
+                </div>
+                
+                <button onclick="window.history.back()" class="btn-outline">
+                    <i class="fas fa-arrow-left mr-2"></i>Back
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 py-6">
+        {% if assignment %}
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="assignment-detail-card">
+                <div class="flex justify-between items-start mb-4 ">
+                    <h2 class="text-2xl font-bold">{{ assignment.title }}</h2>
+                    <span class="status-badge 
+                        {% if assignment.is_overdue %}status-overdue
+                        {% elif assignment.is_due_soon %}status-due-soon
+                        {% else %}status-upcoming
+                        {% endif %}">
+                        {% if assignment.is_overdue %}Overdue
+                        {% elif assignment.is_due_soon %}Due Soon
+                        {% else %}Upcoming
+                        {% endif %}
+                    </span>
+                </div>
+                
+                <p class="mb-6 text-gray-300">{{ assignment.description or 'No description provided.' }}</p>
+                
+                <div class="space-y-3">
+                    <div class="info-row">
+                        <span class="info-label">Due Date:</span>
+                        <span class="info-value">
+                            {% if assignment.due_date %}
+                                {{ assignment.due_date.strftime('%B %d, %Y at %I:%M %p') }}
+                            {% else %}
+                                No due date
+                            {% endif %}
+                        </span>
+                    </div>
+                    
+                    <div class="info-row">
+                        <span class="info-label">Topic:</span>
+                        <span class="info-value">
+                            {% if assignment.topic %}
+                                {{ assignment.topic.name }}
+                            {% else %}
+                                General
+                            {% endif %}
+                        </span>
+                    </div>
+                    
+                    <div class="info-row">
+                        <span class="info-label">Created By:</span>
+                        <span class="info-value">
+                            {% if assignment.creator %}
+                                {{ assignment.creator.username }}
+                            {% else %}
+                                Unknown
+                            {% endif %}
+                        </span>
+                    </div>
+                    
+                    <div class="info-row">
+                        <span class="info-label">Created On:</span>
+                        <span class="info-value">{{ assignment.created_at.strftime('%B %d, %Y') }}</span>
+                    </div>
+                    
+                    {% if assignment.file_name %}
+                    <div class="info-row">
+                        <span class="info-label">File Type:</span>
+                        <span class="info-value">{{ assignment.file_type or 'Unknown' }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- File Preview & Download -->
+            <div class="file-preview-container">
+                {% if assignment.file_name and assignment.file_data %}
+                    <i class="file-icon fas 
+                        {% if assignment.file_type == 'application/pdf' %}fa-file-pdf
+                        {% elif 'word' in assignment.file_type %}fa-file-word
+                        {% elif 'excel' in assignment.file_type %}fa-file-excel
+                        {% elif 'powerpoint' in assignment.file_type %}fa-file-powerpoint
+                        {% elif 'image' in assignment.file_type %}fa-file-image
+                        {% elif 'video' in assignment.file_type %}fa-file-video
+                        {% elif 'audio' in assignment.file_type %}fa-file-audio
+                        {% elif 'zip' in assignment.file_type %}fa-file-archive
+                        {% else %}fa-file-alt
+                        {% endif %}">
+                    </i>
+                    <h3 class="text-xl font-bold mb-2">{{ assignment.file_name }}</h3>
+                    <p class="text-gray-400 mb-6">File is ready for download</p>
+                    <a href="{{ url_for('download_assignment_file', id=assignment.id) }}" class="btn">
+                        <i class="fas fa-download mr-2"></i>Download File
+                    </a>
+                {% else %}
+                    <i class="file-icon fas fa-file-exclamation"></i>
+                    <h3 class="text-xl font-bold mb-2">No File Available</h3>
+                    <p class="text-gray-400 mb-6">This assignment doesn't have an attached file yet.</p>
+                    <button class="btn-outline" disabled>
+                        <i class="fas fa-download mr-2"></i>No File to Download
+                    </button>
+                {% endif %}
+            </div>
+        </div>
+        {% else %}
+        <div class="glass-morph p-8 rounded-2xl text-center">
+            <i class="fas fa-exclamation-triangle text-yellow-500 text-5xl mb-4"></i>
+            <h2 class="text-2xl font-bold mb-2">Assignment Not Found</h2>
+            <p class="text-gray-400 mb-6">The requested assignment could not be found.</p>
+            <button id="backBtn" class="btn">
+                <i class="fas fa-arrow-left mr-2"></i>Back to Assignments
+            </button>
+        </div>
+        {% endif %}
+    </main>
+    <script>
+        const backBtn = document.addEventListener('click', () => {
+            backBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            window.location.href = '/main-page';
+            setTimeout(() => {
+                backBtn.innerHTML = '<i class="fas fa-arrow-left mr-2"></i>Back to Assignments';
+            }, 2000);
+        });
+    </script>
+</body>
+</html>

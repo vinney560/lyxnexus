@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Too Many Requests | LyxNexus</title>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --secondary: #a5b4fc;
+            --background: #0f172a;
+            --card-bg: #1e293b;
+            --text-light: #e2e8f0;
+            --text-dim: #94a3b8;
+            --error: #ef4444;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: var(--background);
+            color: var(--text-light);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            text-align: center;
+        }
+
+        .error-container {
+            background: var(--card-bg);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 20px;
+            padding: 50px 40px;
+            max-width: 420px;
+            width: 90%;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+            animation: fadeIn 0.8s ease;
+        }
+
+        .error-code {
+            font-size: 4rem;
+            font-weight: 800;
+            color: var(--error);
+            margin-bottom: 10px;
+            animation: pulse 1.8s infinite;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: var(--secondary);
+        }
+
+        p {
+            font-size: 1rem;
+            color: var(--text-dim);
+            margin-bottom: 30px;
+        }
+
+        a.button {
+            display: inline-block;
+            background: var(--primary);
+            color: white;
+            padding: 12px 26px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+            transition: all 0.2s ease;
+        }
+
+        a.button:hover {
+            background: var(--secondary);
+            color: #0f172a;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.05); }
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <div class="error-code">429</div>
+        <h2>Too Many Requests</h2>
+        <p>{{ message or "You’ve made too many requests. Please wait a moment and try again." }}</p>
+        <a href="{{ url_for('main_page') }}" class="button">Back to Home</a>
+    </div>
+</body>
+</html>

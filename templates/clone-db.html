@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clone Database | LyxNexus Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
+    <script src="{{ url_for('static', filename='js/n-s.js') }}"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<style>
+    :root {
+        --bg-color: #111827;
+        --text-color: #F9FAFB;
+        --accent-color: #4A90E2;
+        --secondary-color: #8B5CF6;
+        --success-color: #10B981;
+        --warning-color: #F59E0B;
+        --error-color: #EF4444;
+    }
+    
+    body {
+        font-family: 'Poppins', sans-serif;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        min-height: 100vh;
+        overflow-x: hidden;
+    }
+    
+    .gradient-text {
+        background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        color: transparent;
+    }
+    
+    .glass-morph {
+        background: rgba(30, 30, 40, 0.6);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        box-shadow: 0 8px 32px rgba(0, 31, 135, 0.2);
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        transition: all 0.3s ease;
+    }
+    
+    .glass-morph:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 40px rgba(0, 31, 135, 0.3);
+    }
+    
+    .btn {
+        background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 50px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .btn::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        transform: translate(-50%, -50%);
+        transition: width 0.3s, height 0.3s;
+    }
+    
+    .btn:active::after {
+        width: 300px;
+        height: 300px;
+    }
+    
+    .btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+    }
+    
+    .btn-danger {
+        background: linear-gradient(90deg, #EF4444, #DC2626);
+        box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+    }
+    
+    .btn-danger:hover {
+        box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+    }
+    
+    .btn-success {
+        background: linear-gradient(90deg, #10B981, #059669);
+        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+    }
+    
+    .btn-success:hover {
+        box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+    }
+    
+    .btn-outline {
+        background: transparent;
+        border: 2px solid #3B82F6;
+        border-radius: 25px;
+        padding: 8px 20px;
+        color: #3B82F6;
+    }
+    
+    .btn-outline:hover {
+        background: #3B82F6;
+        color: white;
+    }
+    
+    .logo-container {
+        background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+        border-radius: 20px;
+        padding: 15px;
+        display: inline-block;
+        margin-bottom: 10px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .logo-container:hover {
+        transform: scale(1.05);
+        box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+    }
+    
+    .form-input {
+        background: rgba(30, 30, 40, 0.8);
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        border-radius: 10px;
+        padding: 12px 15px;
+        color: white;
+        width: 100%;
+        margin-bottom: 15px;
+        transition: all 0.3s ease;
+    }
+    
+    .form-input:focus {
+        outline: none;
+        border-color: #3B82F6;
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+        color: #D1D5DB;
+    }
+    
+    .floating {
+        animation: floating 3s ease-in-out infinite;
+    }
+    
+    @keyframes floating {
+        0% { transform: translate(0, 0px); }
+        50% { transform: translate(0, 15px); }
+        100% { transform: translate(0, -0px); }
+    }
+    
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+        animation: fadeIn 0.3s ease;
+    }
+    
+    .modal-content {
+        background: var(--bg-color);
+        border-radius: 15px;
+        padding: 30px;
+        width: 90%;
+        max-width: 500px;
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        animation: slideUp 0.3s ease;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    
+    @keyframes slideUp {
+        from { 
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to { 
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .toast-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        max-width: 400px;
+    }
+    
+    .toast {
+        background: rgba(30, 30, 40, 0.95);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        border-radius: 12px;
+        padding: 16px 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        transform: translateX(400px);
+        opacity: 0;
+        transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        max-width: 400px;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .toast::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 100%;
+        width: 4px;
+    }
+    
+    .toast.show {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    
+    .toast.hide {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+    
+    .toast-success {
+        border-color: rgba(16, 185, 129, 0.4);
+    }
+    
+    .toast-success::before {
+        background: var(--success-color);
+    }
+    
+    .toast-error {
+        border-color: rgba(239, 68, 68, 0.4);
+    }
+    
+    .toast-error::before {
+        background: var(--error-color);
+    }
+    
+    .toast-warning {
+        border-color: rgba(245, 158, 11, 0.4);
+    }
+    
+    .toast-warning::before {
+        background: var(--warning-color);
+    }
+    
+    .toast-info {
+        border-color: rgba(59, 130, 246, 0.4);
+    }
+    
+    .toast-info::before {
+        background: var(--accent-color);
+    }
+    
+    .toast-icon {
+        font-size: 20px;
+        flex-shrink: 0;
+    }
+    
+    .toast-success .toast-icon {
+        color: var(--success-color);
+    }
+    
+    .toast-error .toast-icon {
+        color: var(--error-color);
+    }
+    
+    .toast-warning .toast-icon {
+        color: var(--warning-color);
+    }
+    
+    .toast-info .toast-icon {
+        color: var(--accent-color);
+    }
+    
+    .toast-content {
+        flex: 1;
+    }
+    
+    .toast-title {
+        font-weight: 600;
+        margin-bottom: 4px;
+        font-size: 14px;
+    }
+    
+    .toast-message {
+        font-size: 13px;
+        color: #D1D5DB;
+        line-height: 1.4;
+    }
+    
+    .toast-close {
+        background: none;
+        border: none;
+        color: #9CA3AF;
+        cursor: pointer;
+        font-size: 16px;
+        padding: 4px;
+        border-radius: 4px;
+        transition: all 0.2s ease;
+        flex-shrink: 0;
+    }
+    
+    .toast-close:hover {
+        color: white;
+        background: rgba(255, 255, 255, 0.1);
+    }
+    
+    .toast-progress {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        height: 3px;
+        background: rgba(255, 255, 255, 0.3);
+        width: 100%;
+        border-radius: 0 0 12px 12px;
+        overflow: hidden;
+    }
+    
+    .toast-progress-bar {
+        height: 100%;
+        border-radius: 0 0 12px 12px;
+        transition: width 0.1s linear;
+    }
+    
+    .toast-success .toast-progress-bar {
+        background: var(--success-color);
+    }
+    
+    .toast-error .toast-progress-bar {
+        background: var(--error-color);
+    }
+    
+    .toast-warning .toast-progress-bar {
+        background: var(--warning-color);
+    }
+    
+    .toast-info .toast-progress-bar {
+        background: var(--accent-color);
+    }
+    
+    .nav-header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        padding: 20px;
+        z-index: 100;
+        background: rgba(17, 24, 39, 0.8);
+        backdrop-filter: blur(10px);
+    }
+    
+    .nav-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+    
+    .nav-logo {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        padding: 8px 16px;
+        border-radius: 12px;
+    }
+    
+    .nav-logo:hover {
+        background: rgba(59, 130, 246, 0.1);
+    }
+    
+    .nav-logo-text {
+        font-size: 24px;
+        font-weight: 700;
+        background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        color: transparent;
+    }
+    
+    .nav-links {
+        display: flex;
+        gap: 20px;
+    }
+    
+    .nav-link {
+        color: #9CA3AF;
+        text-decoration: none;
+        font-weight: 500;
+        padding: 8px 16px;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+    
+    .nav-link:hover {
+        color: white;
+        background: rgba(59, 130, 246, 0.1);
+    }
+    
+    .nav-link.active {
+        color: #3B82F6;
+        background: rgba(59, 130, 246, 0.1);
+    }
+    
+    .status-indicator {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 14px;
+        font-weight: 500;
+    }
+    
+    .status-success {
+        background: rgba(16, 185, 129, 0.1);
+        color: #10B981;
+        border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    
+    .status-warning {
+        background: rgba(245, 158, 11, 0.1);
+        color: #F59E0B;
+        border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+    
+    .status-error {
+        background: rgba(239, 68, 68, 0.1);
+        color: #EF4444;
+        border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+    
+    .loading-spinner {
+        border: 3px solid rgba(59, 130, 246, 0.3);
+        border-top: 3px solid #3B82F6;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: 20px auto;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    @media (max-width: 768px) {
+        .toast-container {
+            right: 10px;
+            left: 10px;
+            max-width: none;
+        }
+        
+        .toast {
+            max-width: none;
+        }
+        
+        .nav-header {
+            padding: 15px;
+        }
+        
+        .nav-logo-text {
+            font-size: 20px;
+        }
+        
+        .nav-links {
+            gap: 10px;
+        }
+        
+        .nav-link {
+            padding: 6px 12px;
+            font-size: 14px;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .modal-content {
+            margin: 20px;
+            padding: 20px;
+            width: calc(100% - 40px);
+        }
+    }
+</style>
+<body>
+    <header class="nav-header">
+        <div class="nav-content">
+            <div class="nav-logo" onclick="goToHome()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                    <polyline points="7.5 4.21 12 6.81 16.5 4.21"></polyline>
+                    <polyline points="7.5 19.79 7.5 14.6 3 12"></polyline>
+                    <polyline points="21 12 16.5 14.6 16.5 19.79"></polyline>
+                    <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                    <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                </svg>
+                <span class="nav-logo-text">LyxNexus</span>
+            </div>
+            <div class="nav-links">
+                <a href="{{ url_for('admin_page') }}" class="nav-link">
+                    <i class="fas fa-tachometer-alt mr-2"></i>Dashboard
+                </a>
+                <a href="{{ url_for('clone_db_page') }}" class="nav-link active">
+                    <i class="fas fa-database mr-2"></i>Clone DB
+                </a>
+                <a href="{{ url_for('logout') }}" class="nav-link">
+                    <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <div class="toast-container" id="toast-container"></div>
+
+    <div class="container mx-auto px-4 pt-32 pb-8">
+        <div class="max-w-4xl mx-auto">
+            <div class="text-center mb-8">
+                <div class="logo-container floating mx-auto">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                        <polyline points="7.5 4.21 12 6.81 16.5 4.21"></polyline>
+                        <polyline points="7.5 19.79 7.5 14.6 3 12"></polyline>
+                        <polyline points="21 12 16.5 14.6 16.5 19.79"></polyline>
+                        <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                        <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                    </svg>
+                </div>
+                <h1 class="text-3xl font-bold gradient-text mt-4">Database Cloning</h1>
+                <p class="text-gray-400 mt-2">Clone the database with a single click</p>
+            </div>
+
+            <!-- Warning Card -->
+            <div class="glass-morph rounded-2xl p-6 mb-6 border-l-4 border-yellow-500">
+                <div class="flex items-start">
+                    <i class="fas fa-exclamation-triangle text-yellow-500 text-xl mt-1 mr-4"></i>
+                    <div>
+                        <h3 class="text-lg font-semibold text-white mb-2">Important Notice</h3>
+                        <p class="text-gray-300 mb-3">
+                            This operation will clone the entire database. This process may take several minutes 
+                            depending on the database size and should only be performed during maintenance windows.
+                            This process happens automatically after every 25 days!
+                        </p>
+                        <div class="status-indicator status-warning">
+                            <i class="fas fa-clock"></i>
+                            <span>Estimated time: 2-5 minutes</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-morph rounded-2xl p-8">
+                <div class="text-center">
+                    <i class="fas fa-database text-6xl text-blue-400 mb-4"></i>
+                    <h2 class="text-2xl font-bold text-white mb-4">Clone Database</h2>
+                    <p class="text-gray-400 mb-6">
+                        Click the button below to start the database cloning process. 
+                        You will receive a notification when the process is complete.
+                    </p>
+
+                    <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                        <button id="clone-db-btn" class="btn btn-success px-8 py-3">
+                            <i class="fas fa-copy mr-2"></i> Clone Database Now
+                        </button>
+                        <button id="switch-db-btn" class="btn btn-success px-8 py-3">
+                            <i class="fas fa-copy mr-2"></i> Switch Database
+                        </button>
+                        <a href="{{ url_for('admin_page') }}" class="btn-outline px-8 py-3">
+                            <i class="fas fa-arrow-left mr-2"></i> Back to Dashboard
+                        </a>
+                    </div>
+
+                    <div id="progress-section" class="mt-8 hidden">
+                        <div class="loading-spinner"></div>
+                        <p class="text-gray-400 mt-4">Cloning database... Please wait</p>
+                        <div class="mt-4 status-indicator status-warning">
+                            <i class="fas fa-info-circle"></i>
+                            <span>Do not close this page during the process</span>
+                        </div>
+                    </div>
+
+                    <div id="result-section" class="mt-8 hidden">
+                        <div class="p-4 rounded-lg bg-green-500 bg-opacity-10 border border-green-500">
+                            <div class="flex items-center">
+                                <i class="fas fa-check-circle text-green-500 text-xl mr-3"></i>
+                                <div>
+                                    <h4 class="font-semibold text-green-400">Database Cloned Logging</h4>
+                                    <p class="text-green-300 text-sm mt-1" id="result-message"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Information Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+                <div class="glass-morph rounded-2xl p-6">
+                    <h3 class="text-lg font-semibold text-white mb-4 flex items-center">
+                        <i class="fas fa-info-circle text-blue-400 mr-2"></i>
+                        What happens during cloning?
+                    </h3>
+                    <ul class="text-gray-300 space-y-2">
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-400 mt-1 mr-2"></i>
+                            Database backup creation
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-400 mt-1 mr-2"></i>
+                            Schema duplication
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-400 mt-1 mr-2"></i>
+                            Data migration
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-400 mt-1 mr-2"></i>
+                            Integrity verification
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Best practices card -->
+                <div class="glass-morph rounded-2xl p-6">
+                    <h3 class="text-lg font-semibold text-white mb-4 flex items-center">
+                        <i class="fas fa-shield-alt text-purple-400 mr-2"></i>
+                        Best Practices
+                    </h3>
+                    <ul class="text-gray-300 space-y-2">
+                        <li class="flex items-start">
+                            <i class="fas fa-exclamation-triangle text-yellow-400 mt-1 mr-2"></i>
+                            Perform during low-traffic hours
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-exclamation-triangle text-yellow-400 mt-1 mr-2"></i>
+                            Inform users about maintenance
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-exclamation-triangle text-yellow-400 mt-1 mr-2"></i>
+                            Verify backup before proceeding
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-exclamation-triangle text-yellow-400 mt-1 mr-2"></i>
+                            Monitor system resources
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="text-center py-6 text-gray-500 text-sm">
+        <p>&copy; {{ year }} LyxNexus. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // Toast notification system
+        class ToastManager {
+            constructor() {
+                this.container = document.getElementById('toast-container');
+                this.toasts = new Set();
+            }
+            
+            show(title, message, type = 'info', duration = 5000) {
+                const toast = document.createElement('div');
+                toast.className = `toast toast-${type}`;
+                
+                const icons = {
+                    success: 'fa-check-circle',
+                    error: 'fa-exclamation-triangle',
+                    warning: 'fa-exclamation-circle',
+                    info: 'fa-info-circle'
+                };
+                
+                toast.innerHTML = `
+                    <div class="toast-icon">
+                        <i class="fas ${icons[type]}"></i>
+                    </div>
+                    <div class="toast-content">
+                        <div class="toast-title">${title}</div>
+                        <div class="toast-message">${message}</div>
+                    </div>
+                    <button class="toast-close" onclick="toastManager.close(this.parentElement)">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <div class="toast-progress">
+                        <div class="toast-progress-bar" style="width: 100%"></div>
+                    </div>
+                `;
+                
+                this.container.appendChild(toast);
+                this.toasts.add(toast);
+                
+                // Animate in
+                setTimeout(() => {
+                    toast.classList.add('show');
+                }, 10);
+                
+                // Progress bar animation
+                const progressBar = toast.querySelector('.toast-progress-bar');
+                let width = 100;
+                const interval = setInterval(() => {
+                    if (width <= 0) {
+                        clearInterval(interval);
+                        this.close(toast);
+                    } else {
+                        width -= (100 / (duration / 100));
+                        progressBar.style.width = `${width}%`;
+                    }
+                }, 100);
+                
+                // Auto close
+                setTimeout(() => {
+                    this.close(toast);
+                }, duration);
+                
+                return toast;
+            }
+            
+            close(toast) {
+                if (!this.toasts.has(toast)) return;
+                
+                toast.classList.remove('show');
+                toast.classList.add('hide');
+                
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.parentNode.removeChild(toast);
+                    }
+                    this.toasts.delete(toast);
+                }, 400);
+            }
+            
+            closeAll() {
+                this.toasts.forEach(toast => this.close(toast));
+            }
+        }
+        
+        // Initialize toast manager
+        const toastManager = new ToastManager();
+        
+        // Helper function to show toast
+        function showToast(message, type = 'info', title = null) {
+            const titles = {
+                success: 'Success',
+                error: 'Error',
+                warning: 'Warning',
+                info: 'Information'
+            };
+            
+            return toastManager.show(title || titles[type], message, type);
+        }
+
+        // Navigation function
+        function goToHome() {
+            window.location.href = '/';
+        }
+
+        // Clone database function
+        async function cloneDatabase() {
+            const cloneBtn = document.getElementById('clone-db-btn');
+            const progressSection = document.getElementById('progress-section');
+            const resultSection = document.getElementById('result-section');
+            const resultMessage = document.getElementById('result-message');
+
+            // Show loading state
+            cloneBtn.disabled = true;
+            cloneBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Cloning...';
+            progressSection.classList.remove('hidden');
+            resultSection.classList.add('hidden');
+
+            try {
+                const response = await fetch('/api/admin/clone-db', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Success
+                    showToast(data.message, 'success', 'Database Cloning');
+                    resultMessage.textContent = data.message;
+                    resultSection.classList.remove('hidden');
+                } else {
+                    // Error
+                    throw new Error(data.error || 'Failed to clone database');
+                }
+            } catch (error) {
+                console.error('Error cloning database:', error);
+                showToast(error.message, 'error', 'Database Cloning Error');
+                
+                // Show error in result section
+                resultMessage.textContent = error.message;
+                resultSection.querySelector('.bg-green-500').classList.replace('bg-green-500', 'bg-red-500');
+                resultSection.querySelector('.text-green-500').classList.replace('text-green-500', 'text-red-500');
+                resultSection.querySelector('.text-green-400').classList.replace('text-green-400', 'text-red-400');
+                resultSection.querySelector('.text-green-300').classList.replace('text-green-300', 'text-red-300');
+                resultSection.querySelector('i').classList.replace('fa-check-circle', 'fa-exclamation-triangle');
+                resultSection.classList.remove('hidden');
+            } finally {
+                // Reset button state
+                cloneBtn.disabled = false;
+                cloneBtn.innerHTML = '<i class="fas fa-copy mr-2"></i> Clone Database Now';
+                progressSection.classList.add('hidden');
+            }
+        }
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add event listener to clone button
+            document.getElementById('clone-db-btn').addEventListener('click', cloneDatabase);
+            
+            // Show welcome toast
+            setTimeout(() => {
+                showToast('Database cloning page loaded successfully', 'info', 'Ready');
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

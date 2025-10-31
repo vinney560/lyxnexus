@@ -1,0 +1,1189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | LyxNexus</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <meta name="keywords" content="education, coding, programming, web development, technology, online courses, learn to code" />
+    <meta name="author" content="Vincent Kipngetich" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://lyxnexus.onrender.com/" />
+    <link rel="icon" href="https://lyxnexus.onrender.com/uploads/favicon-1.png"/>
+        
+    <meta property="og:title" content="LyxNexus - Education Platform" />
+    <meta property="og:description" content="LyxNexus is a simple yet powerful class hub designed to keep everything in one place — from announcements and assignments to topics and class discussions." />
+    <meta property="og:image" content="https://lyxnexus.onrender.com/favicon.ico" />
+    <meta property="og:url" content="https://lyxnexus.onrender.com/" />
+        
+    <meta name="twitter:card" content="summary" />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
+
+    <script src="{{ url_for('static', filename='js/n-s.js') }}"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<style>
+    :root {
+        --bg-color: #111827;
+        --text-color: #F9FAFB;
+        --accent-color: #4A90E2;
+        --secondary-color: #8B5CF6;
+        --success-color: #10B981;
+        --warning-color: #F59E0B;
+        --error-color: #EF4444;
+    }
+    
+    body {
+        font-family: 'Poppins', sans-serif;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow-x: hidden;
+    }
+    
+    .gradient-text {
+        background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        color: transparent;
+    }
+    
+    .glass-morph {
+        background: rgba(30, 30, 40, 0.6);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        box-shadow: 0 8px 32px rgba(0, 31, 135, 0.2);
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        transition: all 0.3s ease;
+    }
+    
+    .glass-morph:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 40px rgba(0, 31, 135, 0.3);
+    }
+    
+    .btn {
+        background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 50px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+        cursor: pointer;
+        width: 100%;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .btn::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        transform: translate(-50%, -50%);
+        transition: width 0.3s, height 0.3s;
+    }
+    
+    .btn:active::after {
+        width: 300px;
+        height: 300px;
+    }
+    
+    .btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+    }
+    
+    .btn-outline {
+        background: transparent;
+        border: 2px solid #3B82F6;
+        border-radius: 25px;
+        padding: 8px 20px;
+        color: #3B82F6;
+    }
+    
+    .btn-outline:hover {
+        background: #3B82F6;
+        color: white;
+    }
+    
+    .btn-admin {
+        background: linear-gradient(90deg, #8B5CF6, #EC4899);
+        box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+    }
+    
+    .btn-admin:hover {
+        box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
+    }
+    
+    .logo-container {
+        background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+        border-radius: 20px;
+        padding: 15px;
+        display: inline-block;
+        margin-bottom: 10px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .logo-container:hover {
+        transform: scale(1.05);
+        box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+    }
+    
+    .form-input {
+        background: rgba(30, 30, 40, 0.8);
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        border-radius: 10px;
+        padding: 12px 15px;
+        color: white;
+        width: 100%;
+        margin-bottom: 15px;
+        transition: all 0.3s ease;
+    }
+    
+    .form-input:focus {
+        outline: none;
+        border-color: #3B82F6;
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+        color: #D1D5DB;
+    }
+    
+    .floating {
+        animation: floating 3s ease-in-out infinite;
+    }
+    
+    @keyframes floating {
+        0% { transform: translate(0, 0px); }
+        50% { transform: translate(0, 15px); }
+        100% { transform: translate(0, -0px); }
+    }
+    
+    .tab-content {
+        display: none;
+    }
+    
+    .tab-content.active {
+        display: block;
+    }
+    
+    .tab-button {
+        background: transparent;
+        border: none;
+        padding: 12px 20px;
+        color: #9CA3AF;
+        border-bottom: 2px solid transparent;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    
+    .tab-button.active {
+        color: #3B82F6;
+        border-bottom-color: #3B82F6;
+    }
+    
+    .subtab-content {
+        display: none;
+    }
+    
+    .subtab-content.active {
+        display: block;
+    }
+    
+    .subtab-button {
+        background: transparent;
+        border: none;
+        padding: 10px 15px;
+        color: #9CA3AF;
+        border-bottom: 2px solid transparent;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        font-size: 14px;
+    }
+    
+    .subtab-button.active {
+        color: #8B5CF6;
+        border-bottom-color: #8B5CF6;
+    }
+    
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+        animation: fadeIn 0.3s ease;
+    }
+    
+    .modal-content {
+        background: var(--bg-color);
+        border-radius: 15px;
+        padding: 30px;
+        width: 90%;
+        max-width: 500px;
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        animation: slideUp 0.3s ease;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    
+    @keyframes slideUp {
+        from { 
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to { 
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .admin-badge {
+        background: linear-gradient(90deg, #8B5CF6, #EC4899);
+        color: white;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        display: inline-block;
+        margin-left: 10px;
+    }
+    
+    .toast-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        max-width: 400px;
+    }
+    
+    .toast {
+        background: rgba(30, 30, 40, 0.95);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        border-radius: 12px;
+        padding: 16px 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        transform: translateX(400px);
+        opacity: 0;
+        transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        max-width: 400px;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .toast::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 100%;
+        width: 4px;
+    }
+    
+    .toast.show {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    
+    .toast.hide {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+    
+    .toast-success {
+        border-color: rgba(16, 185, 129, 0.4);
+    }
+    
+    .toast-success::before {
+        background: var(--success-color);
+    }
+    
+    .toast-error {
+        border-color: rgba(239, 68, 68, 0.4);
+    }
+    
+    .toast-error::before {
+        background: var(--error-color);
+    }
+    
+    .toast-warning {
+        border-color: rgba(245, 158, 11, 0.4);
+    }
+    
+    .toast-warning::before {
+        background: var(--warning-color);
+    }
+    
+    .toast-info {
+        border-color: rgba(59, 130, 246, 0.4);
+    }
+    
+    .toast-info::before {
+        background: var(--accent-color);
+    }
+    
+    .toast-icon {
+        font-size: 20px;
+        flex-shrink: 0;
+    }
+    
+    .toast-success .toast-icon {
+        color: var(--success-color);
+    }
+    
+    .toast-error .toast-icon {
+        color: var(--error-color);
+    }
+    
+    .toast-warning .toast-icon {
+        color: var(--warning-color);
+    }
+    
+    .toast-info .toast-icon {
+        color: var(--accent-color);
+    }
+    
+    .toast-content {
+        flex: 1;
+    }
+    
+    .toast-title {
+        font-weight: 600;
+        margin-bottom: 4px;
+        font-size: 14px;
+    }
+    
+    .toast-message {
+        font-size: 13px;
+        color: #D1D5DB;
+        line-height: 1.4;
+    }
+    
+    .toast-close {
+        background: none;
+        border: none;
+        color: #9CA3AF;
+        cursor: pointer;
+        font-size: 16px;
+        padding: 4px;
+        border-radius: 4px;
+        transition: all 0.2s ease;
+        flex-shrink: 0;
+    }
+    
+    .toast-close:hover {
+        color: white;
+        background: rgba(255, 255, 255, 0.1);
+    }
+    
+    .toast-progress {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        height: 3px;
+        background: rgba(255, 255, 255, 0.3);
+        width: 100%;
+        border-radius: 0 0 12px 12px;
+        overflow: hidden;
+    }
+    
+    .toast-progress-bar {
+        height: 100%;
+        border-radius: 0 0 12px 12px;
+        transition: width 0.1s linear;
+    }
+    
+    .toast-success .toast-progress-bar {
+        background: var(--success-color);
+    }
+    
+    .toast-error .toast-progress-bar {
+        background: var(--error-color);
+    }
+    
+    .toast-warning .toast-progress-bar {
+        background: var(--warning-color);
+    }
+    
+    .toast-info .toast-progress-bar {
+        background: var(--accent-color);
+    }
+    
+    .nav-header {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        padding: 20px;
+        z-index: 100;
+    }
+    
+    .nav-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+    
+    .nav-logo {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        padding: 8px 16px;
+        border-radius: 12px;
+    }
+    
+    .nav-logo:hover {
+        background: rgba(59, 130, 246, 0.1);
+    }
+    
+    .nav-logo-text {
+        font-size: 24px;
+        font-weight: 700;
+        background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        color: transparent;
+    }
+    
+    .nav-links {
+        display: flex;
+        gap: 20px;
+    }
+    
+    .nav-link {
+        color: #9CA3AF;
+        text-decoration: none;
+        font-weight: 500;
+        padding: 8px 16px;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+    
+    .nav-link:hover {
+        color: white;
+        background: rgba(59, 130, 246, 0.1);
+    }
+    
+    @media (max-width: 768px) {
+        .toast-container {
+            right: 10px;
+            left: 10px;
+            max-width: none;
+        }
+        
+        .toast {
+            max-width: none;
+        }
+        
+        .nav-header {
+            padding: 15px;
+        }
+        
+        .nav-links {
+            display: none;
+        }
+        
+        .nav-logo-text {
+            font-size: 20px;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .modal-content {
+            margin: 20px;
+            padding: 20px;
+            width: calc(100% - 40px);
+        }
+        
+        .tab-button {
+            padding: 10px 15px;
+            font-size: 14px;
+        }
+        
+        .subtab-button {
+            padding: 8px 12px;
+            font-size: 12px;
+        }
+    }
+</style>
+<body class="bg-[url('/uploads/OIP10.jpg')] bg-fixed bg-center bg-cover filter brightness-10">
+    <header class="nav-header">
+        <div class="nav-content">
+            <div class="nav-logo" onclick="goToHome()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                    <polyline points="7.5 4.21 12 6.81 16.5 4.21"></polyline>
+                    <polyline points="7.5 19.79 7.5 14.6 3 12"></polyline>
+                    <polyline points="21 12 16.5 14.6 16.5 19.79"></polyline>
+                    <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                    <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                </svg>
+                <span class="nav-logo-text">LyxNexus</span>
+            </div>
+            <div class="nav-links">
+                <a href="#" class="nav-link" onclick="window.location.href='/terms'">
+                    <i class="fas fa-info-circle mr-2"></i>Terms
+                </a>
+                <a href="#" class="nav-link" onclick="showToast('+254740694312', 'info')">
+                    <i class="fas fa-envelope mr-2"></i>Contact
+                </a>
+                <a href="#" class="nav-link" onclick="window.location.href='/navigation-guide'">
+                    <i class="fas fa-question-circle mr-2"></i>Help
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <div class="toast-container" id="toast-container"></div>
+
+    <div class="w-full max-w-md mx-4">
+        <div class="glass-morph rounded-2xl p-8">
+            <div class="text-center mb-8">
+                <div class="logo-container floating" onclick="goToHome()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                        <polyline points="7.5 4.21 12 6.81 16.5 4.21"></polyline>
+                        <polyline points="7.5 19.79 7.5 14.6 3 12"></polyline>
+                        <polyline points="21 12 16.5 14.6 16.5 19.79"></polyline>
+                        <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                        <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                    </svg>
+                </div>
+                <h1 class="text-3xl font-bold gradient-text">LyxNexus</h1>
+                <p class="text-gray-400 mt-2">Enter your credentials to continue</p>
+            </div>
+
+            <div class="flex border-b border-gray-700 mb-6">
+                <button class="tab-button active" data-tab="student-tab">Student Login</button>
+                <button class="tab-button" data-tab="admin-tab">Admin Access</button>
+            </div>
+
+            <!-- Student Login Form -->
+            <div id="student-tab" class="tab-content active">
+                <form id="student-login-form" method="POST">
+                    <input type="hidden" name="login_type" value="student">
+                    <div class="form-group">
+                        <label class="form-label" for="username">Username</label>
+                        <input type="text" id="username" name="username" class="form-input" placeholder="Enter your username" maxlength="50" value="{{ username if username }}" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="mobile">Mobile Number</label>
+                        <input type="tel" id="mobile" name="mobile" class="form-input invalid:border-pink-500 invalid:text-pink-600" placeholder="10-digit mobile number" pattern="^(07|01)[0-9]{8}$" value="{{ mobile if mobile }}" required>
+                        <p class="text-gray-400 text-xs mt-1">Enter your 10-digit mobile number</p>
+                    </div>
+                    
+                    <button type="submit" class="btn mt-4" id="login-student">
+                        <i class="fas fa-sign-in-alt mr-2"></i> Login as Student
+                    </button>
+                </form>
+                
+                <div class="mt-6 text-center">
+                    <p class="text-gray-400">Need admin access?</p>
+                    <button class="btn-outline mt-2 text-sm" id="switch-to-admin-btn">
+                        <i class="fas fa-user-shield mr-2"></i> Switch to Admin
+                    </button>
+                </div>
+            </div>
+
+            <div id="admin-tab" class="tab-content">
+                <div class="glass-morph rounded-lg p-4 mb-4">
+                    <div class="flex items-center">
+                        <i class="fas fa-info-circle text-blue-400 mr-3"></i>
+                        <span class="text-sm">Admin access requires special privileges</span>
+                    </div>
+                </div>
+                
+                <div class="flex border-b border-gray-700 mb-4">
+                    <button class="subtab-button active" data-subtab="admin-login-tab">Admin Login</button>
+                    <button class="subtab-button" data-subtab="master-key-tab">Master Key Access</button>
+                </div>
+                
+                <!-- Normal Admin Login -->
+                <div id="admin-login-tab" class="subtab-content active">
+                    <form id="admin-login-form" method="POST">
+                        <input type="hidden" name="login_type" value="admin">
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="admin-username">Username</label>
+                            <input type="text" id="admin-username" name="username" class="form-input" placeholder="Enter admin username" maxlength="50" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="admin-mobile">Mobile Number</label>
+                            <input type="tel" id="admin-mobile" name="mobile" class="form-input invalid:border-pink-500 invalid:text-pink-600" placeholder="10-digit mobile number" pattern="^(07|01)[0-9]{8}$" required>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-admin mt-4">
+                            <i class="fas fa-key mr-2"></i> Login as Admin
+                        </button>
+                    </form>
+                </div>
+                
+                <!-- Master Key Admin Access -->
+                <div id="master-key-tab" class="subtab-content">
+                    <form id="master-key-form" method="POST">
+                        <input type="hidden" name="login_type" value="admin">
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="master-key-username">Username</label>
+                            <input type="text" id="master-key-username" name="username" class="form-input" placeholder="Enter username for admin account" maxlength="50" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="master-key-mobile">Mobile Number</label>
+                            <input type="tel" id="master-key-mobile" name="mobile" class="form-input invalid:border-pink-500 invalid:text-pink-600" placeholder="10-digit mobile number" pattern="^(07|01)[0-9]{8}$" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="master-key-input">Master Authorization Key</label>
+                            <input type="password" id="master-key-input" name="master_key" class="form-input" placeholder="Enter master key" required>
+                            <p class="text-gray-400 text-xs mt-1">This will create or promote to admin account</p>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-admin mt-4">
+                            <i class="fas fa-user-shield mr-2"></i> Access with Master Key
+                        </button>
+                    </form>
+                </div>
+                
+                <div class="mt-6 text-center">
+                    <p class="text-gray-400">Don't have admin access?</p>
+                    <button class="btn-outline mt-2 text-sm" id="register-admin-btn">
+                        <i class="fas fa-user-plus mr-2"></i> Register as Admin
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center mt-6 text-gray-500 text-sm">
+            <p>&copy; {{ year }} LyxNexus. All rights reserved.</p>
+        </div>
+    </div>
+
+    <!-- Register Admin Modal -->
+    <div id="register-admin-modal" class="modal">
+        <div class="modal-content">
+            <h3 class="text-xl font-bold mb-4 gradient-text">Register as Administrator</h3>
+            <div class="glass-morph rounded-lg p-4 mb-4">
+                <div class="flex items-center">
+                    <i class="fas fa-shield-alt text-purple-400 mr-3"></i>
+                    <span class="text-sm">Admin registration requires master authorization</span>
+                </div>
+            </div>
+            
+            <form id="register-admin-form">
+                <div class="form-group">
+                    <label class="form-label" for="new-admin-mobile">Mobile Number</label>
+                    <input type="tel" id="new-admin-mobile" name="mobile" class="form-input" placeholder="10-digit mobile number" pattern="[0-9]{10}" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="new-admin-username">Username</label>
+                    <input type="text" id="new-admin-username" name="username" class="form-input" placeholder="Admin username" maxlength="50" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="register-master-key">Master Authorization Key</label>
+                    <input type="password" id="register-master-key" name="master_key" class="form-input" placeholder="Enter master key" required>
+                    <p class="text-gray-400 text-xs mt-1">Contact system administrator for the master key</p>
+                </div>
+                
+                <div class="flex justify-end space-x-3 mt-6">
+                    <button type="button" class="btn-outline" id="cancel-register-admin">Cancel</button>
+                    <button type="submit" class="btn btn-admin">
+                        <i class="fas fa-user-shield mr-2"></i> Register Admin
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = '/api';
+        const ENDPOINTS = {
+            REGISTER_ADMIN: `${API_BASE}/register-admin`,
+            PROMOTE_TO_ADMIN: `${API_BASE}/promote-to-admin`,
+            CHECK_ADMIN: `${API_BASE}/check-admin`,
+            LOGIN: '/login'
+        };
+
+        class ToastManager {
+            constructor() {
+                this.container = document.getElementById('toast-container');
+                this.toasts = new Set();
+            }
+            
+            show(title, message, type = 'info', duration = 5000) {
+                const toast = document.createElement('div');
+                toast.className = `toast toast-${type}`;
+                
+                const icons = {
+                    success: 'fa-check-circle',
+                    error: 'fa-exclamation-triangle',
+                    warning: 'fa-exclamation-circle',
+                    info: 'fa-info-circle'
+                };
+                
+                toast.innerHTML = `
+                    <div class="toast-icon">
+                        <i class="fas ${icons[type]}"></i>
+                    </div>
+                    <div class="toast-content">
+                        <div class="toast-title">${title}</div>
+                        <div class="toast-message">${message}</div>
+                    </div>
+                    <button class="toast-close" onclick="toastManager.close(this.parentElement)">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <div class="toast-progress">
+                        <div class="toast-progress-bar" style="width: 100%"></div>
+                    </div>
+                `;
+                
+                this.container.appendChild(toast);
+                this.toasts.add(toast);
+                
+                setTimeout(() => {
+                    toast.classList.add('show');
+                }, 10);
+                
+                const progressBar = toast.querySelector('.toast-progress-bar');
+                let width = 100;
+                const interval = setInterval(() => {
+                    if (width <= 0) {
+                        clearInterval(interval);
+                        this.close(toast);
+                    } else {
+                        width -= (100 / (duration / 100));
+                        progressBar.style.width = `${width}%`;
+                    }
+                }, 100);
+                
+                // Auto close
+                setTimeout(() => {
+                    this.close(toast);
+                }, duration);
+                
+                return toast;
+            }
+            
+            close(toast) {
+                if (!this.toasts.has(toast)) return;
+                
+                toast.classList.remove('show');
+                toast.classList.add('hide');
+                
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.parentNode.removeChild(toast);
+                    }
+                    this.toasts.delete(toast);
+                }, 400);
+            }
+            
+            closeAll() {
+                this.toasts.forEach(toast => this.close(toast));
+            }
+        }
+        
+        const toastManager = new ToastManager();
+        
+        function showToast(message, type = 'info', title = null) {
+            const titles = {
+                success: 'Success',
+                error: 'Error',
+                warning: 'Warning',
+                info: 'Information'
+            };
+            
+            return toastManager.show(title || titles[type], message, type);
+        }
+
+        function goToHome() {
+            window.location.href = '/';
+        }
+
+        // Tab management
+        function openTab(tabName) {
+            console.log('Opening tab:', tabName);
+            
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.classList.remove('active');
+            });
+            
+            const tabElement = document.getElementById(tabName);
+            if (tabElement) {
+                tabElement.classList.add('active');
+                console.log('Tab element found and activated');
+            } else {
+                console.error('Tab element not found:', tabName);
+            }
+            
+            document.querySelectorAll('.tab-button').forEach(button => {
+                if (button.getAttribute('data-tab') === tabName) {
+                    button.classList.add('active');
+                }
+            });
+            
+            if (tabName === 'student-tab') {
+                showToast('Switched to student login', 'info');
+            } else if (tabName === 'admin-tab') {
+                showToast('Switched to admin access', 'info');
+            }
+        }
+
+        function openSubTab(subTabName) {
+            console.log('Opening subtab:', subTabName);
+            
+            document.querySelectorAll('.subtab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            document.querySelectorAll('.subtab-button').forEach(button => {
+                button.classList.remove('active');
+            });
+            
+            const subtabElement = document.getElementById(subTabName);
+            if (subtabElement) {
+                subtabElement.classList.add('active');
+                console.log('Subtab element found and activated');
+            } else {
+                console.error('Subtab element not found:', subTabName);
+            }
+            
+            document.querySelectorAll('.subtab-button').forEach(button => {
+                if (button.getAttribute('data-subtab') === subTabName) {
+                    button.classList.add('active');
+                }
+            });
+        }
+
+        function openRegisterAdminModal() {
+            document.getElementById('register-admin-modal').style.display = 'flex';
+            showToast('Opening admin registration', 'info');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        function validateMobile(mobile) {
+            return /^\d{10}$/.test(mobile);
+        }
+
+        async function registerAdmin(formData) {
+            try {
+                const response = await fetch(ENDPOINTS.REGISTER_ADMIN, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.error || 'Registration failed');
+                }
+                
+                return data;
+            } catch (error) {
+                console.error('Error registering admin:', error);
+                throw error;
+            }
+        }
+
+        // Promote existing user to admin --> Requested by Class Rep
+        async function promoteToAdmin(formData) {
+            try {
+                const response = await fetch(ENDPOINTS.PROMOTE_TO_ADMIN, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.error || 'Promotion failed');
+                }
+                
+                return data;
+            } catch (error) {
+                console.error('Error promoting to admin:', error);
+                throw error;
+            }
+        }
+
+        async function checkAdmin(mobile) {
+            try {
+                const response = await fetch(ENDPOINTS.CHECK_ADMIN, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ mobile })
+                });
+                
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error('Error checking admin status:', error);
+                return { is_admin: false };
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, initializing page...');
+            
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        showToast("{{ message }}", "{{ category if category in ['success', 'error', 'warning', 'info'] else 'info' }}");
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            
+            const mobileInputs = document.querySelectorAll('input[type="tel"]');
+            mobileInputs.forEach(input => {
+                input.addEventListener('input', function() {
+                    this.value = this.value.replace(/\D/g, '').slice(0, 10);
+                });
+            });
+            
+            // Tab button event listeners
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.addEventListener('click', function() {
+                    const tabName = this.getAttribute('data-tab');
+                    openTab(tabName);
+                });
+            });
+            
+            // Subtab button event listeners
+            document.querySelectorAll('.subtab-button').forEach(button => {
+                button.addEventListener('click', function() {
+                    const subTabName = this.getAttribute('data-subtab');
+                    openSubTab(subTabName);
+                });
+            });
+            
+            document.getElementById('switch-to-admin-btn').addEventListener('click', function() {
+                openTab('admin-tab');
+            });
+            
+            document.getElementById('register-admin-btn').addEventListener('click', function() {
+                openRegisterAdminModal();
+            });
+            
+            document.getElementById('cancel-register-admin').addEventListener('click', function() {
+                closeModal('register-admin-modal');
+            });
+            
+            document.addEventListener('click', function(event) {
+                if (event.target.classList.contains('modal')) {
+                    event.target.style.display = 'none';
+                }
+            });
+            
+            // Student Form submit handlers
+            document.getElementById('student-login-form').addEventListener('submit', function(e) {
+                const mobile = document.getElementById('mobile').value;
+                const username = document.getElementById('username').value;
+                const loginButton = document.getElementById('login-student');
+            
+                loginButton.innerHTML = '<i class="fas fa-sign-in-alt mr-2"></i> Login as Student';
+                loginButton.disabled = false;
+            
+                if (!validateMobile(mobile)) {
+                    e.preventDefault();
+                    showToast('Please enter a valid 10-digit mobile number', 'error', 'Validation Error');
+                    return;
+                }
+            
+                if (!username.trim()) {
+                    e.preventDefault();
+                    showToast('Please enter a username', 'error', 'Validation Error');
+                    return;
+                }
+            
+                // Confirm mobile number --> Requested by Manuu
+                const confirmMobile = confirm(`Is this your mobile number? ${mobile}. By continuing, you agree to our terms and conditions.`);
+                if (!confirmMobile) {
+                    e.preventDefault();
+                    return;
+                }
+            
+                loginButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span> Logging in...</span>';
+                loginButton.disabled = true;
+            
+                setTimeout(() => {
+                    loginButton.innerHTML = '<i class="fas fa-sign-in-alt mr-2"></i> Login as Student';
+                    loginButton.disabled = false;
+                }, 3000);
+            
+                showToast('Logging in...', 'info', 'Please Wait');
+            });
+
+            document.getElementById('admin-login-form').addEventListener('submit', function(e) {
+                const mobile = document.getElementById('admin-mobile').value;
+                const username = document.getElementById('admin-username').value;
+                
+                if (!validateMobile(mobile)) {
+                    e.preventDefault();
+                    showToast('Please enter a valid 10-digit mobile number', 'error', 'Validation Error');
+                    return;
+                }
+                
+                if (!username.trim()) {
+                    e.preventDefault();
+                    showToast('Please enter a username', 'error', 'Validation Error');
+                    return;
+                }
+                
+                showToast('Authenticating admin access...', 'info', 'Please Wait');
+            });
+
+            document.getElementById('master-key-form').addEventListener('submit', function(e) {
+                const mobile = document.getElementById('master-key-mobile').value;
+                const username = document.getElementById('master-key-username').value;
+                const masterKey = document.getElementById('master-key-input').value;
+                
+                if (!validateMobile(mobile)) {
+                    e.preventDefault();
+                    showToast('Please enter a valid 10-digit mobile number', 'error', 'Validation Error');
+                    return;
+                }
+                
+                if (!username.trim()) {
+                    e.preventDefault();
+                    showToast('Please enter a username', 'error', 'Validation Error');
+                    return;
+                }
+                
+                if (!masterKey) {
+                    e.preventDefault();
+                    showToast('Please enter the master authorization key', 'error', 'Validation Error');
+                    return;
+                }
+                
+                showToast('Processing master key access...', 'info', 'Please Wait');
+            });
+
+            document.getElementById('register-admin-form').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const mobile = document.getElementById('new-admin-mobile').value;
+                const username = document.getElementById('new-admin-username').value;
+                const masterKey = document.getElementById('register-master-key').value;
+                
+                if (!validateMobile(mobile)) {
+                    showToast('Please enter a valid 10-digit mobile number', 'error', 'Validation Error');
+                    return;
+                }
+                
+                if (!username.trim()) {
+                    showToast('Please enter a username', 'error', 'Validation Error');
+                    return;
+                }
+                
+                if (!masterKey) {
+                    showToast('Please enter the master authorization key', 'error', 'Validation Error');
+                    return;
+                }
+                
+                const formData = {
+                    mobile: mobile,
+                    username: username,
+                    master_key: masterKey
+                };
+                
+                // Show loading toast
+                const toast = showToast('Processing admin registration...', 'info', 'Please Wait');
+                
+                try {
+                    const result = await registerAdmin(formData);
+                    toastManager.close(toast);
+                    showToast('Admin account created successfully! You can now login.', 'success');
+                    closeModal('register-admin-modal');
+                    
+                    openTab('admin-tab');
+                    document.getElementById('admin-mobile').value = mobile;
+                    document.getElementById('admin-username').value = username;
+                } catch (error) {
+                    try {
+                        const result = await promoteToAdmin(formData);
+                        toastManager.close(toast);
+                        showToast('User promoted to admin successfully! You can now login.', 'success');
+                        closeModal('register-admin-modal');
+                        
+                        openTab('admin-tab');
+                        document.getElementById('admin-mobile').value = mobile;
+                        document.getElementById('admin-username').value = username;
+                    } catch (promoteError) {
+                        toastManager.close(toast);
+                        showToast(promoteError.message || 'Admin registration failed', 'error', 'Registration Failed');
+                    }
+                }
+            });
+            
+            setTimeout(() => {
+                showToast('Please enter credentials and click login to continue.', 'info', 'Welcome');
+            }, 1000);
+            
+            console.log('Page initialization complete');
+        });
+    </script>
+</body>
+</html>

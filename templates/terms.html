@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terms of Service | LyxNexus</title>
+    
+    <!-- SEO Meta -->
+    <meta name="description" content="LyxNexus Terms of Service and Policies - Effective October 25, 2025" />
+    <meta name="keywords" content="terms of service, privacy policy, acceptable use, data security, education platform" />
+    <meta name="author" content="Vincent Kipngetich" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://lyxnexus.onrender.com/terms" />
+    <link rel="icon" href="https://lyxnexus.onrender.com/uploads/favicon-1.png"/>
+
+    <meta name="keywords" content="education, coding, programming, web development, technology, online courses, learn to code" />
+    <meta name="author" content="Vincent Kipngetich" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://lyxnexus.onrender.com/" />
+    <link rel="icon" href="https://lyxnexus.onrender.com/uploads/favicon-1.png"/>
+
+    <meta property="og:title" content="LyxNexus - Education Platform" />
+    <meta property="og:description" content="LyxNexus is a simple yet powerful class hub designed to keep everything in one place — from announcements and assignments to topics and class discussions." />
+    <meta property="og:image" content="https://lyxnexus.onrender.com/favicon.ico" />
+    <meta property="og:url" content="https://lyxnexus.onrender.com/" />
+
+    <meta name="twitter:card" content="summary" />
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="{{ url_for('static', filename='css/tailwind.min.css') }}" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --text-color: #f1f5f9;
+            --accent-color: #3b82f6;
+            --secondary-color: #8b5cf6;
+            --card-bg: rgba(30, 41, 59, 0.8);
+            --border-color: rgba(100, 116, 139, 0.3);
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+        
+        .gradient-text {
+            background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent;
+        }
+        
+        .glass-morph {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .glass-morph:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        .btn {
+            background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+            color: white;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+            cursor: pointer;
+            font-size: 0.95rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-height: 48px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+        }
+        
+        .btn-outline {
+            background: transparent;
+            border: 2px solid #3B82F6;
+            color: #3B82F6;
+            box-shadow: none;
+        }
+        
+        .btn-outline:hover {
+            background: #3B82F6;
+            color: white;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+        }
+        
+        .logo-container {
+            background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+            border-radius: 12px;
+            padding: 10px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .nav-link {
+            color: #cbd5e1;
+            font-weight: 500;
+            padding: 10px 18px;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .nav-link:hover {
+            color: #3B82F6;
+            background: rgba(59, 130, 246, 0.1);
+        }
+        
+        .nav-link.active {
+            color: #3B82F6;
+            background: rgba(59, 130, 246, 0.1);
+        }
+        
+        .section-title {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 3rem;
+            font-weight: 700;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -12px;
+            left: 0;
+            width: 60px;
+            height: 4px;
+            background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+            border-radius: 2px;
+        }
+        
+        .content-container {
+            padding-bottom: 90px;
+        }
+        
+        /* Terms specific styles */
+        .terms-section {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            border-left: 4px solid #3B82F6;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            border: 1px solid var(--border-color);
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.6s ease forwards;
+        }
+        
+        .terms-section:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+        }
+        
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .terms-section h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #3B82F6;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .terms-section h3 i {
+            font-size: 1.2rem;
+        }
+        
+        .terms-section p {
+            margin-bottom: 1rem;
+            color: #cbd5e1;
+        }
+        
+        .terms-section ul {
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .terms-section li {
+            margin-bottom: 0.5rem;
+            color: #cbd5e1;
+        }
+        
+        .terms-toc {
+            position: sticky;
+            top: 100px;
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            border: 1px solid var(--border-color);
+            margin-bottom: 30px;
+        }
+        
+        .terms-toc h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #3B82F6;
+        }
+        
+        .terms-toc ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        
+        .terms-toc li {
+            margin-bottom: 0.75rem;
+            padding-left: 0;
+        }
+        
+        .terms-toc a {
+            color: #cbd5e1;
+            text-decoration: none;
+            transition: color 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .terms-toc a:hover {
+            color: #3B82F6;
+        }
+        
+        .terms-toc a i {
+            font-size: 0.8rem;
+            transition: transform 0.3s ease;
+        }
+        
+        .terms-toc a:hover i {
+            transform: translateX(3px);
+        }
+        
+        .highlight-box {
+            background: rgba(59, 130, 246, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            margin: 20px 0;
+        }
+        
+        .highlight-box h4 {
+            color: #3B82F6;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .effective-date {
+            display: inline-block;
+            background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 2rem;
+        }
+        
+        /* Mobile Navigation */
+        .mobile-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            overflow-x: auto;    
+            overflow-y: hidden;
+            white-space: nowrap;      
+            padding: 12px;
+            z-index: 100;
+            border-top: 1px solid rgba(100, 116, 139, 0.3);
+            scroll-behavior: smooth;   
+            -webkit-overflow-scrolling: touch; 
+        }
+
+        .mobile-nav::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .mobile-nav {
+            -ms-overflow-style: none; 
+            scrollbar-width: none;    
+        }
+
+        .mobile-nav-btn {
+            display: inline-flex;        
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 12px;
+            border-radius: 12px;
+            color: #94a3b8;
+            font-size: 12px;
+            transition: all 0.3s ease;
+            flex: 0 0 auto;               
+            width: 70px;                  
+            margin-right: 10px;
+            text-align: center;
+        }
+
+        .mobile-nav-btn.active {
+            color: #3B82F6;
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .mobile-nav-btn i {
+            font-size: 18px;
+            margin-bottom: 4px;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .terms-toc {
+                position: static;
+                margin-bottom: 30px;
+            }
+            
+            .terms-section {
+                padding: 20px;
+            }
+            
+            .terms-section h3 {
+                font-size: 1.3rem;
+            }
+            
+            .hidden.md\:flex {
+                display: none !important;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .terms-section {
+                padding: 16px;
+            }
+            
+            .terms-section h3 {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body class="bg-[url(/uploads/OIP3.jpg)] bg-fixed bg-center bg-cover">
+    <nav class="glass-morph sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="logo-container">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                        <polyline points="7.5 4.21 12 6.81 16.5 4.21"></polyline>
+                        <polyline points="7.5 19.79 7.5 14.6 3 12"></polyline>
+                        <polyline points="21 12 16.5 14.6 16.5 19.79"></polyline>
+                        <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                        <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                    </svg>
+                </div>
+                <span class="text-2xl font-bold gradient-text">LyxNexus</span>
+            </div>
+            <div class="hidden md:flex space-x-1">
+                <a href="/" class="nav-link">Home</a>
+                <a href="/terms" class="nav-link active">Terms of Service</a>
+                <a href="/login" class="nav-link">Login</a>
+            </div>
+            <div class="flex space-x-3">
+                <button class="btn btn-sm" onclick="window.location.href='/'">
+                    <i class="fas fa-home"></i>
+                    <span class="hidden sm:inline">Back to Home</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <header class="py-16 md:py-20 content-container">
+        <div class="max-w-6xl mx-auto px-4 text-center">
+            <h1 class="text-4xl md:text-5xl font-bold gradient-text mb-6">Terms of Service & Policies</h1>
+            <p class="text-lg text-slate-300 mb-8 max-w-3xl mx-auto">Please read these terms and conditions carefully before using our platform</p>
+            <div class="effective-date">
+                <i class="fas fa-calendar-alt"></i> Effective: October 25, 2025
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 py-12 content-container">
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            <!-- Table of Contents -->
+            <div class="lg:col-span-1">
+                <div class="terms-toc">
+                    <h3><i class="fas fa-list"></i> Table of Contents</h3>
+                    <ul>
+                        <li><a href="#introduction"><i class="fas fa-chevron-right"></i> Introduction</a></li>
+                        <li><a href="#account-registration"><i class="fas fa-chevron-right"></i> Account Registration</a></li>
+                        <li><a href="#use-of-platform"><i class="fas fa-chevron-right"></i> Use of Platform</a></li>
+                        <li><a href="#intellectual-property"><i class="fas fa-chevron-right"></i> Intellectual Property</a></li>
+                        <li><a href="#user-conduct"><i class="fas fa-chevron-right"></i> User Conduct</a></li>
+                        <li><a href="#termination"><i class="fas fa-chevron-right"></i> Termination</a></li>
+                        <li><a href="#warranties"><i class="fas fa-chevron-right"></i> Disclaimer of Warranties</a></li>
+                        <li><a href="#liability"><i class="fas fa-chevron-right"></i> Limitation of Liability</a></li>
+                        <li><a href="#governing-law"><i class="fas fa-chevron-right"></i> Governing Law</a></li>
+                        <li><a href="#changes"><i class="fas fa-chevron-right"></i> Changes to Terms</a></li>
+                        <li><a href="#contact"><i class="fas fa-chevron-right"></i> Contact Us</a></li>
+                        <li><a href="#privacy"><i class="fas fa-chevron-right"></i> Privacy Policy</a></li>
+                        <li><a href="#acceptable-use"><i class="fas fa-chevron-right"></i> Acceptable Use Policy</a></li>
+                        <li><a href="#data-security"><i class="fas fa-chevron-right"></i> Data Security</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Terms Content -->
+            <div class="lg:col-span-3">
+                <section id="introduction" class="terms-section" style="animation-delay: 0.1s">
+                    <h3><i class="fas fa-info-circle"></i> 1. Introduction</h3>
+                    <p>Welcome to LyxNexus, a platform designed to facilitate learning and collaboration. These Terms of Service ("Terms") govern your access to and use of LyxNexus. By using LyxNexus, you agree to be bound by these Terms. If you do not agree to these Terms, please do not use the platform.</p>
+                </section>
+
+                <section id="account-registration" class="terms-section" style="animation-delay: 0.2s">
+                    <h3><i class="fas fa-user-plus"></i> 2. Account Registration</h3>
+                    <ul>
+                        <li>To access certain features of LyxNexus, you may be required to register for an account. You agree to provide accurate, current, and complete information during the registration process and to update such information to keep it accurate, current, and complete.</li>
+                        <li>You are responsible for safeguarding your password and for any activities or actions under your account. You agree to notify us immediately of any unauthorized use of your account.</li>
+                    </ul>
+                </section>
+
+                <section id="use-of-platform" class="terms-section" style="animation-delay: 0.3s">
+                    <h3><i class="fas fa-laptop"></i> 3. Use of the Platform</h3>
+                    <ul>
+                        <li>LyxNexus is intended for educational purposes. You agree to use the platform only for lawful purposes and in accordance with these Terms.</li>
+                        <li>You are responsible for all content you post, upload, or otherwise make available on LyxNexus. You agree not to post any content that is illegal, offensive, or violates the rights of others.</li>
+                        <li>We reserve the right to remove any content that violates these Terms.</li>
+                    </ul>
+                </section>
+
+                <section id="intellectual-property" class="terms-section" style="animation-delay: 0.4s">
+                    <h3><i class="fas fa-copyright"></i> 4. Intellectual Property</h3>
+                    <ul>
+                        <li>LyxNexus and its original content, features, and functionality are owned by Vincent Kipngetich and are protected by international copyright, trademark, patent, trade secret, and other intellectual property or proprietary rights laws.</li>
+                        <li>You may not modify, publish, transmit, participate in the transfer or sale of, create derivative works from, or otherwise exploit any of the content, in whole or in part, without our prior written consent.</li>
+                    </ul>
+                </section>
+
+                <section id="user-conduct" class="terms-section" style="animation-delay: 0.5s">
+                    <h3><i class="fas fa-user-shield"></i> 5. User Conduct</h3>
+                    <p>You agree not to use LyxNexus to:</p>
+                    <ul>
+                        <li>Upload, post, email, transmit, or otherwise make available any content that is unlawful, harmful, threatening, abusive, harassing, tortious, defamatory, vulgar, obscene, libelous, invasive of another's privacy, hateful, or racially, ethnically, or otherwise objectionable.</li>
+                        <li>Impersonate any person or entity, or falsely state or otherwise misrepresent your affiliation with a person or entity.</li>
+                        <li>Forge headers or otherwise manipulate identifiers to disguise the origin of any content transmitted through LyxNexus.</li>
+                        <li>Upload, post, email, transmit, or otherwise make available any content that you do not have a right to make available under any law or under contractual or fiduciary relationships.</li>
+                        <li>Upload, post, email, transmit, or otherwise make available any content that infringes any patent, trademark, trade secret, copyright, or other proprietary rights of any party.</li>
+                        <li>Upload, post, email, transmit, or otherwise make available any unsolicited or unauthorized advertising, promotional materials, "junk mail," "spam," "chain letters," "pyramid schemes," or any other form of solicitation.</li>
+                        <li>Upload, post, email, transmit, or otherwise make available any material that contains software viruses or any other computer code, files, or programs designed to interrupt, destroy, or limit the functionality of any computer software or hardware or telecommunications equipment.</li>
+                        <li>Interfere with or disrupt LyxNexus or servers or networks connected to LyxNexus, or disobey any requirements, procedures, policies, or regulations of networks connected to LyxNexus.</li>
+                        <li>Intentionally or unintentionally violate any applicable local, state, national, or international law.</li>
+                    </ul>
+                </section>
+
+                <section id="termination" class="terms-section" style="animation-delay: 0.6s">
+                    <h3><i class="fas fa-ban"></i> 6. Termination</h3>
+                    <ul>
+                        <li>We may terminate or suspend your account and access to LyxNexus at any time, for any reason, with or without notice.</li>
+                        <li>Upon termination, your right to use LyxNexus will immediately cease.</li>
+                    </ul>
+                </section>
+
+                <section id="warranties" class="terms-section" style="animation-delay: 0.7s">
+                    <h3><i class="fas fa-exclamation-triangle"></i> 7. Disclaimer of Warranties</h3>
+                    <p>LyxNexus is provided on an "as is" and "as available" basis. We make no representations or warranties of any kind, express or implied, as to the operation of LyxNexus or the information, content, materials, or products included on LyxNexus.</p>
+                </section>
+
+                <section id="liability" class="terms-section" style="animation-delay: 0.8s">
+                    <h3><i class="fas fa-balance-scale"></i> 8. Limitation of Liability</h3>
+                    <p>In no event shall we be liable for any damages whatsoever (including, without limitation, damages for loss of profits, business interruption, loss of information) arising out of the use of or inability to use LyxNexus.</p>
+                </section>
+
+                <section id="governing-law" class="terms-section" style="animation-delay: 0.9s">
+                    <h3><i class="fas fa-gavel"></i> 9. Governing Law</h3>
+                    <p>These Terms shall be governed by and construed in accordance with the laws of Kenya.</p>
+                </section>
+
+                <section id="changes" class="terms-section" style="animation-delay: 1.0s">
+                    <h3><i class="fas fa-sync-alt"></i> 10. Changes to Terms</h3>
+                    <p>We reserve the right to modify or revise these Terms at any time. Your continued use of LyxNexus after any such changes constitutes your acceptance of the new Terms.</p>
+                </section>
+
+                <section id="contact" class="terms-section" style="animation-delay: 1.1s">
+                    <h3><i class="fas fa-envelope"></i> 11. Contact Us</h3>
+                    <p>If you have any questions about these Terms, please contact us at <span class="text-blue-400">[Insert Contact Information Here]</span>.</p>
+                </section>
+
+                <section id="privacy" class="terms-section" style="animation-delay: 1.2s">
+                    <h3><i class="fas fa-user-secret"></i> 12. Privacy Policy</h3>
+                    <p>Your use of LyxNexus is also governed by our Privacy Policy, which can be found at <span class="text-blue-400">[Insert Privacy Policy Link Here]</span>.</p>
+                </section>
+
+                <section id="acceptable-use" class="terms-section" style="animation-delay: 1.3s">
+                    <h3><i class="fas fa-check-circle"></i> 13. Acceptable Use Policy</h3>
+                    <p>Users are expected to adhere to a code of conduct that promotes respect, safety, and academic integrity. Any form of harassment, discrimination, or plagiarism is strictly prohibited. Users are responsible for their own actions and content, and are expected to comply with all applicable laws and regulations.</p>
+                    <div class="highlight-box">
+                        <h4><i class="fas fa-lightbulb"></i> Important Note</h4>
+                        <p>We encourage a positive learning environment where all users feel respected and valued. Please report any violations of this policy to our support team.</p>
+                    </div>
+                </section>
+
+                <section id="data-security" class="terms-section" style="animation-delay: 1.4s">
+                    <h3><i class="fas fa-shield-alt"></i> 14. Data Security</h3>
+                    <p>LyxNexus employs industry-standard security measures to protect user data. However, no method of transmission over the Internet, or method of electronic storage, is 100% secure. Therefore, while we strive to use commercially acceptable means to protect your personal information, we cannot guarantee its absolute security.</p>
+                    <div class="highlight-box">
+                        <h4><i class="fas fa-lock"></i> Security Measures</h4>
+                        <p>We implement various security measures including encryption, secure servers, and regular security audits to protect your data.</p>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <footer class="mt-20 py-10 border-t border-slate-800">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-6 md:mb-0">
+                    <div class="flex items-center space-x-3">
+                        <div class="logo-container">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                                <polyline points="7.5 4.21 12 6.81 16.5 4.21"></polyline>
+                                <polyline points="7.5 19.79 7.5 14.6 3 12"></polyline>
+                                <polyline points="21 12 16.5 14.6 16.5 19.79"></polyline>
+                                <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                                <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                            </svg>
+                        </div>
+                        <span class="text-xl font-bold gradient-text">LyxNexus</span>
+                    </div>
+                    <p class="mt-2 text-slate-400">Your learning management system for modern education.</p>
+                </div>
+                <div class="flex space-x-6">
+                    <a href="#" class="text-slate-400 hover:text-blue-400 transition-colors text-lg"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="text-slate-400 hover:text-blue-400 transition-colors text-lg"><i class="fab fa-github"></i></a>
+                    <a href="#" class="text-slate-400 hover:text-blue-400 transition-colors text-lg"><i class="fab fa-linkedin"></i></a>
+                    <a href="#" class="text-slate-400 hover:text-blue-400 transition-colors text-lg"><i class="fab fa-discord"></i></a>
+                </div>
+            </div>
+            <div class="mt-8 pt-8 border-t border-slate-800 text-center text-slate-500 text-sm">
+                <p>© {{ year }} LyxNexus. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Mobile Navigation -->
+    <div class="mobile-nav md:hidden">
+        <a href="/" class="mobile-nav-btn">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </a>
+        <a href="/terms" class="mobile-nav-btn active">
+            <i class="fas fa-file-contract"></i>
+            <span>Terms</span>
+        </a>
+        <a href="/login" class="mobile-nav-btn">
+            <i class="fas fa-sign-in-alt"></i>
+            <span>Login</span>
+        </a>
+    </div>
+
+    <script>
+        // Smooth scrolling for table of contents links
+        document.querySelectorAll('.terms-toc a').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+                
+                window.scrollTo({
+                    top: targetElement.offsetTop - 100,
+                    behavior: 'smooth'
+                });
+            });
+        });
+
+        // Add animation on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.animationPlayState = 'running';
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.terms-section').forEach(section => {
+            section.style.animationPlayState = 'paused';
+            observer.observe(section);
+        });
+
+        // Highlight current section in TOC while scrolling
+        const sections = document.querySelectorAll('.terms-section');
+        const navLinks = document.querySelectorAll('.terms-toc a');
+
+        window.addEventListener('scroll', () => {
+            let current = '';
+            
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                if (scrollY >= (sectionTop - 150)) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('text-blue-400');
+                if (link.getAttribute('href').substring(1) === current) {
+                    link.classList.add('text-blue-400');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

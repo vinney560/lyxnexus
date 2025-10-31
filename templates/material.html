@@ -1,0 +1,1023 @@
+<!-- templates/material.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic Materials | LyxNexus</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <meta name="keywords" content="education, coding, programming, web development, technology, online courses, learn to code" />
+    <meta name="author" content="Vincent Kipngetich" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://lyxnexus.onrender.com/" />
+    <link rel="icon" href="https://lyxnexus.onrender.com/uploads/favicon-1.png"/>
+
+    <meta property="og:title" content="LyxNexus - Education Platform" />
+    <meta property="og:description" content="LyxNexus is a simple yet powerful class hub designed to keep everything in one place — from announcements and assignments to topics and class discussions." />
+    <meta property="og:image" content="https://lyxnexus.onrender.com/favicon.ico" />
+    <meta property="og:url" content="https://lyxnexus.onrender.com/" />
+
+    <meta name="twitter:card" content="summary" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<style>
+    /* Reuse all the CSS styles from files.html */
+    :root {
+        --bg-color: #111827;
+        --text-color: #F9FAFB;
+        --accent-color: #4A90E2;
+        --secondary-color: #8B5CF6;
+        --success-color: #10B981;
+        --warning-color: #F59E0B;
+        --error-color: #EF4444;
+    }
+    
+    body {
+        font-family: 'Poppins', sans-serif;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+    }
+    
+    .gradient-text {
+        background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        color: transparent;
+    }
+    
+    .glass-morph {
+        background: rgba(30, 30, 40, 0.6);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        box-shadow: 0 8px 32px rgba(0, 31, 135, 0.2);
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        transition: all 0.3s ease;
+    }
+    
+    .glass-morph:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 40px rgba(0, 31, 135, 0.3);
+    }
+    
+    .btn {
+        background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 10px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .btn::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        transform: translate(-50%, -50%);
+        transition: width 0.3s, height 0.3s;
+    }
+    
+    .btn:active::after {
+        width: 300px;
+        height: 300px;
+    }
+    
+    .btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+    }
+    
+    .btn-success {
+        background: linear-gradient(90deg, #10B981, #059669);
+        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+    }
+    
+    .btn-success:hover {
+        box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+    }
+    
+    .btn-danger {
+        background: linear-gradient(90deg, #EF4444, #DC2626);
+        box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+    }
+    
+    .btn-danger:hover {
+        box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+    }
+    
+    .btn-secondary {
+        background: linear-gradient(90deg, #6B7280, #4B5563);
+        box-shadow: 0 4px 15px rgba(107, 114, 128, 0.3);
+    }
+    
+    .btn-secondary:hover {
+        box-shadow: 0 6px 20px rgba(107, 114, 128, 0.4);
+    }
+    
+    .logo-container {
+        background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+        border-radius: 20px;
+        padding: 15px;
+        display: inline-block;
+        margin-bottom: 20px;
+    }
+    
+    .material-card {
+        background: rgba(30, 30, 40, 0.7);
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 20px;
+        transition: all 0.3s ease;
+        border-left: 4px solid transparent;
+    }
+    
+    .material-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 31, 135, 0.3);
+        border-left-color: #3B82F6;
+    }
+    
+    .material-card.dragging {
+        opacity: 0.5;
+        transform: rotate(5deg);
+    }
+    
+    .form-input {
+        background: rgba(30, 30, 40, 0.8);
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        border-radius: 10px;
+        padding: 12px 15px;
+        color: white;
+        width: 100%;
+        margin-bottom: 15px;
+        transition: all 0.3s ease;
+    }
+    
+    .form-input:focus {
+        outline: none;
+        border-color: #3B82F6;
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+    }
+    
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+        animation: fadeIn 0.3s ease;
+    }
+    
+    .modal-content {
+        background: var(--bg-color);
+        border-radius: 15px;
+        padding: 30px;
+        width: 90%;
+        max-width: 600px;
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        animation: slideUp 0.3s ease;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    
+    @keyframes slideUp {
+        from { 
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to { 
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .file-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        margin-right: 15px;
+        flex-shrink: 0;
+    }
+    
+    .file-icon-pdf {
+        background: linear-gradient(135deg, #EF4444, #DC2626);
+    }
+    
+    .file-icon-doc {
+        background: linear-gradient(135deg, #3B82F6, #1D4ED8);
+    }
+    
+    .file-icon-image {
+        background: linear-gradient(135deg, #8B5CF6, #7C3AED);
+    }
+    
+    .file-icon-archive {
+        background: linear-gradient(135deg, #F59E0B, #D97706);
+    }
+    
+    .file-icon-generic {
+        background: linear-gradient(135deg, #6B7280, #4B5563);
+    }
+    
+    .drag-handle {
+        cursor: grab;
+        color: #6B7280;
+        transition: color 0.3s ease;
+        padding: 8px;
+        border-radius: 6px;
+    }
+    
+    .drag-handle:hover {
+        color: #3B82F6;
+        background: rgba(59, 130, 246, 0.1);
+    }
+    
+    .drag-handle:active {
+        cursor: grabbing;
+    }
+    
+    .toast-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        max-width: 400px;
+    }
+    
+    .toast {
+        background: rgba(30, 30, 40, 0.95);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        border-radius: 12px;
+        padding: 16px 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        transform: translateX(400px);
+        opacity: 0;
+        transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        max-width: 400px;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .toast::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 100%;
+        width: 4px;
+    }
+    
+    .toast.show {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    
+    .toast.hide {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+    
+    .toast-success {
+        border-color: rgba(16, 185, 129, 0.4);
+    }
+    
+    .toast-success::before {
+        background: var(--success-color);
+    }
+    
+    .toast-error {
+        border-color: rgba(239, 68, 68, 0.4);
+    }
+    
+    .toast-error::before {
+        background: var(--error-color);
+    }
+    
+    .toast-info {
+        border-color: rgba(59, 130, 246, 0.4);
+    }
+    
+    .toast-info::before {
+        background: var(--accent-color);
+    }
+    
+    .toast-icon {
+        font-size: 20px;
+        flex-shrink: 0;
+    }
+    
+    .toast-success .toast-icon {
+        color: var(--success-color);
+    }
+    
+    .toast-error .toast-icon {
+        color: var(--error-color);
+    }
+    
+    .toast-info .toast-icon {
+        color: var(--accent-color);
+    }
+    
+    .toast-content {
+        flex: 1;
+    }
+    
+    .toast-title {
+        font-weight: 600;
+        margin-bottom: 4px;
+        font-size: 14px;
+    }
+    
+    .toast-message {
+        font-size: 13px;
+        color: #D1D5DB;
+        line-height: 1.4;
+    }
+    
+    .toast-close {
+        background: none;
+        border: none;
+        color: #9CA3AF;
+        cursor: pointer;
+        font-size: 16px;
+        padding: 4px;
+        border-radius: 4px;
+        transition: all 0.2s ease;
+        flex-shrink: 0;
+    }
+    
+    .toast-close:hover {
+        color: white;
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    @media (max-width: 768px) {
+        nav.glass-morph {
+            position: static !important;
+            top: auto !important;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            font-size: 14px;
+        }
+        
+        .modal-content {
+            margin: 20px;
+            padding: 20px;
+            width: calc(100% - 40px);
+        }
+        
+        .material-card {
+            padding: 15px;
+        }
+        
+        .action-buttons {
+            width: 100%;
+            justify-content: space-between;
+            margin-top: 15px;
+        }
+        
+        .toast-container {
+            right: 10px;
+            left: 10px;
+            max-width: none;
+        }
+        
+        .toast {
+            max-width: none;
+        }
+    }
+</style>
+<body>
+    <nav class="glass-morph sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-4">
+            <div class="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
+                <div class="flex items-center space-x-2">
+                    <div class="logo-container">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                            <polyline points="7.5 4.21 12 6.81 16.5 4.21"></polyline>
+                            <polyline points="7.5 19.79 7.5 14.6 3 12"></polyline>
+                            <polyline points="21 12 16.5 14.6 16.5 19.79"></polyline>
+                            <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                            <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                        </svg>
+                    </div>
+                    <span class="text-xl sm:text-2xl font-bold gradient-text">Topic Materials</span>
+                </div>
+                <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4 w-full sm:w-auto">
+                    {% if current_user.is_admin %}
+                    <button class="btn bg-red-600 hover:bg-gray-700 text-sm sm:text-base" onclick="window.location.href='/admin'">
+                        <i class="fas fa-arrow-left mr-2"></i> Back 
+                    </button>
+                    {% else %}
+                    <button class="btn bg-gray-600 hover:bg-gray-700 text-sm sm:text-base" onclick="window.location.href='/main-page'">
+                        <i class="fas fa-arrow-left mr-2"></i> Back 
+                    </button>
+                    {% endif %}
+                    {% if current_user.is_admin %}
+                    <button class="btn btn-success text-sm sm:text-base" onclick="openModal('add-material-modal')">
+                        <i class="fas fa-plus mr-2"></i> Add Material
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="toast-container" id="toast-container"></div>
+
+    <main class="max-w-7xl mx-auto px-4 py-8">
+        <div class="glass-morph rounded-xl p-6 mb-6">
+            <h1 class="text-2xl sm:text-3xl font-bold gradient-text mb-2" id="topic-name">Loading...</h1>
+            <p class="text-gray-400" id="topic-description"></p>
+            <div class="flex items-center mt-4 text-sm text-gray-500">
+                <i class="fas fa-layer-group mr-2"></i>
+                <span id="materials-count">0 materials</span>
+            </div>
+        </div>
+
+        <div id="materials-container">
+            <div class="glass-morph rounded-xl p-8 text-center">
+                <div class="spinner"></div>
+                <p class="text-gray-400 mt-4">Loading materials...</p>
+            </div>
+        </div>
+
+        <div id="empty-state" class="hidden">
+            <div class="glass-morph rounded-xl p-8 text-center">
+                <i class="fas fa-folder-open text-4xl text-gray-500 mb-4"></i>
+                <h3 class="text-xl font-bold text-gray-400 mb-2">No materials yet</h3>
+                <p class="text-gray-500">This topic doesn't have any materials yet.</p>
+                {% if current_user.is_admin %}
+                <button class="btn btn-success mt-4" onclick="openModal('add-material-modal')">
+                    <i class="fas fa-plus mr-2"></i> Add First Material
+                </button>
+                {% endif %}
+            </div>
+        </div>
+    </main>
+
+    <div id="add-material-modal" class="modal">
+        <div class="modal-content">
+            <h3 class="text-xl font-bold mb-4">Add Material to Topic</h3>
+            
+            <!-- Search Files -->
+            <div class="mb-4">
+                <input type="text" id="file-search" class="form-input" placeholder="Search available files...">
+            </div>
+            
+            <div id="available-files" class="max-h-96 overflow-y-auto mb-4">
+                <div class="text-center py-8">
+                    <div class="spinner"></div>
+                    <p class="text-gray-400 mt-2">Loading files...</p>
+                </div>
+            </div>
+            
+            <div id="customization-form" class="hidden">
+                <div class="form-group">
+                    <label class="form-label" for="material-display-name">Display Name (Optional)</label>
+                    <input type="text" id="material-display-name" class="form-input" placeholder="Custom name for this material">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="material-description">Description (Optional)</label>
+                    <textarea id="material-description" class="form-input" rows="3" placeholder="Custom description for this material"></textarea>
+                </div>
+            </div>
+            
+            <div class="flex flex-col-reverse sm:flex-row justify-end space-y-4 sm:space-y-0 space-y-reverse sm:space-x-3 mt-4">
+                <button type="button" class="btn btn-secondary w-full sm:w-auto" onclick="closeModal('add-material-modal')">Cancel</button>
+                <button type="button" class="btn btn-success w-full sm:w-auto mb-4 sm:mb-0 hidden" id="add-material-btn" onclick="addMaterial()">
+                    <i class="fas fa-plus mr-2"></i> Add Material
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = '/api';
+        const TOPIC_ID = {{ topic_id }};
+        
+        // Global variables
+        let selectedFileId = null;
+        let currentDragItem = null;
+
+        class ToastManager {
+            constructor() {
+                this.container = document.getElementById('toast-container');
+                this.toasts = new Set();
+            }
+            
+            show(title, message, type = 'info', duration = 5000) {
+                const toast = document.createElement('div');
+                toast.className = `toast toast-${type}`;
+                
+                const icons = {
+                    success: 'fa-check-circle',
+                    error: 'fa-exclamation-triangle',
+                    info: 'fa-info-circle'
+                };
+                
+                toast.innerHTML = `
+                    <div class="toast-icon">
+                        <i class="fas ${icons[type]}"></i>
+                    </div>
+                    <div class="toast-content">
+                        <div class="toast-title">${title}</div>
+                        <div class="toast-message">${message}</div>
+                    </div>
+                    <button class="toast-close" onclick="toastManager.close(this.parentElement)">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                
+                this.container.appendChild(toast);
+                this.toasts.add(toast);
+                
+                setTimeout(() => {
+                    toast.classList.add('show');
+                }, 10);
+                
+                setTimeout(() => {
+                    this.close(toast);
+                }, duration);
+                
+                return toast;
+            }
+            
+            close(toast) {
+                if (!this.toasts.has(toast)) return;
+                
+                toast.classList.remove('show');
+                toast.classList.add('hide');
+                
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.parentNode.removeChild(toast);
+                    }
+                    this.toasts.delete(toast);
+                }, 400);
+            }
+        }
+        
+        const toastManager = new ToastManager();
+        
+        function showToast(message, type = 'info', title = null) {
+            const titles = {
+                success: 'Success',
+                error: 'Error',
+                info: 'Information'
+            };
+            
+            return toastManager.show(title || titles[type], message, type);
+        }
+
+        // Format file size
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // Format date
+        function formatDate(dateString) {
+            const options = { 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            };
+            return new Date(dateString).toLocaleDateString(undefined, options);
+        }
+
+        function getFileIcon(fileType, filename) {
+            if (fileType.includes('pdf')) {
+                return { icon: 'fa-file-pdf', class: 'file-icon-pdf' };
+            } else if (fileType.includes('image')) {
+                return { icon: 'fa-file-image', class: 'file-icon-image' };
+            } else if (fileType.includes('zip') || fileType.includes('rar') || fileType.includes('tar') || fileType.includes('7z')) {
+                return { icon: 'fa-file-archive', class: 'file-icon-archive' };
+            } else if (fileType.includes('word') || fileType.includes('document') || filename.match(/\.(doc|docx)$/i)) {
+                return { icon: 'fa-file-word', class: 'file-icon-doc' };
+            } else if (fileType.includes('excel') || filename.match(/\.(xls|xlsx)$/i)) {
+                return { icon: 'fa-file-excel', class: 'file-icon-doc' };
+            } else if (fileType.includes('powerpoint') || filename.match(/\.(ppt|pptx)$/i)) {
+                return { icon: 'fa-file-powerpoint', class: 'file-icon-doc' };
+            } else if (fileType.includes('text') || filename.match(/\.(txt|rtf)$/i)) {
+                return { icon: 'fa-file-alt', class: 'file-icon-doc' };
+            } else {
+                return { icon: 'fa-file', class: 'file-icon-generic' };
+            }
+        }
+
+        async function loadTopicMaterials() {
+            const container = document.getElementById('materials-container');
+            const emptyState = document.getElementById('empty-state');
+            
+            try {
+                const response = await fetch(`${API_BASE}/topics/${TOPIC_ID}/materials`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                document.getElementById('topic-name').textContent = data.topic.name;
+                document.getElementById('topic-description').textContent = data.topic.description || 'No description available';
+                document.getElementById('materials-count').textContent = `${data.materials.length} material${data.materials.length !== 1 ? 's' : ''}`;
+                
+                if (data.materials.length === 0) {
+                    container.classList.add('hidden');
+                    emptyState.classList.remove('hidden');
+                    return;
+                }
+                
+                emptyState.classList.add('hidden');
+                container.classList.remove('hidden');
+                
+                container.innerHTML = data.materials.map((material, index) => {
+                    const fileIcon = getFileIcon(material.file_type, material.filename);
+                    
+                    return `
+                    <div class="material-card" data-material-id="${material.id}" draggable="true">
+                        <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center">
+                            <div class="flex items-start mb-4 lg:mb-0 flex-1">
+                                <div class="file-icon ${fileIcon.class}">
+                                    <i class="fas ${fileIcon.icon}"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="flex items-start">
+                                        <div class="flex-1">
+                                            <h3 class="text-lg sm:text-xl font-extrabold text-white underline underline-offset-4 decoration-blue-500 leading-snug break-words">
+                                                ${material.display_name}
+                                            </h3>
+                                            <p class="text-gray-400 text-sm">${material.description || 'No description'}</p>
+                                        </div>
+                                        {% if current_user.is_admin %}
+                                        <div class="drag-handle ml-4" draggable="false">
+                                            <i class="fas fa-grip-vertical"></i>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="flex flex-wrap items-center mt-2 text-sm text-gray-500">
+                                        <span class="mr-4">
+                                            <i class="fas fa-file mr-1"></i> ${material.filename}
+                                        </span>
+                                        <span class="mr-4">
+                                            <i class="fas fa-database mr-1"></i> ${formatFileSize(material.file_size)}
+                                        </span>
+                                        <span>
+                                            <i class="fas fa-calendar mr-1"></i> ${formatDate(material.uploaded_at)}
+                                        </span>
+                                    </div>
+                                    <div class="text-xs text-gray-500 mt-1">
+                                        Uploaded by: ${material.uploaded_by}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="action-buttons">
+                                <button class="btn" onclick="downloadMaterial(${material.file_id})">
+                                    <i class="fas fa-download mr-1"></i> Download
+                                </button>
+                                {% if current_user.is_admin %}
+                                <button class="btn btn-danger" onclick="removeMaterial(${material.id})">
+                                    <i class="fas fa-trash mr-1"></i> Remove
+                                </button>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    `;
+                }).join('');
+                
+                {% if current_user.is_admin %}
+                initializeDragAndDrop();
+                {% endif %}
+                
+            } catch (error) {
+                container.innerHTML = `
+                    <div class="glass-morph rounded-xl p-8 text-center">
+                        <i class="fas fa-exclamation-triangle text-4xl text-red-500 mb-4"></i>
+                        <h3 class="text-xl font-bold text-red-400 mb-2">Error Loading Materials</h3>
+                        <p class="text-gray-500">Failed to load materials. Please try again.</p>
+                        <button class="btn btn-secondary mt-4" onclick="loadTopicMaterials()">
+                            <i class="fas fa-redo mr-2"></i> Retry
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        async function loadAvailableFiles(search = '') {
+            const container = document.getElementById('available-files');
+            
+            try {
+                const params = new URLSearchParams();
+                if (search) params.append('search', search);
+                
+                const response = await fetch(`${API_BASE}/files/available?${params}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.files.length === 0) {
+                    container.innerHTML = `
+                        <div class="text-center py-8">
+                            <i class="fas fa-search text-4xl text-gray-500 mb-4"></i>
+                            <p class="text-gray-400">No files found</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                container.innerHTML = data.files.map(file => {
+                    const fileIcon = getFileIcon(file.file_type, file.filename);
+                    
+                    return `
+                    <div class="file-card glass-morph rounded-lg p-4 mb-3 cursor-pointer transition-all hover:transform hover:scale-105" 
+                         onclick="selectFile(${file.id}, '${file.name.replace(/'/g, "\\'")}', '${file.description ? file.description.replace(/'/g, "\\'") : ''}')">
+                        <div class="flex items-center">
+                            <div class="file-icon ${fileIcon.class}">
+                                <i class="fas ${fileIcon.icon}"></i>
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="font-semibold text-white">${file.name}</h4>
+                                <p class="text-sm text-gray-400">${file.filename} • ${formatFileSize(file.file_size)}</p>
+                                ${file.description ? `<p class="text-sm text-gray-500 mt-1">${file.description}</p>` : ''}
+                            </div>
+                            <div class="text-green-500 hidden selected-indicator">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                        </div>
+                    </div>
+                    `;
+                }).join('');
+                
+            } catch (error) {
+                container.innerHTML = `
+                    <div class="text-center py-8">
+                        <i class="fas fa-exclamation-triangle text-4xl text-red-500 mb-4"></i>
+                        <p class="text-red-400">Error loading files</p>
+                    </div>
+                `;
+            }
+        }
+
+        function selectFile(fileId, fileName, fileDescription) {
+            selectedFileId = fileId;
+            
+            document.querySelectorAll('.file-card').forEach(card => {
+                card.classList.remove('border-2', 'border-green-500');
+                card.querySelector('.selected-indicator').classList.add('hidden');
+            });
+            
+            const selectedCard = event.currentTarget;
+            selectedCard.classList.add('border-2', 'border-green-500');
+            selectedCard.querySelector('.selected-indicator').classList.remove('hidden');
+            
+            document.getElementById('customization-form').classList.remove('hidden');
+            document.getElementById('add-material-btn').classList.remove('hidden');
+            
+            document.getElementById('material-display-name').value = fileName;
+            document.getElementById('material-description').value = fileDescription || '';
+        }
+
+        async function addMaterial() {
+            if (!selectedFileId) {
+                showToast('Please select a file', 'error');
+                return;
+            }
+            
+            const displayName = document.getElementById('material-display-name').value;
+            const description = document.getElementById('material-description').value;
+            
+            try {
+                const response = await fetch(`${API_BASE}/topics/${TOPIC_ID}/materials`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        file_id: selectedFileId,
+                        display_name: displayName || null,
+                        description: description || null
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.error || 'Failed to add material');
+                }
+                
+                showToast('Material added successfully', 'success');
+                closeModal('add-material-modal');
+                loadTopicMaterials();
+                
+                document.getElementById('customization-form').classList.add('hidden');
+                document.getElementById('add-material-btn').classList.add('hidden');
+                document.getElementById('material-display-name').value = '';
+                document.getElementById('material-description').value = '';
+                selectedFileId = null;
+                
+            } catch (error) {
+                showToast(error.message, 'error', 'Add Failed');
+            }
+        }
+
+        async function removeMaterial(materialId) {
+            if (!confirm('Are you sure you want to remove this material from the topic?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/topics/${TOPIC_ID}/materials/${materialId}`, {
+                    method: 'DELETE'
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Failed to remove material');
+                }
+                
+                showToast('Material removed successfully', 'success');
+                loadTopicMaterials();
+                
+            } catch (error) {
+                showToast(error.message, 'error', 'Remove Failed');
+            }
+        }
+
+        // Download material
+        function downloadMaterial(fileId) {
+            window.open(`/api/files/${fileId}/download`, '_blank');
+        }
+
+        function initializeDragAndDrop() {
+            const container = document.getElementById('materials-container');
+            const materials = container.querySelectorAll('.material-card');
+            
+            materials.forEach(material => {
+                material.addEventListener('dragstart', handleDragStart);
+                material.addEventListener('dragover', handleDragOver);
+                material.addEventListener('dragenter', handleDragEnter);
+                material.addEventListener('dragleave', handleDragLeave);
+                material.addEventListener('drop', handleDrop);
+                material.addEventListener('dragend', handleDragEnd);
+            });
+        }
+        
+        function handleDragStart(e) {
+            currentDragItem = this;
+            this.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', this.dataset.materialId);
+        }
+        
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+        }
+        
+        function handleDragEnter(e) {
+            this.classList.add('drag-over');
+        }
+        
+        function handleDragLeave() {
+            this.classList.remove('drag-over');
+        }
+        
+        function handleDrop(e) {
+            e.preventDefault();
+            this.classList.remove('drag-over');
+            
+            if (currentDragItem !== this) {
+                const materials = Array.from(this.parentNode.children);
+                const fromIndex = materials.indexOf(currentDragItem);
+                const toIndex = materials.indexOf(this);
+                
+                if (fromIndex < toIndex) {
+                    this.parentNode.insertBefore(currentDragItem, this.nextSibling);
+                } else {
+                    this.parentNode.insertBefore(currentDragItem, this);
+                }
+                
+                updateMaterialOrder();
+            }
+        }
+        
+        function handleDragEnd() {
+            this.classList.remove('dragging');
+            document.querySelectorAll('.material-card').forEach(item => {
+                item.classList.remove('drag-over');
+            });
+        }
+        
+        async function updateMaterialOrder() {
+            const materialIds = Array.from(document.querySelectorAll('.material-card'))
+                .map(card => card.dataset.materialId);
+            
+            try {
+                const response = await fetch(`${API_BASE}/topics/${TOPIC_ID}/materials/reorder`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        order: materialIds
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to update material order');
+                }
+                
+                showToast('Materials reordered successfully', 'success');
+                
+            } catch (error) {
+                showToast(error.message, 'error', 'Reorder Failed');
+                loadTopicMaterials();
+            }
+        }
+
+        function openModal(modalId) {
+            document.getElementById(modalId).style.display = 'flex';
+            if (modalId === 'add-material-modal') {
+                loadAvailableFiles();
+            }
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+            if (modalId === 'add-material-modal') {
+                document.getElementById('file-search').value = '';
+                document.getElementById('customization-form').classList.add('hidden');
+                document.getElementById('add-material-btn').classList.add('hidden');
+                selectedFileId = null;
+            }
+        }
+
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+                document.getElementById('file-search').value = '';
+                document.getElementById('customization-form').classList.add('hidden');
+                document.getElementById('add-material-btn').classList.add('hidden');
+                selectedFileId = null;
+            }
+        }
+
+        // Search files handler
+        let searchTimeout;
+        document.getElementById('file-search').addEventListener('input', function(e) {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                loadAvailableFiles(e.target.value);
+            }, 500);
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadTopicMaterials();
+        });
+    </script>
+</body>
+</html>

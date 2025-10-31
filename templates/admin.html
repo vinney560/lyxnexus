@@ -1,0 +1,1767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | LyxNexus</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
+    <script src="{{ url_for('static', filename='js/n-s.js') }}"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<style>
+    :root {
+        --bg-color: #111827;
+        --text-color: #F9FAFB;
+        --accent-color: #4A90E2;
+        --secondary-color: #8B5CF6;
+        --success-color: #10B981;
+        --warning-color: #F59E0B;
+        --error-color: #EF4444;
+    }
+    
+    body {
+        font-family: 'Poppins', sans-serif;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        min-height: 100vh;
+    }
+    
+    .gradient-text {
+        background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        color: transparent;
+    }
+    
+    .glass-morph {
+        background: rgba(30, 30, 40, 0.8);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        box-shadow: 0 8px 32px rgba(0, 31, 135, 0.2);
+        border: 1px solid rgba(59, 130, 246, 0.4);
+        transition: all 0.3s ease;
+    }
+    
+    .glass-morph:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 40px rgba(0, 31, 135, 0.3);
+        border-color: rgba(59, 130, 246, 0.6);
+    }
+    
+    .btn {
+        background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 15px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .btn::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        transform: translate(-50%, -50%);
+        transition: width 0.3s, height 0.3s;
+    }
+    
+    .btn:active::after {
+        width: 300px;
+        height: 300px;
+    }
+    
+    .btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+    }
+    
+    .btn:active {
+        transform: translateY(-1px);
+    }
+    
+    .btn-danger {
+        background: linear-gradient(90deg, #EF4444, #DC2626);
+        box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+    }
+    
+    .btn-danger:hover {
+        box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+    }
+    
+    .btn-success {
+        background: linear-gradient(90deg, #10B981, #059669);
+        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+    }
+    
+    .btn-success:hover {
+        box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+    }
+    
+    .btn-warning {
+        background: linear-gradient(90deg, #F59E0B, #D97706);
+        box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+    }
+    
+    .btn-warning:hover {
+        box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
+    }
+    
+    .logo-container {
+        background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+        border-radius: 20px;
+        padding: 15px;
+        display: inline-block;
+        margin-bottom: 20px;
+        animation: float 3s ease-in-out infinite;
+    }
+    
+    @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-5px); }
+    }
+    
+    .admin-card {
+        background: rgba(30, 30, 40, 0.8);
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 20px;
+        border: 1px solid rgba(59, 130, 246, 0.4);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s ease;
+        animation: fadeInUp 0.5s ease-out;
+    }
+    
+    .admin-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0, 31, 135, 0.3);
+        border-color: rgba(59, 130, 246, 0.7);
+    }
+    
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .form-input {
+        background: rgba(30, 30, 40, 0.9);
+        border: 1px solid rgba(59, 130, 246, 0.4);
+        border-radius: 10px;
+        padding: 12px 15px;
+        color: white;
+        width: 100%;
+        margin-bottom: 15px;
+        transition: all 0.3s ease;
+    }
+    
+    .form-input:focus {
+        outline: none;
+        border-color: #3B82F6;
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+    }
+    
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+        animation: fadeIn 0.3s ease;
+    }
+    
+    .modal-content {
+        background: var(--bg-color);
+        border-radius: 15px;
+        padding: 30px;
+        width: 90%;
+        max-width: 500px;
+        border: 1px solid rgba(59, 130, 246, 0.4);
+        animation: slideUp 0.3s ease;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    
+    @keyframes slideUp {
+        from { 
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to { 
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .loading {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+    }
+    
+    .spinner {
+        border: 4px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        border-top: 4px solid #3B82F6;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    .tab-content {
+        display: none;
+        animation: fadeIn 0.5s ease;
+    }
+    
+    .tab-content.active {
+        display: block;
+    }
+    
+    .tab-button {
+        background: transparent;
+        border: none;
+        padding: 10px 20px;
+        color: #9CA3AF;
+        border-bottom: 2px solid transparent;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .tab-button::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        width: 0;
+        height: 2px;
+        background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+        transition: all 0.3s ease;
+        transform: translateX(-50%);
+    }
+    
+    .tab-button.active {
+        color: #3B82F6;
+    }
+    
+    .tab-button.active::after {
+        width: 100%;
+    }
+    
+    .tab-button:hover {
+        color: #3B82F6;
+    }
+    
+    .file-info {
+        display: flex;
+        align-items: center;
+        background: rgba(30, 30, 40, 0.9);
+        border-radius: 10px;
+        padding: 10px 15px;
+        margin-bottom: 15px;
+        border: 1px solid rgba(59, 130, 246, 0.4);
+        transition: all 0.3s ease;
+    }
+    
+    .file-info:hover {
+        border-color: rgba(59, 130, 246, 0.7);
+        transform: translateY(-2px);
+    }
+    
+    .file-info i {
+        margin-right: 10px;
+        color: #3B82F6;
+    }
+    
+    .file-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 10px;
+    }
+    
+    .file-input-wrapper {
+        position: relative;
+        overflow: hidden;
+        display: inline-block;
+        width: 100%;
+    }
+    
+    .file-input-wrapper input[type=file] {
+        position: absolute;
+        left: 0;
+        top: 0;
+        opacity: 0;
+        width: 100%;
+        height: 100%;
+        cursor: pointer;
+    }
+    
+    .file-input-label {
+        display: block;
+        padding: 12px 15px;
+        background: rgba(30, 30, 40, 0.9);
+        border: 1px solid rgba(59, 130, 246, 0.4);
+        border-radius: 10px;
+        color: #9CA3AF;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .file-input-label:hover {
+        background: rgba(30, 30, 40, 1);
+        border-color: #3B82F6;
+        color: #3B82F6;
+        transform: translateY(-2px);
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 8px;
+        flex-wrap: nowrap;
+    }
+    
+    .action-buttons .btn {
+        padding: 8px 16px;
+        font-size: 14px;
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+
+    /* Enhanced responsive design */
+    @media (max-width: 768px) {
+        nav.glass-morph {
+          position: static !important;
+          top: auto !important;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            font-size: 14px;
+        }
+        
+        .modal-content {
+            margin: 20px;
+            padding: 20px;
+            width: calc(100% - 40px);
+        }
+        
+        .file-actions {
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .file-actions .btn {
+            width: 100%;
+            justify-content: center;
+        }
+        
+        .admin-card {
+            padding: 15px;
+        }
+        
+        .text-3xl {
+            font-size: 1.5rem;
+        }
+        
+        .text-2xl {
+            font-size: 1.25rem;
+        }
+        
+        /* Improved mobile button layout */
+        .mobile-btn-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            width: 100%;
+        }
+        
+        .mobile-btn-container .btn {
+            flex: 1;
+            min-width: 120px;
+            max-width: 200px;
+        }
+        
+        .tab-container {
+            display: flex;
+            overflow-x: auto;
+            padding-bottom: 10px;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+            gap: 1rem;
+        }
+
+        .tab-container::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-container {
+            -ms-overflow-style: none;
+            scrollbar-width: none;   
+        }
+
+        .tab-container > * {
+            flex: 0 0 auto;
+        }
+
+        .tab-button {
+            padding: 8px 16px;
+            font-size: 14px;
+        }
+    }
+
+    @media (max-width: 640px) {
+        .flex.justify-between.items-center {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 15px;
+        }
+        
+        .flex.justify-between.items-center .btn {
+            width: 100%;
+        }
+        
+        .grid.grid-cols-2 {
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+        
+        .flex.space-x-2 {
+            flex-wrap: wrap;
+        }
+        
+        .flex.space-x-2 .btn {
+            margin-bottom: 5px;
+        }
+        
+        .action-buttons {
+            width: 100%;
+            justify-content: space-between;
+            margin-top: 15px;
+        }
+        
+        .admin-card-content {
+            flex-direction: column;
+        }
+    }
+
+    .scrollbar-hide {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+
+    .scrollbar-hide::-webkit-scrollbar {
+        display: none;
+    }
+
+    @media (max-width: 480px) {
+        .flex.space-x-2.ml-4 {
+            margin-left: 0;
+            margin-top: 10px;
+            width: 100%;
+            justify-content: space-between;
+        }
+        
+        .flex.space-x-2.ml-4 .btn {
+            flex: 1;
+            margin: 0 2px;
+        }
+        
+        .logo-container {
+            padding: 10px;
+        }
+        
+        .logo-container svg {
+            width: 24px;
+            height: 24px;
+        }
+    }
+
+    /* Enhanced card styling */
+    .enhanced-border {
+        border: 1px solid rgba(59, 130, 246, 0.4);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    }
+    
+    .enhanced-border:hover {
+        border-color: rgba(59, 130, 246, 0.7);
+        box-shadow: 0 8px 30px rgba(0, 31, 135, 0.3);
+    }
+    
+    /* Pulse animation for new items */
+    @keyframes pulse {
+        0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); }
+        70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+    }
+    
+    .pulse {
+        animation: pulse 2s infinite;
+    }
+    
+    /* Improved title styling */
+    .admin-title {
+        font-weight: 700;
+        font-size: 1.25rem;
+        background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 5px;
+        line-height: 1.3;
+    }
+    
+    /* Toast notifications */
+    .toast-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        max-width: 400px;
+    }
+    
+    .toast {
+        background: rgba(30, 30, 40, 0.95);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(59, 130, 246, 0.4);
+        border-radius: 12px;
+        padding: 16px 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        transform: translateX(400px);
+        opacity: 0;
+        transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        max-width: 400px;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .toast::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 100%;
+        width: 4px;
+    }
+    
+    .toast.show {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    
+    .toast.hide {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+    
+    .toast-success {
+        border-color: rgba(16, 185, 129, 0.4);
+    }
+    
+    .toast-success::before {
+        background: var(--success-color);
+    }
+    
+    .toast-error {
+        border-color: rgba(239, 68, 68, 0.4);
+    }
+    
+    .toast-error::before {
+        background: var(--error-color);
+    }
+    
+    .toast-info {
+        border-color: rgba(59, 130, 246, 0.4);
+    }
+    
+    .toast-info::before {
+        background: var(--accent-color);
+    }
+    
+    .toast-icon {
+        font-size: 20px;
+        flex-shrink: 0;
+    }
+    
+    .toast-success .toast-icon {
+        color: var(--success-color);
+    }
+    
+    .toast-error .toast-icon {
+        color: var(--error-color);
+    }
+    
+    .toast-info .toast-icon {
+        color: var(--accent-color);
+    }
+    
+    .toast-content {
+        flex: 1;
+    }
+    
+    .toast-title {
+        font-weight: 600;
+        margin-bottom: 4px;
+        font-size: 14px;
+    }
+    
+    .toast-message {
+        font-size: 13px;
+        color: #D1D5DB;
+        line-height: 1.4;
+    }
+    
+    .toast-close {
+        background: none;
+        border: none;
+        color: #9CA3AF;
+        cursor: pointer;
+        font-size: 16px;
+        padding: 4px;
+        border-radius: 4px;
+        transition: all 0.2s ease;
+        flex-shrink: 0;
+    }
+    
+    .toast-close:hover {
+        color: white;
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    /* Enhanced grid layouts */
+    .topics-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    @media (min-width: 640px) {
+        .topics-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+    
+    @media (min-width: 1024px) {
+        .topics-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+
+    /* Status indicators */
+    .status-indicator {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        margin-right: 8px;
+    }
+    
+    .status-active {
+        background-color: var(--success-color);
+        box-shadow: 0 0 6px var(--success-color);
+    }
+    
+    .status-pending {
+        background-color: var(--warning-color);
+        box-shadow: 0 0 6px var(--warning-color);
+    }
+    
+    .status-inactive {
+        background-color: var(--error-color);
+        box-shadow: 0 0 6px var(--error-color);
+    }
+</style>
+<body>
+    <!-- Toast Container -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <nav class="glass-morph sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-4">
+            <div class="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
+                <div class="flex items-center space-x-2">
+                    <div class="logo-container">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                            <polyline points="7.5 4.21 12 6.81 16.5 4.21"></polyline>
+                            <polyline points="7.5 19.79 7.5 14.6 3 12"></polyline>
+                            <polyline points="21 12 16.5 14.6 16.5 19.79"></polyline>
+                            <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                            <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                        </svg>
+                    </div>
+                    <span class="text-xl sm:text-2xl font-bold gradient-text">LyxNexus Admin</span>
+                </div>
+                <div class="mobile-btn-container">
+                    <button class="btn btn-warning hover:bg-gray-700 text-sm sm:text-base" onclick="window.location.href='/admin/secret-code'"><i class="fas fa-shield-alt mr-2"></i>Code</button>
+                    <button class="btn bg-gray-600 hover:bg-gray-700 text-sm sm:text-base" onclick="window.location.href='/admin/clone-db'"><i class="fas fa-database mr-2"></i>Database</button>
+                    <button class="btn bg-gray-600 hover:bg-gray-700 text-sm sm:text-base" onclick="window.location.href='/profile'"><i class="fas fa-user mr-2"></i>Profile</button>
+                    <button class="btn bg-gray-600 hover:bg-gray-700 text-sm sm:text-base" onclick="window.location.href='/messages'"><i class="fas fa-comments mr-2"></i>Messages</button>
+                    <button class="btn bg-gray-600 hover:bg-gray-700 text-sm sm:text-base" onclick="window.location.href='/admin/users'"><i class="fas fa-users mr-2"></i>Users</button>
+                    <button class="btn btn-danger text-sm sm:text-base" onclick="logout()"><i class="fas fa-sign-out-alt mr-2"></i>Logout</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto px-4 py-8">
+        <div class="mb-8">
+            <h1 class="text-2xl sm:text-3xl font-bold gradient-text mb-2">Admin Dashboard</h1>
+            <p class="text-gray-400">Manage announcements, assignments, topics, and timetable</p>
+        </div>
+
+        <!-- Tabs -->
+        <div class="glass-morph rounded-t-xl p-4">
+            <div class="border-b border-gray-700 pb-2 tab-container">
+                <button class="tab-button whitespace-nowrap active" onclick="openTab('announcements-tab')">Announcements</button>
+                <button class="tab-button whitespace-nowrap" onclick="openTab('assignments-tab')">Assignments</button>
+                <button class="tab-button whitespace-nowrap" onclick="openTab('topics-tab')">Units</button>
+                <button class="tab-button whitespace-nowrap" onclick="openTab('timetable-tab')">Timetable</button>
+                <button class="tab-button whitespace-nowrap" onclick="window.location.href='/files'">Files</button>
+            </div>
+        </div>
+
+        <!-- Announcements Tab -->
+        <div id="announcements-tab" class="tab-content active">
+            <div class="glass-morph rounded-b-xl p-4 sm:p-6">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4 sm:gap-0">
+                    <h2 class="text-xl sm:text-2xl font-bold">Manage Announcements</h2>
+                    <button class="btn btn-success w-full sm:w-auto text-sm sm:text-base" onclick="openModal('announcement-modal')">
+                        <i class="fas fa-plus mr-2"></i> New Announcement
+                    </button>
+                </div>
+                <div id="announcements-list" class="space-y-4">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Assignments Tab -->
+        <div id="assignments-tab" class="tab-content">
+            <div class="glass-morph rounded-b-xl p-4 sm:p-6">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4 sm:gap-0">
+                    <h2 class="text-xl sm:text-2xl font-bold">Manage Assignments</h2>
+                    <button class="btn btn-success w-full sm:w-auto text-sm sm:text-base" onclick="openModal('assignment-modal')">
+                        <i class="fas fa-plus mr-2"></i> New Assignment
+                    </button>
+                </div>
+                <div id="assignments-list" class="space-y-4">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Topics Tab -->
+        <div id="topics-tab" class="tab-content">
+            <div class="glass-morph rounded-b-xl p-4 sm:p-6">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4 sm:gap-0">
+                    <h2 class="text-xl sm:text-2xl font-bold">Manage Topics | Units</h2>
+                    <button class="btn btn-success w-full sm:w-auto text-sm sm:text-base" onclick="openModal('topic-modal')">
+                        <i class="fas fa-plus mr-2"></i> New Topic
+                    </button>
+                </div>
+                <div id="topics-list" class="topics-grid">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Timetable Tab -->
+        <div id="timetable-tab" class="tab-content">
+            <div class="glass-morph rounded-b-xl p-4 sm:p-6">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4 sm:gap-0">
+                    <h2 class="text-xl sm:text-2xl font-bold">Manage Timetable</h2>
+                    <button class="btn btn-success w-full sm:w-auto text-sm sm:text-base" onclick="openModal('timetable-modal')">
+                        <i class="fas fa-plus mr-2"></i> New Timetable Slot
+                    </button>
+                </div>
+                <div id="timetable-list" class="space-y-6">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <!-- Announcement Modal -->
+    <div id="announcement-modal" class="modal">
+      <div class="modal-content">
+        <h3 class="text-xl font-bold mb-4" id="announcement-modal-title">Create Announcement</h3>
+        <form id="announcement-form" enctype="multipart/form-data">
+          <input type="hidden" id="announcement-id">
+        
+          <input type="text" id="announcement-title" class="form-input" placeholder="Title" required>
+          <textarea id="announcement-content" class="form-input" rows="5" placeholder="Content" required></textarea>
+        
+          <!-- File Upload Section -->
+          <div id="announcement-file-section">
+            <div class="file-input-wrapper">
+              <input type="file" id="announcement-file" accept="image/*,.pdf,.doc,.docx,.txt,.zip">
+              <label for="announcement-file" class="file-input-label">
+                <i class="fas fa-upload mr-2"></i>Attach File (Optional)
+              </label>
+            </div>
+            <div id="announcement-file-info" class="file-info" style="display: none;">
+              <i class="fas fa-file"></i>
+              <div class="flex-1">
+                <div id="announcement-file-name" class="font-medium"></div>
+                <div id="announcement-file-size" class="text-sm text-gray-400"></div>
+              </div>
+              <button type="button" class="btn btn-danger text-sm" onclick="clearAnnouncementFile()">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+          </div>
+        
+          <div class="flex flex-col-reverse sm:flex-row justify-end space-y-4 sm:space-y-0 space-y-reverse sm:space-x-3 mt-4">
+            <button type="button" class="btn bg-gray-600 hover:bg-gray-700 w-full sm:w-auto" onclick="closeModal('announcement-modal')">Cancel</button>
+            <button type="submit" class="btn btn-success w-full sm:w-auto mb-4 sm:mb-0" id="announcement-submit-btn">Save Announcement</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Assignment Modal -->
+    <div id="assignment-modal" class="modal">
+        <div class="modal-content">
+            <h3 class="text-xl font-bold mb-4" id="assignment-modal-title">Create Assignment</h3>
+            <form id="assignment-form">
+                <input type="hidden" id="assignment-id">
+                <input type="text" id="assignment-title" class="form-input" placeholder="Title" required>
+                <textarea id="assignment-description" class="form-input" rows="3" placeholder="Description" required></textarea>
+                <input type="datetime-local" id="assignment-due-date" class="form-input" required>
+                <select id="assignment-topic" class="form-input">
+                    <option value="">Select Topic (Optional)</option>
+                </select>
+                
+                <!-- File Upload Section -->
+                <div id="assignment-file-section">
+                    <div class="file-input-wrapper">
+                        <input type="file" id="assignment-file" accept=".pdf,.doc,.docx,.txt,.zip">
+                        <label for="assignment-file" class="file-input-label">
+                            <i class="fas fa-upload mr-2"></i>Choose Assignment File (Optional)
+                        </label>
+                    </div>
+                    <div id="assignment-file-info" class="file-info" style="display: none;">
+                        <i class="fas fa-file"></i>
+                        <div class="flex-1">
+                            <div id="assignment-file-name" class="font-medium"></div>
+                            <div id="assignment-file-size" class="text-sm text-gray-400"></div>
+                        </div>
+                        <button type="button" class="btn btn-danger text-sm" onclick="clearAssignmentFile()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="flex flex-col-reverse sm:flex-row justify-end space-y-4 sm:space-y-0 space-y-reverse sm:space-x-3 mt-4">
+                    <button type="button" class="btn bg-gray-600 hover:bg-gray-700 w-full sm:w-auto" onclick="closeModal('assignment-modal')">Cancel</button>
+                    <button type="submit" class="btn btn-success w-full sm:w-auto mb-4 sm:mb-0" id="assignment-submit-btn">Save Assignment</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Topic Modal -->
+    <div id="topic-modal" class="modal">
+        <div class="modal-content">
+            <h3 class="text-xl font-bold mb-4" id="topic-modal-title">Create Topic</h3>
+            <form id="topic-form">
+                <input type="hidden" id="topic-id">
+                <input type="text" id="topic-name" class="form-input" placeholder="Topic Name" required>
+                <textarea id="topic-description" class="form-input" rows="3" placeholder="Description" required></textarea>
+                <div class="flex flex-col-reverse sm:flex-row justify-end space-y-4 sm:space-y-0 space-y-reverse sm:space-x-3 mt-4">
+                    <button type="button" class="btn bg-gray-600 hover:bg-gray-700 w-full sm:w-auto" onclick="closeModal('topic-modal')">Cancel</button>
+                    <button type="submit" class="btn btn-success w-full sm:w-auto mb-4 sm:mb-0" id="topic-submit-btn">Save Topic</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Timetable Modal -->
+    <div id="timetable-modal" class="modal">
+        <div class="modal-content">
+            <h3 class="text-xl font-bold mb-4" id="timetable-modal-title">Create Timetable Slot</h3>
+            <form id="timetable-form">
+                <input type="hidden" id="timetable-id">
+                <select id="timetable-day" class="form-input" required>
+                    <option value="">Select Day</option>
+                    <option value="Monday">Monday</option>
+                    <option value="Tuesday">Tuesday</option>
+                    <option value="Wednesday">Wednesday</option>
+                    <option value="Thursday">Thursday</option>
+                    <option value="Friday">Friday</option>
+                    <option value="Saturday">Saturday</option>
+                    <option value="Sunday">Sunday</option>
+                </select>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <input type="time" id="timetable-start" class="form-input" required>
+                    <input type="time" id="timetable-end" class="form-input" required>
+                </div>
+                <input type="text" id="timetable-subject" class="form-input" placeholder="Subject" required>
+                <input type="text" id="timetable-room" class="form-input" placeholder="Room">
+                <input type="text" id="timetable-teacher" class="form-input" placeholder="Teacher">
+                <select id="timetable-topic" class="form-input">
+                    <option value="">Select Topic (Optional)</option>
+                </select>
+                <div class="flex flex-col-reverse sm:flex-row justify-end space-y-4 sm:space-y-0 space-y-reverse sm:space-x-3 mt-4">
+                    <button type="button" class="btn bg-gray-600 hover:bg-gray-700 w-full sm:w-auto" onclick="closeModal('timetable-modal')">Cancel</button>
+                    <button type="submit" class="btn btn-success w-full sm:w-auto mb-4 sm:mb-0" id="timetable-submit-btn">Save Slot</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Toast notification system
+        class ToastManager {
+            constructor() {
+                this.container = document.getElementById('toast-container');
+                this.toasts = new Set();
+            }
+            
+            show(title, message, type = 'info', duration = 5000) {
+                const toast = document.createElement('div');
+                toast.className = `toast toast-${type}`;
+                
+                const icons = {
+                    success: 'fa-check-circle',
+                    error: 'fa-exclamation-triangle',
+                    info: 'fa-info-circle'
+                };
+                
+                toast.innerHTML = `
+                    <div class="toast-icon">
+                        <i class="fas ${icons[type]}"></i>
+                    </div>
+                    <div class="toast-content">
+                        <div class="toast-title">${title}</div>
+                        <div class="toast-message">${message}</div>
+                    </div>
+                    <button class="toast-close" onclick="toastManager.close(this.parentElement)">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                
+                this.container.appendChild(toast);
+                this.toasts.add(toast);
+                
+                // Animate in
+                setTimeout(() => {
+                    toast.classList.add('show');
+                }, 10);
+                
+                // Auto close
+                setTimeout(() => {
+                    this.close(toast);
+                }, duration);
+                
+                return toast;
+            }
+            
+            close(toast) {
+                if (!this.toasts.has(toast)) return;
+                
+                toast.classList.remove('show');
+                toast.classList.add('hide');
+                
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.parentNode.removeChild(toast);
+                    }
+                    this.toasts.delete(toast);
+                }, 400);
+            }
+        }
+        
+        // Initialize toast manager
+        const toastManager = new ToastManager();
+        
+        // Helper function to show toast
+        function showToast(message, type = 'info', title = null) {
+            const titles = {
+                success: 'Success',
+                error: 'Error',
+                info: 'Information'
+            };
+            
+            return toastManager.show(title || titles[type], message, type);
+        }
+
+        /* ======= CONFIG ======= */
+        const API_BASE = '/api';
+        const ENDPOINTS = {
+          ANNOUNCEMENTS: `${API_BASE}/announcements`,
+          ASSIGNMENTS: `${API_BASE}/assignments`,
+          TIMETABLE: `${API_BASE}/timetable`,
+          TOPICS: `${API_BASE}/topics`,
+          FILES: `${API_BASE}/files`,
+          USERS: `${API_BASE}/users`
+        };
+
+        let currentEditingId = null;
+        let currentAssignmentFile = null;
+
+        /* ======= TAB MANAGEMENT ======= */
+        function openTab(tabId) {
+            // Hide all tab contents
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // Remove active class from all tab buttons
+            const tabButtons = document.querySelectorAll('.tab-button');
+            tabButtons.forEach(button => {
+                button.classList.remove('active');
+            });
+
+            // Show the selected tab content
+            const selectedTab = document.getElementById(tabId);
+            if (selectedTab) {
+                selectedTab.classList.add('active');
+            }
+
+            // Add active class to the clicked tab button
+            const clickedButton = Array.from(tabButtons).find(button => 
+                button.getAttribute('onclick')?.includes(tabId)
+            );
+            if (clickedButton) {
+                clickedButton.classList.add('active');
+            }
+
+            // Load data for the selected tab
+            switch(tabId) {
+                case 'announcements-tab':
+                    loadAnnouncements();
+                    break;
+                case 'assignments-tab':
+                    loadAssignments();
+                    break;
+                case 'topics-tab':
+                    loadTopics();
+                    loadTopicDropdowns();
+                    break;
+                case 'timetable-tab':
+                    loadTimetable();
+                    break;
+            }
+        }
+
+        /* ======= HELPERS ======= */
+        async function fetchData(url) {
+          try {
+            const res = await fetch(url);
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            return await res.json();
+          } catch (err) {
+            console.error('[fetchData] error fetching', url, err);
+            return []; // safe fallback
+          }
+        }
+
+        async function sendData(url, data, method = 'POST') {
+          try {
+            const res = await fetch(url, {
+              method,
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(data)
+            });
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            return await res.json();
+          } catch (err) {
+            console.error('[sendData] error', url, method, err);
+            throw err;
+          }
+        }
+
+        async function deleteData(url) {
+          try {
+            const res = await fetch(url, { method: 'DELETE' });
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            return await res.json();
+          } catch (err) {
+            console.error('[deleteData] error', url, err);
+            throw err;
+          }
+        }
+
+        async function uploadFile(endpoint, file, idSuffix) {
+          try {
+            const fd = new FormData();
+            fd.append('file', file);
+            const res = await fetch(`${endpoint}/${idSuffix}/upload`, {
+              method: 'POST',
+              body: fd
+            });
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            return await res.json();
+          } catch (err) {
+            console.error('[uploadFile] error', endpoint, idSuffix, err);
+            throw err;
+          }
+        }
+
+        function openModal(id) {
+          const el = document.getElementById(id);
+          if (el) el.style.display = 'flex';
+        }
+        function closeModal(id) {
+          const el = document.getElementById(id);
+          if (el) el.style.display = 'none';
+        }
+
+        function getFormData(formEl) {
+          // Returns plain object for simple forms (no file handling)
+          const data = {};
+          if (!formEl) return data;
+          const fd = new FormData(formEl);
+          for (const [k, v] of fd.entries()) {
+            data[k] = v;
+          }
+          return data;
+        }
+
+        /* ======= FILE / ASSIGNMENT FILE HANDLING ======= */
+        function handleAssignmentFileSelect(event) {
+          const file = event.target.files[0];
+          if (file) {
+            currentAssignmentFile = file;
+            const nameEl = document.getElementById('assignment-file-name');
+            const sizeEl = document.getElementById('assignment-file-size');
+            const infoEl = document.getElementById('assignment-file-info');
+            if (nameEl) nameEl.textContent = file.name;
+            if (sizeEl) sizeEl.textContent = `${Math.round(file.size/1024)} KB`;
+            if (infoEl) infoEl.style.display = 'flex';
+          }
+        }
+        function clearAssignmentFile() {
+          currentAssignmentFile = null;
+          const input = document.getElementById('assignment-file');
+          if (input) input.value = '';
+          const infoEl = document.getElementById('assignment-file-info');
+          if (infoEl) infoEl.style.display = 'none';
+        }
+        /* ======= LOADERS (render lists) ======= */
+        async function loadAnnouncements() {
+          const container = document.getElementById('announcements-list') || document.getElementById('announcements-container');
+          if (!container) return;
+        
+          container.innerHTML = `<div class="loading"><div class="spinner"></div></div>`;
+        
+          const items = await fetchData(ENDPOINTS.ANNOUNCEMENTS);
+          if (!items || items.length === 0) {
+            container.innerHTML = '<p class="text-center text-gray-400">No announcements available.</p>';
+            return;
+          }
+        
+          container.innerHTML = items.map(a => `
+            <div class="admin-card enhanced-border">
+              <div class="admin-card-content">
+                <div class="flex-1 mb-4 lg:mb-0">
+                  <h3 class="admin-title">${escapeHtml(a.title || '')}</h3>
+                  <p class="text-gray-400 hyphens-auto break-all mt-1">${escapeHtml(a.content || '')}</p>
+                
+                  ${a.file_name ? `
+                    <div class="mt-2">
+                      <strong>Attachment:</strong> 
+                      <a href="/announcement-file/${a.id}/${encodeURIComponent(a.file_name)}" target="_blank" class="text-blue-400 underline hover:text-blue-300">
+                        ${a.file_name}
+                      </a>
+                    </div>
+                  ` : ''}
+                  
+                  <div class="flex items-center mt-2 text-sm text-gray-500">
+                    <span>By: ${a.author?.username || 'Unknown'}</span>
+                    <span class="mx-2">•</span>
+                    <span>${formatDateSafe(a.created_at)}</span>
+                  </div>
+                </div>
+              
+                <div class="action-buttons">
+                  <button class="btn btn-warning" onclick="editAnnouncement(${a.id})">
+                    <i class="fas fa-edit mr-1"></i> Edit
+                  </button>
+                  <button class="btn btn-danger" onclick="deleteAnnouncement(${a.id})">
+                    <i class="fas fa-trash mr-1"></i> Delete
+                  </button>
+                </div>
+              </div>
+            </div>
+          `).join('');
+        }
+
+        async function loadAssignments() {
+          const container = document.getElementById('assignments-list') || document.getElementById('assignments-container');
+          if (!container) return;
+          container.innerHTML = `<div class="loading"><div class="spinner"></div></div>`;
+          const items = await fetchData(ENDPOINTS.ASSIGNMENTS);
+          if (!items || items.length === 0) {
+            container.innerHTML = '<p class="text-center text-gray-400">No assignments available.</p>';
+            return;
+          }
+        
+          container.innerHTML = items.map(assignment => {
+            const due = assignment.due_date ? formatDateSafe(assignment.due_date) : 'No due date';
+            const fileSection = assignment.file_name ? `
+              <div class="file-info mt-2">
+                <i class="fas fa-file"></i>
+                <div class="flex-1">
+                  <div class="font-medium">${escapeHtml(assignment.file_name)}</div>
+                  <div class="text-sm text-gray-400">${escapeHtml(assignment.file_type || 'Unknown')}</div>
+                </div>
+                <div class="file-actions">
+                  <button class="btn bg-blue-600 hover:bg-blue-700 text-sm" onclick="downloadAssignmentFile(${assignment.id})"><i class="fas fa-download"></i></button>
+                </div>
+              </div>` : '';
+          
+            return `
+              <div class="admin-card enhanced-border">
+                <div class="admin-card-content">
+                  <div class="flex-1 mb-4 lg:mb-0">
+                    <div class="flex flex-col sm:flex-row sm:items-center">
+                      <h3 class="admin-title">${escapeHtml(assignment.title)}</h3>
+                      <span class="bg-blue-500 text-white px-2 py-1 rounded-full text-xs mt-2 sm:mt-0 sm:ml-2">Due: ${due}</span>
+                    </div>
+                    <p class="text-gray-400 break-all hyphens-auto mt-1">${escapeHtml(assignment.description || '')}</p>
+                    ${fileSection}
+                    <div class="flex items-center mt-2 text-sm text-gray-500">
+                      <span>Topic: ${assignment.topic?.name || 'General'}</span>
+                      <span class="mx-2">•</span>
+                      <span>By: ${assignment.creator?.username || 'Unknown'}</span>
+                    </div>
+                  </div>
+                  <div class="action-buttons">
+                    <button class="btn btn-warning" onclick="editAssignment(${assignment.id})"><i class="fas fa-edit mr-1"></i> Edit</button>
+                    <button class="btn btn-danger" onclick="deleteAssignment(${assignment.id})"><i class="fas fa-trash mr-1"></i> Delete</button>
+                  </div>
+                </div>
+              </div>
+            `;
+          }).join('');
+        }
+          
+        async function loadTopics() {
+          const container = document.getElementById('topics-list') || document.getElementById('topics-container');
+          if (!container) return;
+          container.innerHTML = `<div class="loading"><div class="spinner"></div></div>`;
+          const items = await fetchData(ENDPOINTS.TOPICS);
+          if (!items || items.length === 0) {
+            container.innerHTML = '<p class="text-center text-gray-400">No topics available.</p>';
+            return;
+          }
+          
+          container.innerHTML = items.map(t => `
+            <div class="admin-card enhanced-border">
+              <div class="admin-card-content">
+                <div class="flex-1 mb-4 lg:mb-0">
+                  <h3 class="admin-title">${escapeHtml(t.name)}</h3>
+                  <p class="text-gray-400 break-all hyphens-auto mt-1">${escapeHtml(t.description || '')}</p>
+                  <div class="text-sm text-gray-500 mt-2">Created: ${formatDateSafe(t.created_at)}</div>
+                </div>
+                <div class="action-buttons">
+                  <button class="btn bg-blue-500 hover:bg-blue-600 text-white font-semibold flex items-center" onclick="window.location.href='/material/${t.id}'"><i class="fas fa-folder mr-2"></i> Material </button>
+                  <button class="btn btn-warning" onclick="editTopic(${t.id})"><i class="fas fa-edit mr-1"></i> Edit</button>
+                  <button class="btn btn-danger" onclick="deleteTopic(${t.id})"><i class="fas fa-trash mr-1"></i> Delete</button>
+                </div>
+              </div>
+            </div>
+          `).join('');
+        }
+        
+        async function loadTimetable() {
+          const container = document.getElementById('timetable-list') || document.getElementById('timetable-container');
+          if (!container) return;
+          container.innerHTML = `<div class="loading"><div class="spinner"></div></div>`;
+          const raw = await fetchData(ENDPOINTS.TIMETABLE);
+        
+          let grouped = {};
+          if (!raw) {
+            container.innerHTML = '<p class="text-center text-gray-400">No timetable available.</p>';
+            return;
+          }
+        
+          if (Array.isArray(raw) && raw.length && raw[0].day && raw[0].slots) {
+            // grouped response
+            raw.forEach(d => grouped[d.day] = d.slots);
+          } else if (Array.isArray(raw)) {
+            raw.forEach(s => {
+              const day = s.day_of_week || s.day || 'Unsorted';
+              grouped[day] = grouped[day] || [];
+              grouped[day].push(s);
+            });
+          } else {
+            container.innerHTML = '<p class="text-center text-gray-400">No timetable available.</p>';
+            return;
+          }
+        
+          const daysOrder = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+          container.innerHTML = daysOrder.map(day => {
+            const slots = grouped[day];
+            if (!slots || slots.length === 0) return '';
+            return `
+              <div class="admin-card enhanced-border">
+                <h3 class="text-xl font-bold mb-4 border-b border-gray-700 pb-2">${day}</h3>
+                ${slots.map(slot => `
+                  <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center py-3 border-b border-blue-500 last:border-b-0">
+                    <div class="flex-1 mb-2 lg:mb-0">
+                      <div class="font-semibold">${escapeHtml(slot.subject)}</div>
+                      <div class="text-sm text-gray-400">${escapeHtml(slot.teacher || 'TBA')} • ${escapeHtml(slot.room || 'TBA')}</div>
+                      <div class="text-blue-400 mt-1">${escapeHtml(slot.start_time || slot.time || '')} - ${escapeHtml(slot.end_time || '')}</div>
+                    </div>
+                    <div class="action-buttons mt-2 lg:mt-0">
+                      <button class="btn btn-warning" onclick="editTimetableSlot(${slot.id})"><i class="fas fa-edit mr-1"></i> Edit</button>
+                      <button class="btn btn-danger" onclick="deleteTimetableSlot(${slot.id})"><i class="fas fa-trash mr-1"></i> Delete</button>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            `;
+          }).join('');
+        }
+          
+        /* ======= Extra(s) >> escape and date ======= */
+        function escapeHtml(str) {
+          if (!str && str !== 0) return '';
+          return String(str)
+            .replaceAll('&','&amp;')
+            .replaceAll('<','&lt;')
+            .replaceAll('>','&gt;')
+            .replaceAll('"','&quot;')
+            .replaceAll("'", '&#39;');
+        }
+        function formatDateSafe(dateString) {
+          if (!dateString) return '';
+          try {
+            const d = new Date(dateString);
+            return d.toLocaleString(undefined, { year:'numeric', month:'long', day:'numeric', hour:'2-digit', minute:'2-digit' });
+          } catch (e) {
+            return dateString;
+          }
+        }
+          
+        /* ======= EDIT / DELETE / SUBMIT HANDLERS ======= */
+        const announcementFileInput = document.getElementById('announcement-file');
+        const fileInfoContainer = document.getElementById('announcement-file-info');
+        const fileNameEl = document.getElementById('announcement-file-name');
+        const fileSizeEl = document.getElementById('announcement-file-size');
+
+        if (announcementFileInput) {
+          announcementFileInput.addEventListener('change', () => {
+            const file = announcementFileInput.files[0];
+            if (!file) {
+              fileInfoContainer.style.display = 'none';
+              fileNameEl.textContent = '';
+              fileSizeEl.textContent = '';
+              return;
+            }
+            fileInfoContainer.style.display = 'flex';
+            fileNameEl.textContent = file.name;
+            fileSizeEl.textContent = `${(file.size / 1024).toFixed(2)} KB`;
+          });
+        }
+
+        function clearAnnouncementFile() {
+          announcementFileInput.value = '';
+          fileInfoContainer.style.display = 'none';
+          fileNameEl.textContent = '';
+          fileSizeEl.textContent = '';
+        }
+
+        async function editAnnouncement(id) {
+          console.log('[editAnnouncement]', id);
+          const list = await fetchData(ENDPOINTS.ANNOUNCEMENTS);
+          const item = list.find(x => x.id == id);
+          if (!item) return alert('Announcement not found');
+
+          const idEl = document.getElementById('announcement-id');
+          if (idEl) idEl.value = item.id;
+
+          const t = document.getElementById('announcement-title');
+          const c = document.getElementById('announcement-content');
+          if (t) t.value = item.title || '';
+          if (c) c.value = item.content || '';
+
+          const fileSection = document.getElementById('announcement-file-info');
+          const fileNameEl = document.getElementById('announcement-file-name');
+          const fileSizeEl = document.getElementById('announcement-file-size');
+          const fileInput = document.getElementById('announcement-file');
+
+          if (item.file_name && fileSection && fileNameEl && fileSizeEl) {
+            fileSection.style.display = 'flex';
+            fileNameEl.textContent = item.file_name;
+            fileSizeEl.textContent = item.file_size ? `${(item.file_size / 1024).toFixed(1)} KB` : '';
+
+            if (fileInput) fileInput.value = '';
+          } else if (fileSection) {
+            fileSection.style.display = 'none';
+          }
+        
+          const title = document.getElementById('announcement-modal-title');
+          const btn = document.getElementById('announcement-submit-btn');
+          if (title) title.textContent = 'Edit Announcement';
+          if (btn) btn.textContent = 'Update Announcement';
+        
+          currentEditingId = id;
+          openModal('announcement-modal');
+        }
+
+        async function deleteAnnouncement(id) {
+          if (!confirm('Delete this announcement?')) return;
+          try {
+            await deleteData(`${ENDPOINTS.ANNOUNCEMENTS}/${id}`);
+            showToast('Announcement deleted successfully', 'success');
+            loadAnnouncements();
+          } catch (e) {
+            console.error(e);
+            showToast('Failed to delete announcement', 'error');
+          }
+        }
+
+        const annForm = document.getElementById('announcement-form');
+        if (annForm) {
+          annForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+          
+            const submitBtn = document.getElementById('announcement-submit-btn');
+            const originalText = submitBtn ? submitBtn.textContent : '';
+            if (submitBtn) {
+              submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Saving...';
+              submitBtn.disabled = true;
+            }
+          
+            try {
+              const formData = new FormData();
+              formData.append('title', document.getElementById('announcement-title')?.value || '');
+              formData.append('content', document.getElementById('announcement-content')?.value || '');
+            
+              const fileInput = document.getElementById('announcement-file');
+              if (fileInput && fileInput.files.length > 0) {
+                formData.append('file', fileInput.files[0]);
+              }
+            
+              if (currentEditingId) {
+                await fetch(`${ENDPOINTS.ANNOUNCEMENTS}/${currentEditingId}`, {
+                  method: 'PUT',
+                  body: formData
+                });
+                showToast('Announcement updated successfully', 'success');
+              } else {
+                await fetch(`${ENDPOINTS.ANNOUNCEMENTS}/create`, {
+                  method: 'POST',
+                  body: formData
+                });
+                showToast('Announcement created successfully', 'success');
+              }
+            
+              currentEditingId = null;
+              closeModal('announcement-modal');
+              loadAnnouncements();
+            } catch (err) {
+              console.error(err);
+              showToast('Error saving announcement', 'error');
+            } finally {
+              if (submitBtn) {
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+              }
+            }
+          });
+        }
+
+        async function editAssignment(id) {
+          console.log('[editAssignment]', id);
+          const list = await fetchData(ENDPOINTS.ASSIGNMENTS);
+          const item = list.find(x => x.id == id);
+          if (!item) return alert('Assignment not found');
+          const idEl = document.getElementById('assignment-id');
+          if (idEl) idEl.value = item.id;
+          document.getElementById('assignment-title') && (document.getElementById('assignment-title').value = item.title || '');
+          document.getElementById('assignment-description') && (document.getElementById('assignment-description').value = item.description || '');
+          if (item.due_date) {
+            const dt = new Date(item.due_date);
+            const iso = new Date(dt.getTime() - dt.getTimezoneOffset()*60000).toISOString().slice(0,16);
+            document.getElementById('assignment-due-date') && (document.getElementById('assignment-due-date').value = iso);
+          }
+          document.getElementById('assignment-topic') && (document.getElementById('assignment-topic').value = item.topic?.id || '');
+          if (item.file_name) {
+            document.getElementById('assignment-file-name') && (document.getElementById('assignment-file-name').textContent = item.file_name);
+            document.getElementById('assignment-file-info') && (document.getElementById('assignment-file-info').style.display = 'flex');
+          }
+          document.getElementById('assignment-modal-title') && (document.getElementById('assignment-modal-title').textContent = 'Edit Assignment');
+          document.getElementById('assignment-submit-btn') && (document.getElementById('assignment-submit-btn').textContent = 'Update Assignment');
+          currentEditingId = id;
+          openModal('assignment-modal');
+        }
+        async function deleteAssignment(id) {
+          if (!confirm('Delete this assignment?')) return;
+          try {
+            await deleteData(`${ENDPOINTS.ASSIGNMENTS}/${id}`);
+            showToast('Assignment deleted successfully', 'success');
+            loadAssignments();
+          } catch (e) {
+            showToast('Failed to delete assignment', 'error');
+          }
+        }
+        const assignmentForm = document.getElementById('assignment-form');
+        if (assignmentForm) {
+          // file input listener
+          const fileInput = document.getElementById('assignment-file');
+          if (fileInput) fileInput.addEventListener('change', handleAssignmentFileSelect);
+          
+          assignmentForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const submitBtn = document.getElementById('assignment-submit-btn');
+            const originalText = submitBtn ? submitBtn.textContent : '';
+            if (submitBtn) {
+              submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Saving...';
+              submitBtn.disabled = true;
+            }
+            try {
+              const data = {
+                title: document.getElementById('assignment-title')?.value || '',
+                description: document.getElementById('assignment-description')?.value || '',
+                due_date: document.getElementById('assignment-due-date')?.value || '',
+                topic_id: document.getElementById('assignment-topic')?.value || null
+              };
+              let id;
+              if (currentEditingId) {
+                await sendData(`${ENDPOINTS.ASSIGNMENTS}/${currentEditingId}`, data, 'PUT');
+                id = currentEditingId;
+                showToast('Assignment updated successfully', 'success');
+              } else {
+                const res = await sendData(ENDPOINTS.ASSIGNMENTS, data, 'POST');
+                id = res?.id;
+                showToast('Assignment created successfully', 'success');
+              }
+              if (currentAssignmentFile && id) {
+                try { await uploadFile(ENDPOINTS.ASSIGNMENTS, currentAssignmentFile, id); } catch(e){ console.warn('file upload failed', e); }
+              }
+              currentEditingId = null;
+              clearAssignmentFile();
+              closeModal('assignment-modal');
+              loadAssignments();
+            } catch (err) {
+              console.error(err);
+              showToast('Error saving assignment', 'error');
+            } finally {
+              if (submitBtn) {
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+              }
+            }
+          });
+        }
+          
+        /* Topics */
+        async function editTopic(id) {
+          const list = await fetchData(ENDPOINTS.TOPICS);
+          const item = list.find(x => x.id == id);
+          if (!item) return alert('Topic not found');
+          document.getElementById('topic-id') && (document.getElementById('topic-id').value = item.id);
+          document.getElementById('topic-name') && (document.getElementById('topic-name').value = item.name || '');
+          document.getElementById('topic-description') && (document.getElementById('topic-description').value = item.description || '');
+          document.getElementById('topic-modal-title') && (document.getElementById('topic-modal-title').textContent = 'Edit Topic');
+          document.getElementById('topic-submit-btn') && (document.getElementById('topic-submit-btn').textContent = 'Update Topic');
+          currentEditingId = id;
+          openModal('topic-modal');
+        }
+        async function deleteTopic(id) {
+          if (!confirm('Delete this topic?')) return;
+          try {
+            await deleteData(`${ENDPOINTS.TOPICS}/${id}`);
+            showToast('Topic deleted successfully', 'success');
+            loadTopics();
+            loadTopicDropdowns();
+          } catch (e) {
+            showToast('Failed to delete topic', 'error');
+          }
+        }
+        const topicForm = document.getElementById('topic-form');
+        if (topicForm) {
+          topicForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const submitBtn = document.getElementById('topic-submit-btn');
+            const originalText = submitBtn ? submitBtn.textContent : '';
+            if (submitBtn) { submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Saving...'; submitBtn.disabled = true; }
+            try {
+              const data = {
+                name: document.getElementById('topic-name')?.value || '',
+                description: document.getElementById('topic-description')?.value || ''
+              };
+              if (currentEditingId) {
+                await sendData(`${ENDPOINTS.TOPICS}/${currentEditingId}`, data, 'PUT');
+                showToast('Topic updated successfully', 'success');
+              } else {
+                await sendData(ENDPOINTS.TOPICS, data, 'POST');
+                showToast('Topic created successfully', 'success');
+              }
+              currentEditingId = null;
+              closeModal('topic-modal');
+              loadTopics();
+              loadTopicDropdowns();
+            } catch (err) {
+              console.error(err);
+              showToast('Error saving topic', 'error');
+            } finally {
+              if (submitBtn) { submitBtn.textContent = originalText; submitBtn.disabled = false; }
+            }
+          });
+        }
+          
+        /* Timetable */
+        async function editTimetableSlot(id) {
+          console.log('[editTimetableSlot]', id);
+          const raw = await fetchData(ENDPOINTS.TIMETABLE);
+          if (!raw) return alert('No timetable data');
+          let flat = [];
+          if (Array.isArray(raw) && raw.length && raw[0].day && raw[0].slots) {
+            raw.forEach(d => {
+              d.slots.forEach(s => flat.push(Object.assign({}, s, { day: d.day })));
+            });
+          } else if (Array.isArray(raw)) {
+            flat = raw;
+          }
+          const slot = flat.find(s => s.id == id);
+          if (!slot) return alert('Slot not found');
+          
+          document.getElementById('timetable-id') && (document.getElementById('timetable-id').value = slot.id);
+          document.getElementById('timetable-day') && (document.getElementById('timetable-day').value = slot.day_of_week || slot.day || '');
+          document.getElementById('timetable-start') && (document.getElementById('timetable-start').value = slot.start_time || '');
+          document.getElementById('timetable-end') && (document.getElementById('timetable-end').value = slot.end_time || '');
+          document.getElementById('timetable-subject') && (document.getElementById('timetable-subject').value = slot.subject || '');
+          document.getElementById('timetable-room') && (document.getElementById('timetable-room').value = slot.room || '');
+          document.getElementById('timetable-teacher') && (document.getElementById('timetable-teacher').value = slot.teacher || '');
+          document.getElementById('timetable-topic') && (document.getElementById('timetable-topic').value = slot.topic?.id || '');
+          
+          document.getElementById('timetable-modal-title') && (document.getElementById('timetable-modal-title').textContent = 'Edit Timetable Slot');
+          document.getElementById('timetable-submit-btn') && (document.getElementById('timetable-submit-btn').textContent = 'Update Slot');
+          currentEditingId = id;
+          openModal('timetable-modal');
+        }
+        async function deleteTimetableSlot(id) {
+          if (!confirm('Delete this timetable slot?')) return;
+          try {
+            await deleteData(`${ENDPOINTS.TIMETABLE}/${id}`);
+            showToast('Timetable slot deleted successfully', 'success');
+            loadTimetable();
+          } catch (e) {
+            showToast('Failed to delete timetable slot', 'error');
+          }
+        }
+        const timetableForm = document.getElementById('timetable-form');
+        if (timetableForm) {
+          timetableForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const submitBtn = document.getElementById('timetable-submit-btn');
+            const originalText = submitBtn ? submitBtn.textContent : '';
+            if (submitBtn) { submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Saving...'; submitBtn.disabled = true; }
+            try {
+              const data = {
+                day_of_week: document.getElementById('timetable-day')?.value || '',
+                start_time: document.getElementById('timetable-start')?.value || '',
+                end_time: document.getElementById('timetable-end')?.value || '',
+                subject: document.getElementById('timetable-subject')?.value || '',
+                room: document.getElementById('timetable-room')?.value || '',
+                teacher: document.getElementById('timetable-teacher')?.value || '',
+                topic_id: document.getElementById('timetable-topic')?.value || null
+              };
+              if (currentEditingId) {
+                await sendData(`${ENDPOINTS.TIMETABLE}/${currentEditingId}`, data, 'PUT');
+                showToast('Timetable slot updated successfully', 'success');
+              } else {
+                await sendData(ENDPOINTS.TIMETABLE, data, 'POST');
+                showToast('Timetable slot created successfully', 'success');
+              }
+              currentEditingId = null;
+              closeModal('timetable-modal');
+              loadTimetable();
+            } catch (err) {
+              console.error(err);
+              showToast('Error saving timetable slot', 'error');
+            } finally {
+              if (submitBtn) { submitBtn.textContent = originalText; submitBtn.disabled = false; }
+            }
+          });
+        }
+          
+        /* ======= DOWNLOAD helper for assignment files ======= */
+        function downloadAssignmentFile(id) {
+          window.open(`${ENDPOINTS.ASSIGNMENTS}/${id}/download`, '_blank');
+        }
+          
+        async function loadTopicDropdowns() {
+          const topics = await fetchData(ENDPOINTS.TOPICS);
+          const selects = document.querySelectorAll('select[id$="topic"]');
+          selects.forEach(s => {
+      
+            while (s.children.length > 1) s.removeChild(s.lastChild);
+            topics.forEach(t => {
+              const opt = document.createElement('option');
+              opt.value = t.id;
+              opt.textContent = t.name;
+              s.appendChild(opt);
+            });
+          });
+        }
+          
+        document.addEventListener('DOMContentLoaded', () => {
+          openTab('announcements-tab');
+          
+          const fileInput = document.getElementById('assignment-file');
+          if (fileInput) fileInput.addEventListener('change', handleAssignmentFileSelect);
+        });
+
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                window.location.href = '/logout';
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LyxNexus Navigation Guide</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="{{ url_for('static', filename='css/tailwind.min.css') }}" rel="stylesheet">
+  <meta name="keywords" content="education, coding, programming, web development, technology, online courses, learn to code" />
+  <meta name="author" content="Vincent Kipngetich" />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://lyxnexus.onrender.com/" />
+  <link rel="icon" href="https://lyxnexus.onrender.com/uploads/favicon-1.png"/>
+
+  <meta property="og:title" content="LyxNexus - Education Platform" />
+  <meta property="og:description" content="LyxNexus is a simple yet powerful class hub designed to keep everything in one place — from announcements and assignments to topics and class discussions." />
+  <meta property="og:image" content="https://lyxnexus.onrender.com/favicon.ico" />
+  <meta property="og:url" content="https://lyxnexus.onrender.com/" />
+
+  <meta name="twitter:card" content="summary" />
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-color: #0f172a;
+      --text-color: #f1f5f9;
+      --accent-color: #3b82f6;
+      --secondary-color: #8b5cf6;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      margin: 0;
+      overflow-x: hidden;
+      height: 100vh;
+    }
+
+    .guide-container {
+      display: flex;
+      height: 100vh;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scroll-behavior: smooth;
+    }
+    .guide-container::-webkit-scrollbar { display: none; }
+
+    .page {
+      flex: 0 0 100vw;
+      scroll-snap-align: start;
+      display: flex;
+      flex-direction: column;
+      padding: 1rem;
+      box-sizing: border-box;
+    }
+
+    .image-section {
+      flex: 0 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 40vh;
+      cursor: pointer;
+    }
+
+    .page-image {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      border-radius: 15px;
+      transition: transform 0.3s ease;
+    }
+
+    .page-image.zoomed {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      width: 90vw;
+      height: 90vh;
+      transform: translate(-50%, -50%);
+      z-index: 999;
+      box-shadow: 0 0 40px rgba(59,130,246,0.5);
+      border-radius: 20px;
+      background: rgba(0,0,0,0.85);
+    }
+
+    .page-title {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .page-description { color: #cbd5e1; }
+
+    .bottom-section {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      height: 20vh;
+    }
+
+    .bottom-image {
+      flex: 0 0 auto;
+      height: 120px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(59,130,246,0.08), rgba(139,92,246,0.08));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(59,130,246,0.2);
+      overflow: hidden;
+      position: relative;
+      transition: all 0.3s ease;
+    }
+
+    .bottom-image i {
+      position: absolute;
+      font-size: 3rem;
+      color: rgba(59,130,246,0.7);
+      z-index: 1;
+    }
+
+    .bottom-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 12px;
+      opacity: 0.3;
+    }
+
+    .bottom-image:hover { transform: scale(1.05); }
+
+    .navigation-dots {
+      position: fixed;
+      right: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+      z-index: 100;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(59,130,246,0.3);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .dot.active { background: #3b82f6; transform: scale(1.3); }
+
+    .progress-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+      width: 0%;
+      z-index: 101;
+      transition: width 0.3s ease;
+    }
+
+    .controls {
+      position: fixed;
+      bottom: 1.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 1rem;
+      z-index: 100;
+    }
+
+    .control-btn {
+      background: rgba(30,41,59,0.8);
+      border: 1px solid rgba(59,130,246,0.3);
+      color: #3b82f6;
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .control-btn:hover { background: rgba(59,130,246,0.2); transform: scale(1.1); }
+
+    .auto-play-indicator {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      background: rgba(30,41,59,0.8);
+      border: 1px solid rgba(59,130,246,0.3);
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      z-index: 100;
+    }
+
+    .auto-play-toggle {
+      width: 36px;
+      height: 18px;
+      background: rgba(59,130,246,0.3);
+      border-radius: 10px;
+      position: relative;
+      cursor: pointer;
+    }
+
+    .auto-play-toggle::after {
+      content: '';
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      background: #3b82f6;
+      border-radius: 50%;
+      top: 2px;
+      left: 2px;
+      transition: all 0.3s ease;
+    }
+
+    .auto-play-toggle.active::after { left: 20px; }
+
+    .skip-btn {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      color: #fff;
+      border: none;
+      padding: 0.6rem 1.2rem;
+      font-size: 0.9rem;
+      border-radius: 25px;
+      cursor: pointer;
+      z-index: 120;
+      box-shadow: 0 4px 15px rgba(59,130,246,0.3);
+      transition: all 0.3s ease;
+      opacity: 1;
+    }
+
+    .skip-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 4px 20px rgba(59,130,246,0.5);
+    }
+
+    .skip-btn.hidden {
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.6s ease;
+    }
+
+    @media (min-width: 768px) {
+      .page-content { display: flex; gap: 2rem; margin-bottom: 2rem; }
+      .image-section { flex: 0 0 45%; height: 60vh; }
+      .text-section { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+      .bottom-section { flex-direction: row; height: 25vh; }
+      .bottom-image { flex: 0 0 30%; height: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="progress-bar" id="progressBar"></div>
+  <div class="auto-play-indicator">
+    <span>Auto-scroll</span>
+    <div class="auto-play-toggle active" id="autoPlayToggle"></div>
+  </div>
+
+  <div class="guide-container" id="guideContainer"></div>
+  <div class="navigation-dots" id="navigationDots"></div>
+
+  <div class="controls">
+    <div class="control-btn" id="prevBtn"><i class="fas fa-chevron-left"></i></div>
+    <div class="control-btn" id="nextBtn"><i class="fas fa-chevron-right"></i></div>
+  </div>
+
+  <!-- Skip Button -->
+  <button id="skipBtn" class="skip-btn">
+    Skip <i class="fas fa-forward"></i>
+  </button>
+
+  <script>
+    const guideContent = [
+      { topImage: "/uploads/nav-1.png", topTitle: "Welcome to LyxNexus", topDescription: "A platform for students to view announcements, assignments, topics, and small talks.", bottomImage: "/uploads/OIP7.jpg", bottomIcon: "fa-users", bottomTitle: "Getting Started", bottomDescription: "Explore the main interface and get familiar with navigation." },
+      { topImage: "/uploads/nav-2.png", topTitle: "Easy Information Retrival.", topDescription: "Just by click of a single button, BOOM! Announcements, Assignments, Units, and Timetable.", bottomImage: "/uploads/OIP7.jpg", bottomIcon: "fa-bolt", bottomTitle: "Instant Delivery", bottomDescription: "Best part, no login required." },
+      { topImage: "/uploads/nav-5.png", topTitle: "Login Guide", topDescription: "Just enter you mobile number (10-digits starting with either 01 oe 07) and click login. NO SWEAT!", bottomImage: "/uploads/OIP7.jpg", bottomIcon: "fa-right-to-bracket", bottomTitle: "Login Errors", bottomDescription: "The mobile input will shine pink if the mobile is invalid --> as shown in the next section" },
+      { topImage: "/uploads/nav-6.png", topTitle: "Login Guide 2", topDescription: "When this happens, don\'t panic, continue entering till the border turns blue again.'.", bottomImage: "/uploads/OIP7.jpg", bottomIcon: "fa-shield-halved", bottomTitle: "Security", bottomDescription: "Ensure that the mobile you enter is legally yours. The username used at first login will be used at every login session. Happy Exploration!" },
+      { topImage: "/uploads/nav-8.png", topTitle: "Main Page", topDescription: "If you reach this far, congrats. All Informations are gathered here.", bottomImage: "/uploads/OIP7.jpg", bottomIcon: "fa-circle-info", bottomTitle: "Home of IN's Announcements", bottomDescription: "Here you i\'ll see all the announcements as the first page. More navigations -->" },
+      { topImage: "/uploads/nav-9.png", topTitle: "Assignments", topDescription: "Find all the recent Assignment given.", bottomImage: "/uploads/OIP7.jpg", bottomIcon: "fa-clipboard-list", bottomTitle: "Assignment File", bottomDescription: "By clicking view File you will find either the file/document handed out as the main assignment or empty list." },
+      { topImage: "/uploads/nav-10.png", topTitle: "Units / Topics", topDescription: "Find all the Units that Us IN's persue", bottomImage: "/uploads/OIP7.jpg", bottomIcon: "fa-book-open", bottomTitle: "Units Material and Notes", bottomDescription: "By clicking the 'View Material' button, you will be able to access all the available Material for that Unit you want. Zero stress!" },
+      { topImage: "/uploads/nav-11.png", topTitle: "Timetable", topDescription: "Find the latest and clean timetable for our classes.", bottomImage: "/uploads/OIP7.jpg", bottomIcon: "fa-calendar-days", bottomTitle: "Simplicity", bottomDescription: "As you will notice, it\'s very easy to read and understand it. And on top of that, you will have access of it 24/7." },
+      { topImage: "/uploads/nav-12.png", topTitle: "Profile Section", topDescription: "You can quickly get the the stats of the ongoing events like how many assignments have been handed out, and more...", bottomImage: "/uploads/OIP7.jpg", bottomIcon: "fa-user", bottomTitle: "Interactiveness", bottomDescription: "Fell free to edit you Information and also install LyxNexus App for quick access and stable flow of information" },
+      { topImage: "/uploads/nav-14.png", topTitle: "Files Area", topDescription: "Get all the available Notes and documents of all the Units at a single page", bottomImage: "/uploads/OIP7.jpg", bottomIcon: "fa-file-lines", bottomTitle: "Downloable", bottomDescription: "You can download straight to your device and continue learning." },
+      { topImage: "/uploads/nav-15.png", topTitle: "Messages", topDescription: "You can communicate with your fellow Students and get more informations. You can reply to a specific message, and delete a message if wrongly sent or other reasons", bottomImage: "/uploads/OIP7.jpg", bottomIcon: "fa-comments", bottomTitle: "Messages Pages", bottomDescription: "You can switch pages from General, Help to Announcement depending on what event you are interested in." },
+      { topImage: "/uploads/OIP9.jpg", topTitle: "Developer", topDescription: "Meet the mind behind LyxNexus — crafting innovation, performance, and style into one seamless experience.", bottomImage: "/uploads/OIP7.jpg", bottomIcon: "fa-code", bottomTitle: "Developer Insight", bottomDescription: "Created and maintained by the LyxNexus Developer — thank you for being part of the journey. Courtesy of Lyxin." }
+    ];
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const guideContainer = document.getElementById("guideContainer");
+      const navigationDots = document.getElementById("navigationDots");
+      const progressBar = document.getElementById("progressBar");
+      const autoPlayToggle = document.getElementById("autoPlayToggle");
+      const prevBtn = document.getElementById("prevBtn");
+      const nextBtn = document.getElementById("nextBtn");
+
+      let currentPage = 0, autoScrollEnabled = true, autoScrollInterval;
+
+      guideContent.forEach((c) => {
+        const page = document.createElement("div");
+        page.className = "page";
+        page.innerHTML = `
+          <div class="page-content">
+            <div class="image-section">
+              <img src="${c.topImage}" alt="${c.topTitle}" class="page-image">
+            </div>
+            <div class="text-section">
+              <h1 class="page-title">${c.topTitle}</h1>
+              <p class="page-description">${c.topDescription}</p>
+            </div>
+          </div>
+          <div class="bottom-section">
+            <div class="bottom-image">
+              <i class="fas ${c.bottomIcon}"></i>
+              <img src="${c.bottomImage}" alt="${c.bottomTitle}" class="bottom-img">
+            </div>
+            <div class="bottom-text">
+              <h3 class="text-lg font-bold mb-2" style="color:#3b82f6;">${c.bottomTitle}</h3>
+              <p>${c.bottomDescription}</p>
+            </div>
+          </div>`;
+        guideContainer.appendChild(page);
+      });
+
+      guideContent.forEach((_, i) => {
+        const dot = document.createElement("div");
+        dot.className = "dot" + (i === 0 ? " active" : "");
+        dot.addEventListener("click", () => goToPage(i));
+        navigationDots.appendChild(dot);
+      });
+
+      function goToPage(i) {
+        if (i < 0 || i >= guideContent.length) return;
+        currentPage = i;
+        guideContainer.scrollTo({ left: window.innerWidth * i, behavior: "smooth" });
+        updateUI();
+      }
+
+      function updateUI() {
+        document.querySelectorAll(".dot").forEach((d, i) => d.classList.toggle("active", i === currentPage));
+        progressBar.style.width = `${((currentPage + 1) / guideContent.length) * 100}%`;
+      }
+
+      function nextPage() { currentPage = (currentPage + 1) % guideContent.length; goToPage(currentPage); }
+      function prevPage() { currentPage = (currentPage - 1 + guideContent.length) % guideContent.length; goToPage(currentPage); }
+
+      function startAutoScroll() { stopAutoScroll(); if (autoScrollEnabled) autoScrollInterval = setInterval(nextPage, 5000); }
+      function stopAutoScroll() { clearInterval(autoScrollInterval); }
+
+      autoPlayToggle.addEventListener("click", () => {
+        autoScrollEnabled = !autoScrollEnabled;
+        autoPlayToggle.classList.toggle("active", autoScrollEnabled);
+        autoScrollEnabled ? startAutoScroll() : stopAutoScroll();
+      });
+
+      document.body.addEventListener("click", (e) => {
+        const img = e.target.closest(".page-image");
+        if (img) img.classList.toggle("zoomed");
+      });
+
+      prevBtn.onclick = prevPage;
+      nextBtn.onclick = nextPage;
+
+      guideContainer.addEventListener("scroll", () => {
+        const newPage = Math.round(guideContainer.scrollLeft / window.innerWidth);
+        if (newPage !== currentPage) { currentPage = newPage; updateUI(); }
+      });
+
+      window.addEventListener("resize", () => goToPage(currentPage));
+
+      // Skip button logic
+      const skipBtn = document.getElementById("skipBtn");
+
+      // redirect route
+      skipBtn.addEventListener("click", () => {
+        window.location.href = "/main-page";
+      });
+
+      // Auto-hide after 5 seconds
+      let skipTimeout;
+      function resetSkipTimer() {
+        skipBtn.classList.remove("hidden");
+        clearTimeout(skipTimeout);
+        skipTimeout = setTimeout(() => skipBtn.classList.add("hidden"), 5000);
+      }
+
+      ["mousemove", "touchstart", "scroll", "keydown"].forEach(evt => {
+        document.addEventListener(evt, resetSkipTimer);
+      });
+
+      resetSkipTimer();
+      startAutoScroll();
+    });
+  </script>
+</body>
+</html>
