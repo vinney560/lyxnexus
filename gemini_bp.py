@@ -289,21 +289,83 @@ class ReadOnlyDatabaseQueryService:
         return result
     
     def get_public_stats(self):
-        """Get public-facing statistics"""
+        """Get public-facing statistics with actual content"""
         try:
-            from app import User, Announcement, Assignment, Topic, File
-            
+            from app import User, Announcement, Assignment, Topic, Timetable
+
+            # Fetch recent announcements (limit 5)
+            recent_announcements = Announcement.query.order_by(
+                Announcement.created_at.desc()
+            ).limit(5).all()
+
+            # Fetch recent assignments (limit 5)
+            recent_assignments = Assignment.query.order_by(
+                Assignment.created_at.desc()
+            ).limit(5).all()
+
+            # Fetch all topics (or limit if needed)
+            topics = Topic.query.order_by(Topic.created_at.desc()).all()
+
+            # Fetch all timetable entries (optional: limit by week/day)
+            timetable_entries = Timetable.query.order_by(Timetable.created_at.desc()).all()
+
             stats = {
                 'total_users': User.query.count(),
                 'total_announcements': Announcement.query.count(),
                 'total_assignments': Assignment.query.count(),
                 'total_topics': Topic.query.count(),
-                'total_files': File.query.count(),
-                'recent_announcements': Announcement.query.order_by(
-                    Announcement.created_at.desc()
-                ).limit(5).count()
+                'total_timetable_entries': Timetable.query.count(),
+
+                'recent_announcements': [
+                    {
+                        'id': a.id,
+                        'title': a.title,
+                        'content': a.content,
+                        'created_at': a.created_at.isoformat(),
+                        'has_file': a.has_file(),
+                        'file_url': a.get_file_url()
+                    } for a in recent_announcements
+                ],
+
+                'recent_assignments': [
+                    {
+                        'id': assn.id,
+                        'title': assn.title,
+                        'description': assn.description,
+                        'due_date': assn.due_date.isoformat() if assn.due_date else None,
+                        'created_at': assn.created_at.isoformat(),
+                        'topic': assn.topic.name if assn.topic else None,
+                        'has_file': bool(assn.file_data),
+                        'file_name': assn.file_name
+                    } for assn in recent_assignments
+                ],
+
+                'topics': [
+                    {
+                        'id': t.id,
+                        'name': t.name,
+                        'description': t.description,
+                        'created_at': t.created_at.isoformat(),
+                        'assignments_count': len(t.assignments)
+                    } for t in topics
+                ],
+
+                'timetable': [
+                    {
+                        'id': tt.id,
+                        'day_of_week': tt.day_of_week,
+                        'start_time': tt.start_time.isoformat(),
+                        'end_time': tt.end_time.isoformat(),
+                        'subject': tt.subject,
+                        'room': tt.room,
+                        'teacher': tt.teacher,
+                        'topic': tt.topic.name if tt.topic else None
+                    } for tt in timetable_entries
+                ]
             }
+
             return stats
+
         except Exception as e:
             print(f"Error getting stats: {e}")
             return {}
@@ -386,7 +448,7 @@ You are Marion, an AI assistant for the LyxNexus educational platform. You are h
 12. Your knowledge is up-to-date as of {datetime.utcnow().strftime('%Y-%m-%d')} and {(datetime.utcnow() + timedelta(hours=3)).strftime('%H:%M:%S')} EAT.
 13. If the query is "yes" or "no" or requires a binary response, respond with a clear "Yes" or "No" only without additional information.
 14. Always aim to help the user make the most of LyxNexus platform features.
-15. If the query is 'yes', 'go on', 'proceed', 'continue', or similar, respond with "✅ Proceeding as requested using the current context and conversation history." without additional information.
+15. If the query is 'yes', 'go on', 'proceed', 'continue', or similar, ✅ Proceeding as you requested using the current context and conversation history, don't stop rather do what you needed confirmation for. without additional information.
 
 --- IMPORTANT CAPABILITY ---
 - REAL-TIME WEB ACCESS ENABLED: Only use when the query demands current data.
@@ -453,6 +515,29 @@ ASSISTANT RESPONSE (Read-only mode):"""
             db_context += f"- Announcements: {stats.get('total_announcements', 'N/A')}\n"
             db_context += f"- Assignments: {stats.get('total_assignments', 'N/A')}\n"
             db_context += f"- Topics: {stats.get('total_topics', 'N/A')}\n\n"
+            # Recent announcements (titles + file info)
+            db_context += "- Recent Announcements:\n"
+            for a in stats.get('recent_announcements', []):
+                db_context += f"  * {a.get('title', 'No Title')} | Has file: {a.get('has_file', False)}\n"
+            db_context += "\n"
+            
+            # Recent assignments (title, topic, due date, file info)
+            db_context += "- Recent Assignments:\n"
+            for assn in stats.get('recent_assignments', []):
+                db_context += f"  * {assn.get('title', 'No Title')} | Topic: {assn.get('topic', 'N/A')} | Due: {assn.get('due_date', 'N/A')} | Has file: {assn.get('has_file', False)}\n"
+            db_context += "\n"
+            
+            # Topics (name + assignment count)
+            db_context += "- Topics:\n"
+            for t in stats.get('topics', []):
+                db_context += f"  * {t.get('name', 'No Name')} | Assignments: {t.get('assignments_count', 0)}\n"
+            db_context += "\n"
+            
+            # Timetable entries (day, times, subject, teacher, topic)
+            db_context += "- Timetable:\n"
+            for tt in stats.get('timetable', []):
+                db_context += f"  * {tt.get('day_of_week', 'N/A')} | {tt.get('start_time', 'N/A')} - {tt.get('end_time', 'N/A')} | {tt.get('subject', 'N/A')} | Teacher: {tt.get('teacher', 'N/A')} | Topic: {tt.get('topic', 'N/A')}\n"
+            
             
             enhanced_prompt = db_context + basic_prompt
         else:
