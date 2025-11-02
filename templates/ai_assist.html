@@ -162,6 +162,22 @@
             font-weight: 600;
             color: var(--text-primary);
         }
+
+        .history-close {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 0.25rem;
+            border-radius: var(--radius-sm);
+            transition: all 0.3s ease;
+        }
+
+        .history-close:hover {
+            background: var(--surface-light);
+            color: var(--text-primary);
+        }
         
         .history-item {
             padding: 0.75rem;
@@ -172,7 +188,6 @@
             border: 1px solid transparent;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             transform-origin: center;
-            animation: slideInLeft 0.3s ease-out;
         }
         
         .history-item:hover {
@@ -543,6 +558,75 @@
             font-weight: 300;
         }
 
+        /* Text Formatting Styles */
+        .formatted-text {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .formatted-text strong, .formatted-text .bold {
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .formatted-text em, .formatted-text .italic {
+            font-style: italic;
+            color: var(--text-primary);
+        }
+
+        .formatted-text code {
+            background: var(--background);
+            padding: 0.2rem 0.4rem;
+            border-radius: var(--radius-sm);
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.875em;
+            border: 1px solid var(--border);
+            color: var(--primary);
+        }
+
+        .formatted-text pre {
+            background: var(--background);
+            padding: 1rem;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
+            overflow-x: auto;
+            margin: 0.5rem 0;
+        }
+
+        .formatted-text pre code {
+            background: none;
+            padding: 0;
+            border: none;
+            color: var(--text-primary);
+        }
+
+        .formatted-text ul, .formatted-text ol {
+            padding-left: 1.5rem;
+            margin: 0.5rem 0;
+        }
+
+        .formatted-text li {
+            margin: 0.25rem 0;
+        }
+
+        .formatted-text blockquote {
+            border-left: 3px solid var(--primary);
+            padding-left: 1rem;
+            margin: 0.5rem 0;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        .formatted-text .subscript {
+            font-size: 0.75em;
+            vertical-align: sub;
+        }
+
+        .formatted-text .superscript {
+            font-size: 0.75em;
+            vertical-align: super;
+        }
+
         /* Link styling */
         .message-content a {
             color: var(--primary);
@@ -618,17 +702,6 @@
             50% { box-shadow: 0 0 30px rgba(88, 166, 255, 0.6); }
         }
 
-        @keyframes slideInFromLeft {
-            from {
-                opacity: 0;
-                transform: translateX(-100%);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-
         /* Scrollbar Styling */
         #chat-box::-webkit-scrollbar {
             width: 6px;
@@ -666,7 +739,7 @@
             background: var(--text-secondary);
         }
 
-        /* === MOBILE STYLES - SIMPLIFIED APPROACH === */
+        /* === MOBILE STYLES === */
         @media (max-width: 768px) {
             .header {
                 padding: 0.875rem 1rem;
@@ -724,23 +797,13 @@
                 min-width: 70px;
             }
 
-            /* Mobile history panel - COMPLETELY REDESIGNED */
+            /* Mobile history panel */
             .history-panel {
                 width: 85% !important;
                 max-width: 320px !important;
                 top: 60px !important;
                 bottom: 70px !important;
                 z-index: 1002 !important;
-                transform: translateX(-100%) !important;
-            }
-            
-            .history-panel.active {
-                transform: translateX(0) !important;
-            }
-
-            .main-chat.with-history {
-                margin-left: 0 !important;
-                transform: none !important;
             }
 
             .history-toggle {
@@ -855,7 +918,6 @@
             border: 1px solid var(--border);
             text-align: center;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            animation: slideInLeft 0.5s ease-out;
         }
 
         .capability-item:hover {
@@ -911,7 +973,7 @@
     <div class="history-panel" id="historyPanel">
         <div class="history-header">
             <div class="history-title">Conversation History</div>
-            <button class="history-close" id="historyClose" style="background: none; border: none; color: var(--text-secondary); cursor: pointer; font-size: 1.2rem;">
+            <button class="history-close" id="historyClose" title="Close History">
                 <i class="fas fa-times"></i>
             </button>
         </div>
@@ -919,7 +981,7 @@
             {% if sidebar_history_html %}
                 {{ sidebar_history_html | safe }}
             {% else %}
-                <div style="text-align: center; color: var(--text-secondary); padding: 2rem; animation: fadeInUp 0.5s ease-out;">No conversations yet</div>
+                <div style="text-align: center; color: var(--text-secondary); padding: 2rem;">No conversations yet</div>
             {% endif %}
         </div>
     </div>
@@ -1038,7 +1100,6 @@
             this.style.height = 'auto';
             this.style.height = Math.min(this.scrollHeight, 120) + 'px';
             
-            // Enable/disable send button based on content and streaming state
             sendButton.disabled = this.value.trim().length === 0 || isStreaming;
         });
 
@@ -1060,14 +1121,12 @@
             const isActive = !historyPanel.classList.contains('active');
             
             if (isActive) {
-                // Open history panel
                 historyPanel.classList.add('active');
                 historyBackdrop.classList.add('active');
                 if (isMobile) {
                     document.body.style.overflow = 'hidden';
                 }
             } else {
-                // Close history panel
                 closeHistoryPanel();
             }
         }
@@ -1104,7 +1163,6 @@
                 const convId = historyItem.dataset.convId;
                 loadConversation(convId);
                 
-                // Close history panel after selection on mobile
                 if (isMobile) {
                     closeHistoryPanel();
                 }
@@ -1137,11 +1195,34 @@
             return text.replace(urlRegex, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>');
         }
 
+        // Function to format text with markdown-like syntax
+        function formatText(text) {
+            // Convert basic formatting
+            let formatted = text
+                // Bold: *text* or **text**
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.*?)\*/g, '<strong>$1</strong>')
+                // Italics: _text_
+                .replace(/_(.*?)_/g, '<em>$1</em>')
+                // Code: `code`
+                .replace(/`(.*?)`/g, '<code>$1</code>')
+                // Subscript: ~text~
+                .replace(/~(.*?)~/g, '<span class="subscript">$1</span>')
+                // Superscript: ^text^
+                .replace(/\^(.*?)\^/g, '<span class="superscript">$1</span>')
+                // Line breaks
+                .replace(/\n/g, '<br>');
+
+            // Convert URLs to links
+            formatted = linkify(formatted);
+
+            return formatted;
+        }
+
         // Update button states based on streaming status
         function updateButtonStates() {
             sendButton.disabled = isStreaming || messageInput.value.trim().length === 0;
             
-            // Disable all regenerate buttons when streaming
             document.querySelectorAll('.regenerate-button').forEach(btn => {
                 btn.disabled = isStreaming;
             });
@@ -1171,9 +1252,10 @@
                         </div>
                     `;
                 } else {
+                    const formattedContent = formatText(content);
                     messageDiv.innerHTML = `
                         <div class="message-content">
-                            ${linkify(content)}
+                            <div class="formatted-text">${formattedContent}</div>
                             <div class="message-time">${messageTime}</div>
                             <div class="message-actions">
                                 <button class="message-action copy-button" title="Copy response" ${isStreaming ? 'disabled' : ''}>
@@ -1186,12 +1268,10 @@
                         </div>
                     `;
                     
-                    // Store the prompt for regeneration
                     if (prompt) {
                         messageDiv.dataset.prompt = prompt;
                     }
                     
-                    // Hide the message if specified
                     if (isHidden) {
                         messageDiv.classList.add('hidden');
                     }
@@ -1261,12 +1341,10 @@
         // Load specific conversation
         async function loadConversation(convId) {
             try {
-                // Remove active class from all history items
                 document.querySelectorAll('.history-item').forEach(item => {
                     item.classList.remove('active');
                 });
                 
-                // Add active class to clicked item
                 const clickedItem = document.querySelector(`.history-item[data-conv-id="${convId}"]`);
                 if (clickedItem) {
                     clickedItem.classList.add('active');
@@ -1276,20 +1354,16 @@
                 const data = await response.json();
                 
                 if (data.success) {
-                    // Clear the chat box except welcome message
                     const welcomeContainer = chatBox.querySelector('.welcome-container');
                     chatBox.innerHTML = '';
                     if (welcomeContainer) {
                         chatBox.appendChild(welcomeContainer);
                     }
                     
-                    // Add the loaded conversation
                     addMessage(data.conversation.prompt, true, false, data.conversation.timestamp);
                     addMessage(data.conversation.response, false, false, data.conversation.timestamp, data.conversation.prompt);
                     
                     currentConversationId = convId;
-                    
-                    // Scroll to show the loaded conversation
                     scrollToBottom();
                 } else {
                     addMessage('Failed to load conversation. Please try again.', false, true);
@@ -1305,28 +1379,23 @@
             const message = messageInput.value.trim();
             if (!message || isStreaming) return;
 
-            // Set streaming state
             isStreaming = true;
             updateButtonStates();
 
-            // Clear input and reset height
             messageInput.value = '';
             messageInput.style.height = 'auto';
             sendButton.disabled = true;
 
-            // Add user message to chat
             addMessage(message, true);
 
-            // Show typing indicator
             showTypingIndicator();
 
             try {
-                // Create EventSource for streaming response
                 const eventSource = new EventSource(`/gemini/stream?prompt=${encodeURIComponent(message)}`);
 
-                // Create AI message element but keep it hidden initially
                 currentStreamingMessage = addMessage('', false, false, null, message, true);
                 const messageContent = currentStreamingMessage.querySelector('.message-content');
+                const formattedContent = messageContent.querySelector('.formatted-text');
                 messageContent.classList.add('streaming-message');
 
                 let fullResponse = '';
@@ -1336,47 +1405,31 @@
                     hideTypingIndicator();
                     
                     if (event.data.startsWith('❌')) {
-                        // Handle error
-                        messageContent.innerHTML = event.data + '<div class="message-time">' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + '</div>';
+                        formattedContent.innerHTML = event.data;
                         messageContent.classList.remove('streaming-message');
                         eventSource.close();
                         return;
                     }
 
-                    // Show the message when we receive the first data
                     if (!hasReceivedData) {
                         currentStreamingMessage.classList.remove('hidden');
                         hasReceivedData = true;
                     }
 
                     fullResponse += event.data;
-                    messageContent.innerHTML = linkify(fullResponse) + 
-                        '<div class="message-time">' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + '</div>' +
-                        '<div class="message-actions">' +
-                        '<button class="message-action copy-button" title="Copy response"><i class="fas fa-copy"></i> Copy</button>' +
-                        '<button class="message-action regenerate-button" title="Regenerate response"><i class="fas fa-redo"></i> Regenerate</button>' +
-                        '</div>';
+                    formattedContent.innerHTML = formatText(fullResponse);
                     
-                    // Only scroll if user is at bottom
                     if (isAutoScrollEnabled) {
                         scrollToBottom();
                     }
                 };
 
                 eventSource.onerror = function(event) {
-                    console.log('Stream ended:', event);
                     eventSource.close();
-                    
-                    // Remove streaming cursor from final message
                     messageContent.classList.remove('streaming-message');
-                    
-                    // Update history in sidebar
                     updateSidebarHistory(message, fullResponse);
-                    
                     hideTypingIndicator();
                     messageInput.focus();
-                    
-                    // Reset streaming state
                     isStreaming = false;
                     updateButtonStates();
                     currentStreamingMessage = null;
@@ -1387,8 +1440,6 @@
                 hideTypingIndicator();
                 addMessage('Sorry, I encountered an error. Please try again.', false);
                 messageInput.focus();
-                
-                // Reset streaming state
                 isStreaming = false;
                 updateButtonStates();
                 currentStreamingMessage = null;
@@ -1407,23 +1458,16 @@
                 <div class="history-time">${timestamp}</div>
             `;
             
-            // Add to top of history list
             if (historyList.firstChild) {
                 historyList.insertBefore(historyItem, historyList.firstChild);
             } else {
                 historyList.appendChild(historyItem);
             }
             
-            // Remove "No conversations yet" message if present
             const noConvsMsg = historyList.querySelector('div[style*="text-align: center"]');
             if (noConvsMsg) {
                 noConvsMsg.remove();
             }
-
-            // Add click event to the new history item
-            historyItem.addEventListener('click', function() {
-                // This will be handled by the existing event listener
-            });
         }
 
         // Draggable history toggle functionality
@@ -1434,7 +1478,6 @@
         document.addEventListener('mousemove', drag);
         document.addEventListener('mouseup', stopDrag);
 
-        // Touch events for mobile
         historyToggle.addEventListener('touchstart', startDrag);
         document.addEventListener('touchmove', drag);
         document.addEventListener('touchend', stopDrag);
@@ -1477,7 +1520,6 @@
             const newLeft = initialLeft + deltaX;
             const newBottom = initialBottom - deltaY;
             
-            // Constrain to viewport boundaries
             const maxLeft = window.innerWidth - historyToggle.offsetWidth - 10;
             const maxBottom = window.innerHeight - historyToggle.offsetHeight - 10;
             
