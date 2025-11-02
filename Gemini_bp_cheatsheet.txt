@@ -1,0 +1,117 @@
+# Gemini AI Assistant Cheat Sheet
+
+## QUICK START COMMANDS
+
+### Platform Information
+- "Show me announcements" → Gets latest announcements with FULL content
+- "What assignments are due?" → Shows assignments with descriptions
+- "What topics are available?" → Lists all course topics
+- "What's my schedule?" → Shows timetable
+- "Any updates?" → General platform overview
+
+### Conversation Flow
+- "yes" / "no" → Responds to the most recent suggestion
+- "continue" → Continues the current topic
+- "explain more" → Expands on previous answer
+
+## KEYWORD TRIGGERS THAT WORK
+
+### Announcements (triggers full content access)
+- announcement, news, update, new, recent, latest
+- Example: "Any recent news?" → Shows announcement titles AND content
+
+### Assignments
+- assignment, homework, due, submit, task, work
+- Example: "What work is due?" → Shows assignments with descriptions
+
+### Topics/Courses
+- topic, course, lesson, unit, subject
+- Example: "What topics are there?" → Lists all available topics
+
+### Timetable
+- timetable, schedule, class, lecture, time
+- Example: "When is my next class?" → Shows schedule
+
+## SMART CONVERSATION EXAMPLES
+
+### Follow-up Questions (AI remembers context)
+You: "What assignments are due?"
+AI: "You have Math homework due tomorrow..."
+You: "Tell me more about it"
+AI: Continues with Math assignment details (remembers context)
+
+### Topic Switching (Smooth transitions)
+You: "Show me announcements"
+AI: Shows announcements...
+You: "What about assignments?"
+AI: Smoothly switches to assignments without awkward transitions
+
+### Yes/No Responses
+AI: "Would you like me to explain the assignment requirements?"
+You: "yes"
+AI: Explains requirements (continues the suggestion)
+
+## SPECIAL FEATURES
+
+### History Management
+- Auto-reloads: Session refreshes with latest conversations
+- Recent focus: Only uses last 10 conversations for context
+- Persistent memory: All conversations saved to database
+
+### Platform Integration
+- Real data: Accesses actual announcement/assignment content
+- Live stats: Knows user counts, assignment totals, etc.
+- URL references: Can direct you to specific platform pages
+
+### Enhanced Responses
+- Streaming: Responses appear word-by-word naturally
+- No symbols: Clean text without markdown or special characters
+- Context-aware: Uses conversation history for better answers
+
+## PRO TIPS
+
+### For Best Results:
+1. Use natural language - "What's new?" works better than formal queries
+2. Be specific - "Math assignments" vs "assignments"
+3. Follow the flow - Use yes/no for quick responses to suggestions
+4. Let it context-switch - Don't worry about topic changes, it handles them smoothly
+
+### Avoid:
+- "Going back to previous topic" (it does this automatically)
+- Using symbols in your questions
+- Formal/structured language
+
+## TECHNICAL FEATURES
+
+### Available Endpoints:
+- /gemini/ - Main chat interface
+- /gemini/stream - Streaming responses
+- /gemini/stats - Your conversation statistics
+- /gemini/clear-history - Reset conversation history
+- /gemini/rate-conversation/<id> - Rate responses (1-5 stars)
+
+### Data Access:
+- ✅ Announcement titles AND content
+- ✅ Assignment descriptions and due dates
+- ✅ Topic information
+- ✅ Timetable schedules
+- ✅ User-specific conversation history
+
+## QUICK REFERENCE CARD
+
+BASIC USAGE:
+"announcements" → Latest news with full content
+"assignments" → Current work with descriptions
+"schedule" → Your timetable
+"topics" → Available courses
+
+FOLLOW-UPS:
+"yes" → Continue last suggestion
+"no" → Decline last suggestion
+"more" → Expand current topic
+"explain" → Detailed explanation
+
+PLATFORM:
+"main page" → Direct to LyxNexus
+"files" → Access course materials
+"profile" → User information
