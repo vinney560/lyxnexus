@@ -1204,8 +1204,10 @@
                 .replace(/\*(.*?)\*/g, '<strong>$1</strong>')
                 // Italics: _text_
                 .replace(/_(.*?)_/g, '<em>$1</em>')
-                // Code: `code`
+                // Inline code: `code`
                 .replace(/`(.*?)`/g, '<code>$1</code>')
+                // Code blocks: ```language\ncode\n```
+                .replace(/```(\w+)?\n([\s\S]*?)```/g, '<pre><code class="language-$1">$2</code></pre>')
                 // Subscript: ~text~
                 .replace(/~(.*?)~/g, '<span class="subscript">$1</span>')
                 // Superscript: ^text^
