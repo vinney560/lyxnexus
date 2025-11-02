@@ -450,6 +450,7 @@ RESPONSE REQUIREMENTS:
 - Avoid using symbols like "<>", "**", "[]", or any symbols in responses to show URLs, Links, emphasis, or references. For Links or URLs, at the end add a space then "-->".
 
 PLATFORM CONTEXT:
+**Only give the site URL if user asks for it**
 - LyxNexus has: announcements, assignments, topics, files, messages, timetable, profile, specific file(s) for Course Unit Materials or Assignment
 - LyxNexus URL: https://lyxnexus.onrender.com
 - LyxNexus Main Page URL: https://lyxnexus.onrender.com/main-page - contains Announcements, Upcoming Assignments, Messages button, Files button, Profile and Timetable overview.
@@ -470,15 +471,15 @@ Now respond naturally to the user's current message:"""
         # Check if current conversation is about platform content
         current_topic = ""
         if history:
-            # Analyze recent conversation to detect topic
+            # Analyze recent conversation to detect topic - EXPANDED KEYWORDS
             recent_text = " ".join(history[-4:]).lower()
-            if any(word in recent_text for word in ['assignment', 'homework', 'due', 'submit']):
+            if any(word in recent_text for word in ['assignment', 'homework', 'due', 'submit', 'task', 'work']):
                 current_topic = "assignments"
-            elif any(word in recent_text for word in ['announcement', 'news', 'update']):
+            elif any(word in recent_text for word in ['announcement', 'news', 'update', 'new', 'recent', 'latest']):
                 current_topic = "announcements" 
-            elif any(word in recent_text for word in ['topic', 'course', 'lesson']):
+            elif any(word in recent_text for word in ['topic', 'course', 'lesson', 'unit', 'subject']):
                 current_topic = "topics"
-            elif any(word in recent_text for word in ['timetable', 'schedule', 'class']):
+            elif any(word in recent_text for word in ['timetable', 'schedule', 'class', 'lecture', 'time']):
                 current_topic = "timetable"
         
         # Add relevant platform data based on conversation topic
@@ -486,16 +487,21 @@ Now respond naturally to the user's current message:"""
             platform_context = f"\nCurrent Platform Status:\n"
             if current_topic == "assignments" and stats.get('recent_assignments'):
                 platform_context += f"- Recent assignments: {len(stats['recent_assignments'])} available\n"
-                for assn in stats['recent_assignments'][:2]:
-                    platform_context += f"  * {assn.get('title', '')} (Due: {assn.get('due_date', '')})\n"
+                for assn in stats['recent_assignments'][:3]:  # Show 3 items
+                    platform_context += f"  * {assn.get('title', '')}: {assn.get('description', '')} (Due: {assn.get('due_date', '')})\n"
             elif current_topic == "announcements" and stats.get('recent_announcements'):
                 platform_context += f"- Recent announcements: {len(stats['recent_announcements'])} available\n"
-                for ann in stats['recent_announcements'][:2]:
-                    platform_context += f"  * {ann.get('title', '')}\n"
+                for ann in stats['recent_announcements'][:3]:  # Show 3 items with CONTENT
+                    platform_context += f"  * {ann.get('title', '')}: {ann.get('content', '')}\n"
             
             enhanced_prompt = platform_context + smart_prompt
         else:
-            enhanced_prompt = smart_prompt
+            # Always include basic platform overview even if no specific topic detected
+            platform_context = f"\nPlatform Overview:\n"
+            platform_context += f"- Total announcements: {stats.get('total_announcements', 0)}\n"
+            platform_context += f"- Total assignments: {stats.get('total_assignments', 0)}\n"
+            platform_context += f"- Total topics: {stats.get('total_topics', 0)}\n"
+            enhanced_prompt = platform_context + smart_prompt
     except Exception as e:
         print(f"Database context error: {e}")
         enhanced_prompt = smart_prompt
@@ -1044,4 +1050,6 @@ print("📊 Conversation analytics: ENABLED")
 print("⭐ Rating system: ENABLED")
 print("🔄 Session reload on each prompt: ENABLED")
 print("🎯 Recent history focus: ENABLED")
+print("🔍 Expanded keyword detection: ENABLED")
+print("📝 Full content access for announcements: ENABLED")
 print("🚀 Enhanced Gemini Blueprint is ready to use!")
