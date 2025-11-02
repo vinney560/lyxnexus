@@ -766,7 +766,8 @@
 
             /* Keep history toggle visible on mobile */
             .history-toggle {
-                display: flex;
+                display: flex !important;
+                z-index: 1002;
             }
 
             .history-backdrop {
@@ -1048,7 +1049,7 @@
         sendButton.addEventListener('click', sendMessage);
 
         // History toggle with enhanced animations
-        historyToggle.addEventListener('click', function() {
+        function toggleHistoryPanel() {
             const isActive = historyPanel.classList.toggle('active');
             mainChat.classList.toggle('with-history');
             historyBackdrop.classList.toggle('active');
@@ -1059,7 +1060,9 @@
                     historyPanel.style.animation = 'slideInFromLeft 0.4s ease-out';
                 }
             }
-        });
+        }
+
+        historyToggle.addEventListener('click', toggleHistoryPanel);
 
         // Backdrop click to close history on mobile
         historyBackdrop.addEventListener('click', function() {
@@ -1070,7 +1073,7 @@
 
         // Close history when clicking outside on mobile
         document.addEventListener('click', function(e) {
-            if (window.innerWidth <= 480 && 
+            if (window.innerWidth <= 768 && 
                 !historyPanel.contains(e.target) && 
                 !historyToggle.contains(e.target) &&
                 historyPanel.classList.contains('active')) {
