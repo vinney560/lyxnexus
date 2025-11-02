@@ -1,38 +1,39 @@
-# gemini_bp.py
+# gemini_bp.py — Updated for Intelligent Context & Chronological Memory
+# Author: Vincent (Optimized for LyxNexus)
+# Version: Context-Stable | Topic-Aware | Chronological Memory
+
 from flask import Blueprint, request, session, jsonify, render_template, Response, stream_with_context
 from flask_login import current_user, login_required
-from datetime import datetime, date, time
+from datetime import datetime, timedelta, date, time
 import requests
-from datetime import timedelta
-import json
-import time
 import random
+import time as systime
+import json
 
 # Create blueprint
 gemini_bp = Blueprint('gemini', __name__, url_prefix='/gemini')
 
-# API Keys and Model
+# Gemini API Config
 API_KEYS = [
     'AIzaSyA3o8aKHTnVzuW9-qg10KjNy7Lcgn19N2I',
     'AIzaSyCq8-xrPTC40k8E_i3vXZ_-PR6RiPsuOno'
 ]
 MODEL = "gemini-2.0-flash"
 
+
+# =====================================================================
+# Core Services
+# =====================================================================
 class AIConversationService:
-    """
-    Enhanced service for AI conversation management
-    """
-    
+    """Handles conversation persistence and history retrieval."""
     def __init__(self, db_session):
         self.db = db_session
-    
-    def save_conversation(self, user_id, prompt, response, context='general', 
+
+    def save_conversation(self, user_id, prompt, response, context='general',
                          message_type='text', tokens_used=0, response_time=0.0,
                          api_model=None, was_successful=True, error_message=None):
-        """Save conversation with enhanced tracking"""
         try:
             from app import AIConverse
-            
             conversation = AIConverse(
                 user_id=user_id,
                 user_message=prompt,
@@ -45,961 +46,308 @@ class AIConversationService:
                 was_successful=was_successful,
                 error_message=error_message
             )
-            
             self.db.session.add(conversation)
             self.db.session.commit()
-            
-            print(f"✅ Conversation saved for user {user_id} (ID: {conversation.id})")
             return conversation.id
-            
         except Exception as e:
             print(f"❌ Error saving conversation: {e}")
             self.db.session.rollback()
             return None
-    
+
     def get_user_conversation_history(self, user_id, limit=20, offset=0):
-        """Get user's conversation history with pagination"""
+        """Return user's conversations chronologically (oldest → newest)."""
         try:
             from app import AIConverse
-            
-            conversations = AIConverse.query.filter_by(
-                user_id=user_id
-            ).order_by(
-                AIConverse.created_at.desc()
-            ).offset(offset).limit(limit).all()
-            
+            conversations = (
+                AIConverse.query.filter_by(user_id=user_id)
+                .order_by(AIConverse.created_at.asc())  # chronological
+                .offset(offset)
+                .limit(limit)
+                .all()
+            )
             return [conv.to_dict() for conv in conversations]
-            
         except Exception as e:
             print(f"Error getting conversation history: {e}")
             return []
-    
-    def get_conversation_by_id(self, conversation_id, user_id=None):
-        """Get specific conversation by ID with optional user validation"""
-        try:
-            from app import AIConverse
-            
-            query = AIConverse.query.filter_by(id=conversation_id)
-            if user_id:
-                query = query.filter_by(user_id=user_id)
-                
-            conversation = query.first()
-            return conversation.to_dict() if conversation else None
-            
-        except Exception as e:
-            print(f"Error getting conversation: {e}")
-            return None
-    
-    def get_conversation_stats(self, user_id=None):
-        """Get conversation statistics"""
-        try:
-            from app import AIConverse
-            from sqlalchemy import func
-            
-            stats = {}
-            
-            # Base query
-            if user_id:
-                base_query = AIConverse.query.filter_by(user_id=user_id)
-            else:
-                base_query = AIConverse.query
-            
-            # Basic counts
-            stats['total_conversations'] = base_query.count()
-            stats['successful_conversations'] = base_query.filter_by(was_successful=True).count()
-            stats['failed_conversations'] = base_query.filter_by(was_successful=False).count()
-            
-            # Average response time
-            avg_time = base_query.filter(
-                AIConverse.response_time > 0
-            ).with_entities(
-                func.avg(AIConverse.response_time)
-            ).scalar()
-            stats['avg_response_time'] = round(avg_time or 0, 2)
-            
-            # Total tokens used
-            total_tokens = base_query.with_entities(
-                func.sum(AIConverse.tokens_used)
-            ).scalar()
-            stats['total_tokens_used'] = total_tokens or 0
-            
-            # Recent activity (last 7 days)
-            week_ago = datetime.utcnow() - timedelta(days=7)
-            stats['recent_conversations'] = base_query.filter(
-                AIConverse.created_at >= week_ago
-            ).count()
-            
-            return stats
-            
-        except Exception as e:
-            print(f"Error getting conversation stats: {e}")
-            return {}
-    
-    def update_conversation_rating(self, conversation_id, user_id, rating):
-        """Update user rating for a conversation"""
-        try:
-            from app import AIConverse
-            
-            conversation = AIConverse.query.filter_by(
-                id=conversation_id, 
-                user_id=user_id
-            ).first()
-            
-            if conversation:
-                conversation.user_rating = rating
-                self.db.session.commit()
-                return True
-            return False
-            
-        except Exception as e:
-            print(f"Error updating conversation rating: {e}")
-            self.db.session.rollback()
-            return False
-    
-    def delete_user_conversations(self, user_id):
-        """Delete all conversations for a user"""
-        try:
-            from app import AIConverse
-            
-            deleted_count = AIConverse.query.filter_by(user_id=user_id).delete()
-            self.db.session.commit()
-            return deleted_count
-            
-        except Exception as e:
-            print(f"Error deleting user conversations: {e}")
-            self.db.session.rollback()
-            return 0
 
+
+# =====================================================================
+# ReadOnly Query Service
+# =====================================================================
 class ReadOnlyDatabaseQueryService:
-    """
-    Read-only version of DatabaseQueryService for user access
-    Only allows SELECT queries and safe operations
-    """
-    
+    """Provides safe read-only access to platform data."""
     def __init__(self, db_session):
         self.db = db_session
         self.conversation_service = AIConversationService(db_session)
-    
-    def _get_model(self, model_name):
-        """Safely get model class from current app context"""
-        try:
-            from app import User, Announcement, Assignment, Topic, Timetable, Message, File, TopicMaterial, AIConverse
-            
-            model_map = {
-                'User': User,
-                'Announcement': Announcement,
-                'Assignment': Assignment,
-                'Topic': Topic,
-                'Timetable': Timetable,
-                'Message': Message,
-                'File': File,
-                'TopicMaterial': TopicMaterial,
-                'AIConverse': AIConverse
-            }
-            
-            return model_map.get(model_name)
-        except ImportError as e:
-            print(f"Import error: {e}")
-            # Fallback to direct import from app
-            try:
-                from app import User, Announcement, Assignment, Topic, Timetable, Message, File, TopicMaterial, AIConverse
-                model_map = {
-                    'User': User,
-                    'Announcement': Announcement,
-                    'Assignment': Assignment,
-                    'Topic': Topic,
-                    'Timetable': Timetable,
-                    'Message': Message,
-                    'File': File,
-                    'TopicMaterial': TopicMaterial,
-                    'AIConverse': AIConverse
-                }
-                return model_map.get(model_name)
-            except ImportError as e2:
-                print(f"Secondary import error: {e2}")
-                return None
-    
-    def get_available_models(self):
-        """Return models available for read-only access"""
-        return ['User', 'Announcement', 'Assignment', 'Topic', 'Timetable', 'Message', 'File', 'TopicMaterial', 'AIConverse']
-    
-    def query_model_safe(self, model_name, filters=None, limit=10, order_by=None):
-        """
-        Safe read-only query with limited results
-        """
-        Model = self._get_model(model_name)
-        if not Model:
-            return {'error': f'Model {model_name} not found or not accessible'}
-        
-        query = Model.query
-        
-        # Apply basic filters (only equality and like for safety)
-        if filters:
-            for field, value in filters.items():
-                if hasattr(Model, field):
-                    if isinstance(value, dict) and 'like' in value:
-                        query = query.filter(getattr(Model, field).ilike(f'%{value["like"]}%'))
-                    else:
-                        query = query.filter(getattr(Model, field) == value)
-        
-        # Apply ordering safely
-        if order_by and hasattr(Model, order_by.lstrip('-')):
-            if order_by.startswith('-'):
-                query = query.order_by(getattr(Model, order_by[1:]).desc())
-            else:
-                query = query.order_by(getattr(Model, order_by).asc())
-        
-        # Limit results for safety
-        items = query.limit(limit).all()
-        
-        return {
-            'data': [self.serialize_item_safe(item) for item in items],
-            'model': model_name,
-            'count': len(items),
-            'limit': limit
-        }
-    
-    def serialize_item_safe(self, item):
-        """Safe serialization - exclude sensitive data"""
-        if not item:
-            return None
-        
-        # Use to_dict method if available
-        if hasattr(item, 'to_dict'):
-            return item.to_dict()
-        
-        # Fallback to manual serialization
-        result = {}
-        
-        for column in item.__table__.columns:
-            if column.name in ['file_data', 'password', 'secret_key', 'token']:
-                continue
-                
-            value = getattr(item, column.name)
-            
-            if isinstance(value, (datetime, date)):
-                result[column.name] = value.isoformat()
-            elif isinstance(value, time):
-                result[column.name] = value.strftime('%H:%M:%S')
-            elif isinstance(value, bytes):
-                result[column.name] = f'<binary data {len(value)} bytes>'
-            else:
-                result[column.name] = value
-        
-        return result
-    
+
     def get_public_stats(self):
-        """Get public-facing statistics with actual content"""
+        """Return latest platform info: announcements, assignments, timetable."""
         try:
-            from app import User, Announcement, Assignment, Topic, Timetable
+            from app import Announcement, Assignment, Timetable, Topic
 
-            # Fetch recent announcements (limit 5)
-            recent_announcements = Announcement.query.order_by(
-                Announcement.created_at.desc()
-            ).limit(5).all()
+            recent_announcements = Announcement.query.order_by(Announcement.created_at.desc()).limit(5).all()
+            recent_assignments = Assignment.query.order_by(Assignment.created_at.desc()).limit(5).all()
+            timetable_entries = Timetable.query.order_by(Timetable.created_at.desc()).limit(5).all()
+            topics = Topic.query.order_by(Topic.created_at.desc()).limit(5).all()
 
-            # Fetch recent assignments (limit 5)
-            recent_assignments = Assignment.query.order_by(
-                Assignment.created_at.desc()
-            ).limit(5).all()
-
-            # Fetch all topics (or limit if needed)
-            topics = Topic.query.order_by(Topic.created_at.desc()).all()
-
-            # Fetch all timetable entries (optional: limit by week/day)
-            timetable_entries = Timetable.query.order_by(Timetable.created_at.desc()).all()
-
-            stats = {
-                'total_users': User.query.count(),
-                'total_announcements': Announcement.query.count(),
-                'total_assignments': Assignment.query.count(),
-                'total_topics': Topic.query.count(),
-                'total_timetable_entries': Timetable.query.count(),
-
-                'recent_announcements': [
-                    {
-                        'id': a.id,
-                        'title': a.title,
-                        'content': a.content,
-                        'created_at': a.created_at.isoformat(),
-                        'has_file': a.has_file(),
-                        'file_url': a.get_file_url()
-                    } for a in recent_announcements
+            return {
+                "announcements": [
+                    {"title": a.title, "content": a.content, "created_at": a.created_at.isoformat()}
+                    for a in recent_announcements
                 ],
-
-                'recent_assignments': [
-                    {
-                        'id': assn.id,
-                        'title': assn.title,
-                        'description': assn.description,
-                        'due_date': assn.due_date.isoformat() if assn.due_date else None,
-                        'created_at': assn.created_at.isoformat(),
-                        'topic': assn.topic.name if assn.topic else None,
-                        'has_file': bool(assn.file_data),
-                        'file_name': assn.file_name
-                    } for assn in recent_assignments
+                "assignments": [
+                    {"title": a.title, "description": a.description, "due_date": a.due_date.isoformat() if a.due_date else None}
+                    for a in recent_assignments
                 ],
-
-                'topics': [
-                    {
-                        'id': t.id,
-                        'name': t.name,
-                        'description': t.description,
-                        'created_at': t.created_at.isoformat(),
-                        'assignments_count': len(t.assignments)
-                    } for t in topics
+                "timetable": [
+                    {"day": t.day_of_week, "subject": t.subject, "start": t.start_time.isoformat(), "end": t.end_time.isoformat()}
+                    for t in timetable_entries
                 ],
-
-                'timetable': [
-                    {
-                        'id': tt.id,
-                        'day_of_week': tt.day_of_week,
-                        'start_time': tt.start_time.isoformat(),
-                        'end_time': tt.end_time.isoformat(),
-                        'subject': tt.subject,
-                        'room': tt.room,
-                        'teacher': tt.teacher,
-                        'topic': tt.topic.name if tt.topic else None
-                    } for tt in timetable_entries
-                ]
+                "topics": [{"name": tp.name, "description": tp.description} for tp in topics]
             }
-
-            return stats
-
         except Exception as e:
-            print(f"Error getting stats: {e}")
+            print(f"Error loading public stats: {e}")
             return {}
 
     def get_user_conversation_history(self, user_id, limit=20):
-        """Get user's conversation history using the enhanced service"""
         return self.conversation_service.get_user_conversation_history(user_id, limit)
-    
+
     def save_conversation(self, user_id, prompt, response, **kwargs):
-        """Save conversation using the enhanced service"""
-        return self.conversation_service.save_conversation(
-            user_id, prompt, response, **kwargs
-        )
+        return self.conversation_service.save_conversation(user_id, prompt, response, **kwargs)
+
+
+# =====================================================================
+# Intelligent Response System
+# =====================================================================
+def detect_topic_from_text(text):
+    """Identify main topic from text content."""
+    text = text.lower()
+    if any(k in text for k in ["assignment", "due", "submit", "homework"]):
+        return "assignments"
+    elif any(k in text for k in ["announcement", "news", "update"]):
+        return "announcements"
+    elif any(k in text for k in ["timetable", "schedule", "class"]):
+        return "timetable"
+    elif any(k in text for k in ["topic", "course", "lesson"]):
+        return "topics"
+    else:
+        return "general"
+
+
+def build_conversation_context(history):
+    """Build context from chronological history for natural continuity."""
+    context = ""
+    if not history:
+        return "No previous conversation."
+
+    # use only last 6 exchanges (3 user-AI pairs)
+    limited = history[-6:]
+    for i in range(0, len(limited), 2):
+        user_msg = limited[i]
+        ai_msg = limited[i + 1] if i + 1 < len(limited) else ""
+        context += f"User: {user_msg}\nAssistant: {ai_msg}\n"
+    return context.strip()
+
 
 def get_gemini_response(prompt, history, user_context=None):
-    """Get response from Gemini API with smart conversation continuity"""
-    start_time = time.time()
-    
-    # Smart history processing - focus on maintaining conversation flow
-    conversation_context = ""
-    if history:
-        # Always take the last 3 exchanges (6 messages) for context
-        recent_history = history[-6:]  # Last 3 user-assistant pairs
-        
-        # Build context with clear conversation flow
-        for i in range(0, len(recent_history), 2):
-            if i < len(recent_history):
-                user_msg = recent_history[i]
-                ai_msg = recent_history[i+1] if i+1 < len(recent_history) else ""
-                conversation_context += f"User: {user_msg}\nAssistant: {ai_msg}\n"
-    
-    # Smart prompt that maintains conversation continuity
-    smart_prompt = f"""You are Marion, an AI assistant for LyxNexus educational platform.
+    """Enhanced Gemini API integration with topic stability and continuity."""
+    start_time = systime.time()
 
-CONVERSATION CONTEXT (Last 3 exchanges):
-{conversation_context if conversation_context else 'No recent conversation'}
+    # Build chronological context
+    conversation_context = build_conversation_context(history)
+    topic = detect_topic_from_text(" ".join(history[-4:]) + " " + prompt)
 
-CURRENT USER MESSAGE: {prompt}
-
-CONVERSATION FLOW RULES:
-1. **CONTINUITY FIRST**: If the current message continues the recent conversation, maintain that topic naturally
-2. **TOPIC TRANSITIONS**: If the user changes topic, smoothly transition without mentioning the shift
-3. **FOLLOW-UP HANDLING**: Treat "yes", "no", "continue" as direct responses to the most recent exchange
-4. **CONTEXT AWARENESS**: Use the conversation history to understand references and context
-5. **NATURAL FLOW**: Respond as if you naturally remember the recent conversation
-
-SPECIFIC SCENARIO GUIDANCE:
-- If user says "yes"/"no" to a recent suggestion: Continue with that suggestion
-- If user asks a follow-up question: Answer in context of recent discussion  
-- If user starts new topic: Address it directly while maintaining conversational flow
-- If user refers to something from earlier: Connect it naturally without explicit references
-- If user gives an explicit command or requirement adhire and respond naturally
-
-RESPONSE REQUIREMENTS:
-- Answer the current message directly and naturally
-- Maintain conversation continuity when appropriate
-- Never say "going back to" or "returning to previous topic"
-- Never explicitly acknowledge topic changes
-- Never mention conversation history or context
-- Be concise and directly helpful
-- Avoid using symbols like "<>", "**", "[]", or any symbols in responses to show URLs, Links, emphasis, or references. For Links or URLs, at the end add a space then "-->".
-
-PLATFORM CONTEXT:
-- LyxNexus has: announcements, assignments, topics, files, messages, timetable, profile, specific file(s) for Course Unit Materials or Assignment
-- LyxNexus URL: https://lyxnexus.onrender.com
-- LyxNexus Main Page URL: https://lyxnexus.onrender.com/main-page - contains Announcements, Upcoming Assignments, Messages button, Files button, Profile and Timetable overview.
-- LyxNexus Files Page URL: https://lyxnexus.onrender.com/files - for managing Course Unit Materials and all available files related to all Units or Topics.
-- LyxNexus is an educational platform for managing course Units, assignments, Course Units Materials, Announcements, and communications.
-- LyxNexus support: vincentkipngetich479@gmail.com or +254740694312 for WhatsApp or Contant
-- Current user: {current_user.username}
-- Time: {(datetime.utcnow() + timedelta(hours=3)).strftime('%Y-%m-%d %H:%M:%S')} EAT
-
-Now respond naturally to the user's current message:"""
-    
-    # Add platform data context when relevant to current conversation
+    # Fetch platform data when relevant
+    platform_context = ""
     try:
         from app import db
         db_service = ReadOnlyDatabaseQueryService(db)
         stats = db_service.get_public_stats()
-        
-        # Check if current conversation is about platform content
-        current_topic = ""
-        if history:
-            # Analyze recent conversation to detect topic
-            recent_text = " ".join(history[-4:]).lower()
-            if any(word in recent_text for word in ['assignment', 'homework', 'due', 'submit']):
-                current_topic = "assignments"
-            elif any(word in recent_text for word in ['announcement', 'news', 'update']):
-                current_topic = "announcements" 
-            elif any(word in recent_text for word in ['topic', 'course', 'lesson']):
-                current_topic = "topics"
-            elif any(word in recent_text for word in ['timetable', 'schedule', 'class']):
-                current_topic = "timetable"
-        
-        # Add relevant platform data based on conversation topic
-        if current_topic and stats:
-            platform_context = f"\nCurrent Platform Status:\n"
-            if current_topic == "assignments" and stats.get('recent_assignments'):
-                platform_context += f"- Recent assignments: {len(stats['recent_assignments'])} available\n"
-                for assn in stats['recent_assignments'][:2]:
-                    platform_context += f"  * {assn.get('title', '')} (Due: {assn.get('due_date', '')})\n"
-            elif current_topic == "announcements" and stats.get('recent_announcements'):
-                platform_context += f"- Recent announcements: {len(stats['recent_announcements'])} available\n"
-                for ann in stats['recent_announcements'][:2]:
-                    platform_context += f"  * {ann.get('title', '')}\n"
-            
-            enhanced_prompt = platform_context + smart_prompt
-        else:
-            enhanced_prompt = smart_prompt
+
+        if topic == "assignments" and stats.get("assignments"):
+            recent = stats["assignments"][:2]
+            platform_context += "\nRecent Assignments:\n"
+            for a in recent:
+                platform_context += f"- {a['title']} (Due: {a['due_date']})\n"
+        elif topic == "announcements" and stats.get("announcements"):
+            recent = stats["announcements"][:2]
+            platform_context += "\nRecent Announcements:\n"
+            for a in recent:
+                platform_context += f"- {a['title']}\n"
+        elif topic == "timetable" and stats.get("timetable"):
+            platform_context += "\nUpcoming Classes:\n"
+            for t in stats["timetable"][:2]:
+                platform_context += f"- {t['day']} {t['subject']} ({t['start']} - {t['end']})\n"
     except Exception as e:
-        print(f"Database context error: {e}")
-        enhanced_prompt = smart_prompt
-    
-    # Prepare API request with focused history
-    contents = []
-    
-    # Add only the last 3 exchanges to maintain context without overload
-    if history:
-        recent_exchanges = history[-6:]  # Last 3 complete exchanges
-        for i in range(0, len(recent_exchanges), 2):
-            if i < len(recent_exchanges):
-                contents.append({"role": "user", "parts": [{"text": recent_exchanges[i]}]})
-                if i + 1 < len(recent_exchanges):
-                    contents.append({"role": "model", "parts": [{"text": recent_exchanges[i + 1]}]})
-    
-    # Add current smart prompt
-    contents.append({"role": "user", "parts": [{"text": enhanced_prompt}]})
-    
-    # Use standard API
-    for api_key in API_KEYS:
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/{MODEL}:generateContent?key={api_key}"
-        headers = {"Content-Type": "application/json"}
-        payload = {
-            "contents": contents,
-            "generationConfig": {
-                "temperature": 0.7,
-                "topK": 40,
-                "topP": 0.95,
-                "maxOutputTokens": 1024,
-            },
-            "tools": [{"google_search": {}}]
+        print(f"Context data load error: {e}")
+
+    # Smart prompt
+    smart_prompt = f"""
+You are Marion, a wise and friendly AI assistant on the LyxNexus educational platform.
+
+Platform Context:
+{platform_context if platform_context else '(No specific platform data relevant right now)'}
+
+Recent Conversation (chronological):
+{conversation_context}
+
+Current User Message: {prompt}
+
+Rules:
+1. Maintain context naturally. Don't jump between topics.
+2. If user continues same topic, keep flow smooth.
+3. If user switches to new topic, transition silently and respond relevantly.
+4. Treat short replies like 'yes', 'no', 'continue' as follow-ups to the last exchange.
+5. Be concise, clear, and natural — avoid overexplaining.
+6. Never mention “previous messages” or “context.”
+
+Time: {(datetime.utcnow() + timedelta(hours=3)).strftime('%Y-%m-%d %H:%M:%S')} EAT
+User: {current_user.username}
+    """.strip()
+
+    # Prepare payload
+    contents = [{"role": "user", "parts": [{"text": smart_prompt}]}]
+    payload = {
+        "contents": contents,
+        "generationConfig": {
+            "temperature": 0.7,
+            "topK": 40,
+            "topP": 0.95,
+            "maxOutputTokens": 1024,
         }
-        
-        try:
-            response = requests.post(url, headers=headers, json=payload, timeout=60)
-            response_time = time.time() - start_time
-            
-            if response.status_code == 200:
-                data = response.json()
-                if 'candidates' in data and data['candidates']:
-                    text = data["candidates"][0]["content"]["parts"][0]["text"]
-                    
-                    # Clean response - remove any meta-commentary about conversation flow
-                    lines = text.split('\n')
-                    clean_lines = []
-                    for line in lines:
-                        # Remove lines that break conversation flow
-                        if not any(phrase in line.lower() for phrase in [
-                            'going back to', 'returning to', 'as we were discussing',
-                            'previously we talked', 'earlier you asked', 'regarding your previous'
-                        ]):
-                            clean_lines.append(line)
-                    
-                    clean_text = '\n'.join(clean_lines).strip()
-                    
-                    # Estimate token usage
-                    tokens_used = len(clean_text.split()) + len(prompt.split())
-                    
-                    return {
-                        'text': clean_text,
-                        'tokens_used': tokens_used,
-                        'response_time': response_time,
-                        'success': True
-                    }
-                else:
-                    print(f"No candidates in response: {data}")
-            else:
-                print(f"API key {api_key[:10]}... failed with status: {response.status_code}")
-                print(f"Response: {response.text}")
-        except Exception as e:
-            print(f"API key {api_key[:10]}... failed: {e}")
-            continue
-    
-    return {
-        'text': "I'm currently experiencing technical difficulties. Please try again in a moment.",
-        'tokens_used': 0,
-        'response_time': time.time() - start_time,
-        'success': False
     }
 
+    # Try Gemini keys sequentially
+    for key in API_KEYS:
+        try:
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/{MODEL}:generateContent?key={key}"
+            r = requests.post(url, headers={"Content-Type": "application/json"}, json=payload, timeout=60)
+            response_time = systime.time() - start_time
+
+            if r.status_code == 200:
+                data = r.json()
+                if "candidates" in data and data["candidates"]:
+                    text = data["candidates"][0]["content"]["parts"][0]["text"].strip()
+                    return {
+                        "text": text,
+                        "tokens_used": len(text.split()) + len(prompt.split()),
+                        "response_time": round(response_time, 2),
+                        "success": True,
+                        "context_used": topic,
+                    }
+            else:
+                print(f"Gemini API error {r.status_code}: {r.text}")
+        except Exception as e:
+            print(f"Gemini API key {key[:10]}... failed: {e}")
+
+    # fallback
+    return {
+        "text": "I'm experiencing a temporary issue. Please try again shortly.",
+        "tokens_used": 0,
+        "response_time": systime.time() - start_time,
+        "success": False,
+        "context_used": "general"
+    }
+
+
+# =====================================================================
+# Streaming System
+# =====================================================================
 def simulate_streaming(text, base_delay=0.03):
-    """Optimized streaming that preserves spaces and feels natural"""
-    if not text:
-        return
-    
+    """Stream text gradually for live chat feel."""
     words = text.split(' ')
     i = 0
-    
     while i < len(words):
-        # Calculate how many words to include in this chunk (1-3 words)
-        words_in_chunk = min(random.randint(1, 3), len(words) - i)
-        
-        # Get the chunk of words
-        chunk_words = words[i:i + words_in_chunk]
-        chunk = ' '.join(chunk_words)
-        
-        # Add space if not the last chunk
-        if i + words_in_chunk < len(words):
+        chunk_size = min(random.randint(1, 3), len(words) - i)
+        chunk = ' '.join(words[i:i + chunk_size])
+        if i + chunk_size < len(words):
             chunk += ' '
-        
-        yield chunk
-        
-        # Variable delay based on chunk size and punctuation
-        delay = base_delay * len(chunk) * random.uniform(0.8, 1.2)
-        
-        # Check for punctuation in the last word of chunk
-        last_word = chunk_words[-1] if chunk_words else ''
-        if last_word and last_word[-1] in '.!?':
-            delay *= 2.5  # Longer pause at sentence endings
-        elif last_word and last_word[-1] in ',;:':
-            delay *= 1.5  # Slightly longer pause at commas
-            
-        time.sleep(delay)
-        i += words_in_chunk
+        yield f"data: {chunk}\n\n"
+        delay = base_delay * len(chunk) * random.uniform(0.9, 1.3)
+        if chunk.endswith(('.', '!', '?')):
+            delay *= 2
+        systime.sleep(delay)
+        i += chunk_size
+
 
 def generate_stream(prompt, history, user_context):
-    """Generate streaming response with persistent memory from DB"""
+    """Generate and stream response with chronological, topic-aware memory."""
     try:
         from app import db
         db_service = ReadOnlyDatabaseQueryService(db)
 
-        # Ensure history has context from DB if session is empty
         if not history:
-            db_history = db_service.get_user_conversation_history(
-                user_id=current_user.id, 
-                limit=20
-            )
+            db_history = db_service.get_user_conversation_history(current_user.id, 20)
             history = []
-            for conv in db_history:
-                history.append(conv['user_message'])
-                history.append(conv['ai_response'])
+            for h in db_history:
+                history += [h["user_message"], h["ai_response"]]
 
-        print(f"Getting response for prompt: {prompt[:100]}...")
+        response = get_gemini_response(prompt, history, user_context)
+        text = response["text"]
+        context_used = response.get("context_used", "general")
 
-        # Get full response from Gemini
-        response_data = get_gemini_response(prompt, history, user_context)
-        full_response = response_data['text']
+        db_service.save_conversation(
+            user_id=current_user.id,
+            prompt=prompt,
+            response=text,
+            context=context_used,
+            tokens_used=response["tokens_used"],
+            response_time=response["response_time"],
+            was_successful=response["success"]
+        )
 
-        if not full_response:
-            yield "data: ❌ Failed to get response from AI service.\n\n"
-            return
-
-        # Save conversation to database
-        try:
-            conversation_id = db_service.save_conversation(
-                user_id=current_user.id,
-                prompt=prompt,
-                response=full_response,
-                tokens_used=response_data.get('tokens_used', 0),
-                response_time=response_data.get('response_time', 0),
-                was_successful=response_data.get('success', True)
-            )
-            print(f"✅ Conversation saved (ID: {conversation_id})")
-        except Exception as e:
-            print(f"❌ Failed to save conversation: {e}")
-
-        # Update session history
-        if 'gemini_history' not in session:
-            session['gemini_history'] = []
-        session['gemini_history'].append(prompt)
-        session['gemini_history'].append(full_response)
-
-        # Keep last 40 entries for performance
-        if len(session['gemini_history']) > 40:
-            session['gemini_history'] = session['gemini_history'][-40:]
+        session.setdefault("gemini_history", [])
+        session["gemini_history"] += [prompt, text]
+        session["gemini_history"] = session["gemini_history"][-40:]
         session.modified = True
 
-        # Stream response in chunks
-        for chunk in simulate_streaming(full_response):
-            yield f"data: {chunk}\n\n"
-
-        print(f"Stored in history. Total exchanges: {len(session['gemini_history']) // 2}")
-
+        for chunk in simulate_streaming(text):
+            yield chunk
     except Exception as e:
         print(f"Streaming error: {e}")
-        yield "data: ❌ An error occurred while generating the response.\n\n"
+        yield "data: ❌ An error occurred during streaming.\n\n"
 
+
+# =====================================================================
+# Routes
+# =====================================================================
 @gemini_bp.route('/')
 @login_required
 def gemini_chat():
-    """Render the Gemini chat interface with streaming and history"""
     from app import db
     db_service = ReadOnlyDatabaseQueryService(db)
+    history_data = db_service.get_user_conversation_history(current_user.id, 20)
 
-    # Load conversation history from database (latest 20)
-    conversation_history = db_service.get_user_conversation_history(
-        user_id=current_user.id,
-        limit=20
+    session["gemini_history"] = []
+    for h in history_data:
+        session["gemini_history"] += [h["user_message"], h["ai_response"]]
+    session.modified = True
+
+    history_html = "".join(
+        f"<div class='message user-message'><div class='message-content'>{h['user_message']}</div></div>"
+        f"<div class='message ai-message'><div class='message-content'>{h['ai_response']}</div></div>"
+        for h in history_data
     )
 
-    # Load DB history into session for AI context
-    if 'gemini_history' not in session or not session['gemini_history']:
-        session['gemini_history'] = []
-        for conv in conversation_history:
-            session['gemini_history'].append(conv['user_message'])
-            session['gemini_history'].append(conv['ai_response'])
-        session.modified = True
+    return render_template("ai_assist.html", current_user=current_user, history_html=history_html, sidebar_history_html=history_html)
 
-    # Generate HTML for main chat
-    history_html = ""
-    for conv in reversed(conversation_history):  # newest first
-        try:
-            timestamp = datetime.fromisoformat(conv['created_at'].replace('Z', '+00:00'))
-            time_str = timestamp.strftime('%H:%M')
-        except:
-            time_str = "Just now"
-
-        history_html += f'''
-        <div class="message user-message">
-            <div class="message-content">
-                {conv['user_message']}
-                <div class="message-time">{time_str}</div>
-            </div>
-        </div>
-        <div class="message ai-message">
-            <div class="message-content">
-                {conv['ai_response']}
-                <div class="message-time">{time_str}</div>
-            </div>
-        </div>
-        '''
-
-    # Sidebar history
-    sidebar_history_html = ""
-    for conv in conversation_history:
-        try:
-            timestamp = datetime.fromisoformat(conv['created_at'].replace('Z', '+00:00'))
-            time_str = timestamp.strftime('%H:%M')
-        except:
-            time_str = "Just now"
-
-        prompt_preview = conv['user_message'][:60] + "..." if len(conv['user_message']) > 60 else conv['user_message']
-
-        sidebar_history_html += f'''
-        <div class="history-item" data-conv-id="{conv['id']}">
-            <div class="history-prompt">{prompt_preview}</div>
-            <div class="history-time">{time_str}</div>
-        </div>
-        '''
-
-    return render_template('ai_assist.html',
-        current_user=current_user,
-        history_html=history_html,
-        sidebar_history_html=sidebar_history_html
-    )
 
 @gemini_bp.route('/stream')
 @login_required
 def gemini_stream():
-    """Streaming endpoint for Gemini responses"""
-    prompt = request.args.get('prompt', '').strip()
-    
+    prompt = request.args.get("prompt", "").strip()
     if not prompt:
-        return Response("data: ❌ Error: Empty prompt\n\n", mimetype='text/event-stream')
-    
-    print(f"Starting stream for prompt: {prompt[:50]}...")
-    
-    # Get user context
-    user_context = {
-        'user_id': current_user.id,
-        'username': current_user.username,
-        'is_admin': current_user.is_admin
-    }
-    
-    # Get conversation history from session
-    history = session.get('gemini_history', [])
-    
+        return Response("data: ❌ Empty prompt\n\n", mimetype="text/event-stream")
+
+    user_context = {"user_id": current_user.id, "username": current_user.username}
+    history = session.get("gemini_history", [])
     return Response(
         stream_with_context(generate_stream(prompt, history, user_context)),
-        mimetype='text/event-stream',
-        headers={
-            'Cache-Control': 'no-cache',
-            'Connection': 'keep-alive',
-            'X-Accel-Buffering': 'no'
-        }
+        mimetype="text/event-stream",
+        headers={"Cache-Control": "no-cache", "Connection": "keep-alive", "X-Accel-Buffering": "no"},
     )
 
-@gemini_bp.route('/get-conversation/<int:conv_id>')
-@login_required
-def get_conversation(conv_id):
-    """Get specific conversation by ID"""
-    try:
-        from app import AIConverse
-        
-        conversation = AIConverse.query.filter_by(
-            id=conv_id, 
-            user_id=current_user.id
-        ).first()
-        
-        if conversation:
-            # Format timestamp for display
-            try:
-                timestamp = conversation.created_at.strftime('%H:%M') if conversation.created_at else "Just now"
-            except:
-                timestamp = "Just now"
-                
-            return jsonify({
-                'success': True,
-                'conversation': {
-                    'id': conversation.id,
-                    'prompt': conversation.user_message,
-                    'response': conversation.ai_response,
-                    'timestamp': timestamp,
-                    'created_at': conversation.created_at.isoformat() if conversation.created_at else None
-                }
-            })
-        else:
-            return jsonify({'success': False, 'error': 'Conversation not found'}), 404
-            
-    except Exception as e:
-        print(f"Error getting conversation: {e}")
-        return jsonify({'success': False, 'error': 'Failed to load conversation'}), 500
 
-@gemini_bp.route('/rate-conversation/<int:conv_id>', methods=['POST'])
-@login_required
-def rate_conversation(conv_id):
-    """Rate a conversation (1-5 stars)"""
-    try:
-        data = request.get_json()
-        if not data or 'rating' not in data:
-            return jsonify({'success': False, 'error': 'No rating provided'}), 400
-            
-        rating = data.get('rating')
-        if not isinstance(rating, int) or rating < 1 or rating > 5:
-            return jsonify({'success': False, 'error': 'Rating must be between 1 and 5'}), 400
-        
-        from app import db
-        conversation_service = AIConversationService(db)
-        
-        success = conversation_service.update_conversation_rating(
-            conversation_id=conv_id,
-            user_id=current_user.id,
-            rating=rating
-        )
-        
-        if success:
-            return jsonify({
-                'success': True,
-                'message': f'Conversation rated {rating} stars successfully'
-            })
-        else:
-            return jsonify({'success': False, 'error': 'Conversation not found or access denied'}), 404
-            
-    except Exception as e:
-        print(f"Error rating conversation: {e}")
-        return jsonify({'success': False, 'error': 'Failed to rate conversation'}), 500
-
-@gemini_bp.route('/stats')
-@login_required
-def get_conversation_stats():
-    """Get conversation statistics for the current user"""
-    try:
-        from app import db
-        conversation_service = AIConversationService(db)
-        
-        user_stats = conversation_service.get_conversation_stats(user_id=current_user.id)
-        global_stats = conversation_service.get_conversation_stats()
-        
-        return jsonify({
-            'success': True,
-            'user_stats': user_stats,
-            'global_stats': global_stats
-        })
-        
-    except Exception as e:
-        print(f"Error getting conversation stats: {e}")
-        return jsonify({'success': False, 'error': 'Failed to load statistics'}), 500
-
-@gemini_bp.route('/chat', methods=['POST'])
-@login_required
-def gemini_chat_api():
-    """Fallback non-streaming endpoint"""
-    try:
-        data = request.get_json()
-        if not data:
-            return jsonify({'success': False, 'error': 'No data provided'}), 400
-            
-        prompt = data.get('prompt', '').strip()
-        
-        if not prompt:
-            return jsonify({'success': False, 'error': 'Empty prompt'}), 400
-        
-        # Get user context
-        user_context = {
-            'user_id': current_user.id,
-            'username': current_user.username,
-            'is_admin': current_user.is_admin
-        }
-        
-        history = session.get('gemini_history', [])
-        
-        # Get response
-        response_data = get_gemini_response(prompt, history, user_context)
-        full_response = response_data['text']
-        
-        if full_response:
-            # Save to database with enhanced tracking
-            try:
-                from app import db
-                db_service = ReadOnlyDatabaseQueryService(db)
-                conversation_id = db_service.save_conversation(
-                    user_id=current_user.id,
-                    prompt=prompt,
-                    response=full_response,
-                    tokens_used=response_data.get('tokens_used', 0),
-                    response_time=response_data.get('response_time', 0),
-                    was_successful=response_data.get('success', True)
-                )
-            except Exception as e:
-                print(f"Failed to save conversation: {e}")
-            
-            # Store in session
-            if 'gemini_history' not in session:
-                session['gemini_history'] = []
-            
-            session['gemini_history'].append(prompt)
-            session['gemini_history'].append(full_response)
-            if len(session['gemini_history']) > 20:
-                session['gemini_history'] = session['gemini_history'][-20:]
-            
-            session.modified = True
-            
-            return jsonify({
-                'success': True,
-                'response': full_response,
-                'history_length': len(session['gemini_history']),
-                'conversation_id': conversation_id,
-                'response_time': response_data.get('response_time', 0),
-                'tokens_used': response_data.get('tokens_used', 0)
-            })
-        else:
-            return jsonify({'success': False, 'error': 'Service unavailable'}), 503
-        
-    except Exception as e:
-        print(f"Gemini chat error: {e}")
-        return jsonify({'success': False, 'error': 'Failed to process request'}), 500
-
-@gemini_bp.route('/clear-history')
-@login_required
-def clear_chat_history():
-    """Clear the chat history from both session and database"""
-    try:
-        # Clear session history
-        session.pop('gemini_history', None)
-        
-        # Clear database history
-        from app import db
-        conversation_service = AIConversationService(db)
-        deleted_count = conversation_service.delete_user_conversations(current_user.id)
-        
-        return jsonify({
-            'success': True, 
-            'message': f'Chat history cleared ({deleted_count} conversations deleted)'
-        })
-    except Exception as e:
-        print(f"Error clearing history: {e}")
-        return jsonify({'success': False, 'error': 'Failed to clear history'}), 500
-
-@gemini_bp.route('/get-history')
-@login_required
-def get_conversation_history():
-    """Get user's conversation history"""
-    try:
-        limit = request.args.get('limit', 20, type=int)
-        offset = request.args.get('offset', 0, type=int)
-        
-        from app import db
-        conversation_service = AIConversationService(db)
-        conversations = conversation_service.get_user_conversation_history(
-            user_id=current_user.id, 
-            limit=limit,
-            offset=offset
-        )
-        
-        return jsonify({
-            'success': True,
-            'conversations': conversations,
-            'total': len(conversations)
-        })
-    except Exception as e:
-        print(f"Error getting conversation history: {e}")
-        return jsonify({'success': False, 'error': 'Failed to load history'}), 500
-
-@gemini_bp.route('/status')
-@login_required
-def status():
-    """Get chat status with enhanced statistics"""
-    history = session.get('gemini_history', [])
-    
-    # Get database statistics
-    try:
-        from app import db
-        conversation_service = AIConversationService(db)
-        stats = conversation_service.get_conversation_stats(user_id=current_user.id)
-        db_count = stats.get('total_conversations', 0)
-    except:
-        db_count = 0
-    
-    return jsonify({
-        'history_length': len(history),
-        'exchanges': len(history) // 2,
-        'database_conversations': db_count,
-        'user': {
-            'id': current_user.id,
-            'username': current_user.username,
-            'is_admin': current_user.is_admin
-        },
-        'stats': stats
-    })
-
-print("✅ Enhanced Gemini Blueprint loaded successfully!")
-print("📋 Available routes:")
-print("   - GET  /gemini/              -> Chat interface with enhanced memory")
-print("   - GET  /gemini/stream        -> Streaming responses") 
-print("   - GET  /gemini/get-conversation/<id> -> Get specific conversation")
-print("   - POST /gemini/rate-conversation/<id> -> Rate conversation (1-5 stars)")
-print("   - GET  /gemini/stats         -> Conversation statistics")
-print("   - POST /gemini/chat          -> Non-streaming API")
-print("   - POST /gemini/clear-history -> Clear history (session + DB)")
-print("   - GET  /gemini/get-history   -> Get conversation history")
-print("   - GET  /gemini/status        -> Status info with stats")
-print("🔑 API Keys configured:", len(API_KEYS))
-print("🤖 Model:", MODEL)
-print("💾 Enhanced persistent memory: ENABLED")
-print("📊 Conversation analytics: ENABLED")
-print("⭐ Rating system: ENABLED")
-print("🚀 Enhanced Gemini Blueprint is ready to use!")
+print("✅ Gemini Blueprint Updated — Chronological, Topic-Aware, Context-Stable")
+print("🤖 Enhanced AI memory & topic understanding active")
+print("🚀 Ready to chat intelligently on LyxNexus!")
