@@ -429,6 +429,11 @@ RESPONSE REQUIREMENTS:
 
 PLATFORM CONTEXT:
 - LyxNexus has: announcements, assignments, topics, files, messages, timetable
+- LyxNexus URL: https://lyxnexus.onrender.com
+- LyxNexus Main Page URL: https://lyxnexus.onrender.com/main-page - contains Announcements, Upcoming Assignments, Messages button, Files button, Profile and Timetable overview.
+- LyxNexus Files Page URL: https://lyxnexus.onrender.com/files - for managing Course Unit Materials and all available files related to all Units or Topics.
+- LyxNexus is an educational platform for managing course Units, assignments, Course Units Materials, Announcements, and communications.
+- LyxNexus support: vincentkipgetich479@gmail.com
 - Current user: {current_user.username}
 - Time: {(datetime.utcnow() + timedelta(hours=3)).strftime('%Y-%m-%d %H:%M:%S')} EAT
 

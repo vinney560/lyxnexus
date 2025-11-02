@@ -58,6 +58,7 @@
             right: 0;
             z-index: 1000;
             height: 70px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .header-content {
@@ -77,6 +78,11 @@
             font-size: 0.875rem;
             font-weight: 600;
             color: white;
+            transition: transform 0.3s ease;
+        }
+
+        .logo:hover {
+            transform: scale(1.1);
         }
 
         .header-text {
@@ -114,6 +120,7 @@
             align-items: center;
             gap: 0.25rem;
             animation: pulse 2s infinite;
+            transition: all 0.3s ease;
         }
 
         .badge.web {
@@ -133,7 +140,8 @@
             padding: 1rem;
             z-index: 900;
             transform: translateX(-100%);
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 4px 0 20px rgba(0, 0, 0, 0.3);
         }
         
         .history-panel.active {
@@ -162,17 +170,22 @@
             border-radius: var(--radius-md);
             cursor: pointer;
             border: 1px solid transparent;
-            transition: all 0.2s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-origin: center;
+            animation: slideInLeft 0.3s ease-out;
         }
         
         .history-item:hover {
             border-color: var(--primary);
             background: var(--background);
+            transform: translateX(4px);
+            box-shadow: var(--shadow);
         }
 
         .history-item.active {
             border-color: var(--primary);
             background: var(--background);
+            transform: translateX(4px);
         }
         
         .history-prompt {
@@ -183,11 +196,13 @@
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
+            transition: color 0.2s ease;
         }
         
         .history-time {
             font-size: 0.75rem;
             color: var(--text-secondary);
+            transition: color 0.2s ease;
         }
         
         .history-toggle {
@@ -206,19 +221,45 @@
             cursor: pointer;
             z-index: 1001;
             box-shadow: var(--shadow);
-            transition: all 0.3s ease;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             touch-action: none;
             user-select: none;
+        }
+
+        .history-toggle:hover {
+            transform: scale(1.1);
+            box-shadow: var(--shadow-lg);
         }
 
         .history-toggle.dragging {
             transition: none;
             box-shadow: var(--shadow-lg);
+            transform: scale(1.05);
+        }
+
+        /* Backdrop for mobile */
+        .history-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            z-index: 899;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .history-backdrop.active {
+            opacity: 1;
+            visibility: visible;
         }
         
         .main-chat {
             margin-left: 0;
-            transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
         
         .main-chat.with-history {
@@ -235,6 +276,7 @@
             overflow: hidden;
             display: flex;
             flex-direction: column;
+            transition: all 0.3s ease;
         }
 
         .chat-background {
@@ -247,6 +289,7 @@
                 radial-gradient(circle at 20% 80%, rgba(88, 166, 255, 0.1) 0%, transparent 50%),
                 radial-gradient(circle at 80% 20%, rgba(35, 134, 54, 0.1) 0%, transparent 50%);
             pointer-events: none;
+            transition: all 0.5s ease;
         }
 
         /* Messages Container - Scrollable */
@@ -269,9 +312,10 @@
             line-height: 1.5;
             word-wrap: break-word;
             position: relative;
-            animation: messageSlideIn 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            animation: messageSlideIn 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             backdrop-filter: blur(10px);
             border: 1px solid transparent;
+            transition: all 0.3s ease;
         }
 
         .user-message {
@@ -283,6 +327,11 @@
             transform-origin: right bottom;
         }
 
+        .user-message:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
         .ai-message {
             align-self: flex-start;
             background: var(--surface-light);
@@ -290,6 +339,11 @@
             border-bottom-left-radius: var(--radius-sm);
             box-shadow: var(--shadow);
             transform-origin: left bottom;
+        }
+
+        .ai-message:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
         }
 
         .ai-message.hidden {
@@ -307,6 +361,7 @@
             border-radius: var(--radius-lg);
             box-shadow: var(--shadow);
             animation: glow 3s ease-in-out infinite;
+            transition: all 0.3s ease;
         }
 
         .message-content {
@@ -319,6 +374,7 @@
             opacity: 0.7;
             margin-top: 0.5rem;
             display: block;
+            transition: opacity 0.2s ease;
         }
 
         /* Message actions */
@@ -328,11 +384,13 @@
             margin-top: 0.75rem;
             justify-content: flex-end;
             opacity: 0;
-            transition: opacity 0.2s ease;
+            transition: all 0.3s ease;
+            transform: translateY(10px);
         }
 
         .message:hover .message-actions {
             opacity: 1;
+            transform: translateY(0);
         }
 
         .message-action {
@@ -343,7 +401,7 @@
             border-radius: var(--radius-sm);
             font-size: 0.75rem;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             align-items: center;
             gap: 0.25rem;
@@ -353,11 +411,13 @@
             background: var(--primary);
             color: white;
             border-color: var(--primary);
+            transform: translateY(-1px);
         }
 
         .message-action:disabled {
             opacity: 0.5;
             cursor: not-allowed;
+            transform: none !important;
         }
 
         /* Input Container - Fixed at bottom */
@@ -373,6 +433,7 @@
             height: 80px;
             display: flex;
             align-items: center;
+            transition: all 0.3s ease;
         }
 
         .input-wrapper {
@@ -404,6 +465,7 @@
         #message-input:focus {
             border-color: var(--primary);
             box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.1);
+            transform: translateY(-1px);
         }
 
         #message-input::placeholder {
@@ -429,8 +491,8 @@
 
         #send-button:hover:not(:disabled) {
             background: var(--success);
-            transform: translateY(-1px);
-            box-shadow: var(--shadow);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
         }
 
         #send-button:active:not(:disabled) {
@@ -453,6 +515,7 @@
             font-style: italic;
             padding: 0.875rem 1rem;
             animation: fadeInUp 0.5s ease-out;
+            transition: all 0.3s ease;
         }
 
         .typing-dots {
@@ -485,11 +548,14 @@
             color: var(--primary);
             text-decoration: none;
             border-bottom: 1px solid transparent;
-            transition: border-color 0.2s ease;
+            transition: all 0.3s ease;
+            padding: 0 1px;
         }
 
         .message-content a:hover {
             border-bottom: 1px solid var(--primary);
+            background: rgba(88, 166, 255, 0.1);
+            border-radius: 2px;
         }
 
         /* Animations */
@@ -501,6 +567,17 @@
             to {
                 opacity: 1;
                 transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
             }
         }
 
@@ -541,6 +618,17 @@
             50% { box-shadow: 0 0 30px rgba(88, 166, 255, 0.6); }
         }
 
+        @keyframes slideInFromLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
         /* Scrollbar Styling */
         #chat-box::-webkit-scrollbar {
             width: 6px;
@@ -553,6 +641,7 @@
         #chat-box::-webkit-scrollbar-thumb {
             background: var(--border);
             border-radius: 3px;
+            transition: background 0.3s ease;
         }
 
         #chat-box::-webkit-scrollbar-thumb:hover {
@@ -570,6 +659,11 @@
         .history-panel::-webkit-scrollbar-thumb {
             background: var(--border);
             border-radius: 2px;
+            transition: background 0.3s ease;
+        }
+
+        .history-panel::-webkit-scrollbar-thumb:hover {
+            background: var(--text-secondary);
         }
 
         /* Responsive Design with Keyboard Handling */
@@ -635,20 +729,24 @@
                 width: 280px;
                 top: 60px;
                 bottom: 70px;
+                z-index: 901;
             }
 
             .main-chat.with-history {
-                margin-left: 280px;
+                margin-left: 0;
+                transform: translateX(280px);
             }
 
             .history-toggle {
                 bottom: 5rem;
                 width: 45px;
                 height: 45px;
+                z-index: 1002;
             }
 
             .message-actions {
                 opacity: 1; /* Always show on mobile */
+                transform: translateY(0);
             }
         }
 
@@ -658,16 +756,21 @@
             }
 
             .history-panel {
-                width: 100%;
+                width: 85%;
+                max-width: 300px;
             }
 
             .main-chat.with-history {
-                margin-left: 0;
+                transform: translateX(85%);
             }
 
             /* Keep history toggle visible on mobile */
             .history-toggle {
                 display: flex;
+            }
+
+            .history-backdrop {
+                display: block;
             }
         }
 
@@ -719,6 +822,7 @@
             font-size: 3rem;
             margin-bottom: 1rem;
             opacity: 0.8;
+            transition: all 0.3s ease;
         }
 
         .welcome-title {
@@ -729,12 +833,14 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            transition: all 0.3s ease;
         }
 
         .welcome-subtitle {
             font-size: 1rem;
             color: var(--text-secondary);
             margin-bottom: 2rem;
+            transition: all 0.3s ease;
         }
 
         .capabilities-grid {
@@ -750,17 +856,27 @@
             border-radius: var(--radius-lg);
             border: 1px solid var(--border);
             text-align: center;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: slideInLeft 0.5s ease-out;
+        }
+
+        .capability-item:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+            box-shadow: var(--shadow-lg);
         }
 
         .capability-icon {
             font-size: 1.5rem;
             margin-bottom: 0.5rem;
             color: var(--primary);
+            transition: all 0.3s ease;
         }
 
         .capability-text {
             font-size: 0.875rem;
             color: var(--text-secondary);
+            transition: all 0.3s ease;
         }
 
         /* Focus styles for accessibility */
@@ -790,6 +906,9 @@
     </style>
 </head>
 <body>
+    <!-- History Backdrop for Mobile -->
+    <div class="history-backdrop" id="historyBackdrop"></div>
+
     <!-- History Panel -->
     <div class="history-panel" id="historyPanel">
         <div class="history-header">
@@ -799,7 +918,7 @@
             {% if sidebar_history_html %}
                 {{ sidebar_history_html | safe }}
             {% else %}
-                <div style="text-align: center; color: var(--text-secondary); padding: 2rem;">No conversations yet</div>
+                <div style="text-align: center; color: var(--text-secondary); padding: 2rem; animation: fadeInUp 0.5s ease-out;">No conversations yet</div>
             {% endif %}
         </div>
     </div>
@@ -898,6 +1017,7 @@
         const sendButton = document.getElementById('send-button');
         const historyPanel = document.getElementById('historyPanel');
         const historyToggle = document.getElementById('historyToggle');
+        const historyBackdrop = document.getElementById('historyBackdrop');
         const mainChat = document.getElementById('mainChat');
         const historyList = document.getElementById('historyList');
         let currentConversationId = null;
@@ -927,10 +1047,25 @@
         // Send button click
         sendButton.addEventListener('click', sendMessage);
 
-        // History toggle
+        // History toggle with enhanced animations
         historyToggle.addEventListener('click', function() {
-            historyPanel.classList.toggle('active');
+            const isActive = historyPanel.classList.toggle('active');
             mainChat.classList.toggle('with-history');
+            historyBackdrop.classList.toggle('active');
+            
+            // Add animation class for mobile slide effect
+            if (window.innerWidth <= 768) {
+                if (isActive) {
+                    historyPanel.style.animation = 'slideInFromLeft 0.4s ease-out';
+                }
+            }
+        });
+
+        // Backdrop click to close history on mobile
+        historyBackdrop.addEventListener('click', function() {
+            historyPanel.classList.remove('active');
+            mainChat.classList.remove('with-history');
+            historyBackdrop.classList.remove('active');
         });
 
         // Close history when clicking outside on mobile
@@ -941,6 +1076,7 @@
                 historyPanel.classList.contains('active')) {
                 historyPanel.classList.remove('active');
                 mainChat.classList.remove('with-history');
+                historyBackdrop.classList.remove('active');
             }
         });
 
@@ -950,6 +1086,13 @@
             if (historyItem) {
                 const convId = historyItem.dataset.convId;
                 loadConversation(convId);
+                
+                // Close history panel on mobile after selection
+                if (window.innerWidth <= 768) {
+                    historyPanel.classList.remove('active');
+                    mainChat.classList.remove('with-history');
+                    historyBackdrop.classList.remove('active');
+                }
             }
         });
 
