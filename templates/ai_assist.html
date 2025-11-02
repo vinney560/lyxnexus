@@ -666,7 +666,7 @@
             background: var(--text-secondary);
         }
 
-        /* Responsive Design with Keyboard Handling */
+        /* === MOBILE STYLES - SIMPLIFIED APPROACH === */
         @media (max-width: 768px) {
             .header {
                 padding: 0.875rem 1rem;
@@ -724,28 +724,40 @@
                 min-width: 70px;
             }
 
-            /* Mobile history panel */
+            /* Mobile history panel - COMPLETELY REDESIGNED */
             .history-panel {
-                width: 280px;
-                top: 60px;
-                bottom: 70px;
-                z-index: 901;
+                width: 85% !important;
+                max-width: 320px !important;
+                top: 60px !important;
+                bottom: 70px !important;
+                z-index: 1002 !important;
+                transform: translateX(-100%) !important;
+            }
+            
+            .history-panel.active {
+                transform: translateX(0) !important;
             }
 
             .main-chat.with-history {
-                margin-left: 0;
-                transform: translateX(280px);
+                margin-left: 0 !important;
+                transform: none !important;
             }
 
             .history-toggle {
+                display: flex !important;
                 bottom: 5rem;
                 width: 45px;
                 height: 45px;
-                z-index: 1002;
+                z-index: 1003;
+            }
+
+            .history-backdrop {
+                display: block;
+                z-index: 1001;
             }
 
             .message-actions {
-                opacity: 1; /* Always show on mobile */
+                opacity: 1;
                 transform: translateY(0);
             }
         }
@@ -754,24 +766,9 @@
             .message {
                 max-width: 95% !important;
             }
-
+            
             .history-panel {
-                width: 85%;
-                max-width: 300px;
-            }
-
-            .main-chat.with-history {
-                transform: translateX(85%);
-            }
-
-            /* Keep history toggle visible on mobile */
-            .history-toggle {
-                display: flex !important;
-                z-index: 1002;
-            }
-
-            .history-backdrop {
-                display: block;
+                width: 90% !important;
             }
         }
 
@@ -914,6 +911,9 @@
     <div class="history-panel" id="historyPanel">
         <div class="history-header">
             <div class="history-title">Conversation History</div>
+            <button class="history-close" id="historyClose" style="background: none; border: none; color: var(--text-secondary); cursor: pointer; font-size: 1.2rem;">
+                <i class="fas fa-times"></i>
+            </button>
         </div>
         <div id="historyList">
             {% if sidebar_history_html %}
@@ -1019,12 +1019,19 @@
         const historyPanel = document.getElementById('historyPanel');
         const historyToggle = document.getElementById('historyToggle');
         const historyBackdrop = document.getElementById('historyBackdrop');
+        const historyClose = document.getElementById('historyClose');
         const mainChat = document.getElementById('mainChat');
         const historyList = document.getElementById('historyList');
         let currentConversationId = null;
         let isAutoScrollEnabled = true;
         let currentStreamingMessage = null;
         let isStreaming = false;
+        let isMobile = window.innerWidth <= 768;
+
+        // Check if mobile on resize
+        window.addEventListener('resize', function() {
+            isMobile = window.innerWidth <= 768;
+        });
 
         // Auto-resize textarea
         messageInput.addEventListener('input', function() {
@@ -1048,38 +1055,45 @@
         // Send button click
         sendButton.addEventListener('click', sendMessage);
 
-        // History toggle with enhanced animations
+        // History toggle function
         function toggleHistoryPanel() {
-            const isActive = historyPanel.classList.toggle('active');
-            mainChat.classList.toggle('with-history');
-            historyBackdrop.classList.toggle('active');
+            const isActive = !historyPanel.classList.contains('active');
             
-            // Add animation class for mobile slide effect
-            if (window.innerWidth <= 768) {
-                if (isActive) {
-                    historyPanel.style.animation = 'slideInFromLeft 0.4s ease-out';
+            if (isActive) {
+                // Open history panel
+                historyPanel.classList.add('active');
+                historyBackdrop.classList.add('active');
+                if (isMobile) {
+                    document.body.style.overflow = 'hidden';
                 }
+            } else {
+                // Close history panel
+                closeHistoryPanel();
             }
         }
 
+        // Close history panel function
+        function closeHistoryPanel() {
+            historyPanel.classList.remove('active');
+            historyBackdrop.classList.remove('active');
+            if (isMobile) {
+                document.body.style.overflow = '';
+            }
+        }
+
+        // History toggle click
         historyToggle.addEventListener('click', toggleHistoryPanel);
 
-        // Backdrop click to close history on mobile
-        historyBackdrop.addEventListener('click', function() {
-            historyPanel.classList.remove('active');
-            mainChat.classList.remove('with-history');
-            historyBackdrop.classList.remove('active');
-        });
+        // Close button click
+        historyClose.addEventListener('click', closeHistoryPanel);
 
-        // Close history when clicking outside on mobile
-        document.addEventListener('click', function(e) {
-            if (window.innerWidth <= 768 && 
-                !historyPanel.contains(e.target) && 
-                !historyToggle.contains(e.target) &&
-                historyPanel.classList.contains('active')) {
-                historyPanel.classList.remove('active');
-                mainChat.classList.remove('with-history');
-                historyBackdrop.classList.remove('active');
+        // Backdrop click to close history
+        historyBackdrop.addEventListener('click', closeHistoryPanel);
+
+        // Close history with Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && historyPanel.classList.contains('active')) {
+                closeHistoryPanel();
             }
         });
 
@@ -1090,11 +1104,9 @@
                 const convId = historyItem.dataset.convId;
                 loadConversation(convId);
                 
-                // Close history panel on mobile after selection
-                if (window.innerWidth <= 768) {
-                    historyPanel.classList.remove('active');
-                    mainChat.classList.remove('with-history');
-                    historyBackdrop.classList.remove('active');
+                // Close history panel after selection on mobile
+                if (isMobile) {
+                    closeHistoryPanel();
                 }
             }
         });
