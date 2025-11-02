@@ -1207,7 +1207,7 @@
                 // Inline code: `code`
                 .replace(/`(.*?)`/g, '<code>$1</code>')
                 // Code blocks: ```language\ncode\n```
-                .replace(/```(\w+)?\n([\s\S]*?)```/g, '<pre><code class="language-$1">$2</code></pre>')
+                .replace(/```(\w+)?\n([\s\S]*?)```/g, '<code class="language-$1">$2</code>')
                 // Subscript: ~text~
                 .replace(/~(.*?)~/g, '<span class="subscript">$1</span>')
                 // Superscript: ^text^

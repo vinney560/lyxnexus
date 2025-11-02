@@ -452,7 +452,7 @@ RESPONSE REQUIREMENTS:
 FORMATTING TECHNIQUES:
 - Use "_" for _italics_ to emphasize words
 - Use "~" for ~subscript~ and "^" for ^superscript^ if needed
-- Use "```" for ```code blocks``` or `code block` if sharing code snippets
+- Use "`" for `code block` or ```code blocks``` if sharing code snippets
 - Use "*" for *bold* to highlight important terms or titles or where necessary
 
 PLATFORM CONTEXT:
