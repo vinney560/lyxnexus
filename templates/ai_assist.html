@@ -207,6 +207,13 @@
             z-index: 1001;
             box-shadow: var(--shadow);
             transition: all 0.3s ease;
+            touch-action: none;
+            user-select: none;
+        }
+
+        .history-toggle.dragging {
+            transition: none;
+            box-shadow: var(--shadow-lg);
         }
         
         .main-chat {
@@ -285,6 +292,10 @@
             transform-origin: left bottom;
         }
 
+        .ai-message.hidden {
+            display: none;
+        }
+
         .info-message {
             align-self: center;
             background: var(--primary);
@@ -338,10 +349,15 @@
             gap: 0.25rem;
         }
 
-        .message-action:hover {
+        .message-action:hover:not(:disabled) {
             background: var(--primary);
             color: white;
             border-color: var(--primary);
+        }
+
+        .message-action:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
 
         /* Input Container - Fixed at bottom */
@@ -649,8 +665,9 @@
                 margin-left: 0;
             }
 
+            /* Keep history toggle visible on mobile */
             .history-toggle {
-                display: none;
+                display: flex;
             }
         }
 
@@ -886,14 +903,15 @@
         let currentConversationId = null;
         let isAutoScrollEnabled = true;
         let currentStreamingMessage = null;
+        let isStreaming = false;
 
         // Auto-resize textarea
         messageInput.addEventListener('input', function() {
             this.style.height = 'auto';
             this.style.height = Math.min(this.scrollHeight, 120) + 'px';
             
-            // Enable/disable send button
-            sendButton.disabled = this.value.trim().length === 0;
+            // Enable/disable send button based on content and streaming state
+            sendButton.disabled = this.value.trim().length === 0 || isStreaming;
         });
 
         // Enter key to send (Shift+Enter for new line)
@@ -961,8 +979,18 @@
             return text.replace(urlRegex, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>');
         }
 
+        // Update button states based on streaming status
+        function updateButtonStates() {
+            sendButton.disabled = isStreaming || messageInput.value.trim().length === 0;
+            
+            // Disable all regenerate buttons when streaming
+            document.querySelectorAll('.regenerate-button').forEach(btn => {
+                btn.disabled = isStreaming;
+            });
+        }
+
         // Add message to chat
-        function addMessage(content, isUser = false, isInfo = false, timestamp = null, prompt = null) {
+        function addMessage(content, isUser = false, isInfo = false, timestamp = null, prompt = null, isHidden = false) {
             const messageDiv = document.createElement('div');
             const messageTime = timestamp || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             
@@ -990,10 +1018,10 @@
                             ${linkify(content)}
                             <div class="message-time">${messageTime}</div>
                             <div class="message-actions">
-                                <button class="message-action copy-button" title="Copy response">
+                                <button class="message-action copy-button" title="Copy response" ${isStreaming ? 'disabled' : ''}>
                                     <i class="fas fa-copy"></i> Copy
                                 </button>
-                                <button class="message-action regenerate-button" title="Regenerate response">
+                                <button class="message-action regenerate-button" title="Regenerate response" ${isStreaming ? 'disabled' : ''}>
                                     <i class="fas fa-redo"></i> Regenerate
                                 </button>
                             </div>
@@ -1003,6 +1031,11 @@
                     // Store the prompt for regeneration
                     if (prompt) {
                         messageDiv.dataset.prompt = prompt;
+                    }
+                    
+                    // Hide the message if specified
+                    if (isHidden) {
+                        messageDiv.classList.add('hidden');
                     }
                 }
             }
@@ -1031,7 +1064,7 @@
             }
             
             // Regenerate button
-            if (e.target.closest('.regenerate-button')) {
+            if (e.target.closest('.regenerate-button') && !isStreaming) {
                 const messageDiv = e.target.closest('.message');
                 const prompt = messageDiv.dataset.prompt;
                 if (prompt) {
@@ -1112,7 +1145,11 @@
         // Send message function
         async function sendMessage() {
             const message = messageInput.value.trim();
-            if (!message) return;
+            if (!message || isStreaming) return;
+
+            // Set streaming state
+            isStreaming = true;
+            updateButtonStates();
 
             // Clear input and reset height
             messageInput.value = '';
@@ -1129,12 +1166,13 @@
                 // Create EventSource for streaming response
                 const eventSource = new EventSource(`/gemini/stream?prompt=${encodeURIComponent(message)}`);
 
-                // Create AI message element
-                currentStreamingMessage = addMessage('', false, false, null, message);
+                // Create AI message element but keep it hidden initially
+                currentStreamingMessage = addMessage('', false, false, null, message, true);
                 const messageContent = currentStreamingMessage.querySelector('.message-content');
                 messageContent.classList.add('streaming-message');
 
                 let fullResponse = '';
+                let hasReceivedData = false;
 
                 eventSource.onmessage = function(event) {
                     hideTypingIndicator();
@@ -1145,6 +1183,12 @@
                         messageContent.classList.remove('streaming-message');
                         eventSource.close();
                         return;
+                    }
+
+                    // Show the message when we receive the first data
+                    if (!hasReceivedData) {
+                        currentStreamingMessage.classList.remove('hidden');
+                        hasReceivedData = true;
                     }
 
                     fullResponse += event.data;
@@ -1173,6 +1217,10 @@
                     
                     hideTypingIndicator();
                     messageInput.focus();
+                    
+                    // Reset streaming state
+                    isStreaming = false;
+                    updateButtonStates();
                     currentStreamingMessage = null;
                 };
 
@@ -1181,6 +1229,10 @@
                 hideTypingIndicator();
                 addMessage('Sorry, I encountered an error. Please try again.', false);
                 messageInput.focus();
+                
+                // Reset streaming state
+                isStreaming = false;
+                updateButtonStates();
                 currentStreamingMessage = null;
             }
         }
@@ -1214,6 +1266,73 @@
             historyItem.addEventListener('click', function() {
                 // This will be handled by the existing event listener
             });
+        }
+
+        // Draggable history toggle functionality
+        let isDragging = false;
+        let startX, startY, initialLeft, initialBottom;
+
+        historyToggle.addEventListener('mousedown', startDrag);
+        document.addEventListener('mousemove', drag);
+        document.addEventListener('mouseup', stopDrag);
+
+        // Touch events for mobile
+        historyToggle.addEventListener('touchstart', startDrag);
+        document.addEventListener('touchmove', drag);
+        document.addEventListener('touchend', stopDrag);
+
+        function startDrag(e) {
+            isDragging = true;
+            historyToggle.classList.add('dragging');
+            
+            const rect = historyToggle.getBoundingClientRect();
+            initialLeft = rect.left;
+            initialBottom = window.innerHeight - rect.bottom;
+            
+            if (e.type === 'mousedown') {
+                startX = e.clientX;
+                startY = e.clientY;
+            } else {
+                startX = e.touches[0].clientX;
+                startY = e.touches[0].clientY;
+            }
+            
+            e.preventDefault();
+        }
+
+        function drag(e) {
+            if (!isDragging) return;
+            
+            let clientX, clientY;
+            
+            if (e.type === 'mousemove') {
+                clientX = e.clientX;
+                clientY = e.clientY;
+            } else {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            }
+            
+            const deltaX = clientX - startX;
+            const deltaY = clientY - startY;
+            
+            const newLeft = initialLeft + deltaX;
+            const newBottom = initialBottom - deltaY;
+            
+            // Constrain to viewport boundaries
+            const maxLeft = window.innerWidth - historyToggle.offsetWidth - 10;
+            const maxBottom = window.innerHeight - historyToggle.offsetHeight - 10;
+            
+            historyToggle.style.left = Math.max(10, Math.min(newLeft, maxLeft)) + 'px';
+            historyToggle.style.bottom = Math.max(10, Math.min(newBottom, maxBottom)) + 'px';
+            historyToggle.style.top = 'auto';
+            
+            e.preventDefault();
+        }
+
+        function stopDrag() {
+            isDragging = false;
+            historyToggle.classList.remove('dragging');
         }
 
         // Initial scroll to bottom
