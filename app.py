@@ -101,7 +101,7 @@ logging.basicConfig(
         logging.StreamHandler()
     ]
 )
-app.permanent_session_lifetime = timedelta(hours=732)
+
 app.config["SESSION_TYPE"] = "filesystem"
 UPLOAD_FOLDER = os.path.join(app.root_path, 'uploads')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -117,14 +117,14 @@ app.config['SESSION_COOKIE_HTTPONLY'] = True             # prevents JavaScript a
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'            # prevents CSRF
 app.config['SESSION_COOKIE_SECURE'] = True
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=31)
+app.permanent_session_lifetime = timedelta(days=31)
 # =======================================
-# ===============================
 #   RATE LIMITER INITIALIZATION
 # ===============================
 limiter = Limiter(
     key_func=get_remote_address,  # identifies users by IP address
     app=app,                      # attach limiter to the Flask app
-    default_limits=["200 per day", "50 per hour"]  # global limits
+    default_limits=["2200 per day", "200 per hour"]  # global limits
 )
 # ===============================
 login_manager = LoginManager()
@@ -338,7 +338,7 @@ class TopicMaterial(db.Model):
     def __repr__(self):
         return f'<TopicMaterial {self.display_name or self.file.name}>'
 
-# Ai DB for conversation tracking
+# Ai DB for conversation btwn Admin and Super AI Assistant
 class AIConversation(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -350,7 +350,7 @@ class AIConversation(db.Model):
     # Relationships
     user = db.relationship('User', backref=db.backref('ai_conversations', lazy=True))
 
-# Enhanced AI Conversation tracking with better organization
+# Students AI Assistant
 class AIConverse(db.Model):
     __tablename__ = 'ai_converse'
     
@@ -451,19 +451,6 @@ with app.app_context():
         db.create_all()
         initialize_admin_code()
 
-        # Create admin user if not exists (For easy access and testing)
-        admin = User.query.filter_by(mobile="0740694312").first()
-        if not admin:
-            admin = User(
-                username="Administrator",
-                mobile="0740694312",
-                is_admin=True
-            )
-            db.session.add(admin)
-            db.session.commit()
-            print("✅ Admin user created.")
-        else:
-            print("ℹ️ Admin already exists.")
     except Exception as e:
         db.session.rollback()
         print(f"⚠️ Database initialization error: {e}")
@@ -758,7 +745,7 @@ def delete_old_announcements():
     with app.app_context():
         # Current time in UTC+3 (Nairobi)
         now = datetime.utcnow() + timedelta(hours=3)
-        cutoff = now - timedelta(days=14)
+        cutoff = now - timedelta(days=30)
         print(f"🕒 Current time (UTC+3): {now}")
         print(f"🗑️ Deleting announcements created before: {cutoff}")
 
@@ -792,7 +779,7 @@ scheduler.add_job(
 # Start only once, to avoid duplicate jobs when Flask reloads
 if not scheduler.running:
     scheduler.start()
-    print("🕒 APScheduler started: deleting announcements older than 5 days daily")
+    print("🕒 APScheduler started: deleting announcements older than 30 days daily")
 
 # Ensure graceful shutdown on app exit
 atexit.register(lambda: scheduler.shutdown(wait=False))
@@ -2632,15 +2619,12 @@ def get_related_items(model_name, item_id, relation_name):
     
     return jsonify(result)
 
-# Add this to your app.py after all the model definitions and before the routes
-
-# Import the blueprint (save the above code as gemini_bp.py)
+# Gemini_bp Blueprint registering
 from gemini_bp import gemini_bp
 
 # Register the blueprint
 app.register_blueprint(gemini_bp)
 
-# Also add this route to your existing app.py to link to the Gemini chat
 @app.route('/lyx-ai')
 @login_required
 def ai_assistant():
@@ -5399,24 +5383,20 @@ def get_user_analytics(user_id):
 #==========================================
 
 @app.errorhandler(404)
-
 def not_found_error(error):
     return render_template('404.html'), 404
 
 @app.errorhandler(403)
-
 def forbidden_error(error):
     return render_template('403.html'), 403
 
 import logging
-# Configure logging (only once, ideally in app setup)
 logging.basicConfig(
     level=logging.INFO,
     format='[%(asctime)s] %(levelname)s in %(module)s: %(message)s'
 )
 
 @app.errorhandler(429)
-
 def ratelimit_handler(e):
     client_ip = request.remote_addr or 'unknown'
     route = request.path
@@ -5439,16 +5419,14 @@ def ratelimit_handler(e):
             message="You’ve made too many requests. Please wait a moment and try again."
         ), 429
     except Exception:
-        return redirect(url_for('login'))
+        return redirect(url_for('home'))
 
 @app.errorhandler(500)
-
 def internal_error(error):
     app.logger.error(f'Internal Server Error: {error}', exc_info=True)
     flash('Oops! Something went wrong. Try again.', 'error')
 
     referrer = request.referrer
-    flash('An unexpected error occurred. Please try again later.', 'error')
     if referrer:
         return redirect(referrer), 302
     else:

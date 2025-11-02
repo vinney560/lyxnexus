@@ -310,6 +310,40 @@
             display: block;
         }
 
+        /* Message actions */
+        .message-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+            justify-content: flex-end;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .message:hover .message-actions {
+            opacity: 1;
+        }
+
+        .message-action {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            padding: 0.375rem 0.75rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .message-action:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
         /* Input Container - Fixed at bottom */
         .input-container {
             position: fixed;
@@ -428,6 +462,18 @@
             color: var(--primary);
             margin-left: 2px;
             font-weight: 300;
+        }
+
+        /* Link styling */
+        .message-content a {
+            color: var(--primary);
+            text-decoration: none;
+            border-bottom: 1px solid transparent;
+            transition: border-color 0.2s ease;
+        }
+
+        .message-content a:hover {
+            border-bottom: 1px solid var(--primary);
         }
 
         /* Animations */
@@ -583,6 +629,10 @@
                 bottom: 5rem;
                 width: 45px;
                 height: 45px;
+            }
+
+            .message-actions {
+                opacity: 1; /* Always show on mobile */
             }
         }
 
@@ -812,7 +862,7 @@
             <div class="input-wrapper">
                 <textarea 
                     id="message-input" 
-                    placeholder="Ask me anything about the platform, search the web, or get help..." 
+                    placeholder="Ask me anything about the platform..." 
                     rows="1"
                     maxlength="2000"
                 ></textarea>
@@ -834,6 +884,8 @@
         const mainChat = document.getElementById('mainChat');
         const historyList = document.getElementById('historyList');
         let currentConversationId = null;
+        let isAutoScrollEnabled = true;
+        let currentStreamingMessage = null;
 
         // Auto-resize textarea
         messageInput.addEventListener('input', function() {
@@ -886,13 +938,31 @@
         // Auto-focus input
         messageInput.focus();
 
-        // Scroll to bottom of chat
+        // Check if user is scrolled to bottom
+        function isScrolledToBottom() {
+            return chatBox.scrollHeight - chatBox.clientHeight <= chatBox.scrollTop + 10;
+        }
+
+        // Scroll to bottom of chat only if auto-scroll is enabled
         function scrollToBottom() {
-            chatBox.scrollTop = chatBox.scrollHeight;
+            if (isAutoScrollEnabled) {
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }
+        }
+
+        // Update auto-scroll setting based on user scroll behavior
+        chatBox.addEventListener('scroll', function() {
+            isAutoScrollEnabled = isScrolledToBottom();
+        });
+
+        // Function to convert URLs to clickable links
+        function linkify(text) {
+            const urlRegex = /(https?:\/\/[^\s]+)/g;
+            return text.replace(urlRegex, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>');
         }
 
         // Add message to chat
-        function addMessage(content, isUser = false, isInfo = false, timestamp = null) {
+        function addMessage(content, isUser = false, isInfo = false, timestamp = null, prompt = null) {
             const messageDiv = document.createElement('div');
             const messageTime = timestamp || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             
@@ -906,18 +976,71 @@
                 `;
             } else {
                 messageDiv.className = isUser ? 'message user-message' : 'message ai-message';
-                messageDiv.innerHTML = `
-                    <div class="message-content">
-                        ${content}
-                        <div class="message-time">${messageTime}</div>
-                    </div>
-                `;
+                
+                if (isUser) {
+                    messageDiv.innerHTML = `
+                        <div class="message-content">
+                            ${content}
+                            <div class="message-time">${messageTime}</div>
+                        </div>
+                    `;
+                } else {
+                    messageDiv.innerHTML = `
+                        <div class="message-content">
+                            ${linkify(content)}
+                            <div class="message-time">${messageTime}</div>
+                            <div class="message-actions">
+                                <button class="message-action copy-button" title="Copy response">
+                                    <i class="fas fa-copy"></i> Copy
+                                </button>
+                                <button class="message-action regenerate-button" title="Regenerate response">
+                                    <i class="fas fa-redo"></i> Regenerate
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    
+                    // Store the prompt for regeneration
+                    if (prompt) {
+                        messageDiv.dataset.prompt = prompt;
+                    }
+                }
             }
             
             chatBox.appendChild(messageDiv);
             scrollToBottom();
             return messageDiv;
         }
+
+        // Add event delegation for message actions
+        chatBox.addEventListener('click', function(e) {
+            // Copy button
+            if (e.target.closest('.copy-button')) {
+                const messageDiv = e.target.closest('.message');
+                const messageContent = messageDiv.querySelector('.message-content');
+                const textToCopy = messageContent.textContent.replace(/CopyRegenerate/g, '').trim();
+                
+                navigator.clipboard.writeText(textToCopy).then(() => {
+                    const copyBtn = e.target.closest('.copy-button');
+                    const originalText = copyBtn.innerHTML;
+                    copyBtn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                    setTimeout(() => {
+                        copyBtn.innerHTML = originalText;
+                    }, 2000);
+                });
+            }
+            
+            // Regenerate button
+            if (e.target.closest('.regenerate-button')) {
+                const messageDiv = e.target.closest('.message');
+                const prompt = messageDiv.dataset.prompt;
+                if (prompt) {
+                    messageInput.value = prompt;
+                    messageInput.dispatchEvent(new Event('input'));
+                    sendMessage();
+                }
+            }
+        });
 
         // Show typing indicator
         function showTypingIndicator() {
@@ -971,7 +1094,7 @@
                     
                     // Add the loaded conversation
                     addMessage(data.conversation.prompt, true, false, data.conversation.timestamp);
-                    addMessage(data.conversation.response, false, false, data.conversation.timestamp);
+                    addMessage(data.conversation.response, false, false, data.conversation.timestamp, data.conversation.prompt);
                     
                     currentConversationId = convId;
                     
@@ -1007,8 +1130,8 @@
                 const eventSource = new EventSource(`/gemini/stream?prompt=${encodeURIComponent(message)}`);
 
                 // Create AI message element
-                const aiMessageDiv = addMessage('', false);
-                const messageContent = aiMessageDiv.querySelector('.message-content');
+                currentStreamingMessage = addMessage('', false, false, null, message);
+                const messageContent = currentStreamingMessage.querySelector('.message-content');
                 messageContent.classList.add('streaming-message');
 
                 let fullResponse = '';
@@ -1025,8 +1148,17 @@
                     }
 
                     fullResponse += event.data;
-                    messageContent.innerHTML = fullResponse + '<div class="message-time">' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + '</div>';
-                    scrollToBottom();
+                    messageContent.innerHTML = linkify(fullResponse) + 
+                        '<div class="message-time">' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + '</div>' +
+                        '<div class="message-actions">' +
+                        '<button class="message-action copy-button" title="Copy response"><i class="fas fa-copy"></i> Copy</button>' +
+                        '<button class="message-action regenerate-button" title="Regenerate response"><i class="fas fa-redo"></i> Regenerate</button>' +
+                        '</div>';
+                    
+                    // Only scroll if user is at bottom
+                    if (isAutoScrollEnabled) {
+                        scrollToBottom();
+                    }
                 };
 
                 eventSource.onerror = function(event) {
@@ -1041,6 +1173,7 @@
                     
                     hideTypingIndicator();
                     messageInput.focus();
+                    currentStreamingMessage = null;
                 };
 
             } catch (error) {
@@ -1048,6 +1181,7 @@
                 hideTypingIndicator();
                 addMessage('Sorry, I encountered an error. Please try again.', false);
                 messageInput.focus();
+                currentStreamingMessage = null;
             }
         }
 
