@@ -1579,9 +1579,17 @@
                         </span>
                     </td>
                     <td>
-                        <span class="status-badge ${user.status ? 'status-allowed' : 'status-banned'}">
-                            ${user.status ? 'Allowed' : 'Banned'}
-                        </span>
+                        ${(() => {
+                            console.log('Raw status:', user.status, 'Type:', typeof user.status);
+                            const status = (user.status === true || user.status === 'true' || user.status === 1);
+                            console.log('Normalized status:', status);
+                        
+                            return `
+                                <span class="status-badge ${status ? 'status-allowed' : 'status-banned'}">
+                                    ${status ? 'Allowed' : 'Banned'}
+                                </span>
+                            `;
+                        })()}
                     </td>
                     <td>
                         <span class="status-badge ${isOnline ? 'status-online' : 'status-user'}">
@@ -1622,16 +1630,21 @@
                                     <i class="fas fa-trash mr-1"></i> Delete
                                 </button>`
                             }
-                            ${user.status ? 
-                                `<button class="btn btn-danger btn-sm toggle-status-btn" data-user-id="${user.id}">
-                                    <span class="btn-spinner"></span>
-                                    <i class="fas fa-user-slash mr-1"></i> Ban
-                                </button>` :
-                                `<button class="btn btn-success btn-sm toggle-status-btn" data-user-id="${user.id}">
-                                    <span class="btn-spinner"></span>
-                                    <i class="fas fa-user-check mr-1"></i> Unban
-                                </button>`
-                            }
+                            ${(() => {
+                                console.log('Raw status:', user.status, 'Type:', typeof user.status);
+                                const status = (user.status === true || user.status === 'true' || user.status === 1);
+                                console.log('Normalized status:', status);
+
+                                return status ? 
+                                    `<button class="btn btn-danger btn-sm toggle-status-btn" data-user-id="${user.id}">
+                                        <span class="btn-spinner"></span>
+                                        <i class="fas fa-user-slash mr-1"></i> Ban
+                                    </button>` :
+                                    `<button class="btn btn-success btn-sm toggle-status-btn" data-user-id="${user.id}">
+                                        <span class="btn-spinner"></span>
+                                        <i class="fas fa-user-check mr-1"></i> Unban
+                                    </button>`;
+                            })()}
                         </div>
                     </td>
                 </tr>
