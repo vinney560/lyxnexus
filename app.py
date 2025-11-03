@@ -2007,6 +2007,7 @@ def get_complete_database_context(user_message, current_user):
                 'id': current_user.id,
                 'username': current_user.username,
                 'is_admin': current_user.is_admin,
+                'status': current_user.status,
                 'created_at': current_user.created_at.isoformat() if current_user.created_at else 'Unknown'
             }
         }
@@ -4087,6 +4088,7 @@ def get_users():
             'mobile': user.mobile,
             'created_at': user.created_at.isoformat() if user.created_at else None,
             'is_admin': user.is_admin,
+            'status': user.status,
             'announcements_count': len(user.announcements),
             'assignments_count': len(user.assignments),
             'total_activity': total_activity,
