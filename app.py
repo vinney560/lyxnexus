@@ -456,8 +456,8 @@ with app.app_context():
 
         # Execute raw SQL
         print("Running ALTER TABLE...")
-        db.session.execute(text('ALTER TABLE "user" ADD COLUMN status BOOLEAN DEFAULT TRUE'))
-        db.session.commit()
+        #db.session.execute(text('ALTER TABLE "user" ADD COLUMN status BOOLEAN DEFAULT TRUE'))
+        #db.session.commit()
         print("Done!")
 
         initialize_admin_code()
