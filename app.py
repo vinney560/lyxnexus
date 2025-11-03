@@ -4333,6 +4333,7 @@ def toggle_status(user_id):
         return jsonify({'error': 'cannot modify self status'}), 400
     
     user.status = not user.status
+    print(f"User {user.username} status changed to {user.status}")
     db.session.commit()
 
     return jsonify({

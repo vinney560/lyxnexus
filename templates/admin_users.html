@@ -190,7 +190,15 @@
         background: linear-gradient(90deg, #8B5CF6, #7C3AED);
         color: white;
     }
-    
+
+    .status-allowed {
+        background-color: #16a34a; /* green */
+    }
+
+    .status-banned {
+        background-color: #dc2626; /* red */
+    }
+
     .status-user {
         background: rgba(59, 130, 246, 0.2);
         color: #3B82F6;
@@ -1571,7 +1579,7 @@
                         </span>
                     </td>
                     <td>
-                        <span class="status-badge ${user.status ? 'status-admin' : 'status-user'}">
+                        <span class="status-badge ${user.status ? 'status-allowed' : 'status-banned'}">
                             ${user.status ? 'Allowed' : 'Banned'}
                         </span>
                     </td>
