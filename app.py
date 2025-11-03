@@ -3046,6 +3046,7 @@ def get_user_profile():
         'mobile': current_user.mobile,
         'created_at': current_user.created_at.isoformat(),
         'is_admin': current_user.is_admin,
+        'status': current_user.status,
         'announcements_count': len(current_user.announcements),
         'assignments_count': len(current_user.assignments)
     }

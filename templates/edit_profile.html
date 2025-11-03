@@ -245,6 +245,10 @@
                             <span class="info-value" id="user-role">-</span>
                         </div>
                         <div class="info-item">
+                            <span class="info-label">Status:</span>
+                            <span class="info-value" id="user-status">-</span>
+                        </div>
+                        <div class="info-item">
                             <span class="info-label">Announcements Created:</span>
                             <span class="info-value" id="announcements-count">-</span>
                         </div>
@@ -448,6 +452,7 @@
                 document.getElementById('user-id').textContent = userData.id;
                 document.getElementById('created-at').textContent = formatDate(userData.created_at);
                 document.getElementById('user-role').textContent = userData.is_admin ? 'Administrator' : 'User';
+                document.getElementById('user-status').textContent = userData.status ? 'Active' : 'Banned';
                 document.getElementById('announcements-count').textContent = userData.announcements_count || 0;
                 document.getElementById('assignments-count').textContent = userData.assignments_count || 0;
                 
