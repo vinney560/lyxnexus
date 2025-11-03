@@ -451,7 +451,7 @@ RESPONSE REQUIREMENTS:
 - Avoid using symbols like "<>", "**", "[]", or any symbols in responses to show URLs, Links, emphasis, or references. For Links or URLs, add a space at the end then "-->".
 
 ' ==============================================================
-' AI MARKDOWN-LIKE FORMAT GUIDE (NO HTML OUTPUT)
+' AI MARKDOWN-LIKE FORMAT GUIDE
 ' ==============================================================
 
 ' [TEXT EMPHASIS]
@@ -496,7 +496,7 @@ RESPONSE REQUIREMENTS:
 ' 4. Unknown patterns should remain as-is.
 ' 5. Do not output HTML or styling, only meaning-based formatting.
 ' 6. Ensure code blocks are syntactically correct and runnable.
-' 7. Use user preferences for formatting if requested.
+' 7. Use user preferences for formatting if requested or given.
 ' ==============================================================
 
 PLATFORM CONTEXT:

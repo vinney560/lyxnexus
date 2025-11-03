@@ -148,6 +148,7 @@ class User(db.Model, UserMixin):
     mobile = db.Column(db.String(20), unique=True, nullable=True)
     created_at = db.Column(db.DateTime, default=nairobi_time)
     is_admin = db.Column(db.Boolean, default=False)
+    status = db.Column(db.Boolean, default=True, nullable=True)
 
     # Relationships
     announcements = db.relationship('Announcement', backref='author', lazy=True)
@@ -2758,6 +2759,8 @@ app.jinja_env.filters['message_time'] = format_message_time
 @login_required
 def messages():
     """Render the messages page with initial data"""
+    if not current_user.status:
+        abort(403)
     try:
         room = request.args.get('room', 'general')
         
@@ -4311,6 +4314,21 @@ def toggle_admin(user_id):
         'is_admin': user.is_admin
     })
 
+@app.route('/api/users/<int:user_id>/toggle-status', methods=['PUT'])
+@admin_required
+def toggle_status(user_id):
+    user = User.query.get_or_404(user_id)
+
+    if user.id == current_user.id:
+        return jsonify({'error': 'cannot modify self status'}), 400
+    
+    user.status = not user.status
+    db.session.commit()
+
+    return jsonify({
+        'message': 'User status updated successfully',
+        'status': user.status
+    })
 # =========================================
 # ANNOUNCEMENT API ROUTES
 # =========================================

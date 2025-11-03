@@ -1571,6 +1571,11 @@
                         </span>
                     </td>
                     <td>
+                        <span class="status-badge ${user.status ? 'status-admin' : 'status-user'}">
+                            ${user.status ? 'Allowed' : 'Banned'}
+                        </span>
+                    </td>        
+                    <td>
                         <span class="status-badge ${isOnline ? 'status-online' : 'status-user'}">
                             ${isOnline ? 'Online' : 'Offline'}
                         </span>
@@ -1609,6 +1614,16 @@
                                     <i class="fas fa-trash mr-1"></i> Delete
                                 </button>`
                             }
+                            ${user.status ? 
+                                `<button class="btn btn-danger btn-sm toggle-status-btn" data-user-id="${user.id}">
+                                    <span class="btn-spinner"></span>
+                                    <i class="fas fa-user-slash mr-1"></i> Ban
+                                </button>` :
+                                `<button>
+                                    <span class="btn-spinner"></span>
+                                    <i class="fas fa-user-check mr-2"></i> Unban
+                                </button>`
+                            }    
                         </div>
                     </td>
                 </tr>
@@ -1621,6 +1636,13 @@
                 });
             });
             
+            document.querySelectorAll('.toggle-status-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const userId = this.getAttribute('data-user-id');
+                    toggleStatus(userId, this);
+                });
+            });
+
             document.querySelectorAll('.delete-user-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
                     const userId = this.getAttribute('data-user-id');
@@ -1634,9 +1656,38 @@
         }
 
         function filterUsers() {
-            // Instead of filtering locally, reload from backend with new filters
+            
             currentPage = 1;
             loadUsers(currentPage);
+        }
+
+        // Update user status for control
+        async function toggleStatus(userId, button) {
+            if (!userId) return;
+            
+            try {
+                setButtonLoading(button, true);
+
+                const response = await fetch(`${USERS_ENDPOINT}/${userId}/toggle-status`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    'X-CSRFToken': getCSRFToken()    
+                    }
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Failed to update user status');
+                }
+
+                const result = await response.json();
+                showToast(`User status updated successfully`, 'success');
+                await loadUsers(); //Refresh list
+            } catch (error) {
+                showToast('Error: ' + error.message, 'error');
+                setButtonLoading(button, false);
+            }
         }
 
         async function toggleAdmin(userId, button) {
