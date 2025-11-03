@@ -454,8 +454,7 @@ with app.app_context():
         db.create_all()
         db.session.commit()
 
-        # Execute raw SQL
-        print("Running ALTER TABLE...")
+        # Execute raw SQL if needed
         #db.session.execute(text('ALTER TABLE "user" ADD COLUMN status BOOLEAN DEFAULT TRUE'))
         #db.session.commit()
         print("Done!")
