@@ -558,10 +558,11 @@
             font-weight: 300;
         }
 
-        /* Text Formatting Styles */
+        /* Enhanced Text Formatting Styles */
         .formatted-text {
             white-space: pre-wrap;
             word-wrap: break-word;
+            line-height: 1.6;
         }
 
         .formatted-text strong, .formatted-text .bold {
@@ -591,6 +592,7 @@
             border: 1px solid var(--border);
             overflow-x: auto;
             margin: 0.5rem 0;
+            position: relative;
         }
 
         .formatted-text pre code {
@@ -598,6 +600,20 @@
             padding: 0;
             border: none;
             color: var(--text-primary);
+            display: block;
+        }
+
+        .formatted-text pre::before {
+            content: attr(data-language);
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: var(--primary);
+            color: white;
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+            border-bottom-left-radius: var(--radius-sm);
+            border-top-right-radius: var(--radius-md);
         }
 
         .formatted-text ul, .formatted-text ol {
@@ -615,6 +631,9 @@
             margin: 0.5rem 0;
             color: var(--text-secondary);
             font-style: italic;
+            background: rgba(88, 166, 255, 0.05);
+            padding: 0.75rem 1rem;
+            border-radius: 0 var(--radius-md) var(--radius-md) 0;
         }
 
         .formatted-text .subscript {
@@ -625,6 +644,68 @@
         .formatted-text .superscript {
             font-size: 0.75em;
             vertical-align: super;
+        }
+
+        .formatted-text .underline {
+            text-decoration: underline;
+        }
+
+        .formatted-text .strikethrough {
+            text-decoration: line-through;
+            opacity: 0.8;
+        }
+
+        .formatted-text .highlight {
+            background: rgba(255, 255, 0, 0.2);
+            padding: 0.1rem 0.2rem;
+            border-radius: 2px;
+        }
+
+        .formatted-text table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 0.75rem 0;
+            background: var(--surface);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+        }
+
+        .formatted-text th, .formatted-text td {
+            padding: 0.5rem 0.75rem;
+            border: 1px solid var(--border);
+            text-align: left;
+        }
+
+        .formatted-text th {
+            background: var(--surface-light);
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .formatted-text tr:nth-child(even) {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .formatted-text h1, .formatted-text h2, .formatted-text h3, 
+        .formatted-text h4, .formatted-text h5, .formatted-text h6 {
+            margin: 1rem 0 0.5rem 0;
+            color: var(--primary);
+            font-weight: 600;
+            line-height: 1.3;
+        }
+
+        .formatted-text h1 { font-size: 1.5rem; }
+        .formatted-text h2 { font-size: 1.35rem; }
+        .formatted-text h3 { font-size: 1.2rem; }
+        .formatted-text h4 { font-size: 1.1rem; }
+        .formatted-text h5 { font-size: 1rem; }
+        .formatted-text h6 { font-size: 0.9rem; }
+
+        .formatted-text hr {
+            border: none;
+            height: 1px;
+            background: var(--border);
+            margin: 1rem 0;
         }
 
         /* Link styling */
@@ -797,13 +878,19 @@
                 min-width: 70px;
             }
 
-            /* Mobile history panel */
+            /* Mobile history panel - improved */
             .history-panel {
                 width: 85% !important;
                 max-width: 320px !important;
                 top: 60px !important;
                 bottom: 70px !important;
                 z-index: 1002 !important;
+                transform: translateX(-100%);
+                box-shadow: 8px 0 30px rgba(0, 0, 0, 0.5);
+            }
+
+            .history-panel.active {
+                transform: translateX(0);
             }
 
             .history-toggle {
@@ -823,6 +910,27 @@
                 opacity: 1;
                 transform: translateY(0);
             }
+
+            /* Mobile text formatting adjustments */
+            .formatted-text h1 { font-size: 1.3rem; }
+            .formatted-text h2 { font-size: 1.2rem; }
+            .formatted-text h3 { font-size: 1.1rem; }
+            .formatted-text h4 { font-size: 1rem; }
+            .formatted-text h5 { font-size: 0.95rem; }
+            .formatted-text h6 { font-size: 0.9rem; }
+
+            .formatted-text pre {
+                padding: 0.75rem;
+                font-size: 0.85rem;
+            }
+
+            .formatted-text table {
+                font-size: 0.85rem;
+            }
+
+            .formatted-text th, .formatted-text td {
+                padding: 0.375rem 0.5rem;
+            }
         }
 
         @media (max-width: 480px) {
@@ -832,6 +940,11 @@
             
             .history-panel {
                 width: 90% !important;
+            }
+
+            .formatted-text pre {
+                padding: 0.5rem;
+                font-size: 0.8rem;
             }
         }
 
@@ -1195,25 +1308,73 @@
             return text.replace(urlRegex, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>');
         }
 
-        // Function to format text with markdown-like syntax
+        // Enhanced function to format text with markdown-like syntax
         function formatText(text) {
-            // Convert basic formatting
-            let formatted = text
-                // Bold: *text* or **text**
-                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                .replace(/\*(.*?)\*/g, '<strong>$1</strong>')
-                // Italics: _text_
-                .replace(/_(.*?)_/g, '<em>$1</em>')
-                // Inline code: `code`
-                .replace(/`(.*?)`/g, '<code>$1</code>')
-                // Code blocks: ```language\ncode\n```
-                .replace(/```(\w+)?\n([\s\S]*?)```/g, '<code class="language-$1">$2</code>')
-                // Subscript: ~text~
-                .replace(/~(.*?)~/g, '<span class="subscript">$1</span>')
-                // Superscript: ^text^
-                .replace(/\^(.*?)\^/g, '<span class="superscript">$1</span>')
-                // Line breaks
-                .replace(/\n/g, '<br>');
+            // Convert code blocks with language specification first
+            let formatted = text.replace(/```(\w+)?\n([\s\S]*?)```/g, function(match, language, code) {
+                const lang = language || 'text';
+                return `<pre data-language="${lang}"><code>${code.trim()}</code></pre>`;
+            });
+
+            // Convert inline code
+            formatted = formatted.replace(/`([^`]+)`/g, '<code>$1</code>');
+
+            // Headers
+            formatted = formatted.replace(/^### (.*$)/gim, '<h3>$1</h3>');
+            formatted = formatted.replace(/^## (.*$)/gim, '<h2>$1</h2>');
+            formatted = formatted.replace(/^# (.*$)/gim, '<h1>$1</h1>');
+
+            // Bold and Italic
+            formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            formatted = formatted.replace(/\*(.*?)\*/g, '<em>$1</em>');
+            formatted = formatted(/_(.*?)_/g, '<em>$1</em>');
+
+            // Strikethrough
+            formatted = formatted.replace(/~~(.*?)~~/g, '<span class="strikethrough">$1</span>');
+
+            // Underline
+            formatted = formatted.replace(/__(.*?)__/g, '<span class="underline">$1</span>');
+
+            // Highlight
+            formatted = formatted.replace(/==(.*?)==/g, '<span class="highlight">$1</span>');
+
+            // Blockquotes
+            formatted = formatted.replace(/^> (.*$)/gim, '<blockquote>$1</blockquote>');
+
+            // Horizontal rules
+            formatted = formatted.replace(/^\*\*\*$/gim, '<hr>');
+            formatted = formatted.replace(/^---$/gim, '<hr>');
+            formatted = formatted.replace(/^___$/gim, '<hr>');
+
+            // Lists - unordered
+            formatted = formatted.replace(/^\s*[-*+] (.*$)/gim, '<li>$1</li>');
+            
+            // Lists - ordered
+            formatted = formatted.replace(/^\s*\d+\. (.*$)/gim, '<li>$1</li>');
+
+            // Wrap consecutive list items in ul/ol
+            formatted = formatted.replace(/(<li>.*<\/li>)/g, '<ul>$1</ul>');
+            
+            // Simple table detection (basic)
+            formatted = formatted.replace(/\|(.+)\|/g, function(match) {
+                const cells = match.split('|').filter(cell => cell.trim() !== '');
+                if (cells.length > 1) {
+                    let tableHTML = '<table><tr>';
+                    cells.forEach(cell => {
+                        tableHTML += `<td>${cell.trim()}</td>`;
+                    });
+                    tableHTML += '</tr></table>';
+                    return tableHTML;
+                }
+                return match;
+            });
+
+            // Subscript and superscript
+            formatted = formatted.replace(/~(.+?)~/g, '<span class="subscript">$1</span>');
+            formatted = formatted.replace(/\^(.+?)\^/g, '<span class="superscript">$1</span>');
+
+            // Line breaks
+            formatted = formatted.replace(/\n/g, '<br>');
 
             // Convert URLs to links
             formatted = linkify(formatted);
