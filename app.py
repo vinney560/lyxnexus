@@ -447,14 +447,22 @@ def initialize_admin_code():
         print("Default admin code initialized")
 #==========================================
 
+from sqlalchemy import text
+
 with app.app_context():
     try:
         db.create_all()
+
+        # Execute raw SQL using db.session
+        db.session.execute(text("ALTER TABLE user ADD COLUMN status BOOLEAN DEFAULT TRUE NULL"))
+        db.session.commit()
+
         initialize_admin_code()
 
     except Exception as e:
         db.session.rollback()
         print(f"⚠️ Database initialization error: {e}")
+
 #========================================
 #          HELPERS && BACKGROUND WORKERS
 #==========================================
