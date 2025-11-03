@@ -451,10 +451,10 @@ from sqlalchemy import text
 
 with app.app_context():
     try:
-        db.create_all()
 
-        # Execute raw SQL using db.session
+        # Execute raw SQL
         db.session.execute(text("ALTER TABLE user ADD COLUMN status BOOLEAN DEFAULT TRUE NULL"))
+        db.create_all()
         db.session.commit()
 
         initialize_admin_code()
