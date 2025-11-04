@@ -292,8 +292,13 @@ class LyxNexusNotificationService {
         const subscriptionData = subscription.toJSON();
 
         // Add the user ID (if available)
-        subscriptionData.user_id = window.currentUserId || null;
-
+        const userId = window.currentUserId || await new Promise(resolve => {
+            const interval = setInterval(() => {
+                if (window.currentUserId) { clearInterval(interval); resolve(window.currentUserId); }
+            }, 50);
+        });
+        subscriptionData.user_id = userId;
+        
         console.log("📩 Sending subscription to backend:", subscriptionData);
 
         // Send to Flask
@@ -302,8 +307,6 @@ class LyxNexusNotificationService {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(subscriptionData)
         });
-
-        await this.showNotification('Push Subscription', 'You have successfully subscribed to push notifications.');
 
         console.log(`${this.serviceName}: ✅ Push notifications subscribed.`);
       } catch (err) {
