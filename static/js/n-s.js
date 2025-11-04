@@ -41,37 +41,30 @@ class LyxNexusNotificationService {
 
     setupSocketConnection() {
         try {
-            
             let baseUrl;
 
             if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
-              baseUrl = "https://lyxnexus.onrender.com";
+                baseUrl = "https://lyxnexus.onrender.com";
             } else {
-              baseUrl = window.location.origin;
+                baseUrl = window.location.origin;
             }
 
-            // remove all ---> Still not working for Aiven DB
             baseUrl = baseUrl.replace(/\/+$/, '');
 
             this.socket = io(baseUrl, {
-              path: "/socket.io",
-              transports: ["websocket", "polling"],
-              reconnection: true,
-              reconnectionAttempts: Infinity,
-              reconnectionDelay: 1000,
-              reconnectionDelayMax: 10000
+                path: "/socket.io",
+                transports: ["websocket", "polling"],
+                reconnection: true,
+                reconnectionAttempts: Infinity,
+                reconnectionDelay: 1000,
+                reconnectionDelayMax: 10000
             });
 
             this.socket.on('connect', () => console.log(`${this.serviceName}: ✅ Connected to server`));
             this.socket.on('disconnect', () => console.log(`${this.serviceName}: ❌ Disconnected from server`));
 
-            this.socket.on('new_message', (data) => {
-                this.handleNewMessage(data);
-            });
- //For flaks messages 
-            this.socket.on('push_notification', (data) => {
-                this.handlePushNotification(data); //diff from socket.emit and send_notif...()
-            });
+            this.socket.on('new_message', (data) => this.handleNewMessage(data));
+            this.socket.on('push_notification', (data) => this.handlePushNotification(data));
 
         } catch (error) {
             console.error(`${this.serviceName}: Socket setup failed:`, error);
@@ -101,10 +94,10 @@ class LyxNexusNotificationService {
 
     retryInitialization() {
         setTimeout(() => this.startInitialization(), 2000);
-    } // just for slow net .... and Chrome Web Apps
+    }
 
     delay(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms)); // for less aggressiv intervals--> pause a bit
+        return new Promise(resolve => setTimeout(resolve, ms));
     }
 
     getCurrentUserId() {
@@ -114,7 +107,7 @@ class LyxNexusNotificationService {
         if (el) return el.getAttribute('data-user-id');
         return localStorage.getItem('current_user_id') || -1;
     }
-// specified for messages allone, still updating it
+
     async handleNewMessage(messageData) {
         const currentUserId = this.getCurrentUserId();
         if (messageData.user_id == currentUserId && !document.hidden) return;
@@ -123,7 +116,7 @@ class LyxNexusNotificationService {
             `💬 ${messageData.username}`,
             messageData.content.length > 100
                 ? messageData.content.substring(0, 100) + '...'
-                : messageData.content, //format 4 ez reading
+                : messageData.content,
             {
                 icon: '/uploads/favicon-1.png',
                 tag: `message-${messageData.id}`,
@@ -139,7 +132,6 @@ class LyxNexusNotificationService {
             { icon: '/uploads/favicon-1.png', tag: `push-${Date.now()}`, data }
         );
 
-        //USe of SMS, --> still banned in Kemya
         if (data.broadcast) {
             try {
                 const res = await fetch('/api/users-sms/');
@@ -159,8 +151,6 @@ class LyxNexusNotificationService {
             }
         }
     }
-                  // real deal. --> still needs a lot of updates
-
 
     showNotification(title, message, options = {}) {
         if (!('Notification' in window) || this.isWebView) {
@@ -196,7 +186,7 @@ class LyxNexusNotificationService {
         }
     }
 
-    playSound() { // for interactivity, n notify/ring when no user interactions
+    playSound() {
         try {
             this.audio.currentTime = 0;
             this.audio.play().catch(() => {});
@@ -207,7 +197,7 @@ class LyxNexusNotificationService {
         this.playSound();
 
         if (this.isWebView || !('Notification' in window)) {
-            alert(`${title}\n\n${message}`); // fallback to alert on Webview --> still needs polish
+            alert(`${title}\n\n${message}`);
             return;
         }
 
@@ -221,7 +211,7 @@ class LyxNexusNotificationService {
             <div style="margin-top:4px; font-size:0.875rem;">${message}</div>
             <div style="margin-top:6px; display:flex; gap:8px;"></div>
         `;
-// Class rep ez repost on groups
+
         if (window.current_user?.number) {
             const smsLink = document.createElement('a');
             smsLink.href = `https://api.whatsapp.com/send?phone=${window.current_user.number}&text=${encodeURIComponent(message)}`;
@@ -267,61 +257,57 @@ class LyxNexusNotificationService {
         if (data.type === 'message' && window.location.pathname !== '/messages') window.location.href = '/messages';
         else if (['announcement','assignment','timetable'].includes(data.type) && window.location.pathname !== '/main-page') window.location.href = '/main-page';
     }
-    // --- Push Subscription Setup ---
+
     async subscribeForPush() {
-      if (!("serviceWorker" in navigator)) {
-        console.warn(`${this.serviceName}: Service Worker not supported.`);
-        return;
-      }
+        if (!("serviceWorker" in navigator)) {
+            console.warn(`${this.serviceName}: Service Worker not supported.`);
+            return;
+        }
 
-      const registration = await navigator.serviceWorker.ready;
+        const registration = await navigator.serviceWorker.ready;
 
-      // Your public VAPID key
-      const publicVapidKey = "BEk4C5_aQbjOMkvGYk4OFZMyMAInUdVP6oAFs9kAd7Gx3iog2UF4ZLwdQ8GmB0-i61FANGD6D0TCHsFYVOA45OQ";
-      const convertedKey = this.urlBase64ToUint8Array(publicVapidKey);
+        const publicVapidKey = "BEk4C5_aQbjOMkvGYk4OFZMyMAInUdVP6oAFs9kAd7Gx3iog2UF4ZLwdQ8GmB0-i61FANGD6D0TCHsFYVOA45OQ";
+        const convertedKey = this.urlBase64ToUint8Array(publicVapidKey);
 
-      try {
-        const subscription = await registration.pushManager.subscribe({
-          userVisibleOnly: true,
-          applicationServerKey: convertedKey
-        });
+        try {
+            const subscription = await registration.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: convertedKey
+            });
 
-        console.log(`${this.serviceName}: Push subscription successful.`);
+            console.log(`${this.serviceName}: Push subscription successful.`);
 
-        // Convert the subscription to a plain object
-        const subscriptionData = subscription.toJSON();
+            const subscriptionData = subscription.toJSON();
 
-        // Add the user ID (if available)
-        const userId = window.currentUserId || await new Promise(resolve => {
-            const interval = setInterval(() => {
-                if (window.currentUserId) { clearInterval(interval); resolve(window.currentUserId); }
-            }, 500);
-        });
-        subscriptionData.user_id = userId;
-        
-        console.log("📩 Sending subscription to backend:", subscriptionData);
+            const userId = window.currentUserId || await new Promise(resolve => {
+                const interval = setInterval(() => {
+                    if (window.currentUserId) { clearInterval(interval); resolve(window.currentUserId); }
+                }, 500);
+            });
 
-        // Send to Flask
-        await fetch("/subscribe", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(subscriptionData)
-        });
+            subscriptionData.user_id = userId;
 
-        console.log(`${this.serviceName}: ✅ Push notifications subscribed.`);
-      } catch (err) {
-        console.error(`${this.serviceName}: Failed to subscribe for push`, err);
-      }
+            console.log("📩 Sending subscription to backend:", subscriptionData);
+
+            await fetch("/subscribe", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(subscriptionData)
+            });
+
+            console.log(`${this.serviceName}: ✅ Push notifications subscribed.`);
+        } catch (err) {
+            console.error(`${this.serviceName}: Failed to subscribe for push`, err);
+        }
     }
 
-    // Utility
     urlBase64ToUint8Array(base64String) {
-      const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
-      const base64 = (base64String + padding)
-        .replace(/\-/g, "+")
-        .replace(/_/g, "/");
-      const rawData = atob(base64);
-      return Uint8Array.from([...rawData].map((char) => char.charCodeAt(0)));
+        const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+        const base64 = (base64String + padding)
+            .replace(/\-/g, "+")
+            .replace(/_/g, "/");
+        const rawData = atob(base64);
+        return Uint8Array.from([...rawData].map((char) => char.charCodeAt(0)));
     }
 
     testNotification() {
@@ -333,12 +319,15 @@ class LyxNexusNotificationService {
         return { isInitialized: this.isInitialized, socketConnected: this.socket?.connected||false, notificationPermission: this.notificationPermission };
     }
 }
-// get window with register script --> 'static', filename='js/n-s.js'
+
 window.initLyxNexusNotifications = function() {
     if (window.LyxNexusNotifications) return window.LyxNexusNotifications;
     window.LyxNexusNotifications = new LyxNexusNotificationService();
     return window.LyxNexusNotifications;
 };
-// register it gracefully upon window load or just Content loaded successfully and net availble
-if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => setTimeout(() => window.initLyxNexusNotifications(), 500));
-else setTimeout(() => window.initLyxNexusNotifications(), 500); // retry every 0.5 secs --> 500ms weak nets
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => setTimeout(() => window.initLyxNexusNotifications(), 500));
+} else {
+    setTimeout(() => window.initLyxNexusNotifications(), 500);
+}
