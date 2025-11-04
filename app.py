@@ -106,7 +106,7 @@ app.config["SESSION_TYPE"] = "filesystem"
 UPLOAD_FOLDER = os.path.join(app.root_path, 'uploads')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 # --- Push Notification Configuration ---
-VAPID_PUBLIC_KEY = "BEk4C5_aQbjOMkvGYk4OFZMyMAInUdVP6oAFs9kAd7Gx3iog2UF4ZLwdQ8GmB0-i61FANGD6D0TCHsFYVOA45OQ"
+VAPID_PUBLIC_KEY = "BEk4C5_aQbjOMkvGYk4OFZMyMAInUdVP6oAFs9kAd7Gx3iog2UF4ZLwdQ8GmB0-i61FANGD6D0TCHsFYVOA45OQ";
 VAPID_PRIVATE_KEY = "42FlV4n_SjaTAcJnUcCi8bDrVEwX_8YCFJiCzAOhngw"
 VAPID_CLAIMS = {"sub": "mailto:vincentkipngetich479@gmail.com"}
 
@@ -2763,31 +2763,49 @@ def is_authenticated():
 @login_required
 def subscribe():
     data = request.get_json()
+
     endpoint = data.get("endpoint")
-    keys = data.get("keys", {})
+    p256dh = data.get("keys", {}).get("p256dh")
+    auth = data.get("keys", {}).get("auth")
 
-    if not endpoint:
-        return jsonify({"error": "Missing endpoint"}), 400
+    if not endpoint or not p256dh or not auth:
+        return jsonify({"error": "Invalid subscription data"}), 400
 
-    existing = PushSubscription.query.filter_by(endpoint=endpoint).first()
-    if not existing:
-        sub = PushSubscription(
+    # Detect push service type based on endpoint URL
+    if "fcm.googleapis.com" in endpoint:
+        service_type = "FCM (Google Chrome / Android)"
+    elif "wns2" in endpoint or "notify.windows.com" in endpoint:
+        service_type = "WNS (Edge / Windows)"
+    elif "push.services.mozilla.com" in endpoint:
+        service_type = "Mozilla Push (Firefox)"
+    else:
+        service_type = "Unknown Push Service"
+
+    # Upsert subscription for the logged-in user
+    existing = PushSubscription.query.filter_by(user_id=current_user.id).first()
+    if existing:
+        existing.endpoint = endpoint
+        existing.p256dh = p256dh
+        existing.auth = auth
+        db.session.commit()
+        action = "♻️ Subscription updated"
+    else:
+        new_sub = PushSubscription(
             user_id=current_user.id,
             endpoint=endpoint,
-            p256dh=keys.get("p256dh"),
-            auth=keys.get("auth")
+            p256dh=p256dh,
+            auth=auth
         )
-        db.session.add(sub)
+        db.session.add(new_sub)
         db.session.commit()
-        print(f"✅ New subscription added: user_id={current_user.id}")
-    else:
-        existing.p256dh = keys.get("p256dh")
-        existing.auth = keys.get("auth")
-        existing.user_id = current_user.id
-        db.session.commit()
-        print(f"♻️ Subscription updated: user_id={current_user.id}")
+        action = "✅ New subscription added"
 
-    return jsonify({"message": "Subscription saved"}), 201
+    print(f"{action}: user_id={current_user.id}, service={service_type}")
+
+    return jsonify({
+        "message": f"Subscription saved successfully",
+        "service": service_type
+    }), 201
 
 def send_webpush(data: dict):
     """Send a push notification to all active users."""
