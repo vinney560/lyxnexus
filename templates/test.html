@@ -1,203 +1,1595 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Draggable Robot Button</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<html lang="en" class="scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Discover excellence in education with our comprehensive programs, modern facilities, and dedicated learning community."
+    />
+    <meta
+      name="keywords"
+      content="education, learning, courses, programs, academic excellence"
+    />
+    <meta property="og:title" content="Excellence in Education" />
+    <meta
+      property="og:description"
+      content="Discover excellence in education with our comprehensive programs, modern facilities, and dedicated learning community."
+    />
+    <meta property="og:type" content="website" />
+    <title>Excellence in Education</title>
+
     <style>
-        body {
-            margin: 0;
-            padding: 0;
-            height: 100vh;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&display=swap');
 
-        #robot-button {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            width: 60px;
-            height: 60px;
-            background: linear-gradient(135deg, #0f404d 0%, #0072ff 100%);
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: grab;
-            box-shadow: 0 10px 25px rgba(0, 114, 255, 0.5);
-            transition: transform 0.3s, box-shadow 0.3s;
-            z-index: 1000;
-            user-select: none;
-            border: 3px solid rgba(255, 255, 255, 0.2);
-        }
+      html,
+      body {
+        color: hsl(215, 16%, 18%);
+      }
 
-        #robot-button:hover {
-            transform: scale(1.1);
-            box-shadow: 0 15px 30px rgba(0, 114, 255, 0.7);
-        }
+/* ! tailwindcss v3.4.1 | MIT License | https://tailwindcss.com */
+*,
+:before,
+:after {
+  box-sizing: border-box;
+  border-width: 0;
+  border-style: solid;
+  border-color: hsl(0, 0%, 90%);
+}
+:before,
+:after {
+  --tw-content: '';
+}
+html,
+:host {
+  line-height: 1.5;
+  -webkit-text-size-adjust: 100%;
+  -moz-tab-size: 4;
+  tab-size: 4;
+  font-family: Inter, sans-serif;
+  font-feature-settings: normal;
+  font-variation-settings: normal;
+  -webkit-tap-highlight-color: transparent;
+}
+body {
+  margin: 0;
+  line-height: inherit;
+}
+hr {
+  height: 0;
+  color: inherit;
+  border-top-width: 1px;
+}
+abbr:where([title]) {
+  text-decoration: underline dotted;
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-size: inherit;
+  font-weight: inherit;
+}
+a {
+  color: inherit;
+  text-decoration: inherit;
+}
+b,
+strong {
+  font-weight: bolder;
+}
+code,
+kbd,
+samp,
+pre {
+  font-family:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono',
+    'Courier New', monospace;
+  font-feature-settings: normal;
+  font-variation-settings: normal;
+  font-size: 1em;
+}
+small {
+  font-size: 80%;
+}
+sub,
+sup {
+  font-size: 75%;
+  line-height: 0;
+  position: relative;
+  vertical-align: baseline;
+}
+sub {
+  bottom: -0.25em;
+}
+sup {
+  top: -0.5em;
+}
+table {
+  text-indent: 0;
+  border-color: inherit;
+  border-collapse: collapse;
+}
+button,
+input,
+optgroup,
+select,
+textarea {
+  font-family: inherit;
+  font-feature-settings: inherit;
+  font-variation-settings: inherit;
+  font-size: 100%;
+  font-weight: inherit;
+  line-height: inherit;
+  color: inherit;
+  margin: 0;
+  padding: 0;
+}
+button,
+select {
+  text-transform: none;
+}
+button,
+[type='button'],
+[type='reset'],
+[type='submit'] {
+  -webkit-appearance: button;
+  background-color: transparent;
+  background-image: none;
+}
+:-moz-focusring {
+  outline: auto;
+}
+:-moz-ui-invalid {
+  box-shadow: none;
+}
+progress {
+  vertical-align: baseline;
+}
+::-webkit-inner-spin-button,
+::-webkit-outer-spin-button {
+  height: auto;
+}
+[type='search'] {
+  -webkit-appearance: textfield;
+  outline-offset: -2px;
+}
+::-webkit-search-decoration {
+  -webkit-appearance: none;
+}
+::-webkit-file-upload-button {
+  -webkit-appearance: button;
+  font: inherit;
+}
+summary {
+  display: list-item;
+}
+blockquote,
+dl,
+dd,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+hr,
+figure,
+p,
+pre {
+  margin: 0;
+}
+fieldset {
+  margin: 0;
+  padding: 0;
+}
+legend {
+  padding: 0;
+}
+ol,
+ul,
+menu {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+dialog {
+  padding: 0;
+}
+textarea {
+  resize: vertical;
+}
+input::placeholder,
+textarea::placeholder {
+  opacity: 1;
+  color: hsl(0, 0%, 65%);
+}
+button,
+[role='button'] {
+  cursor: pointer;
+}
+:disabled {
+  cursor: default;
+}
+img,
+svg,
+video,
+canvas,
+audio,
+iframe,
+embed,
+object {
+  display: block;
+  vertical-align: middle;
+}
+img,
+video {
+  max-width: 100%;
+  height: auto;
+}
+[hidden] {
+  display: none;
+}
+*,
+::before,
+::after {
+  --tw-border-spacing-x: 0;
+  --tw-border-spacing-y: 0;
+  --tw-translate-x: 0;
+  --tw-translate-y: 0;
+  --tw-rotate: 0;
+  --tw-skew-x: 0;
+  --tw-skew-y: 0;
+  --tw-scale-x: 1;
+  --tw-scale-y: 1;
+  --tw-pan-x: ;
+  --tw-pan-y: ;
+  --tw-pinch-zoom: ;
+  --tw-scroll-snap-strictness: proximity;
+  --tw-gradient-from-position: ;
+  --tw-gradient-via-position: ;
+  --tw-gradient-to-position: ;
+  --tw-ordinal: ;
+  --tw-slashed-zero: ;
+  --tw-numeric-figure: ;
+  --tw-numeric-spacing: ;
+  --tw-numeric-fraction: ;
+  --tw-ring-inset: ;
+  --tw-ring-offset-width: 0px;
+  --tw-ring-offset-color: #fff;
+  --tw-ring-color: rgb(59 130 246 / 0.5);
+  --tw-ring-offset-shadow: 0 0 #0000;
+  --tw-ring-shadow: 0 0 #0000;
+  --tw-shadow: 0 0 #0000;
+  --tw-shadow-colored: 0 0 #0000;
+  --tw-blur: ;
+  --tw-brightness: ;
+  --tw-contrast: ;
+  --tw-grayscale: ;
+  --tw-hue-rotate: ;
+  --tw-invert: ;
+  --tw-saturate: ;
+  --tw-sepia: ;
+  --tw-drop-shadow: ;
+  --tw-backdrop-blur: ;
+  --tw-backdrop-brightness: ;
+  --tw-backdrop-contrast: ;
+  --tw-backdrop-grayscale: ;
+  --tw-backdrop-hue-rotate: ;
+  --tw-backdrop-invert: ;
+  --tw-backdrop-opacity: ;
+  --tw-backdrop-saturate: ;
+  --tw-backdrop-sepia: ;
+}
+::backdrop {
+  --tw-border-spacing-x: 0;
+  --tw-border-spacing-y: 0;
+  --tw-translate-x: 0;
+  --tw-translate-y: 0;
+  --tw-rotate: 0;
+  --tw-skew-x: 0;
+  --tw-skew-y: 0;
+  --tw-scale-x: 1;
+  --tw-scale-y: 1;
+  --tw-pan-x: ;
+  --tw-pan-y: ;
+  --tw-pinch-zoom: ;
+  --tw-scroll-snap-strictness: proximity;
+  --tw-gradient-from-position: ;
+  --tw-gradient-via-position: ;
+  --tw-gradient-to-position: ;
+  --tw-ordinal: ;
+  --tw-slashed-zero: ;
+  --tw-numeric-figure: ;
+  --tw-numeric-spacing: ;
+  --tw-numeric-fraction: ;
+  --tw-ring-inset: ;
+  --tw-ring-offset-width: 0px;
+  --tw-ring-offset-color: #fff;
+  --tw-ring-color: rgb(59 130 246 / 0.5);
+  --tw-ring-offset-shadow: 0 0 #0000;
+  --tw-ring-shadow: 0 0 #0000;
+  --tw-shadow: 0 0 #0000;
+  --tw-shadow-colored: 0 0 #0000;
+  --tw-blur: ;
+  --tw-brightness: ;
+  --tw-contrast: ;
+  --tw-grayscale: ;
+  --tw-hue-rotate: ;
+  --tw-invert: ;
+  --tw-saturate: ;
+  --tw-sepia: ;
+  --tw-drop-shadow: ;
+  --tw-backdrop-blur: ;
+  --tw-backdrop-brightness: ;
+  --tw-backdrop-contrast: ;
+  --tw-backdrop-grayscale: ;
+  --tw-backdrop-hue-rotate: ;
+  --tw-backdrop-invert: ;
+  --tw-backdrop-opacity: ;
+  --tw-backdrop-saturate: ;
+  --tw-backdrop-sepia: ;
+}
+.pointer-events-none {
+  pointer-events: none;
+}
+.fixed {
+  position: fixed;
+}
+.absolute {
+  position: absolute;
+}
+.relative {
+  position: relative;
+}
+.inset-0 {
+  inset: 0px;
+}
+.left-0 {
+  left: 0px;
+}
+.right-0 {
+  right: 0px;
+}
+.top-0 {
+  top: 0px;
+}
+.z-10 {
+  z-index: 10;
+}
+.z-50 {
+  z-index: 50;
+}
+.order-1 {
+  order: 1;
+}
+.order-2 {
+  order: 2;
+}
+.mx-auto {
+  margin-left: auto;
+  margin-right: auto;
+}
+.mb-12 {
+  margin-bottom: 3rem;
+}
+.mb-16 {
+  margin-bottom: 4rem;
+}
+.mb-2 {
+  margin-bottom: 0.5rem;
+}
+.mb-3 {
+  margin-bottom: 0.75rem;
+}
+.mb-4 {
+  margin-bottom: 1rem;
+}
+.mb-6 {
+  margin-bottom: 1.5rem;
+}
+.mb-8 {
+  margin-bottom: 2rem;
+}
+.block {
+  display: block;
+}
+.inline-block {
+  display: inline-block;
+}
+.flex {
+  display: flex;
+}
+.grid {
+  display: grid;
+}
+.hidden {
+  display: none;
+}
+.h-16 {
+  height: 4rem;
+}
+.h-6 {
+  height: 1.5rem;
+}
+.h-64 {
+  height: 16rem;
+}
+.h-96 {
+  height: 24rem;
+}
+.h-auto {
+  height: auto;
+}
+.h-full {
+  height: 100%;
+}
+.h-screen {
+  height: 100vh;
+}
+.w-6 {
+  width: 1.5rem;
+}
+.w-full {
+  width: 100%;
+}
+.max-w-2xl {
+  max-width: 42rem;
+}
+.max-w-screen-lg {
+  max-width: 1024px;
+}
+.max-w-screen-xl {
+  max-width: 1280px;
+}
+.flex-1 {
+  flex: 1 1 0%;
+}
+.cursor-pointer {
+  cursor: pointer;
+}
+.grid-cols-1 {
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+}
+.flex-col {
+  flex-direction: column;
+}
+.items-center {
+  align-items: center;
+}
+.justify-center {
+  justify-content: center;
+}
+.justify-between {
+  justify-content: space-between;
+}
+.gap-12 {
+  gap: 3rem;
+}
+.gap-8 {
+  gap: 2rem;
+}
+.space-x-8 > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-x-reverse: 0;
+  margin-right: calc(2rem * var(--tw-space-x-reverse));
+  margin-left: calc(2rem * calc(1 - var(--tw-space-x-reverse)));
+}
+.space-y-3 > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-y-reverse: 0;
+  margin-top: calc(0.75rem * calc(1 - var(--tw-space-y-reverse)));
+  margin-bottom: calc(0.75rem * var(--tw-space-y-reverse));
+}
+.space-y-4 > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-y-reverse: 0;
+  margin-top: calc(1rem * calc(1 - var(--tw-space-y-reverse)));
+  margin-bottom: calc(1rem * var(--tw-space-y-reverse));
+}
+.space-y-6 > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-y-reverse: 0;
+  margin-top: calc(1.5rem * calc(1 - var(--tw-space-y-reverse)));
+  margin-bottom: calc(1.5rem * var(--tw-space-y-reverse));
+}
+.overflow-hidden {
+  overflow: hidden;
+}
+.scroll-smooth {
+  scroll-behavior: smooth;
+}
+.rounded {
+  border-radius: 0.5rem;
+}
+.border-t {
+  border-top-width: 1px;
+}
+.border-primary-foreground\/20 {
+  border-color: hsl(0 0% 100% / 0.2);
+}
+.bg-gray-50 {
+  --tw-bg-opacity: 1;
+  background-color: hsl(0 0% 98% / var(--tw-bg-opacity));
+}
+.bg-neutral {
+  --tw-bg-opacity: 1;
+  background-color: hsl(0 0% 98% / var(--tw-bg-opacity));
+}
+.bg-primary {
+  --tw-bg-opacity: 1;
+  background-color: hsl(215 75% 24% / var(--tw-bg-opacity));
+}
+.bg-secondary {
+  --tw-bg-opacity: 1;
+  background-color: hsl(215 60% 40% / var(--tw-bg-opacity));
+}
+.bg-gradient-1 {
+  background-image: linear-gradient(
+    135deg,
+    hsl(215, 75%, 24%) 0%,
+    hsl(215, 60%, 40%) 100%
+  );
+}
+.bg-gradient-to-b {
+  background-image: linear-gradient(to bottom, var(--tw-gradient-stops));
+}
+.from-black\/0 {
+  --tw-gradient-from: rgb(0 0 0 / 0) var(--tw-gradient-from-position);
+  --tw-gradient-to: rgb(0 0 0 / 0) var(--tw-gradient-to-position);
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+}
+.to-black\/80 {
+  --tw-gradient-to: rgb(0 0 0 / 0.8) var(--tw-gradient-to-position);
+}
+.object-cover {
+  object-fit: cover;
+}
+.p-2 {
+  padding: 0.5rem;
+}
+.p-6 {
+  padding: 1.5rem;
+}
+.p-8 {
+  padding: 2rem;
+}
+.px-8 {
+  padding-left: 2rem;
+  padding-right: 2rem;
+}
+.py-16 {
+  padding-top: 4rem;
+  padding-bottom: 4rem;
+}
+.py-24 {
+  padding-top: 6rem;
+  padding-bottom: 6rem;
+}
+.py-3 {
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+}
+.py-4 {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+.py-6 {
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
+}
+.pt-8 {
+  padding-top: 2rem;
+}
+.text-center {
+  text-align: center;
+}
+.font-heading {
+  font-family: Poppins, sans-serif;
+}
+.font-sans {
+  font-family: Inter, sans-serif;
+}
+.text-2xl {
+  font-size: 1.5rem;
+  line-height: 2rem;
+}
+.text-3xl {
+  font-size: 1.875rem;
+  line-height: 2.25rem;
+}
+.text-4xl {
+  font-size: 2.25rem;
+  line-height: 2.5rem;
+}
+.text-base {
+  font-size: 1rem;
+  line-height: 1.5rem;
+}
+.text-lg {
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+}
+.text-sm {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+.text-xl {
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+}
+.font-bold {
+  font-weight: 700;
+}
+.font-normal {
+  font-weight: 400;
+}
+.font-semibold {
+  font-weight: 600;
+}
+.leading-relaxed {
+  line-height: 1.625;
+}
+.text-neutral-foreground {
+  --tw-text-opacity: 1;
+  color: hsl(215 16% 18% / var(--tw-text-opacity));
+}
+.text-primary {
+  --tw-text-opacity: 1;
+  color: hsl(215 75% 24% / var(--tw-text-opacity));
+}
+.text-primary-foreground {
+  --tw-text-opacity: 1;
+  color: hsl(0 0% 100% / var(--tw-text-opacity));
+}
+.text-secondary-foreground {
+  --tw-text-opacity: 1;
+  color: hsl(0 0% 100% / var(--tw-text-opacity));
+}
+.text-tertiary {
+  --tw-text-opacity: 1;
+  color: hsl(34 41% 85% / var(--tw-text-opacity));
+}
+.opacity-0 {
+  opacity: 0;
+}
+.shadow-none {
+  --tw-shadow: 0 0 #0000;
+  --tw-shadow-colored: 0 0 #0000;
+  box-shadow:
+    var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000),
+    var(--tw-shadow);
+}
+.transition-all {
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+.transition-colors {
+  transition-property:
+    color, background-color, border-color, text-decoration-color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+.duration-300 {
+  transition-duration: 300ms;
+}
+.ease-in {
+  transition-timing-function: cubic-bezier(0.4, 0, 1, 1);
+}
+.hover\:scale-105:hover {
+  --tw-scale-x: 1.05;
+  --tw-scale-y: 1.05;
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y))
+    rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y))
+    scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+}
+.hover\:bg-primary:hover {
+  --tw-bg-opacity: 1;
+  background-color: hsl(215 75% 24% / var(--tw-bg-opacity));
+}
+.hover\:bg-secondary:hover {
+  --tw-bg-opacity: 1;
+  background-color: hsl(215 60% 40% / var(--tw-bg-opacity));
+}
+.hover\:text-secondary:hover {
+  --tw-text-opacity: 1;
+  color: hsl(215 60% 40% / var(--tw-text-opacity));
+}
+.hover\:text-tertiary:hover {
+  --tw-text-opacity: 1;
+  color: hsl(34 41% 85% / var(--tw-text-opacity));
+}
+.focus\:outline-none:focus {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+}
+.focus\:ring-2:focus {
+  --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0
+    var(--tw-ring-offset-width) var(--tw-ring-offset-color);
+  --tw-ring-shadow: var(--tw-ring-inset) 0 0 0
+    calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);
+  box-shadow:
+    var(--tw-ring-offset-shadow), var(--tw-ring-shadow),
+    var(--tw-shadow, 0 0 #0000);
+}
+.focus\:ring-primary-foreground:focus {
+  --tw-ring-opacity: 1;
+  --tw-ring-color: hsl(0 0% 100% / var(--tw-ring-opacity));
+}
+@media (min-width: 768px) {
+  .md\:order-1 {
+    order: 1;
+  }
+  .md\:order-2 {
+    order: 2;
+  }
+  .md\:flex {
+    display: flex;
+  }
+  .md\:hidden {
+    display: none;
+  }
+  .md\:h-20 {
+    height: 5rem;
+  }
+  .md\:grid-cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .md\:grid-cols-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .md\:flex-row {
+    flex-direction: row;
+  }
+  .md\:py-32 {
+    padding-top: 8rem;
+    padding-bottom: 8rem;
+  }
+  .md\:text-2xl {
+    font-size: 1.5rem;
+    line-height: 2rem;
+  }
+  .md\:text-4xl {
+    font-size: 2.25rem;
+    line-height: 2.5rem;
+  }
+  .md\:text-5xl {
+    font-size: 3rem;
+    line-height: 1;
+  }
+  .md\:text-lg {
+    font-size: 1.125rem;
+    line-height: 1.75rem;
+  }
+  .md\:text-xl {
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+  }
+}
+@media (min-width: 1024px) {
+  .lg\:grid-cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .lg\:grid-cols-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .lg\:px-16 {
+    padding-left: 4rem;
+    padding-right: 4rem;
+  }
+  .lg\:text-6xl {
+    font-size: 3.75rem;
+    line-height: 1;
+  }
+}
 
-        #robot-button:active {
-            cursor: grabbing;
-            transform: scale(0.95);
-        }
-
-        #robot-button i {
-            font-size: 32px;
-            color: white;
-            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-        }
-
-        .pulse {
-            animation: pulse 0.5s ease-out;
-        }
-
-        @keyframes pulse {
-            0% {
-                transform: scale(1);
-                box-shadow: 0 0 0 0 rgba(0, 198, 255, 0.7);
-            }
-            50% {
-                transform: scale(1.2);
-                box-shadow: 0 0 0 15px rgba(0, 198, 255, 0);
-            }
-            100% {
-                transform: scale(1);
-                box-shadow: 0 0 0 0 rgba(0, 198, 255, 0);
-            }
-        }
-
-        .instructions {
-            position: absolute;
-            top: 20px;
-            left: 0;
-            right: 0;
-            text-align: center;
-            color: white;
-            font-size: 18px;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-        }
     </style>
-</head>
-<body>
-    <div class="instructions">Drag the robot button and click to animate!</div>
-    <div id="robot-button">
-        <i class="fas fa-robot"></i>
-    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <link rel="stylesheet" href="globals.css" />
+  </head>
+  <body class="font-sans text-neutral-foreground bg-neutral">
+    <!-- Navigation -->
+    <nav
+      class="fixed top-0 left-0 right-0 z-50 bg-gradient-1"
+      role="navigation"
+      aria-label="Main navigation"
+    >
+      <div class="max-w-screen-xl mx-auto px-8 lg:px-16">
+        <div class="flex items-center justify-between h-16 md:h-20">
+          <div class="flex items-center">
+            <a
+              href="#hero"
+              class="text-primary-foreground font-heading font-bold text-xl md:text-2xl"
+              >EduHub</a
+            >
+          </div>
+
+          <!-- Desktop Navigation -->
+          <div class="hidden md:flex items-center space-x-8">
+            <a
+              href="#hero"
+              class="text-primary-foreground hover:text-tertiary transition-colors duration-300 cursor-pointer font-normal"
+              >Home</a
+            >
+            <a
+              href="#about"
+              class="text-primary-foreground hover:text-tertiary transition-colors duration-300 cursor-pointer font-normal"
+              >About</a
+            >
+            <a
+              href="#courses"
+              class="text-primary-foreground hover:text-tertiary transition-colors duration-300 cursor-pointer font-normal"
+              >Courses</a
+            >
+            <a
+              href="#resources"
+              class="text-primary-foreground hover:text-tertiary transition-colors duration-300 cursor-pointer font-normal"
+              >Resources</a
+            >
+            <a
+              href="#location"
+              class="text-primary-foreground hover:text-tertiary transition-colors duration-300 cursor-pointer font-normal"
+              >Contact</a
+            >
+          </div>
+
+          <!-- Mobile Menu Button -->
+          <button
+            id="mobile-menu-button"
+            class="md:hidden text-primary-foreground p-2 focus:outline-none focus:ring-2 focus:ring-primary-foreground"
+            aria-label="Toggle mobile menu"
+            aria-expanded="false"
+          >
+            <svg
+              class="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M4 6h16M4 12h16M4 18h16"
+              ></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Mobile Menu -->
+      <div id="mobile-menu" class="hidden md:hidden bg-primary">
+        <div class="px-8 py-6 space-y-4">
+          <a
+            href="#hero"
+            class="block text-primary-foreground hover:text-tertiary transition-colors duration-300 cursor-pointer font-normal py-3"
+            >Home</a
+          >
+          <a
+            href="#about"
+            class="block text-primary-foreground hover:text-tertiary transition-colors duration-300 cursor-pointer font-normal py-3"
+            >About</a
+          >
+          <a
+            href="#courses"
+            class="block text-primary-foreground hover:text-tertiary transition-colors duration-300 cursor-pointer font-normal py-3"
+            >Courses</a
+          >
+          <a
+            href="#resources"
+            class="block text-primary-foreground hover:text-tertiary transition-colors duration-300 cursor-pointer font-normal py-3"
+            >Resources</a
+          >
+          <a
+            href="#location"
+            class="block text-primary-foreground hover:text-tertiary transition-colors duration-300 cursor-pointer font-normal py-3"
+            >Contact</a
+          >
+        </div>
+      </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section
+      id="hero"
+      class="relative h-screen flex items-center justify-center overflow-hidden"
+    >
+      <div class="absolute inset-0 w-full h-full">
+        <video
+          aria-label="Education background video"
+          src="https://c.animaapp.com/mhkxsuhdjJL2w6/img/ai_5.mp4"
+          poster="https://c.animaapp.com/mhkxsuhdjJL2w6/img/ai_5-poster.png"
+          class="w-full h-full object-cover"
+          autoplay=""
+          loop=""
+          muted=""
+          playsinline=""
+        ></video>
+        <div
+          class="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/0 to-black/80"
+        ></div>
+      </div>
+
+      <div
+        class="relative z-10 max-w-screen-lg mx-auto px-8 lg:px-16 text-center"
+      >
+        <h1
+          class="hero-headline font-heading font-bold text-4xl md:text-5xl lg:text-6xl text-primary-foreground mb-6 opacity-0"
+        >
+          Empowering Minds, Shaping Futures
+        </h1>
+        <p
+          class="hero-text text-lg md:text-xl text-primary-foreground mb-8 max-w-2xl mx-auto opacity-0"
+        >
+          Join a community dedicated to academic excellence, innovative
+          learning, and personal growth. Discover programs designed to unlock
+          your potential.
+        </p>
+        <a
+          href="#courses"
+          class="hero-button inline-block bg-primary text-primary-foreground px-8 py-4 rounded font-normal text-base transition-all duration-300 ease-in hover:bg-secondary hover:scale-105 opacity-0"
+        >
+          Explore Courses
+        </a>
+      </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="py-24 md:py-32 px-8 lg:px-16 bg-neutral">
+      <div class="max-w-screen-xl mx-auto">
+        <div class="flex flex-col md:flex-row gap-12 items-center">
+          <div class="flex-1 about-text">
+            <h2
+              class="font-heading font-bold text-3xl md:text-4xl text-primary mb-6"
+            >
+              About Our Institution
+            </h2>
+            <p
+              class="text-neutral-foreground text-base md:text-lg leading-relaxed mb-4"
+            >
+              For over two decades, we have been at the forefront of educational
+              innovation, fostering a culture of curiosity, critical thinking,
+              and collaboration. Our mission is to provide accessible,
+              high-quality education that prepares students for the challenges
+              of tomorrow.
+            </p>
+            <p
+              class="text-neutral-foreground text-base md:text-lg leading-relaxed"
+            >
+              With state-of-the-art facilities, experienced faculty, and a
+              diverse student body, we create an environment where learning
+              thrives. Whether you're pursuing undergraduate studies,
+              professional development, or lifelong learning, we're here to
+              support your journey.
+            </p>
+          </div>
+          <div class="flex-1 about-image">
+            <img
+              src="https://c.animaapp.com/mhkxsuhdjJL2w6/img/ai_1.png"
+              alt="Students collaborating"
+              width="1600"
+              height="900"
+              loading="lazy"
+              class="w-full h-auto rounded shadow-none"
+            />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Courses Section -->
+    <section id="courses" class="py-24 md:py-32 px-8 lg:px-16 bg-gray-50">
+      <div class="max-w-screen-xl mx-auto">
+        <div class="text-center mb-16 courses-header">
+          <h2
+            class="font-heading font-bold text-3xl md:text-4xl text-primary mb-4"
+          >
+            Our Programs
+          </h2>
+          <p
+            class="text-neutral-foreground text-base md:text-lg max-w-2xl mx-auto"
+          >
+            Explore our diverse range of programs designed to meet your
+            educational and career goals.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <!-- Course Card 1 -->
+          <a
+            href="#courses"
+            class="course-card block bg-neutral rounded overflow-hidden transition-all duration-300 ease-in hover:scale-105 cursor-pointer"
+          >
+            <div class="overflow-hidden">
+              <img
+                src="https://c.animaapp.com/mhkxsuhdjJL2w6/img/ai_2.png"
+                alt="Classroom learning"
+                width="1600"
+                height="900"
+                loading="lazy"
+                class="w-full h-64 object-cover"
+              />
+            </div>
+            <div class="p-6">
+              <h3 class="font-heading font-semibold text-xl text-primary mb-3">
+                Business Administration
+              </h3>
+              <p class="text-neutral-foreground text-base leading-relaxed">
+                Develop leadership skills and business acumen with our
+                comprehensive MBA and undergraduate business programs.
+              </p>
+            </div>
+          </a>
+
+          <!-- Course Card 2 -->
+          <a
+            href="#courses"
+            class="course-card block bg-neutral rounded overflow-hidden transition-all duration-300 ease-in hover:scale-105 cursor-pointer"
+          >
+            <div class="overflow-hidden">
+              <img
+                src="https://c.animaapp.com/mhkxsuhdjJL2w6/img/ai_3.png"
+                alt="Modern library interior"
+                width="1600"
+                height="900"
+                loading="lazy"
+                class="w-full h-64 object-cover"
+              />
+            </div>
+            <div class="p-6">
+              <h3 class="font-heading font-semibold text-xl text-primary mb-3">
+                Computer Science
+              </h3>
+              <p class="text-neutral-foreground text-base leading-relaxed">
+                Master cutting-edge technologies and programming languages in
+                our industry-aligned computer science curriculum.
+              </p>
+            </div>
+          </a>
+
+          <!-- Course Card 3 -->
+          <a
+            href="#courses"
+            class="course-card block bg-neutral rounded overflow-hidden transition-all duration-300 ease-in hover:scale-105 cursor-pointer"
+          >
+            <div class="overflow-hidden">
+              <img
+                src="https://c.animaapp.com/mhkxsuhdjJL2w6/img/ai_4.png"
+                alt="Campus exterior"
+                width="1600"
+                height="900"
+                loading="lazy"
+                class="w-full h-64 object-cover"
+              />
+            </div>
+            <div class="p-6">
+              <h3 class="font-heading font-semibold text-xl text-primary mb-3">
+                Liberal Arts
+              </h3>
+              <p class="text-neutral-foreground text-base leading-relaxed">
+                Explore humanities, social sciences, and creative arts to
+                develop critical thinking and communication skills.
+              </p>
+            </div>
+          </a>
+
+          <!-- Course Card 4 -->
+          <a
+            href="#courses"
+            class="course-card block bg-neutral rounded overflow-hidden transition-all duration-300 ease-in hover:scale-105 cursor-pointer"
+          >
+            <div class="overflow-hidden">
+              <img
+                src="https://c.animaapp.com/mhkxsuhdjJL2w6/img/ai_1.png"
+                alt="Students collaborating"
+                width="1600"
+                height="900"
+                loading="lazy"
+                class="w-full h-64 object-cover"
+              />
+            </div>
+            <div class="p-6">
+              <h3 class="font-heading font-semibold text-xl text-primary mb-3">
+                Engineering
+              </h3>
+              <p class="text-neutral-foreground text-base leading-relaxed">
+                Build innovative solutions with our hands-on engineering
+                programs in mechanical, electrical, and civil disciplines.
+              </p>
+            </div>
+          </a>
+
+          <!-- Course Card 5 -->
+          <a
+            href="#courses"
+            class="course-card block bg-neutral rounded overflow-hidden transition-all duration-300 ease-in hover:scale-105 cursor-pointer"
+          >
+            <div class="overflow-hidden">
+              <img
+                src="https://c.animaapp.com/mhkxsuhdjJL2w6/img/ai_2.png"
+                alt="Classroom learning"
+                width="1600"
+                height="900"
+                loading="lazy"
+                class="w-full h-64 object-cover"
+              />
+            </div>
+            <div class="p-6">
+              <h3 class="font-heading font-semibold text-xl text-primary mb-3">
+                Health Sciences
+              </h3>
+              <p class="text-neutral-foreground text-base leading-relaxed">
+                Prepare for a rewarding career in healthcare with our nursing,
+                public health, and medical programs.
+              </p>
+            </div>
+          </a>
+
+          <!-- Course Card 6 -->
+          <a
+            href="#courses"
+            class="course-card block bg-neutral rounded overflow-hidden transition-all duration-300 ease-in hover:scale-105 cursor-pointer"
+          >
+            <div class="overflow-hidden">
+              <img
+                src="https://c.animaapp.com/mhkxsuhdjJL2w6/img/ai_4.png"
+                alt="Campus exterior"
+                width="1600"
+                height="900"
+                loading="lazy"
+                class="w-full h-64 object-cover"
+              />
+            </div>
+            <div class="p-6">
+              <h3 class="font-heading font-semibold text-xl text-primary mb-3">
+                Education
+              </h3>
+              <p class="text-neutral-foreground text-base leading-relaxed">
+                Inspire the next generation with our teacher training and
+                educational leadership programs.
+              </p>
+            </div>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Resources Section -->
+    <section id="resources" class="py-24 md:py-32 px-8 lg:px-16 bg-neutral">
+      <div class="max-w-screen-xl mx-auto">
+        <div class="flex flex-col md:flex-row gap-12 items-center">
+          <div class="flex-1 resources-image order-2 md:order-1">
+            <img
+              src="https://c.animaapp.com/mhkxsuhdjJL2w6/img/ai_3.png"
+              alt="Modern library interior"
+              width="1600"
+              height="900"
+              loading="lazy"
+              class="w-full h-auto rounded shadow-none"
+            />
+          </div>
+          <div class="flex-1 resources-text order-1 md:order-2">
+            <h2
+              class="font-heading font-bold text-3xl md:text-4xl text-primary mb-6"
+            >
+              World-Class Facilities
+            </h2>
+            <p
+              class="text-neutral-foreground text-base md:text-lg leading-relaxed mb-4"
+            >
+              Our campus features modern libraries, advanced laboratories,
+              collaborative study spaces, and cutting-edge technology to support
+              your learning experience. Access thousands of digital resources,
+              research databases, and expert librarians ready to assist you.
+            </p>
+            <p
+              class="text-neutral-foreground text-base md:text-lg leading-relaxed mb-6"
+            >
+              From quiet reading rooms to interactive maker spaces, our
+              facilities are designed to accommodate diverse learning styles and
+              foster innovation.
+            </p>
+            <a
+              href="#location"
+              class="inline-block bg-secondary text-secondary-foreground px-8 py-4 rounded font-normal text-base transition-all duration-300 ease-in hover:bg-primary hover:scale-105"
+            >
+              Visit Our Campus
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Location & Membership Section -->
+    <section id="location" class="py-24 md:py-32 px-8 lg:px-16 bg-gray-50">
+      <div class="max-w-screen-xl mx-auto">
+        <div class="text-center mb-16 location-header">
+          <h2
+            class="font-heading font-bold text-3xl md:text-4xl text-primary mb-4"
+          >
+            Visit Us
+          </h2>
+          <p
+            class="text-neutral-foreground text-base md:text-lg max-w-2xl mx-auto"
+          >
+            We're located in the heart of the city, easily accessible by public
+            transportation. Come visit our campus and experience our community
+            firsthand.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+          <!-- Map -->
+          <div class="location-map">
+            <div class="bg-neutral rounded overflow-hidden h-96">
+              <iframe
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3022.1841374555634!2d-73.98823492346652!3d40.75797097138558!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c25855c6480299%3A0x55194ec5a1ae072e!2sTimes%20Square!5e0!3m2!1sen!2sus!4v1234567890123!5m2!1sen!2sus&amp;key=YOUR_API_KEY"
+                width="100%"
+                height="100%"
+                style="border: 0"
+                allowfullscreen=""
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade"
+                title="Campus location map"
+              ></iframe>
+            </div>
+          </div>
+
+          <!-- Contact Info -->
+          <div class="location-info">
+            <div class="bg-neutral rounded p-8">
+              <h3 class="font-heading font-semibold text-2xl text-primary mb-6">
+                Contact Information
+              </h3>
+
+              <div class="space-y-6 mb-8">
+                <div>
+                  <h4 class="font-semibold text-lg text-primary mb-2">
+                    Address
+                  </h4>
+                  <p class="text-neutral-foreground text-base">
+                    123 Education Boulevard<br />
+                    Learning District<br />
+                    City, State 12345
+                  </p>
+                </div>
+
+                <div>
+                  <h4 class="font-semibold text-lg text-primary mb-2">Phone</h4>
+                  <p class="text-neutral-foreground text-base">
+                    <a
+                      href="tel:+15551234567"
+                      class="hover:text-secondary transition-colors duration-300"
+                      >+1 (555) 123-4567</a
+                    >
+                  </p>
+                </div>
+
+                <div>
+                  <h4 class="font-semibold text-lg text-primary mb-2">Email</h4>
+                  <p class="text-neutral-foreground text-base">
+                    <a
+                      href="mailto:info@eduhub.edu"
+                      class="hover:text-secondary transition-colors duration-300"
+                      >info@eduhub.edu</a
+                    >
+                  </p>
+                </div>
+
+                <div>
+                  <h4 class="font-semibold text-lg text-primary mb-2">
+                    Office Hours
+                  </h4>
+                  <p class="text-neutral-foreground text-base">
+                    Monday - Friday: 8:00 AM - 6:00 PM<br />
+                    Saturday: 9:00 AM - 2:00 PM<br />
+                    Sunday: Closed
+                  </p>
+                </div>
+              </div>
+
+              <a
+                href="#courses"
+                class="inline-block bg-primary text-primary-foreground px-8 py-4 rounded font-normal text-base transition-all duration-300 ease-in hover:bg-secondary hover:scale-105 w-full text-center"
+              >
+                Apply Now
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-primary text-primary-foreground py-16 px-8 lg:px-16">
+      <div class="max-w-screen-xl mx-auto">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
+          <div>
+            <h3
+              class="font-heading font-bold text-xl mb-4 text-primary-foreground"
+            >
+              EduHub
+            </h3>
+            <p class="text-primary-foreground text-base leading-relaxed">
+              Empowering minds and shaping futures through excellence in
+              education.
+            </p>
+          </div>
+
+          <div>
+            <h4
+              class="font-heading font-semibold text-lg mb-4 text-primary-foreground"
+            >
+              Quick Links
+            </h4>
+            <ul class="space-y-3">
+              <li>
+                <a
+                  href="#about"
+                  class="text-primary-foreground hover:text-tertiary transition-colors duration-300 text-base"
+                  >About Us</a
+                >
+              </li>
+              <li>
+                <a
+                  href="#courses"
+                  class="text-primary-foreground hover:text-tertiary transition-colors duration-300 text-base"
+                  >Programs</a
+                >
+              </li>
+              <li>
+                <a
+                  href="#resources"
+                  class="text-primary-foreground hover:text-tertiary transition-colors duration-300 text-base"
+                  >Facilities</a
+                >
+              </li>
+              <li>
+                <a
+                  href="#location"
+                  class="text-primary-foreground hover:text-tertiary transition-colors duration-300 text-base"
+                  >Contact</a
+                >
+              </li>
+            </ul>
+          </div>
+
+          <div>
+            <h4
+              class="font-heading font-semibold text-lg mb-4 text-primary-foreground"
+            >
+              Connect With Us
+            </h4>
+            <ul class="space-y-3">
+              <li>
+                <a
+                  href="#"
+                  class="text-primary-foreground hover:text-tertiary transition-colors duration-300 text-base"
+                  >Facebook</a
+                >
+              </li>
+              <li>
+                <a
+                  href="#"
+                  class="text-primary-foreground hover:text-tertiary transition-colors duration-300 text-base"
+                  >Twitter</a
+                >
+              </li>
+              <li>
+                <a
+                  href="#"
+                  class="text-primary-foreground hover:text-tertiary transition-colors duration-300 text-base"
+                  >LinkedIn</a
+                >
+              </li>
+              <li>
+                <a
+                  href="#"
+                  class="text-primary-foreground hover:text-tertiary transition-colors duration-300 text-base"
+                  >Instagram</a
+                >
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="border-t border-primary-foreground/20 pt-8 text-center">
+          <p class="text-primary-foreground text-sm">
+            © 2024 EduHub. All rights reserved. |
+            <a
+              href="#"
+              class="hover:text-tertiary transition-colors duration-300"
+              >Privacy Policy</a
+            >
+            |
+            <a
+              href="#"
+              class="hover:text-tertiary transition-colors duration-300"
+              >Terms of Service</a
+            >
+          </p>
+        </div>
+      </div>
+    </footer>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const button = document.getElementById('robot-button');
-            let isDragging = false;
-            let currentX;
-            let currentY;
-            let initialX;
-            let initialY;
-            let xOffset = 0;
-            let yOffset = 0;
+      // Mobile menu toggle
+      const mobileMenuButton = document.getElementById('mobile-menu-button');
+      const mobileMenu = document.getElementById('mobile-menu');
 
-            // Set initial position
-            button.style.left = (window.innerWidth - button.offsetWidth - 20) + 'px';
-            button.style.top = (window.innerHeight - button.offsetHeight - 20) + 'px';
+      mobileMenuButton.addEventListener('click', () => {
+        const isExpanded =
+          mobileMenuButton.getAttribute('aria-expanded') === 'true';
+        mobileMenuButton.setAttribute('aria-expanded', !isExpanded);
+        mobileMenu.classList.toggle('hidden');
+      });
 
-            button.addEventListener('mousedown', dragStart);
-            button.addEventListener('touchstart', dragStart);
-            document.addEventListener('mousemove', drag);
-            document.addEventListener('touchmove', drag);
-            document.addEventListener('mouseup', dragEnd);
-            document.addEventListener('touchend', dragEnd);
-            button.addEventListener('click', handleClick);
-
-            function dragStart(e) {
-                if (e.type === 'touchstart') {
-                    initialX = e.touches[0].clientX - xOffset;
-                    initialY = e.touches[0].clientY - yOffset;
-                } else {
-                    initialX = e.clientX - xOffset;
-                    initialY = e.clientY - yOffset;
-                }
-
-                if (e.target === button || e.target.parentNode === button) {
-                    isDragging = true;
-                    button.style.cursor = 'grabbing';
-                }
-            }
-
-            function drag(e) {
-                if (isDragging) {
-                    e.preventDefault();
-                    
-                    if (e.type === 'touchmove') {
-                        currentX = e.touches[0].clientX - initialX;
-                        currentY = e.touches[0].clientY - initialY;
-                    } else {
-                        currentX = e.clientX - initialX;
-                        currentY = e.clientY - initialY;
-                    }
-
-                    xOffset = currentX;
-                    yOffset = currentY;
-
-                    setTranslate(currentX, currentY, button);
-                }
-            }
-
-            function setTranslate(xPos, yPos, el) {
-                el.style.transform = `translate3d(${xPos}px, ${yPos}px, 0)`;
-            }
-
-            function dragEnd() {
-                initialX = currentX;
-                initialY = currentY;
-                isDragging = false;
-                button.style.cursor = 'grab';
-            }
-
-            function handleClick(e) {
-                // Only trigger if not dragging (to prevent click after drag)
-                if (!isDragging) {
-                    // Add animation class
-                    button.classList.add('pulse');
-                    
-                    // Remove animation class after animation completes
-                    setTimeout(() => {
-                        button.classList.remove('pulse');
-                    }, 500);
-                    
-                    // Navigate to /gemini after animation
-                    setTimeout(() => {
-                        window.location.href = '/gemini';
-                    }, 600);
-                }
-            }
-
-            // Make button responsive to window resize
-            window.addEventListener('resize', function() {
-                // Keep the button in view if window is resized
-                const rect = button.getBoundingClientRect();
-                
-                if (rect.right > window.innerWidth) {
-                    button.style.left = (window.innerWidth - button.offsetWidth - 20) + 'px';
-                }
-                
-                if (rect.bottom > window.innerHeight) {
-                    button.style.top = (window.innerHeight - button.offsetHeight - 20) + 'px';
-                }
-                
-                if (rect.left < 0) {
-                    button.style.left = '20px';
-                }
-                
-                if (rect.top < 0) {
-                    button.style.top = '20px';
-                }
-            });
+      // Close mobile menu when clicking on a link
+      const mobileMenuLinks = mobileMenu.querySelectorAll('a');
+      mobileMenuLinks.forEach((link) => {
+        link.addEventListener('click', () => {
+          mobileMenu.classList.add('hidden');
+          mobileMenuButton.setAttribute('aria-expanded', 'false');
         });
+      });
+
+      // GSAP Animations
+      gsap.registerPlugin(ScrollTrigger);
+
+      // Hero animations
+      gsap.to('.hero-headline', {
+        opacity: 1,
+        y: 0,
+        duration: 1,
+        delay: 0.3,
+        ease: 'power2.out',
+      });
+
+      gsap.to('.hero-text', {
+        opacity: 1,
+        y: 0,
+        duration: 1,
+        delay: 0.6,
+        ease: 'power2.out',
+      });
+
+      gsap.to('.hero-button', {
+        opacity: 1,
+        y: 0,
+        duration: 1,
+        delay: 0.9,
+        ease: 'power2.out',
+      });
+
+      // About section animation
+      gsap.from('.about-text', {
+        scrollTrigger: {
+          trigger: '.about-text',
+          start: 'top 80%',
+        },
+        opacity: 0,
+        x: -50,
+        duration: 1,
+        ease: 'power2.out',
+      });
+
+      gsap.from('.about-image', {
+        scrollTrigger: {
+          trigger: '.about-image',
+          start: 'top 80%',
+        },
+        opacity: 0,
+        x: 50,
+        duration: 1,
+        ease: 'power2.out',
+      });
+
+      // Courses section animation
+      gsap.from('.courses-header', {
+        scrollTrigger: {
+          trigger: '.courses-header',
+          start: 'top 80%',
+        },
+        opacity: 0,
+        y: 30,
+        duration: 0.8,
+        ease: 'power2.out',
+      });
+
+      gsap.from('.course-card', {
+        scrollTrigger: {
+          trigger: '.course-card',
+          start: 'top 85%',
+        },
+        opacity: 0,
+        y: 40,
+        duration: 0.8,
+        stagger: 0.15,
+        ease: 'power2.out',
+      });
+
+      // Resources section animation
+      gsap.from('.resources-image', {
+        scrollTrigger: {
+          trigger: '.resources-image',
+          start: 'top 80%',
+        },
+        opacity: 0,
+        x: -50,
+        duration: 1,
+        ease: 'power2.out',
+      });
+
+      gsap.from('.resources-text', {
+        scrollTrigger: {
+          trigger: '.resources-text',
+          start: 'top 80%',
+        },
+        opacity: 0,
+        x: 50,
+        duration: 1,
+        ease: 'power2.out',
+      });
+
+      // Location section animation
+      gsap.from('.location-header', {
+        scrollTrigger: {
+          trigger: '.location-header',
+          start: 'top 80%',
+        },
+        opacity: 0,
+        y: 30,
+        duration: 0.8,
+        ease: 'power2.out',
+      });
+
+      gsap.from('.location-map', {
+        scrollTrigger: {
+          trigger: '.location-map',
+          start: 'top 80%',
+        },
+        opacity: 0,
+        x: -50,
+        duration: 1,
+        ease: 'power2.out',
+      });
+
+      gsap.from('.location-info', {
+        scrollTrigger: {
+          trigger: '.location-info',
+          start: 'top 80%',
+        },
+        opacity: 0,
+        x: 50,
+        duration: 1,
+        ease: 'power2.out',
+      });
+
+      // Active navigation highlighting
+      const sections = document.querySelectorAll('section[id]');
+      const navLinks = document.querySelectorAll('nav a[href^="#"]');
+
+      function highlightNavigation() {
+        let scrollY = window.pageYOffset;
+
+        sections.forEach((section) => {
+          const sectionHeight = section.offsetHeight;
+          const sectionTop = section.offsetTop - 100;
+          const sectionId = section.getAttribute('id');
+
+          if (scrollY > sectionTop && scrollY <= sectionTop + sectionHeight) {
+            navLinks.forEach((link) => {
+              link.classList.remove('text-tertiary');
+              if (link.getAttribute('href') === `#${sectionId}`) {
+                link.classList.add('text-tertiary');
+              }
+            });
+          }
+        });
+      }
+
+      window.addEventListener('scroll', highlightNavigation);
     </script>
-</body>
+  </body>
 </html>

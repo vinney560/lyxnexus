@@ -797,13 +797,14 @@
                 min-width: 70px;
             }
 
-            /* Mobile history panel */
+            /* Mobile history panel - Overlay instead of push */
             .history-panel {
                 width: 85% !important;
                 max-width: 320px !important;
                 top: 60px !important;
                 bottom: 70px !important;
                 z-index: 1002 !important;
+                box-shadow: 8px 0 32px rgba(0, 0, 0, 0.5);
             }
 
             .history-toggle {
@@ -822,6 +823,11 @@
             .message-actions {
                 opacity: 1;
                 transform: translateY(0);
+            }
+
+            /* Remove margin-left for mobile */
+            .main-chat.with-history {
+                margin-left: 0;
             }
         }
 
@@ -1051,8 +1057,41 @@
                     </div>
                 </div>
 
-                <!-- Existing conversation history -->
-                {{ history_html | safe }}
+                <!-- Existing conversation history - Apply formatting to all messages -->
+                {% if history_html %}
+                    <script>
+                        document.addEventListener('DOMContentLoaded', function() {
+                            // Apply formatting to all existing AI messages in the chat history
+                            const aiMessages = document.querySelectorAll('.ai-message .message-content');
+                            aiMessages.forEach(messageContent => {
+                                const textContent = messageContent.textContent || messageContent.innerText;
+                                const formattedContent = formatText(textContent);
+                                
+                                // Find the existing text element and replace with formatted content
+                                const textElements = messageContent.querySelectorAll('div, p, span');
+                                let textElement = null;
+                                
+                                // Find the main text container
+                                textElements.forEach(el => {
+                                    if (el.textContent === textContent.trim()) {
+                                        textElement = el;
+                                    }
+                                });
+                                
+                                if (textElement) {
+                                    textElement.innerHTML = formattedContent;
+                                } else {
+                                    // If no specific element found, wrap the formatted content
+                                    const formattedDiv = document.createElement('div');
+                                    formattedDiv.className = 'formatted-text';
+                                    formattedDiv.innerHTML = formattedContent;
+                                    messageContent.insertBefore(formattedDiv, messageContent.firstChild);
+                                }
+                            });
+                        });
+                    </script>
+                    {{ history_html | safe }}
+                {% endif %}
             </div>
         </div>
 
@@ -1093,6 +1132,12 @@
         // Check if mobile on resize
         window.addEventListener('resize', function() {
             isMobile = window.innerWidth <= 768;
+            // On mobile, we don't want to push content, so remove with-history class
+            if (isMobile) {
+                mainChat.classList.remove('with-history');
+            } else if (historyPanel.classList.contains('active')) {
+                mainChat.classList.add('with-history');
+            }
         });
 
         // Auto-resize textarea
@@ -1123,6 +1168,9 @@
             if (isActive) {
                 historyPanel.classList.add('active');
                 historyBackdrop.classList.add('active');
+                if (!isMobile) {
+                    mainChat.classList.add('with-history');
+                }
                 if (isMobile) {
                     document.body.style.overflow = 'hidden';
                 }
@@ -1135,6 +1183,9 @@
         function closeHistoryPanel() {
             historyPanel.classList.remove('active');
             historyBackdrop.classList.remove('active');
+            if (!isMobile) {
+                mainChat.classList.remove('with-history');
+            }
             if (isMobile) {
                 document.body.style.overflow = '';
             }
@@ -1268,7 +1319,6 @@
             return formatted;
         }
         
-
         // Update button states based on streaming status
         function updateButtonStates() {
             sendButton.disabled = isStreaming || messageInput.value.trim().length === 0;
