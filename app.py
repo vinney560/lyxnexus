@@ -2759,7 +2759,6 @@ def is_authenticated():
     return jsonify({'authenticated': current_user.is_authenticated})
 #-------------------------------------------------------------------
 
-# --- Subscribe route ---
 @app.route("/subscribe", methods=["POST"])
 @login_required
 def subscribe():
@@ -2770,42 +2769,39 @@ def subscribe():
     if not endpoint:
         return jsonify({"error": "Missing endpoint"}), 400
 
-    current_user_id = current_user.id
-
     existing = PushSubscription.query.filter_by(endpoint=endpoint).first()
     if not existing:
         sub = PushSubscription(
-            user_id=current_user_id,
+            user_id=current_user.id,
             endpoint=endpoint,
             p256dh=keys.get("p256dh"),
             auth=keys.get("auth")
         )
         db.session.add(sub)
         db.session.commit()
-        print(f"✅ New subscription added: user_id={current_user_id}")
+        print(f"✅ New subscription added: user_id={current_user.id}")
     else:
         existing.p256dh = keys.get("p256dh")
         existing.auth = keys.get("auth")
-        existing.user_id = current_user_id  # ensure linked to user
+        existing.user_id = current_user.id
         db.session.commit()
-        print(f"♻️ Subscription updated: user_id={current_user_id}")
+        print(f"♻️ Subscription updated: user_id={current_user.id}")
 
     return jsonify({"message": "Subscription saved"}), 201
 
+def send_webpush(data: dict):
+    """Send a push notification to all active users."""
 
-# --- Send push function (broadcast to all users by default) ---
-def send_webpush(data: dict, user_id: int | None = None):
-    """
-    Send a push notification to a specific user or broadcast to all.
-    Returns the number of successful pushes.
-    """
-    print("📡 Sending push notification with data:", data, "to user_id:", user_id)
+    print("📡 Sending push notification with data:", data)
 
-    query = PushSubscription.query
-    if user_id is not None:
-        query = query.filter_by(user_id=user_id)
+    # Get all subscriptions linked to active users
+    subs = (
+        PushSubscription.query
+        .join(User)
+        .filter(User.status == True)
+        .all()
+    )
 
-    subs = query.all()
     print(f"📥 Total subscriptions to notify: {len(subs)}")
 
     payload = json.dumps(data)
@@ -2819,11 +2815,10 @@ def send_webpush(data: dict, user_id: int | None = None):
                 vapid_private_key=VAPID_PRIVATE_KEY,
                 vapid_claims=VAPID_CLAIMS,
             )
-            success_count += 1
             print(f"✅ Push sent to: {sub.endpoint[:60]}..., user_id={sub.user_id}")
+            success_count += 1
         except WebPushException as ex:
             print(f"⚠️ Push failed: {ex}")
-            # Clean invalid subscriptions
             if hasattr(ex, "response") and ex.response is not None:
                 if ex.response.status_code in [400, 404, 410]:
                     print(f"🗑 Removing invalid subscription: {sub.endpoint[:60]}...")
@@ -2831,78 +2826,24 @@ def send_webpush(data: dict, user_id: int | None = None):
                     db.session.commit()
 
     print(f"📤 Total successful pushes: {success_count}")
-    return success_count
+    return success_count, len(subs)
 
-
-# --- Test push Confimr ---
 @app.route("/test-broadcast")
 @login_required
 def test_broadcast():
-    """Send a test push to all valid subscriptions and clean out invalid ones."""
-    from pywebpush import WebPushException
-
-    # Prepare payload
     data = {
         "title": "LyxNexus",
-        "message": "This is a broadcast test push to all users!"
+        "message": "This is a broadcast notification to all users!"
     }
-    payload = json.dumps(data)
 
-    # Fetch all subscriptions
-    subs = PushSubscription.query.all()
-    total = len(subs)
-    success_count = 0
-
-    for sub in subs:
-        try:
-            webpush(
-                subscription_info=sub.to_dict(),
-                data=payload,
-                vapid_private_key=VAPID_PRIVATE_KEY,
-                vapid_claims=VAPID_CLAIMS
-            )
-            success_count += 1
-            print(f"✅ Push sent: {sub.endpoint[:60]}..., user_id={sub.user_id}")
-        except WebPushException as ex:
-            print(f"⚠️ Push failed: {ex}")
-            # Remove invalid subscriptions
-            if hasattr(ex, "response") and ex.response is not None:
-                if ex.response.status_code in [400, 404, 410]:
-                    print(f"🗑 Removing invalid subscription: {sub.endpoint[:60]}...")
-                    db.session.delete(sub)
-                    db.session.commit()
+    success_count, total = send_webpush(data)
 
     return jsonify({
         "message": "Broadcast test completed",
-        "total_subscriptions": total,
-        "successful_pushes": success_count
+        "successful_pushes": success_count,
+        "total_subscriptions": total
     }), 200
 
-@app.route("/test-push")
-@login_required
-def test_push():
-    db.session.expire_all()
-
-    # Broadcast test message to all subscriptions
-    data = {
-        "title": "LyxNexus",
-        "message": "This is a test push sent to all users!"
-    }
-
-    total_success = send_webpush(data)  # no user_id → broadcast
-    subs = PushSubscription.query.all()
-    subs_data = [
-        {"id": sub.id, "user_id": sub.user_id, "endpoint": sub.endpoint}
-        for sub in subs
-    ]
-
-    return jsonify({
-        "message": "Test push sent!",
-        "subscriptions": subs_data,
-        "success_count": total_success
-    }), 200
-
-# --- List all subscriptions route ---
 @app.route("/api/subscriptions")
 @login_required
 def list_subscriptions():
@@ -2910,7 +2851,8 @@ def list_subscriptions():
     data = [
         {
             "id": sub.id,
-            "user_id": sub.user_id,  # direct column, may be None
+            "user_id": sub.user.id if sub.user else None,
+            "username": sub.user.username if sub.user else None,
             "endpoint": sub.endpoint,
             "p256dh": sub.p256dh,
             "auth": sub.auth
