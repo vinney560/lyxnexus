@@ -442,8 +442,8 @@ class PushSubscription(db.Model):
     endpoint = db.Column(db.String(500), unique=True, nullable=False)
     p256dh = db.Column(db.String(255), nullable=False)
     auth = db.Column(db.String(255), nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
+    # Fix: remove cascade from this side, put it in backref
     user = db.relationship(
         "User",
         backref=db.backref("subscriptions", cascade="all, delete-orphan")
@@ -454,7 +454,7 @@ class PushSubscription(db.Model):
             "endpoint": self.endpoint,
             "keys": {"p256dh": self.p256dh, "auth": self.auth}
         }
-
+    
 #==========================================    
 def initialize_admin_code():
     """Initialize the admin code system if no code exists"""
