@@ -33,6 +33,7 @@ class LyxNexusNotificationService {
         console.log(`${this.serviceName}: Starting initialization...`);
         this.setupSocketConnection();
         await this.requestPermission();
+        await this.subscribeForPush();
         this.setupEventListeners();
         this.isInitialized = true;
         console.log(`${this.serviceName}: Ready and listening for notifications`);
@@ -265,6 +266,47 @@ class LyxNexusNotificationService {
         if (!data) return;
         if (data.type === 'message' && window.location.pathname !== '/messages') window.location.href = '/messages';
         else if (['announcement','assignment','timetable'].includes(data.type) && window.location.pathname !== '/main-page') window.location.href = '/main-page';
+    }
+    // --- Push Subscription Setup ---
+    async subscribeForPush() {
+      if (!("serviceWorker" in navigator)) {
+        console.warn(`${this.serviceName}: Service Worker not supported.`);
+        return;
+      }
+
+      const registration = await navigator.serviceWorker.ready;
+
+      // Your public VAPID key
+      const publicVapidKey = "BEk4C5_aQbjOMkvGYk4OFZMyMAInUdVP6oAFs9kAd7Gx3iog2UF4ZLwdQ8GmB0-i61FANGD6D0TCHsFYVOA45OQ";
+      const convertedKey = this.urlBase64ToUint8Array(publicVapidKey);
+
+      try {
+        const subscription = await registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: convertedKey
+        });
+
+        // Send subscription to Flask backend
+        await fetch("/subscribe", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(subscription)
+        });
+
+        console.log(`${this.serviceName}: ✅ Push notifications subscribed.`);
+      } catch (err) {
+        console.error(`${this.serviceName}: Failed to subscribe for push`, err);
+      }
+    }
+
+    // Utility
+    urlBase64ToUint8Array(base64String) {
+      const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+      const base64 = (base64String + padding)
+        .replace(/\-/g, "+")
+        .replace(/_/g, "/");
+      const rawData = atob(base64);
+      return Uint8Array.from([...rawData].map((char) => char.charCodeAt(0)));
     }
 
     testNotification() {

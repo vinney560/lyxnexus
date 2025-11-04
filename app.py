@@ -27,7 +27,7 @@ from bs4 import BeautifulSoup
 from flask_session import Session
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
-
+from pywebpush import webpush, WebPushException
 #==========================================
 
 app = Flask(__name__)
@@ -105,6 +105,10 @@ logging.basicConfig(
 app.config["SESSION_TYPE"] = "filesystem"
 UPLOAD_FOLDER = os.path.join(app.root_path, 'uploads')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+# --- Push Notification Configuration ---
+VAPID_PUBLIC_KEY = "BEk4C5_aQbjOMkvGYk4OFZMyMAInUdVP6oAFs9kAd7Gx3iog2UF4ZLwdQ8GmB0-i61FANGD6D0TCHsFYVOA45OQ"
+VAPID_PRIVATE_KEY = "42FlV4n_SjaTAcJnUcCi8bDrVEwX_8YCFJiCzAOhngw"
+VAPID_CLAIMS = {"sub": "mailto:vincentkipngetich479@gmail.com"}
 
 # =======================================
 #   SESSION INITIALIZATION
@@ -430,6 +434,20 @@ class AdminCode(db.Model):
 
     # Relationship
     user = db.relationship('User', backref=db.backref('admin_codes', lazy=True))
+
+#=========================================
+class PushSubscription(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    endpoint = db.Column(db.String(500), unique=True, nullable=False)
+    p256dh = db.Column(db.String(255))
+    auth = db.Column(db.String(255))
+
+    def to_dict(self):
+        return {
+            "endpoint": self.endpoint,
+            "keys": {"p256dh": self.p256dh, "auth": self.auth}
+        }
 
 #==========================================    
 def initialize_admin_code():
@@ -2735,6 +2753,71 @@ def sw():
 def is_authenticated():
     return jsonify({'authenticated': current_user.is_authenticated})
 #-------------------------------------------------------------------
+
+
+
+@app.route("/subscribe", methods=["POST"])
+def subscribe():
+    data = request.get_json()
+    endpoint = data.get("endpoint")
+    keys = data.get("keys", {})
+    current_user_id = getattr(current_user, "id", None)
+
+    if not endpoint:
+        return jsonify({"error": "Missing endpoint"}), 400
+
+    existing = PushSubscription.query.filter_by(endpoint=endpoint).first()
+    if not existing:
+        sub = PushSubscription(
+            user_id=current_user_id,
+            endpoint=endpoint,
+            p256dh=keys.get("p256dh"),
+            auth=keys.get("auth")
+        )
+        db.session.add(sub)
+        db.session.commit()
+
+    return jsonify({"message": "Subscription saved"}), 201
+
+def send_webpush(data: dict, user_id: int | None = None):
+    """Send a push notification to a single user or all subscribed users."""
+    query = PushSubscription.query
+    if user_id:
+        query = query.filter_by(user_id=user_id)
+
+    subs = query.all()
+    payload = json.dumps(data)
+
+    for sub in subs:
+        try:
+            webpush(
+                subscription_info=sub.to_dict(),
+                data=payload,
+                vapid_private_key=VAPID_PRIVATE_KEY,
+                vapid_claims=VAPID_CLAIMS,
+            )
+        except WebPushException as ex:
+            print(f"⚠️ Push failed: {ex}")
+            db.session.delete(sub)
+            db.session.commit()
+
+@app.route("/test-push")
+def test_push():
+    """Simple GET route to test push notifications manually."""
+    data = {
+        "title": "🔔 LyxNexus Test Notification",
+        "message": "This is a test push sent from Flask!",
+        "type": "test",
+        "timestamp": datetime.utcnow().isoformat()
+    }
+
+    # Send real push via your helper
+    send_webpush(data)
+
+    return jsonify({"message": "Test push sent!"}), 200
+
+#------------------------------------------------------------------------
+
 #              SPECIFIED ROUTES
 
 def format_message_time(created_at):
@@ -4402,14 +4485,21 @@ def create_announcement():
         f'You created: {announcement.title}'
     )
     
-    # Broadcast to all users
-    socketio.emit('push_notification', {
+    # Prepare notification payload once
+    data = {
         'title': 'New Announcement',
         'message': f'New announcement: {announcement.title}',
         'type': 'announcement',
         'announcement_id': announcement.id,
         'timestamp': datetime.utcnow().isoformat()
-    })
+    }
+
+    # Broadcast via Socket.IO
+    socketio.emit('push_notification', data, broadcast=True)
+
+    # Mirror to browser push (system notification)
+    send_webpush(data)
+
     return jsonify({'message': 'Announcement created successfully', 'id': announcement.id}), 201
 
 @app.route('/api/announcements/<int:id>', methods=['PUT'])

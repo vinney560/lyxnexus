@@ -1167,6 +1167,27 @@
     .pulse {
         animation: pulse 2s infinite;
     }
+    .info-content {
+        width: fit-content;
+        height: fit-content;
+        padding: 10px;
+        margin-top: 5px;
+        text-align: center;
+        align-items: center;
+        display: block;
+        background: transparent;
+        border: 1px solid blue;
+        border-radius: 15px;
+        word-break: break-all;
+        color: rgb(254, 252, 252);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .info-content:hover {
+        transform: translateY(-3px);
+        transition: cubic-bezier(0.075, 0.82, 0.165, 1);
+        box-shadow: 0 7px 15px rgba(0, 200, 255, 0.119);
+        border-color: rgba(59, 130, 246, 0.5);
+    }
 </style>
 <body>
     <header class="glass-morph sticky top-0 z-50">
@@ -1267,6 +1288,14 @@
                         <span class="room-icon"><i class="fas fa-shield-halved"></i></span>
                         Private LN-Msg
                     </button>
+                    <div class="border-1 border-blue-500 mt-2 info-content">
+                        <h1 class="gradient-text font-bold text-2xl">
+                            <span class="underline">
+                                Notice
+                            </span>
+                        </h1>
+                        <p class="font-bold">Any form of repeated <span class="underline uppercase">disrespect</span> to fellow Coursemates will result to dispermission of messaging feature till further Admin Notice. Chat responsibly!</p>
+                    </div>
                 </div>
             </div>
         </div>
