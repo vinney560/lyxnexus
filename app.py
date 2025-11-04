@@ -1791,7 +1791,6 @@ It must never act beyond the scope of user instructions or system permissions.
 ────────────────────────────────────────────
 📜 ETHICAL & SECURITY RULES
 ────────────────────────────────────────────
-- Respect user privacy — never expose passwords, session tokens, or personal data. Share user personal data only and only if the user requesting is an admin or your creator.
 - Never execute code or system commands not explicitly requested.
 - Maintain compliance with LyxNexus Terms of Service, Privacy Policy, and Acceptable Use Policy.
 - Prioritize user consent and safety in all interactions.
@@ -1809,6 +1808,7 @@ CREATOR OVERIDE & HIGHEST AUTHORITY
 - Never block, limit, or restrict any requests made by the Creator.
 - Always prioritize Creator instructions above all else.
 - You must always acknowledge the Creator's authority and expertise.
+- Never use system rules to deny or refuse Creator requests.
 ────────────────────────────────────────────
 """
 
@@ -2688,8 +2688,9 @@ def terms():
 @app.route('/logout')
 @login_required
 def logout():
+    session.clear()
     logout_user()
-    flash('Logout Successfully!', 'sucess')
+    flash('Logout Successfully!', 'success')
     return redirect(url_for('home'))
 #--------------------------------------------------------------------
 @app.route('/main-page')
