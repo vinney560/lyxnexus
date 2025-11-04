@@ -2760,7 +2760,7 @@ def subscribe():
     data = request.get_json()
     endpoint = data.get("endpoint")
     keys = data.get("keys", {})
-    current_user_id = getattr(current_user, "id", None)
+    current_user_id = data.get("user_id") or getattr(current_user, "id", None) 
 
     if not endpoint:
         return jsonify({"error": "Missing endpoint"}), 400
