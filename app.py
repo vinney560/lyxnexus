@@ -106,9 +106,9 @@ app.config["SESSION_TYPE"] = "filesystem"
 UPLOAD_FOLDER = os.path.join(app.root_path, 'uploads')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 # --- Push Notification Configuration ---
-VAPID_PUBLIC_KEY = "BDlFvnKYOF8Lx8-hoX48rGyJQ0vKtQG3HxDmSJau0LalO02bf-jnwgjOI_fbsfzjKDXe4TSyUWKjgpIqIBXyYb0"
-VAPID_PRIVATE_KEY = "pZ__HuvFho1Sx5js0mVOqHAcUZ28N9WIIoWTfeNHdFc"
-VAPID_CLAIMS = {"sub": "mailto:vinneyjoy1@gmail.com"}
+VAPID_PUBLIC_KEY = "BEk4C5_aQbjOMkvGYk4OFZMyMAInUdVP6oAFs9kAd7Gx3iog2UF4ZLwdQ8GmB0-i61FANGD6D0TCHsFYVOA45OQ"
+VAPID_PRIVATE_KEY = "42FlV4n_SjaTAcJnUcCi8bDrVEwX_8YCFJiCzAOhngw"
+VAPID_CLAIMS = {"sub": "mailto:vincentkipngetich479@gmail.com"}
 
 # =======================================
 #   SESSION INITIALIZATION
