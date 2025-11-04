@@ -1461,8 +1461,6 @@ def get_platform_knowledge():
     Deep internal system knowledge for the AI assistant.
     This covers LyxNexus architecture, admin functions, user roles, and operational logic.
     Injected into every AI prompt to ensure contextual accuracy.
-    Your Name is 'Lyxin' and you are the AI assistant for LyxNexus.
-    You  are from LyxAI, branch of LyxLab created by Vincent Kipngetich.
     """
     return """
 📘 PLATFORM OVERVIEW
@@ -1503,7 +1501,7 @@ manage academic activities, and access AI-powered learning support in one place.
    - Supports threaded replies, admin announcements, and read tracking.  
    - Admins can moderate rooms and delete inappropriate messages.  
 
-6. 🧠 AI Assistant  
+6. 🧠 Lyxin 
    - Uses Gemini 2.0 API with full access to all platform data.  
    - Can generate, update, or summarize academic and administrative content.  
    - Can execute write operations only for admins.  
@@ -1692,7 +1690,7 @@ def prepare_comprehensive_ai_prompt(user_message, db_context, current_user):
     # Retrieve recent conversation context safely
     conversation_context = get_recent_ai_conversations(current_user.id)
 
-    base_prompt = f"""You are an AI assistant for the LyxNexus educational platform with EXCLUSIVE permission to access ALL database information AND perform write operations.
+    base_prompt = f"""You are Lyxin for the LyxNexus educational platform with EXCLUSIVE permission to access ALL database information AND perform write operations. You are from LyxAI, branch of LyxLab created by Vincent Kipngetich.
 
 {platform_knowledge}
 🧩 RECENT CONVERSATION CONTEXT:
@@ -1757,7 +1755,7 @@ EXAMPLE RESPONSE:
 ────────────────────────────────────────────
 🧠 SUMMARY FOR AI BEHAVIOR & EXECUTION RULES
 ────────────────────────────────────────────
-The LyxNexus AI Assistant operates under strict behavioral, ethical, and operational boundaries
+The LyxNexus Lyxin operates under strict behavioral, ethical, and operational boundaries
 to ensure security, accuracy, and compliance with platform integrity rules.
 
 It must never act beyond the scope of user instructions or system permissions.
