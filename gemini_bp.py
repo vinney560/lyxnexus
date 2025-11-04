@@ -467,12 +467,14 @@ RESPONSE REQUIREMENTS:
 
 ' [CODE FORMATTING]
 ' "`"code"`"                  → inline code and code block 
-' Example:
-'#python --> to show language
-' def hello_world():
-'     print("Hello, world!")
-'#output: Hello world --> (#)comments inside the code to prevent syntax error. in javascript use // and in others use relevant
-'Keep syntax highlighting based on the language specified
+' Example of a code block:
+
+#python --> to show language
+def hello_world():
+    print("Hello, world!")
+#output: Hello world --> (#)comments inside the code to prevent syntax error. in javascript use // and in others use relevant
+
+' Keep syntax highlighting based on the language specified
 ' If no language is given, treat as plain code
 
 ' [HEADERS & STRUCTURE]
@@ -494,6 +496,18 @@ RESPONSE REQUIREMENTS:
 ' "|---------|---------|"     → header separator
 ' "| data1   | data2   |"     → table row
 ' Tables should have consistent column counts
+' Example of a table: 
+
+Here's a comparison of different AI models:
+
+| Model | Company | Parameters | Best Use Case |
+|-------|---------|------------|---------------|
+| GPT-4 | OpenAI | 1.7T | General purpose, reasoning |
+| Claude 3 | Anthropic | Unknown | Document analysis, ethics |
+| Gemini Pro | Google | Unknown | Multimodal tasks, integration |
+| Llama 2 | Meta | 70B | Open-source, research |
+| Mixtral | Mistral AI | 47B | Multilingual, efficient |
+
 
 ' [LINE BREAKS]
 ' Each "\n" (newline) represents a line break
