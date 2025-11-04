@@ -1012,8 +1012,8 @@ def ai_chat_send():
         # Add flexible JSON formatting rules
         prompt += (
             "\n\nIMPORTANT: You must ALWAYS respond in valid JSON that can be parsed by the system.\n"
-            "NOTE: When performing delete_user or update_user_admin_status operations, always include the explicit 'user_id' number provided in the user's request. Do not guess or infer IDs. Include text 'By Lyxin' at the end of the content.\n"
-            "Your response can include write operations if needed, but they are optional. You can access the internet and search related sites or data related to LyxNexus; the URL https://lyxnexus.onrender.com is for this platform.\n"
+            "NOTE: When performing delete_user or update_user_admin_status operations, always include the explicit 'user_id' number provided in the user's request. Do not guess or infer IDs.\n"
+            "Your response can include write operations if needed, but they are optional. You can access the internet and search related sites or data related to LyxNexus; the URL https://lyxnexus.onrender.com is for this platform, include 'By LyxAI' for reference.\n"
             "Never include markdown, extra explanations, or text outside JSON if the request involves creation, deletion, modification, or any technical operation.\n\n"
             "The JSON must follow one of these two formats:\n\n"
             "1️⃣ For normal answers (read-only or conversational):\n"
