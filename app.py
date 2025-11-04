@@ -2795,11 +2795,20 @@ def subscribe():
 
 def send_webpush(data: dict, user_id: int | None = None):
     """Send a push notification to a single user or all subscribed users."""
+    
+    # Debug: show what we’re sending
+    print("📡 Sending push notification with data:", data, "to user_id:", user_id)
+    
+    # If user_id is provided, filter by it; otherwise send to everyone
     query = PushSubscription.query
     if user_id:
         query = query.filter_by(user_id=user_id)
 
     subs = query.all()
+    
+    # Debug: list subscriptions that will be targeted
+    print(f"📥 Total subscriptions to notify: {len(subs)}")
+    
     payload = json.dumps(data)
 
     for sub in subs:
@@ -2810,26 +2819,52 @@ def send_webpush(data: dict, user_id: int | None = None):
                 vapid_private_key=VAPID_PRIVATE_KEY,
                 vapid_claims=VAPID_CLAIMS,
             )
-            print(f"✅ Push sent to: {sub.endpoint[:60]}...")
+            print(f"✅ Push sent to: {sub.endpoint[:60]}..., user_id={sub.user_id}")
         except WebPushException as ex:
             print(f"⚠️ Push failed: {ex}")
             # Auto-clean invalid subscriptions (400/410)
             if hasattr(ex, "response") and ex.response is not None:
                 if ex.response.status_code in [400, 404, 410]:
+                    print(f"🗑 Removing invalid subscription: {sub.endpoint[:60]}...")
                     db.session.delete(sub)
                     db.session.commit()
-
-
 @app.route("/test-push")
-@login_required  # optional, ensures current_user is defined
+@login_required
 def test_push():
-    """Simple GET route to test push notifications manually."""
-    data = json.dumps({
+    # Ensure DB session sees latest data
+    db.session.expire_all()
+    
+    # Get all subscriptions
+    subs = PushSubscription.query.all()
+    
+    # Debug: print subscriptions in console
+    print("📥 Subscriptions in DB:", subs)
+    
+    # Format subscriptions for JSON response
+    subs_data = [
+        {
+            "id": sub.id,
+            "user_id": sub.user_id,
+            "endpoint": sub.endpoint,
+            "p256dh": sub.p256dh,
+            "auth": sub.auth
+        } for sub in subs
+    ]
+    
+    # Prepare test push payload
+    data = {
         "title": "LyxNexus",
-        "message": "This is a test push sent from Flask via Chrome!"
-    })
-    send_webpush(data, user_id=getattr(current_user, "id", None))
-    return jsonify({"message": "Test push sent!"}), 200
+        "message": "This is a test push sent from Flask!"
+    }
+    
+    # Send push to current user
+    send_webpush(data, user_id=current_user.id)
+    
+    # Return JSON including subscriptions for debugging
+    return jsonify({
+        "message": "Test push sent!",
+        "subscriptions": subs_data
+    }), 200
 
 @app.route("/api/subscriptions")
 @login_required  # optional, remove if you want it public for debugging
