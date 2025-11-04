@@ -2800,12 +2800,10 @@ def subscribe():
 def send_webpush(data: dict, user_id: int | None = None):
     """Send a push notification to a single user or all subscribed users."""
 
-    # Debug: show what we’re sending
     print("📡 Sending push notification with data:", data, "to user_id:", user_id)
 
-    # Filter subscriptions
     query = PushSubscription.query
-    if user_id:
+    if user_id is not None:  # Only filter if a specific user
         query = query.filter_by(user_id=user_id)
 
     subs = query.all()
@@ -2824,7 +2822,6 @@ def send_webpush(data: dict, user_id: int | None = None):
             print(f"✅ Push sent to: {sub.endpoint[:60]}..., user_id={sub.user_id}")
         except WebPushException as ex:
             print(f"⚠️ Push failed: {ex}")
-            # Auto-clean invalid subscriptions (400/410)
             if hasattr(ex, "response") and ex.response is not None:
                 if ex.response.status_code in [400, 404, 410]:
                     print(f"🗑 Removing invalid subscription: {sub.endpoint[:60]}...")
