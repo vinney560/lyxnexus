@@ -444,7 +444,10 @@ class PushSubscription(db.Model):
     auth = db.Column(db.String(255), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    user = db.relationship("User", backref="subscriptions", cascade="all, delete-orphan")
+    user = db.relationship(
+        "User",
+        backref=db.backref("subscriptions", cascade="all, delete-orphan")
+    )
 
     def to_dict(self):
         return {
