@@ -2825,6 +2825,23 @@ def test_push():
     send_webpush(data, user_id=getattr(current_user, "id", None))
     return jsonify({"message": "Test push sent!"}), 200
 
+@app.route("/api/subscriptions")
+@login_required  # optional, remove if you want it public for debugging
+def list_subscriptions():
+    """Return all stored push subscriptions."""
+    subs = PushSubscription.query.all()
+    data = [
+        {
+            "id": sub.id,
+            "user_id": sub.user_id,
+            "endpoint": sub.endpoint,
+            "p256dh": sub.p256dh,
+            "auth": sub.auth
+        }
+        for sub in subs
+    ]
+    return jsonify(data), 200
+
 #------------------------------------------------------------------------
 
 #              SPECIFIED ROUTES
