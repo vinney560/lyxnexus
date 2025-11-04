@@ -765,7 +765,84 @@ def gemini_chat():
         session['gemini_history'].append(conv['ai_response'])
     session.modified = True
 
-    # Generate HTML for main chat
+    # Format text function for server-side formatting
+    def format_text(text):
+        """Format text with markdown-like syntax (matches client-side formatting)"""
+        import re
+        
+        formatted = text
+        # Code blocks with language
+        formatted = re.sub(r'```(\w+)?\n([\s\S]*?)```', 
+                          lambda m: f'<pre data-language="{m.group(1) or "text"}"><code>{m.group(2).strip()}</code></pre>', 
+                          formatted)
+        
+        # Inline code
+        formatted = re.sub(r'`([^`]+)`', r'<code>\1</code>', formatted)
+        
+        # Headers
+        formatted = re.sub(r'^### (.*$)', r'<h3>\1</h3>', formatted, flags=re.MULTILINE)
+        formatted = re.sub(r'^## (.*$)', r'<h2>\1</h2>', formatted, flags=re.MULTILINE)
+        formatted = re.sub(r'^# (.*$)', r'<h1>\1</h1>', formatted, flags=re.MULTILINE)
+        
+        # Bold and Italic
+        formatted = re.sub(r'\*\*(.*?)\*\*', r'<strong>\1</strong>', formatted)
+        formatted = re.sub(r'\*(.*?)\*', r'<em>\1</em>', formatted)
+        formatted = re.sub(r'_(.*?)_', r'<em>\1</em>', formatted)
+        
+        # Strikethrough
+        formatted = re.sub(r'~~(.*?)~~', r'<span class="strikethrough">\1</span>', formatted)
+        
+        # Underline
+        formatted = re.sub(r'__(.*?)__', r'<span class="underline">\1</span>', formatted)
+        
+        # Highlight
+        formatted = re.sub(r'==(.*?)==', r'<span class="highlight">\1</span>', formatted)
+        
+        # Blockquotes
+        formatted = re.sub(r'^> (.*$)', r'<blockquote>\1</blockquote>', formatted, flags=re.MULTILINE)
+        
+        # Horizontal rules
+        formatted = re.sub(r'^\*\*\*$', r'<hr>', formatted, flags=re.MULTILINE)
+        formatted = re.sub(r'^---$', r'<hr>', formatted, flags=re.MULTILINE)
+        formatted = re.sub(r'^___$', r'<hr>', formatted, flags=re.MULTILINE)
+        
+        # Lists - unordered
+        formatted = re.sub(r'^\s*[-*+] (.*$)', r'<li>\1</li>', formatted, flags=re.MULTILINE)
+        
+        # Lists - ordered
+        formatted = re.sub(r'^\s*\d+\. (.*$)', r'<li>\1</li>', formatted, flags=re.MULTILINE)
+        
+        # Wrap list items in ul/ol
+        formatted = re.sub(r'(<li>.*</li>)', r'<ul>\1</ul>', formatted, flags=re.DOTALL)
+        
+        # Tables (basic)
+        def format_table(match):
+            row = match.group(1)
+            cells = [cell.strip() for cell in row.split('|') if cell.strip()]
+            if len(cells) > 1:
+                table_html = '<table><tr>'
+                for cell in cells:
+                    table_html += f'<td>{cell}</td>'
+                table_html += '</tr></table>'
+                return table_html
+            return match.group(0)
+        
+        formatted = re.sub(r'\|(.+)\|', format_table, formatted)
+        
+        # Subscript and superscript
+        formatted = re.sub(r'~(.+?)~', r'<span class="subscript">\1</span>', formatted)
+        formatted = re.sub(r'\^(.+?)\^', r'<span class="superscript">\1</span>', formatted)
+        
+        # Line breaks
+        formatted = formatted.replace('\n', '<br>')
+        
+        # Convert URLs to clickable links
+        url_regex = r'(https?://[^\s]+)'
+        formatted = re.sub(url_regex, r'<a href="\1" target="_blank" rel="noopener noreferrer">\1</a>', formatted)
+        
+        return formatted
+
+    # Generate HTML for main chat with formatting
     history_html = ""
     for conv in reversed(conversation_history):  # newest first
         try:
@@ -774,6 +851,9 @@ def gemini_chat():
         except:
             time_str = "Just now"
 
+        # Format AI response
+        formatted_ai_response = format_text(conv['ai_response'])
+
         history_html += f'''
         <div class="message user-message">
             <div class="message-content">
@@ -781,10 +861,18 @@ def gemini_chat():
                 <div class="message-time">{time_str}</div>
             </div>
         </div>
-        <div class="message ai-message">
+        <div class="message ai-message" data-prompt="{conv['user_message'].replace('"', '&quot;')}">
             <div class="message-content">
-                {conv['ai_response']}
+                <div class="formatted-text">{formatted_ai_response}</div>
                 <div class="message-time">{time_str}</div>
+                <div class="message-actions">
+                    <button class="message-action copy-button" title="Copy response">
+                        <i class="fas fa-copy"></i> Copy
+                    </button>
+                    <button class="message-action regenerate-button" title="Regenerate response">
+                        <i class="fas fa-redo"></i> Regenerate
+                    </button>
+                </div>
             </div>
         </div>
         '''
