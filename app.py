@@ -2834,7 +2834,50 @@ def send_webpush(data: dict, user_id: int | None = None):
     return success_count
 
 
-# --- Test push route ---
+# --- Test push Confimr ---
+@app.route("/test-broadcast")
+@login_required
+def test_broadcast():
+    """Send a test push to all valid subscriptions and clean out invalid ones."""
+    from pywebpush import WebPushException
+
+    # Prepare payload
+    data = {
+        "title": "LyxNexus",
+        "message": "This is a broadcast test push to all users!"
+    }
+    payload = json.dumps(data)
+
+    # Fetch all subscriptions
+    subs = PushSubscription.query.all()
+    total = len(subs)
+    success_count = 0
+
+    for sub in subs:
+        try:
+            webpush(
+                subscription_info=sub.to_dict(),
+                data=payload,
+                vapid_private_key=VAPID_PRIVATE_KEY,
+                vapid_claims=VAPID_CLAIMS
+            )
+            success_count += 1
+            print(f"✅ Push sent: {sub.endpoint[:60]}..., user_id={sub.user_id}")
+        except WebPushException as ex:
+            print(f"⚠️ Push failed: {ex}")
+            # Remove invalid subscriptions
+            if hasattr(ex, "response") and ex.response is not None:
+                if ex.response.status_code in [400, 404, 410]:
+                    print(f"🗑 Removing invalid subscription: {sub.endpoint[:60]}...")
+                    db.session.delete(sub)
+                    db.session.commit()
+
+    return jsonify({
+        "message": "Broadcast test completed",
+        "total_subscriptions": total,
+        "successful_pushes": success_count
+    }), 200
+
 @app.route("/test-push")
 @login_required
 def test_push():
@@ -2859,7 +2902,7 @@ def test_push():
         "success_count": total_success
     }), 200
 
-# --- List all subscriptions route (for debugging) ---
+# --- List all subscriptions route ---
 @app.route("/api/subscriptions")
 @login_required
 def list_subscriptions():
@@ -2867,7 +2910,7 @@ def list_subscriptions():
     data = [
         {
             "id": sub.id,
-            "user_id": sub.user.id if sub.user else None,
+            "user_id": sub.user_id,  # direct column, may be None
             "endpoint": sub.endpoint,
             "p256dh": sub.p256dh,
             "auth": sub.auth
