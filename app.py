@@ -2812,7 +2812,7 @@ def test_push():
     }
 
     # Send real push via your helper
-    send_webpush(data)
+    send_webpush(data, user_id=getattr(current_user, "id", None))
 
     return jsonify({"message": "Test push sent!"}), 200
 
