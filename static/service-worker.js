@@ -9,9 +9,8 @@ const STATIC_ASSETS = [
   '/offline.html',
   '/uploads/favicon-1.png',
   '/uploads/notify.mp3',
-  'https://fonts.googleapis.com',
-  'https://fonts.gstatic.com',
-  '/static/css/tailwind.min.css'
+  '/static/css/tailwind.min.css',
+  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'
 ];
 
 const DEBOUNCE_DELAY = 2000;

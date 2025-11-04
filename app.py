@@ -5612,7 +5612,7 @@ def ratelimit_handler(e):
             message="You’ve made too many requests. Please wait a moment and try again."
         ), 429
     except Exception:
-        return redirect(url_for('home'))
+        return redirect(url_for('index'))
 
 @app.errorhandler(500)
 def internal_error(error):
@@ -5623,7 +5623,7 @@ def internal_error(error):
     if referrer:
         return redirect(referrer), 302
     else:
-        return redirect(url_for('home')), 302
+        return redirect(url_for('index')), 302
 
 # ==========================================
 if __name__ == '__main__':
