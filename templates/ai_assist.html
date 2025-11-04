@@ -1057,41 +1057,8 @@
                     </div>
                 </div>
 
-                <!-- Existing conversation history - Apply formatting to all messages -->
-                {% if history_html %}
-                    <script>
-                        document.addEventListener('DOMContentLoaded', function() {
-                            // Apply formatting to all existing AI messages in the chat history
-                            const aiMessages = document.querySelectorAll('.ai-message .message-content');
-                            aiMessages.forEach(messageContent => {
-                                const textContent = messageContent.textContent || messageContent.innerText;
-                                const formattedContent = formatText(textContent);
-                                
-                                // Find the existing text element and replace with formatted content
-                                const textElements = messageContent.querySelectorAll('div, p, span');
-                                let textElement = null;
-                                
-                                // Find the main text container
-                                textElements.forEach(el => {
-                                    if (el.textContent === textContent.trim()) {
-                                        textElement = el;
-                                    }
-                                });
-                                
-                                if (textElement) {
-                                    textElement.innerHTML = formattedContent;
-                                } else {
-                                    // If no specific element found, wrap the formatted content
-                                    const formattedDiv = document.createElement('div');
-                                    formattedDiv.className = 'formatted-text';
-                                    formattedDiv.innerHTML = formattedContent;
-                                    messageContent.insertBefore(formattedDiv, messageContent.firstChild);
-                                }
-                            });
-                        });
-                    </script>
-                    {{ history_html | safe }}
-                {% endif %}
+                <!-- Existing conversation history - Now pre-formatted by server -->
+                {{ history_html | safe }}
             </div>
         </div>
 
