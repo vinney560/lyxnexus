@@ -277,7 +277,7 @@ class LyxNexusNotificationService {
       const registration = await navigator.serviceWorker.ready;
 
       // Your public VAPID key
-      const publicVapidKey = "BEk4C5_aQbjOMkvGYk4OFZMyMAInUdVP6oAFs9kAd7Gx3iog2UF4ZLwdQ8GmB0-i61FANGD6D0TCHsFYVOA45OQ";
+      const publicVapidKey = "BDlFvnKYOF8Lx8-hoX48rGyJQ0vKtQG3HxDmSJau0LalO02bf-jnwgjOI_fbsfzjKDXe4TSyUWKjgpIqIBXyYb0";
       const convertedKey = this.urlBase64ToUint8Array(publicVapidKey);
 
       try {
