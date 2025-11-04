@@ -466,8 +466,7 @@ RESPONSE REQUIREMENTS:
 ' "^"text"^"                  → superscript
 
 ' [CODE FORMATTING]
-' "`"code"`"                  → inline code
-' "```language\ncode\n```"     → code block (with optional language)
+' "`"code"`"                  → inline code and code block 
 ' If no language is given, treat as plain code
 
 ' [HEADERS & STRUCTURE]
@@ -483,7 +482,12 @@ RESPONSE REQUIREMENTS:
 
 ' [VISUAL ELEMENTS]
 ' "---", "***", or "___"      → horizontal line
-' "| col1 | col2 | col3 |"    → table row (each column separated by "|")
+
+' [TABLES]
+' "| header1 | header2 |"     → table header
+' "|---------|---------|"     → header separator
+' "| data1   | data2   |"     → table row
+' Tables should have consistent column counts
 
 ' [LINE BREAKS]
 ' Each "\n" (newline) represents a line break

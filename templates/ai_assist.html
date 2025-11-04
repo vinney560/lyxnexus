@@ -627,6 +627,36 @@
             vertical-align: super;
         }
 
+        .formatted-text .underline {
+            text-decoration: underline;
+        }
+
+        .formatted-text .strikethrough {
+            text-decoration: line-through;
+        }
+
+        .formatted-text .link {
+            color: var(--primary);
+            text-decoration: underline;
+        }
+        
+        .formatted-text .link:hover {
+            background: rgba(88, 166, 255, 0.1);
+            border-radius: 2px;
+        }
+        
+        .formatted-text hr {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 1rem 0;
+        }
+
+        .formatted-text .highlight {
+            background-color: rgba(88, 166, 255, 0.3);
+            padding: 0.1rem 0.3rem;
+            border-radius: 3px;
+        }
+
         /* Link styling */
         .message-content a {
             color: var(--primary);
