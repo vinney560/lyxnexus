@@ -438,10 +438,13 @@ class AdminCode(db.Model):
 #=========================================
 class PushSubscription(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     endpoint = db.Column(db.String(500), unique=True, nullable=False)
-    p256dh = db.Column(db.String(255))
-    auth = db.Column(db.String(255))
+    p256dh = db.Column(db.String(255), nullable=False)
+    auth = db.Column(db.String(255), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    user = db.relationship("User", backref="subscriptions", cascade="all, delete-orphan")
 
     def to_dict(self):
         return {
@@ -2754,26 +2757,24 @@ def is_authenticated():
     return jsonify({'authenticated': current_user.is_authenticated})
 #-------------------------------------------------------------------
 
+# --- Subscribe route ---
 @app.route("/subscribe", methods=["POST"])
+@login_required
 def subscribe():
     data = request.get_json()
-    
-    # Debug: show incoming request data
-    print("📥 /subscribe received data:", data)
-    
     endpoint = data.get("endpoint")
     keys = data.get("keys", {})
-    current_user_id = data.get("user_id") or getattr(current_user, "id", None)
-    
-    # Debug: log user_id resolution
-    print("🆔 Resolved current_user_id:", current_user_id)
-    
+
+    # Ensure user_id is set from logged-in user
+    try:
+        current_user_id = int(data.get("user_id")) if data.get("user_id") else current_user.id
+    except Exception:
+        current_user_id = current_user.id
+
     if not endpoint:
-        print("❌ Missing endpoint in subscription request")
         return jsonify({"error": "Missing endpoint"}), 400
 
     existing = PushSubscription.query.filter_by(endpoint=endpoint).first()
-    
     if not existing:
         sub = PushSubscription(
             user_id=current_user_id,
@@ -2783,32 +2784,31 @@ def subscribe():
         )
         db.session.add(sub)
         db.session.commit()
-        print(f"✅ New subscription added: endpoint={endpoint[:60]}..., user_id={current_user_id}")
+        print(f"✅ New subscription added: user_id={current_user_id}")
     else:
-        # Update existing subscription
         existing.p256dh = keys.get("p256dh")
         existing.auth = keys.get("auth")
+        existing.user_id = current_user_id  # update user_id too
         db.session.commit()
-        print(f"♻️ Subscription updated: endpoint={endpoint[:60]}..., user_id={current_user_id}")
+        print(f"♻️ Subscription updated: user_id={current_user_id}")
 
     return jsonify({"message": "Subscription saved"}), 201
 
+# --- Send push function ---
 def send_webpush(data: dict, user_id: int | None = None):
     """Send a push notification to a single user or all subscribed users."""
-    
+
     # Debug: show what we’re sending
     print("📡 Sending push notification with data:", data, "to user_id:", user_id)
-    
-    # If user_id is provided, filter by it; otherwise send to everyone
+
+    # Filter subscriptions
     query = PushSubscription.query
     if user_id:
         query = query.filter_by(user_id=user_id)
 
     subs = query.all()
-    
-    # Debug: list subscriptions that will be targeted
     print(f"📥 Total subscriptions to notify: {len(subs)}")
-    
+
     payload = json.dumps(data)
 
     for sub in subs:
@@ -2828,18 +2828,18 @@ def send_webpush(data: dict, user_id: int | None = None):
                     print(f"🗑 Removing invalid subscription: {sub.endpoint[:60]}...")
                     db.session.delete(sub)
                     db.session.commit()
+
+# --- Test push route ---
 @app.route("/test-push")
 @login_required
 def test_push():
     # Ensure DB session sees latest data
     db.session.expire_all()
-    
+
     # Get all subscriptions
     subs = PushSubscription.query.all()
-    
-    # Debug: print subscriptions in console
     print("📥 Subscriptions in DB:", subs)
-    
+
     # Format subscriptions for JSON response
     subs_data = [
         {
@@ -2850,24 +2850,25 @@ def test_push():
             "auth": sub.auth
         } for sub in subs
     ]
-    
+
     # Prepare test push payload
     data = {
         "title": "LyxNexus",
         "message": "This is a test push sent from Flask!"
     }
-    
+
     # Send push to current user
     send_webpush(data, user_id=current_user.id)
-    
+
     # Return JSON including subscriptions for debugging
     return jsonify({
         "message": "Test push sent!",
         "subscriptions": subs_data
     }), 200
 
+# --- List all subscriptions route (for debugging) ---
 @app.route("/api/subscriptions")
-@login_required  # optional, remove if you want it public for debugging
+@login_required
 def list_subscriptions():
     """Return all stored push subscriptions."""
     subs = PushSubscription.query.all()
@@ -4605,7 +4606,16 @@ def update_announcement(id):
         'type': 'announcement',
         'announcement_id': announcement.id,
         'timestamp': datetime.utcnow().isoformat()
-    })    
+    })   
+    data = {
+        'title': 'Announcement Editted',
+        'message': f'announcement eddited: {announcement.title}',
+        'type': 'announcement', 
+        'announcement_id': announcement.id,
+        'timestamp': datetime.utcnow().isoformat()
+    }
+    send_webpush(data)
+
     return jsonify({'message': 'Announcement updated successfully'})
 
 
@@ -4631,9 +4641,17 @@ def delete_announcement(id):
         'announcement_id': announcement.id,
         'timestamp': datetime.utcnow().isoformat()
     })    
+    data = {
+        'title': 'Announcement Deleted',
+        'message': f'Announcement was deleted by {current_user.username}',
+        'type': 'announcement',
+        'announcement_id': announcement.id,
+        'timestamp': datetime.utcnow().isoformat()
+    }
     db.session.delete(announcement)
     db.session.commit()
-    
+    send_webpush(data)
+
     return jsonify({'message': 'Announcement deleted successfully'})
 
 @app.route('/announcement-file/<int:id>/<filename>')
@@ -4708,6 +4726,15 @@ def create_assignment():
         'timestamp': datetime.utcnow().isoformat()
     })    
     
+    data = {
+        'title': 'New Assignment',
+        'message': f'New assignment: {assignment.title}',
+        'type': 'assignment',
+        'assignment_id': assignment.id,
+        'timestamp': datetime.utcnow().isoformat()
+    }
+    send_webpush(data)
+
     return jsonify({'message': 'Assignment created successfully', 'id': assignment.id}), 201
 
 @app.route('/api/assignments/<int:id>', methods=['PUT'])
