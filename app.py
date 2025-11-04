@@ -2793,38 +2793,47 @@ def subscribe():
 
 
 # --- Send push function ---
-def send_webpush(data: dict, users: list[User] | None = None):
-    """
-    Send a push notification to a list of users or all users if none provided.
-    """
-    if users is None:
-        users = User.query.all()  # broadcast to all users
+# --- Send push to all or specific user ---
+def send_webpush(data: dict, user_id: int | None = None):
+    """Send a push notification to a single user or all subscribed users."""
+    
+    print("📡 Sending push notification with data:", data, "to user_id:", user_id)
 
-    print(f"📡 Sending push notification with data: {data} to {len(users)} users")
+    if user_id is not None:
+        # Send to a specific user
+        user = User.query.get(user_id)
+        if not user:
+            print(f"⚠️ User with id={user_id} not found")
+            return
+        subs = user.subscriptions  # use the relationship
+    else:
+        # Broadcast to all subscriptions
+        subs = PushSubscription.query.all()
+
+    print(f"📥 Total subscriptions to notify: {len(subs)}")
 
     payload = json.dumps(data)
 
-    total_sent = 0
-    for user in users:
-        for sub in getattr(user, "subscriptions", []):
-            try:
-                webpush(
-                    subscription_info=sub.to_dict(),
-                    data=payload,
-                    vapid_private_key=VAPID_PRIVATE_KEY,
-                    vapid_claims=VAPID_CLAIMS,
-                )
-                total_sent += 1
-                print(f"✅ Push sent to {sub.endpoint[:60]}..., user_id={user.id}")
-            except WebPushException as ex:
-                print(f"⚠️ Push failed: {ex}")
-                if hasattr(ex, "response") and ex.response is not None:
-                    if ex.response.status_code in [400, 404, 410]:
-                        print(f"🗑 Removing invalid subscription: {sub.endpoint[:60]}...")
-                        db.session.delete(sub)
-                        db.session.commit()
-    print(f"📥 Total successful pushes: {total_sent}")
-
+    total_success = 0
+    for sub in subs:
+        try:
+            webpush(
+                subscription_info=sub.to_dict(),
+                data=payload,
+                vapid_private_key=VAPID_PRIVATE_KEY,
+                vapid_claims=VAPID_CLAIMS,
+            )
+            print(f"✅ Push sent to: {sub.endpoint[:60]}..., user_id={sub.user_id}")
+            total_success += 1
+        except WebPushException as ex:
+            print(f"⚠️ Push failed: {ex}")
+            if hasattr(ex, "response") and ex.response is not None:
+                if ex.response.status_code in [400, 404, 410]:
+                    print(f"🗑 Removing invalid subscription: {sub.endpoint[:60]}...")
+                    db.session.delete(sub)
+                    db.session.commit()
+    
+    print(f"📤 Total successful pushes: {total_success}")
 
 # --- Test push route ---
 @app.route("/test-push")
@@ -2840,7 +2849,6 @@ def test_push():
     send_webpush(data)
 
     return jsonify({"message": "Test push sent!"}), 200
-
 
 # --- List all subscriptions route (for debugging) ---
 @app.route("/api/subscriptions")
