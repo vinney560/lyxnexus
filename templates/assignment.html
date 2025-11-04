@@ -218,16 +218,18 @@
             <div class="assignment-detail-card">
                 <div class="flex justify-between items-start mb-4 ">
                     <h2 class="text-2xl font-bold">{{ assignment.title }}</h2>
-                    <span class="status-badge 
-                        {% if assignment.is_overdue %}status-overdue
-                        {% elif assignment.is_due_soon %}status-due-soon
+                    {% set today = now %}
+                    <span class="status-badge
+                        {% if assignment.due_date < today %}status-overdue
+                        {% elif assignment.due_date <= today + timedelta(days=3) %}status-due-soon
                         {% else %}status-upcoming
                         {% endif %}">
-                        {% if assignment.is_overdue %}Overdue
-                        {% elif assignment.is_due_soon %}Due Soon
+                        {% if assignment.due_date < today %}Overdue
+                        {% elif assignment.due_date <= today + timedelta(days=3) %}Due Soon
                         {% else %}Not Due Yet
                         {% endif %}
                     </span>
+
                 </div>
                 
                 <p class="mb-6 text-gray-300">{{ assignment.description or 'No description provided.' }}</p>
