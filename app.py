@@ -2770,51 +2770,47 @@ def subscribe():
     if not endpoint:
         return jsonify({"error": "Missing endpoint"}), 400
 
-    # Check if subscription already exists
+    current_user_id = current_user.id
+
     existing = PushSubscription.query.filter_by(endpoint=endpoint).first()
     if not existing:
         sub = PushSubscription(
-            user=current_user,  # link subscription directly to User object
+            user_id=current_user_id,
             endpoint=endpoint,
             p256dh=keys.get("p256dh"),
             auth=keys.get("auth")
         )
         db.session.add(sub)
         db.session.commit()
-        print(f"✅ New subscription added for user: {current_user.id}")
+        print(f"✅ New subscription added: user_id={current_user_id}")
     else:
         existing.p256dh = keys.get("p256dh")
         existing.auth = keys.get("auth")
-        existing.user = current_user  # update user relationship
+        existing.user_id = current_user_id  # ensure linked to user
         db.session.commit()
-        print(f"♻️ Subscription updated for user: {current_user.id}")
+        print(f"♻️ Subscription updated: user_id={current_user_id}")
 
     return jsonify({"message": "Subscription saved"}), 201
 
 
-# --- Send push function ---
-# --- Send push to all or specific user ---
+# --- Send push function (broadcast to all users by default) ---
 def send_webpush(data: dict, user_id: int | None = None):
-    """Send a push notification to a single user or all subscribed users."""
-    
+    """
+    Send a push notification to a specific user or broadcast to all.
+    Returns the number of successful pushes.
+    """
     print("📡 Sending push notification with data:", data, "to user_id:", user_id)
 
+    query = PushSubscription.query
     if user_id is not None:
-        # Send to a specific user
-        user = User.query.get(user_id)
-        if not user:
-            print(f"⚠️ User with id={user_id} not found")
-            return
-        subs = user.subscriptions  # use the relationship
-    else:
-        # Broadcast to all subscriptions
-        subs = PushSubscription.query.all()
+        query = query.filter_by(user_id=user_id)
 
+    subs = query.all()
     print(f"📥 Total subscriptions to notify: {len(subs)}")
 
     payload = json.dumps(data)
+    success_count = 0
 
-    total_success = 0
     for sub in subs:
         try:
             webpush(
@@ -2823,32 +2819,45 @@ def send_webpush(data: dict, user_id: int | None = None):
                 vapid_private_key=VAPID_PRIVATE_KEY,
                 vapid_claims=VAPID_CLAIMS,
             )
+            success_count += 1
             print(f"✅ Push sent to: {sub.endpoint[:60]}..., user_id={sub.user_id}")
-            total_success += 1
         except WebPushException as ex:
             print(f"⚠️ Push failed: {ex}")
+            # Clean invalid subscriptions
             if hasattr(ex, "response") and ex.response is not None:
                 if ex.response.status_code in [400, 404, 410]:
                     print(f"🗑 Removing invalid subscription: {sub.endpoint[:60]}...")
                     db.session.delete(sub)
                     db.session.commit()
-    
-    print(f"📤 Total successful pushes: {total_success}")
+
+    print(f"📤 Total successful pushes: {success_count}")
+    return success_count
+
 
 # --- Test push route ---
 @app.route("/test-push")
 @login_required
 def test_push():
     db.session.expire_all()
-    
-    # Broadcast to all users
+
+    # Broadcast test message to all subscriptions
     data = {
         "title": "LyxNexus",
-        "message": "This is a test push sent from Flask!"
+        "message": "This is a test push sent to all users!"
     }
-    send_webpush(data)
 
-    return jsonify({"message": "Test push sent!"}), 200
+    total_success = send_webpush(data)  # no user_id → broadcast
+    subs = PushSubscription.query.all()
+    subs_data = [
+        {"id": sub.id, "user_id": sub.user_id, "endpoint": sub.endpoint}
+        for sub in subs
+    ]
+
+    return jsonify({
+        "message": "Test push sent!",
+        "subscriptions": subs_data,
+        "success_count": total_success
+    }), 200
 
 # --- List all subscriptions route (for debugging) ---
 @app.route("/api/subscriptions")
