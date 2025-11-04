@@ -285,19 +285,27 @@ class LyxNexusNotificationService {
           userVisibleOnly: true,
           applicationServerKey: convertedKey
         });
+
         console.log(`${this.serviceName}: Push subscription successful.`);
+
+        // Convert the subscription to a plain object
+        const subscriptionData = subscription.toJSON();
+
+        // Add the user ID (if available)
+        subscriptionData.user_id = window.currentUserId || null;
+
+        console.log("📩 Sending subscription to backend:", subscriptionData);
+
+        // Send to Flask
         await fetch("/subscribe", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            ...subscription,
-            user_id: window.currentUserId || null
-          })
+          body: JSON.stringify(subscriptionData)
         });
+
         await this.showNotification('Push Subscription', 'You have successfully subscribed to push notifications.');
 
         console.log(`${this.serviceName}: ✅ Push notifications subscribed.`);
-        console.log("📩 Sending subscription to backend:", subscription);
       } catch (err) {
         console.error(`${this.serviceName}: Failed to subscribe for push`, err);
       }
