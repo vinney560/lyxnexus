@@ -295,7 +295,7 @@ class LyxNexusNotificationService {
         const userId = window.currentUserId || await new Promise(resolve => {
             const interval = setInterval(() => {
                 if (window.currentUserId) { clearInterval(interval); resolve(window.currentUserId); }
-            }, 50);
+            }, 500);
         });
         subscriptionData.user_id = userId;
         

@@ -2754,18 +2754,26 @@ def is_authenticated():
     return jsonify({'authenticated': current_user.is_authenticated})
 #-------------------------------------------------------------------
 
-
 @app.route("/subscribe", methods=["POST"])
 def subscribe():
     data = request.get_json()
+    
+    # Debug: show incoming request data
+    print("📥 /subscribe received data:", data)
+    
     endpoint = data.get("endpoint")
     keys = data.get("keys", {})
-    current_user_id = data.get("user_id") or getattr(current_user, "id", None) 
-
+    current_user_id = data.get("user_id") or getattr(current_user, "id", None)
+    
+    # Debug: log user_id resolution
+    print("🆔 Resolved current_user_id:", current_user_id)
+    
     if not endpoint:
+        print("❌ Missing endpoint in subscription request")
         return jsonify({"error": "Missing endpoint"}), 400
 
     existing = PushSubscription.query.filter_by(endpoint=endpoint).first()
+    
     if not existing:
         sub = PushSubscription(
             user_id=current_user_id,
@@ -2775,14 +2783,15 @@ def subscribe():
         )
         db.session.add(sub)
         db.session.commit()
+        print(f"✅ New subscription added: endpoint={endpoint[:60]}..., user_id={current_user_id}")
     else:
-        # Update the existing subscription keys if they changed
+        # Update existing subscription
         existing.p256dh = keys.get("p256dh")
         existing.auth = keys.get("auth")
         db.session.commit()
+        print(f"♻️ Subscription updated: endpoint={endpoint[:60]}..., user_id={current_user_id}")
 
     return jsonify({"message": "Subscription saved"}), 201
-
 
 def send_webpush(data: dict, user_id: int | None = None):
     """Send a push notification to a single user or all subscribed users."""
