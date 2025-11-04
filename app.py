@@ -2755,7 +2755,6 @@ def is_authenticated():
 #-------------------------------------------------------------------
 
 
-
 @app.route("/subscribe", methods=["POST"])
 def subscribe():
     data = request.get_json()
@@ -2776,8 +2775,14 @@ def subscribe():
         )
         db.session.add(sub)
         db.session.commit()
+    else:
+        # Update the existing subscription keys if they changed
+        existing.p256dh = keys.get("p256dh")
+        existing.auth = keys.get("auth")
+        db.session.commit()
 
     return jsonify({"message": "Subscription saved"}), 201
+
 
 def send_webpush(data: dict, user_id: int | None = None):
     """Send a push notification to a single user or all subscribed users."""
@@ -2796,12 +2801,18 @@ def send_webpush(data: dict, user_id: int | None = None):
                 vapid_private_key=VAPID_PRIVATE_KEY,
                 vapid_claims=VAPID_CLAIMS,
             )
+            print(f"✅ Push sent to: {sub.endpoint[:60]}...")
         except WebPushException as ex:
             print(f"⚠️ Push failed: {ex}")
-            db.session.delete(sub)
-            db.session.commit()
+            # Auto-clean invalid subscriptions (400/410)
+            if hasattr(ex, "response") and ex.response is not None:
+                if ex.response.status_code in [400, 404, 410]:
+                    db.session.delete(sub)
+                    db.session.commit()
+
 
 @app.route("/test-push")
+@login_required  # optional, ensures current_user is defined
 def test_push():
     """Simple GET route to test push notifications manually."""
     data = {
@@ -2811,9 +2822,7 @@ def test_push():
         "timestamp": datetime.utcnow().isoformat()
     }
 
-    # Send real push via your helper
     send_webpush(data, user_id=getattr(current_user, "id", None))
-
     return jsonify({"message": "Test push sent!"}), 200
 
 #------------------------------------------------------------------------
