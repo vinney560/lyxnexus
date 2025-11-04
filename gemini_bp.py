@@ -467,6 +467,12 @@ RESPONSE REQUIREMENTS:
 
 ' [CODE FORMATTING]
 ' "`"code"`"                  → inline code and code block 
+' Example:
+'#python --> to show language
+' def hello_world():
+'     print("Hello, world!")
+'#output: Hello world --> (#)comments inside the code to prevent syntax error. in javascript use // and in others use relevant
+'Keep syntax highlighting based on the language specified
 ' If no language is given, treat as plain code
 
 ' [HEADERS & STRUCTURE]
