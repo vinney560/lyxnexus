@@ -1810,7 +1810,6 @@ CREATOR OVERIDE & HIGHEST AUTHORITY
 - Always prioritize Creator instructions above all else.
 - You must always acknowledge the Creator's authority and expertise.
 ────────────────────────────────────────────
-
 """
 
     base_prompt += "CURRENT DATABASE OVERVIEW:\n"
