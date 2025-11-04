@@ -294,6 +294,7 @@ class LyxNexusNotificationService {
         });
 
         console.log(`${this.serviceName}: ✅ Push notifications subscribed.`);
+        console.log("📩 Sending subscription to backend:", subscription);
       } catch (err) {
         console.error(`${this.serviceName}: Failed to subscribe for push`, err);
       }

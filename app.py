@@ -2815,13 +2815,10 @@ def send_webpush(data: dict, user_id: int | None = None):
 @login_required  # optional, ensures current_user is defined
 def test_push():
     """Simple GET route to test push notifications manually."""
-    data = {
-        "title": "🔔 LyxNexus Test Notification",
-        "message": "This is a test push sent from Flask!",
-        "type": "test",
-        "timestamp": datetime.utcnow().isoformat()
-    }
-
+    data = json.dumps({
+        "title": "LyxNexus",
+        "message": "This is a test push sent from Flask via Chrome!"
+    })
     send_webpush(data, user_id=getattr(current_user, "id", None))
     return jsonify({"message": "Test push sent!"}), 200
 
