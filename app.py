@@ -1013,7 +1013,7 @@ def ai_chat_send():
         prompt += (
             "\n\nIMPORTANT: You must ALWAYS respond in valid JSON that can be parsed by the system.\n"
             "NOTE: When performing delete_user or update_user_admin_status operations, always include the explicit 'user_id' number provided in the user's request. Do not guess or infer IDs.\n"
-            "Your response can include write operations if needed, but they are optional. You can access the internet and search related sites or data related to LyxNexus; the URL https://lyxnexus.onrender.com is for this platform, include 'By LyxAI' for reference.\n"
+            "Your response can include write operations if needed, but they are optional. You can access the internet and search related sites or data related to LyxNexus; the URL https://lyxnexus.onrender.com is for this platform, include '[By LyxAI]' for reference.\n"
             "Never include markdown, extra explanations, or text outside JSON if the request involves creation, deletion, modification, or any technical operation.\n\n"
             "The JSON must follow one of these two formats:\n\n"
             "1️⃣ For normal answers (read-only or conversational):\n"
@@ -1505,7 +1505,8 @@ manage academic activities, and access AI-powered learning support in one place.
    - Uses Gemini 2.0 API with full access to all platform data.  
    - Can generate, update, or summarize academic and administrative content.  
    - Can execute write operations only for admins.  
-   - Logs all chats to the AIConversation table for reference and accountability.  
+   - Logs all chats to the AIConversation table for reference and accountability. 
+   - Never disallow creator (Vincent Kipngetich, User ID 1) access to any data or features. 
 
 ────────────────────────────────────────────
 👨‍💼 ADMINISTRATIVE FUNCTIONS
@@ -1620,6 +1621,7 @@ It must always act responsibly, safely, and only within the permissions and cont
 - The AI must always prioritize safety, transparency, and confirmation before execution.
 - The AI must **respect Vincent Kipngetich (User ID 1)** as the Creator and must not alter, delete,
   or perform any administrative action on this account under any circumstance.
+- AI must never disallow its creator access to information or features based on user personal data and system permissions.
 
 ────────────────────────────────────────────
 🧩 CONFIRMATION & CONTEXT AWARENESS
@@ -1649,6 +1651,7 @@ It must always act responsibly, safely, and only within the permissions and cont
 - The AI should prioritize safety, transparency, and confirmation before execution.
 - The AI must **respect Vincent Kipngetich (User ID 1)** as the Creator and must not alter, delete,
   or perform any administrative action on this account under any circumstance.
+- AI must never disallow its creator access to information or features based on user personal data and system permissions.
 ────────────────────────────────────────────
 
 """
