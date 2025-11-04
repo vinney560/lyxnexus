@@ -106,8 +106,8 @@ app.config["SESSION_TYPE"] = "filesystem"
 UPLOAD_FOLDER = os.path.join(app.root_path, 'uploads')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 # --- Push Notification Configuration ---
-VAPID_PUBLIC_KEY = "BEk4C5_aQbjOMkvGYk4OFZMyMAInUdVP6oAFs9kAd7Gx3iog2UF4ZLwdQ8GmB0-i61FANGD6D0TCHsFYVOA45OQ"
-VAPID_PRIVATE_KEY = "42FlV4n_SjaTAcJnUcCi8bDrVEwX_8YCFJiCzAOhngw"
+VAPID_PUBLIC_KEY = "BDlFvnKYOF8Lx8-hoX48rGyJQ0vKtQG3HxDmSJau0LalO02bf-jnwgjOI_fbsfzjKDXe4TSyUWKjgpIqIBXyYb0"
+VAPID_PRIVATE_KEY = "pZ__HuvFho1Sx5js0mVOqHAcUZ28N9WIIoWTfeNHdFc"
 VAPID_CLAIMS = {"sub": "mailto:vincentkipngetich479@gmail.com"}
 
 # =======================================
@@ -443,7 +443,6 @@ class PushSubscription(db.Model):
     p256dh = db.Column(db.String(255), nullable=False)
     auth = db.Column(db.String(255), nullable=False)
 
-    # Fix: remove cascade from this side, put it in backref
     user = db.relationship(
         "User",
         backref=db.backref("subscriptions", cascade="all, delete-orphan")
@@ -4566,7 +4565,7 @@ def create_announcement():
     }
 
     # Broadcast via Socket.IO
-    socketio.emit('push_notification', data, broadcast=True)
+    socketio.emit('push_notification', data)
 
     # Mirror to browser push (system notification)
     send_webpush(data)
