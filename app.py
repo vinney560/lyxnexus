@@ -134,6 +134,8 @@ limiter = Limiter(
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
+login_manager.session_protection = "strong"  # Extra security
+login_manager.refresh_view = 'login'
 
 jwt = JWTManager(app)
 Compress(app)
@@ -496,6 +498,8 @@ with app.app_context():
 @login_manager.user_loader
 def load_user(user_id):
     try:
+        if '_user_id' not in session:
+            return None
         return User.query.get(int(user_id))
     except Exception as e:
         print(f'⚠️ Error loading user {user_id}: {e}')
@@ -863,17 +867,16 @@ def secret_code():
 
 
 @app.route('/login', methods=['POST', 'GET'])
-#@limiter.limit("10 per minute")
+@limiter.limit("10 per minute")
 def login():
     next_page = request.args.get("next") or request.form.get("next")
     login_type = request.form.get('login_type', 'student')  # 'student' or 'admin'
 
+    from flask import make_response
+
     # ===============================
     #  PREVENT RE-LOGIN IF LOGGED IN
     # ===============================
-    # Double-check session integrity (extra safety)
-    from flask import make_response
-
     if current_user.is_authenticated:
         if current_user.is_admin:
             flash('You are already logged in as an administrator.', 'info')
@@ -881,20 +884,17 @@ def login():
         else:
             flash('You are already logged in as student.', 'info')
             return redirect(url_for('main_page'))
-    else:
-        # Properly clear user session and cookies
-        logout_user()
-        session.pop('authenticated', None)
-        session.pop('_user_id', None)
-        session.clear()
 
-        # Also remove "remember me" cookie if present
+    # ===============================
+    #  FIX STALE OR CORRUPT SESSIONS
+    # ===============================
+    if '_user_id' in session and not current_user.is_authenticated:
+        logout_user()
+        session.clear()
         response = make_response(redirect(url_for('login')))
         response.set_cookie('remember_token', '', expires=0)
-
         flash('Session expired. Please log in again.', 'warning')
-        return response
-
+        return response  # ✅ Only triggers in broken-session case
 
     # ===============================
     #  LOGIN FORM HANDLING
