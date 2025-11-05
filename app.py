@@ -877,11 +877,12 @@ def login():
     #  PREVENT RE-LOGIN IF LOGGED IN
     # ===============================
     if current_user.is_authenticated:
-        print("Reached Here, and USER ID: ", current_user.id)
         if current_user.is_admin:
+            print("Reached Here, for Admins, and USER ID: ", current_user.id)
             flash('You are already logged in as an administrator.', 'info')
             return redirect(url_for('admin_page'))
         else:
+            print("Reached Here, For Student, and USER ID: ", current_user.id)
             flash('You are already logged in as student.', 'info')
             return redirect(url_for('main_page'))
 

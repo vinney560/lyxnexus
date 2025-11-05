@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nova | AI Assistant</title>
+    <title>Chloe | AI Assistant</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -814,7 +814,7 @@
             <div class="sidebar-header">
                 <div class="logo">
                     <div class="logo-icon">N</div>
-                    <div class="logo-text">Nova</div>
+                    <div class="logo-text">Chloe</div>
                 </div>
             </div>
             <div class="sidebar-content">
@@ -850,7 +850,7 @@
                         <div class="welcome-icon">
                             <i class="fas fa-stars"></i>
                         </div>
-                        <h1 class="welcome-title">Hello, I'm Nova</h1>
+                        <h1 class="welcome-title">Hello, I'm Chloe</h1>
                         <p class="welcome-subtitle">
                             Your AI assistant ready to help with anything you need. 
                             Let's start a conversation!
@@ -861,7 +861,7 @@
                                 <div class="action-icon">
                                     <i class="fas fa-robot"></i>
                                 </div>
-                                <div class="action-text">About Nova</div>
+                                <div class="action-text">About Chloe</div>
                             </div>
                             <div class="quick-action" data-prompt="What can you help me with?">
                                 <div class="action-icon">
@@ -892,7 +892,7 @@
                     <div class="input-main" id="inputMain">
                         <textarea 
                             id="message-input" 
-                            placeholder="Message Nova..." 
+                            placeholder="Message Chloe..." 
                             rows="1"
                             maxlength="4000"
                         ></textarea>
@@ -1290,7 +1290,7 @@
             typingDiv.className = 'typing-indicator';
             typingDiv.id = 'typing-indicator';
             typingDiv.innerHTML = `
-                <div>Nova is typing</div>
+                <div>Chloe is typing</div>
                 <div class="typing-dots">
                     <div class="typing-dot"></div>
                     <div class="typing-dot"></div>
@@ -1376,8 +1376,8 @@
             // Get current local date and time
             const currentTime = new Date().toLocaleString();
 
-            // Build Nova's context
-            let context = "You are Nova, a friendly and helpful AI assistant created to be warm, smart, and human-like. 💫 ";
+            // Build Chloe's context
+            let context = "You are Chloe, a friendly and helpful AI assistant created to be warm, smart, and human-like. 💫 ";
             context += "You're having a natural, flowing conversation with the user — be very conversational, warm, and engaging. 😊 ";
             context += "Use emojis occasionally to express emotion or tone. Never overdo them — keep it balanced and expressive. ";
             context += "You automatically remind the user of their reminders when the time comes, and summarize upcoming ones when asked. ⏰ ";
@@ -1407,7 +1407,7 @@
                 const recentHistory = conversationHistory.slice(-5);
                 recentHistory.forEach(exchange => {
                     context += `User: ${exchange.user}\n`;
-                    context += `Nova: ${exchange.ai}\n`;
+                    context += `Chloe: ${exchange.ai}\n`;
                 });
                 context += "\n";
             }
@@ -1415,7 +1415,7 @@
             const requestBody = {
                 contents: [{
                     parts: [{
-                        text: context + "Current user message: " + prompt + "\nNova:"
+                        text: context + "Current user message: " + prompt + "\nChloe:"
                     }]
                 }],
                 generationConfig: {
@@ -1485,7 +1485,7 @@
         // Save conversation items to localStorage
         function saveConversationItems() {
             try {
-                localStorage.setItem('novaAI_conversationItems', JSON.stringify(conversationItems));
+                localStorage.setItem('ChloeAI_conversationItems', JSON.stringify(conversationItems));
             } catch (error) {
                 console.error('Failed to save conversation items:', error);
             }
@@ -1494,7 +1494,7 @@
         // Load conversation items from localStorage
         function loadConversationItems() {
             try {
-                const saved = localStorage.getItem('novaAI_conversationItems');
+                const saved = localStorage.getItem('ChloeAI_conversationItems');
                 if (saved) {
                     conversationItems = JSON.parse(saved);
                     renderConversationItems();
