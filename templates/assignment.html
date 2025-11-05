@@ -220,11 +220,11 @@
                     {% set today = now %}
                     <span class="status-badge
                         {% if assignment.due_date < today %}status-overdue
-                        {% elif assignment.due_date <= today + timedelta(days=3) %}status-due-soon
+                        {% elif assignment.due_date <= (today + 3 * 24 * 60 * 60) %}status-due-soon
                         {% else %}status-upcoming
                         {% endif %}">
                         {% if assignment.due_date < today %}Overdue
-                        {% elif assignment.due_date <= today + timedelta(days=3) %}Due Soon
+                        {% elif assignment.due_date <= (today + 3 * 24 * 60 * 60) %}Due Soon
                         {% else %}Not Due Yet
                         {% endif %}
                     </span>
