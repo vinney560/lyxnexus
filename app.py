@@ -982,6 +982,16 @@ def login():
 import requests
 import json
 
+@app.route('/ai/lyxin')
+@login_required
+def ai_lyxin():
+    """Render the LyxNexus AI information page"""
+    api_keys = [
+        'AIzaSyA3o8aKHTnVzuW9-qg10KjNy7Lcgn19N2I',
+        'AIzaSyCq8-xrPTC40k8E_i3vXZ_-PR6RiPsuOno'
+    ]
+    return render_template('talkAI.html', api_keys=api_keys)
+
 @app.route('/ai-chat')
 @login_required
 @admin_required
