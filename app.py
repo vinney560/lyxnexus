@@ -871,6 +871,8 @@ def login():
     #  PREVENT RE-LOGIN IF LOGGED IN
     # ===============================
     # Double-check session integrity (extra safety)
+    from flask import make_response
+
     if '_user_id' in session or current_user.is_authenticated:
         if current_user.is_admin:
             flash('You are already logged in as an administrator.', 'info')
@@ -879,11 +881,19 @@ def login():
             flash('You are already logged in as student.', 'info')
             return redirect(url_for('main_page'))
     else:
-        # Session lost but still marked authenticated (rare edge case)
+        # Properly clear user session and cookies
         logout_user()
-        session['authenticated'] = False
+        session.pop('authenticated', None)
+        session.pop('_user_id', None)
         session.clear()
+
+        # Also remove "remember me" cookie if present
+        response = make_response(redirect(url_for('login')))
+        response.set_cookie('remember_token', '', expires=0)
+
         flash('Session expired. Please log in again.', 'warning')
+        return response
+
 
     # ===============================
     #  LOGIN FORM HANDLING
@@ -2708,7 +2718,8 @@ def terms():
 def logout():
     logout_user()
     session.clear()
-    session['authenticated'] = False
+    session.pop('authenticated', None)
+    session.pop('_user_id', None)
     flash('Logout Successfully!', 'success')
     return redirect(url_for('home'))
 #--------------------------------------------------------------------
