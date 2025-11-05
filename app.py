@@ -871,7 +871,7 @@ def login():
     #  PREVENT RE-LOGIN IF LOGGED IN
     # ===============================
     # Double-check session integrity (extra safety)
-    if '_user_id' in session and current_user.is_authenticated:
+    if '_user_id' in session or current_user.is_authenticated:
         if current_user.is_admin:
             flash('You are already logged in as an administrator.', 'info')
             return redirect(url_for('admin_page'))
@@ -880,7 +880,7 @@ def login():
             return redirect(url_for('main_page'))
     else:
         # Session lost but still marked authenticated (rare edge case)
-        logout_user()
+        logout_user(current_user)
         session['authenticated'] = False
         session.clear()
         flash('Session expired. Please log in again.', 'warning')
