@@ -865,6 +865,24 @@ def secret_code():
     
     return render_template('admin_code.html')
 
+from flask_login import _get_user
+
+@app.before_request
+def auto_login_on_login_page():
+    # Only run this logic on the login page
+    if request.endpoint == 'login' and not current_user.is_authenticated:
+        user = _get_user()  # Check if Flask-Login can restore a remembered session
+
+        # If user session exists and is valid
+        if user and user.is_authenticated:
+            login_user(user, remember=True)
+            flash('Welcome back! You are already logged in.', 'info')
+
+            # Redirect to correct dashboard
+            if getattr(user, 'is_admin', False):
+                return redirect(url_for('admin_page'))
+            else:
+                return redirect(url_for('main_page'))
 
 @app.route('/login', methods=['POST', 'GET'])
 @limiter.limit("10 per minute")
@@ -2724,10 +2742,12 @@ def logout():
     flash('Logout Successfully!', 'success')
     return redirect(url_for('home'))
 #--------------------------------------------------------------------
-@app.route('/main-page')
-@limiter.limit("10 per minute")
+@app.route('/main_page')
 @login_required
 def main_page():
+    if not session.get('authenticated'):
+        session['authenticated'] = True
+        print("Post-login setup completed ✅")
     return render_template('main_page.html', year=_year())
 #-----------------------------------------------------------------
 @app.route('/navigation-guide')
