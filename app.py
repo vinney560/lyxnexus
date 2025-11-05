@@ -865,6 +865,26 @@ def secret_code():
     
     return render_template('admin_code.html')
 
+@app.before_request
+def auto_login_on_login_page():
+    # Only run on /login when not authenticated
+    if request.endpoint == 'login' and not current_user.is_authenticated:
+        print("Accessed auto login")
+        if '_user_id' in session:
+            flash('Welcome back! Restoring your session...', 'info')
+
+            # Add a short artificial wait (optional)
+            import time
+            time.sleep(1.5)  # ~1.5 seconds
+
+            user = current_user
+            if user.is_authenticated:
+                if getattr(user, 'is_admin', False):
+                    print("Tried Login Admin")
+                    return redirect(url_for('admin_page'))
+                print("Tried Student Login")
+                return redirect(url_for('main_page'))
+
 @app.route('/login', methods=['POST', 'GET'])
 @limiter.limit("10 per minute")
 def login():
