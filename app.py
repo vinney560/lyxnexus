@@ -4184,7 +4184,8 @@ import requests
 
 TARGET_URLS = [
     "https://lyxspace.onrender.com/files",
-    "https://lyxnexus.onrender.com/"
+    "https://lyxnexus.onrender.com/",
+    "https://viewtv.viewtv.gt.tc/"
 ]
 
 def ping_urls():
