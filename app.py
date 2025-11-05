@@ -880,7 +880,7 @@ def login():
             return redirect(url_for('main_page'))
     else:
         # Session lost but still marked authenticated (rare edge case)
-        logout_user(current_user)
+        logout_user()
         session['authenticated'] = False
         session.clear()
         flash('Session expired. Please log in again.', 'warning')
