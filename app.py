@@ -865,28 +865,8 @@ def secret_code():
     
     return render_template('admin_code.html')
 
-def auto_login_redirect(func):
-    """
-    Automatically redirects remembered users when visiting the login page.
-    """
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        if current_user.is_authenticated:
-            flash('Welcome back! Restoring your session...', 'info')
-            
-            import time
-            time.sleep(1.2)
-            if getattr(current_user, 'is_admin', False):
-                return redirect(url_for('admin_page'))
-            return redirect(url_for('main_page'))
-
-        # Otherwise, continue to the original route
-        return func(*args, **kwargs)
-    return wrapper
-
 @app.route('/login', methods=['POST', 'GET'])
 @limiter.limit("10 per minute")
-@auto_login_redirect
 def login():
     next_page = request.args.get("next") or request.form.get("next")
     login_type = request.form.get('login_type', 'student')  # 'student' or 'admin'
@@ -905,8 +885,7 @@ def login():
         else:
             print("Reached Here, For Student, and USER ID: ", current_user.id)
             flash('You are already logged in as student.', 'info')
-            response = make_response(redirect(url_for('main_page')))
-            return response
+            return redirect(url_for('main_page', message='Restored!', message_type='success'))
 
     # ===============================
     #  FIX STALE OR CORRUPT SESSIONS
