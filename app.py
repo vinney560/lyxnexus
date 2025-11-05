@@ -876,7 +876,7 @@ def login():
             flash('You are already logged in as an administrator.', 'info')
             return redirect(url_for('admin_page'))
         else:
-            flash('You are already logged in.', 'info')
+            flash('You are already logged in as student.', 'info')
             return redirect(url_for('main_page'))
     else:
         # Session lost but still marked authenticated (rare edge case)
