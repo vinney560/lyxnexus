@@ -917,7 +917,7 @@ def login():
                     db.session.commit()
 
                 session.clear()  # Prevent session fixation
-                login_user(user)
+                login_user(user, remember=True)
                 flash('Administrator access granted successfully!', 'success')
                 return redirect(next_page or url_for('admin_page'))
             else:
@@ -942,7 +942,7 @@ def login():
                                        login_type=login_type, year=_year())
 
             session.clear()
-            login_user(user)
+            login_user(user, remember=True)
             flash('Admin login successful!', 'success')
             return redirect(next_page or url_for('admin_page'))
 
@@ -955,7 +955,7 @@ def login():
                 db.session.add(new_user)
                 db.session.commit()
                 session.clear()
-                login_user(new_user)
+                login_user(new_user, remember=True)
                 flash('Welcome to LyxNexus! Let\'s get you started.', 'success')
                 return redirect(url_for('nav_guide'))
             else:
@@ -965,7 +965,7 @@ def login():
                                            login_type=login_type, year=_year())
 
                 session.clear()
-                login_user(user)
+                login_user(user, remember=True)
                 return redirect(next_page or url_for('main_page', message='Login successful!', message_type='success'))
 
     # Render login form for new session
