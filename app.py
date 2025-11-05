@@ -871,18 +871,14 @@ def auto_login_redirect(func):
     """
     @wraps(func)
     def wrapper(*args, **kwargs):
-        # Only run this logic when user visits /login normally (not during POST)
-        if request.endpoint == 'login' and request.method == 'GET':
-            if current_user.is_authenticated:
-                flash('Welcome back! Restoring your session...', 'info')
-                
-                # Optional wait for smooth UX
-                import time
-                time.sleep(1.2)
-
-                if getattr(current_user, 'is_admin', False):
-                    return redirect(url_for('admin_page'))
-                return redirect(url_for('main_page'))
+        if current_user.is_authenticated:
+            flash('Welcome back! Restoring your session...', 'info')
+            
+            import time
+            time.sleep(1.2)
+            if getattr(current_user, 'is_admin', False):
+                return redirect(url_for('admin_page'))
+            return redirect(url_for('main_page'))
 
         # Otherwise, continue to the original route
         return func(*args, **kwargs)
