@@ -134,8 +134,6 @@ limiter = Limiter(
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
-login_manager.session_protection = "strong"  # Extra security
-login_manager.refresh_view = 'login'
 
 jwt = JWTManager(app)
 Compress(app)
@@ -867,7 +865,7 @@ def secret_code():
 
 
 @app.route('/login', methods=['POST', 'GET'])
-@limiter.limit("5 per minute")
+#@limiter.limit("10 per minute")
 def login():
     next_page = request.args.get("next") or request.form.get("next")
     login_type = request.form.get('login_type', 'student')  # 'student' or 'admin'
