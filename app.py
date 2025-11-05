@@ -496,8 +496,6 @@ with app.app_context():
 @login_manager.user_loader
 def load_user(user_id):
     try:
-        if '_user_id' not in session:
-            return None
         return User.query.get(int(user_id))
     except Exception as e:
         print(f'⚠️ Error loading user {user_id}: {e}')
