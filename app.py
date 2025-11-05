@@ -865,28 +865,32 @@ def secret_code():
     
     return render_template('admin_code.html')
 
-@app.before_request
-def auto_login_on_login_page():
-    # Only run on /login when not authenticated
-    if request.endpoint == 'login' and not current_user.is_authenticated:
-        print("Accessed auto login")
-        if '_user_id' in session:
-            flash('Welcome back! Restoring your session...', 'info')
+def auto_login_redirect(func):
+    """
+    Automatically redirects remembered users when visiting the login page.
+    """
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        # Only run this logic when user visits /login normally (not during POST)
+        if request.endpoint == 'login' and request.method == 'GET':
+            if current_user.is_authenticated:
+                flash('Welcome back! Restoring your session...', 'info')
+                
+                # Optional wait for smooth UX
+                import time
+                time.sleep(1.2)
 
-            # Add a short artificial wait (optional)
-            import time
-            time.sleep(1.5)  # ~1.5 seconds
-
-            user = current_user
-            if user.is_authenticated:
-                if getattr(user, 'is_admin', False):
-                    print("Tried Login Admin")
+                if getattr(current_user, 'is_admin', False):
                     return redirect(url_for('admin_page'))
-                print("Tried Student Login")
                 return redirect(url_for('main_page'))
+
+        # Otherwise, continue to the original route
+        return func(*args, **kwargs)
+    return wrapper
 
 @app.route('/login', methods=['POST', 'GET'])
 @limiter.limit("10 per minute")
+@auto_login_redirect
 def login():
     next_page = request.args.get("next") or request.form.get("next")
     login_type = request.form.get('login_type', 'student')  # 'student' or 'admin'
