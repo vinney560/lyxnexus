@@ -871,7 +871,7 @@ def login():
     #  PREVENT RE-LOGIN IF LOGGED IN
     # ===============================
     # Double-check session integrity (extra safety)
-    if '_user_id' in session:
+    if '_user_id' in session and current_user.is_authenticated:
         if current_user.is_admin:
             flash('You are already logged in as an administrator.', 'info')
             return redirect(url_for('admin_page'))
@@ -881,6 +881,7 @@ def login():
     else:
         # Session lost but still marked authenticated (rare edge case)
         logout_user()
+        session['authenticated'] = False
         session.clear()
         flash('Session expired. Please log in again.', 'warning')
 
@@ -941,6 +942,7 @@ def login():
                                        login_type=login_type, year=_year())
 
             session.clear()
+            session['authenticated'] = True
             login_user(user, remember=True)
             flash('Admin login successful!', 'success')
             return redirect(next_page or url_for('admin_page'))
@@ -964,6 +966,7 @@ def login():
                                            login_type=login_type, year=_year())
 
                 session.clear()
+                session['authenticated'] = True
                 login_user(user, remember=True)
                 return redirect(next_page or url_for('main_page', message='Login successful!', message_type='success'))
 
@@ -2694,18 +2697,6 @@ def ai_assistant():
 #=======================================================================================================
 @app.route('/')
 def home():
-    if '_user_id' in session:
-        if current_user.is_admin:
-            flash('You are already logged in as an administrator.', 'info')
-            return redirect(url_for('admin_page'))
-        else:
-            flash('You are already logged in as student.', 'info')
-            return redirect(url_for('main_page'))
-    else:
-        # Session lost but still marked authenticated (rare edge case)
-        logout_user()
-        session.clear()
-        flash('Session expired. Please log in again.', 'warning')
     return render_template('index.html', year=_year())
 #--------------------------------------------------------------------
 @app.route('/terms')
@@ -2715,8 +2706,9 @@ def terms():
 @app.route('/logout')
 @login_required
 def logout():
-    session.clear()
     logout_user()
+    session.clear()
+    session['authenticated'] = False
     flash('Logout Successfully!', 'success')
     return redirect(url_for('home'))
 #--------------------------------------------------------------------
@@ -2795,7 +2787,10 @@ def sw():
 #-------------------------------------------------------------------
 @app.route('/is_authenticated')
 def is_authenticated():
-    return jsonify({'authenticated': current_user.is_authenticated})
+    # Checks both Flask-Login and session for reliability
+    return jsonify({
+        'authenticated': current_user.is_authenticated or session.get('authenticated', False)
+    })
 #-------------------------------------------------------------------
 
 @app.route("/subscribe", methods=["POST"])
