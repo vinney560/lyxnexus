@@ -44,7 +44,7 @@ def database_url():
     print(f"DB_2: {db_2}")
     print(f"DB_3: {db_3}")
 
-    for name, db_url in [("Aiven DB", db_1), ("Render DB", db_2)]:
+    for name, db_url in [("Render DB", db_1), ("Aiven DB", db_2)]:
         if db_url:
             try:
                 engine = create_engine(db_url)
