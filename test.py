@@ -3,6 +3,7 @@ from flask_login import current_user, login_required
 
 test_routes = Blueprint('test_routes', __name__, url_prefix='/test')
 
+print('Reached TEST')
 @test_routes.route('/template')
 def test_template():
     return render_template('test.html')
