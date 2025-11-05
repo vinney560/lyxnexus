@@ -4865,7 +4865,9 @@ def download_assignment_file(id):
 def assignment_page(id):
     """Serve the assignment file view and download page"""
     assignment = Assignment.query.get_or_404(id)
-    return render_template('assignment.html', assignment=assignment, now=datetime.utcnow())
+    now = datetime.utcnow()
+    three_days = now + timedelta(days=3)
+    return render_template('assignment.html', assignment=assignment, now=now, three_days=three_days)
 
 @app.route("/api/preview")
 def preview():
