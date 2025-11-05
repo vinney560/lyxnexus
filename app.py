@@ -2694,6 +2694,18 @@ def ai_assistant():
 #=======================================================================================================
 @app.route('/')
 def home():
+    if '_user_id' in session:
+        if current_user.is_admin:
+            flash('You are already logged in as an administrator.', 'info')
+            return redirect(url_for('admin_page'))
+        else:
+            flash('You are already logged in as student.', 'info')
+            return redirect(url_for('main_page'))
+    else:
+        # Session lost but still marked authenticated (rare edge case)
+        logout_user()
+        session.clear()
+        flash('Session expired. Please log in again.', 'warning')
     return render_template('index.html', year=_year())
 #--------------------------------------------------------------------
 @app.route('/terms')
