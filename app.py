@@ -2690,12 +2690,12 @@ def get_related_items(model_name, item_id, relation_name):
 # Gemini_bp Blueprint registering
 from gemini_bp import gemini_bp
 from test import test_routes
-from chloe import chloe
+from chloe import _chloe_ai
 
 # Register the blueprint
 app.register_blueprint(gemini_bp)
 app.register_blueprint(test_routes)
-app.register_blueprint(chloe)
+app.register_blueprint(_chloe_ai)
 #========================================================================
 @app.route('/lyx-ai')
 @login_required
