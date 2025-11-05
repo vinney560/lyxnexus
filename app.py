@@ -133,8 +133,11 @@ limiter = Limiter(
 # ===============================
 login_manager = LoginManager()
 login_manager.init_app(app)
-jwt = JWTManager(app)
 login_manager.login_view = 'login'
+login_manager.session_protection = "strong"  # Extra security
+login_manager.refresh_view = 'login'
+
+jwt = JWTManager(app)
 Compress(app)
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode="eventlet", ping_timeout=20, ping_interval=10)
 db = SQLAlchemy(app)
@@ -495,6 +498,8 @@ with app.app_context():
 @login_manager.user_loader
 def load_user(user_id):
     try:
+        if '_user_id' not in session:
+            return None
         return User.query.get(int(user_id))
     except Exception as e:
         print(f'⚠️ Error loading user {user_id}: {e}')
@@ -873,7 +878,7 @@ def login():
     # Double-check session integrity (extra safety)
     from flask import make_response
 
-    if '_user_id' in session or current_user.is_authenticated:
+    if current_user.is_authenticated:
         if current_user.is_admin:
             flash('You are already logged in as an administrator.', 'info')
             return redirect(url_for('admin_page'))
