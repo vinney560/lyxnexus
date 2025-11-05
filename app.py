@@ -875,16 +875,15 @@ def login():
         if '_user_id' in session:
             if current_user.is_admin:
                 flash('You are already logged in as an administrator.', 'info')
-                return redirect(next_page or url_for('admin_page'))
+                return redirect(url_for('admin_page'))
             else:
                 flash('You are already logged in.', 'info')
-                return redirect(next_page or url_for('main_page'))
+                return redirect(url_for('main_page'))
         else:
             # Session lost but still marked authenticated (rare edge case)
             logout_user()
             session.clear()
             flash('Session expired. Please log in again.', 'warning')
-            return redirect(url_for('login'))
 
     # ===============================
     #  LOGIN FORM HANDLING
