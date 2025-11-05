@@ -997,16 +997,6 @@ def login():
 import requests
 import json
 
-@app.route('/ai/lyxin')
-@login_required
-def ai_lyxin():
-    """Render the LyxNexus AI information page"""
-    api_keys = [
-        'AIzaSyA3o8aKHTnVzuW9-qg10KjNy7Lcgn19N2I',
-        'AIzaSyCq8-xrPTC40k8E_i3vXZ_-PR6RiPsuOno'
-    ]
-    return render_template('talkAI.html', api_keys=api_keys)
-
 @app.route('/ai-chat')
 @login_required
 @admin_required
@@ -2696,13 +2686,17 @@ def get_related_items(model_name, item_id, relation_name):
         return jsonify(result), 404
     
     return jsonify(result)
-
+#========================================================================
 # Gemini_bp Blueprint registering
 from gemini_bp import gemini_bp
+from test import test_routes
+from chloe import chloe
 
 # Register the blueprint
 app.register_blueprint(gemini_bp)
-
+app.register_blueprint(test_routes)
+app.register_blueprint(chloe)
+#========================================================================
 @app.route('/lyx-ai')
 @login_required
 def ai_assistant():
@@ -2739,9 +2733,6 @@ def main_page():
 def nav_guide():
     return render_template('navigation.html')
 #--------------------------------------------------------------------
-@app.route('/test')
-def test_template():
-    return render_template('test.html')
 #--------------------------------------------------------------------
 @app.route('/admin')
 @login_required
