@@ -1770,9 +1770,6 @@ WRITE OPERATIONS AVAILABLE (Admin only):
    {{"operation": "send_notification", "title": "Title", "message": "Message"}} 
    {{"operation": "send_notification", "title": "Title", "message": "Message", "user_id": 123}}
 
-11. get_user_info - Retrieve detailed information about a specific user
-   {{"operation": "get_user_info", "user_id": 5}}
-
    ⚙️ Behavior rules:
    - Available to Admins and the Creator (User ID 1).
    - When used, return complete details including:
@@ -1796,13 +1793,6 @@ EXAMPLE RESPONSE:
     {{"operation": "send_notification", "title": "New Announcement", "message": "Check the new exam schedule announcement"}}
   ],
   "data_sources": ["announcements", "users"]
-}}
-
-EXAMPLE RESPONSE (User Information Retrieval):
-{{
-  "response": "Here are the details for the requested user:\n\n👤 User Information:\nID: 5\nUsername: Vincent\nMobile: 0712345678\nAdmin: Yes\nStatus: Active\nCreated At: 2025-11-06T08:45:00\nAnnouncements: 3\nAssignments: 1\nMessages: 12\nFiles: 2",
-  "operations": [],
-  "data_sources": ["users"]
 }}
 
 ────────────────────────────────────────────
