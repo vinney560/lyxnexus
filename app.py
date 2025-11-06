@@ -1797,7 +1797,7 @@ EXAMPLE RESPONSE:
 
 EXAMPLE RESPONSE (User Information Retrieval):
 {{
-  "response": "Here are the details for the requested user.",
+  "response": "Here are the details for the requested user:\n\n👤 User Information:\nID: 5\nUsername: Vincent\nMobile: 0712345678\nAdmin: Yes\nStatus: Active\nCreated At: 2025-11-06T08:45:00\nAnnouncements: 3\nAssignments: 1\nMessages: 12\nFiles: 2",
   "operations": [
     {{
       "operation": "get_user_info",
