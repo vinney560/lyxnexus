@@ -1696,6 +1696,7 @@
                 .replace(/_(.*?)_/g, '<em>$1</em>')                 // _italic_
                 .replace(/~(.*?)~/g, '<span class="strikethrough">$1</span>')  // ~strike~
                 .replace(/==(.*?)==/g, '<span class="highlight">$1</span>')    // ==highlight==
+                .replace(/\n{2,}/g, '\n').replace(/\n/g, '<br>')
         }
 
         // Load announcements
