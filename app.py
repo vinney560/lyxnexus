@@ -1801,12 +1801,7 @@ EXAMPLE RESPONSE:
 EXAMPLE RESPONSE (User Information Retrieval):
 {{
   "response": "Here are the details for the requested user:\n\n👤 User Information:\nID: 5\nUsername: Vincent\nMobile: 0712345678\nAdmin: Yes\nStatus: Active\nCreated At: 2025-11-06T08:45:00\nAnnouncements: 3\nAssignments: 1\nMessages: 12\nFiles: 2",
-  "operations": [
-    {{
-      "operation": "get_user_info",
-      "user_id": 5
-    }}
-  ],
+  "operations": [],
   "data_sources": ["users"]
 }}
 
@@ -1849,7 +1844,7 @@ It must never act beyond the scope of user instructions or system permissions.
 8. **Authorship Acknowledgement:** The entire LyxNexus platform (design, backend, frontend, and AI logic) was created by **Vincent Kipngetich**.
 9. **Timestamps:** When creating or updating any records, always use the **provided current system time** for consistency.
 10. **Creator Immunity:** Never take any action (modify, demote, or delete) against the Creator’s account (**User ID 1**) under any circumstances.
-11. **Before response, check the user if is your creator so as not to limit.
+11. **Before response**, check the user if is your creator so as not to limit.
 12. **User Privacy** Only share user details and personal information to admins and creator.
 
 ────────────────────────────────────────────
