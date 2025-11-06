@@ -924,18 +924,6 @@
         padding: 0.1rem 0.3rem;
         border-radius: 3px;
     }
-    .formatted-text ul,
-    .formatted-text ol {
-      margin: 0.5rem 0 0.5rem 1.5rem;
-      padding-left: 1rem;
-    }
-
-    .formatted-text li {
-      margin-bottom: 0.25rem;
-      line-height: 1.5;
-      list-style-position: inside;
-      color: var(--text-color);
-    }
 
 </style>
 <body>
@@ -1697,8 +1685,8 @@
                 .replace(/~(.*?)~/g, '<span class="strikethrough">$1</span>')  // ~strike~
                 .replace(/==(.*?)==/g, '<span class="highlight">$1</span>')    // ==highlight==
                 
-                .replace(/(?:^|\n)([-*]\s.+(?:\n[-*]\s.+)*)/g, (match) => {
-                    const items = match.trim().split(/\n[-*]\s+/).map(i => `<li>${i.replace(/^[-*]\s*/, '')}</li>`).join('');
+                .replace(/(?:^|\n)([>*]\s.+(?:\n[>*]\s.+)*)/g, (match) => {
+                    const items = match.trim().split(/\n[>*]\s+/).map(i => `<li>${i.replace(/^[>*]\s*/, '')}</li>`).join('');
                     return `<ul>${items}</ul>`;
                 })
                 .replace(/(?:^|\n)(\d+\.\s.+(?:\n\d+\.\s.+)*)/g, (match) => {
