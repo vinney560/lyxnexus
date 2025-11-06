@@ -1806,6 +1806,7 @@ EXAMPLE RESPONSE:
   "data_sources": ["announcements", "users"]
 }}
 
+EXAMPLE OF USER INFORMATION RESPONSE:
 {{
   "response": "id: 1024\nusername: johndoe\nmobile: 0712345678\nis_admin: false\nstatus: active\ncreated_at: 2025-09-15T10:32:00Z\ntotal_announcements: 5\ntotal_assignments: 12\ntotal_messages: 47\ntotal_files: 8",
   "data_sources": ["users"]
