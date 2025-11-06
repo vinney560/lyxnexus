@@ -4132,6 +4132,7 @@ import requests
 
 TARGET_URLS = [
     "https://lyxspace.onrender.com/files",
+    "https://lyxnexus.xo.je",
     "https://lyxnexus.onrender.com/",
     "https://viewtv.viewtv.gt.tc/"
 ]
