@@ -1799,10 +1799,10 @@ EXAMPLE RESPONSE (User Information Retrieval):
 {{
   "response": "Here are the details for the requested user.",
   "operations": [
-    {
+    {{
       "operation": "get_user_info",
       "user_id": 5
-    }
+    }}
   ],
   "data_sources": ["users"]
 }}
