@@ -735,6 +735,29 @@
         font-size: 22px;
         margin: 0 auto 12px;
     }
+    /* Text Formatting Styles */
+    .formatted-text {
+        white-space: pre-wrap;
+        word-wrap: break-word;
+    }
+
+    .formatted-text strong, .formatted-text .bold {
+        font-weight: 700;
+        color: var(--text-primary);
+    }
+
+    .formatted-text em, .formatted-text .italic {
+        font-style: italic;
+        color: var(--text-primary);
+    }
+    .formatted-text .strikethrough {
+        text-decoration: line-through;
+    }
+    .formatted-text .highlight {
+        background-color: rgba(88, 166, 255, 0.3);
+        padding: 0.1rem 0.3rem;
+        border-radius: 3px;
+    }
 </style>
 <body class="bg-[url(/uploads/OIP3.jpg)] bg-fixed bg-center bg-cover">
     
@@ -1025,6 +1048,17 @@
             loop: true            // keep looping
         });
         
+        function formatText(text) {
+            let formatted = text
+                .replace(/\*\*(.*?)\*\*/g, '<em>$1</em>')
+                .replace(/\*(.*?)\*/g, '<strong>$1</strong>')
+                .replace(/_(.*?)_/g, '<em>$1</em>') 
+                .replace(/~(.*?)~/g, '<span class="strikethrough">$1</span>')   
+                .replace(/==(.*?)==/g, '<span class="highlight">$1</span>')        
+                .replace(/\n/g, '<br>');
+            return formatted
+        }
+
         class ToastSystem {
             constructor() {
                 this.container = document.getElementById('toast-container');
@@ -1175,6 +1209,7 @@
             }
             
             document.getElementById('announcements-count').textContent = announcements.length;
+            const formattedText = formatText(announcement.content)
         
             container.innerHTML = announcements.map(announcement => `
               <div class="announcement-card b-l-4 b-blue-500">
@@ -1184,7 +1219,7 @@
                   </h3>
                   <span class="text-blue-400 text-sm">Posted: ${formatDate(announcement.created_at)}</span>
                 </div>
-                <p class="mb-3 break-all hyphens-auto text-slate-300 leading-relaxed whitespace-pre-line list-inside">${announcement.content}</p>
+                <p class="mb-3 break-all hyphens-auto text-slate-300 leading-relaxed whitespace-pre-line list-inside">${formattedText}</p>
                 <div class="flex justify-between items-center">
                   <span class="text-slate-400 text-sm">By: ${announcement.author?.username || 'Unknown'}</span>
                   <button class="view-details-btn text-blue-400 hover:text-blue-300 text-sm flex items-center gap-1">
