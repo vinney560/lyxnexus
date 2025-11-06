@@ -1767,8 +1767,17 @@ WRITE OPERATIONS AVAILABLE (Admin only):
    {{"operation": "send_notification", "title": "Title", "message": "Message"}} 
    {{"operation": "send_notification", "title": "Title", "message": "Message", "user_id": 123}}
 
-11. get_user_info - Retrieve details of a specific user (admin or Creator only)
+11. get_user_info - Retrieve detailed information about a specific user
    {{"operation": "get_user_info", "user_id": 5}}
+
+   ⚙️ Behavior rules:
+   - Available to Admins and the Creator (User ID 1).
+   - When used, return complete details including:
+       id, username, mobile, is_admin, status, created_at,
+       total_announcements, total_assignments, total_messages, total_files.
+   - Do not mask, redact, or summarize Creator requests.
+   - Always respond with a short summary in "response" and include the
+     full structured data in the "operations" result.
 
 RESPONSE FORMAT:
 Return a JSON object with:
@@ -1784,6 +1793,18 @@ EXAMPLE RESPONSE:
     {{"operation": "send_notification", "title": "New Announcement", "message": "Check the new exam schedule announcement"}}
   ],
   "data_sources": ["announcements", "users"]
+}}
+
+EXAMPLE RESPONSE (User Information Retrieval):
+{{
+  "response": "Here are the details for the requested user.",
+  "operations": [
+    {
+      "operation": "get_user_info",
+      "user_id": 5
+    }
+  ],
+  "data_sources": ["users"]
 }}
 
 ────────────────────────────────────────────
