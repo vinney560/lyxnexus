@@ -897,10 +897,16 @@
     }
     /* Text Formatting Styles */
     .formatted-text {
-        white-space: pre-wrap;
-        word-wrap: break-word;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      line-height: 1.3;
     }
 
+    .formatted-text br {
+      margin-bottom: 0.2em;
+      display: block;
+    }
+    
     .formatted-text strong, .formatted-text .bold {
         font-weight: 700;
         color: var(--text-primary);
@@ -1672,13 +1678,12 @@
             // Apply linkify FIRST, then continue formatting
             const linkified = linkify(escaped);
         
-            // Then apply your markdown-like formatting
             return linkified
                 .replace(/\*(.*?)\*/g, '<strong>$1</strong>')               // *bold*
                 .replace(/_(.*?)_/g, '<em>$1</em>')                 // _italic_
                 .replace(/~(.*?)~/g, '<span class="strikethrough">$1</span>')  // ~strike~
                 .replace(/==(.*?)==/g, '<span class="highlight">$1</span>')    // ==highlight==
-                .replace(/\n/g, '<br>');                             // line breaks
+                .replace(/\n/g, '<br>'); // line breaks
         }
 
         // Load announcements
