@@ -871,34 +871,6 @@ def login():
     next_page = request.args.get("next") or request.form.get("next")
     login_type = request.form.get('login_type', 'student')  # 'student' or 'admin'
 
-    from flask import make_response
-
-    # ===============================
-    #  PREVENT RE-LOGIN IF LOGGED IN
-    # ===============================
-    if current_user.is_authenticated:
-        if current_user.is_admin:
-            print("Reached Here, for Admins, and USER ID: ", current_user.id)
-            flash('You are already logged in as an administrator.', 'info')
-            response = make_response(redirect(url_for('admin_page')))
-            return response
-        else:
-            print("Reached Here, For Student, and USER ID: ", current_user.id)
-            flash('You are already logged in as student.', 'info')
-            return redirect(url_for('main_page', message='Restored!', message_type='success'))
-
-    # ===============================
-    #  FIX STALE OR CORRUPT SESSIONS
-    # ===============================
-    if '_user_id' in session and not current_user.is_authenticated:
-        print("PAssed Auto Login, User_id=", current_user.id)
-        logout_user()
-        session.clear()
-        response = make_response(redirect(url_for('login')))
-        response.set_cookie('remember_token', '', expires=0)
-        flash('Session expired. Please log in again.', 'warning')
-        return response  # ✅ Only triggers in broken-session case
-
     # ===============================
     #  LOGIN FORM HANDLING
     # ===============================
@@ -931,7 +903,7 @@ def login():
                     db.session.commit()
 
                 session.clear()  # Prevent session fixation
-                login_user(user, remember=True)
+                login_user(user)
                 flash('Administrator access granted successfully!', 'success')
                 return redirect(next_page or url_for('admin_page'))
             else:
@@ -957,7 +929,7 @@ def login():
 
             session.clear()
             session['authenticated'] = True
-            login_user(user, remember=True)
+            login_user(user)
             flash('Admin login successful!', 'success')
             return redirect(next_page or url_for('admin_page'))
 
@@ -970,7 +942,7 @@ def login():
                 db.session.add(new_user)
                 db.session.commit()
                 session.clear()
-                login_user(new_user, remember=True)
+                login_user(new_user)
                 flash('Welcome to LyxNexus! Let\'s get you started.', 'success')
                 return redirect(url_for('nav_guide'))
             else:
@@ -981,7 +953,7 @@ def login():
 
                 session.clear()
                 session['authenticated'] = True
-                login_user(user, remember=True)
+                login_user(user)
                 return redirect(next_page or url_for('main_page', message='Login successful!', message_type='success'))
 
     # Render login form for new session
