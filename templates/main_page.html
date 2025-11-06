@@ -895,6 +895,29 @@
             box-shadow: 0 0 0 0 rgba(0, 198, 255, 0);
         }
     }
+    /* Text Formatting Styles */
+    .formatted-text {
+        white-space: pre-wrap;
+        word-wrap: break-word;
+    }
+
+    .formatted-text strong, .formatted-text .bold {
+        font-weight: 700;
+        color: var(--text-primary);
+    }
+
+    .formatted-text em, .formatted-text .italic {
+        font-style: italic;
+        color: var(--text-primary);
+    }
+    .formatted-text .strikethrough {
+        text-decoration: line-through;
+    }
+    .formatted-text .highlight {
+        background-color: rgba(88, 166, 255, 0.3);
+        padding: 0.1rem 0.3rem;
+        border-radius: 3px;
+    }
 </style>
 <body>
     <!-- Toast Container -->
@@ -1633,7 +1656,32 @@
               `<a href="${url}" target="_blank" rel="noopener noreferrer" class="text-blue-400 underline hover:text-blue-300">${url}</a>`
           );
         }
+
+        function formatText(text) {
+            if (!text) return '';
+            text = text.trim();
         
+            // Escape HTML
+            const escaped = text
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        
+            // Apply linkify FIRST, then continue formatting
+            const linkified = linkify(escaped);
+        
+            // Then apply your markdown-like formatting
+            return linkified
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')   // **bold**
+                .replace(/\*(.*?)\*/g, '<em>$1</em>')               // *italic*
+                .replace(/_(.*?)_/g, '<em>$1</em>')                 // _italic_
+                .replace(/~(.*?)~/g, '<span class="strikethrough">$1</span>')  // ~strike~
+                .replace(/==(.*?)==/g, '<span class="highlight">$1</span>')    // ==highlight==
+                .replace(/\n/g, '<br>');                             // line breaks
+        }
+
         // Load announcements
         async function loadAnnouncements(isRefresh = false) {
           const container = document.getElementById("announcements-container");
@@ -1773,9 +1821,7 @@
 
                         </div>
                     
-                        <p class="mb-4 break-all text-gray-300 hyphens-auto text-sm leading-relaxed whitespace-pre-line list-inside">
-                            ${linkify(announcement.content)}
-                        </p>
+                        <p class="mb-3 break-all hyphens-auto text-slate-300 leading-relaxed list-inside formatted-text">${formatText(announcement.content)}</p>
                     
                         <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
                             <span class="text-gray-400 text-xs sm:text-sm">
