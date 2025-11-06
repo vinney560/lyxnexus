@@ -1127,6 +1127,9 @@ def execute_ai_database_operation(operation_type, operation_data, current_user):
         elif operation_type == "update_user_admin_status":
             return update_ai_user_admin_status(operation_data, current_user)
         
+        elif operation_type == "get_user_info":
+            return get_ai_user_info(operation_data, current_user)
+        
         elif operation_type == "delete_user":
             user_id = operation_data.get("user_id") or operation_data.get("id")
 
@@ -1182,6 +1185,44 @@ def update_ai_user_admin_status(data, user):
     except Exception as e:
         db.session.rollback()
         return False, f"Failed to update admin status: {str(e)}", None
+
+def get_ai_user_info(data, current_user):
+    """
+    Retrieve detailed information about a specific user.
+    Only allowed for admins and the Creator (User ID 1).
+    """
+    try:
+        target_id = data.get("user_id")
+        if not target_id:
+            return False, "Missing 'user_id' in operation data.", None
+
+        # Permission check: allow Creator or Admins only
+        if not current_user.is_admin and current_user.id != 1:
+            return False, "Permission denied: only admins or Creator can access user info.", None
+
+        user = User.query.get(target_id)
+        if not user:
+            return False, f"User with ID {target_id} not found.", None
+
+        # Build structured info for the AI response
+        user_info = {
+            "id": user.id,
+            "username": user.username,
+            "mobile": user.mobile,
+            "is_admin": user.is_admin,
+            "status": user.status,
+            "created_at": user.created_at.isoformat() if user.created_at else None,
+            "total_announcements": len(user.announcements),
+            "total_assignments": len(user.assignments),
+            "total_messages": len(user.messages),
+            "total_files": len(user.uploaded_files)
+        }
+
+        return True, f"Retrieved information for user {user.username} (ID {user.id}).", user_info
+
+    except Exception as e:
+        db.session.rollback()
+        return False, f"Failed to retrieve user info: {str(e)}", None
 
 def create_ai_announcement(data, current_user):
     """Create announcement via AI"""
@@ -1726,6 +1767,9 @@ WRITE OPERATIONS AVAILABLE (Admin only):
    {{"operation": "send_notification", "title": "Title", "message": "Message"}} 
    {{"operation": "send_notification", "title": "Title", "message": "Message", "user_id": 123}}
 
+11. get_user_info - Retrieve details of a specific user (admin or Creator only)
+   {{"operation": "get_user_info", "user_id": 5}}
+
 RESPONSE FORMAT:
 Return a JSON object with:
 - "response": "Your text response to the user"
@@ -1853,8 +1897,7 @@ def get_active_users_today():
         )
     ).distinct().count()
     return active_today
-
-    
+  
 def get_complete_database_context(user_message, current_user):
     """Get COMPLETE database access without limits - Exclusive AI Permission"""
     message_lower = user_message.lower()
