@@ -113,12 +113,12 @@ VAPID_CLAIMS = {"sub": "mailto:vincentkipngetich479@gmail.com"}
 # =======================================
 #   SESSION INITIALIZATION
 # =======================================
-app.config['SESSION_TYPE'] = 'filesystem'                # store session data in server-side files
-app.config['SESSION_PERMANENT'] = False                  # session ends when browser closes
-app.config['SESSION_USE_SIGNER'] = True                  # adds an extra layer of security
-app.config['SESSION_FILE_DIR'] = './flask_session/'      # directory for session files
-app.config['SESSION_COOKIE_HTTPONLY'] = True             # prevents JavaScript access
-app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'            # prevents CSRF
+app.config['SESSION_TYPE'] = 'filesystem'          
+app.config['SESSION_PERMANENT'] = False            
+app.config['SESSION_USE_SIGNER'] = True            
+app.config['SESSION_FILE_DIR'] = './flask_session/'
+app.config['SESSION_COOKIE_HTTPONLY'] = True       
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'      
 app.config['SESSION_COOKIE_SECURE'] = True
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=31)
 app.permanent_session_lifetime = timedelta(days=31)
@@ -126,9 +126,9 @@ app.permanent_session_lifetime = timedelta(days=31)
 #   RATE LIMITER INITIALIZATION
 # ===============================
 limiter = Limiter(
-    key_func=get_remote_address,  # identifies users by IP address
-    app=app,                      # attach limiter to the Flask app
-    default_limits=["2200 per day", "200 per hour"]  # global limits
+    key_func=get_remote_address,
+    app=app,                    
+    default_limits=["2200 per day", "200 per hour"]
 )
 # ===============================
 login_manager = LoginManager()
@@ -321,7 +321,6 @@ class File(db.Model):
     uploaded_at = db.Column(db.DateTime, default=nairobi_time)
     updated_at = db.Column(db.DateTime, default=nairobi_time, onupdate=nairobi_time)
     
-    # Foreign Keys
     uploaded_by = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     
     # Relationships
@@ -367,16 +366,16 @@ class AIConverse(db.Model):
     user_message = db.Column(db.Text, nullable=False)
     ai_response = db.Column(db.Text, nullable=False)
     context_used = db.Column(db.String(50), default='general')
-    message_type = db.Column(db.String(20), default='text')  # text, query, command, etc.
+    message_type = db.Column(db.String(20), default='text')
     tokens_used = db.Column(db.Integer, default=0)
-    response_time = db.Column(db.Float, default=0.0)  # Response time in seconds
+    response_time = db.Column(db.Float, default=0.0)
     api_model = db.Column(db.String(50), default='gemini-2.0-flash')
     was_successful = db.Column(db.Boolean, default=True)
     error_message = db.Column(db.Text, nullable=True)
-    user_rating = db.Column(db.Integer, nullable=True, default=1)  # 1-5 rating
+    user_rating = db.Column(db.Integer, nullable=True, default=1)
     created_at = db.Column(db.DateTime, default=nairobi_time)
     
-    # Index for better performance
+    # Index
     __table_args__ = (
         db.Index('idx_user_created', 'user_id', 'created_at'),
         db.Index('idx_created_at', 'created_at'),
@@ -411,7 +410,7 @@ class Visit(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     page = db.Column(db.String(100), default='main_page')
-    section = db.Column(db.String(50))  # Which section was active
+    section = db.Column(db.String(50))
     timestamp = db.Column(db.DateTime, default=nairobi_time)
     session_id = db.Column(db.String(100))
     user_agent = db.Column(db.Text)
@@ -421,10 +420,10 @@ class Visit(db.Model):
 class UserActivity(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    action = db.Column(db.String(50))  # 'page_view', 'section_click', etc.
-    target = db.Column(db.String(100))  # 'announcements', 'assignments', etc.
+    action = db.Column(db.String(50))  
+    target = db.Column(db.String(100)) 
     timestamp = db.Column(db.DateTime, default=nairobi_time)
-    duration = db.Column(db.Integer)  # Time spent in seconds --> b4 session ended
+    duration = db.Column(db.Integer)
     
     user = db.relationship('User', backref=db.backref('activities', lazy=True))
 #==========================================
@@ -525,7 +524,7 @@ def ignore_bad_fd(record):
 
 logging.getLogger().addFilter(ignore_bad_fd)
 
-# Function to clean old data
+# Function to clean old data for user vsits(> a day)
 def cleanup_old_visits():
     """Delete visits older than 24 hours"""
     cutoff_time = datetime.utcnow() - timedelta(hours=24)
@@ -544,8 +543,6 @@ def send_notification(user_id, title, message):
         'type': 'info',
         'timestamp': datetime.utcnow().isoformat()
     }
-    
-    # Send to specific user
 
     socketio.emit('push_notification', notification_data, room=f'user_{user_id}')
 
@@ -699,7 +696,7 @@ def auto_close_sessions():
                         WHERE datname = :db_name AND pid <> pg_backend_pid();
                     """), {'db_name': db_name})
                     total_before = result.scalar()
-                    print(f"🔗 Active connections (excluding current): {total_before}")
+                    print(f"Active connections (excluding current): {total_before}")
                     print(f"Database: {db_name}")
                     
             except Exception as e:
@@ -720,9 +717,8 @@ def auto_close_sessions():
                     print(f"🔫 Killed {killed_connections} idle connections")
                     
             except Exception as e:
-                print(f"⚠️ Connection killing failed: {e}")
+                print(f"Connection killing failed: {e}")
 
-            # Regular cleanup
             db.session.remove()
             db.engine.dispose()
 
@@ -738,7 +734,6 @@ def auto_close_sessions():
             except Exception as e:
                 print(f"ℹ️ Final count failed: {e}")
 
-        # Calculate duration
         end_time = datetime.utcnow()
         elapsed = (end_time - start_time).total_seconds()
 
@@ -769,7 +764,7 @@ with app.app_context():
         scheduler.start()
         atexit.register(lambda: scheduler.shutdown(wait=False))
         now = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC')
-        print(f"🕒 [{now}] DB session auto-cleaner started (runs every 1 minutes).")
+        print(f"[{now}] DB session auto-cleaner started (runs every 1 minutes).")
         
     except Exception as e:
         print('X' * 70)
@@ -782,19 +777,18 @@ from datetime import datetime, timedelta
 
 def delete_old_announcements():
     with app.app_context():
-        # Current time in UTC+3 (Nairobi)
         now = datetime.utcnow() + timedelta(hours=3)
         cutoff = now - timedelta(days=30)
-        print(f"🕒 Current time (UTC+3): {now}")
-        print(f"🗑️ Deleting announcements created before: {cutoff}")
+        print(f"Current time (UTC+3): {now}")
+        print(f"Deleting announcements created before: {cutoff}")
 
         old_announcements = Announcement.query.filter(Announcement.created_at < cutoff).all()
         if not old_announcements:
-            print("🗑️ No old announcements to delete.")
+            print("No old announcements to delete.")
             return
 
         for ann in old_announcements:
-            print(f"🗑️ Deleting announcement ID {ann.id} | Title: '{ann.title}' | Created at: {ann.created_at}")
+            print(f"Deleting announcement ID {ann.id} | Title: '{ann.title}' | Created at: {ann.created_at}")
             db.session.delete(ann)
 
         db.session.commit()
@@ -804,7 +798,6 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 import atexit
 
-# Initialize the scheduler
 scheduler = BackgroundScheduler()
 
 # Add the cleanup job (runs every 24 hours)
@@ -815,12 +808,10 @@ scheduler.add_job(
     replace_existing=True,
 )
 
-# Start only once, to avoid duplicate jobs when Flask reloads
 if not scheduler.running:
     scheduler.start()
     print("🕒 APScheduler started: deleting announcements older than 30 days daily")
 
-# Ensure graceful shutdown on app exit
 atexit.register(lambda: scheduler.shutdown(wait=False))
 
 #==========================================
@@ -902,7 +893,7 @@ def login():
                     db.session.add(user)
                     db.session.commit()
 
-                session.clear()  # Prevent session fixation
+                session.clear()
                 login_user(user)
                 flash('Administrator access granted successfully!', 'success')
                 return redirect(next_page or url_for('admin_page'))
@@ -913,9 +904,9 @@ def login():
 
         user = User.query.filter_by(mobile=mobile).first()
 
-        # ===============================
+        # =================================
         #  ADMIN LOGIN (WITHOUT MASTER KEY)
-        # ===============================
+        # =================================
         if login_type == 'admin':
             if not user or not user.is_admin:
                 flash('Invalid admin credentials', 'error')
@@ -933,9 +924,9 @@ def login():
             flash('Admin login successful!', 'success')
             return redirect(next_page or url_for('admin_page'))
 
-        # ===============================
+        # ================
         #  STUDENT LOGIN
-        # ===============================
+        # ================
         if login_type == 'student':
             if not user:
                 new_user = User(username=username, mobile=mobile, is_admin=False)
@@ -1650,9 +1641,9 @@ and accountability.  Once authenticated, the AI must return precise, unredacted
 information exactly as stored in the database.
 """
 
-# =========================================
+# ===============================================
 # SAFE FUNCTION TO RETRIEVE RECENT CONVERSATIONS
-# =========================================
+# ===============================================
 def get_recent_ai_conversations(user_id, limit=3):
     """
     Retrieve the most recent AI conversation exchanges for a given user.
@@ -3109,6 +3100,7 @@ def upload_file():
         
     except Exception as e:
         db.session.rollback()
+        print(f'Error Saving Files: {e}')
         return jsonify({'error': 'Failed to upload file'}), 500
 
 @app.route('/api/files/<int:id>/download')
