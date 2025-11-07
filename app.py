@@ -114,7 +114,7 @@ VAPID_CLAIMS = {"sub": "mailto:vincentkipngetich479@gmail.com"}
 #   SESSION INITIALIZATION
 # =======================================
 app.config['SESSION_TYPE'] = 'filesystem'          
-app.config['SESSION_PERMANENT'] = False            
+app.config['SESSION_PERMANENT'] = True           
 app.config['SESSION_USE_SIGNER'] = True            
 app.config['SESSION_FILE_DIR'] = './flask_session/'
 app.config['SESSION_COOKIE_HTTPONLY'] = True       
@@ -864,6 +864,14 @@ def login():
     next_page = request.args.get("next") or request.form.get("next")
     login_type = request.form.get('login_type', 'student')  # 'student' or 'admin'
 
+    if current_user.is_authenticated:
+        if current_user.is_admin:
+            print("Session Restored for Admin: ", current_user.id)
+            return redirect(url_for('admin_page'))
+        else:
+            print("Session Restored for Student: ", current_user.id)
+            return redirect(url_for('main_page'))
+        
     # ===============================
     #  LOGIN FORM HANDLING
     # ===============================

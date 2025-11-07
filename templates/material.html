@@ -194,6 +194,12 @@
         animation: slideUp 0.3s ease;
         max-height: 90vh;
         overflow-y: auto;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+
+    .modal-content::-webkit-scrollbar {
+        display: none;
     }
     
     @keyframes fadeIn {
