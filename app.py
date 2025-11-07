@@ -474,19 +474,49 @@ def initialize_admin_code():
 # Execute raw SQL if needed
 #db.session.execute(text('ALTER TABLE "user" ADD COLUMN status BOOLEAN DEFAULT TRUE'))
 #db.session.commit()
+from sqlalchemy import text
 
 with app.app_context():
     try:
-        # Create tables if they don't exist
+        # Create tables
         db.create_all()
         db.session.commit()
 
-        print("✅ Database tables created successfully!")
+        # Reset all sequences for all tables
+        reset_sequences_sql = text("""
+        DO $$
+        DECLARE
+            seq_record RECORD;
+        BEGIN
+            FOR seq_record IN
+                SELECT 
+                    c.relname AS sequence_name,
+                    t.relname AS table_name,
+                    a.attname AS column_name
+                FROM pg_class c
+                JOIN pg_depend d ON d.objid = c.oid
+                JOIN pg_class t ON t.oid = d.refobjid
+                JOIN pg_attribute a ON a.attrelid = t.oid AND a.attnum = d.refobjsubid
+                WHERE c.relkind = 'S'
+            LOOP
+                EXECUTE format(
+                    'SELECT setval(''%I'', COALESCE((SELECT MAX(%I) FROM %I), 1))',
+                    seq_record.sequence_name,
+                    seq_record.column_name,
+                    seq_record.table_name
+                );
+            END LOOP;
+        END$$;
+        """)
+
+        db.session.execute(reset_sequences_sql)
+        db.session.commit()
+        print("✅ All sequences reset!")
 
         # Optional: initialize admin or other setup code
         initialize_admin_code()
 
-        print("✅ Initialization Done!")
+        print("Done!")
 
     except Exception as e:
         db.session.rollback()
