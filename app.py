@@ -1502,7 +1502,7 @@ in managing operations, automating tasks, and retrieving system intelligence.
 ────────────────────────────────────────────
 🎯 CORE PURPOSE
 ────────────────────────────────────────────
-To empower administrators and creators with real-time, accurate user and data insights, while efficiently handling management tasks—like announcements, assignments, deletions, and user account control.
+To empower administrators and creator with real-time, accurate user and data insights, while efficiently handling management tasks—like announcements, assignments, deletions, and user account control.
 ────────────────────────────────────────────
 🏗 SYSTEM ARCHITECTURE
 ────────────────────────────────────────────
@@ -1760,12 +1760,6 @@ EXAMPLE RESPONSE:
     {{"operation": "send_notification", "title": "New Announcement", "message": "Check the new exam schedule announcement"}}
   ],
   "data_sources": ["announcements", "users"]
-}}
-
-EXAMPLE OF USER INFORMATION RESPONSE:
-{{
-  "response": "id: 1024\nusername: johndoe\nmobile: 0712345678\nis_admin: false\nstatus: active\ncreated_at: 2025-09-15T10:32:00Z\ntotal_announcements: 5\ntotal_assignments: 12\ntotal_messages: 47\ntotal_files: 8",
-  "data_sources": ["users"]
 }}
 
 """
