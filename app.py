@@ -864,13 +864,22 @@ def login():
     next_page = request.args.get("next") or request.form.get("next")
     login_type = request.form.get('login_type', 'student')  # 'student' or 'admin'
 
+    from flask import make_response
     if current_user.is_authenticated:
         if current_user.is_admin:
             print("Session Restored for Admin: ", current_user.id)
-            return redirect(url_for('admin_page'))
+            target = url_for('admin_page')
         else:
             print("Session Restored for Student: ", current_user.id)
-            return redirect(url_for('main_page'))
+            target = url_for('main_page')
+
+        # Side-effects
+        resp = make_response(redirect(target))
+        resp.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+        resp.headers['Pragma'] = 'no-cache'
+        resp.headers['Expires'] = '0'
+        return resp
+
         
     # ===============================
     #  LOGIN FORM HANDLING
