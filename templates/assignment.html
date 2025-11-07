@@ -218,6 +218,7 @@
                 <div class="flex justify-between items-start mb-4 ">
                     <h2 class="text-2xl font-bold">{{ assignment.title }}</h2>
                     {% set today = now %}
+                    {% set three_days = three_days %}
                     <span class="status-badge
                         {% if assignment.due_date < today %}status-overdue
                         {% elif assignment.due_date <= three_days %}status-due-soon
