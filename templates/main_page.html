@@ -2295,116 +2295,266 @@
           });
         });
     </script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const button = document.getElementById('robot-button');
-            let isDragging = false;
-            let currentX;
-            let currentY;
-            let initialX;
-            let initialY;
-            let xOffset = 0;
-            let yOffset = 0;
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const button = document.getElementById('robot-button');
+        let isDragging = false;
+        let currentX;
+        let currentY;
+        let initialX;
+        let initialY;
+        let xOffset = 0;
+        let yOffset = 0;
 
-            // Set initial position
-            button.style.left = (window.innerWidth - button.offsetWidth - 20) + 'px';
-            button.style.top = (window.innerHeight - button.offsetHeight - 20) + 'px';
+        // Set initial position
+        button.style.left = (window.innerWidth - button.offsetWidth - 20) + 'px';
+        button.style.top = (window.innerHeight - button.offsetHeight - 20) + 'px';
 
-            button.addEventListener('mousedown', dragStart);
-            button.addEventListener('touchstart', dragStart);
-            document.addEventListener('mousemove', drag);
-            document.addEventListener('touchmove', drag);
-            document.addEventListener('mouseup', dragEnd);
-            document.addEventListener('touchend', dragEnd);
-            button.addEventListener('click', handleClick);
+        // Create modal
+        createModal();
 
-            function dragStart(e) {
-                if (e.type === 'touchstart') {
-                    initialX = e.touches[0].clientX - xOffset;
-                    initialY = e.touches[0].clientY - yOffset;
+        button.addEventListener('mousedown', dragStart);
+        button.addEventListener('touchstart', dragStart);
+        document.addEventListener('mousemove', drag);
+        document.addEventListener('touchmove', drag);
+        document.addEventListener('mouseup', dragEnd);
+        document.addEventListener('touchend', dragEnd);
+        button.addEventListener('click', handleClick);
+
+        function dragStart(e) {
+            if (e.type === 'touchstart') {
+                initialX = e.touches[0].clientX - xOffset;
+                initialY = e.touches[0].clientY - yOffset;
+            } else {
+                initialX = e.clientX - xOffset;
+                initialY = e.clientY - yOffset;
+            }
+
+            if (e.target === button || e.target.parentNode === button) {
+                isDragging = true;
+                button.style.cursor = 'grabbing';
+            }
+        }
+
+        function drag(e) {
+            if (isDragging) {
+                e.preventDefault();
+
+                if (e.type === 'touchmove') {
+                    currentX = e.touches[0].clientX - initialX;
+                    currentY = e.touches[0].clientY - initialY;
                 } else {
-                    initialX = e.clientX - xOffset;
-                    initialY = e.clientY - yOffset;
+                    currentX = e.clientX - initialX;
+                    currentY = e.clientY - initialY;
                 }
 
-                if (e.target === button || e.target.parentNode === button) {
-                    isDragging = true;
-                    button.style.cursor = 'grabbing';
+                xOffset = currentX;
+                yOffset = currentY;
+
+                setTranslate(currentX, currentY, button);
+            }
+        }
+
+        function setTranslate(xPos, yPos, el) {
+            el.style.transform = `translate3d(${xPos}px, ${yPos}px, 0)`;
+        }
+
+        function dragEnd() {
+            initialX = currentX;
+            initialY = currentY;
+            isDragging = false;
+            button.style.cursor = 'grab';
+        }
+
+        function handleClick(e) {
+            // Only trigger if not dragging (to prevent click after drag)
+            if (!isDragging) {
+                // Add animation class
+                button.classList.add('pulse');
+                button.innerHTML = '<i class="fas fa-spinner fa-spin m-auto"></i>';
+
+                // Remove animation class after animation completes
+                setTimeout(() => {
+                    button.classList.remove('pulse');
+                    button.innerHTML = '<i class="fas fa-robot"></i>';
+                    
+                    // Show modal instead of navigating directly
+                    const modal = document.querySelector('.modal-backdrop');
+                    modal.style.display = 'flex';
+                }, 1000);
+            }
+        }
+
+        function createModal() {
+            // Create modal backdrop
+            const modalBackdrop = document.createElement('div');
+            modalBackdrop.className = 'modal-backdrop';
+            modalBackdrop.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.5);
+                display: none;
+                justify-content: center;
+                align-items: center;
+                z-index: 1000;
+            `;
+
+            // Create modal content
+            const modalContent = document.createElement('div');
+            modalContent.className = 'modal-content';
+            modalContent.style.cssText = `
+                background: rgba(30, 41, 59, 0.8);
+                padding: 30px;
+                border-radius: 12px;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+                max-width: 400px;
+                width: 90%;
+                text-align: center;
+                border: 1px solid lightblue;
+            `;
+
+            // Create modal header
+            const modalHeader = document.createElement('h2');
+            modalHeader.textContent = 'Choose AI';
+            modalHeader.style.cssText = `
+                margin-bottom: 25px;
+                color: #3b82f6;
+                font-size: 24px;
+                font-weight: 700;
+                text-decoration: underline;
+                text-underline-offset: 6;
+            `;
+
+            // Create buttons container
+            const buttonsContainer = document.createElement('div');
+            buttonsContainer.style.cssText = `
+                display: flex;
+                flex-direction: column;
+                gap: 15px;
+            `;
+
+            // Create Marion AI button
+            const marionButton = document.createElement('button');
+            marionButton.innerHTML = '<i class="fas fa-robot"></i> Marion AI Assistant';
+            marionButton.style.cssText = `
+                padding: 15px 20px;
+                background: linear-gradient(135deg, #667eea, #764ba2);
+                color: white;
+                border: none;
+                border-radius: 8px;
+                font-size: 16px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 10px;
+            `;
+            marionButton.onmouseover = () => marionButton.style.transform = 'translateY(-2px)';
+            marionButton.onmouseout = () => marionButton.style.transform = 'translateY(0)';
+            marionButton.onclick = () => {
+                window.location.href = '/gemini';
+            };
+
+            // Create Nova Quiz button
+            const novaButton = document.createElement('button');
+            novaButton.innerHTML = '<i class="fas fa-question-circle"></i> Nova Quiz Generator';
+            novaButton.style.cssText = `
+                padding: 15px 20px;
+                background: linear-gradient(135deg, #f093fb, #f5576c);
+                color: white;
+                border: none;
+                border-radius: 8px;
+                font-size: 16px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 10px;
+            `;
+            novaButton.onmouseover = () => novaButton.style.transform = 'translateY(-2px)';
+            novaButton.onmouseout = () => novaButton.style.transform = 'translateY(0)';
+            novaButton.onclick = () => {
+                window.location.href = '/quiz';
+            };
+
+            // Create close button
+            const closeButton = document.createElement('button');
+            closeButton.textContent = 'Close';
+            closeButton.style.cssText = `
+                margin-top: 20px;
+                padding: 10px 20px;
+                background: #6c757d;
+                color: white;
+                border: none;
+                border-radius: 6px;
+                cursor: pointer;
+                transition: background 0.3s ease;
+            `;
+            closeButton.onmouseover = () => closeButton.style.background = '#5a6268';
+            closeButton.onmouseout = () => closeButton.style.background = '#6c757d';
+            closeButton.onclick = () => {
+                modalBackdrop.style.display = 'none';
+            };
+
+            // Assemble modal
+            buttonsContainer.appendChild(marionButton);
+            buttonsContainer.appendChild(novaButton);
+            modalContent.appendChild(modalHeader);
+            modalContent.appendChild(buttonsContainer);
+            modalContent.appendChild(closeButton);
+            modalBackdrop.appendChild(modalContent);
+            document.body.appendChild(modalBackdrop);
+
+            // Close modal when clicking outside
+            modalBackdrop.onclick = (e) => {
+                if (e.target === modalBackdrop) {
+                    modalBackdrop.style.display = 'none';
                 }
+            };
+        }
+
+        // Make button responsive to window resize
+        window.addEventListener('resize', function() {
+            // Keep the button in view if window is resized
+            const rect = button.getBoundingClientRect();
+
+            if (rect.right > window.innerWidth) {
+                button.style.left = (window.innerWidth - button.offsetWidth - 20) + 'px';
             }
 
-            function drag(e) {
-                if (isDragging) {
-                    e.preventDefault();
-
-                    if (e.type === 'touchmove') {
-                        currentX = e.touches[0].clientX - initialX;
-                        currentY = e.touches[0].clientY - initialY;
-                    } else {
-                        currentX = e.clientX - initialX;
-                        currentY = e.clientY - initialY;
-                    }
-
-                    xOffset = currentX;
-                    yOffset = currentY;
-
-                    setTranslate(currentX, currentY, button);
-                }
+            if (rect.bottom > window.innerHeight) {
+                button.style.top = (window.innerHeight - button.offsetHeight - 20) + 'px';
             }
 
-            function setTranslate(xPos, yPos, el) {
-                el.style.transform = `translate3d(${xPos}px, ${yPos}px, 0)`;
+            if (rect.left < 0) {
+                button.style.left = '20px';
             }
 
-            function dragEnd() {
-                initialX = currentX;
-                initialY = currentY;
-                isDragging = false;
-                button.style.cursor = 'grab';
+            if (rect.top < 0) {
+                button.style.top = '20px';
             }
-
-            function handleClick(e) {
-                // Only trigger if not dragging (to prevent click after drag)
-                if (!isDragging) {
-                    // Add animation class
-                    button.classList.add('pulse');
-                    button.innerHTML = '<i class="fas fa-spinner fa-spin m-auto"></i>';
-
-                    // Remove animation class after animation completes
-                    setTimeout(() => {
-                        button.classList.remove('pulse');
-                        button.innerHTML = '<i class="fas fa-robot"></i>';
-                    }, 1000);
-
-                    // Navigate to /gemini after animation
-                    setTimeout(() => {
-                        window.location.href = '/gemini';
-                    }, 600);
-                }
-            }
-
-            // Make button responsive to window resize
-            window.addEventListener('resize', function() {
-                // Keep the button in view if window is resized
-                const rect = button.getBoundingClientRect();
-
-                if (rect.right > window.innerWidth) {
-                    button.style.left = (window.innerWidth - button.offsetWidth - 20) + 'px';
-                }
-
-                if (rect.bottom > window.innerHeight) {
-                    button.style.top = (window.innerHeight - button.offsetHeight - 20) + 'px';
-                }
-
-                if (rect.left < 0) {
-                    button.style.left = '20px';
-                }
-
-                if (rect.top < 0) {
-                    button.style.top = '20px';
-                }
-            });
         });
-    </script>    
+
+        // Add CSS for pulse animation
+        const style = document.createElement('style');
+        style.textContent = `
+            .pulse {
+                animation: pulse 0.5s ease-in-out;
+            }
+            
+            @keyframes pulse {
+                0% { transform: scale(1); }
+                50% { transform: scale(1.1); }
+                100% { transform: scale(1); }
+            }
+        `;
+        document.head.appendChild(style);
+    });
+</script>    
 </body>
 </html>

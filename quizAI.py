@@ -1,0 +1,186 @@
+# guizAI.py
+from flask import Flask, request, jsonify, render_template, Blueprint
+import google.generativeai as genai
+import os
+import json
+
+_quiz_AI = Blueprint('quizAI', __name__, url_prefix='/quiz')
+
+class QuizGenerator:
+    def __init__(self):
+        self.api_keys = [
+            'AIzaSyA3o8aKHTnVzuW9-qg10KjNy7Lcgn19N2I',
+            'AIzaSyCq8-xrPTC40k8E_i3vXZ_-PR6RiPsuOno'
+        ]
+        self.current_key_index = 0
+        self.model_name = "gemini-2.5-flash-lite"
+        self.setup_genai()
+    
+    def setup_genai(self):
+        """Configure Gemini AI with current API key"""
+        current_key = self.api_keys[self.current_key_index]
+        if current_key and current_key != 'your_fallback_key_here':
+            genai.configure(api_key=current_key)
+        else:
+            print("Warning: Using fallback mode - no valid API keys found")
+    
+    def switch_api_key(self):
+        """Switch to next API key if available"""
+        self.current_key_index = (self.current_key_index + 1) % len(self.api_keys)
+        self.setup_genai()
+    
+    def generate_quiz_stream(self, topic, num_questions=5, difficulty="Medium", style="Multiple Choice"):
+        """Generate quiz using Gemini AI"""
+        try:
+            if self.api_keys[0] == '':
+                return self._create_fallback_quiz(num_questions)
+            
+            model = genai.GenerativeModel(self.model_name)
+            prompt = self._build_prompt(topic, num_questions, difficulty, style)
+            
+            response = model.generate_content(
+                prompt,
+                generation_config=genai.types.GenerationConfig(
+                    temperature=0.7,
+                    max_output_tokens=2000,
+                )
+            )
+            
+            return self._parse_response(response.text)
+            
+        except Exception as e:
+            print(f"API Error: {e}")
+            # Try switching API key on error, or return fallback
+            self.switch_api_key()
+            return self._create_fallback_quiz(num_questions)
+    
+    def _build_prompt(self, topic, num_questions, difficulty, style):
+        """Build the prompt for quiz generation"""
+        return f"""
+        Generate exactly {num_questions} {style.lower()} questions about: "{topic}"
+        Difficulty: {difficulty}
+        
+        Return ONLY valid JSON in this exact format:
+        [
+          {{
+            "question": "Question text here",
+            "options": ["Option1", "Option2", "Option3", "Option4"],
+            "correct": "Correct answer text",
+            "explanation": "Brief explanation"
+          }}
+        ]
+        
+        Important:
+        You are an intelligent academic topic evaluator within LyxNexus — a learning and collaboration hub designed for structured educational use.
+        - For True/False: use options ["True", "False"]
+        - For Fill-in-the-Blank: include "correct" with exact expected answer
+        - Ensure ALL questions have all required fields
+        - Return ONLY the JSON array, no other text
+
+        Your responsibility:
+        Determine whether the given topic is academic or school-related. An educational topic refers to any subject or theme that could logically belong in a formal learning environment, such as a classroom, college, university, or academic curriculum.
+
+        Educational topics typically fall under categories like:
+        - Science (Physics, Chemistry, Biology, Environmental Studies)
+        - Technology (Computer Science, AI, Robotics, Data Structures)
+        - Mathematics (Algebra, Calculus, Statistics)
+        - Humanities (History, Philosophy, Literature, Psychology)
+        - Social Sciences (Economics, Political Science, Sociology)
+        - Languages and Communication (English, Linguistics, Grammar, communication skills)
+        - Professional Studies (Engineering, Business, Education, Medicine)
+
+        A non-educational topic includes:
+        - Entertainment, media, and pop culture (movies, celebrities, music)
+        - Internet trends or memes
+        - Sports and games (unless being studied academically, e.g., sports science)
+        - Personal or informal lifestyle topics
+
+        Carefully analyze the provided topic.  
+        If it can reasonably be studied, taught, or analyzed in an academic context, classify it as educational.  
+        If it primarily belongs to casual, entertainment, or social contexts, classify it as non-educational.
+
+        """
+    
+    def _parse_response(self, response_text):
+        """Parse and validate the AI response"""
+        try:
+            
+            cleaned_text = response_text.strip()
+            if '```json' in cleaned_text:
+                cleaned_text = cleaned_text.split('```json')[1].split('```')[0]
+            elif '```' in cleaned_text:
+                cleaned_text = cleaned_text.split('```')[1]
+            
+            quiz_data = json.loads(cleaned_text)
+            
+            if not isinstance(quiz_data, list):
+                raise ValueError("Expected list of questions")
+            
+            for question in quiz_data:
+                if not all(key in question for key in ['question', 'correct']):
+                    raise ValueError("Missing required fields in question")
+                if 'options' not in question:
+                    question['options'] = []
+            
+            return quiz_data
+            
+        except (json.JSONDecodeError, ValueError) as e:
+            print(f"Parse error: {e}, Response: {response_text[:200]}...")
+            return self._create_fallback_quiz(3)
+    
+    def _create_fallback_quiz(self, num_questions=3):
+        """Create a fallback quiz when AI fails"""
+        fallback_questions = [
+            {
+                "question": "What is the capital of France?",
+                "options": ["London", "Berlin", "Paris", "Madrid"],
+                "correct": "Paris",
+                "explanation": "Paris is the capital and most populous city of France."
+            },
+            {
+                "question": "Which planet is known as the Red Planet?",
+                "options": ["Venus", "Mars", "Jupiter", "Saturn"],
+                "correct": "Mars",
+                "explanation": "Mars _quiz_AIears red due to iron oxide (rust) on its surface."
+            },
+            {
+                "question": "What is 2 + 2?",
+                "options": ["3", "4", "5", "6"],
+                "correct": "4",
+                "explanation": "Basic arithmetic: 2 + 2 = 4"
+            }
+        ]
+        return fallback_questions[:num_questions]
+
+quiz_gen = QuizGenerator()
+
+@_quiz_AI.route('/generate-quiz', methods=['POST'])
+def generate_quiz():
+    """Endpoint to generate quiz"""
+    try:
+        data = request.json
+        topic = data.get('topic', '')
+        num_questions = data.get('num_questions', 5)
+        difficulty = data.get('difficulty', 'Medium')
+        style = data.get('style', 'Multiple Choice')
+        
+        if not topic:
+            return jsonify({'error': 'Topic is required'}), 400
+        
+        quiz_data = quiz_gen.generate_quiz_stream(
+            topic, num_questions, difficulty, style
+        )
+        
+        return jsonify({'quiz': quiz_data})
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@_quiz_AI.route('/')
+def quiz():
+    return render_template('quizAI.html')
+
+@_quiz_AI.route('/health', methods=['GET'])
+def health_check():
+    """Health check endpoint"""
+    return jsonify({'status': 'healthy', 'service': 'Quiz Generator API'})
