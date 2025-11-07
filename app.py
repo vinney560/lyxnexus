@@ -863,27 +863,6 @@ def secret_code():
 def login():
     next_page = request.args.get("next") or request.form.get("next")
     login_type = request.form.get('login_type', 'student')  # 'student' or 'admin'
-
-    from threading import Thread
-    from flask import make_response, redirect, url_for
-
-    if current_user.is_authenticated:
-        # Decide redirect
-        target = url_for('admin_page') if current_user.is_admin else url_for('main_page')
-
-        # Run login-specific post-redirect tasks in the background
-        def do_login_tasks(user_id):
-            # Logging, analytics, etc.
-            print("Post-login tasks for user", user_id)
-
-        Thread(target=do_login_tasks, args=(current_user.id,)).start()
-
-        # Send redirect with no-cache headers
-        resp = make_response(redirect(target))
-        resp.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
-        resp.headers['Pragma'] = 'no-cache'
-        resp.headers['Expires'] = '0'
-        return resp
         
     # ===============================
     #  LOGIN FORM HANDLING
@@ -2648,6 +2627,27 @@ def ai_assistant():
 #=======================================================================================================
 @app.route('/')
 def home():
+    from threading import Thread
+    from flask import make_response, redirect, url_for
+
+    if current_user.is_authenticated:
+        # Decide redirect
+        target = url_for('admin_page') if current_user.is_admin else url_for('main_page')
+
+        # Run login-specific post-redirect tasks in the background
+        def do_login_tasks(user_id):
+            # Logging, analytics, etc.
+            print("Post-login tasks for user", user_id)
+
+        Thread(target=do_login_tasks, args=(current_user.id,)).start()
+
+        # Send redirect with no-cache headers
+        resp = make_response(redirect(target))
+        resp.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+        resp.headers['Pragma'] = 'no-cache'
+        resp.headers['Expires'] = '0'
+        return resp
+
     return render_template('index.html', year=_year())
 #--------------------------------------------------------------------
 @app.route('/terms')
@@ -2664,7 +2664,7 @@ def logout():
     flash('Logout Successfully!', 'success')
     return redirect(url_for('home'))
 #--------------------------------------------------------------------
-@app.route('/main_page')
+@app.route('/main-page')
 @login_required
 def main_page():
     if not session.get('authenticated'):
