@@ -1184,5 +1184,34 @@
             console.log('Page initialization complete');
         });
     </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const forms = ['student-login-form', 'admin-login-form', 'master-key-form'];
+        
+            forms.forEach((id) => {
+                const form = document.getElementById(id);
+                if (!form) return;
+            
+                form.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                
+                    try {
+                        const response = await fetch(form.action || '/login', {
+                            method: form.method || 'POST',
+                            body: new FormData(form),
+                            redirect: 'follow'
+                        });
+                    
+                        if (response.redirected) {
+                            window.location.href = response.url;
+                        }
+                    } catch (err) {
+                        console.error('Login fetch failed, falling back to normal submit', err);
+                        form.submit();
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 </html>

@@ -4,6 +4,7 @@ const OFFLINE_URL = '/offline.html';
 
 const STATIC_ASSETS = [
   '/',
+  '/login',
   '/main_page',
   '/offline.html',
   '/uploads/favicon-1.png',
