@@ -483,7 +483,7 @@ with app.app_context():
 
         print("✅ Database tables created successfully!")
 
-        # Optional: initialize admin or other setup code
+        # initialize admin or other setup code
         initialize_admin_code()
 
         print("✅ Initialization Done!")
