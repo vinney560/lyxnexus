@@ -864,22 +864,26 @@ def login():
     next_page = request.args.get("next") or request.form.get("next")
     login_type = request.form.get('login_type', 'student')  # 'student' or 'admin'
 
-    from flask import make_response
-    if current_user.is_authenticated:
-        if current_user.is_admin:
-            print("Session Restored for Admin: ", current_user.id)
-            target = url_for('admin_page')
-        else:
-            print("Session Restored for Student: ", current_user.id)
-            target = url_for('main_page')
+    from threading import Thread
+    from flask import make_response, redirect, url_for
 
-        # Side-effects
+    if current_user.is_authenticated:
+        # Decide redirect
+        target = url_for('admin_page') if current_user.is_admin else url_for('main_page')
+
+        # Run login-specific post-redirect tasks in the background
+        def do_login_tasks(user_id):
+            # Logging, analytics, etc.
+            print("Post-login tasks for user", user_id)
+
+        Thread(target=do_login_tasks, args=(current_user.id,)).start()
+
+        # Send redirect with no-cache headers
         resp = make_response(redirect(target))
         resp.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
         resp.headers['Pragma'] = 'no-cache'
         resp.headers['Expires'] = '0'
         return resp
-
         
     # ===============================
     #  LOGIN FORM HANDLING
