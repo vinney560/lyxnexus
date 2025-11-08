@@ -1205,13 +1205,15 @@
         let currentActiveSection = localStorage.getItem('activeSection') || 'announcements';
         
         let repeatCount = 0;
-        const maxRepeats = 4;
+        const maxRepeats = 7;
 
         const typed = new Typed('#announceH', {
             strings: ['Latest Announcements'],
             typeSpeed: 80,
             backSpeed: 60,
-            backDelay: 40,
+            startDelay: 1000,
+            backDelay: 100000,
+            smartBackspace: true,
             loop: false, // no infinite loop
             onComplete: function(self) {
                 repeatCount++;
@@ -1672,8 +1674,10 @@
             document.getElementById('detail-type').className = currentUser.is_admin ? 
                 'font-medium bg-purple-500 text-white px-2 py-1 rounded-full text-xs' : 
                 'font-medium bg-blue-500 text-white px-2 py-1 rounded-full text-xs';
-            document.getElementById('detail-status').textContent = currentUser.status ? 'Allowed' : 'Banned';                
-            document.getElementById('detail-status').className = currentUser.status ?
+
+            const Userstatus = {{ current_user.status|tojson }};
+            document.getElementById('detail-status').textContent = Userstatus ? 'Allowed' : 'Banned';                
+            document.getElementById('detail-status').className = Userstatus ?
                 'font-medium bg-blue-500 text-white px-2 py-1 rounded-full text-xs' :
                 'font-medium bg-purple-500 text-white px-2 py-1 rounded-full text-xs';
         }
