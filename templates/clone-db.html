@@ -602,8 +602,8 @@
                         <button id="clone-db-btn" class="btn btn-success px-8 py-3">
                             <i class="fas fa-copy mr-2"></i> Clone Database Now
                         </button>
-                        <button id="switch-db-btn" class="btn btn-success px-8 py-3">
-                            <i class="fas fa-copy mr-2"></i> Switch Database
+                        <button id="switch-db-btn" class="btn btn-success px-8 py-3" onclick="fixSequences()">
+                            <i class="fas fa-copy mr-2"></i> Fix Database
                         </button>
                         <a href="{{ url_for('admin_page') }}" class="btn-outline px-8 py-3">
                             <i class="fas fa-arrow-left mr-2"></i> Back to Dashboard
@@ -859,6 +859,57 @@
                 showToast('Database cloning page loaded successfully', 'info', 'Ready');
             }, 1000);
         });
+    </script>
+    <script>
+        async function fixSequences() {
+            const btn = document.getElementById("switch-db-btn");
+            const originalText = btn.innerHTML;
+        
+            try {
+                // Indicate loading
+                btn.disabled = true;
+                btn.innerHTML = `<i class="fas fa-spinner fa-spin mr-2"></i> Fixing...`;
+                btn.classList.remove("btn-success", "btn-danger");
+                btn.classList.add("btn-warning");
+            
+                const response = await fetch("/db/fix-sequences", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" }
+                });
+            
+                const data = await response.json();
+            
+                if (response.ok) {
+                    // Success state
+                    showToast(data.message, 'success', 'Database Fixed');
+                    btn.innerHTML = `<i class="fas fa-check mr-2"></i> Fixed! (${data.fixed.length})`;
+                    btn.classList.remove("btn-warning");
+                    btn.classList.add("btn-success");
+                
+                    // Revert back after 2 seconds
+                    setTimeout(() => {
+                        btn.innerHTML = originalText;
+                        btn.disabled = false;
+                        btn.classList.remove("btn-success");
+                        btn.classList.add("btn-success");
+                    }, 2000);
+                } else {
+                    // Error state
+                    btn.innerHTML = `<i class="fas fa-exclamation-triangle mr-2"></i> Error!`;
+                    btn.classList.remove("btn-warning");
+                    btn.classList.add("btn-danger");
+                    btn.disabled = false;
+                }
+            } catch (error) {
+                showToast(error.message, 'error', 'Database Cloning Error');
+                // Network or unexpected error
+                btn.innerHTML = `<i class="fas fa-exclamation-triangle mr-2"></i> Failed!`;
+                btn.classList.remove("btn-warning");
+                btn.classList.add("btn-danger");
+                btn.disabled = false;
+                console.error("Request failed:", error);
+            }
+        }
     </script>
 </body>
 </html>

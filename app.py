@@ -2636,12 +2636,14 @@ def get_related_items(model_name, item_id, relation_name):
 """Gemini_bp Blueprint registering"""
 from gemini_bp import gemini_bp
 from quizAI import _quiz_AI
+from db_fix import db_tools
 from test import test_routes
 from chloe import _chloe_ai
 
 # Register the blueprint
 app.register_blueprint(gemini_bp)
 app.register_blueprint(_quiz_AI)
+app.register_blueprint(db_tools)
 app.register_blueprint(test_routes)
 app.register_blueprint(_chloe_ai)
 #========================================================================
