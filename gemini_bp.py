@@ -152,6 +152,7 @@ class AIConversationService:
             print(f"Error getting conversation stats: {e}")
             return {}
     
+    """Not yet implemented --> Don't Know how to do it"""
     def update_conversation_rating(self, conversation_id, user_id, rating):
         """Update user rating for a conversation"""
         try:
@@ -190,7 +191,7 @@ class AIConversationService:
 class ReadOnlyDatabaseQueryService:
     """
     Read-only version of DatabaseQueryService for user access
-    Only allows SELECT queries and safe operations
+    Only allows SELECT queries and safe operations --> Since its Student BAsed AI
     """
     
     def __init__(self, db_session):

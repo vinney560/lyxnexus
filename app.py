@@ -9,25 +9,25 @@ import os
 from flask import Flask, jsonify, request, abort, send_from_directory, render_template, redirect, url_for, flash, session
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from flask import jsonify, request, send_file
-from io import BytesIO
+from io import BytesIO # For file handling & Download
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import create_engine
 from sqlalchemy.exc import OperationalError, ArgumentError
 from sqlalchemy.orm import sessionmaker
-from flask_cors import CORS
+from flask_cors import CORS # Prevent API's Access (Cross Origin Restrictions) --> NOt used
 from datetime import timedelta, datetime, date
-from flask_compress import Compress
-from dotenv import load_dotenv
+from flask_compress import Compress # I think for more speed
+from dotenv import load_dotenv # Loads environments where keys are safly stored 
 import traceback
-import logging
-import re
-from flask_jwt_extended import JWTManager
-from functools import wraps
-from bs4 import BeautifulSoup
-from flask_session import Session
-from flask_limiter import Limiter
-from flask_limiter.util import get_remote_address
-from pywebpush import webpush, WebPushException
+import logging # For under the Hood Error showing
+import re # Handle large texts
+from flask_jwt_extended import JWTManager # Not used for now
+from functools import wraps # Wraps a function to a decorator
+from bs4 import BeautifulSoup # HTTP Response
+from flask_session import Session # Short term In-SYstem Memory keeping
+from flask_limiter import Limiter # Prevent Brute Force Attack
+from flask_limiter.util import get_remote_address # Efficient Block of Specific IP 
+from pywebpush import webpush, WebPushException # CHrome Notification Push Module
 #==========================================
 
 app = Flask(__name__)
@@ -35,6 +35,7 @@ load_dotenv()
 
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 
+"""Choose the active or reachable Database"""
 def database_url():
     db_1 = os.getenv('DATABASE_URL')
     db_2 = os.getenv('DATABASE_URL_2')
@@ -80,6 +81,7 @@ app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY", "4321REWQ")
+# For only Our Server to access our Utils and API's
 CORS(app, resources={
     r'/*': {
         'origins': [
@@ -90,6 +92,7 @@ CORS(app, resources={
     }
 })
 
+# Start Logging process for all Processess made --> easy retrieval and 'debug'
 app.logger.setLevel(logging.INFO)
 
 # Setup logging
@@ -102,9 +105,11 @@ logging.basicConfig(
     ]
 )
 
+# For Now we use Filesystem --> this is what i know how to use
 app.config["SESSION_TYPE"] = "filesystem"
 UPLOAD_FOLDER = os.path.join(app.root_path, 'uploads')
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER # Where to save files --> We moved to DB saving
+
 # --- Push Notification Configuration ---
 VAPID_PUBLIC_KEY = "BEk4C5_aQbjOMkvGYk4OFZMyMAInUdVP6oAFs9kAd7Gx3iog2UF4ZLwdQ8GmB0-i61FANGD6D0TCHsFYVOA45OQ";
 VAPID_PRIVATE_KEY = "42FlV4n_SjaTAcJnUcCi8bDrVEwX_8YCFJiCzAOhngw"
@@ -137,12 +142,13 @@ login_manager.login_view = 'login'
 login_manager.session_protection = "strong"  # Extra security
 login_manager.refresh_view = 'login'
 
-jwt = JWTManager(app)
+jwt = JWTManager(app) # Initialized but domant
 Compress(app)
-socketio = SocketIO(app, cors_allowed_origins="*", async_mode="eventlet", ping_timeout=20, ping_interval=10)
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode="eventlet", ping_timeout=20, ping_interval=10) # because we are using socketIO for messaging and it must run on its on
 db = SQLAlchemy(app)
 Session(app)
 
+"""Format to Nairobi BAsed Time UTC + 3"""
 def nairobi_time():
     return (datetime.utcnow() + timedelta(hours=3)).strftime('%Y-%m-%d %H:%M:%S')
 
@@ -438,6 +444,7 @@ class AdminCode(db.Model):
     user = db.relationship('User', backref=db.backref('admin_codes', lazy=True))
 
 #=========================================
+# This are devices and Users registed to the PUSh Not.. We can Push to Id if no device to recieve
 class PushSubscription(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -456,7 +463,8 @@ class PushSubscription(db.Model):
             "keys": {"p256dh": self.p256dh, "auth": self.auth}
         }
     
-#==========================================    
+#==========================================  
+# Master key for Admin Access  
 def initialize_admin_code():
     """Initialize the admin code system if no code exists"""
     admin_code_record = AdminCode.query.first()
@@ -475,6 +483,7 @@ def initialize_admin_code():
 #db.session.execute(text('ALTER TABLE "user" ADD COLUMN status BOOLEAN DEFAULT TRUE'))
 #db.session.commit()
 
+"""Initialize the creation of database and any SQL Operations"""
 with app.app_context():
     try:
         # Create tables if they don't exist
@@ -495,7 +504,7 @@ with app.app_context():
 #========================================
 #          HELPERS && BACKGROUND WORKERS
 #==========================================
-# User Loader Helper
+# User Loader Helper (LOads users from DB --> I dont know why!!)
 @login_manager.user_loader
 def load_user(user_id):
     try:
@@ -507,6 +516,7 @@ def load_user(user_id):
         db.session.rollback()
         return None
 
+"""If error occur on user Loader, we rollback the db(Restart and clean it)"""
 @app.teardown_request
 def teardown_request(exception):
     if exception:
@@ -526,7 +536,7 @@ def ignore_bad_fd(record):
 
 logging.getLogger().addFilter(ignore_bad_fd)
 
-# Function to clean old data for user vsits(> a day)
+"""Function to clean old data for user vsits(> a day)"""
 def cleanup_old_visits():
     """Delete visits older than 24 hours"""
     cutoff_time = datetime.utcnow() - timedelta(hours=24)
@@ -548,6 +558,7 @@ def send_notification(user_id, title, message):
 
     socketio.emit('push_notification', notification_data, room=f'user_{user_id}')
 
+# Keeps Admin Level Phases Admins Only Access (Authorisation in Action)
 def admin_required(f):
     @wraps(f)
     def decorator(*args, **kwargs):
@@ -566,6 +577,8 @@ def admin_required(f):
 #------------------------------------------------------------------------------
                                  # BACKGROUND WORKERS
 
+
+"""THIS CLONES DATABASE_URL TO DATABASE_RUL_2"""
 from sqlalchemy import create_engine, MetaData, Table, select, text
 from sqlalchemy_utils import database_exists, create_database, drop_database
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -606,12 +619,14 @@ def clone_database_robust():
                 offset += BATCH_SIZE
             print(f"✅ Done: {table.name}")
 
+# Frontend accesss to CLone feature
 @app.route("/admin/clone-db")
 @admin_required
 def clone_db_page():
     """Render the database cloning page"""
     return render_template("clone-db.html", year=_year())
 
+# API Access to DB Clone Feature
 @app.route("/api/admin/clone-db", methods=["POST"])
 @admin_required
 def clone_db_route():
@@ -621,9 +636,9 @@ def clone_db_route():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
-# ============================================================
-#  Database Keep-Alive 'n Status Logging
-# ============================================================
+# =======================================================================
+#  Database Keep-Alive 'n Status Logging --> Prevent Aiven's Deactivation
+# =======================================================================
 
 SRC_DB_URL = os.getenv("DATABASE_URL")
 TGT_DB_URL = os.getenv("DATABASE_URL_2")
@@ -650,6 +665,7 @@ def log_status(message: str):
     with open(LOG_FILE, "a", encoding="utf-8") as f:
         f.write(line)
 
+"""ACtual Funtion To be Called"""
 def keep_databases_alive():
     for name, engine in [("Source", src_engine), ("Target", tgt_engine)]:
         try:
@@ -661,7 +677,7 @@ def keep_databases_alive():
         except Exception as e:
             log_status(f"❌ Unexpected error pinging {name} DB: {e}")
 
-# Scheduler setup
+# Scheduler setup --> Background Ping/Keep Alive
 scheduler = BackgroundScheduler()
 scheduler.add_job(
     func=keep_databases_alive,
@@ -674,7 +690,9 @@ scheduler.start()
 
 log_status("Keep-alive scheduler started — pinging both DBs every 3 minutes")
 atexit.register(lambda: scheduler.shutdown(wait=False))
-#-------------------------------------- Aiven max conn pool
+#------------------------------ Aiven max conn pool Close ------------
+
+"""Closes any Ideal Conn to prevent Max conn Limit"""
 def auto_close_sessions():
     print('=' * 70)
     start_time = datetime.utcnow()
@@ -753,7 +771,7 @@ def auto_close_sessions():
         print(f"❌ [{now}] Error during cleanup: {e}")
         print("#" * 70)
 
-# to prevent using diff thread --> work with main thread
+# to prevent using different thread --> work with main thread
 with app.app_context():
     try:
         scheduler = BackgroundScheduler()
@@ -777,6 +795,8 @@ with app.app_context():
 #      ANNOUNCEMENT CLEANER
 from datetime import datetime, timedelta
 
+
+"""CLeans Old Announcement on accordance of its life (Saves DB Storage)"""
 def delete_old_announcements():
     with app.app_context():
         now = datetime.utcnow() + timedelta(hours=3)
@@ -802,7 +822,7 @@ import atexit
 
 scheduler = BackgroundScheduler()
 
-# Add the cleanup job (runs every 24 hours)
+# Add the cleanup job (runs every 24 hours) --> Background Cleaning
 scheduler.add_job(
     func=delete_old_announcements,
     trigger=IntervalTrigger(days=1),
@@ -821,6 +841,7 @@ atexit.register(lambda: scheduler.shutdown(wait=False))
 #==========================================
 from werkzeug.security import generate_password_hash, check_password_hash
 
+"""ADMin To change the Master Key!!!"""
 @app.route('/admin/secret-code', methods=['GET', 'POST'])
 @login_required
 @admin_required
@@ -858,6 +879,8 @@ def secret_code():
     
     return render_template('admin_code.html')
 
+
+"""LOGIN USER BASED ON THE PROVIDED REQUIREMENTS"""
 @app.route('/login', methods=['POST', 'GET'])
 @limiter.limit("10 per minute")
 def login():
@@ -962,11 +985,11 @@ def login():
 import requests
 import json
 
+"""Admin LEVEL AI, Powerful AI in the Platform!!!"""
 @app.route('/ai-chat')
 @login_required
 @admin_required
 def ai_chat():
-    """Render the AI chat page"""
     return render_template('ai_chat.html', year=_year())
 
 # Update the AI chat send route to handle write operations
@@ -1130,7 +1153,7 @@ def execute_ai_database_operation(operation_type, operation_data, current_user):
                 return False, "Missing user_id in operation data.", None
 
             try:
-                # Construct full endpoint URL (assuming same domain)
+                # Construct full endpoint URL
                 delete_url = url_for('delete_user', user_id=user_id, _external=True)
                 response = requests.post(delete_url, headers={"Authorization": f"Bearer {current_user.id}"})
 
@@ -1655,6 +1678,7 @@ def get_recent_ai_conversations(user_id, limit=3):
     from sqlalchemy import desc
 
     try:
+        """To run on the main / Current App"""
         with current_app.app_context():
             recent_conversations = (
                 AIConversation.query.filter_by(user_id=user_id)
@@ -2609,7 +2633,7 @@ def get_related_items(model_name, item_id, relation_name):
     
     return jsonify(result)
 #========================================================================
-# Gemini_bp Blueprint registering
+"""Gemini_bp Blueprint registering"""
 from gemini_bp import gemini_bp
 from quizAI import _quiz_AI
 from test import test_routes
@@ -2668,6 +2692,7 @@ def main_page():
 def nav_guide():
     return render_template('navigation.html')
 #--------------------------------------------------------------------
+
 #--------------------------------------------------------------------
 @app.route('/admin')
 @login_required
@@ -2858,7 +2883,7 @@ def list_subscriptions():
 
 #------------------------------------------------------------------------
 
-#              SPECIFIED ROUTES
+#                 SPECIFIED ROUTES
 
 def format_message_time(created_at):
     now = datetime.now()

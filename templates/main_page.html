@@ -2418,7 +2418,7 @@
 
             // Create modal header
             const modalHeader = document.createElement('h2');
-            modalHeader.textContent = 'Choose AI';
+            modalHeader.textContent = 'CHOOSE AI TO ACCESS.';
             modalHeader.style.cssText = `
                 margin-bottom: 25px;
                 color: #3b82f6;
@@ -2456,7 +2456,21 @@
             marionButton.onmouseover = () => marionButton.style.transform = 'translateY(-2px)';
             marionButton.onmouseout = () => marionButton.style.transform = 'translateY(0)';
             marionButton.onclick = () => {
-                window.location.href = '/gemini';
+                marionButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Opening...';
+                setTimeout(() => {
+                    marionButton.style.opacity = '0.5';
+                    window.location.href = '/gemini';
+                }, 200);
+                setTimeout(() => {
+                    marionButton.style.opacity = '0';
+                }, 500);
+                setTimeout(() => {
+                    marionButton.style.opacity = '1';
+                    marionButton.innerHTML = '<i class="fas fa-robot"></i> Marion AI Assistant';
+                }, 1000);
+                setInterval(() => {
+                    window.location.href = '/gemini';
+                }, 1200);
             };
 
             // Create Nova Quiz button
@@ -2479,7 +2493,21 @@
             novaButton.onmouseover = () => novaButton.style.transform = 'translateY(-2px)';
             novaButton.onmouseout = () => novaButton.style.transform = 'translateY(0)';
             novaButton.onclick = () => {
-                window.location.href = '/quiz';
+                novaButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Opening...';
+                setTimeout(() => {
+                    novaButton.style.opacity = '0.5';
+                    window.location.href = '/quiz';
+                }, 200);
+                setTimeout(() => {
+                    novaButton.style.opacity = '0';
+                }, 500);
+                setTimeout(() => {
+                    novaButton.style.opacity = '1';
+                    novaButton.innerHTML = '<i class="fas fa-question-circle"></i> Nova Quiz Generator';
+                }, 1000);
+                setInterval(() => {
+                    window.location.href = '/quiz';
+                }, 1200);
             };
 
             // Create close button

@@ -605,6 +605,43 @@
         background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
         border: 1px solid rgba(59, 130, 246, 0.3);
     }
+
+    .nav-buttons-container {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 12px;
+        width: 100%;
+        justify-content: flex-end;
+    }
+
+    @media (max-width: 640px) {
+        .nav-buttons-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-areas: 
+                "ai help"
+                "back logout";
+            gap: 6px;
+        }
+
+        .nav-buttons-container .btn:nth-child(1) { grid-area: ai; }
+        .nav-buttons-container .btn:nth-child(2) { grid-area: help; }
+        .nav-buttons-container .btn:nth-child(3) { grid-area: back; }
+        .nav-buttons-container .btn:nth-child(4) { grid-area: logout; }
+
+        .nav-buttons-container .btn {
+            min-height: 44px;
+            font-size: 13px;
+            padding: 10px 12px;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .nav-buttons-container .btn i {
+            margin-right: 4px;
+        }
+    }    
 </style>
 <body>
 
@@ -616,28 +653,30 @@
                 <div class="flex items-center space-x-2">
                     <div class="logo-container">
                         <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
-                            <circle cx="9" cy="7" r="4"></circle>
-                            <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
-                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                        </svg>
+                            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                            <polyline points="7.5 4.21 12 6.81 16.5 4.21"></polyline>
+                            <polyline points="7.5 19.79 7.5 14.6 3 12"></polyline>
+                            <polyline points="21 12 16.5 14.6 16.5 19.79"></polyline>
+                            <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                            <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                        </svg>                        
                     </div>
                     <span class="text-xl sm:text-2xl font-bold gradient-text">User Management</span>
                 </div>
-                <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4 w-full sm:w-auto">
+                <div class="nav-buttons-container">
                     <button class="btn btn-ai" onclick="window.location.href='/ai-chat'">
-                        <i class="fas fa-robot mr-2"></i> User AI Help
+                        <i class="fas fa-robot mr-2"></i> AI Help
                     </button>
                     <button class="btn btn-info" onclick="window.location.href='/admin/analytics'">
-                        <i class="fas fa-chart-bar mr-2"></i> Analytics Dashboard
+                        <i class="fas fa-chart-bar mr-2"></i> Analytics
                     </button>
                     <button class="btn btn-secondary" onclick="window.location.href='/admin'">
-                        <i class="fas fa-arrow-left mr-2"></i> Back to Dashboard
+                        <i class="fas fa-arrow-left mr-2"></i> Back
                     </button>
                     <button class="btn btn-danger" onclick="logout()">
                         <i class="fas fa-sign-out-alt mr-2"></i> Logout
                     </button>
-                </div>
+                </div>                
             </div>
         </div>
     </nav>

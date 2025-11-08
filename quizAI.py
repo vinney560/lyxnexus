@@ -50,7 +50,7 @@ class QuizGenerator:
             
         except Exception as e:
             print(f"API Error: {e}")
-            # Try switching API key on error, or return fallback
+            # Try switching API key on error, or return fallback --> not included
             self.switch_api_key()
             return self._create_fallback_quiz(num_questions)
     
@@ -129,7 +129,7 @@ class QuizGenerator:
             return self._create_fallback_quiz(3)
     
     def _create_fallback_quiz(self, num_questions=3):
-        """Create a fallback quiz when AI fails"""
+        """Create a fallback quiz when AI fails or on error"""
         fallback_questions = [
             {
                 "question": "What is the capital of France?",
@@ -176,11 +176,16 @@ def generate_quiz():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+# Rendering the interface
 @_quiz_AI.route('/')
 def quiz():
     return render_template('quizAI.html')
 
+# Test connection btwn frontend and backend
 @_quiz_AI.route('/health', methods=['GET'])
 def health_check():
     """Health check endpoint"""
     return jsonify({'status': 'healthy', 'service': 'Quiz Generator API'})
+
+print("✅ Nova AI Quiz Generator Initiated Successfully!!!!")
+print("Ready to GIVE QUIZ & ANSWERS!!")
