@@ -1222,23 +1222,14 @@
         // Section persistence
         let currentActiveSection = localStorage.getItem('activeSection') || 'announcements';
         
-        let repeatCount = 0;
-        const maxRepeats = 7;
-
         const typed = new Typed('#announceH', {
             strings: ['Latest Announcements'],
-            typeSpeed: 20,  
-            backSpeed: 60,  
-            startDelay: 500,
+            typeSpeed: 100,  
+            backSpeed: 120,  
+            startDelay: 1900,
             backDelay: 300000,
             smartBackspace: true,
-            loop: false, // no infinite loop
-            onComplete: function(self) {
-                repeatCount++;
-                if (repeatCount < maxRepeats) {
-                    self.reset(); 
-                }
-            }
+            loop: true,
         });
         
         const logoutBtn = document.getElementById('logout');
