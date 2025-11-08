@@ -1188,11 +1188,15 @@
             </button>
         </div>
     </div>
-
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            window.Userstatus = {{ current_user.status|tojson }};
+            console.log("Userstatus initialized:", window.Userstatus);
+        });
+    </script>
     <script>
         window.currentUserId = {{ current_user.id }};
-        window.Userstatus = {{ current_user.status|tojson }};
-        console.log('User Status: ', window.Userstatus)
+        console.log('User Status: ', window.Userstatus);
         console.log('User ID:', window.currentUserId);
         const API_BASE = '/api';
         const ENDPOINTS = {
