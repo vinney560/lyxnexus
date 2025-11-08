@@ -1120,7 +1120,19 @@
                             </div>
                             <div class="flex justify-between py-3">
                                 <span class="text-gray-400">Status:</span>
-                                <span id="#" class="font-medium bg-blue-500 text-white px-2 py-1 rounded-full text-xs">Allowed</span>
+                                <span id="detail-status" 
+                                      class="font-medium px-2 py-1 rounded-full text-xs
+                                             {% if current_user.status %}
+                                                 bg-blue-500 text-white
+                                             {% else %}
+                                                 bg-purple-500 text-white
+                                             {% endif %}">
+                                    {% if current_user.status %}
+                                        Allowed
+                                    {% else %}
+                                        Banned
+                                    {% endif %}
+                                </span>                               
                             </div>
                         </div>
                     </div>
@@ -1215,10 +1227,10 @@
 
         const typed = new Typed('#announceH', {
             strings: ['Latest Announcements'],
-            typeSpeed: 80,
-            backSpeed: 60,
-            startDelay: 1000,
-            backDelay: 100000,
+            typeSpeed: 20,  
+            backSpeed: 60,  
+            startDelay: 500,
+            backDelay: 300000,
             smartBackspace: true,
             loop: false, // no infinite loop
             onComplete: function(self) {
@@ -1680,10 +1692,6 @@
             document.getElementById('detail-type').className = currentUser.is_admin ? 
                 'font-medium bg-purple-500 text-white px-2 py-1 rounded-full text-xs' : 
                 'font-medium bg-blue-500 text-white px-2 py-1 rounded-full text-xs';
-            document.getElementById('detail-status').textContent = Userstatus ? 'Allowed' : 'Banned';                
-            document.getElementById('detail-status').className = Userstatus ?
-                'font-medium bg-blue-500 text-white px-2 py-1 rounded-full text-xs' :
-                'font-medium bg-purple-500 text-white px-2 py-1 rounded-full text-xs';
         }
         
         function linkify(text) {
