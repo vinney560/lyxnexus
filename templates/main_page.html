@@ -1204,12 +1204,21 @@
         // Section persistence
         let currentActiveSection = localStorage.getItem('activeSection') || 'announcements';
         
-        new Typed('#announceH', {
-            strings: ['Latest Announcements', 'Latest Announcements'],
+        let repeatCount = 0;
+        const maxRepeats = 4;
+
+        const typed = new Typed('#announceH', {
+            strings: ['Latest Announcements'],
             typeSpeed: 80,
             backSpeed: 60,
             backDelay: 40,
-            loop: false
+            loop: false, // no infinite loop
+            onComplete: function(self) {
+                repeatCount++;
+                if (repeatCount < maxRepeats) {
+                    self.reset(); 
+                }
+            }
         });
         
         const logoutBtn = document.getElementById('logout');
@@ -1660,10 +1669,10 @@
             document.getElementById('detail-mobile').textContent = currentUser.mobile || 'Not provided';
             document.getElementById('detail-joined').textContent = formatDate(currentUser.created_at);
             document.getElementById('detail-type').textContent = currentUser.is_admin ? 'Administrator' : 'Student';
-            document.getElementById('detail-status').textContent = currentUser.is_admin ? 'Allowed' : 'Banned';
             document.getElementById('detail-type').className = currentUser.is_admin ? 
                 'font-medium bg-purple-500 text-white px-2 py-1 rounded-full text-xs' : 
                 'font-medium bg-blue-500 text-white px-2 py-1 rounded-full text-xs';
+            document.getElementById('detail-status').textContent = currentUser.status ? 'Allowed' : 'Banned';                
             document.getElementById('detail-status').className = currentUser.status ?
                 'font-medium bg-blue-500 text-white px-2 py-1 rounded-full text-xs' :
                 'font-medium bg-purple-500 text-white px-2 py-1 rounded-full text-xs';
@@ -2475,7 +2484,7 @@
                 setTimeout(() => {
                     marionButton.style.opacity = '1';
                     marionButton.innerHTML = '<i class="fas fa-robot"></i> Marion AI Assistant';
-                }, 1000);
+                }, 2000);
                 setInterval(() => {
                     window.location.href = '/gemini';
                 }, 1200);
@@ -2512,7 +2521,7 @@
                 setTimeout(() => {
                     novaButton.style.opacity = '1';
                     novaButton.innerHTML = '<i class="fas fa-question-circle"></i> Nova Quiz Generator';
-                }, 1000);
+                }, 2000);
                 setInterval(() => {
                     window.location.href = '/quiz';
                 }, 1200);
