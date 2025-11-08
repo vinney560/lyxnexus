@@ -2673,10 +2673,10 @@ def check():
 @app.route('/logout')
 @login_required
 def logout():
-    logout_user()
     session.clear()
     session.pop('authenticated', None)
     session.pop('_user_id', None)
+    logout_user()
     flash('Logout Successfully!', 'success')
     return redirect(url_for('home'))
 #--------------------------------------------------------------------
@@ -4843,7 +4843,7 @@ def assignment_page(id):
     """Serve the assignment file view and download page"""
     assignment = Assignment.query.get_or_404(id)
     now = datetime.utcnow()
-    three_days = now + timedelta(days=3)
+    three_days = datetime.utcnow() + timedelta(days=3)
     return render_template('assignment.html', assignment=assignment, now=now, three_days=three_days)
 
 @app.route("/api/preview")

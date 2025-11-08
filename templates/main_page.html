@@ -1118,6 +1118,10 @@
                                 <span class="text-gray-400">Account Type:</span>
                                 <span id="detail-type" class="font-medium bg-blue-500 text-white px-2 py-1 rounded-full text-xs">Student</span>
                             </div>
+                            <div class="flex justify-between py-3">
+                                <span class="text-gray-400">Status:</span>
+                                <span id="detail-status" class="font-medium bg-blue-500 text-white px-2 py-1 rounded-full text-xs">Allowed</span>
+                            </div>
                         </div>
                     </div>
                     
@@ -1656,9 +1660,13 @@
             document.getElementById('detail-mobile').textContent = currentUser.mobile || 'Not provided';
             document.getElementById('detail-joined').textContent = formatDate(currentUser.created_at);
             document.getElementById('detail-type').textContent = currentUser.is_admin ? 'Administrator' : 'Student';
+            document.getElementById('detail-status').textContent = currentUser.is_admin ? 'Allowed' : 'Banned';
             document.getElementById('detail-type').className = currentUser.is_admin ? 
                 'font-medium bg-purple-500 text-white px-2 py-1 rounded-full text-xs' : 
                 'font-medium bg-blue-500 text-white px-2 py-1 rounded-full text-xs';
+            document.getElementById('detail-status').className = currentUser.status ?
+                'font-medium bg-blue-500 text-white px-2 py-1 rounded-full text-xs' :
+                'font-medium bg-purple-500 text-white px-2 py-1 rounded-full text-xs';
         }
         
         function linkify(text) {
