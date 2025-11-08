@@ -56,6 +56,7 @@ def fix_sequences():
             except Exception as inner_e:
                 # Skip sequences that fail individually
                 print(f"⚠ Skipping sequence {seq_name}: {inner_e}")
+                return jsonify({'message': 'Failed to Fix DB', 'status': 'error'})
 
         db.session.commit()
         return jsonify({"status": "ok", "fixed": fixed})

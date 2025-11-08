@@ -881,7 +881,7 @@
             
                 if (response.ok) {
                     // Success state
-                    showToast(data.message, 'success', 'Database Fixed');
+                    showToast(data.fixed, 'success', 'Database Fixed');
                     btn.innerHTML = `<i class="fas fa-check mr-2"></i> Fixed! (${data.fixed.length})`;
                     btn.classList.remove("btn-warning");
                     btn.classList.add("btn-success");
@@ -901,7 +901,7 @@
                     btn.disabled = false;
                 }
             } catch (error) {
-                showToast(error.message, 'error', 'Database Cloning Error');
+                showToast(error.message, 'error', 'Database Fix Failed');
                 // Network or unexpected error
                 btn.innerHTML = `<i class="fas fa-exclamation-triangle mr-2"></i> Failed!`;
                 btn.classList.remove("btn-warning");
