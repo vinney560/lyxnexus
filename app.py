@@ -483,6 +483,7 @@ def initialize_admin_code():
 # Execute raw SQL if needed
 #db.session.execute(text('ALTER TABLE "user" ADD COLUMN status BOOLEAN DEFAULT TRUE'))
 #db.session.commit()
+from sqlalchemy import text
 
 """Initialize the creation of database and any SQL Operations"""
 with app.app_context():
