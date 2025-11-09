@@ -322,6 +322,7 @@ class File(db.Model):
     file_type = db.Column(db.String(100), nullable=False)
     file_size = db.Column(db.Integer, nullable=False)
     file_data = db.Column(db.LargeBinary, nullable=False)
+    file_url = db.Column(db.String(500))  # stores Cloudinary link
     description = db.Column(db.Text)
     category = db.Column(db.String(100), default='general')
     uploaded_at = db.Column(db.DateTime, default=nairobi_time)
@@ -489,7 +490,8 @@ with app.app_context():
         # Create tables if they don't exist
         db.create_all()
         db.session.commit()
-
+        db.session.execute(text('ALTER TABLE "file" ADD COLUMN file_url VARCHAR(500)'))
+        db.session.commit()
         print("✅ Database tables created successfully!")
 
         # initialize admin or other setup code
