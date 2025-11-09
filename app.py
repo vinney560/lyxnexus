@@ -490,7 +490,7 @@ with app.app_context():
         # Create tables if they don't exist
         db.create_all()
         #db.session.commit()
-        db.session.execute(text('ALTER TABLE "files" ADD COLUMN file_url VARCHAR(500)'))
+        db.session.execute(text('ALTER TABLE file ADD COLUMN file_url VARCHAR(500)'))
         db.session.commit()
         print("✅ Database tables created successfully!")
 
@@ -5655,7 +5655,7 @@ def internal_error(error):
     if referrer:
         return redirect(referrer), 302
     else:
-        return redirect(url_for('index')), 302
+        return redirect(url_for('home')), 302
 
 # ==========================================
 if __name__ == '__main__':
