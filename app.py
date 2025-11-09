@@ -4674,7 +4674,7 @@ def serve_announcement_file(id, filename):
 @app.route('/api/assignments')
 def get_assignments():
     """Get all assignments"""
-    assignments = Assignment.query.order_by(Assignment.due_date.asc()).all()
+    assignments = Assignment.query.order_by(Assignment.created_at.desc()).all()
     result = []
     for assignment in assignments:
         result.append({

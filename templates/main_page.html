@@ -1208,7 +1208,6 @@
     </script>
     <script>
         window.currentUserId = {{ current_user.id }};
-        console.log('User Status: ', window.Userstatus);
         console.log('User ID:', window.currentUserId);
         const API_BASE = '/api';
         const ENDPOINTS = {
@@ -2010,7 +2009,7 @@
                 }
                 
                 return `
-                <div class="assignment-card border-l-4 border-blue-500 bg-gray-800/50 p-4 sm:p-5 rounded-xl shadow-md hover:shadow-lg transition duration-200 ease-in-out card-hover-lift fade-in ${newClass}">
+                <div class="assignment-card border-l-4 border-blue-500 border-r-1 border-blue-500 border-t-1 border-blue-500 border-b-1 border-blue-500 bg-gray-800/50 p-4 sm:p-5 rounded-xl shadow-md hover:shadow-lg transition duration-200 ease-in-out card-hover-lift fade-in ${newClass}">
                     ${isNew ? `<div class="absolute top-3 left-3 w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>` : ''}
                     <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-3 gap-2">
                         <h3 class="text-xl sm:text-2xl font-extrabold text-white underline underline-offset-4 decoration-blue-500 leading-snug break-words">
