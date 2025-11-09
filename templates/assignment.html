@@ -221,11 +221,11 @@
                     {% set three_days = three_days %}
                     <span class="status-badge
                         {% if assignment.due_date < today %}status-overdue
-                        {% elif assignment.due_date <= three_days %}status-due-soon
+                        {% elif assignment.due_date < three_days %}status-due-soon
                         {% else %}status-upcoming
                         {% endif %}">
                         {% if assignment.due_date < today %}Overdue
-                        {% elif assignment.due_date <= three_days %}Due Soon
+                        {% elif assignment.due_date < three_days %}Due Soon
                         {% else %}...
                         {% endif %}
                     </span>
