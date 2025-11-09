@@ -60,7 +60,7 @@ def migrate_files():
 
 from flask import render_template
 
-@app.route('/files_preview')
+@cloud_migration_bp.route('/files_preview')
 def files_preview():
     files = File.query.order_by(File.uploaded_at.desc()).limit(5).all()
     return render_template('file_preview.html', files=files)
