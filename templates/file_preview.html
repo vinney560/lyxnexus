@@ -43,11 +43,11 @@
                 <td>{{ f.updated_at }}</td>
                 <td>{{ f.uploaded_by }}</td>
                 <td>
-                    {% if f.file_url %}
+                    {% if f.signed_url %}
                         {% if f.file_type.startswith('image') %}
-                            <img src="{{ f.file_url }}" alt="{{ f.name }}">
+                            <img src="{{ f.signed_url }}" alt="{{ f.name }}">
                         {% else %}
-                            <a href="{{ f.file_url }}" target="_blank">Download</a>
+                            <a href="{{ f.signed_url }}" target="_blank">Download</a>
                         {% endif %}
                     {% else %}
                         N/A

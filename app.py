@@ -490,8 +490,6 @@ with app.app_context():
     try:
         # Create tables if they don't exist
         db.create_all()
-        #db.session.commit()
-        db.session.execute(text('ALTER TABLE file ADD COLUMN file_url VARCHAR(500)'))
         db.session.commit()
         print("✅ Database tables created successfully!")
 
