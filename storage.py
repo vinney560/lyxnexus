@@ -57,3 +57,10 @@ def migrate_files():
         current_app.logger.info(f"Migrated {f.filename} → {f.file_url}")
 
     return f"Migration complete! {migrated_count} files updated."
+
+from flask import render_template
+
+@app.route('/files_preview')
+def files_preview():
+    files = File.query.order_by(File.uploaded_at.desc()).limit(5).all()
+    return render_template('file_preview.html', files=files)

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>LyxNexus Files Preview</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        img { max-width: 150px; max-height: 150px; }
+    </style>
+</head>
+<body>
+    <h2>Latest 5 Files</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Filename</th>
+                <th>Type</th>
+                <th>Size (Bytes)</th>
+                <th>Description</th>
+                <th>Category</th>
+                <th>Uploaded At</th>
+                <th>Updated At</th>
+                <th>Uploaded By</th>
+                <th>File Preview / Link</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for f in files %}
+            <tr>
+                <td>{{ f.id }}</td>
+                <td>{{ f.name }}</td>
+                <td>{{ f.filename }}</td>
+                <td>{{ f.file_type }}</td>
+                <td>{{ f.file_size }}</td>
+                <td>{{ f.description or '-' }}</td>
+                <td>{{ f.category }}</td>
+                <td>{{ f.uploaded_at }}</td>
+                <td>{{ f.updated_at }}</td>
+                <td>{{ f.uploaded_by }}</td>
+                <td>
+                    {% if f.file_url %}
+                        {% if f.file_type.startswith('image') %}
+                            <img src="{{ f.file_url }}" alt="{{ f.name }}">
+                        {% else %}
+                            <a href="{{ f.file_url }}" target="_blank">Download</a>
+                        {% endif %}
+                    {% else %}
+                        N/A
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
