@@ -64,3 +64,6 @@ from flask import render_template
 def files_preview():
     files = File.query.order_by(File.uploaded_at.desc()).limit(5).all()
     return render_template('file_preview.html', files=files)
+
+print('Cloud Storage Script Available!!!')
+print('✅ Cloud Storage Script Initialized!!!')

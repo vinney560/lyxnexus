@@ -5642,8 +5642,9 @@ def ratelimit_handler(e):
             'error429.html',
             message="You’ve made too many requests. Please wait a moment and try again."
         ), 429
-    except Exception:
-        return redirect(url_for('index'))
+    except Exception as e:
+        print(f'Error on 429: {e}')
+        return redirect(url_for('home'))
 
 @app.errorhandler(500)
 def internal_error(error):
