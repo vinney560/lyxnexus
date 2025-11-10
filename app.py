@@ -2687,9 +2687,6 @@ def check():
 @app.route('/logout')
 @login_required
 def logout():
-    session.clear()
-    session.pop('authenticated', None)
-    session.pop('_user_id', None)
     logout_user()
     flash('Logout Successfully!', 'success')
     return redirect(url_for('home'))
