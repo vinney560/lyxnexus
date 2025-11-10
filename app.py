@@ -2712,7 +2712,8 @@ def nav_guide():
 @login_required
 @admin_required
 def admin_page():
-    return render_template('admin.html', year=_year())
+    topics = Topic.query.all()
+    return render_template('admin.html', year=_year(), topics=topics)
 #--------------------------------------------------------------------
 @app.route('/admin/users')
 @login_required

@@ -876,7 +876,10 @@
                 <textarea id="assignment-description" class="form-input" rows="3" placeholder="Description" required></textarea>
                 <input type="datetime-local" id="assignment-due-date" class="form-input" required>
                 <select id="assignment-topic" class="form-input">
-                    <option value="">Select Topic (Optional)</option>
+                  <option value="">Select Topic (Optional)</option>
+                      {% for topic in topics %}
+                          <option value="{{ topic.id }}">{{ topic.name }}</option>
+                      {% endfor %}                    
                 </select>
                 
                 <!-- File Upload Section -->
@@ -1271,7 +1274,7 @@
                     <p class="text-gray-400 break-all hyphens-auto mt-1">${escapeHtml(assignment.description || '')}</p>
                     ${fileSection}
                     <div class="flex items-center mt-2 text-sm text-gray-500">
-                      <span>Topic: ${assignment.topic?.name || 'General'}</span>
+                      <span>Topic: ${assignment.topic_id?.name || 'General'}</span>
                       <span class="mx-2">•</span>
                       <span>By: ${assignment.creator?.username || 'Unknown'}</span>
                     </div>
