@@ -934,6 +934,16 @@
       color: var(--text-color);
     }
 
+    #announceH {
+     display: inline-block;
+     vertical-align: middle;
+    }
+
+    .typed-cursor {
+      margin-left: 0 !important;
+      vertical-align: middle;
+    }
+
 </style>
 <body>
     <!-- Toast Container -->
@@ -1011,7 +1021,7 @@
 
         <section id="announcements" class="content-section active scroll-fade-in">
             <div class="flex justify-between items-center mb-6 section-header">
-                <h2 id="announceH" class="text-2xl md:text-3xl font-bold gradient-text"></h2>
+                <h2 id="announceH" class="text-2xl md:text-3xl font-bold gradient-text inline-block align-middle"></h2>
                 <span class="text-gray-400 text-sm" id="announcements-count">Loading...</span>
             </div>
             <div id="announcements-container">
@@ -2432,7 +2442,7 @@
             const modalContent = document.createElement('div');
             modalContent.className = 'modal-content';
             modalContent.style.cssText = `
-                background: rgba(30, 41, 59, 0.8);
+                background: linear-gradient(135deg, rgba(30, 41, 59, 0.8) 50%, rgba(30, 41, 59, 0.2) 50%);
                 padding: 30px;
                 border-radius: 12px;
                 box-shadow: 0 10px 30px rgba(0,0,0,0.3);
@@ -2445,15 +2455,20 @@
             // Create modal header
             const modalHeader = document.createElement('h2');
             modalHeader.textContent = 'CHOOSE AI TO ACCESS.';
-            modalHeader.style.cssText = `
-                margin-bottom: 25px;
-                color: #3b82f6;
-                font-size: 24px;
-                font-weight: 700;
-                text-decoration: underline;
-                text-underline-offset: 6;
-            `;
-
+            modalHeader.style.background = "linear-gradient(130deg, #3B82F6, #8B5CF6)";
+            modalHeader.style.webkitBackgroundClip = "text";
+            modalHeader.style.backgroundClip = "text";
+            modalHeader.style.webkitTextFillColor = "transparent";
+            modalHeader.style.color = "transparent";
+            modalHeader.style.backgroundSize = "200% 200%";
+            modalHeader.style.animation = "gradient-shift 3s ease infinite";
+            modalHeader.classList.add('text-xl', 'md:text-2xl', 'font-bold');
+            modalHeader.style.display = "inline-block";
+            modalHeader.style.borderTop = "2px solid #3B82F6";
+            modalHeader.style.marginBottom = "25px";
+            modalHeader.style.borderBottom = "2px solid #3B82F6";
+            modalHeader.style.textUnderlineOffset = "6px";
+                    
             // Create buttons container
             const buttonsContainer = document.createElement('div');
             buttonsContainer.style.cssText = `
@@ -2470,7 +2485,7 @@
                 background: linear-gradient(135deg, #667eea, #764ba2);
                 color: white;
                 border: none;
-                border-radius: 8px;
+                border-radius: 10px;
                 font-size: 16px;
                 cursor: pointer;
                 transition: all 0.3s ease;
