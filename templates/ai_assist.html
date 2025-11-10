@@ -237,11 +237,19 @@
             z-index: 1001;
             box-shadow: var(--shadow);
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            touch-action: none;
+            user-select: none;
         }
 
         .history-toggle:hover {
             transform: scale(1.1);
             box-shadow: var(--shadow-lg);
+        }
+
+        .history-toggle.dragging {
+            transition: none;
+            box-shadow: var(--shadow-lg);
+            transform: scale(1.05);
         }
 
         /* Backdrop for mobile */
@@ -293,8 +301,8 @@
             right: 0;
             bottom: 0;
             background: 
-                radial-gradient(circle at 20% 80%, rgba(45, 74, 120, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(72, 53, 117, 0.1) 0%, transparent 50%);
+                radial-gradient(circle at 20% 80%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.1) 0%, transparent 50%);
             pointer-events: none;
             transition: all 0.5s ease;
         }
@@ -351,6 +359,10 @@
         .ai-message:hover {
             transform: translateY(-2px);
             box-shadow: var(--shadow-lg);
+        }
+
+        .ai-message.hidden {
+            display: none;
         }
 
         .info-message {
@@ -1136,10 +1148,10 @@
         const historyList = document.getElementById('historyList');
         let currentConversationId = null;
         let isAutoScrollEnabled = true;
+        let currentStreamingMessage = null;
         let isStreaming = false;
         let isMobile = window.innerWidth <= 768;
         let sidebarOpen = false;
-        let currentStreamingElement = null;
 
         // Check if mobile on resize
         window.addEventListener('resize', function() {
@@ -1173,9 +1185,9 @@
         // Send button click
         sendButton.addEventListener('click', sendMessage);
 
-        // History toggle function
+        // History toggle function - NEW IMPLEMENTATION
         function toggleHistoryPanel() {
-            sidebarOpen = !historyPanel.classList.contains('active');
+            sidebarOpen = !sidebarOpen;
             
             if (sidebarOpen) {
                 historyPanel.classList.add('active');
@@ -1186,6 +1198,8 @@
                 if (isMobile) {
                     document.body.style.overflow = 'hidden';
                 }
+                // Add event listener to close on backdrop click
+                historyBackdrop.addEventListener('click', closeHistoryPanel);
             } else {
                 closeHistoryPanel();
             }
@@ -1193,6 +1207,7 @@
 
         // Close history panel function
         function closeHistoryPanel() {
+            sidebarOpen = false;
             historyPanel.classList.remove('active');
             historyBackdrop.classList.remove('active');
             if (!isMobile) {
@@ -1201,7 +1216,8 @@
             if (isMobile) {
                 document.body.style.overflow = '';
             }
-            sidebarOpen = false;
+            // Remove event listener
+            historyBackdrop.removeEventListener('click', closeHistoryPanel);
         }
 
         // History toggle click
@@ -1210,12 +1226,9 @@
         // Close button click
         historyClose.addEventListener('click', closeHistoryPanel);
 
-        // Backdrop click to close history
-        historyBackdrop.addEventListener('click', closeHistoryPanel);
-
         // Close history with Escape key
         document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape' && historyPanel.classList.contains('active')) {
+            if (e.key === 'Escape' && sidebarOpen) {
                 closeHistoryPanel();
             }
         });
@@ -1370,7 +1383,7 @@
         }
 
         // Add message to chat
-        function addMessage(content, isUser = false, isInfo = false, timestamp = null, prompt = null) {
+        function addMessage(content, isUser = false, isInfo = false, timestamp = null, prompt = null, isHidden = false) {
             const messageDiv = document.createElement('div');
             const messageTime = timestamp || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             
@@ -1412,56 +1425,16 @@
                     if (prompt) {
                         messageDiv.dataset.prompt = prompt;
                     }
+                    
+                    if (isHidden) {
+                        messageDiv.classList.add('hidden');
+                    }
                 }
             }
             
             chatBox.appendChild(messageDiv);
             scrollToBottom();
             return messageDiv;
-        }
-
-        // Create streaming message element
-        function createStreamingMessage(prompt) {
-            const messageDiv = document.createElement('div');
-            messageDiv.className = 'message ai-message streaming-message';
-            
-            const messageTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            
-            messageDiv.innerHTML = `
-                <div class="message-content">
-                    <div class="formatted-text"></div>
-                    <div class="message-time">${messageTime}</div>
-                    <div class="message-actions">
-                        <button class="message-action copy-button" title="Copy response">
-                            <i class="fas fa-copy"></i> Copy
-                        </button>
-                        <button class="message-action regenerate-button" title="Regenerate response" disabled>
-                            <i class="fas fa-redo"></i> Regenerate
-                        </button>
-                    </div>
-                </div>
-            `;
-            
-            if (prompt) {
-                messageDiv.dataset.prompt = prompt;
-            }
-            
-            chatBox.appendChild(messageDiv);
-            scrollToBottom();
-            
-            return messageDiv;
-        }
-
-        // Update streaming message content with formatting
-        function updateStreamingMessage(content) {
-            if (currentStreamingElement) {
-                const formattedContent = formatText(content);
-                currentStreamingElement.querySelector('.formatted-text').innerHTML = formattedContent;
-                
-                if (isAutoScrollEnabled) {
-                    scrollToBottom();
-                }
-            }
         }
 
         // Add event delegation for message actions
@@ -1574,8 +1547,11 @@
             try {
                 const eventSource = new EventSource(`/gemini/stream?prompt=${encodeURIComponent(message)}`);
 
-                // Create streaming message element
-                currentStreamingElement = createStreamingMessage(message);
+                currentStreamingMessage = addMessage('', false, false, null, message, true);
+                const messageContent = currentStreamingMessage.querySelector('.message-content');
+                const formattedContent = messageContent.querySelector('.formatted-text');
+                messageContent.classList.add('streaming-message');
+
                 let fullResponse = '';
                 let hasReceivedData = false;
 
@@ -1583,36 +1559,34 @@
                     hideTypingIndicator();
                     
                     if (event.data.startsWith('❌')) {
-                        currentStreamingElement.querySelector('.formatted-text').innerHTML = event.data;
-                        currentStreamingElement.classList.remove('streaming-message');
+                        formattedContent.innerHTML = event.data;
+                        messageContent.classList.remove('streaming-message');
                         eventSource.close();
                         return;
                     }
 
                     if (!hasReceivedData) {
+                        currentStreamingMessage.classList.remove('hidden');
                         hasReceivedData = true;
                     }
 
                     fullResponse += event.data;
-                    updateStreamingMessage(fullResponse);
+                    formattedContent.innerHTML = formatText(fullResponse);
+                    
+                    if (isAutoScrollEnabled) {
+                        scrollToBottom();
+                    }
                 };
 
                 eventSource.onerror = function(event) {
                     eventSource.close();
-                    currentStreamingElement.classList.remove('streaming-message');
+                    messageContent.classList.remove('streaming-message');
                     updateSidebarHistory(message, fullResponse);
-                    
-                    // Enable regenerate button
-                    const regenerateBtn = currentStreamingElement.querySelector('.regenerate-button');
-                    if (regenerateBtn) {
-                        regenerateBtn.disabled = false;
-                    }
-                    
                     hideTypingIndicator();
                     messageInput.focus();
                     isStreaming = false;
                     updateButtonStates();
-                    currentStreamingElement = null;
+                    currentStreamingMessage = null;
                 };
 
             } catch (error) {
@@ -1622,7 +1596,7 @@
                 messageInput.focus();
                 isStreaming = false;
                 updateButtonStates();
-                currentStreamingElement = null;
+                currentStreamingMessage = null;
             }
         }
 
