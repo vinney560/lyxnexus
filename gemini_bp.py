@@ -316,6 +316,11 @@ class ReadOnlyDatabaseQueryService:
                 Announcement.created_at.desc()
             ).limit(5).all()
 
+            # fetch Specifc user
+            specific_user = User.query.order_by(
+                User.created_at.desc()
+            ).all()
+
             # Fetch recent assignments (limit 5)
             recent_assignments = Assignment.query.order_by(
                 Assignment.created_at.desc()
@@ -333,6 +338,17 @@ class ReadOnlyDatabaseQueryService:
                 'total_assignments': Assignment.query.count(),
                 'total_topics': Topic.query.count(),
                 'total_timetable_entries': Timetable.query.count(),
+
+                'specific_user': [
+                    {
+                        'id': u.id,
+                        'username': u.username,
+                        'mobile': u.mobile,
+                        'created_at': u.created_at,
+                        'is_admin': u.is_admin,
+                        'status': u.status
+                    } for u in specific_user
+                ],
 
                 'recent_announcements': [
                     {
@@ -522,6 +538,7 @@ Here's a comparison of different AI models:
 ' 5. Do not output HTML or styling, only meaning-based formatting.
 ' 6. Ensure code blocks are syntactically correct and runnable.
 ' 7. Use user preferences for formatting if requested or given.
+' 8. If Currect user Admin status is false, do not provide any user information apart from is own!
 ' ==============================================================
 
 PLATFORM CONTEXT:
@@ -563,6 +580,8 @@ Now respond naturally to the user's current message:"""
                 current_topic = "topics"
             elif any(word in recent_text for word in ['timetable', 'schedule', 'class', 'lecture', 'time']):
                 current_topic = "timetable"
+            elif any(word in recent_text for word in ['user', 'id', 'data', 'personal', 'userid']):
+                current_topic = "user"
         
         # Add relevant platform data based on conversation topic
         if current_topic and stats:
@@ -575,6 +594,10 @@ Now respond naturally to the user's current message:"""
                 platform_context += f"- Recent announcements: {len(stats['recent_announcements'])} available\n"
                 for ann in stats['recent_announcements'][:3]:  # Show 3 items with CONTENT
                     platform_context += f"  * {ann.get('title', '')}: {ann.get('content', '')}\n"
+            elif current_topic == "user" and stats.get('specific_user'):
+                platform_context += f"- User data: {len(stats['specific_user'])} information available\n"
+                for u in stats['specific_user']:
+                    platform_context += f"  * {u.get('id', '')}: {u.get('username', '')}: {u.get('mobile', '')}: {u.get('created_at', '')}: {u.get('is_admin', '')}: {u.get('status', '')} \n"
             
             enhanced_prompt = platform_context + smart_prompt
         else:
