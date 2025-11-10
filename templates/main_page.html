@@ -1235,14 +1235,21 @@
         let currentActiveSection = localStorage.getItem('activeSection') || 'announcements';
         
         const typed = new Typed('#announceH', {
-            strings: ['Latest Announcements'],
-            typeSpeed: 100,  
-            backSpeed: 120,  
-            startDelay: 700,
-            backDelay: 300000,
-            smartBackspace: true,
-            loop: true,
+          strings: ['Latest Announcements'],
+          typeSpeed: 100,
+          backSpeed: 120,
+          startDelay: 700,
+          backDelay: 300000,
+          smartBackspace: true,
+          loop: true,
+          cursorChar: '|',       // default cursor
+          showCursor: true,
+          onComplete: (self) => {
+            self.cursor.style.marginLeft = '0'; // removes gap after text
+            self.cursor.style.verticalAlign = 'middle';
+          }
         });
+        
         
         const logoutBtn = document.getElementById('logout');
         logoutBtn.addEventListener('click', (e) => {
@@ -2442,7 +2449,7 @@
             const modalContent = document.createElement('div');
             modalContent.className = 'modal-content';
             modalContent.style.cssText = `
-                background: linear-gradient(135deg, rgba(30, 41, 59, 0.8) 50%, rgba(30, 41, 59, 0.2) 50%);
+                background: linear-gradient(143deg, rgba(30, 41, 59, 0.8) 50%, rgba(30, 41, 59, 0.4) 50%);
                 padding: 30px;
                 border-radius: 12px;
                 box-shadow: 0 10px 30px rgba(0,0,0,0.3);

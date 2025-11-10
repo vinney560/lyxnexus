@@ -1036,7 +1036,13 @@
             startDelay: 500,      // delay before typing starts
             backDelay: 3000,      // pause before deleting (so users can read)
             smartBackspace: true, // only backspace what’s necessary
-            loop: true            // keep looping
+            loop: true,           // keep looping
+            cursorChar: '|',       // default cursor
+            showCursor: true,
+            onComplete: (self) => {
+              self.cursor.style.marginLeft = '0'; // removes gap after text
+              self.cursor.style.verticalAlign = 'middle';
+            }
         });
         
         function formatText(text) {
