@@ -7,18 +7,18 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --primary: #58a6ff;
-            --secondary: #238636;
-            --background: #0d1117;
-            --surface: #161b22;
-            --surface-light: #21262d;
-            --border: #30363d;
-            --text-primary: #e6edf3;
-            --text-secondary: #8b949e;
-            --success: #2ea043;
-            --warning: #d29922;
-            --error: #f85149;
-            --gradient: linear-gradient(135deg, #58a6ff, #238636);
+            --primary: #3b82f6;
+            --secondary: #8b5cf6;
+            --background: #0f172a;
+            --surface: rgba(30, 41, 59, 0.8);
+            --surface-light: #1a2332;
+            --border: rgba(100, 116, 139, 0.3);
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --gradient: linear-gradient(135deg, #3b82f6, #8b5cf6);
             --shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
             --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.4);
             --radius-sm: 8px;
@@ -301,8 +301,8 @@
             right: 0;
             bottom: 0;
             background: 
-                radial-gradient(circle at 20% 80%, rgba(88, 166, 255, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(35, 134, 54, 0.1) 0%, transparent 50%);
+                radial-gradient(circle at 20% 80%, rgba(42, 67, 108, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(96, 63, 174, 0.1) 0%, transparent 50%);
             pointer-events: none;
             transition: all 0.5s ease;
         }
@@ -335,7 +335,7 @@
 
         .user-message {
             align-self: flex-end;
-            background: linear-gradient(135deg, var(--secondary), #1e6e32);
+            background: linear-gradient(135deg, var(--secondary), #7c3aed);
             color: white;
             border-bottom-right-radius: var(--radius-sm);
             box-shadow: var(--shadow);
@@ -479,7 +479,7 @@
 
         #message-input:focus {
             border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.1);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
             transform: translateY(-1px);
         }
 
@@ -641,7 +641,7 @@
         }
         
         .formatted-text .link:hover {
-            background: rgba(88, 166, 255, 0.1);
+            background: rgba(59, 130, 246, 0.1);
             border-radius: 2px;
         }
         
@@ -652,9 +652,35 @@
         }
 
         .formatted-text .highlight {
-            background-color: rgba(88, 166, 255, 0.3);
+            background-color: rgba(59, 130, 246, 0.3);
             padding: 0.1rem 0.3rem;
             border-radius: 3px;
+        }
+
+        /* Table Styling */
+        .formatted-text table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 0.75rem 0;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+        }
+
+        .formatted-text th, .formatted-text td {
+            border: 1px solid var(--border);
+            padding: 0.5rem 0.75rem;
+            text-align: left;
+        }
+
+        .formatted-text th {
+            background: var(--surface);
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .formatted-text tr:nth-child(even) {
+            background: rgba(30, 41, 59, 0.3);
         }
 
         /* Link styling */
@@ -668,7 +694,7 @@
 
         .message-content a:hover {
             border-bottom: 1px solid var(--primary);
-            background: rgba(88, 166, 255, 0.1);
+            background: rgba(59, 130, 246, 0.1);
             border-radius: 2px;
         }
 
@@ -728,8 +754,8 @@
         }
 
         @keyframes glow {
-            0%, 100% { box-shadow: 0 0 20px rgba(88, 166, 255, 0.3); }
-            50% { box-shadow: 0 0 30px rgba(88, 166, 255, 0.6); }
+            0%, 100% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.3); }
+            50% { box-shadow: 0 0 30px rgba(59, 130, 246, 0.6); }
         }
 
         /* Scrollbar Styling */
@@ -994,9 +1020,9 @@
         /* Dark mode support */
         @media (prefers-color-scheme: dark) {
             :root {
-                --background: #0d1117;
-                --surface: #161b22;
-                --text-primary: #e6edf3;
+                --background: #0f172a;
+                --surface: rgba(30, 41, 59, 0.8);
+                --text-primary: #f1f5f9;
             }
         }
     </style>
@@ -1125,6 +1151,7 @@
         let currentStreamingMessage = null;
         let isStreaming = false;
         let isMobile = window.innerWidth <= 768;
+        let sidebarOpen = false;
 
         // Check if mobile on resize
         window.addEventListener('resize', function() {
@@ -1132,7 +1159,7 @@
             // On mobile, we don't want to push content, so remove with-history class
             if (isMobile) {
                 mainChat.classList.remove('with-history');
-            } else if (historyPanel.classList.contains('active')) {
+            } else if (sidebarOpen) {
                 mainChat.classList.add('with-history');
             }
         });
@@ -1158,11 +1185,11 @@
         // Send button click
         sendButton.addEventListener('click', sendMessage);
 
-        // History toggle function
+        // History toggle function - NEW IMPLEMENTATION
         function toggleHistoryPanel() {
-            const isActive = !historyPanel.classList.contains('active');
+            sidebarOpen = !sidebarOpen;
             
-            if (isActive) {
+            if (sidebarOpen) {
                 historyPanel.classList.add('active');
                 historyBackdrop.classList.add('active');
                 if (!isMobile) {
@@ -1171,6 +1198,8 @@
                 if (isMobile) {
                     document.body.style.overflow = 'hidden';
                 }
+                // Add event listener to close on backdrop click
+                historyBackdrop.addEventListener('click', closeHistoryPanel);
             } else {
                 closeHistoryPanel();
             }
@@ -1178,6 +1207,7 @@
 
         // Close history panel function
         function closeHistoryPanel() {
+            sidebarOpen = false;
             historyPanel.classList.remove('active');
             historyBackdrop.classList.remove('active');
             if (!isMobile) {
@@ -1186,6 +1216,8 @@
             if (isMobile) {
                 document.body.style.overflow = '';
             }
+            // Remove event listener
+            historyBackdrop.removeEventListener('click', closeHistoryPanel);
         }
 
         // History toggle click
@@ -1194,12 +1226,9 @@
         // Close button click
         historyClose.addEventListener('click', closeHistoryPanel);
 
-        // Backdrop click to close history
-        historyBackdrop.addEventListener('click', closeHistoryPanel);
-
         // Close history with Escape key
         document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape' && historyPanel.classList.contains('active')) {
+            if (e.key === 'Escape' && sidebarOpen) {
                 closeHistoryPanel();
             }
         });
@@ -1291,17 +1320,45 @@
                 // Wrap list items in ul/ol
                 .replace(/(<li>.*<\/li>)/g, '<ul>$1</ul>')
                 
-                // Tables (basic)
+                // Tables (improved implementation)
                 .replace(/\|(.+)\|/g, (match) => {
+                    // Check if this looks like a table row (contains multiple cells separated by |)
                     const cells = match.split('|').filter(cell => cell.trim() !== '');
-                    if (cells.length > 1) {
-                        let tableHTML = '<table><tr>';
-                        cells.forEach(cell => tableHTML += `<td>${cell.trim()}</td>`);
-                        tableHTML += '</tr></table>';
-                        return tableHTML;
+                    
+                    // Only process if we have at least 2 cells (indicating a table row)
+                    if (cells.length >= 2) {
+                        // Check if this is a header row (next line might be a separator)
+                        const lines = text.split('\n');
+                        const currentLineIndex = lines.findIndex(line => line.includes(match));
+                        
+                        if (currentLineIndex >= 0) {
+                            const nextLine = lines[currentLineIndex + 1];
+                            const isHeader = nextLine && /^[\s|:-]+$/.test(nextLine);
+                            
+                            let rowHTML = '<tr>';
+                            cells.forEach(cell => {
+                                const cellContent = cell.trim();
+                                if (isHeader) {
+                                    rowHTML += `<th>${cellContent}</th>`;
+                                } else {
+                                    rowHTML += `<td>${cellContent}</td>`;
+                                }
+                            });
+                            rowHTML += '</tr>';
+                            
+                            // If this is a header, we'll need to create the full table structure
+                            if (isHeader) {
+                                return `<table>${rowHTML}`;
+                            }
+                            
+                            return rowHTML;
+                        }
                     }
                     return match;
                 })
+            
+                // Close table tags when we detect the end of table rows
+                .replace(/(<\/tr>\s*)(?=[^<]*(<h[1-6]|$|<p|<\/?ul|<\/?ol|<\/?blockquote|^#|^>|^-|\d+\.))/g, '$1</table>')
             
                 // Subscript and superscript
                 .replace(/~(.+?)~/g, '<span class="subscript">$1</span>')
