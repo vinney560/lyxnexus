@@ -201,7 +201,7 @@
         background: rgba(30, 30, 40, 0.7);
         border-radius: 15px;
         padding: 20px;
-        margin-bottom: 20px;
+        margin-bottom: 21px;
         border-left: 4px solid #3B82F6;
         transition: all 0.3s ease;
         position: relative;
@@ -232,7 +232,7 @@
         background: rgba(30, 30, 40, 0.7);
         border-radius: 15px;
         padding: 20px;
-        margin-bottom: 20px;
+        margin-bottom: 24px;
         border-left: 4px solid #8B5CF6;
         border-right: 1px solid #8B5CF6;
         border-top: 1px solid #8B5CF6;
@@ -267,7 +267,7 @@
         background: rgba(30, 30, 40, 0.7);
         border-radius: 15px;
         padding: 20px;
-        margin-bottom: 20px;
+        margin-bottom: 21px;
         text-align: center;
         color: white;
         z-index: 1;
@@ -316,7 +316,7 @@
         border-radius: 15px;
         border: 1px solid #3b82f6; 
         padding: 20px;
-        margin-bottom: 20px;
+        margin-bottom: 21px;
         transition: all 0.3s ease;
     }
     
@@ -996,7 +996,7 @@
         </div>
     </header>
 
-    <main class="content-container max-w-7xl mx-auto px-4 pt-5 pb-[40px] md:pb-[100px] animate-fadeIn">
+    <main class="content-container max-w-7xl mx-auto px-3 pt-5 pb-[40px] md:pb-[100px] animate-fadeIn">
         
         <div id="robot-button">
             <i class="fas fa-robot"></i>
@@ -1748,11 +1748,11 @@
             container.innerHTML =
               '<p class="text-center text-gray-400 py-8">No announcements available.</p>';
             document.getElementById("announcements-count").textContent =
-              "0 announcements";
+              "0 announced";
             return;
           }
       
-          document.getElementById("announcements-count").textContent = `${newAnnouncements.length} announcements`;
+          document.getElementById("announcements-count").textContent = `${newAnnouncements.length} announced`;
       
           let pinnedIds = JSON.parse(localStorage.getItem("pinnedAnnouncements") || "[]");
       
@@ -2012,7 +2012,7 @@
                 }
                 
                 return `
-                <div class="assignment-card border-l-4 border-blue-500 border-r-1 border-blue-500 border-t-1 border-blue-500 border-b-1 border-blue-500 bg-gray-800/50 p-4 sm:p-5 rounded-xl shadow-md hover:shadow-lg transition duration-200 ease-in-out card-hover-lift fade-in ${newClass}">
+                <div class="assignment-card border-l-4 border-blue-500 border-r-1 border-blue-500 border-t-1 border-blue-500 border-b-1 border-blue-500 bg-gray-800/50 p-3 sm:p-4 rounded-xl shadow-md hover:shadow-lg transition duration-200 ease-in-out card-hover-lift fade-in ${newClass}">
                     ${isNew ? `<div class="absolute top-3 left-3 w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>` : ''}
                     <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-3 gap-2">
                         <h3 class="text-xl sm:text-2xl font-extrabold text-white underline underline-offset-4 decoration-blue-500 leading-snug break-words">
