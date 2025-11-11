@@ -60,7 +60,7 @@
             background: linear-gradient(90deg, #3B82F6, #8B5CF6);
             color: white;
             border: none;
-            padding: 10px 24px;
+            padding: 8px 16px;
             border-radius: 50px;
             font-weight: 600;
             transition: all 0.3s ease;
@@ -68,6 +68,7 @@
             cursor: pointer;
             position: relative;
             overflow: hidden;
+            font-size: 0.875rem;
         }
         
         .btn::before {
@@ -465,6 +466,23 @@
             display: none;
         }
         
+        /* Responsive Header Styles */
+        .header-compact {
+            padding: 0.75rem 1rem;
+        }
+        
+        .header-compact .btn {
+            padding: 0.5rem 1rem;
+            min-width: auto;
+        }
+        
+        .header-compact .user-avatar {
+            width: 2rem;
+            height: 2rem;
+            font-size: 0.75rem;
+        }
+        
+        /* Mobile optimizations */
         @media (max-width: 1024px) {
             .sidebar {
                 position: fixed;
@@ -496,9 +514,123 @@
                 display: block;
             }
         }
+        
+        @media (max-width: 768px) {
+            .header-desktop-only {
+                display: none !important;
+            }
+            
+            .analytics-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            
+            .stat-card {
+                padding: 1rem;
+            }
+            
+            .stat-number {
+                font-size: 2rem;
+            }
+        }
+        
+        @media (max-width: 640px) {
+            .header-compact {
+                padding: 0.2rem;
+            }
+            
+            .header-compact .btn {
+                padding: 0.375rem 0.75rem;
+                font-size: 0.75rem;
+            }
+            
+            .chart-container {
+                padding: 1rem;
+                margin-bottom: 1rem;
+            }
+            
+            .activity-item {
+                padding: 0.75rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .header-compact .flex.items-center.space-x-2 {
+                gap: 0.25rem;
+            }
+            
+            .header-compact .p-2 {
+                padding: 0.375rem;
+            }
+            
+            .header-compact .user-avatar {
+                width: 1.75rem;
+                height: 1.75rem;
+                font-size: 0.625rem;
+            }
+            
+            .grid-cols-1 {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 360px) {
+            .header-stacked {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .header-stacked .flex.items-center {
+                justify-content: space-between;
+                width: 100%;
+            }
+        }
+        
+        /* Prevent overflow */
+        .overflow-guard {
+            overflow: hidden;
+        }
+        
+        .text-ellipsis {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        /* Add to your existing CSS */
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+            scroll-behavior: smooth;
+        }
+        
+        /* For specific elements */
+        .activity-feed {
+            max-height: 400px;
+            overflow-y: auto;
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* IE/Edge */
+        }
+        
+        .activity-feed::-webkit-scrollbar {
+            display: none; /* Chrome/Safari/Opera */
+        }
+        
+        /* Body scrollbar hide */
+        body.hide-scrollbar {
+            overflow: -moz-scrollbars-none;
+            -ms-overflow-style: none;
+        }
+        
+        body.hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }        
     </style>
 </head>
-<body class="bg-gray-900">
+<body class="bg-gray-900 overflow-guard">
     <div class="flex h-screen overflow-hidden">
         <!-- Sidebar -->
         <div class="sidebar">
@@ -564,7 +696,7 @@
                         <div class="user-avatar w-10 h-10 text-sm" id="sidebar-user-avatar">LN</div>
                         <div class="flex-1 min-w-0">
                             <p class="text-sm font-medium truncate" id="sidebar-username">Loading...</p>
-                            <p class="text-xs text-gray-400 truncate" id="sidebar-role">Administrator</p>
+                            <p class="text-xs text-gray-400 truncate" id="sidebar-role">Student</p>
                         </div>
                         <button class="text-gray-400 hover:text-white transition-colors" onclick="window.location.href='/logout'">
                             <i class="fas fa-sign-out-alt"></i>
@@ -575,50 +707,59 @@
         </div>
         
         <!-- Main Content -->
-        <div class="flex-1 overflow-auto">
-            <!-- Header -->
-            <header class="glass-morph sticky top-0 z-20">
-                <div class="flex items-center justify-between p-4">
-                    <div class="flex items-center space-x-4">
-                        <button class="mobile-menu-btn text-gray-400 hover:text-white">
-                            <i class="fas fa-bars text-xl"></i>
+        <div class="flex-1 overflow-x-hidden hide-scrollbar">
+            <!-- Header - Responsive -->
+            <header class="glass-morph sticky top-0 z-20 header-compact">
+                <div class="flex items-center justify-between w-full">
+                    <div class="flex items-center space-x-2 md:space-x-4 flex-1 min-w-0">
+                        <button class="mobile-menu-btn text-gray-400 hover:text-white p-2">
+                            <i class="fas fa-bars text-lg md:text-xl"></i>
                         </button>
-                        <div>
-                            <h1 class="text-2xl font-bold gradient-text">Dashboard Overview</h1>
-                            <div class="flex items-center space-x-2">
-                                <p class="text-sm text-gray-400" id="welcome-message">Welcome back</p>
-                                <div class="live-indicator">
+                        <div class="min-w-0 flex-1">
+                            <h1 class="text-lg md:text-2xl font-bold gradient-text text-ellipsis">Dashboard Overview</h1>
+                            <div class="flex items-center space-x-1 md:space-x-2">
+                                <p class="text-xs md:text-sm text-gray-400 text-ellipsis" id="welcome-message">Welcome back</p>
+                                <div class="live-indicator flex-shrink-0">
                                     <div class="pulse-dot"></div>
-                                    <span>LIVE</span>
+                                    <span class="hidden xs:inline">LIVE</span>
                                 </div>
                             </div>
                         </div>
                     </div>
                     
-                    <div class="flex items-center space-x-4">
-                        <button onclick="refreshDashboard()" id="refreshData" class="btn flex items-center space-x-2">
-                            <i class="fas fa-sync-alt"></i>
-                            <span>Refresh</span>
+                    <div class="flex items-center space-x-1 md:space-x-2 flex-shrink-0">
+                        <!-- Refresh Button -->
+                        <button onclick="refreshDashboard()" class="btn flex items-center space-x-1 md:space-x-2">
+                            <i class="fas fa-sync-alt text-xs md:text-sm"></i>
+                            <span class="hidden sm:inline">Refresh</span>
                         </button>
                         
+                        <!-- Notification Bell -->
                         <div class="relative">
-                            <button class="text-gray-400 hover:text-white transition-colors">
-                                <i class="fas fa-bell text-xl"></i>
+                            <button class="text-gray-400 hover:text-white transition-colors p-2">
+                                <i class="fas fa-bell text-lg md:text-xl"></i>
                             </button>
-                            <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">3</span>
+                            <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 md:w-5 md:h-5 flex items-center justify-center text-[10px] md:text-xs">3</span>
                         </div>
                         
+                        <!-- User Profile Dropdown -->
                         <div class="relative group">
-                            <button class="flex items-center space-x-2 text-gray-300 hover:text-white transition-colors">
-                                <div class="user-avatar w-8 h-8 text-xs" id="header-user-avatar">LN</div>
-                                <span class="hidden md:block" id="header-username">Loading...</span>
-                                <i class="fas fa-chevron-down text-xs"></i>
+                            <button class="flex items-center space-x-1 md:space-x-2 text-gray-300 hover:text-white transition-colors p-1 md:p-0">
+                                <div class="user-avatar w-6 h-6 md:w-8 md:h-8 text-xs" id="header-user-avatar">LN</div>
+                                <span class="hidden md:block text-sm text-ellipsis max-w-[120px]" id="header-username">Loading...</span>
+                                <i class="fas fa-chevron-down text-xs hidden md:block"></i>
                             </button>
                             <div class="absolute right-0 mt-2 w-48 bg-gray-800 rounded-lg shadow-lg py-2 z-30 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
-                                <a href="/profile" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white">Profile</a>
-                                <a href="/navigation-guide" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white">Help</a>
+                                <a href="/profile" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white">
+                                    <i class="fas fa-user mr-2"></i>Profile
+                                </a>
+                                <a href="/navigation-guide" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white">
+                                    <i class="fas fa-life-ring mr-2"></i>Help
+                                </a>
                                 <div class="border-t border-gray-700 my-1"></div>
-                                <a href="/logout" class="block px-4 py-2 text-sm text-red-400 hover:bg-gray-700">Sign out</a>
+                                <a href="/logout" class="block px-4 py-2 text-sm text-red-400 hover:bg-gray-700">
+                                    <i class="fas fa-sign-out-alt mr-2"></i>Sign out
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -626,36 +767,10 @@
             </header>
 
             <!-- Main Content Area -->
-            <div class="p-6">
-                <!-- Stats Grid -->
+            <div class="p-4 md:p-6">
+                <!-- Stats Grid - Removed Announcements and Assignments -->
                 <div class="analytics-grid">
-                    <div class="stat-card border-l-blue-500 card-hover-lift fade-in" style="animation-delay: 0.1s">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <div class="stat-number count-up" id="total-announcements">0</div>
-                                <div class="stat-label">Announcements</div>
-                                <div class="stat-trend trend-up" id="announcements-trend">↑ Loading...</div>
-                            </div>
-                            <div class="p-3 bg-blue-500/20 rounded-xl">
-                                <i class="fas fa-bullhorn text-blue-400 text-xl"></i>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="stat-card border-l-green-500 card-hover-lift fade-in" style="animation-delay: 0.2s">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <div class="stat-number count-up" id="total-assignments">0</div>
-                                <div class="stat-label">Assignments</div>
-                                <div class="stat-trend trend-up" id="assignments-trend">↑ Loading...</div>
-                            </div>
-                            <div class="p-3 bg-green-500/20 rounded-xl">
-                                <i class="fas fa-tasks text-green-400 text-xl"></i>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="stat-card border-l-purple-500 card-hover-lift fade-in" style="animation-delay: 0.3s">
+                    <div class="stat-card border-l-purple-500 card-hover-lift fade-in" style="animation-delay: 0.1s">
                         <div class="flex justify-between items-start">
                             <div>
                                 <div class="stat-number count-up" id="total-visits">0</div>
@@ -668,7 +783,7 @@
                         </div>
                     </div>
                     
-                    <div class="stat-card border-l-yellow-500 card-hover-lift fade-in" style="animation-delay: 0.4s">
+                    <div class="stat-card border-l-yellow-500 card-hover-lift fade-in" style="animation-delay: 0.2s">
                         <div class="flex justify-between items-start">
                             <div>
                                 <div class="stat-number count-up" id="user-status">Active</div>
@@ -680,37 +795,63 @@
                             </div>
                         </div>
                     </div>
+                    
+                    <div class="stat-card border-l-blue-500 card-hover-lift fade-in" style="animation-delay: 0.3s">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <div class="stat-number count-up" id="session-duration">0h</div>
+                                <div class="stat-label">Avg. Session</div>
+                                <div class="stat-trend trend-up" id="session-trend">↑ Loading...</div>
+                            </div>
+                            <div class="p-3 bg-blue-500/20 rounded-xl">
+                                <i class="fas fa-clock text-blue-400 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card border-l-green-500 card-hover-lift fade-in" style="animation-delay: 0.4s">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <div class="stat-number count-up" id="active-time">0</div>
+                                <div class="stat-label">Active Hours</div>
+                                <div class="stat-trend trend-up" id="time-trend">↑ Loading...</div>
+                            </div>
+                            <div class="p-3 bg-green-500/20 rounded-xl">
+                                <i class="fas fa-bolt text-green-400 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- User Profile & Activity -->
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6 mb-6">
                     <!-- User Profile Card -->
                     <div class="chart-container card-hover-lift fade-in" style="animation-delay: 0.5s">
                         <div class="flex justify-between items-center mb-4">
-                            <h3 class="text-xl font-bold text-shimmer">User Profile</h3>
+                            <h3 class="text-lg md:text-xl font-bold text-shimmer">User Profile</h3>
                             <i class="fas fa-user-circle text-blue-400 text-xl"></i>
                         </div>
                         <div class="text-center">
-                            <div class="user-avatar mx-auto mb-4 w-20 h-20 text-2xl" id="profile-avatar">LN</div>
-                            <h4 class="text-lg font-bold" id="profile-username">Loading...</h4>
-                            <p class="text-gray-400 mb-4" id="profile-role">Loading...</p>
+                            <div class="user-avatar mx-auto mb-4 w-16 h-16 md:w-20 md:h-20 text-xl md:text-2xl" id="profile-avatar">LN</div>
+                            <h4 class="text-base md:text-lg font-bold text-ellipsis" id="profile-username">Loading...</h4>
+                            <p class="text-gray-400 mb-4 text-ellipsis" id="profile-role">Loading...</p>
                             
                             <div class="space-y-3 text-left">
                                 <div class="flex justify-between items-center p-3 bg-gray-800/30 rounded-lg">
-                                    <span class="text-gray-400"><i class="fas fa-id-card mr-2"></i>User ID</span>
-                                    <span class="font-semibold text-blue-400" id="profile-id">--</span>
+                                    <span class="text-gray-400 text-sm"><i class="fas fa-id-card mr-2"></i>User ID</span>
+                                    <span class="font-semibold text-blue-400 text-sm" id="profile-id">--</span>
                                 </div>
                                 <div class="flex justify-between items-center p-3 bg-gray-800/30 rounded-lg">
-                                    <span class="text-gray-400"><i class="fas fa-mobile mr-2"></i>Mobile</span>
-                                    <span class="font-semibold text-green-400" id="profile-mobile">--</span>
+                                    <span class="text-gray-400 text-sm"><i class="fas fa-mobile mr-2"></i>Mobile</span>
+                                    <span class="font-semibold text-green-400 text-sm" id="profile-mobile">--</span>
                                 </div>
                                 <div class="flex justify-between items-center p-3 bg-gray-800/30 rounded-lg">
-                                    <span class="text-gray-400"><i class="fas fa-calendar mr-2"></i>Member Since</span>
-                                    <span class="font-semibold text-purple-400" id="profile-joined">--</span>
+                                    <span class="text-gray-400 text-sm"><i class="fas fa-calendar mr-2"></i>Member Since</span>
+                                    <span class="font-semibold text-purple-400 text-sm" id="profile-joined">--</span>
                                 </div>
                                 <div class="flex justify-between items-center p-3 bg-gray-800/30 rounded-lg">
-                                    <span class="text-gray-400"><i class="fas fa-shield-alt mr-2"></i>Admin Access</span>
-                                    <span class="font-semibold text-yellow-400" id="profile-admin">No</span>
+                                    <span class="text-gray-400 text-sm"><i class="fas fa-shield-alt mr-2"></i>Admin Access</span>
+                                    <span class="font-semibold text-yellow-400 text-sm" id="profile-admin">No</span>
                                 </div>
                             </div>
                         </div>
@@ -719,7 +860,7 @@
                     <!-- Recent Activity -->
                     <div class="chart-container lg:col-span-2 card-hover-lift fade-in" style="animation-delay: 0.6s">
                         <div class="flex justify-between items-center mb-4">
-                            <h3 class="text-xl font-bold text-shimmer">Recent Activity</h3>
+                            <h3 class="text-lg md:text-xl font-bold text-shimmer">Recent Activity</h3>
                             <span class="text-sm text-gray-400" id="activity-count">0 activities</span>
                         </div>
                         <div class="activity-feed" id="activity-feed">
@@ -731,11 +872,11 @@
                 </div>
 
                 <!-- Charts Section -->
-                <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                <div class="grid grid-cols-1 xl:grid-cols-2 gap-4 md:gap-6">
                     <!-- Activity Chart -->
                     <div class="chart-container card-hover-lift fade-in" style="animation-delay: 0.7s">
                         <div class="flex justify-between items-center mb-4">
-                            <h3 class="text-xl font-bold text-shimmer">Activity Overview</h3>
+                            <h3 class="text-lg md:text-xl font-bold text-shimmer">Activity Overview</h3>
                             <div class="flex space-x-2">
                                 <button class="text-xs px-3 py-1 bg-blue-500/20 text-blue-400 rounded-full font-medium transition-all hover:scale-105">7D</button>
                                 <button class="text-xs px-3 py-1 bg-gray-700 text-gray-400 rounded-full font-medium transition-all hover:scale-105">30D</button>
@@ -749,7 +890,7 @@
                     <!-- Platform Usage -->
                     <div class="chart-container card-hover-lift fade-in" style="animation-delay: 0.8s">
                         <div class="flex justify-between items-center mb-4">
-                            <h3 class="text-xl font-bold text-shimmer">Platform Usage</h3>
+                            <h3 class="text-lg md:text-xl font-bold text-shimmer">Platform Usage</h3>
                             <i class="fas fa-chart-pie text-purple-400 floating"></i>
                         </div>
                         <div class="chart-wrapper chart-wrapper-medium">
@@ -808,7 +949,7 @@
                 }
                 const userData = await userResponse.json();
                 
-                console.log('User Data:', userData); // Debug log
+                console.log('User Data:', userData);
                 
                 // Update user profile information
                 updateUserProfile(userData._data);
@@ -820,7 +961,7 @@
                 }
                 const activityData = await activityResponse.json();
                 
-                console.log('Activity Data:', activityData); // Debug log
+                console.log('Activity Data:', activityData);
                 
                 // Update activity information
                 updateActivity(activityData);
@@ -882,13 +1023,9 @@
             document.getElementById('profile-role').textContent = user.is_admin ? 'Administrator' : 'User';
             
             // Update stats
-            document.getElementById('total-announcements').textContent = user.announcements;
-            document.getElementById('total-assignments').textContent = user.assignment;
             document.getElementById('user-status').textContent = user.status ? 'Active' : 'Inactive';
             
             // Update trends
-            document.getElementById('announcements-trend').textContent = user.announcements > 5 ? '↑ High engagement' : user.announcements > 2 ? '↑ Normal activity' : '↑ Getting started';
-            document.getElementById('assignments-trend').textContent = user.assignment > 3 ? '↑ Many tasks' : user.assignment > 1 ? '↑ Steady progress' : '↑ Starting up';
             document.getElementById('status-trend').textContent = user.status ? '↑ All systems go' : '↑ Account inactive';
         }
         
@@ -911,6 +1048,12 @@
             document.getElementById('activity-count').textContent = `${activities.length} activities`;
             document.getElementById('visits-trend').textContent = activityData.visits > 50 ? '↑ High activity' : activityData.visits > 20 ? '↑ Normal usage' : '↑ Getting started';
             
+            // Generate sample data for demo cards
+            document.getElementById('session-duration').textContent = '1.5h';
+            document.getElementById('session-trend').textContent = '↑ 12% increase';
+            document.getElementById('active-time').textContent = '24';
+            document.getElementById('time-trend').textContent = '↑ 8% more active';
+            
             if (activities.length === 0) {
                 feed.innerHTML = `
                     <div class="text-center py-8">
@@ -923,18 +1066,18 @@
             
             feed.innerHTML = activities.map((activity, index) => `
                 <div class="activity-item glass-morph" style="animation-delay: ${index * 0.1}s">
-                    <div class="flex items-center gap-4">
-                        <div class="user-avatar">
+                    <div class="flex items-center gap-3 md:gap-4">
+                        <div class="user-avatar w-8 h-8 md:w-10 md:h-10 text-sm">
                             <i class="fas fa-${getActivityIcon(activity.action, activity.target)}"></i>
                         </div>
                         <div class="flex-1 min-w-0">
                             <div class="flex items-center justify-between mb-1">
-                                <div class="font-semibold text-white truncate">${formatActivityTitle(activity.action, activity.target)}</div>
-                                <div class="activity-time">${formatActivityTime(activity.timestamp)}</div>
+                                <div class="font-semibold text-white text-ellipsis text-sm md:text-base">${formatActivityTitle(activity.action, activity.target)}</div>
+                                <div class="activity-time text-xs">${formatActivityTime(activity.timestamp)}</div>
                             </div>
-                            <div class="text-sm text-gray-300 flex items-center flex-wrap gap-1">
+                            <div class="text-xs md:text-sm text-gray-300 flex items-center flex-wrap gap-1">
                                 <span>${formatActivityDescription(activity.action, activity.target)}</span>
-                                ${activity.target ? `<span class="section-badge">${formatSectionName(activity.target)}</span>` : ''}
+                                ${activity.target ? `<span class="section-badge text-xs">${formatSectionName(activity.target)}</span>` : ''}
                                 ${activity.duration ? `<span class="text-xs text-gray-500 ml-2">${activity.duration}s</span>` : ''}
                             </div>
                         </div>
@@ -1038,7 +1181,7 @@
                 data = Object.values(statsData.action_stats);
             } else {
                 // Fallback to sample data
-                labels = ['Dashboard', 'Assignments', 'Announcements', 'Settings', 'Profile'];
+                labels = ['Dashboard', 'Profile', 'Settings', 'Analytics', 'Reports'];
                 data = [35, 25, 20, 10, 10];
             }
             
@@ -1191,7 +1334,7 @@
         }
         
         function refreshDashboard() {
-            const btn = event?.target || document.getElementById('refreshData');
+            const btn = event?.target || document.querySelector('.btn');
             const originalHtml = btn.innerHTML;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Refreshing...';
             btn.disabled = true;

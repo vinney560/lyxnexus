@@ -98,7 +98,7 @@ def user_stats():
         # Format action stats
         action_data = {action: count for action, count in action_stats}
         
-        # Get weekly activity (last 7 days)
+        # Get weekly
         week_ago = datetime.datetime.now() - datetime.timedelta(days=7)
         weekly_activity = db.session.query(
             func.date(UserActivity.timestamp),
@@ -137,7 +137,7 @@ def log_activity():
         target = data.get('target', 'dashboard')
         duration = data.get('duration', 0)
         
-        # Create new activity log
+        # Create new activity log --> inplace of Main-page
         new_activity = UserActivity(
             user_id=current_user.id,
             action=action,
