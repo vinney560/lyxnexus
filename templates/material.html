@@ -536,25 +536,27 @@
 
     <script>
         const backMain = document.getElementById("backMain");
-        backMain.addEventListener('click', () => {
-            const originalContent = backMain.innerHTML;
-        
-            // Show spinner
-            backMain.innerHTML = '<i class="fas fa-spinner fa-spin"></i> exiting...';
-            backMain.style.transition = 'opacity 0.3s';
-            backMain.style.opacity = 0.5; // slight fade
-        
-            setTimeout(() => {
-                backMain.style.opacity = 0; // fade out completely
-            }, 200);
-        
-            // Redirect after animation
-            setTimeout(() => {
-                window.location.href = '/main-page';
-                backMain.innerHTML = '<i class="fas fa-arrow-left mr-2"></i> Back ';
-                backMain.style.opacity = 1;
-            }, 500);
-        });
+        if (backMain) {
+            backMain.addEventListener('click', () => {
+                const originalContent = backMain.innerHTML;
+            
+                // Show spinner
+                backMain.innerHTML = '<i class="fas fa-spinner fa-spin"></i> exiting...';
+                backMain.style.transition = 'opacity 0.3s';
+                backMain.style.opacity = 0.5; // slight fade
+            
+                setTimeout(() => {
+                    backMain.style.opacity = 0; // fade out completely
+                }, 200);
+            
+                // Redirect after animation
+                setTimeout(() => {
+                    window.location.href = '/main-page';
+                    backMain.innerHTML = '<i class="fas fa-arrow-left mr-2"></i> Back ';
+                    backMain.style.opacity = 1;
+                }, 500);
+            });
+        }        
 
         const API_BASE = '/api';
         const TOPIC_ID = {{ topic_id }};
