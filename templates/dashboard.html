@@ -739,7 +739,7 @@
                     
                     <div class="flex items-center space-x-1 md:space-x-2 flex-shrink-0">
                         <!-- Refresh Button -->
-                        <button onclick="refreshDashboard()" class="btn flex items-center space-x-1 md:space-x-2">
+                        <button onclick="refreshDashboard()" id="refreshData" class="btn flex items-center space-x-1 md:space-x-2">
                             <i class="fas fa-sync-alt text-xs md:text-sm"></i>
                             <span class="hidden sm:inline">Refresh</span>
                         </button>
@@ -1344,7 +1344,7 @@
         }
         
         function refreshDashboard() {
-            const btn = event?.target || document.querySelector('.btn');
+            const btn = event?.target || document.getElementById('refreshData');
             const originalHtml = btn.innerHTML;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Refreshing...';
             btn.disabled = true;
