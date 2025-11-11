@@ -1,0 +1,1172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Dashboard | LyxNexus</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #111827;
+            --text-color: #F9FAFB;
+            --accent-color: #4A90E2;
+            --secondary-color: #8B5CF6;
+            --success-color: #10B981;
+            --warning-color: #F59E0B;
+            --danger-color: #EF4444;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            overflow-x: hidden;
+        }
+        
+        .gradient-text {
+            background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent;
+            background-size: 200% 200%;
+            animation: gradient-shift 3s ease infinite;
+        }
+        
+        @keyframes gradient-shift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .glass-morph {
+            background: rgba(30, 30, 40, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            box-shadow: 0 8px 32px rgba(0, 31, 135, 0.2);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .glass-morph:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0, 31, 135, 0.3);
+        }
+        
+        .btn {
+            background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 50px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .btn:hover::before {
+            left: 100%;
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+        }
+        
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: rgba(30, 30, 40, 0.7);
+            border-radius: 16px;
+            padding: 1.5rem;
+            border-left: 4px solid;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+            transition: left 0.5s;
+        }
+        
+        .stat-card:hover::before {
+            left: 100%;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .stat-label {
+            color: #9CA3AF;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .stat-trend {
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-top: 0.5rem;
+        }
+        
+        .trend-up { color: #10B981; }
+        .trend-down { color: #EF4444; }
+        
+        .chart-container {
+            background: rgba(30, 30, 40, 0.7);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .chart-container:hover {
+            border-color: rgba(59, 130, 246, 0.4);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+        
+        .chart-wrapper {
+            position: relative;
+            width: 100%;
+            margin: 0 auto;
+        }
+        
+        .chart-wrapper-large {
+            height: 300px;
+        }
+        
+        .chart-wrapper-medium {
+            height: 280px;
+        }
+        
+        .activity-feed {
+            max-height: 400px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(59, 130, 246, 0.3) transparent;
+        }
+        
+        .activity-feed::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .activity-feed::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        
+        .activity-feed::-webkit-scrollbar-thumb {
+            background: rgba(59, 130, 246, 0.3);
+            border-radius: 3px;
+        }
+        
+        .activity-feed::-webkit-scrollbar-thumb:hover {
+            background: rgba(59, 130, 246, 0.5);
+        }
+        
+        .activity-item {
+            padding: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            animation: slideInUp 0.5s ease-out;
+        }
+        
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .activity-item:hover {
+            background: rgba(59, 130, 246, 0.1);
+            transform: translateY(5px);
+        }
+        
+        .activity-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+        
+        .activity-time {
+            color: #9CA3AF;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .user-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+            animation: bounceIn 0.6s ease-out;
+        }
+        
+        @keyframes bounceIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.3);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.05);
+            }
+            70% {
+                transform: scale(0.9);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+        
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 3px solid #3B82F6;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #10B981;
+            animation: pulse 2s infinite;
+            margin-right: 0.5rem;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        .live-indicator {
+            display: flex;
+            align-items: center;
+            font-size: 0.8rem;
+            color: #10B981;
+            font-weight: 600;
+        }
+        
+        .card-hover-lift {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover-lift:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .text-shimmer {
+            background: linear-gradient(90deg, #3B82F6, #8B5CF6, #3B82F6);
+            background-size: 200% 100%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shimmer 3s infinite linear;
+        }
+        
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.8s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .slide-in-left {
+            animation: slideInLeft 0.6s ease-out;
+        }
+        
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .slide-in-right {
+            animation: slideInRight 0.6s ease-out;
+        }
+        
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .count-up {
+            animation: countUp 1.5s ease-out;
+        }
+        
+        @keyframes countUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .glow {
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes glow {
+            from {
+                box-shadow: 0 0 5px rgba(59, 130, 246, 0.5);
+            }
+            to {
+                box-shadow: 0 0 20px rgba(59, 130, 246, 0.8);
+            }
+        }
+        
+        .floating {
+            animation: floating 3s ease-in-out infinite;
+        }
+        
+        @keyframes floating {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        
+        .sidebar {
+            width: 260px;
+            background: rgba(30, 30, 40, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-right: 1px solid rgba(59, 130, 246, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar-item {
+            padding: 14px 20px;
+            margin: 5px 15px;
+            border-radius: 10px;
+            color: #9CA3AF;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .sidebar-item:hover {
+            background: rgba(59, 130, 246, 0.1);
+            color: #3B82F6;
+            transform: translateX(5px);
+        }
+        
+        .sidebar-item.active {
+            background: rgba(59, 130, 246, 0.2);
+            color: #3B82F6;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+        }
+        
+        .notification-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #EF4444;
+            position: absolute;
+            right: 20px;
+            animation: pulse 1.5s infinite;
+        }
+        
+        .mobile-menu-btn {
+            display: none;
+        }
+        
+        @media (max-width: 1024px) {
+            .sidebar {
+                position: fixed;
+                left: -260px;
+                z-index: 40;
+                height: 100vh;
+            }
+            
+            .sidebar.active {
+                left: 0;
+            }
+            
+            .mobile-menu-btn {
+                display: block;
+            }
+            
+            .overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 30;
+            }
+            
+            .overlay.active {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-900">
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="p-6 border-b border-gray-800">
+                <div class="flex items-center space-x-3">
+                    <div class="logo-container bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl p-2 glow">
+                        <i class="fas fa-chart-line text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold gradient-text">LyxNexus</h1>
+                        <p class="text-xs text-gray-400">Dashboard</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="py-6 overflow-y-auto h-full">
+                <div class="space-y-2">
+                    <div class="sidebar-item active">
+                        <i class="fas fa-home w-5"></i>
+                        <span>Dashboard</span>
+                    </div>
+                    <div class="sidebar-item">
+                        <i class="fas fa-chart-bar w-5"></i>
+                        <span>Analytics</span>
+                    </div>
+                    <div class="sidebar-item">
+                        <i class="fas fa-users w-5"></i>
+                        <span>Users</span>
+                        <div class="notification-dot"></div>
+                    </div>
+                    <div class="sidebar-item">
+                        <i class="fas fa-cog w-5"></i>
+                        <span>Settings</span>
+                    </div>
+                    <div class="sidebar-item">
+                        <i class="fas fa-bell w-5"></i>
+                        <span>Notifications</span>
+                        <span class="ml-auto bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">3</span>
+                    </div>
+                    <div class="sidebar-item">
+                        <i class="fas fa-file-alt w-5"></i>
+                        <span>Reports</span>
+                    </div>
+                </div>
+                
+                <div class="mt-10 px-6">
+                    <h3 class="text-xs uppercase text-gray-500 font-semibold mb-3">Tools</h3>
+                    <div class="space-y-2">
+                        <div class="sidebar-item">
+                            <i class="fas fa-palette w-5"></i>
+                            <span>Themes</span>
+                        </div>
+                        <div class="sidebar-item">
+                            <i class="fas fa-shield-alt w-5"></i>
+                            <span>Security</span>
+                        </div>
+                        <div class="sidebar-item">
+                            <i class="fas fa-life-ring w-5"></i>
+                            <span>Support</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="absolute bottom-0 w-full p-6 border-t border-gray-800">
+                    <div class="flex items-center space-x-3">
+                        <div class="user-avatar w-10 h-10 text-sm" id="sidebar-user-avatar">JD</div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm font-medium truncate" id="sidebar-username">Loading...</p>
+                            <p class="text-xs text-gray-400 truncate" id="sidebar-role">Administrator</p>
+                        </div>
+                        <button class="text-gray-400 hover:text-white transition-colors">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="flex-1 overflow-auto">
+            <!-- Header -->
+            <header class="glass-morph sticky top-0 z-20">
+                <div class="flex items-center justify-between p-4">
+                    <div class="flex items-center space-x-4">
+                        <button class="mobile-menu-btn text-gray-400 hover:text-white">
+                            <i class="fas fa-bars text-xl"></i>
+                        </button>
+                        <div>
+                            <h1 class="text-2xl font-bold gradient-text">Dashboard Overview</h1>
+                            <div class="flex items-center space-x-2">
+                                <p class="text-sm text-gray-400" id="welcome-message">Welcome back</p>
+                                <div class="live-indicator">
+                                    <div class="pulse-dot"></div>
+                                    <span>LIVE</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center space-x-4">
+                        <div class="relative">
+                            <button class="text-gray-400 hover:text-white transition-colors">
+                                <i class="fas fa-bell text-xl"></i>
+                            </button>
+                            <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">3</span>
+                        </div>
+                        
+                        <div class="relative group">
+                            <button class="flex items-center space-x-2 text-gray-300 hover:text-white transition-colors">
+                                <div class="user-avatar w-8 h-8 text-xs" id="header-user-avatar">JD</div>
+                                <span class="hidden md:block" id="header-username">Loading...</span>
+                                <i class="fas fa-chevron-down text-xs"></i>
+                            </button>
+                            <div class="absolute right-0 mt-2 w-48 bg-gray-800 rounded-lg shadow-lg py-2 z-30 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
+                                <a href="#" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white">Profile</a>
+                                <a href="#" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white">Settings</a>
+                                <a href="#" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white">Help</a>
+                                <div class="border-t border-gray-700 my-1"></div>
+                                <a href="#" class="block px-4 py-2 text-sm text-red-400 hover:bg-gray-700">Sign out</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Main Content Area -->
+            <div class="p-6">
+                <!-- Stats Grid -->
+                <div class="analytics-grid">
+                    <div class="stat-card border-l-blue-500 card-hover-lift fade-in" style="animation-delay: 0.1s">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <div class="stat-number count-up" id="total-announcements">0</div>
+                                <div class="stat-label">Announcements</div>
+                                <div class="stat-trend trend-up" id="announcements-trend">↑ Loading...</div>
+                            </div>
+                            <div class="p-3 bg-blue-500/20 rounded-xl">
+                                <i class="fas fa-bullhorn text-blue-400 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card border-l-green-500 card-hover-lift fade-in" style="animation-delay: 0.2s">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <div class="stat-number count-up" id="total-assignments">0</div>
+                                <div class="stat-label">Assignments</div>
+                                <div class="stat-trend trend-up" id="assignments-trend">↑ Loading...</div>
+                            </div>
+                            <div class="p-3 bg-green-500/20 rounded-xl">
+                                <i class="fas fa-tasks text-green-400 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card border-l-purple-500 card-hover-lift fade-in" style="animation-delay: 0.3s">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <div class="stat-number count-up" id="total-visits">0</div>
+                                <div class="stat-label">Total Visits</div>
+                                <div class="stat-trend trend-up" id="visits-trend">↑ Loading...</div>
+                            </div>
+                            <div class="p-3 bg-purple-500/20 rounded-xl">
+                                <i class="fas fa-chart-line text-purple-400 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card border-l-yellow-500 card-hover-lift fade-in" style="animation-delay: 0.4s">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <div class="stat-number count-up" id="user-status">Active</div>
+                                <div class="stat-label">Account Status</div>
+                                <div class="stat-trend trend-up" id="status-trend">All systems go</div>
+                            </div>
+                            <div class="p-3 bg-yellow-500/20 rounded-xl">
+                                <i class="fas fa-user-check text-yellow-400 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- User Profile & Activity -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                    <!-- User Profile Card -->
+                    <div class="chart-container card-hover-lift fade-in" style="animation-delay: 0.5s">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-xl font-bold text-shimmer">User Profile</h3>
+                            <i class="fas fa-user-circle text-blue-400 text-xl"></i>
+                        </div>
+                        <div class="text-center">
+                            <div class="user-avatar mx-auto mb-4 w-20 h-20 text-2xl" id="profile-avatar">JD</div>
+                            <h4 class="text-lg font-bold" id="profile-username">Loading...</h4>
+                            <p class="text-gray-400 mb-4" id="profile-role">Loading...</p>
+                            
+                            <div class="space-y-3 text-left">
+                                <div class="flex justify-between items-center p-3 bg-gray-800/30 rounded-lg">
+                                    <span class="text-gray-400">User ID</span>
+                                    <span class="font-semibold text-blue-400" id="profile-id">--</span>
+                                </div>
+                                <div class="flex justify-between items-center p-3 bg-gray-800/30 rounded-lg">
+                                    <span class="text-gray-400">Mobile</span>
+                                    <span class="font-semibold text-green-400" id="profile-mobile">--</span>
+                                </div>
+                                <div class="flex justify-between items-center p-3 bg-gray-800/30 rounded-lg">
+                                    <span class="text-gray-400">Member Since</span>
+                                    <span class="font-semibold text-purple-400" id="profile-joined">--</span>
+                                </div>
+                                <div class="flex justify-between items-center p-3 bg-gray-800/30 rounded-lg">
+                                    <span class="text-gray-400">Admin Access</span>
+                                    <span class="font-semibold text-yellow-400" id="profile-admin">No</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Recent Activity -->
+                    <div class="chart-container lg:col-span-2 card-hover-lift fade-in" style="animation-delay: 0.6s">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-xl font-bold text-shimmer">Recent Activity</h3>
+                            <span class="text-sm text-gray-400" id="activity-count">0 activities</span>
+                        </div>
+                        <div class="activity-feed" id="activity-feed">
+                            <div class="loading">
+                                <div class="spinner"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Section -->
+                <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                    <!-- Activity Chart -->
+                    <div class="chart-container card-hover-lift fade-in" style="animation-delay: 0.7s">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-xl font-bold text-shimmer">Activity Overview</h3>
+                            <div class="flex space-x-2">
+                                <button class="text-xs px-3 py-1 bg-blue-500/20 text-blue-400 rounded-full font-medium transition-all hover:scale-105">7D</button>
+                                <button class="text-xs px-3 py-1 bg-gray-700 text-gray-400 rounded-full font-medium transition-all hover:scale-105">30D</button>
+                            </div>
+                        </div>
+                        <div class="chart-wrapper chart-wrapper-large">
+                            <canvas id="activityChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <!-- Platform Usage -->
+                    <div class="chart-container card-hover-lift fade-in" style="animation-delay: 0.8s">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-xl font-bold text-shimmer">Platform Usage</h3>
+                            <i class="fas fa-chart-pie text-purple-400 floating"></i>
+                        </div>
+                        <div class="chart-wrapper chart-wrapper-medium">
+                            <canvas id="usageChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Overlay -->
+    <div class="overlay"></div>
+
+    <script>
+        // Charts
+        let activityChart, usageChart;
+        
+        // Chart configuration
+        const chartConfig = {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: {
+                duration: 2000,
+                easing: 'easeOutQuart'
+            },
+            plugins: {
+                legend: { 
+                    display: true,
+                    position: 'bottom',
+                    labels: {
+                        color: '#e5e7eb',
+                        padding: 15,
+                        usePointStyle: true,
+                        pointStyle: 'circle',
+                        font: {
+                            size: 11
+                        }
+                    }
+                }
+            }
+        };
+        
+        // Fetch user data from Flask API
+        async function loadUserData() {
+            try {
+                showLoadingStates();
+                
+                // Fetch user profile data
+                const userResponse = await fetch('/dashboard/api/data');
+                if (!userResponse.ok) {
+                    throw new Error(`HTTP error! status: ${userResponse.status}`);
+                }
+                const userData = await userResponse.json();
+                
+                console.log('User Data:', userData); // Debug log
+                
+                // Update user profile information
+                updateUserProfile(userData._data);
+                
+                // Fetch activity data
+                const activityResponse = await fetch('/dashboard/api/activity');
+                if (!activityResponse.ok) {
+                    throw new Error(`HTTP error! status: ${activityResponse.status}`);
+                }
+                const activityData = await activityResponse.json();
+                
+                console.log('Activity Data:', activityData); // Debug log
+                
+                // Update activity information
+                updateActivity(activityData);
+                
+                // Update charts with data
+                updateCharts(userData._data, activityData);
+                
+            } catch (error) {
+                console.error('Failed to load dashboard data:', error);
+                showErrorStates();
+            } finally {
+                hideLoadingStates();
+            }
+        }
+        
+        function updateUserProfile(user) {
+            // Update user information throughout the page
+            document.getElementById('sidebar-username').textContent = user.username;
+            document.getElementById('header-username').textContent = user.username;
+            document.getElementById('profile-username').textContent = user.username;
+            document.getElementById('welcome-message').textContent = `Welcome back, ${user.username}`;
+            
+            // Update user avatar initials
+            const initials = user.username ? user.username.charAt(0).toUpperCase() : 'U';
+            document.getElementById('sidebar-user-avatar').textContent = initials;
+            document.getElementById('header-user-avatar').textContent = initials;
+            document.getElementById('profile-avatar').textContent = initials;
+            
+            // Update user details
+            document.getElementById('profile-id').textContent = user.id;
+            document.getElementById('profile-mobile').textContent = user.mobile || 'Not set';
+            document.getElementById('profile-joined').textContent = user.created_at;
+            document.getElementById('profile-admin').textContent = user.is_admin ? 'Yes' : 'No';
+            document.getElementById('profile-role').textContent = user.is_admin ? 'Administrator' : 'User';
+            
+            // Update stats
+            document.getElementById('total-announcements').textContent = user.announcements;
+            document.getElementById('total-assignments').textContent = user.assignment;
+            document.getElementById('user-status').textContent = user.status ? 'Active' : 'Inactive';
+            
+            // Update trends
+            document.getElementById('announcements-trend').textContent = user.announcements > 5 ? '↑ High engagement' : user.announcements > 2 ? '↑ Normal activity' : '↑ Getting started';
+            document.getElementById('assignments-trend').textContent = user.assignment > 3 ? '↑ Many tasks' : user.assignment > 1 ? '↑ Steady progress' : '↑ Starting up';
+            document.getElementById('status-trend').textContent = user.status ? '↑ All systems go' : '↑ Account inactive';
+        }
+        
+        function updateActivity(activityData) {
+            const feed = document.getElementById('activity-feed');
+            const activities = activityData.visited_page || [];
+            
+            document.getElementById('total-visits').textContent = activityData.visits || 0;
+            document.getElementById('activity-count').textContent = `${activities.length} activities`;
+            document.getElementById('visits-trend').textContent = activityData.visits > 50 ? '↑ High activity' : activityData.visits > 20 ? '↑ Normal usage' : '↑ Getting started';
+            
+            if (activities.length === 0) {
+                feed.innerHTML = `
+                    <div class="text-center py-8">
+                        <i class="fas fa-inbox text-4xl text-gray-600 mb-4"></i>
+                        <p class="text-gray-400">No recent activity found</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            feed.innerHTML = activities.map((activity, index) => `
+                <div class="activity-item glass-morph" style="animation-delay: ${index * 0.1}s">
+                    <div class="flex items-center gap-4">
+                        <div class="user-avatar">
+                            <i class="fas fa-${getActivityIcon(activity.page)}"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center justify-between mb-1">
+                                <div class="font-semibold text-white truncate">${formatActivityTitle(activity.page)}</div>
+                                <div class="activity-time">${formatActivityTime(activity.timestamp)}</div>
+                            </div>
+                            <div class="text-sm text-gray-300 flex items-center flex-wrap gap-1">
+                                <span>${formatActivityDescription(activity.page, activity.section)}</span>
+                                ${activity.section ? `<span class="section-badge">${formatSectionName(activity.section)}</span>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function updateCharts(userData, activityData) {
+            updateActivityChart(userData, activityData);
+            updateUsageChart(userData, activityData);
+        }
+        
+        function updateActivityChart(userData, activityData) {
+            const activityCtx = document.getElementById('activityChart').getContext('2d');
+            if (activityChart) activityChart.destroy();
+            
+            // Generate sample activity data for the chart
+            const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+            const activityCounts = days.map(() => Math.floor(Math.random() * 10) + 1);
+            
+            activityChart = new Chart(activityCtx, {
+                type: 'bar',
+                data: {
+                    labels: days,
+                    datasets: [{
+                        label: 'Daily Visits',
+                        data: activityCounts,
+                        backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                        borderColor: '#3B82F6',
+                        borderWidth: 2,
+                        borderRadius: 8,
+                        borderSkipped: false,
+                    }]
+                },
+                options: {
+                    ...chartConfig,
+                    plugins: {
+                        ...chartConfig.plugins,
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: 'rgba(30, 30, 40, 0.9)',
+                            titleColor: '#ffffff',
+                            bodyColor: '#e5e7eb',
+                            borderColor: '#3B82F6',
+                            borderWidth: 1,
+                            displayColors: false,
+                            callbacks: {
+                                title: function(tooltipItems) {
+                                    return `Day: ${tooltipItems[0].label}`;
+                                },
+                                label: function(context) {
+                                    return `Visits: ${context.parsed.y}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { 
+                                color: 'rgba(255, 255, 255, 0.1)',
+                                borderDash: [3, 3]
+                            },
+                            ticks: { 
+                                color: '#9CA3AF',
+                                font: { size: 10 },
+                                stepSize: 2
+                            }
+                        },
+                        x: {
+                            grid: { 
+                                color: 'rgba(255, 255, 255, 0.1)',
+                                borderDash: [3, 3]
+                            },
+                            ticks: { 
+                                color: '#9CA3AF',
+                                font: { size: 11 }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function updateUsageChart(userData, activityData) {
+            const usageCtx = document.getElementById('usageChart').getContext('2d');
+            if (usageChart) usageChart.destroy();
+            
+            // Generate sample usage data
+            const usageData = {
+                'Dashboard': 35,
+                'Assignments': 25,
+                'Announcements': 20,
+                'Settings': 10,
+                'Profile': 10
+            };
+            
+            usageChart = new Chart(usageCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(usageData),
+                    datasets: [{
+                        data: Object.values(usageData),
+                        backgroundColor: [
+                            '#3B82F6', '#8B5CF6', '#10B981', '#F59E0B', '#EF4444'
+                        ],
+                        borderWidth: 0,
+                        hoverOffset: 15
+                    }]
+                },
+                options: {
+                    ...chartConfig,
+                    cutout: '60%',
+                    plugins: {
+                        ...chartConfig.plugins,
+                        tooltip: {
+                            backgroundColor: 'rgba(30, 30, 40, 0.9)',
+                            titleColor: '#ffffff',
+                            bodyColor: '#e5e7eb',
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.raw || 0;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = Math.round((value / total) * 100);
+                                    return `${label}: ${value}% (${percentage}% of time)`;
+                                }
+                            }
+                        }
+                    },
+                    layout: {
+                        padding: {
+                            top: 10,
+                            bottom: 10
+                        }
+                    }
+                }
+            });
+        }
+        
+        function getActivityIcon(page) {
+            const icons = {
+                'dashboard': 'tachometer-alt',
+                'profile': 'user',
+                'settings': 'cog',
+                'announcements': 'bullhorn',
+                'assignments': 'tasks'
+            };
+            return icons[page] || 'file';
+        }
+        
+        function formatActivityTitle(page) {
+            const titles = {
+                'dashboard': 'Dashboard View',
+                'profile': 'Profile Page',
+                'settings': 'Settings Page',
+                'announcements': 'Announcements',
+                'assignments': 'Assignments'
+            };
+            return titles[page] || 'Page View';
+        }
+        
+        function formatActivityDescription(page, section) {
+            const descriptions = {
+                'dashboard': 'Viewed dashboard overview',
+                'profile': 'Accessed user profile',
+                'settings': 'Updated account settings',
+                'announcements': 'Checked announcements',
+                'assignments': 'Reviewed assignments'
+            };
+            return descriptions[page] || 'Visited page';
+        }
+        
+        function formatSectionName(section) {
+            if (!section) return 'General';
+            return section.charAt(0).toUpperCase() + section.slice(1);
+        }
+        
+        function formatActivityTime(timestamp) {
+            if (!timestamp) return 'Recently';
+            
+            // Handle both string and Date objects
+            const date = new Date(timestamp);
+            const now = new Date();
+            const diffMs = now - date;
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMs / 3600000);
+            
+            if (diffMins < 1) return 'Just now';
+            if (diffMins < 60) return `${diffMins}m ago`;
+            if (diffHours < 24) return `${diffHours}h ago`;
+            return date.toLocaleDateString();
+        }
+        
+        function showLoadingStates() {
+            document.querySelectorAll('.loading').forEach(el => {
+                el.style.display = 'flex';
+            });
+        }
+        
+        function hideLoadingStates() {
+            document.querySelectorAll('.loading').forEach(el => {
+                el.style.display = 'none';
+            });
+        }
+        
+        function showErrorStates() {
+            document.getElementById('activity-feed').innerHTML = `
+                <div class="text-center py-8">
+                    <i class="fas fa-exclamation-triangle text-4xl text-yellow-400 mb-4"></i>
+                    <p class="text-gray-400 mb-2">Failed to load dashboard data</p>
+                    <button onclick="loadUserData()" class="text-blue-400 hover:text-blue-300 text-sm">
+                        <i class="fas fa-redo mr-1"></i> Retry
+                    </button>
+                </div>
+            `;
+        }
+        
+        function refreshDashboard() {
+            const btn = event?.target || document.getElementById('refreshData');
+            const originalHtml = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Refreshing...';
+            btn.disabled = true;
+            
+            // Add refresh animation to stats
+            document.querySelectorAll('.stat-card').forEach(card => {
+                card.classList.add('glow');
+                setTimeout(() => card.classList.remove('glow'), 2000);
+            });
+            
+            loadUserData().finally(() => {
+                setTimeout(() => {
+                    btn.innerHTML = originalHtml;
+                    btn.disabled = false;
+                }, 1000);
+            });
+        }
+        
+        // Mobile menu functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.querySelector('.overlay');
+            
+            mobileMenuBtn.addEventListener('click', function() {
+                sidebar.classList.toggle('active');
+                overlay.classList.toggle('active');
+            });
+            
+            overlay.addEventListener('click', function() {
+                sidebar.classList.remove('active');
+                overlay.classList.remove('active');
+            });
+            
+            // Initialize dashboard
+            setTimeout(() => {
+                loadUserData();
+            }, 500);
+
+            // Auto-refresh every 2 minutes
+            setInterval(loadUserData, 120000);
+        });
+        
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            if (activityChart) {
+                activityChart.resize();
+            }
+            if (usageChart) {
+                usageChart.resize();
+            }
+        });
+    </script>
+</body>
+</html>

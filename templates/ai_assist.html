@@ -8,7 +8,7 @@
     <style>
         :root {
             --primary: #3b82f6;
-            --secondary: #8b5cf6;
+            --secondary: #295a97;
             --background: #0f172a;
             --surface: rgba(30, 41, 59, 0.8);
             --surface-light: #1e293b;
@@ -43,7 +43,6 @@
             line-height: 1.6;
         }
 
-        /* Header - Fixed at top */
         .header {
             background: var(--surface);
             padding: 1rem 1.25rem;
@@ -127,7 +126,6 @@
             background: var(--primary);
         }
 
-        /* History Panel Styles */
         .history-panel {
             position: fixed;
             left: 0;
@@ -252,7 +250,6 @@
             transform: scale(1.05);
         }
 
-        /* Backdrop for mobile */
         .history-backdrop {
             position: fixed;
             top: 0;
@@ -281,13 +278,12 @@
             margin-left: 300px;
         }
 
-        /* Main Chat Container - Fixed with scrollable content */
         .chat-container {
             position: fixed;
-            top: 70px; /* Header height */
+            top: 70px;
             left: 0;
             right: 0;
-            bottom: 80px; /* Input container height */
+            bottom: 80px;
             overflow: hidden;
             display: flex;
             flex-direction: column;
@@ -307,7 +303,6 @@
             transition: all 0.5s ease;
         }
 
-        /* Messages Container - Scrollable */
         #chat-box {
             flex: 1;
             overflow-y: auto;
@@ -335,7 +330,7 @@
 
         .user-message {
             align-self: flex-end;
-            background: linear-gradient(135deg, var(--secondary), #7c3aed);
+            background: linear-gradient(135deg, var(--secondary), #3c99a9);
             color: white;
             border-bottom-right-radius: var(--radius-sm);
             box-shadow: var(--shadow);
@@ -435,7 +430,6 @@
             transform: none !important;
         }
 
-        /* Input Container - Fixed at bottom */
         .input-container {
             position: fixed;
             bottom: 0;
@@ -558,7 +552,6 @@
             font-weight: 300;
         }
 
-        /* Text Formatting Styles */
         .formatted-text {
             white-space: pre-wrap;
             word-wrap: break-word;
@@ -698,7 +691,6 @@
             border-radius: 2px;
         }
 
-        /* Animations */
         @keyframes messageSlideIn {
             from {
                 opacity: 0;

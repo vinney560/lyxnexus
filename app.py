@@ -2648,6 +2648,7 @@ from gemini_bp import gemini_bp
 from quizAI import _quiz_AI
 from db_fix import db_tools
 from storage import cloud_migration_bp
+from dashboard_bp import dashboard_bp
 from test import test_routes
 from chloe import _chloe_ai
 
@@ -2655,6 +2656,7 @@ from chloe import _chloe_ai
 app.register_blueprint(gemini_bp)
 app.register_blueprint(_quiz_AI)
 app.register_blueprint(db_tools)
+app.register_blueprint(dashboard_bp)
 app.register_blueprint(cloud_migration_bp)
 app.register_blueprint(test_routes)
 app.register_blueprint(_chloe_ai)

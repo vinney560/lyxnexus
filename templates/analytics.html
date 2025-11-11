@@ -454,7 +454,7 @@
                 
                 <div class="flex items-center space-x-3 slide-in-right">
                     <span class="text-sm text-gray-400 hidden md:block">Last 24 hours</span>
-                    <button onclick="refreshAnalytics()" class="btn flex items-center space-x-2">
+                    <button onclick="refreshAnalytics()" id="RefreshData" class="btn flex items-center space-x-2">
                         <i class="fas fa-sync-alt"></i>
                         <span>Refresh Data</span>
                     </button>
@@ -1026,7 +1026,7 @@
         }
         
         function refreshAnalytics() {
-            const btn = event?.target || document.querySelector('button[onclick="refreshAnalytics()"]');
+            const btn = event?.target || document.getElementById('refreshData');
             const originalHtml = btn.innerHTML;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Refreshing...';
             btn.disabled = true;

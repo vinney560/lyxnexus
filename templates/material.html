@@ -802,7 +802,7 @@
                     const fileIcon = getFileIcon(file.file_type, file.filename);
                     
                     return `
-                    <div class="file-card glass-morph rounded-lg p-4 mb-3 cursor-pointer transition-all hover:transform hover:scale-105" 
+                    <div class="file-card glass-morph rounded-lg p-4 mb-3 cursor-pointer transition-all transform hover:scale-95"
                          onclick="selectFile(${file.id}, '${file.name.replace(/'/g, "\\'")}', '${file.description ? file.description.replace(/'/g, "\\'") : ''}')">
                         <div class="flex items-center">
                             <div class="file-icon ${fileIcon.class}">
