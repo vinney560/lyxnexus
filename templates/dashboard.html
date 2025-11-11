@@ -4,6 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Modern Dashboard | LyxNexus</title>
+    <!-- SEO Meta -->
+    <meta name="description" content="LyxNexus is a simple yet powerful class hub designed to keep everything in one place — from announcements and assignments to topics and class discussions." />
+    <meta name="keywords" content="education, coding, programming, web development, technology, online courses, learn to code" />
+    <meta name="author" content="Vincent Kipngetich" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://lyxnexus.onrender.com/" />
+    <link rel="icon" href="https://lyxnexus.onrender.com/uploads/favicon-1.png"/>
+    
+    <meta property="og:title" content="LyxNexus - Education Platform" />
+    <meta property="og:description" content="LyxNexus is a simple yet powerful class hub designed to keep everything in one place — from announcements and assignments to topics and class discussions." />
+    <meta property="og:image" content="https://lyxnexus.onrender.com/favicon.ico" />
+    <meta property="og:url" content="https://lyxnexus.onrender.com/" />
+    
+    <meta name="twitter:card" content="summary" />
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -466,9 +481,10 @@
             display: none;
         }
         
-        /* Responsive Header Styles */
         .header-compact {
-            padding: 0.75rem 1rem;
+            padding-top: 2.0rem;
+            padding-bottom: 0.6rem;
+            min-height: 70px;
         }
         
         .header-compact .btn {
@@ -596,35 +612,33 @@
             text-overflow: ellipsis;
             white-space: nowrap;
         }
-        /* Add to your existing CSS */
+
         .hide-scrollbar::-webkit-scrollbar {
             display: none;
         }
-        
+
         .hide-scrollbar {
             -ms-overflow-style: none;
             scrollbar-width: none;
             scroll-behavior: smooth;
         }
-        
-        /* For specific elements */
+
         .activity-feed {
             max-height: 400px;
             overflow-y: auto;
-            scrollbar-width: none; /* Firefox */
-            -ms-overflow-style: none; /* IE/Edge */
+            scrollbar-width: none;
+            -ms-overflow-style: none; 
         }
-        
+
         .activity-feed::-webkit-scrollbar {
-            display: none; /* Chrome/Safari/Opera */
+            display: none; 
         }
-        
-        /* Body scrollbar hide */
+
         body.hide-scrollbar {
             overflow: -moz-scrollbars-none;
             -ms-overflow-style: none;
         }
-        
+
         body.hide-scrollbar::-webkit-scrollbar {
             display: none;
         }        
@@ -683,11 +697,7 @@
                         <div class="sidebar-item">
                             <i class="fas fa-database w-5"></i>
                             <span>Data Sources</span>
-                        </div>
-                        <div class="sidebar-item">
-                            <i class="fas fa-life-ring w-5"></i>
-                            <span>Support</span>
-                        </div>
+                        </div>                
                     </div>
                 </div>
                 
