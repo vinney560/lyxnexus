@@ -505,7 +505,14 @@
             <div class="p-6 border-b border-gray-800">
                 <div class="flex items-center space-x-3">
                     <div class="logo-container bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl p-2 glow">
-                        <i class="fas fa-chart-line text-white text-xl"></i>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                            <polyline points="7.5 4.21 12 6.81 16.5 4.21"></polyline>
+                            <polyline points="7.5 19.79 7.5 14.6 3 12"></polyline>
+                            <polyline points="21 12 16.5 14.6 16.5 19.79"></polyline>
+                            <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                            <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                        </svg>        
                     </div>
                     <div>
                         <h1 class="text-xl font-bold gradient-text">LyxNexus</h1>
@@ -517,7 +524,7 @@
             <div class="py-6 overflow-y-auto h-full">
                 <div class="space-y-2">
                     <div class="sidebar-item active">
-                        <i class="fas fa-home w-5"></i>
+                        <i class="fas fa-tachometer-alt w-5"></i>
                         <span>Dashboard</span>
                     </div>
                     <div class="sidebar-item">
@@ -525,22 +532,12 @@
                         <span>Analytics</span>
                     </div>
                     <div class="sidebar-item">
-                        <i class="fas fa-users w-5"></i>
-                        <span>Users</span>
-                        <div class="notification-dot"></div>
+                        <i class="fas fa-bullhorn w-5"></i>
+                        <span>Announcements</span>
                     </div>
                     <div class="sidebar-item">
-                        <i class="fas fa-cog w-5"></i>
-                        <span>Settings</span>
-                    </div>
-                    <div class="sidebar-item">
-                        <i class="fas fa-bell w-5"></i>
-                        <span>Notifications</span>
-                        <span class="ml-auto bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">3</span>
-                    </div>
-                    <div class="sidebar-item">
-                        <i class="fas fa-file-alt w-5"></i>
-                        <span>Reports</span>
+                        <i class="fas fa-tasks w-5"></i>
+                        <span>Assignments</span>
                     </div>
                 </div>
                 
@@ -548,12 +545,12 @@
                     <h3 class="text-xs uppercase text-gray-500 font-semibold mb-3">Tools</h3>
                     <div class="space-y-2">
                         <div class="sidebar-item">
-                            <i class="fas fa-palette w-5"></i>
-                            <span>Themes</span>
+                            <i class="fas fa-chart-line w-5"></i>
+                            <span>Reports</span>
                         </div>
                         <div class="sidebar-item">
-                            <i class="fas fa-shield-alt w-5"></i>
-                            <span>Security</span>
+                            <i class="fas fa-database w-5"></i>
+                            <span>Data Sources</span>
                         </div>
                         <div class="sidebar-item">
                             <i class="fas fa-life-ring w-5"></i>
@@ -564,12 +561,12 @@
                 
                 <div class="absolute bottom-0 w-full p-6 border-t border-gray-800">
                     <div class="flex items-center space-x-3">
-                        <div class="user-avatar w-10 h-10 text-sm" id="sidebar-user-avatar">JD</div>
+                        <div class="user-avatar w-10 h-10 text-sm" id="sidebar-user-avatar">LN</div>
                         <div class="flex-1 min-w-0">
                             <p class="text-sm font-medium truncate" id="sidebar-username">Loading...</p>
                             <p class="text-xs text-gray-400 truncate" id="sidebar-role">Administrator</p>
                         </div>
-                        <button class="text-gray-400 hover:text-white transition-colors">
+                        <button class="text-gray-400 hover:text-white transition-colors" onclick="window.location.href='/logout'">
                             <i class="fas fa-sign-out-alt"></i>
                         </button>
                     </div>
@@ -599,6 +596,11 @@
                     </div>
                     
                     <div class="flex items-center space-x-4">
+                        <button onclick="refreshDashboard()" id="refreshData" class="btn flex items-center space-x-2">
+                            <i class="fas fa-sync-alt"></i>
+                            <span>Refresh</span>
+                        </button>
+                        
                         <div class="relative">
                             <button class="text-gray-400 hover:text-white transition-colors">
                                 <i class="fas fa-bell text-xl"></i>
@@ -608,16 +610,15 @@
                         
                         <div class="relative group">
                             <button class="flex items-center space-x-2 text-gray-300 hover:text-white transition-colors">
-                                <div class="user-avatar w-8 h-8 text-xs" id="header-user-avatar">JD</div>
+                                <div class="user-avatar w-8 h-8 text-xs" id="header-user-avatar">LN</div>
                                 <span class="hidden md:block" id="header-username">Loading...</span>
                                 <i class="fas fa-chevron-down text-xs"></i>
                             </button>
                             <div class="absolute right-0 mt-2 w-48 bg-gray-800 rounded-lg shadow-lg py-2 z-30 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
-                                <a href="#" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white">Profile</a>
-                                <a href="#" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white">Settings</a>
-                                <a href="#" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white">Help</a>
+                                <a href="/profile" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white">Profile</a>
+                                <a href="/navigation-guide" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white">Help</a>
                                 <div class="border-t border-gray-700 my-1"></div>
-                                <a href="#" class="block px-4 py-2 text-sm text-red-400 hover:bg-gray-700">Sign out</a>
+                                <a href="/logout" class="block px-4 py-2 text-sm text-red-400 hover:bg-gray-700">Sign out</a>
                             </div>
                         </div>
                     </div>
@@ -690,25 +691,25 @@
                             <i class="fas fa-user-circle text-blue-400 text-xl"></i>
                         </div>
                         <div class="text-center">
-                            <div class="user-avatar mx-auto mb-4 w-20 h-20 text-2xl" id="profile-avatar">JD</div>
+                            <div class="user-avatar mx-auto mb-4 w-20 h-20 text-2xl" id="profile-avatar">LN</div>
                             <h4 class="text-lg font-bold" id="profile-username">Loading...</h4>
                             <p class="text-gray-400 mb-4" id="profile-role">Loading...</p>
                             
                             <div class="space-y-3 text-left">
                                 <div class="flex justify-between items-center p-3 bg-gray-800/30 rounded-lg">
-                                    <span class="text-gray-400">User ID</span>
+                                    <span class="text-gray-400"><i class="fas fa-id-card mr-2"></i>User ID</span>
                                     <span class="font-semibold text-blue-400" id="profile-id">--</span>
                                 </div>
                                 <div class="flex justify-between items-center p-3 bg-gray-800/30 rounded-lg">
-                                    <span class="text-gray-400">Mobile</span>
+                                    <span class="text-gray-400"><i class="fas fa-mobile mr-2"></i>Mobile</span>
                                     <span class="font-semibold text-green-400" id="profile-mobile">--</span>
                                 </div>
                                 <div class="flex justify-between items-center p-3 bg-gray-800/30 rounded-lg">
-                                    <span class="text-gray-400">Member Since</span>
+                                    <span class="text-gray-400"><i class="fas fa-calendar mr-2"></i>Member Since</span>
                                     <span class="font-semibold text-purple-400" id="profile-joined">--</span>
                                 </div>
                                 <div class="flex justify-between items-center p-3 bg-gray-800/30 rounded-lg">
-                                    <span class="text-gray-400">Admin Access</span>
+                                    <span class="text-gray-400"><i class="fas fa-shield-alt mr-2"></i>Admin Access</span>
                                     <span class="font-semibold text-yellow-400" id="profile-admin">No</span>
                                 </div>
                             </div>
@@ -797,6 +798,9 @@
             try {
                 showLoadingStates();
                 
+                // Log current page view
+                await logActivity('view', 'dashboard');
+                
                 // Fetch user profile data
                 const userResponse = await fetch('/dashboard/api/data');
                 if (!userResponse.ok) {
@@ -821,14 +825,39 @@
                 // Update activity information
                 updateActivity(activityData);
                 
-                // Update charts with data
-                updateCharts(userData._data, activityData);
+                // Fetch additional stats
+                const statsResponse = await fetch('/dashboard/api/stats');
+                if (statsResponse.ok) {
+                    const statsData = await statsResponse.json();
+                    updateCharts(userData._data, activityData, statsData);
+                } else {
+                    updateCharts(userData._data, activityData, null);
+                }
                 
             } catch (error) {
                 console.error('Failed to load dashboard data:', error);
                 showErrorStates();
             } finally {
                 hideLoadingStates();
+            }
+        }
+        
+        // Log user activity
+        async function logActivity(action, target, duration = 0) {
+            try {
+                await fetch('/dashboard/api/log_activity', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: action,
+                        target: target,
+                        duration: duration
+                    })
+                });
+            } catch (error) {
+                console.error('Failed to log activity:', error);
             }
         }
         
@@ -865,6 +894,17 @@
         
         function updateActivity(activityData) {
             const feed = document.getElementById('activity-feed');
+            
+            if (!activityData.success) {
+                feed.innerHTML = `
+                    <div class="text-center py-8">
+                        <i class="fas fa-exclamation-triangle text-4xl text-yellow-400 mb-4"></i>
+                        <p class="text-gray-400">Failed to load activity data</p>
+                    </div>
+                `;
+                return;
+            }
+            
             const activities = activityData.visited_page || [];
             
             document.getElementById('total-visits').textContent = activityData.visits || 0;
@@ -885,16 +925,17 @@
                 <div class="activity-item glass-morph" style="animation-delay: ${index * 0.1}s">
                     <div class="flex items-center gap-4">
                         <div class="user-avatar">
-                            <i class="fas fa-${getActivityIcon(activity.page)}"></i>
+                            <i class="fas fa-${getActivityIcon(activity.action, activity.target)}"></i>
                         </div>
                         <div class="flex-1 min-w-0">
                             <div class="flex items-center justify-between mb-1">
-                                <div class="font-semibold text-white truncate">${formatActivityTitle(activity.page)}</div>
+                                <div class="font-semibold text-white truncate">${formatActivityTitle(activity.action, activity.target)}</div>
                                 <div class="activity-time">${formatActivityTime(activity.timestamp)}</div>
                             </div>
                             <div class="text-sm text-gray-300 flex items-center flex-wrap gap-1">
-                                <span>${formatActivityDescription(activity.page, activity.section)}</span>
-                                ${activity.section ? `<span class="section-badge">${formatSectionName(activity.section)}</span>` : ''}
+                                <span>${formatActivityDescription(activity.action, activity.target)}</span>
+                                ${activity.target ? `<span class="section-badge">${formatSectionName(activity.target)}</span>` : ''}
+                                ${activity.duration ? `<span class="text-xs text-gray-500 ml-2">${activity.duration}s</span>` : ''}
                             </div>
                         </div>
                     </div>
@@ -902,26 +943,33 @@
             `).join('');
         }
         
-        function updateCharts(userData, activityData) {
-            updateActivityChart(userData, activityData);
-            updateUsageChart(userData, activityData);
+        function updateCharts(userData, activityData, statsData) {
+            updateActivityChart(userData, activityData, statsData);
+            updateUsageChart(userData, activityData, statsData);
         }
         
-        function updateActivityChart(userData, activityData) {
+        function updateActivityChart(userData, activityData, statsData) {
             const activityCtx = document.getElementById('activityChart').getContext('2d');
             if (activityChart) activityChart.destroy();
             
-            // Generate sample activity data for the chart
-            const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-            const activityCounts = days.map(() => Math.floor(Math.random() * 10) + 1);
+            // Use real data if available, otherwise generate sample data
+            let labels, data;
+            if (statsData && statsData.success && statsData.weekly_activity) {
+                labels = statsData.weekly_activity.map(item => item.date);
+                data = statsData.weekly_activity.map(item => item.count);
+            } else {
+                // Fallback to sample data
+                labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+                data = labels.map(() => Math.floor(Math.random() * 10) + 1);
+            }
             
             activityChart = new Chart(activityCtx, {
                 type: 'bar',
                 data: {
-                    labels: days,
+                    labels: labels,
                     datasets: [{
                         label: 'Daily Visits',
-                        data: activityCounts,
+                        data: data,
                         backgroundColor: 'rgba(59, 130, 246, 0.7)',
                         borderColor: '#3B82F6',
                         borderWidth: 2,
@@ -943,7 +991,7 @@
                             displayColors: false,
                             callbacks: {
                                 title: function(tooltipItems) {
-                                    return `Day: ${tooltipItems[0].label}`;
+                                    return `Date: ${tooltipItems[0].label}`;
                                 },
                                 label: function(context) {
                                     return `Visits: ${context.parsed.y}`;
@@ -979,25 +1027,27 @@
             });
         }
         
-        function updateUsageChart(userData, activityData) {
+        function updateUsageChart(userData, activityData, statsData) {
             const usageCtx = document.getElementById('usageChart').getContext('2d');
             if (usageChart) usageChart.destroy();
             
-            // Generate sample usage data
-            const usageData = {
-                'Dashboard': 35,
-                'Assignments': 25,
-                'Announcements': 20,
-                'Settings': 10,
-                'Profile': 10
-            };
+            // Use real data if available, otherwise generate sample data
+            let labels, data;
+            if (statsData && statsData.success && statsData.action_stats) {
+                labels = Object.keys(statsData.action_stats);
+                data = Object.values(statsData.action_stats);
+            } else {
+                // Fallback to sample data
+                labels = ['Dashboard', 'Assignments', 'Announcements', 'Settings', 'Profile'];
+                data = [35, 25, 20, 10, 10];
+            }
             
             usageChart = new Chart(usageCtx, {
                 type: 'doughnut',
                 data: {
-                    labels: Object.keys(usageData),
+                    labels: labels,
                     datasets: [{
-                        data: Object.values(usageData),
+                        data: data,
                         backgroundColor: [
                             '#3B82F6', '#8B5CF6', '#10B981', '#F59E0B', '#EF4444'
                         ],
@@ -1020,7 +1070,7 @@
                                     const value = context.raw || 0;
                                     const total = context.dataset.data.reduce((a, b) => a + b, 0);
                                     const percentage = Math.round((value / total) * 100);
-                                    return `${label}: ${value}% (${percentage}% of time)`;
+                                    return `${label}: ${value} (${percentage}% of activities)`;
                                 }
                             }
                         }
@@ -1035,37 +1085,61 @@
             });
         }
         
-        function getActivityIcon(page) {
+        function getActivityIcon(action, target) {
             const icons = {
+                'view': 'eye',
+                'create': 'plus',
+                'update': 'edit',
+                'delete': 'trash',
+                'login': 'sign-in-alt',
+                'logout': 'sign-out-alt',
+                'download': 'download',
+                'upload': 'upload'
+            };
+            
+            const targetIcons = {
                 'dashboard': 'tachometer-alt',
                 'profile': 'user',
                 'settings': 'cog',
                 'announcements': 'bullhorn',
                 'assignments': 'tasks'
             };
-            return icons[page] || 'file';
+            
+            return icons[action] || targetIcons[target] || 'file';
         }
         
-        function formatActivityTitle(page) {
-            const titles = {
-                'dashboard': 'Dashboard View',
-                'profile': 'Profile Page',
-                'settings': 'Settings Page',
+        function formatActivityTitle(action, target) {
+            const actions = {
+                'view': 'Viewed',
+                'create': 'Created',
+                'update': 'Updated',
+                'delete': 'Deleted',
+                'login': 'Logged in',
+                'logout': 'Logged out'
+            };
+            
+            const targets = {
+                'dashboard': 'Dashboard',
+                'profile': 'Profile',
+                'settings': 'Settings',
                 'announcements': 'Announcements',
                 'assignments': 'Assignments'
             };
-            return titles[page] || 'Page View';
+            
+            return `${actions[action] || 'Accessed'} ${targets[target] || target || 'Page'}`;
         }
         
-        function formatActivityDescription(page, section) {
+        function formatActivityDescription(action, target) {
             const descriptions = {
-                'dashboard': 'Viewed dashboard overview',
-                'profile': 'Accessed user profile',
-                'settings': 'Updated account settings',
-                'announcements': 'Checked announcements',
-                'assignments': 'Reviewed assignments'
+                'view': `Viewed ${target || 'page'}`,
+                'create': `Created new ${target || 'item'}`,
+                'update': `Updated ${target || 'item'}`,
+                'delete': `Deleted ${target || 'item'}`,
+                'login': 'Signed into account',
+                'logout': 'Signed out of account'
             };
-            return descriptions[page] || 'Visited page';
+            
+            return descriptions[action] || `Performed ${action} on ${target || 'page'}`;
         }
         
         function formatSectionName(section) {
@@ -1074,19 +1148,22 @@
         }
         
         function formatActivityTime(timestamp) {
-            if (!timestamp) return 'Recently';
+            if (!timestamp || timestamp === 'Unknown') return 'Recently';
             
-            // Handle both string and Date objects
-            const date = new Date(timestamp);
-            const now = new Date();
-            const diffMs = now - date;
-            const diffMins = Math.floor(diffMs / 60000);
-            const diffHours = Math.floor(diffMs / 3600000);
-            
-            if (diffMins < 1) return 'Just now';
-            if (diffMins < 60) return `${diffMins}m ago`;
-            if (diffHours < 24) return `${diffHours}h ago`;
-            return date.toLocaleDateString();
+            try {
+                const date = new Date(timestamp);
+                const now = new Date();
+                const diffMs = now - date;
+                const diffMins = Math.floor(diffMs / 60000);
+                const diffHours = Math.floor(diffMs / 3600000);
+                
+                if (diffMins < 1) return 'Just now';
+                if (diffMins < 60) return `${diffMins}m ago`;
+                if (diffHours < 24) return `${diffHours}h ago`;
+                return date.toLocaleDateString();
+            } catch (e) {
+                return 'Recently';
+            }
         }
         
         function showLoadingStates() {
@@ -1139,15 +1216,19 @@
             const sidebar = document.querySelector('.sidebar');
             const overlay = document.querySelector('.overlay');
             
-            mobileMenuBtn.addEventListener('click', function() {
-                sidebar.classList.toggle('active');
-                overlay.classList.toggle('active');
-            });
+            if (mobileMenuBtn) {
+                mobileMenuBtn.addEventListener('click', function() {
+                    sidebar.classList.toggle('active');
+                    overlay.classList.toggle('active');
+                });
+            }
             
-            overlay.addEventListener('click', function() {
-                sidebar.classList.remove('active');
-                overlay.classList.remove('active');
-            });
+            if (overlay) {
+                overlay.addEventListener('click', function() {
+                    sidebar.classList.remove('active');
+                    overlay.classList.remove('active');
+                });
+            }
             
             // Initialize dashboard
             setTimeout(() => {
