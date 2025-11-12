@@ -5,15 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Math Assignment Assistant - LyxNexus</title>
     
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
     <!-- Math Rendering Libraries -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/contrib/auto-render.min.js"></script>
     
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     
     <style>
@@ -22,9 +22,9 @@
             --text-color: #f1f5f9;
             --accent-color: #3b82f6;
             --secondary-color: #8b5cf6;
-            --sidebar-width: 100%;
-            --header-height: auto;
-            --input-height: 70px;
+            --sidebar-width: 350px;
+            --header-height: 80px;
+            --input-height: 120px;
         }
 
         * {
@@ -37,11 +37,9 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: var(--bg-color);
             color: var(--text-color);
-            height: 100vh;
-            overflow: hidden;
+            min-height: 100vh;
             display: flex;
-            flex-direction: column;
-            font-size: 14px;
+            overflow: hidden;
         }
 
         .gradient-text {
@@ -74,155 +72,66 @@
             box-shadow: 0 12px 40px rgba(2, 8, 32, 0.4);
         }
 
-        .math-header {
-            height: var(--header-height);
+        /* Sidebar Styles */
+        .sidebar {
+            width: var(--sidebar-width);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid rgba(59, 130, 246, 0.2);
+            overflow: hidden;
+        }
+
+        .sidebar-header {
+            padding: 25px;
+            border-bottom: 1px solid rgba(59, 130, 246, 0.2);
             background: rgba(15, 23, 42, 0.9);
-            padding: 12px 15px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            border-bottom: 1px solid rgba(59, 130, 246, 0.3);
-            flex-shrink: 0;
-            z-index: 100;
-            gap: 10px;
         }
 
-        .header-content {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            width: 100%;
-        }
-
-        .header-left h1 {
-            font-size: 1.5em;
+        .sidebar-header h1 {
+            font-size: 1.6em;
+            margin-bottom: 5px;
             font-weight: 600;
-            margin-bottom: 4px;
         }
 
-        .header-left p {
+        .sidebar-header p {
             opacity: 0.8;
             font-size: 0.9em;
             color: #cbd5e1;
         }
 
-        .header-right {
-            display: flex;
-            gap: 8px;
-            width: 100%;
-            justify-content: space-between;
-        }
-
-        .header-button {
-            background: rgba(59, 130, 246, 0.1);
-            border: 1px solid rgba(59, 130, 246, 0.3);
-            color: var(--accent-color);
-            border-radius: 8px;
-            padding: 8px 12px;
-            cursor: pointer;
-            font-size: 12px;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 6px;
+        .sidebar-content {
             flex: 1;
-            justify-content: center;
-        }
-
-        .header-button:hover {
-            background: rgba(59, 130, 246, 0.2);
-            transform: translateY(-2px);
-        }
-
-        .header-button.danger {
-            background: rgba(239, 68, 68, 0.1);
-            border-color: rgba(239, 68, 68, 0.3);
-            color: #ef4444;
-        }
-
-        .header-button.danger:hover {
-            background: rgba(239, 68, 68, 0.2);
-        }
-
-        .math-content {
-            display: flex;
-            flex: 1;
-            height: calc(100vh - var(--header-height));
-            overflow: hidden;
-            position: relative;
-        }
-
-        .sidebar {
-            position: fixed;
-            width: var(--sidebar-width);
-            height: 100%;
-            background: rgba(15, 23, 42, 0.98);
-            z-index: 50;
-            box-shadow: 5px 0 15px rgba(0, 0, 0, 0.3);
-            transform: translateX(-100%);
-            transition: transform 0.3s ease;
-            padding: 20px 15px;
+            padding: 20px;
             overflow-y: auto;
-        }
-
-        .sidebar:not(.collapsed) {
-            transform: translateX(0);
-        }
-
-        .toggle-sidebar {
-            position: fixed;
-            top: 15px;
-            left: 15px;
-            background: rgba(59, 130, 246, 0.9);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            width: 40px;
-            height: 40px;
             display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            z-index: 60;
-            transition: all 0.3s ease;
-        }
-
-        .toggle-sidebar:hover {
-            background: rgba(59, 130, 246, 1);
+            flex-direction: column;
         }
 
         .assignments-section h3 {
             color: var(--text-color);
-            margin-bottom: 15px;
+            margin-bottom: 20px;
             font-weight: 500;
             font-size: 1.2em;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
         }
 
         .assignment-list {
-            max-height: calc(100vh - 200px);
+            flex: 1;
             overflow-y: auto;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
 
         .assignment-item {
             background: rgba(51, 65, 85, 0.6);
             border: 1px solid rgba(100, 116, 139, 0.3);
-            border-radius: 10px;
-            padding: 12px;
-            margin-bottom: 10px;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
             cursor: pointer;
             transition: all 0.3s ease;
-            animation: slideIn 0.4s ease;
-        }
-
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateX(-20px); }
-            to { opacity: 1; transform: translateX(0); }
         }
 
         .assignment-item:hover {
@@ -234,83 +143,91 @@
         .assignment-item.active {
             border-color: var(--accent-color);
             background: rgba(59, 130, 246, 0.15);
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
         }
 
         .assignment-title {
             font-weight: 600;
             color: var(--text-color);
-            margin-bottom: 6px;
+            margin-bottom: 8px;
             font-size: 1em;
-            display: flex;
-            align-items: center;
-            gap: 6px;
         }
 
         .assignment-meta {
             font-size: 0.85em;
             color: #94a3b8;
-            display: flex;
-            flex-direction: column;
-            gap: 3px;
-        }
-
-        .assignment-meta div {
-            display: flex;
-            align-items: center;
-            gap: 5px;
         }
 
         .current-assignment {
             background: rgba(34, 197, 94, 0.1);
             border: 1px solid rgba(34, 197, 94, 0.3);
-            border-radius: 10px;
-            padding: 12px;
-            margin-bottom: 15px;
-            animation: fadeIn 0.5s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 20px;
         }
 
         .current-assignment h4 {
             color: #22c55e;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
             font-size: 1em;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
         }
 
-        .chat-area {
+        .chat-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        /* Main Content Area */
+        .main-content {
             flex: 1;
+            height: 100vh;
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            position: relative;
-            width: 100%;
+        }
+
+        .chat-header {
+            height: var(--header-height);
+            padding: 0 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(59, 130, 246, 0.2);
+            background: rgba(15, 23, 42, 0.9);
+        }
+
+        .chat-title {
+            font-size: 1.5em;
+            font-weight: 600;
+        }
+
+        .chat-actions {
+            display: flex;
+            gap: 15px;
+        }
+
+        .chat-messages-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 25px;
+            background: rgba(15, 23, 42, 0.6);
         }
 
         .chat-messages {
-            flex: 1;
-            padding: 15px;
-            overflow-y: auto;
-            background: rgba(15, 23, 42, 0.6);
-            display: flex;
-            flex-direction: column;
-            padding-bottom: 0;
+            max-width: 900px;
+            margin: 0 auto;
         }
 
         .message {
-            margin-bottom: 20px;
-            max-width: 92%;
-            animation: messageAppear 0.4s ease;
+            margin-bottom: 25px;
+            animation: fadeIn 0.3s ease;
         }
 
-        @keyframes messageAppear {
-            from { opacity: 0; transform: translateY(20px); }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
@@ -318,130 +235,129 @@
             margin-left: auto;
             background: rgba(59, 130, 246, 0.9);
             color: white;
-            padding: 14px 16px;
-            border-radius: 16px 16px 4px 16px;
-            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.3);
+            padding: 18px 22px;
+            border-radius: 20px 20px 6px 20px;
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
             border: 1px solid rgba(59, 130, 246, 0.4);
-            font-size: 0.95em;
+            max-width: 85%;
         }
 
         .ai-message {
             background: rgba(255, 255, 255, 0.95);
             color: #1e293b;
-            padding: 16px;
-            border-radius: 16px 16px 16px 4px;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+            padding: 22px;
+            border-radius: 20px 20px 20px 6px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
             border: 1px solid rgba(255, 255, 255, 0.2);
-            font-size: 0.95em;
+            max-width: 85%;
         }
 
         .message-content {
-            line-height: 1.6;
-            font-size: 14px;
-            word-wrap: break-word;
-            overflow-wrap: break-word;
+            line-height: 1.7;
+            font-size: 15px;
         }
 
         .message-content p {
-            margin-bottom: 10px;
+            margin-bottom: 12px;
         }
 
         .message-content ul, .message-content ol {
-            margin: 10px 0 10px 20px;
+            margin: 12px 0 12px 24px;
         }
 
         .message-content li {
-            margin-bottom: 5px;
+            margin-bottom: 6px;
         }
 
         .message-content code {
             background: #f1f5f9;
             color: #0f172a;
-            padding: 2px 6px;
-            border-radius: 4px;
+            padding: 3px 8px;
+            border-radius: 6px;
             font-family: 'Courier New', monospace;
-            font-size: 0.85em;
+            font-size: 0.9em;
             border: 1px solid #e2e8f0;
         }
 
         .message-content pre {
             background: #1e293b;
             color: #f8fafc;
-            padding: 14px;
-            border-radius: 8px;
+            padding: 18px;
+            border-radius: 10px;
             overflow-x: auto;
-            margin: 14px 0;
+            margin: 18px 0;
             border: 1px solid #334155;
-            font-size: 0.85em;
         }
 
         .message-content blockquote {
-            border-left: 3px solid var(--accent-color);
-            padding-left: 14px;
-            margin: 14px 0;
+            border-left: 4px solid var(--accent-color);
+            padding-left: 18px;
+            margin: 18px 0;
             color: #64748b;
             font-style: italic;
         }
 
         /* Math specific styles */
         .math-expression {
-            margin: 14px 0;
+            margin: 18px 0;
             text-align: center;
-            overflow-x: auto;
         }
 
         .katex-display {
-            margin: 16px 0;
+            margin: 22px 0;
             overflow-x: auto;
             overflow-y: hidden;
         }
 
         .step-solution {
             background: rgba(34, 197, 94, 0.1);
-            border-left: 3px solid #22c55e;
-            padding: 14px;
-            margin: 14px 0;
-            border-radius: 0 8px 8px 0;
+            border-left: 4px solid #22c55e;
+            padding: 18px;
+            margin: 18px 0;
+            border-radius: 0 10px 10px 0;
             color: #1e293b;
         }
 
         .theorem {
             background: rgba(245, 158, 11, 0.1);
-            border-left: 3px solid #f59e0b;
-            padding: 14px;
-            margin: 14px 0;
-            border-radius: 0 8px 8px 0;
+            border-left: 4px solid #f59e0b;
+            padding: 18px;
+            margin: 18px 0;
+            border-radius: 0 10px 10px 0;
             color: #1e293b;
         }
 
+        /* Chat Input Area */
         .chat-input-container {
-            padding: 15px;
+            height: var(--input-height);
+            padding: 20px 30px;
             border-top: 1px solid rgba(59, 130, 246, 0.2);
-            background: rgba(15, 23, 42, 0.95);
-            flex-shrink: 0;
-            position: relative;
-            z-index: 10;
+            background: rgba(15, 23, 42, 0.9);
         }
 
         .chat-input-wrapper {
+            max-width: 900px;
+            margin: 0 auto;
             display: flex;
-            gap: 10px;
+            gap: 15px;
             align-items: flex-end;
+            height: 100%;
         }
 
         .chat-input {
             flex: 1;
-            background: rgba(30, 41, 59, 0.9);
+            background: rgba(30, 41, 59, 0.8);
             border: 2px solid rgba(59, 130, 246, 0.3);
-            border-radius: 12px;
-            padding: 14px 16px;
-            font-size: 14px;
+            border-radius: 14px;
+            padding: 16px 20px;
+            font-size: 16px;
             color: var(--text-color);
             resize: none;
-            min-height: 50px;
-            max-height: 100px;
+            min-height: 60px;
+            max-height: 80px;
             font-family: inherit;
             transition: all 0.3s ease;
+            height: 100%;
         }
 
         .chat-input:focus {
@@ -458,22 +374,23 @@
             background: linear-gradient(135deg, var(--accent-color), var(--secondary-color));
             color: white;
             border: none;
-            border-radius: 12px;
-            padding: 14px 20px;
+            border-radius: 14px;
+            padding: 16px 28px;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 16px;
             font-weight: 600;
             transition: all 0.3s ease;
-            min-width: 80px;
+            min-width: 110px;
+            height: 60px;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 6px;
+            gap: 8px;
         }
 
         .send-button:hover:not(:disabled) {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
         }
 
         .send-button:disabled {
@@ -484,21 +401,13 @@
 
         .typing-indicator {
             display: none;
-            padding: 14px 16px;
+            padding: 18px 22px;
             color: #94a3b8;
             font-style: italic;
             background: rgba(30, 41, 59, 0.6);
-            border-radius: 12px;
-            margin: 8px 0;
-            max-width: 180px;
-            animation: pulse 1.5s infinite;
-            font-size: 0.9em;
-        }
-
-        @keyframes pulse {
-            0% { opacity: 0.6; }
-            50% { opacity: 1; }
-            100% { opacity: 0.6; }
+            border-radius: 14px;
+            margin: 10px 0;
+            max-width: 85%;
         }
 
         .typing-dots {
@@ -526,158 +435,132 @@
         .empty-state {
             text-align: center;
             color: #94a3b8;
-            padding: 40px 15px;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
+            padding: 50px 20px;
         }
 
         .empty-state .icon {
-            font-size: 3em;
-            margin-bottom: 15px;
+            font-size: 4em;
+            margin-bottom: 20px;
             opacity: 0.7;
-            animation: bounce 2s infinite;
-        }
-
-        @keyframes bounce {
-            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-            40% { transform: translateY(-8px); }
-            60% { transform: translateY(-4px); }
         }
 
         .empty-state h3 {
             color: var(--text-color);
-            margin-bottom: 8px;
-            font-size: 1.2em;
+            margin-bottom: 10px;
+            font-size: 1.4em;
         }
 
-        .loading-assignments {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 25px;
-            color: #94a3b8;
-        }
-
-        .loading-spinner {
-            width: 35px;
-            height: 35px;
-            border: 3px solid rgba(59, 130, 246, 0.3);
-            border-left: 3px solid var(--accent-color);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 12px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        /* Scroll to bottom button */
-        .scroll-to-bottom {
-            position: fixed;
-            bottom: 80px;
-            right: 15px;
-            background: var(--accent-color);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 45px;
-            height: 45px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
-            transition: all 0.3s ease;
-            opacity: 0;
-            transform: translateY(20px);
-            z-index: 100;
-        }
-
-        .scroll-to-bottom.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .scroll-to-bottom:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 6px 16px rgba(59, 130, 246, 0.6);
-        }
-
-        /* Assignment selection prompt */
-        .assignment-prompt {
-            background: rgba(245, 158, 11, 0.1);
-            border: 1px solid rgba(245, 158, 11, 0.3);
+        /* Control buttons */
+        .control-button {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            color: var(--accent-color);
             border-radius: 10px;
-            padding: 12px;
-            margin: 15px 0;
-            text-align: center;
-            animation: fadeIn 0.5s ease;
-        }
-
-        .assignment-prompt h4 {
-            color: #f59e0b;
-            margin-bottom: 8px;
+            padding: 12px 20px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            width: 100%;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 6px;
-            font-size: 1em;
-        }
-
-        /* Mobile menu */
-        .mobile-menu {
-            position: fixed;
-            bottom: 15px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(59, 130, 246, 0.9);
-            border-radius: 50px;
-            padding: 10px 18px;
-            z-index: 100;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-            display: flex;
             gap: 8px;
         }
 
-        .mobile-menu button {
-            background: transparent;
-            border: none;
-            color: white;
-            font-size: 1.1em;
-            padding: 8px 12px;
-            cursor: pointer;
-            border-radius: 50%;
-            transition: all 0.3s ease;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        .control-button:hover {
+            background: rgba(59, 130, 246, 0.2);
+            transform: translateY(-1px);
         }
 
-        .mobile-menu button:hover {
-            background: rgba(255, 255, 255, 0.2);
+        .control-button.danger {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: rgba(239, 68, 68, 0.3);
+            color: #ef4444;
+        }
+
+        .control-button.danger:hover {
+            background: rgba(239, 68, 68, 0.2);
+        }
+
+        /* Action button */
+        .action-button {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            color: var(--accent-color);
+            border-radius: 10px;
+            padding: 10px 15px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .action-button:hover {
+            background: rgba(59, 130, 246, 0.2);
+            transform: translateY(-1px);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 968px) {
+            body {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: auto;
+                max-height: 40vh;
+            }
+            
+            .main-content {
+                height: calc(100vh - 40vh);
+            }
+            
+            .user-message, .ai-message {
+                max-width: 95%;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .chat-header {
+                padding: 0 15px;
+            }
+            
+            .chat-messages-container {
+                padding: 15px;
+            }
+            
+            .chat-input-container {
+                padding: 15px;
+            }
+            
+            .user-message, .ai-message {
+                max-width: 100%;
+            }
+            
+            :root {
+                --header-height: 70px;
+                --input-height: 100px;
+            }
         }
 
         /* Scrollbar Styling */
         ::-webkit-scrollbar {
-            width: 6px;
+            width: 8px;
         }
 
         ::-webkit-scrollbar-track {
             background: rgba(30, 41, 59, 0.6);
-            border-radius: 3px;
+            border-radius: 4px;
         }
 
         ::-webkit-scrollbar-thumb {
             background: rgba(59, 130, 246, 0.4);
-            border-radius: 3px;
+            border-radius: 4px;
         }
 
         ::-webkit-scrollbar-thumb:hover {
@@ -695,117 +578,21 @@
             outline: 2px solid var(--accent-color);
             outline-offset: 2px;
         }
-
-        /* Extra small devices */
-        @media (max-width: 360px) {
-            .math-header {
-                padding: 10px 12px;
-            }
-            
-            .header-left h1 {
-                font-size: 1.3em;
-            }
-            
-            .header-button {
-                padding: 6px 8px;
-                font-size: 11px;
-            }
-            
-            .chat-messages {
-                padding: 12px;
-            }
-            
-            .message {
-                max-width: 96%;
-            }
-            
-            .user-message, .ai-message {
-                padding: 12px 14px;
-            }
-            
-            .chat-input-container {
-                padding: 12px;
-            }
-            
-            .chat-input {
-                padding: 12px 14px;
-                font-size: 13px;
-            }
-            
-            .send-button {
-                padding: 12px 16px;
-                min-width: 70px;
-                font-size: 13px;
-            }
-            
-            .mobile-menu {
-                padding: 8px 15px;
-            }
-            
-            .mobile-menu button {
-                width: 36px;
-                height: 36px;
-                font-size: 1em;
-            }
-            
-            .scroll-to-bottom {
-                width: 40px;
-                height: 40px;
-                bottom: 70px;
-            }
-        }
-
-        /* Height adjustments for very short screens */
-        @media (max-height: 600px) {
-            .assignment-list {
-                max-height: calc(100vh - 150px);
-            }
-            
-            .empty-state {
-                padding: 20px 15px;
-            }
-            
-            .empty-state .icon {
-                font-size: 2.5em;
-            }
-        }
     </style>
 </head>
 <body>
-    <!-- Header -->
-    <div class="math-header">
-        <div class="header-content">
-            <div class="header-left">
-                <h1 class="gradient-text">Math Assistant</h1>
-                <p>Step-by-step math solutions</p>
-            </div>
-            <div class="header-right">
-                <button class="header-button" onclick="loadAssignments()">
-                    <i class="fas fa-sync-alt"></i> Refresh
-                </button>
-                <button class="header-button danger" onclick="clearHistory()">
-                    <i class="fas fa-trash"></i> Clear
-                </button>
-            </div>
+    <!-- Sidebar -->
+    <div class="sidebar glass-morph">
+        <div class="sidebar-header">
+            <h1 class="gradient-text"><i class="fas fa-calculator"></i> Math Assistant</h1>
+            <p>Step-by-step solutions and guidance</p>
         </div>
-    </div>
 
-    <!-- Main Content -->
-    <div class="math-content">
-        <!-- Sidebar Toggle -->
-        <button class="toggle-sidebar" id="toggleSidebar">
-            <i class="fas fa-bars" id="sidebarIcon"></i>
-        </button>
-
-        <!-- Sidebar with Assignments -->
-        <div class="sidebar collapsed" id="sidebar">
+        <div class="sidebar-content">
             <div class="assignments-section">
                 <h3><i class="fas fa-tasks"></i> Your Assignments</h3>
                 <div class="assignment-list" id="assignmentList">
-                    <div class="loading-assignments" id="loadingAssignments">
-                        <div class="loading-spinner"></div>
-                        <p>Loading assignments...</p>
-                    </div>
+                    <!-- Assignments will be loaded here -->
                 </div>
             </div>
 
@@ -814,14 +601,31 @@
                 <div id="assignmentDetails"></div>
             </div>
 
-            <div class="assignment-prompt" id="assignmentPrompt" style="display: none;">
-                <h4><i class="fas fa-info-circle"></i> Assignment Required</h4>
-                <p>Select an assignment to start asking math questions</p>
+            <div class="chat-controls">
+                <button class="control-button" onclick="loadAssignments()">
+                    <i class="fas fa-sync-alt"></i> Refresh Assignments
+                </button>
+                <button class="control-button danger" onclick="clearHistory()">
+                    <i class="fas fa-trash-alt"></i> Clear History
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="chat-header">
+            <div class="chat-title">
+                <span id="currentAssignmentTitle">Math Assistant</span>
+            </div>
+            <div class="chat-actions">
+                <button class="action-button" onclick="toggleMathRendering()">
+                    <i class="fas fa-square-root-variable"></i> Render Math
+                </button>
             </div>
         </div>
 
-        <!-- Main Chat Area -->
-        <div class="chat-area">
+        <div class="chat-messages-container">
             <div class="chat-messages" id="chatMessages">
                 <div class="empty-state" id="emptyState">
                     <div class="icon">🧮</div>
@@ -829,79 +633,46 @@
                     <p>Select an assignment and start asking math questions!</p>
                 </div>
             </div>
+        </div>
 
-            <div class="typing-indicator" id="typingIndicator">
-                <div class="typing-dots">
-                    <i class="fas fa-circle-notch fa-spin"></i> Thinking <span>.</span><span>.</span><span>.</span>
-                </div>
+        <div class="typing-indicator" id="typingIndicator">
+            <div class="typing-dots">
+                Math Assistant is thinking <span>.</span><span>.</span><span>.</span>
             </div>
+        </div>
 
-            <div class="chat-input-container">
-                <div class="chat-input-wrapper">
-                    <textarea 
-                        id="chatInput" 
-                        class="chat-input" 
-                        placeholder="Ask a math question..."
-                        rows="1"
-                    ></textarea>
-                    <button id="sendButton" class="send-button" onclick="sendMessage()">
-                        <i class="fas fa-paper-plane"></i> Send
-                    </button>
-                </div>
+        <div class="chat-input-container">
+            <div class="chat-input-wrapper">
+                <textarea 
+                    id="chatInput" 
+                    class="chat-input" 
+                    placeholder="Ask a math question or request step-by-step solution..."
+                    rows="1"
+                ></textarea>
+                <button id="sendButton" class="send-button" onclick="sendMessage()">
+                    <i class="fas fa-paper-plane"></i> Send
+                </button>
             </div>
         </div>
     </div>
 
-    <!-- Mobile Menu -->
-    <div class="mobile-menu">
-        <button onclick="toggleSidebarView()" title="Toggle Sidebar">
-            <i class="fas fa-bars"></i>
-        </button>
-        <button onclick="loadAssignments()" title="Refresh Assignments">
-            <i class="fas fa-sync-alt"></i>
-        </button>
-        <button onclick="clearHistory()" title="Clear History">
-            <i class="fas fa-trash"></i>
-        </button>
-    </div>
-
-    <!-- Scroll to bottom button -->
-    <button class="scroll-to-bottom" id="scrollToBottom">
-        <i class="fas fa-arrow-down"></i>
-    </button>
-
     <script>
         let currentAssignmentId = null;
         let isProcessing = false;
-        let isSidebarCollapsed = true;
-        let isUserScrolling = false;
-        let scrollTimeout = null;
-        let assignmentsLoaded = false;
+        let isNearBottom = true;
+        let mathRenderInterval = null;
 
         // Initialize when page loads
         document.addEventListener('DOMContentLoaded', function() {
-            isSidebarCollapsed = true;
-            updateSidebarState();
-            
             loadAssignments();
             loadChatHistory();
             setupEventListeners();
-            setupScrollHandler();
-            
-            // Show assignment prompt if no assignment is selected
-            setTimeout(() => {
-                if (!currentAssignmentId) {
-                    document.getElementById('assignmentPrompt').style.display = 'block';
-                }
-            }, 1000);
+            setupScrollDetection();
         });
 
         function setupEventListeners() {
             const chatInput = document.getElementById('chatInput');
-            const toggleSidebar = document.getElementById('toggleSidebar');
-            const scrollToBottomBtn = document.getElementById('scrollToBottom');
             
-            // Chat input handling
             chatInput.addEventListener('keypress', function(e) {
                 if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();
@@ -911,151 +682,65 @@
 
             chatInput.addEventListener('input', function() {
                 this.style.height = 'auto';
-                this.style.height = Math.min(this.scrollHeight, 100) + 'px';
+                this.style.height = Math.min(this.scrollHeight, 80) + 'px';
             });
+        }
 
-            // Sidebar toggle
-            toggleSidebar.addEventListener('click', function() {
-                toggleSidebarView();
-            });
-
-            // Scroll to bottom button
-            scrollToBottomBtn.addEventListener('click', function() {
-                scrollToBottom(true);
-            });
-
-            // Close sidebar when clicking outside on mobile
-            document.addEventListener('click', function(e) {
-                const sidebar = document.getElementById('sidebar');
-                const toggleBtn = document.getElementById('toggleSidebar');
+        function setupScrollDetection() {
+            const chatMessagesContainer = document.querySelector('.chat-messages-container');
+            
+            chatMessagesContainer.addEventListener('scroll', function() {
+                const threshold = 100;
+                const position = chatMessagesContainer.scrollTop + chatMessagesContainer.clientHeight;
+                const height = chatMessagesContainer.scrollHeight;
                 
-                if (!sidebar.contains(e.target) && !toggleBtn.contains(e.target) && !isSidebarCollapsed) {
-                    toggleSidebarView();
-                }
-            });
-
-            // Handle window resize
-            window.addEventListener('resize', function() {
-                // Adjust layout for very small screens
-                if (window.innerWidth < 360) {
-                    document.body.style.fontSize = '13px';
-                } else {
-                    document.body.style.fontSize = '14px';
-                }
+                isNearBottom = position > height - threshold;
             });
         }
 
-        function setupScrollHandler() {
-            const chatMessages = document.getElementById('chatMessages');
-            const scrollToBottomBtn = document.getElementById('scrollToBottom');
-            
-            chatMessages.addEventListener('scroll', function() {
-                // Check if user is near the bottom
-                const isNearBottom = chatMessages.scrollHeight - chatMessages.scrollTop - chatMessages.clientHeight < 80;
-                
-                if (!isNearBottom) {
-                    // User is scrolling up, show the scroll to bottom button
-                    scrollToBottomBtn.classList.add('visible');
-                    isUserScrolling = true;
-                    
-                    // Clear any existing timeout
-                    if (scrollTimeout) clearTimeout(scrollTimeout);
-                    
-                    // Hide button after 3 seconds of inactivity
-                    scrollTimeout = setTimeout(() => {
-                        scrollToBottomBtn.classList.remove('visible');
-                        isUserScrolling = false;
-                    }, 3000);
-                } else {
-                    // User is at the bottom, hide the button
-                    scrollToBottomBtn.classList.remove('visible');
-                    isUserScrolling = false;
-                }
-            });
-        }
-
-        function toggleSidebarView() {
-            isSidebarCollapsed = !isSidebarCollapsed;
-            updateSidebarState();
-            
-            // Load assignments if sidebar is opened and they haven't been loaded yet
-            if (!isSidebarCollapsed && !assignmentsLoaded) {
-                loadAssignments();
-            }
-        }
-
-        function updateSidebarState() {
-            const sidebar = document.getElementById('sidebar');
-            const toggleBtn = document.getElementById('toggleSidebar');
-            const sidebarIcon = document.getElementById('sidebarIcon');
-            
-            if (isSidebarCollapsed) {
-                sidebar.classList.add('collapsed');
-                sidebarIcon.className = 'fas fa-bars';
-            } else {
-                sidebar.classList.remove('collapsed');
-                sidebarIcon.className = 'fas fa-times';
+        function scrollToBottomIfNeeded() {
+            if (isNearBottom) {
+                const chatMessagesContainer = document.querySelector('.chat-messages-container');
+                chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
             }
         }
 
         async function loadAssignments() {
-            const assignmentList = document.getElementById('assignmentList');
-            const loadingElement = document.getElementById('loadingAssignments');
-            
-            // Show loading state
-            assignmentList.innerHTML = '';
-            assignmentList.appendChild(loadingElement);
-            loadingElement.style.display = 'flex';
-            
             try {
-                // Simulate API call - replace with actual endpoint
                 const response = await fetch('/math/assignments');
                 const data = await response.json();
                 
                 if (data.success) {
-                    assignmentsLoaded = true;
                     displayAssignments(data.assignments);
-                    showNotification('Assignments loaded', 'success');
                 } else {
                     console.error('Failed to load assignments');
-                    assignmentList.innerHTML = '<div class="empty-state">Failed to load assignments</div>';
                     showNotification('Failed to load assignments', 'error');
                 }
             } catch (error) {
                 console.error('Error loading assignments:', error);
-                assignmentList.innerHTML = '<div class="empty-state">Error loading assignments</div>';
                 showNotification('Error loading assignments', 'error');
-            } finally {
-                loadingElement.style.display = 'none';
             }
         }
 
         function displayAssignments(assignments) {
             const assignmentList = document.getElementById('assignmentList');
-            const assignmentPrompt = document.getElementById('assignmentPrompt');
             
             if (assignments.length === 0) {
                 assignmentList.innerHTML = '<div class="empty-state">No assignments found</div>';
-                assignmentPrompt.style.display = 'block';
                 return;
             }
 
             assignmentList.innerHTML = assignments.map(assignment => `
                 <div class="assignment-item" onclick="selectAssignment(${assignment.id})" 
                      data-assignment-id="${assignment.id}">
-                    <div class="assignment-title">
-                        <i class="fas fa-file-alt"></i> ${assignment.title || 'Untitled Assignment'}
-                    </div>
+                    <div class="assignment-title">${assignment.title || 'Untitled Assignment'}</div>
                     <div class="assignment-meta">
-                        ${assignment.topic_name ? `<div><i class="fas fa-book"></i> ${assignment.topic_name}</div>` : ''}
-                        ${assignment.due_date ? `<div><i class="fas fa-clock"></i> Due: ${new Date(assignment.due_date).toLocaleDateString()}</div>` : ''}
-                        ${assignment.has_file ? '<div><i class="fas fa-paperclip"></i> Has attachment</div>' : ''}
+                        ${assignment.topic_name ? `<i class="fas fa-book"></i> ${assignment.topic_name}` : ''}
+                        ${assignment.due_date ? `<br><i class="fas fa-clock"></i> Due: ${new Date(assignment.due_date).toLocaleDateString()}` : ''}
+                        ${assignment.has_file ? '<br><i class="fas fa-paperclip"></i> Has attachment' : ''}
                     </div>
                 </div>
             `).join('');
-            
-            // Hide assignment prompt since we have assignments
-            assignmentPrompt.style.display = 'none';
         }
 
         async function selectAssignment(assignmentId) {
@@ -1073,13 +758,8 @@
                 if (data.success) {
                     currentAssignmentId = assignmentId;
                     displayAssignmentDetails(data.assignment);
+                    document.getElementById('currentAssignmentTitle').textContent = data.assignment.title || 'Math Assistant';
                     showNotification(`Selected: ${data.assignment.title || 'Assignment'}`, 'success');
-                    
-                    // Hide assignment prompt
-                    document.getElementById('assignmentPrompt').style.display = 'none';
-                    
-                    // Auto-close sidebar after selection
-                    toggleSidebarView();
                 }
             } catch (error) {
                 console.error('Error loading assignment details:', error);
@@ -1093,7 +773,7 @@
             
             details.innerHTML = `
                 <strong>${assignment.title || 'Untitled Assignment'}</strong>
-                <div style="margin-top: 8px; font-size: 0.9em; color: #cbd5e1;">
+                <div style="margin-top: 12px; font-size: 0.9em; color: #cbd5e1;">
                     ${assignment.description ? `<p>${assignment.description}</p>` : ''}
                     ${assignment.topic_name ? `<div><i class="fas fa-book"></i> ${assignment.topic_name}</div>` : ''}
                     ${assignment.due_date ? `<div><i class="fas fa-clock"></i> Due: ${new Date(assignment.due_date).toLocaleDateString()}</div>` : ''}
@@ -1125,9 +805,12 @@
                 emptyState.style.display = 'none';
                 
                 conversations.reverse().forEach(conv => {
-                    addMessageToChat(conv.user_message, 'user', false);
-                    addMessageToChat(conv.ai_response, 'ai', false);
+                    addMessageToChat(conv.user_message, 'user');
+                    addMessageToChat(conv.ai_response, 'ai');
                 });
+                
+                scrollToBottomIfNeeded();
+                renderMath();
             }
         }
 
@@ -1139,10 +822,6 @@
 
             if (!currentAssignmentId) {
                 showNotification('Please select an assignment first.', 'warning');
-                // Open sidebar to show assignment prompt
-                if (isSidebarCollapsed) {
-                    toggleSidebarView();
-                }
                 return;
             }
 
@@ -1153,7 +832,7 @@
             document.getElementById('sendButton').disabled = true;
 
             // Add user message to chat
-            addMessageToChat(message, 'user', true);
+            addMessageToChat(message, 'user');
 
             // Show typing indicator
             showTypingIndicator();
@@ -1165,7 +844,10 @@
                 
                 let aiResponse = '';
                 hideTypingIndicator();
-                const messageElement = addMessageToChat('', 'ai', true, true);
+                addMessageToChat('', 'ai', true); // Create empty AI message for streaming
+
+                // Start math rendering interval
+                startMathRendering();
 
                 while (true) {
                     const { done, value } = await reader.read();
@@ -1179,31 +861,23 @@
                             const data = line.slice(6);
                             if (data && !data.includes('❌')) {
                                 aiResponse += data;
-                                updateStreamingMessage(messageElement, aiResponse);
-                                
-                                // Render math dynamically as content streams
-                                renderMathInElement(messageElement, {
-                                    delimiters: [
-                                        {left: '$$', right: '$$', display: true},
-                                        {left: '$', right: '$', display: false},
-                                        {left: '\\(', right: '\\)', display: false},
-                                        {left: '\\[', right: '\\]', display: true}
-                                    ],
-                                    throwOnError: false
-                                });
+                                updateLastMessage(aiResponse);
+                                scrollToBottomIfNeeded();
                             }
                         }
                     }
                 }
 
-                // Final math render after complete response
+                // Stop math rendering interval and do final render
+                stopMathRendering();
                 renderMath();
                 showNotification('Response received', 'success');
 
             } catch (error) {
                 console.error('Error streaming response:', error);
                 hideTypingIndicator();
-                addMessageToChat('Sorry, I encountered an error while processing your math question. Please try again.', 'ai', true);
+                stopMathRendering();
+                addMessageToChat('Sorry, I encountered an error while processing your math question. Please try again.', 'ai');
                 showNotification('Error generating response', 'error');
             } finally {
                 isProcessing = false;
@@ -1212,7 +886,7 @@
             }
         }
 
-        function addMessageToChat(content, sender, animate = true, isStreaming = false) {
+        function addMessageToChat(content, sender, isStreaming = false) {
             const chatMessages = document.getElementById('chatMessages');
             const emptyState = document.getElementById('emptyState');
             
@@ -1222,10 +896,6 @@
 
             const messageDiv = document.createElement('div');
             messageDiv.className = `message ${sender}-message`;
-            if (!animate) {
-                messageDiv.style.animation = 'none';
-            }
-            
             messageDiv.innerHTML = `
                 <div class="message-content">${formatContent(content)}</div>
             `;
@@ -1235,43 +905,33 @@
             }
 
             chatMessages.appendChild(messageDiv);
-            
-            // Only scroll to bottom if user is already at bottom or it's a new message
-            if (!isUserScrolling) {
-                scrollToBottom();
-            }
+            scrollToBottomIfNeeded();
 
             if (!isStreaming) {
                 renderMath();
             }
-            
-            return messageDiv;
         }
 
-        function updateStreamingMessage(messageElement, content) {
-            if (messageElement) {
-                messageElement.querySelector('.message-content').innerHTML = formatContent(content);
-                
-                // Only scroll to bottom if user is already at bottom
-                if (!isUserScrolling) {
-                    scrollToBottom();
-                }
+        function updateLastMessage(content) {
+            const streamingMessage = document.getElementById('streamingMessage');
+            if (streamingMessage) {
+                streamingMessage.querySelector('.message-content').innerHTML = formatContent(content);
             }
         }
 
         function formatContent(content) {
             if (!content) return '';
             
-            // Basic formatting optimized for small screens
+            // Basic formatting
             let formatted = content
                 .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
                 .replace(/\*(.*?)\*/g, '<em>$1</em>')
                 .replace(/~~(.*?)~~/g, '<del>$1</del>')
                 .replace(/__(.*?)__/g, '<u>$1</u>')
                 .replace(/`(.*?)`/g, '<code>$1</code>')
-                .replace(/^# (.*$)/gim, '<h4>$1</h4>')
-                .replace(/^## (.*$)/gim, '<h5>$1</h5>')
-                .replace(/^### (.*$)/gim, '<h6>$1</h6>')
+                .replace(/^# (.*$)/gim, '<h3>$1</h3>')
+                .replace(/^## (.*$)/gim, '<h4>$1</h4>')
+                .replace(/^### (.*$)/gim, '<h5>$1</h5>')
                 .replace(/^- (.*$)/gim, '<li>$1</li>')
                 .replace(/^> (.*$)/gim, '<blockquote>$1</blockquote>')
                 .replace(/\n/g, '<br>');
@@ -1286,6 +946,18 @@
             formatted = formatted.replace(/\*\*Step \d+:\*\*/g, '<div class="step-solution"><strong>$&</strong>');
             
             return formatted;
+        }
+
+        function startMathRendering() {
+            // Render math every 500ms during streaming
+            mathRenderInterval = setInterval(renderMath, 500);
+        }
+
+        function stopMathRendering() {
+            if (mathRenderInterval) {
+                clearInterval(mathRenderInterval);
+                mathRenderInterval = null;
+            }
         }
 
         function renderMath() {
@@ -1308,29 +980,22 @@
             }
         }
 
+        function toggleMathRendering() {
+            renderMath();
+            showNotification('Math rendering refreshed', 'success');
+        }
+
         function showTypingIndicator() {
             document.getElementById('typingIndicator').style.display = 'block';
-            if (!isUserScrolling) {
-                scrollToBottom();
-            }
+            scrollToBottomIfNeeded();
         }
 
         function hideTypingIndicator() {
             document.getElementById('typingIndicator').style.display = 'none';
         }
 
-        function scrollToBottom(force = false) {
-            if (force || !isUserScrolling) {
-                const chatMessages = document.getElementById('chatMessages');
-                chatMessages.scrollTop = chatMessages.scrollHeight;
-                
-                // Hide scroll to bottom button when we scroll to bottom
-                document.getElementById('scrollToBottom').classList.remove('visible');
-            }
-        }
-
         async function clearHistory() {
-            if (!confirm('Clear all math conversation history?')) {
+            if (!confirm('Are you sure you want to clear all math conversation history?')) {
                 return;
             }
 
@@ -1341,7 +1006,8 @@
                 if (data.success) {
                     const chatMessages = document.getElementById('chatMessages');
                     chatMessages.innerHTML = '<div class="empty-state" id="emptyState"><div class="icon">🧮</div><h3>Welcome to Math Assistant</h3><p>Select an assignment and start asking math questions!</p></div>';
-                    showNotification('History cleared', 'success');
+                    document.getElementById('currentAssignmentTitle').textContent = 'Math Assistant';
+                    showNotification('History cleared successfully', 'success');
                 } else {
                     showNotification('Failed to clear history', 'error');
                 }
@@ -1356,17 +1022,15 @@
             const notification = document.createElement('div');
             notification.style.cssText = `
                 position: fixed;
-                top: 15px;
-                right: 15px;
-                padding: 10px 16px;
-                border-radius: 8px;
+                top: 20px;
+                right: 20px;
+                padding: 12px 20px;
+                border-radius: 10px;
                 color: white;
                 font-weight: 500;
                 z-index: 1000;
                 transform: translateX(100%);
                 transition: transform 0.3s ease;
-                font-size: 0.9em;
-                max-width: 80%;
                 ${type === 'success' ? 'background: #22c55e;' : ''}
                 ${type === 'error' ? 'background: #ef4444;' : ''}
                 ${type === 'warning' ? 'background: #f59e0b;' : ''}
