@@ -735,6 +735,87 @@
         align-items: center;
         gap: 15px;
     }
+
+    /* Ensure header controls have proper spacing on mobile */
+    @media (max-width: 768px) {
+        .header-controls {
+            gap: 8px;
+            flex-wrap: nowrap;
+        }
+        
+        .select-mode-btn {
+            order: 1;
+            margin-right: 0;
+        }
+        
+        .connection-status {
+            order: 2;
+            font-size: 0.7em;
+            padding: 4px 8px;
+            margin-right: 0;
+        }
+        
+        .unread-badge {
+            order: 3;
+        }
+        
+        .btn-outline {
+            order: 4;
+            padding: 6px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+        }
+        
+        .btn-outline span {
+            display: none;
+        }
+        
+        .btn-outline i {
+            margin-right: 0;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .header-controls {
+            gap: 5px;
+        }
+        
+        .select-mode-btn {
+            font-size: 1em;
+            padding: 4px;
+        }
+        
+        .connection-status {
+            font-size: 0.65em;
+            padding: 3px 6px;
+        }
+        
+        .connection-quality {
+            display: none;
+        }
+    }
+    
+    .select-mode-btn {
+        background: transparent;
+        border: none;
+        color: #94a3b8;
+        font-size: 1.1em;
+        cursor: pointer;
+        transition: color 0.2s;
+        padding: 5px;
+        border-radius: 5px;
+        margin-right: 8px;
+    }
+    
+    .select-mode-btn:hover {
+        color: #3b82f6;
+    }
+    
+    .select-mode-btn.active {
+        color: #3b82f6;
+        background: rgba(59, 130, 246, 0.1);
+    }
     
     @media (max-width: 768px) {
         header {
@@ -908,10 +989,10 @@
     
     .floating-action-btn {
         position: fixed;
-        bottom: 80px;
+        bottom: 100px;
         right: 30px;
-        width: 40px;
-        height: 40px;
+        width: 50px;
+        height: 50px;
         border-radius: 50%;
         background: transparent;
         color: #3b82f6;
@@ -933,10 +1014,10 @@
     
     @media (max-width: 768px) {
         .floating-action-btn {
-            bottom: 70px;
+            bottom: 120px;
             right: 20px;
-            width: 35px;
-            height: 35px;
+            width: 45px;
+            height: 45px;
         }
     }
     
@@ -1456,6 +1537,9 @@
                 </div>
                 
                 <div class="header-controls">
+                    <button class="select-mode-btn" id="selectModeBtn">
+                        <i class="fas fa-check-square"></i>
+                    </button>
                     <div class="connection-status" id="connectionStatus">
                         <div class="status-dot status-connected" id="statusDot"></div>
                         <span id="statusText">Connected</span>
@@ -1464,9 +1548,6 @@
                     {% if unread_count > 0 %}
                     <span class="unread-badge">{{ unread_count }}</span>
                     {% endif %}
-                    <button class="select-mode-btn" id="selectModeBtn">
-                        <i class="fas fa-check-square"></i>
-                    </button>
                     <button id="backBtn" class="btn-outline">
                         <i class="fas fa-arrow-left mr-2"></i>
                     </button>
@@ -1959,8 +2040,6 @@
             
             const contextMenu = document.createElement('div');
             contextMenu.className = 'context-menu';
-            contextMenu.style.left = `${x}px`;
-            contextMenu.style.top = `${y}px`;
             
             const menuItems = [
                 { icon: 'fa-reply', text: 'Reply', action: () => replyToMessage(messageId) },
