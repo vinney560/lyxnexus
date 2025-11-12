@@ -315,7 +315,7 @@
             flex-direction: column;
             gap: 1rem;
             scroll-behavior: smooth;
-            -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+            -webkit-overflow-scrolling: touch;
         }
 
         /* Message Styles */
@@ -472,7 +472,7 @@
             max-height: 120px;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             font-family: inherit;
-            -webkit-appearance: none; /* Remove iOS shadow */
+            -webkit-appearance: none;
         }
 
         #message-input:focus {
@@ -1084,11 +1084,7 @@
             </button>
         </div>
         <div id="historyList">
-            {% if sidebar_history_html %}
-                {{ sidebar_history_html | safe }}
-            {% else %}
-                <div style="text-align: center; color: var(--text-secondary); padding: 2rem;">No conversations yet</div>
-            {% endif %}
+            <div style="text-align: center; color: var(--text-secondary); padding: 2rem;">Loading conversations...</div>
         </div>
     </div>
 
@@ -1126,7 +1122,7 @@
                     <div class="welcome-icon">
                         <i class="fas fa-robot"></i>
                     </div>
-                    <h1 class="welcome-title">Hello, {{ current_user.username }}!</h1>
+                    <h1 class="welcome-title">Hello, <span id="username">User</span>!</h1>
                     <p class="welcome-subtitle">I'm Marion, your AI assistant. How can I help you today?</p>
                     
                     <div class="capabilities-grid">
@@ -1157,8 +1153,7 @@
                     </div>
                 </div>
 
-                <!-- Existing conversation history - Now pre-formatted by server -->
-                {{ history_html | safe }}
+                <!-- Conversation history will be loaded here by JavaScript -->
             </div>
         </div>
 
@@ -1190,17 +1185,98 @@
         const historyClose = document.getElementById('historyClose');
         const mainChat = document.getElementById('mainChat');
         const historyList = document.getElementById('historyList');
+        const usernameSpan = document.getElementById('username');
         let currentConversationId = null;
         let isAutoScrollEnabled = true;
         let currentStreamingMessage = null;
         let isStreaming = false;
         let isMobile = window.innerWidth <= 768;
         let sidebarOpen = false;
+        let userData = null;
+
+        // Initialize the application
+        async function initApp() {
+            try {
+                const response = await fetch('/gemini/');
+                const data = await response.json();
+                
+                if (data.success) {
+                    userData = data.user;
+                    usernameSpan.textContent = userData.username;
+                    await loadConversationHistory(data.conversations);
+                } else {
+                    showError('Failed to load chat data');
+                }
+            } catch (error) {
+                console.error('Error initializing app:', error);
+                showError('Failed to connect to server');
+            }
+        }
+
+        // Load conversation history from raw data
+        async function loadConversationHistory(conversations) {
+            if (!conversations || conversations.length === 0) {
+                return;
+            }
+
+            // Clear existing content except welcome message
+            const welcomeContainer = chatBox.querySelector('.welcome-container');
+            chatBox.innerHTML = '';
+            if (welcomeContainer) {
+                chatBox.appendChild(welcomeContainer);
+            }
+
+            // Add conversations in chronological order (oldest first)
+            const sortedConversations = [...conversations].reverse();
+            
+            for (const conv of sortedConversations) {
+                addMessage(conv.user_message, true, false, formatTime(conv.created_at));
+                addMessage(conv.ai_response, false, false, formatTime(conv.created_at), conv.user_message);
+            }
+
+            // Update sidebar history
+            updateSidebarHistory(conversations);
+            
+            scrollToBottom();
+        }
+
+        // Format timestamp
+        function formatTime(timestamp) {
+            try {
+                const date = new Date(timestamp);
+                return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            } catch {
+                return "Just now";
+            }
+        }
+
+        // Update sidebar history
+        function updateSidebarHistory(conversations) {
+            historyList.innerHTML = '';
+            
+            if (conversations.length === 0) {
+                historyList.innerHTML = '<div style="text-align: center; color: var(--text-secondary); padding: 2rem;">No conversations yet</div>';
+                return;
+            }
+
+            for (const conv of conversations) {
+                const promptPreview = conv.user_message.length > 60 ? 
+                    conv.user_message.substring(0, 60) + '...' : conv.user_message;
+                
+                const historyItem = document.createElement('div');
+                historyItem.className = 'history-item';
+                historyItem.dataset.convId = conv.id;
+                historyItem.innerHTML = `
+                    <div class="history-prompt">${promptPreview}</div>
+                    <div class="history-time">${formatTime(conv.created_at)}</div>
+                `;
+                historyList.appendChild(historyItem);
+            }
+        }
 
         // Check if mobile on resize
         window.addEventListener('resize', function() {
             isMobile = window.innerWidth <= 768;
-            // On mobile, we don't want to push content, so remove with-history class
             if (isMobile) {
                 mainChat.classList.remove('with-history');
             } else if (sidebarOpen) {
@@ -1229,7 +1305,7 @@
         // Send button click
         sendButton.addEventListener('click', sendMessage);
 
-        // History toggle function - NEW IMPLEMENTATION
+        // History toggle function
         function toggleHistoryPanel() {
             sidebarOpen = !sidebarOpen;
             
@@ -1242,7 +1318,6 @@
                 if (isMobile) {
                     document.body.style.overflow = 'hidden';
                 }
-                // Add event listener to close on backdrop click
                 historyBackdrop.addEventListener('click', closeHistoryPanel);
             } else {
                 closeHistoryPanel();
@@ -1260,7 +1335,6 @@
             if (isMobile) {
                 document.body.style.overflow = '';
             }
-            // Remove event listener
             historyBackdrop.removeEventListener('click', closeHistoryPanel);
         }
 
@@ -1411,12 +1485,9 @@
                 
                 // Tables (improved implementation)
                 .replace(/\|(.+)\|/g, (match) => {
-                    // Check if this looks like a table row (contains multiple cells separated by |)
                     const cells = match.split('|').filter(cell => cell.trim() !== '');
                     
-                    // Only process if we have at least 2 cells (indicating a table row)
                     if (cells.length >= 2) {
-                        // Check if this is a header row (next line might be a separator)
                         const lines = text.split('\n');
                         const currentLineIndex = lines.findIndex(line => line.includes(match));
                         
@@ -1435,7 +1506,6 @@
                             });
                             rowHTML += '</tr>';
                             
-                            // If this is a header, we'll need to create the full table structure
                             if (isHeader) {
                                 return `<table>${rowHTML}`;
                             }
@@ -1595,10 +1665,12 @@
         // Load specific conversation
         async function loadConversation(convId) {
             try {
+                // Clear active states
                 document.querySelectorAll('.history-item').forEach(item => {
                     item.classList.remove('active');
                 });
                 
+                // Set active state
                 const clickedItem = document.querySelector(`.history-item[data-conv-id="${convId}"]`);
                 if (clickedItem) {
                     clickedItem.classList.add('active');
@@ -1686,12 +1758,14 @@
                 eventSource.onerror = function(event) {
                     eventSource.close();
                     messageContent.classList.remove('streaming-message');
-                    updateSidebarHistory(message, fullResponse);
                     hideTypingIndicator();
                     messageInput.focus();
                     isStreaming = false;
                     updateButtonStates();
                     currentStreamingMessage = null;
+                    
+                    // Reload conversation history to get updated data
+                    initApp();
                 };
 
             } catch (error) {
@@ -1705,29 +1779,13 @@
             }
         }
 
-        // Update sidebar history
-        function updateSidebarHistory(prompt, response) {
-            const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            const promptPreview = prompt.length > 60 ? prompt.substring(0, 60) + '...' : prompt;
-            
-            const historyItem = document.createElement('div');
-            historyItem.className = 'history-item';
-            historyItem.innerHTML = `
-                <div class="history-prompt">${promptPreview}</div>
-                <div class="history-time">${timestamp}</div>
-            `;
-            
-            if (historyList.firstChild) {
-                historyList.insertBefore(historyItem, historyList.firstChild);
-            } else {
-                historyList.appendChild(historyItem);
-            }
-            
-            const noConvsMsg = historyList.querySelector('div[style*="text-align: center"]');
-            if (noConvsMsg) {
-                noConvsMsg.remove();
-            }
+        // Show error message
+        function showError(message) {
+            addMessage(message, false, true);
         }
+
+        // Initialize the application when DOM is loaded
+        document.addEventListener('DOMContentLoaded', initApp);
 
         // Initial scroll to bottom
         scrollToBottom();

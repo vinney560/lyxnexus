@@ -1,5 +1,5 @@
 # gemini_bp.py
-from flask import Blueprint, request, session, jsonify, render_template, Response, stream_with_context
+from flask import Blueprint, request, session, jsonify, Response, stream_with_context
 from flask_login import current_user, login_required
 from datetime import datetime, date, time
 import requests
@@ -152,7 +152,6 @@ class AIConversationService:
             print(f"Error getting conversation stats: {e}")
             return {}
     
-    """Not yet implemented --> Don't Know how to do it"""
     def update_conversation_rating(self, conversation_id, user_id, rating):
         """Update user rating for a conversation"""
         try:
@@ -449,10 +448,10 @@ RESPONSE REQUIREMENTS:
 - Never mention conversation history or context
 - Be concise and directly helpful
 - If user request for a code, respond with valid code format and syntax that are correct and runnable
-- Avoid using symbols like "<>", "**", "[]", or any symbols in responses to show URLs, Links, emphasis, or references. For Links or URLs, add a space at the end then "-->".
+- Use the exact formatting syntax specified below for all responses
 
 ' ==============================================================
-' AI MARKDOWN-LIKE FORMAT GUIDE
+' AI MARKDOWN-LIKE FORMAT GUIDE - USE EXACTLY AS SPECIFIED
 ' ==============================================================
 
 ' [TEXT EMPHASIS]
@@ -467,16 +466,13 @@ RESPONSE REQUIREMENTS:
 ' "^"text"^"                  → superscript
 
 ' [CODE FORMATTING]
-' "`"code"`"                  → inline code and code block 
-' Example of a code block:
-
-#python --> to show language
-def hello_world():
-    print("Hello, world!")
-#output: Hello world --> (#)comments inside the code to prevent syntax error. in javascript use // and in others use relevant
-
-' Keep syntax highlighting based on the language specified
-' If no language is given, treat as plain code
+' "`"code"`"                  → inline code
+' Code blocks:
+' ```python
+' def hello_world():
+'     print("Hello, world!")
+' ```
+' #output: Hello world --> Use comments to show expected output
 
 ' [HEADERS & STRUCTURE]
 ' "# text"                    → level 1 header
@@ -487,27 +483,14 @@ def hello_world():
 ' "- text", "* text", "+ text" → unordered list item
 ' "1. text", "2. text"        → ordered list item
 ' "> text"                    → blockquote
-' Consecutive list items should be grouped together
 
 ' [VISUAL ELEMENTS]
 ' "---", "***", or "___"      → horizontal line
 
 ' [TABLES]
-' "| header1 | header2 |"     → table header
-' "|---------|---------|"     → header separator
-' "| data1   | data2   |"     → table row
-' Tables should have consistent column counts
-' Example of a table: 
+' | header1 | header2 |       → table header
+' | data1   | data2   |       → table row
 
-Here's a comparison of different AI models:
-
-| Model | Company | Parameters | Best Use Case |
-|-------|---------|------------|---------------|
-| GPT-4 | OpenAI | 1.7T | General purpose, reasoning |
-| Claude 3 | Anthropic | Unknown | Document analysis, ethics |
-| Gemini Pro | Google | Unknown | Multimodal tasks, integration |
-| Llama 2 | Meta | 70B | Open-source, research |
-| Mixtral | Mistral AI | 47B | Multilingual, efficient |
 
 ' [LINE BREAKS]
 ' Each "\n" (newline) represents a line break
@@ -522,6 +505,7 @@ Here's a comparison of different AI models:
 ' 5. Do not output HTML or styling, only meaning-based formatting.
 ' 6. Ensure code blocks are syntactically correct and runnable.
 ' 7. Use user preferences for formatting if requested or given.
+' 8. For math expressions, use LaTeX syntax with $...$ for inline and $$...$$ for display
 ' ==============================================================
 
 PLATFORM CONTEXT:
@@ -542,42 +526,15 @@ BACKGROUND AND ORIGIN:
 - You were built by Vincent Kipngetich nicknamed "Lyxin" who is your creator, maintainer and developer. Refer him as Lyxin
 - You are from LyxNexus educational platform branch of Main LyxLab Intelligence.
 - You are designed to assist users in navigating and utilizing the LyxNexus platform effectively.
-Now respond naturally to the user's current message:"""
 
-    # Append math rendering instructions
+Now respond naturally to the user's current message using the exact formatting syntax specified above:"""
     smart_prompt += r"""
-    ==============================================================
-    [MATH & SCIENTIFIC RENDERING & FORMATTING]
-    ==============================================================
-
-    Instructions for you:
-
-    1. Solve any math or science problem provided.
-    2. Output **pure LaTeX** for equations, suitable for KaTeX rendering.
-    3. Do NOT wrap expressions in $...$ or $$...$$.
-    4. Do NOT escape {} — they are required for LaTeX syntax.
-    5. Preserve ^ for superscripts and ~ for subscripts.
-    6. Use standard LaTeX commands like \frac, \sqrt, \pm, \int, etc.
-    7. Do NOT output plain text equations.
-    8. Avoid explanations unless explicitly requested.
-    9. Your output will be rendered automatically in LyxNexus via KaTeX.
-
-    Example input: "Solve x^2 - 5x + 6 = 0"
-
-    Example AI output:
-
-    x^2 - 5x + 6 = 0
-
-    x = \frac{-(-5) \pm \sqrt{(-5)^2 - 4(1)(6)}}{2(1)}
-
-    x = \frac{5 \pm \sqrt{25 - 24}}{2}
-
-    x = \frac{5 \pm 1}{2}
-
-    Solutions:
-
-    x = 3  or  x = 2
-    """
+' [MATH & SCIENTIFIC FORMATTING]
+' For inline math: $E = mc^2$
+' For display math: $$x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}$$
+' Use standard LaTeX syntax for all mathematical expressions
+' Do NOT escape curly braces {{}} - they are required for LaTeX
+' Use ^ for superscripts and _ for subscripts in LaTeX mode"""
     # Add platform data context when relevant to current conversation
     try:
         from app import db
@@ -806,7 +763,7 @@ def generate_stream(prompt, history, user_context):
 @gemini_bp.route('/')
 @login_required
 def gemini_chat():
-    """Render the Gemini chat interface with streaming and history"""
+    """Render the Gemini chat interface - returns raw data only"""
     from app import db
     db_service = ReadOnlyDatabaseQueryService(db)
 
@@ -824,135 +781,17 @@ def gemini_chat():
         session['gemini_history'].append(conv['ai_response'])
     session.modified = True
 
-    # Format text function for server-side formatting
-    def format_text(text):
-        """Format text using custom markdown-like syntax with math-safe rendering."""
-        import re
-    
-        formatted = text
-    
-        # Code blocks with language
-        formatted = re.sub(
-            r'```(\w+)?\n([\s\S]*?)```',
-            lambda m: f'<pre data-language="{m.group(1) or "text"}"><code>{m.group(2).strip()}</code></pre>',
-            formatted
-        )
-    
-        # Inline code
-        formatted = re.sub(r'`([^`]+)`', r'<code>\1</code>', formatted)
-    
-        # Headers
-        formatted = re.sub(r'^### (.*$)', r'<h3>\1</h3>', formatted, flags=re.MULTILINE)
-        formatted = re.sub(r'^## (.*$)', r'<h2>\1</h2>', formatted, flags=re.MULTILINE)
-        formatted = re.sub(r'^# (.*$)', r'<h1>\1</h1>', formatted, flags=re.MULTILINE)
-    
-        # Bold / Italic / Underline / Highlight / Strikethrough
-        formatted = re.sub(r'\*\*(.*?)\*\*', r'<strong>\1</strong>', formatted)
-        formatted = re.sub(r'\*(.*?)\*', r'<em>\1</em>', formatted)
-        formatted = re.sub(r'_(.*?)_', r'<em>\1</em>', formatted)
-        formatted = re.sub(r'__(.*?)__', r'<span class="underline">\1</span>', formatted)
-        formatted = re.sub(r'==(.*?)==', r'<span class="highlight">\1</span>', formatted)
-        formatted = re.sub(r'~~(.*?)~~', r'<span class="strikethrough">\1</span>', formatted)
-    
-        # Blockquotes
-        formatted = re.sub(r'^> (.*$)', r'<blockquote>\1</blockquote>', formatted, flags=re.MULTILINE)
-    
-        # Horizontal rules
-        formatted = re.sub(r'^(?:\*\*\*|---|___)$', r'<hr>', formatted, flags=re.MULTILINE)
-    
-        # Lists
-        formatted = re.sub(r'^\s*[-*+] (.*$)', r'<li>\1</li>', formatted, flags=re.MULTILINE)
-        formatted = re.sub(r'^\s*\d+\. (.*$)', r'<li>\1</li>', formatted, flags=re.MULTILINE)
-        formatted = re.sub(r'(<li>.*</li>)', r'<ul>\1</ul>', formatted, flags=re.DOTALL)
-    
-        # Tables
-        def format_table(match):
-            row = match.group(1)
-            cells = [cell.strip() for cell in row.split('|') if cell.strip()]
-            if len(cells) > 1:
-                table_html = '<table><tr>' + ''.join(f'<td>{cell}</td>' for cell in cells) + '</tr></table>'
-                return table_html
-            return match.group(0)
-    
-        formatted = re.sub(r'\|(.+)\|', format_table, formatted)
-    
-        # Math-safe: subscripts and superscripts
-        # Do not escape math syntax (^ or ~); wrap them lightly for CSS/MathJax/KaTeX rendering.
-        formatted = re.sub(r'~(.+?)~', r'<span class="subscript">\1</span>', formatted)
-        formatted = re.sub(r'\^(.+?)\^', r'<span class="superscript">\1</span>', formatted)
-    
-        # Line breaks
-        formatted = formatted.replace('\n', '<br>')
-    
-        # URLs
-        formatted = re.sub(
-            r'(https?://[^\s]+)',
-            r'<a href="\1" target="_blank" rel="noopener noreferrer">\1</a>',
-            formatted
-        )
-    
-        # Prevent escaping math or special characters — let KaTeX/MathJax handle inline math
-        # Example: y^3 + 8y - 15 = 0 should remain as-is
-        return formatted
-
-    # Generate HTML for main chat with formatting
-    history_html = ""
-    for conv in reversed(conversation_history):  # newest first
-        try:
-            timestamp = datetime.fromisoformat(conv['created_at'].replace('Z', '+00:00'))
-            time_str = timestamp.strftime('%H:%M')
-        except:
-            time_str = "Just now"
-
-        # Format AI response
-        formatted_ai_response = format_text(conv['ai_response'])
-
-        history_html += f'''
-        <div class="message user-message">
-            <div class="message-content">
-                {conv['user_message']}
-                <div class="message-time">{time_str}</div>
-            </div>
-        </div>
-        <div class="message ai-message" data-prompt="{conv['user_message'].replace('"', '&quot;')}">
-            <div class="message-content">
-                <div class="formatted-text">{formatted_ai_response}</div>
-                <div class="message-time">{time_str}</div>
-                <div class="message-actions">
-                    <button class="message-action copy-button" title="Copy response">
-                        <i class="fas fa-copy"></i> Copy
-                    </button>
-                    <button class="message-action regenerate-button" title="Regenerate response">
-                        <i class="fas fa-redo"></i> Regenerate
-                    </button>
-                </div>
-            </div>
-        </div>
-        '''
-
-    # Sidebar history
-    sidebar_history_html = ""
-    for conv in conversation_history:
-        try:
-            timestamp = datetime.fromisoformat(conv['created_at'].replace('Z', '+00:00'))
-            time_str = timestamp.strftime('%H:%M')
-        except:
-            time_str = "Just now"
-
-        prompt_preview = conv['user_message'][:60] + "..." if len(conv['user_message']) > 60 else conv['user_message']
-
-        sidebar_history_html += f'''
-        <div class="history-item" data-conv-id="{conv['id']}">
-            <div class="history-prompt">{prompt_preview}</div>
-            <div class="history-time">{time_str}</div>
-        </div>
-        '''
-
-    return render_template('ai_assist.html',
-        current_user=current_user,
-        history_html=history_html,
-        sidebar_history_html=sidebar_history_html
-    )
+    # Return raw data - frontend handles all rendering
+    return jsonify({
+        'success': True,
+        'user': {
+            'username': current_user.username,
+            'id': current_user.id,
+            'is_admin': current_user.is_admin
+        },
+        'conversations': conversation_history,
+        'total_conversations': len(conversation_history)
+    })
 
 @gemini_bp.route('/stream')
 @login_required
@@ -988,7 +827,7 @@ def gemini_stream():
 @gemini_bp.route('/get-conversation/<int:conv_id>')
 @login_required
 def get_conversation(conv_id):
-    """Get specific conversation by ID"""
+    """Get specific conversation by ID - returns raw data"""
     try:
         from app import AIConverse
         
