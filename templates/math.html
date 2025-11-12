@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
     <title>Assignment Assistant | LyxNexus</title>
     
     <!-- Font Awesome -->
@@ -13,7 +14,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/contrib/auto-render.min.js"></script>
     
-    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <!--script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script-->
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     
     <style>
@@ -22,7 +23,7 @@
             --text-color: #f1f5f9;
             --accent-color: #3b82f6;
             --secondary-color: #8b5cf6;
-            --sidebar-width: 360px;
+            --sidebar-width: 320px;
 
             @media (max-width: 768px) {
               --sidebar-width: 290px;
@@ -177,7 +178,7 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            z-index: 10;
+            z-index: 100;
             transition: all 0.3s ease;
         }
 
@@ -267,6 +268,7 @@
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            transition: margin-left 0.3s ease;
         }
 
         .chat-messages {
@@ -582,26 +584,45 @@
             outline-offset: 2px;
         }
 
-        /* Responsive Design */
+        /* Responsive Design - Fixed for Mobile */
         @media (max-width: 968px) {
             .sidebar {
                 position: absolute;
                 height: 100%;
-                z-index: 5;
+                z-index: 99;
                 box-shadow: 5px 0 15px rgba(0, 0, 0, 0.2);
             }
             
             .sidebar:not(.collapsed) {
-                width: 100%;
-                max-width: 400px;
+                width: 85%;
+                max-width: 320px;
             }
             
             .toggle-sidebar {
-                display: flex;
+                position: fixed;
+                top: 100px;
+                left: 0;
+                z-index: 100;
+            }
+            
+            .toggle-sidebar.collapsed {
+                left: 0;
             }
             
             .message {
                 max-width: 95%;
+                word-wrap: break-word;
+            }
+            
+            .message-content {
+                font-size: 14px;
+                line-height: 1.5;
+            }
+            
+            .katex-display {
+                overflow-x: auto;
+                overflow-y: hidden;
+                -webkit-overflow-scrolling: touch;
             }
         }
 
@@ -625,14 +646,21 @@
             .header-button {
                 flex: 1;
                 justify-content: center;
+                padding: 12px 8px;
+                min-height: 44px;
             }
             
             .chat-messages {
-                padding: 15px;
+                padding: 15px 10px;
             }
             
             .message {
                 max-width: 100%;
+            }
+            
+            .user-message,
+            .ai-message {
+                padding: 12px 15px;
             }
             
             .chat-input-container {
@@ -642,6 +670,38 @@
             .scroll-to-bottom {
                 bottom: 80px;
                 right: 15px;
+            }
+            
+            .assignment-item {
+                padding: 12px;
+                min-height: 60px;
+            }
+            
+            .sidebar:not(.collapsed) {
+                width: 90%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .sidebar:not(.collapsed) {
+                width: 95%;
+            }
+            
+            .chat-input-wrapper {
+                gap: 10px;
+            }
+            
+            .send-button {
+                padding: 12px 20px;
+                min-width: 90px;
+            }
+            
+            .assignment-title {
+                font-size: 1em;
+            }
+            
+            .assignment-meta {
+                font-size: 0.85em;
             }
         }
     </style>
@@ -734,11 +794,35 @@
 
         // Initialize when page loads
         document.addEventListener('DOMContentLoaded', function() {
+            // Ensure sidebar is visible on small screens initially
+            if (window.innerWidth <= 968) {
+                const sidebar = document.getElementById('sidebar');
+                sidebar.classList.remove('collapsed');
+                isSidebarCollapsed = false;
+            }
+            
             loadAssignments();
             loadChatHistory();
             setupEventListeners();
             setupScrollHandler();
+            checkMobileRendering();
         });
+
+        function checkMobileRendering() {
+            if (window.innerWidth <= 968) {
+                console.log('Mobile rendering check - ensuring elements are visible');
+                
+                // Force visible if elements exist but are hidden
+                const elements = ['sidebar', 'chatMessages', 'assignmentList'];
+                elements.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el && el.offsetParent === null) {
+                        console.warn(`${id} was not visible - fixing`);
+                        el.style.display = 'block';
+                    }
+                });
+            }
+        }
 
         function setupEventListeners() {
             const chatInput = document.getElementById('chatInput');
@@ -766,6 +850,11 @@
             // Scroll to bottom button
             scrollToBottomBtn.addEventListener('click', function() {
                 scrollToBottom(true);
+            });
+
+            // Handle window resize for mobile
+            window.addEventListener('resize', function() {
+                checkMobileRendering();
             });
         }
 
@@ -809,10 +898,19 @@
                 sidebar.classList.add('collapsed');
                 toggleBtn.classList.add('collapsed');
                 sidebarIcon.className = 'fas fa-chevron-right';
+                
+                // Ensure chat area is fully visible on small screens
+                if (window.innerWidth <= 968) {
+                    document.querySelector('.chat-area').style.marginLeft = '0';
+                }
             } else {
                 sidebar.classList.remove('collapsed');
                 toggleBtn.classList.remove('collapsed');
                 sidebarIcon.className = 'fas fa-chevron-left';
+                
+                if (window.innerWidth <= 968) {
+                    document.querySelector('.chat-area').style.marginLeft = '0';
+                }
             }
         }
 
@@ -977,7 +1075,9 @@
                                         {left: '\\(', right: '\\)', display: false},
                                         {left: '\\[', right: '\\]', display: true}
                                     ],
-                                    throwOnError: false
+                                    throwOnError: false,
+                                    output: 'html',
+                                    trust: true
                                 });
                             }
                         }
@@ -1078,12 +1178,24 @@
                         {left: '\\(', right: '\\)', display: false},
                         {left: '\\[', right: '\\]', display: true}
                     ],
-                    throwOnError: false
+                    throwOnError: false,
+                    output: 'html',
+                    trust: true
                 });
             }
 
             if (typeof MathJax !== 'undefined') {
-                MathJax.typesetPromise();
+                MathJax.typesetPromise().catch((error) => {
+                    console.warn('MathJax rendering warning:', error);
+                });
+            }
+            
+            // Force reflow on mobile devices
+            if (window.innerWidth <= 968) {
+                document.body.style.overflow = 'hidden';
+                setTimeout(() => {
+                    document.body.style.overflow = 'auto';
+                }, 100);
             }
         }
 
