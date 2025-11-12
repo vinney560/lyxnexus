@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Assignment Assistant - LyxNexus</title>
+    
+    <!-- Math Rendering Libraries -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/contrib/auto-render.min.js"></script>
+    
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .math-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+            min-height: 90vh;
+        }
+
+        .math-header {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            color: white;
+            padding: 25px 30px;
+            text-align: center;
+        }
+
+        .math-header h1 {
+            font-size: 2.2em;
+            margin-bottom: 8px;
+            font-weight: 300;
+        }
+
+        .math-header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .math-content {
+            display: flex;
+            height: calc(90vh - 140px);
+        }
+
+        .sidebar {
+            width: 300px;
+            background: #f8f9fa;
+            border-right: 1px solid #e9ecef;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .assignments-section h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+
+        .assignment-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .assignment-item {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .assignment-item:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+        }
+
+        .assignment-item.active {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+
+        .assignment-title {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .assignment-meta {
+            font-size: 0.85em;
+            color: #6c757d;
+        }
+
+        .chat-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: white;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 25px;
+            overflow-y: auto;
+            background: #fafbfc;
+        }
+
+        .message {
+            margin-bottom: 25px;
+            max-width: 85%;
+        }
+
+        .user-message {
+            margin-left: auto;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 18px 18px 5px 18px;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .ai-message {
+            background: white;
+            border: 1px solid #e9ecef;
+            padding: 20px;
+            border-radius: 18px 18px 18px 5px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .message-content {
+            line-height: 1.6;
+        }
+
+        .message-content p {
+            margin-bottom: 10px;
+        }
+
+        .message-content ul, .message-content ol {
+            margin: 10px 0 10px 20px;
+        }
+
+        .message-content li {
+            margin-bottom: 5px;
+        }
+
+        .message-content code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+
+        .message-content pre {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+
+        .message-content blockquote {
+            border-left: 4px solid #667eea;
+            padding-left: 15px;
+            margin: 15px 0;
+            color: #6c757d;
+            font-style: italic;
+        }
+
+        /* Math specific styles */
+        .math-expression {
+            margin: 15px 0;
+            text-align: center;
+        }
+
+        .katex-display {
+            margin: 20px 0;
+            overflow-x: auto;
+            overflow-y: hidden;
+        }
+
+        .step-solution {
+            background: #f8f9fa;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .theorem {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .chat-input-container {
+            padding: 20px 25px;
+            border-top: 1px solid #e9ecef;
+            background: white;
+        }
+
+        .chat-input-wrapper {
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+        }
+
+        .chat-input {
+            flex: 1;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 15px 20px;
+            font-size: 16px;
+            resize: none;
+            min-height: 60px;
+            max-height: 120px;
+            font-family: inherit;
+            transition: border-color 0.3s ease;
+        }
+
+        .chat-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .send-button {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 15px 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            min-width: 100px;
+        }
+
+        .send-button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .send-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .typing-indicator {
+            display: none;
+            padding: 15px 20px;
+            color: #6c757d;
+            font-style: italic;
+        }
+
+        .typing-dots {
+            display: inline-block;
+        }
+
+        .typing-dots span {
+            animation: typing 1.4s infinite;
+            opacity: 0.6;
+        }
+
+        .typing-dots span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dots span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+            0%, 60%, 100% { opacity: 0.6; }
+            30% { opacity: 1; }
+        }
+
+        .current-assignment {
+            background: #e8f5e8;
+            border: 1px solid #28a745;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 15px;
+        }
+
+        .current-assignment h4 {
+            color: #28a745;
+            margin-bottom: 8px;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #6c757d;
+            padding: 40px 20px;
+        }
+
+        .empty-state i {
+            font-size: 3em;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .math-content {
+                flex-direction: column;
+                height: auto;
+            }
+            
+            .sidebar {
+                width: 100%;
+                max-height: 300px;
+            }
+            
+            .message {
+                max-width: 95%;
+            }
+            
+            body {
+                padding: 10px;
+            }
+        }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+    </style>
+</head>
+<body>
+    <div class="math-container">
+        <div class="math-header">
+            <h1>Math Assignment Assistant</h1>
+            <p>Get step-by-step solutions and mathematical guidance</p>
+        </div>
+
+        <div class="math-content">
+            <!-- Sidebar with Assignments -->
+            <div class="sidebar">
+                <div class="assignments-section">
+                    <h3>Your Assignments</h3>
+                    <div class="assignment-list" id="assignmentList">
+                        <!-- Assignments will be loaded here -->
+                    </div>
+                </div>
+
+                <div id="currentAssignment" class="current-assignment" style="display: none;">
+                    <h4>Selected Assignment</h4>
+                    <div id="assignmentDetails"></div>
+                </div>
+
+                <div class="chat-controls">
+                    <button class="send-button" onclick="clearHistory()" style="background: #dc3545; margin-top: 10px; width: 100%;">
+                        Clear History
+                    </button>
+                </div>
+            </div>
+
+            <!-- Main Chat Area -->
+            <div class="chat-area">
+                <div class="chat-messages" id="chatMessages">
+                    <div class="empty-state" id="emptyState">
+                        <div>🧮</div>
+                        <h3>Welcome to Math Assistant</h3>
+                        <p>Select an assignment and start asking math questions!</p>
+                    </div>
+                </div>
+
+                <div class="typing-indicator" id="typingIndicator">
+                    <div class="typing-dots">
+                        Math Assistant is thinking <span>.</span><span>.</span><span>.</span>
+                    </div>
+                </div>
+
+                <div class="chat-input-container">
+                    <div class="chat-input-wrapper">
+                        <textarea 
+                            id="chatInput" 
+                            class="chat-input" 
+                            placeholder="Ask a math question or request step-by-step solution..."
+                            rows="1"
+                        ></textarea>
+                        <button id="sendButton" class="send-button" onclick="sendMessage()">
+                            Send
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentAssignmentId = null;
+        let isProcessing = false;
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            loadAssignments();
+            loadChatHistory();
+            setupEventListeners();
+        });
+
+        function setupEventListeners() {
+            const chatInput = document.getElementById('chatInput');
+            
+            chatInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+
+            chatInput.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+            });
+        }
+
+        async function loadAssignments() {
+            try {
+                const response = await fetch('/math/assignments');
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayAssignments(data.assignments);
+                } else {
+                    console.error('Failed to load assignments');
+                }
+            } catch (error) {
+                console.error('Error loading assignments:', error);
+            }
+        }
+
+        function displayAssignments(assignments) {
+            const assignmentList = document.getElementById('assignmentList');
+            
+            if (assignments.length === 0) {
+                assignmentList.innerHTML = '<div class="empty-state">No assignments found</div>';
+                return;
+            }
+
+            assignmentList.innerHTML = assignments.map(assignment => `
+                <div class="assignment-item" onclick="selectAssignment(${assignment.id})" 
+                     data-assignment-id="${assignment.id}">
+                    <div class="assignment-title">${assignment.title || 'Untitled Assignment'}</div>
+                    <div class="assignment-meta">
+                        ${assignment.topic_name ? `Topic: ${assignment.topic_name}` : ''}
+                        ${assignment.due_date ? ` • Due: ${new Date(assignment.due_date).toLocaleDateString()}` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function selectAssignment(assignmentId) {
+            // Update UI
+            document.querySelectorAll('.assignment-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            document.querySelector(`[data-assignment-id="${assignmentId}"]`).classList.add('active');
+
+            // Load assignment details
+            try {
+                const response = await fetch(`/math/assignment/${assignmentId}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    currentAssignmentId = assignmentId;
+                    displayAssignmentDetails(data.assignment);
+                }
+            } catch (error) {
+                console.error('Error loading assignment details:', error);
+            }
+        }
+
+        function displayAssignmentDetails(assignment) {
+            const container = document.getElementById('currentAssignment');
+            const details = document.getElementById('assignmentDetails');
+            
+            details.innerHTML = `
+                <strong>${assignment.title || 'Untitled Assignment'}</strong>
+                <div style="margin-top: 8px; font-size: 0.9em;">
+                    ${assignment.description ? `<p>${assignment.description}</p>` : ''}
+                    ${assignment.topic_name ? `<div>Topic: ${assignment.topic_name}</div>` : ''}
+                    ${assignment.due_date ? `<div>Due: ${new Date(assignment.due_date).toLocaleDateString()}</div>` : ''}
+                    ${assignment.has_file ? `<div>📎 Has attachment</div>` : ''}
+                </div>
+            `;
+            
+            container.style.display = 'block';
+        }
+
+        async function loadChatHistory() {
+            try {
+                const response = await fetch('/math/data');
+                const data = await response.json();
+                
+                if (data.success && data.conversations.length > 0) {
+                    displayChatHistory(data.conversations);
+                }
+            } catch (error) {
+                console.error('Error loading chat history:', error);
+            }
+        }
+
+        function displayChatHistory(conversations) {
+            const chatMessages = document.getElementById('chatMessages');
+            const emptyState = document.getElementById('emptyState');
+            
+            if (conversations.length > 0) {
+                emptyState.style.display = 'none';
+                
+                conversations.reverse().forEach(conv => {
+                    addMessageToChat(conv.user_message, 'user');
+                    addMessageToChat(conv.ai_response, 'ai');
+                });
+                
+                scrollToBottom();
+            }
+        }
+
+        async function sendMessage() {
+            const chatInput = document.getElementById('chatInput');
+            const message = chatInput.value.trim();
+            
+            if (!message || isProcessing) return;
+
+            if (!currentAssignmentId) {
+                alert('Please select an assignment first.');
+                return;
+            }
+
+            // Clear input and disable
+            chatInput.value = '';
+            chatInput.style.height = 'auto';
+            isProcessing = true;
+            document.getElementById('sendButton').disabled = true;
+
+            // Add user message to chat
+            addMessageToChat(message, 'user');
+
+            // Show typing indicator
+            showTypingIndicator();
+
+            try {
+                const response = await fetch(`/math/stream?prompt=${encodeURIComponent(message)}&assignment_id=${currentAssignmentId}`);
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                
+                let aiResponse = '';
+                hideTypingIndicator();
+                addMessageToChat('', 'ai', true); // Create empty AI message for streaming
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    const chunk = decoder.decode(value);
+                    const lines = chunk.split('\n');
+
+                    for (const line of lines) {
+                        if (line.startsWith('data: ')) {
+                            const data = line.slice(6);
+                            if (data && !data.includes('❌')) {
+                                aiResponse += data;
+                                updateLastMessage(aiResponse);
+                            }
+                        }
+                    }
+                }
+
+                // Render math after complete response
+                renderMath();
+
+            } catch (error) {
+                console.error('Error streaming response:', error);
+                hideTypingIndicator();
+                addMessageToChat('Sorry, I encountered an error. Please try again.', 'ai');
+            } finally {
+                isProcessing = false;
+                document.getElementById('sendButton').disabled = false;
+                chatInput.focus();
+            }
+        }
+
+        function addMessageToChat(content, sender, isStreaming = false) {
+            const chatMessages = document.getElementById('chatMessages');
+            const emptyState = document.getElementById('emptyState');
+            
+            if (emptyState.style.display !== 'none') {
+                emptyState.style.display = 'none';
+            }
+
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}-message`;
+            messageDiv.innerHTML = `
+                <div class="message-content">${formatContent(content)}</div>
+            `;
+
+            if (isStreaming) {
+                messageDiv.id = 'streamingMessage';
+            }
+
+            chatMessages.appendChild(messageDiv);
+            scrollToBottom();
+
+            if (!isStreaming) {
+                renderMath();
+            }
+        }
+
+        function updateLastMessage(content) {
+            const streamingMessage = document.getElementById('streamingMessage');
+            if (streamingMessage) {
+                streamingMessage.querySelector('.message-content').innerHTML = formatContent(content);
+                scrollToBottom();
+            }
+        }
+
+        function formatContent(content) {
+            if (!content) return '';
+            
+            // Basic formatting
+            let formatted = content
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                .replace(/~~(.*?)~~/g, '<del>$1</del>')
+                .replace(/__(.*?)__/g, '<u>$1</u>')
+                .replace(/`(.*?)`/g, '<code>$1</code>')
+                .replace(/^# (.*$)/gim, '<h3>$1</h3>')
+                .replace(/^## (.*$)/gim, '<h4>$1</h4>')
+                .replace(/^### (.*$)/gim, '<h5>$1</h5>')
+                .replace(/^- (.*$)/gim, '<li>$1</li>')
+                .replace(/^> (.*$)/gim, '<blockquote>$1</blockquote>')
+                .replace(/\n/g, '<br>');
+
+            // Wrap lists
+            formatted = formatted.replace(/(<li>.*?<\/li>)/g, '<ul>$1</ul>');
+            
+            // Handle code blocks
+            formatted = formatted.replace(/```(\w+)?\n([\s\S]*?)```/g, '<pre><code class="language-$1">$2</code></pre>');
+            
+            return formatted;
+        }
+
+        function renderMath() {
+            // Render KaTeX
+            if (typeof renderMathInElement !== 'undefined') {
+                renderMathInElement(document.body, {
+                    delimiters: [
+                        {left: '$$', right: '$$', display: true},
+                        {left: '$', right: '$', display: false},
+                        {left: '\\(', right: '\\)', display: false},
+                        {left: '\\[', right: '\\]', display: true}
+                    ],
+                    throwOnError: false
+                });
+            }
+
+            // Render MathJax if available
+            if (typeof MathJax !== 'undefined') {
+                MathJax.typesetPromise();
+            }
+        }
+
+        function showTypingIndicator() {
+            document.getElementById('typingIndicator').style.display = 'block';
+            scrollToBottom();
+        }
+
+        function hideTypingIndicator() {
+            document.getElementById('typingIndicator').style.display = 'none';
+        }
+
+        function scrollToBottom() {
+            const chatMessages = document.getElementById('chatMessages');
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        async function clearHistory() {
+            if (!confirm('Are you sure you want to clear all math conversation history?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/math/clear-history', { method: 'POST' });
+                const data = await response.json();
+                
+                if (data.success) {
+                    const chatMessages = document.getElementById('chatMessages');
+                    chatMessages.innerHTML = '<div class="empty-state" id="emptyState"><div>🧮</div><h3>Welcome to Math Assistant</h3><p>Select an assignment and start asking math questions!</p></div>';
+                } else {
+                    alert('Failed to clear history');
+                }
+            } catch (error) {
+                console.error('Error clearing history:', error);
+                alert('Error clearing history');
+            }
+        }
+    </script>
+</body>
+</html>
