@@ -168,6 +168,23 @@
         box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
     }
     
+    .message.selected::before {
+        content: "✓";
+        position: absolute;
+        top: 8px;
+        left: 8px;
+        width: 20px;
+        height: 20px;
+        background: #3b82f6;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8em;
+        color: white;
+        z-index: 5;
+    }
+    
     .reply-message {
         background: rgba(59, 130, 246, 0.15);
         border-left: 3px solid #3b82f6;
@@ -1210,7 +1227,8 @@
         background: rgba(59, 130, 246, 0.2);
         display: flex;
         align-items: center;
-        padding-left: 15px;
+        padding-right: 15px;
+        justify-content: flex-end;
         color: #3b82f6;
         font-size: 0.9em;
         opacity: 0;
@@ -1224,27 +1242,30 @@
     
     .emoji-picker {
         position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
         background: var(--sidebar-bg);
         border: 1px solid rgba(59, 130, 246, 0.3);
         border-radius: 12px;
-        padding: 10px;
+        padding: 15px;
         display: flex;
-        gap: 8px;
+        gap: 10px;
         z-index: 1000;
         box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
-        transform: scale(0);
+        transform: translate(-50%, -50%) scale(0);
         transition: transform 0.2s ease;
     }
     
     .emoji-picker.show {
-        transform: scale(1);
+        transform: translate(-50%, -50%) scale(1);
     }
     
     .emoji-option {
-        font-size: 1.2em;
+        font-size: 1.5em;
         cursor: pointer;
-        padding: 5px;
-        border-radius: 6px;
+        padding: 8px;
+        border-radius: 8px;
         transition: all 0.2s;
     }
     
@@ -1255,78 +1276,6 @@
     
     .selection-mode .message {
         cursor: pointer;
-    }
-    
-    .selection-mode .message.selected::before {
-        content: "✓";
-        position: absolute;
-        top: 8px;
-        left: 8px;
-        width: 20px;
-        height: 20px;
-        background: #3b82f6;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 0.8em;
-        color: white;
-    }
-    
-    .selection-toolbar {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        background: var(--sidebar-bg);
-        padding: 15px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        border-top: 1px solid rgba(59, 130, 246, 0.3);
-        transform: translateY(100%);
-        transition: transform 0.3s ease;
-        z-index: 90;
-    }
-    
-    .selection-toolbar.show {
-        transform: translateY(0);
-    }
-    
-    .selection-info {
-        font-size: 0.9em;
-        color: #94a3b8;
-    }
-    
-    .selection-actions {
-        display: flex;
-        gap: 10px;
-    }
-    
-    .selection-btn {
-        background: transparent;
-        border: 1px solid #3b82f6;
-        color: #3b82f6;
-        padding: 8px 15px;
-        border-radius: 20px;
-        cursor: pointer;
-        transition: all 0.2s;
-        font-size: 0.9em;
-    }
-    
-    .selection-btn:hover {
-        background: #3b82f6;
-        color: white;
-    }
-    
-    .selection-btn.delete {
-        border-color: #ef4444;
-        color: #ef4444;
-    }
-    
-    .selection-btn.delete:hover {
-        background: #ef4444;
-        color: white;
     }
     
     .loading-indicator {
@@ -1361,26 +1310,6 @@
     .retry-btn:hover {
         background: rgba(59, 130, 246, 0.3);
     }
-    
-    .select-mode-btn {
-        background: transparent;
-        border: none;
-        color: #94a3b8;
-        font-size: 1.1em;
-        cursor: pointer;
-        transition: color 0.2s;
-        padding: 5px;
-        border-radius: 5px;
-    }
-    
-    .select-mode-btn:hover {
-        color: #3b82f6;
-    }
-    
-    .select-mode-btn.active {
-        color: #3b82f6;
-        background: rgba(59, 130, 246, 0.1);
-    }
 </style>
 <body>
     <header class="glass-morph sticky top-0 z-50">
@@ -1400,9 +1329,6 @@
                     {% if unread_count > 0 %}
                     <span class="unread-badge">{{ unread_count }}</span>
                     {% endif %}
-                    <button class="select-mode-btn" id="selectModeBtn" title="Select messages">
-                        <i class="fas fa-check-square"></i>
-                    </button>
                     <button id="backBtn" class="btn-outline">
                         <i class="fas fa-arrow-left mr-2"></i>
                     </button>
@@ -1410,16 +1336,6 @@
             </div>
         </div>
     </header>
-
-    <!-- Selection Toolbar -->
-    <div class="selection-toolbar" id="selectionToolbar">
-        <div class="selection-info" id="selectionInfo">0 messages selected</div>
-        <div class="selection-actions">
-            <button class="selection-btn" id="replySelectedBtn">Reply</button>
-            <button class="selection-btn delete" id="deleteSelectedBtn">Delete</button>
-            <button class="selection-btn" id="cancelSelectionBtn">Cancel</button>
-        </div>
-    </div>
 
     <!-- Sidebar Toggle Button -->
     <button class="sidebar-toggle" id="sidebarToggle">
@@ -1641,12 +1557,6 @@
         const sidebarToggle = document.getElementById('sidebarToggle');
         const scrollToBottomBtn = document.getElementById('scrollToBottomBtn');
         const loadingIndicator = document.getElementById('loadingIndicator');
-        const selectModeBtn = document.getElementById('selectModeBtn');
-        const selectionToolbar = document.getElementById('selectionToolbar');
-        const selectionInfo = document.getElementById('selectionInfo');
-        const replySelectedBtn = document.getElementById('replySelectedBtn');
-        const deleteSelectedBtn = document.getElementById('deleteSelectedBtn');
-        const cancelSelectionBtn = document.getElementById('cancelSelectionBtn');
         
         let currentRoom = 'general';
         let onlineUsers = {};
@@ -1662,12 +1572,10 @@
             quality: 'good'
         };
         let replyingToMessage = null;
-        let isSelectionMode = false;
-        let selectedMessages = new Set();
         let longPressTimer = null;
-        let swipeStartX = 0;
-        let swipeStartY = 0;
         let isSwiping = false;
+        let swipeStartX = 0;
+        let selectedMessages = new Set();
 
         // Back button handler
         const isAdmin = {{ 'true' if current_user.is_admin else 'false' }};
@@ -1719,103 +1627,13 @@
         const inputKeyJoin = document.getElementById('inputKeyJoin');
         const privateRoomStatus = document.getElementById('privateRoomStatus');
 
-        // Selection mode handlers
-        selectModeBtn.addEventListener('click', toggleSelectionMode);
-        cancelSelectionBtn.addEventListener('click', cancelSelectionMode);
-        replySelectedBtn.addEventListener('click', replyToSelectedMessages);
-        deleteSelectedBtn.addEventListener('click', deleteSelectedMessages);
-
-        function toggleSelectionMode() {
-            isSelectionMode = !isSelectionMode;
-            if (isSelectionMode) {
-                document.body.classList.add('selection-mode');
-                selectionToolbar.classList.add('show');
-                selectModeBtn.classList.add('active');
-                updateSelectionInfo();
-            } else {
-                cancelSelectionMode();
-            }
-        }
-
-        function cancelSelectionMode() {
-            isSelectionMode = false;
-            document.body.classList.remove('selection-mode');
-            selectionToolbar.classList.remove('show');
-            selectModeBtn.classList.remove('active');
-            selectedMessages.clear();
-            document.querySelectorAll('.message.selected').forEach(msg => {
-                msg.classList.remove('selected');
-            });
-        }
-
-        function updateSelectionInfo() {
-            const count = selectedMessages.size;
-            selectionInfo.textContent = `${count} message${count !== 1 ? 's' : ''} selected`;
-            
-            // Enable/disable buttons based on selection
-            replySelectedBtn.disabled = count === 0;
-            deleteSelectedBtn.disabled = count === 0;
-        }
-
-        function toggleMessageSelection(messageId) {
-            const messageElement = document.querySelector(`[data-message-id="${messageId}"]`);
-            if (!messageElement) return;
-            
-            if (selectedMessages.has(messageId)) {
-                selectedMessages.delete(messageId);
-                messageElement.classList.remove('selected');
-            } else {
-                selectedMessages.add(messageId);
-                messageElement.classList.add('selected');
-            }
-            
-            updateSelectionInfo();
-        }
-
-        function replyToSelectedMessages() {
-            if (selectedMessages.size === 0) return;
-            
-            // For now, we'll just reply to the first selected message
-            const firstMessageId = Array.from(selectedMessages)[0];
-            const messageElement = document.querySelector(`[data-message-id="${firstMessageId}"]`);
-            
-            if (messageElement) {
-                const username = messageElement.querySelector('.username').textContent;
-                const content = messageElement.querySelector('.message-content').textContent;
-                
-                startReply({
-                    id: parseInt(firstMessageId),
-                    username: username,
-                    content: content
-                });
-                
-                cancelSelectionMode();
-            }
-        }
-
-        function deleteSelectedMessages() {
-            if (selectedMessages.size === 0) return;
-            
-            if (!confirm(`Are you sure you want to delete ${selectedMessages.size} message${selectedMessages.size !== 1 ? 's' : ''}?`)) {
-                return;
-            }
-            
-            selectedMessages.forEach(messageId => {
-                deleteMessage(messageId);
-            });
-            
-            cancelSelectionMode();
-        }
-
-        // Swipe to reply functionality
+        // Swipe to reply functionality (right swipe)
         function setupSwipeEvents(messageElement) {
             let startX, startY, distX, distY;
             const swipeThreshold = 50;
             const messageId = messageElement.dataset.messageId;
             
             messageElement.addEventListener('touchstart', function(e) {
-                if (isSelectionMode) return;
-                
                 const touch = e.touches[0];
                 startX = touch.clientX;
                 startY = touch.clientY;
@@ -1823,38 +1641,36 @@
                 swipeStartY = startY;
                 isSwiping = false;
                 
-                // Start long press timer for emoji picker
+                // Start long press timer for selection
                 longPressTimer = setTimeout(() => {
-                    showEmojiPicker(messageElement, touch.clientX, touch.clientY);
+                    toggleMessageSelection(messageId);
                 }, 500);
             }, { passive: true });
             
             messageElement.addEventListener('touchmove', function(e) {
-                if (isSelectionMode || !startX || !startY) return;
+                if (!startX || !startY) return;
                 
                 const touch = e.touches[0];
                 distX = touch.clientX - startX;
                 distY = touch.clientY - startY;
                 
-                // Only consider it a swipe if horizontal movement is dominant
-                if (Math.abs(distX) > Math.abs(distY) && Math.abs(distX) > 5) {
+                // Only consider it a swipe if horizontal movement is dominant and rightward
+                if (Math.abs(distX) > Math.abs(distY) && Math.abs(distX) > 5 && distX > 0) {
                     isSwiping = true;
                     clearTimeout(longPressTimer);
                     
-                    // Show swipe indicator for right-to-left swipe
-                    if (distX < 0) {
-                        const indicator = messageElement.querySelector('.swipe-indicator');
-                        indicator.classList.add('show');
-                        indicator.style.transform = `translateX(${Math.max(distX, -100)}px)`;
-                    }
+                    // Show swipe indicator for right swipe
+                    const indicator = messageElement.querySelector('.swipe-indicator');
+                    indicator.classList.add('show');
+                    indicator.style.transform = `translateX(${Math.min(distX, 100)}px)`;
                 }
             }, { passive: true });
             
             messageElement.addEventListener('touchend', function(e) {
                 clearTimeout(longPressTimer);
                 
-                if (isSwiping && distX < -swipeThreshold) {
-                    // Swipe to reply
+                if (isSwiping && distX > swipeThreshold) {
+                    // Swipe to reply (right swipe)
                     const username = messageElement.querySelector('.username').textContent;
                     const content = messageElement.querySelector('.message-content').textContent;
                     
@@ -1878,18 +1694,38 @@
                 isSwiping = false;
             }, { passive: true });
             
-            // Click handler for selection mode
+            // Click handler for regular clicks (not long press)
             messageElement.addEventListener('click', function(e) {
-                if (isSelectionMode && !e.target.closest('.message-actions')) {
-                    toggleMessageSelection(messageId);
+                // If it's a regular click (not long press) and not on action buttons
+                if (!e.target.closest('.message-actions') && !isSwiping) {
+                    // If message is selected, deselect it
+                    if (selectedMessages.has(messageId)) {
+                        toggleMessageSelection(messageId);
+                    }
                 }
             });
         }
 
+        // Toggle message selection
+        function toggleMessageSelection(messageId) {
+            const messageElement = document.querySelector(`[data-message-id="${messageId}"]`);
+            if (!messageElement) return;
+            
+            if (selectedMessages.has(messageId)) {
+                selectedMessages.delete(messageId);
+                messageElement.classList.remove('selected');
+            } else {
+                selectedMessages.add(messageId);
+                messageElement.classList.add('selected');
+                
+                // Show emoji picker in center of screen
+                showEmojiPicker(messageId);
+            }
+        }
+
         // Emoji picker for quick reactions
-        function showEmojiPicker(messageElement, x, y) {
+        function showEmojiPicker(messageId) {
             const emojis = ['👍', '❤️', '😂', '😮', '😢', '🙏'];
-            const messageId = messageElement.dataset.messageId;
             
             // Remove existing emoji picker
             const existingPicker = document.querySelector('.emoji-picker');
@@ -1897,30 +1733,32 @@
                 existingPicker.remove();
             }
             
-            // Create emoji picker
+            // Create emoji picker in center of screen
             const emojiPicker = document.createElement('div');
             emojiPicker.className = 'emoji-picker';
-            emojiPicker.style.left = `${x}px`;
-            emojiPicker.style.top = `${y}px`;
             
             emojis.forEach(emoji => {
                 const emojiOption = document.createElement('div');
                 emojiOption.className = 'emoji-option';
                 emojiOption.textContent = emoji;
                 emojiOption.addEventListener('click', function() {
-                    // Send quick reply with emoji
-                    const quickReply = {
-                        content: emoji,
-                        room: currentRoom,
-                        parent_id: parseInt(messageId)
-                    };
+                    // Send quick reply with emoji to all selected messages
+                    selectedMessages.forEach(selectedId => {
+                        const quickReply = {
+                            content: emoji,
+                            room: currentRoom,
+                            parent_id: parseInt(selectedId)
+                        };
+                        
+                        if (isConnected) {
+                            socket.emit('send_message', quickReply);
+                        } else {
+                            addToMessageQueue(quickReply);
+                        }
+                    });
                     
-                    if (isConnected) {
-                        socket.emit('send_message', quickReply);
-                    } else {
-                        addToMessageQueue(quickReply);
-                    }
-                    
+                    // Clear selection and close picker
+                    clearSelection();
                     emojiPicker.remove();
                 });
                 
@@ -1938,6 +1776,7 @@
             const closePicker = function(e) {
                 if (!emojiPicker.contains(e.target)) {
                     emojiPicker.remove();
+                    clearSelection();
                     document.removeEventListener('click', closePicker);
                 }
             };
@@ -1945,6 +1784,17 @@
             setTimeout(() => {
                 document.addEventListener('click', closePicker);
             }, 100);
+        }
+
+        // Clear message selection
+        function clearSelection() {
+            selectedMessages.forEach(messageId => {
+                const messageElement = document.querySelector(`[data-message-id="${messageId}"]`);
+                if (messageElement) {
+                    messageElement.classList.remove('selected');
+                }
+            });
+            selectedMessages.clear();
         }
 
         // Private Room Event Listeners
@@ -2517,7 +2367,7 @@
             
             // Add retry mechanism for poor connections
             let retryCount = 0;
-            const maxRetries = 3;
+            const maxRetries = 5;
             
             function attemptLoad() {
                 fetch(`/api/messages?room=${room}&since_id=${sinceId}`)
