@@ -512,38 +512,6 @@ Here's a comparison of different AI models:
 ' [LINE BREAKS]
 ' Each "\n" (newline) represents a line break
 
-'==============================================================
-'[MATH & SCIENTIFIC RENDERING & FORMATS]
-'==============================================================
-'
-' Instructions for AI:
-' 
-' 1. Solve the math/science problem given.
-' 2. Output **only LaTeX-ready math**, formatted for KaTeX.
-' 3. Do **not** wrap expressions in `$...$` or `$$...$$`.
-' 4. Do **not** escape characters or double backslashes.
-' 5. Input may contain `^` for superscripts and `~` for subscripts; preserve them as-is.
-' 6. Inline and display math can be written naturally using LaTeX syntax (e.g., \frac, \sqrt, \int, etc.).
-' 7. Do **not** output plain text equations — all math should be in proper LaTeX format.
-' 8. Avoid explanations outside the equations unless explicitly asked.
-' 9. Rendering engines like KaTeX will interpret the output automatically in the chat.
-' 
-' Example input: "Solve x^2 - 5x + 6 = 0"
-' 
-' Example AI output:
-' 
-' x^2 - 5x + 6 = 0
-' 
-' x = \frac{-(-5) \pm \sqrt{(-5)^2 - 4(1)(6)}}{2(1)}
-' 
-' x = \frac{5 \pm \sqrt{25 - 24}}{2}
-' 
-' x = \frac{5 \pm 1}{2}
-' 
-' Solutions:
-' 
-' x = 3  or  x = 2
-
 ' ==============================================================
 ' [NOTES FOR AI]
 ' ==============================================================
@@ -575,7 +543,41 @@ BACKGROUND AND ORIGIN:
 - You are from LyxNexus educational platform branch of Main LyxLab Intelligence.
 - You are designed to assist users in navigating and utilizing the LyxNexus platform effectively.
 Now respond naturally to the user's current message:"""
-    
+
+    # Append math rendering instructions
+    smart_prompt += r"""
+    ==============================================================
+    [MATH & SCIENTIFIC RENDERING & FORMATTING]
+    ==============================================================
+
+    Instructions for you:
+
+    1. Solve any math or science problem provided.
+    2. Output **pure LaTeX** for equations, suitable for KaTeX rendering.
+    3. Do NOT wrap expressions in $...$ or $$...$$.
+    4. Do NOT escape {} — they are required for LaTeX syntax.
+    5. Preserve ^ for superscripts and ~ for subscripts.
+    6. Use standard LaTeX commands like \frac, \sqrt, \pm, \int, etc.
+    7. Do NOT output plain text equations.
+    8. Avoid explanations unless explicitly requested.
+    9. Your output will be rendered automatically in LyxNexus via KaTeX.
+
+    Example input: "Solve x^2 - 5x + 6 = 0"
+
+    Example AI output:
+
+    x^2 - 5x + 6 = 0
+
+    x = \frac{-(-5) \pm \sqrt{(-5)^2 - 4(1)(6)}}{2(1)}
+
+    x = \frac{5 \pm \sqrt{25 - 24}}{2}
+
+    x = \frac{5 \pm 1}{2}
+
+    Solutions:
+
+    x = 3  or  x = 2
+    """
     # Add platform data context when relevant to current conversation
     try:
         from app import db
