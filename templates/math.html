@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DOER Assistant - LyxNexus</title>
+    <title>Assignment Assistant | LyxNexus</title>
     
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -22,7 +22,16 @@
             --text-color: #f1f5f9;
             --accent-color: #3b82f6;
             --secondary-color: #8b5cf6;
-            --sidebar-width: 320px;
+            --sidebar-width: 360px;
+
+            @media (max-width: 768px) {
+              --sidebar-width: 290px;
+            }
+
+            @media (max-width: 480px) {
+              --sidebar-width: 300px;
+            }
+
             --header-height: 80px;
             --input-height: 70px;
         }
@@ -82,7 +91,6 @@
             justify-content: space-between;
             border-bottom: 1px solid rgba(59, 130, 246, 0.3);
             flex-shrink: 0;
-            z-index: 100;
         }
 
         .header-left h1 {
@@ -137,32 +145,29 @@
             flex: 1;
             height: calc(100vh - var(--header-height));
             overflow: hidden;
-            position: relative;
         }
 
         .sidebar {
             width: var(--sidebar-width);
-            background: rgba(15, 23, 42, 0.95);
+            background: rgba(15, 23, 42, 0.8);
             border-right: 1px solid rgba(59, 130, 246, 0.2);
             padding: 20px;
             overflow-y: auto;
             flex-shrink: 0;
             transition: all 0.3s ease;
-            z-index: 50;
         }
 
         .sidebar.collapsed {
-            transform: translateX(-100%);
             width: 0;
             padding: 0;
-            border-right: none;
+            overflow: hidden;
         }
 
         .toggle-sidebar {
             position: absolute;
-            top: 20px;
+            top: 90px;
             left: var(--sidebar-width);
-            background: rgba(59, 130, 246, 0.9);
+            background: rgba(59, 130, 246, 0.8);
             color: white;
             border: none;
             border-radius: 0 8px 8px 0;
@@ -172,17 +177,12 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            z-index: 60;
+            z-index: 10;
             transition: all 0.3s ease;
         }
 
         .toggle-sidebar.collapsed {
             left: 0;
-        }
-
-        .toggle-sidebar:hover {
-            background: rgba(59, 130, 246, 1);
-            width: 28px;
         }
 
         .assignments-section h3 {
@@ -225,7 +225,6 @@
         .assignment-item.active {
             border-color: var(--accent-color);
             background: rgba(59, 130, 246, 0.15);
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
         }
 
         .assignment-title {
@@ -233,23 +232,11 @@
             color: var(--text-color);
             margin-bottom: 8px;
             font-size: 1.1em;
-            display: flex;
-            align-items: center;
-            gap: 8px;
         }
 
         .assignment-meta {
             font-size: 0.9em;
             color: #94a3b8;
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-
-        .assignment-meta div {
-            display: flex;
-            align-items: center;
-            gap: 6px;
         }
 
         .current-assignment {
@@ -280,7 +267,6 @@
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            position: relative;
         }
 
         .chat-messages {
@@ -400,10 +386,8 @@
         .chat-input-container {
             padding: 20px 25px;
             border-top: 1px solid rgba(59, 130, 246, 0.2);
-            background: rgba(15, 23, 42, 0.95);
+            background: rgba(15, 23, 42, 0.8);
             flex-shrink: 0;
-            position: relative;
-            z-index: 10;
         }
 
         .chat-input-wrapper {
@@ -414,7 +398,7 @@
 
         .chat-input {
             flex: 1;
-            background: rgba(30, 41, 59, 0.9);
+            background: rgba(30, 41, 59, 0.8);
             border: 2px solid rgba(59, 130, 246, 0.3);
             border-radius: 14px;
             padding: 16px 20px;
@@ -535,30 +519,6 @@
             font-size: 1.4em;
         }
 
-        .loading-assignments {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 30px;
-            color: #94a3b8;
-        }
-
-        .loading-spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid rgba(59, 130, 246, 0.3);
-            border-left: 4px solid var(--accent-color);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 15px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
         /* Scroll to bottom button */
         .scroll-to-bottom {
             position: fixed;
@@ -589,55 +549,6 @@
         .scroll-to-bottom:hover {
             transform: translateY(-5px);
             box-shadow: 0 6px 20px rgba(59, 130, 246, 0.6);
-        }
-
-        /* Assignment selection prompt */
-        .assignment-prompt {
-            background: rgba(245, 158, 11, 0.1);
-            border: 1px solid rgba(245, 158, 11, 0.3);
-            border-radius: 12px;
-            padding: 16px;
-            margin: 20px 0;
-            text-align: center;
-            animation: fadeIn 0.5s ease;
-        }
-
-        .assignment-prompt h4 {
-            color: #f59e0b;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        /* Mobile menu */
-        .mobile-menu {
-            display: none;
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(59, 130, 246, 0.9);
-            border-radius: 50px;
-            padding: 12px 20px;
-            z-index: 100;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-        }
-
-        .mobile-menu button {
-            background: transparent;
-            border: none;
-            color: white;
-            font-size: 1.2em;
-            padding: 8px 15px;
-            cursor: pointer;
-            border-radius: 50%;
-            transition: all 0.3s ease;
-        }
-
-        .mobile-menu button:hover {
-            background: rgba(255, 255, 255, 0.2);
         }
 
         /* Scrollbar Styling */
@@ -674,15 +585,15 @@
         /* Responsive Design */
         @media (max-width: 968px) {
             .sidebar {
-                position: fixed;
+                position: absolute;
                 height: 100%;
-                z-index: 50;
-                box-shadow: 5px 0 15px rgba(0, 0, 0, 0.3);
+                z-index: 5;
+                box-shadow: 5px 0 15px rgba(0, 0, 0, 0.2);
             }
             
             .sidebar:not(.collapsed) {
-                width: 85%;
-                max-width: 350px;
+                width: 100%;
+                max-width: 400px;
             }
             
             .toggle-sidebar {
@@ -690,22 +601,16 @@
             }
             
             .message {
-                max-width: 90%;
-            }
-
-            .mobile-menu {
-                display: flex;
-                gap: 10px;
+                max-width: 95%;
             }
         }
 
         @media (max-width: 640px) {
             .math-header {
                 padding: 0 15px;
+                flex-direction: column;
                 height: auto;
                 padding: 15px;
-                flex-direction: column;
-                gap: 10px;
             }
             
             .header-left, .header-right {
@@ -713,14 +618,13 @@
             }
             
             .header-right {
+                margin-top: 10px;
                 justify-content: space-between;
             }
             
             .header-button {
                 flex: 1;
                 justify-content: center;
-                font-size: 12px;
-                padding: 8px 12px;
             }
             
             .chat-messages {
@@ -728,7 +632,7 @@
             }
             
             .message {
-                max-width: 95%;
+                max-width: 100%;
             }
             
             .chat-input-container {
@@ -736,38 +640,8 @@
             }
             
             .scroll-to-bottom {
-                bottom: 90px;
+                bottom: 80px;
                 right: 15px;
-                width: 45px;
-                height: 45px;
-            }
-
-            .mobile-menu {
-                bottom: 15px;
-            }
-            
-            .sidebar:not(.collapsed) {
-                width: 90%;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .assignment-item {
-                padding: 12px;
-            }
-            
-            .chat-input-wrapper {
-                gap: 10px;
-            }
-            
-            .send-button {
-                min-width: 80px;
-                padding: 12px 20px;
-            }
-            
-            .header-button {
-                font-size: 11px;
-                padding: 6px 10px;
             }
         }
     </style>
@@ -776,7 +650,7 @@
     <!-- Header -->
     <div class="math-header">
         <div class="header-left">
-            <h1 class="gradient-text">DOER Assistant</h1>
+            <h1 class="gradient-text">Doer</h1>
             <p>Get step-by-step solutions and mathematical guidance</p>
         </div>
         <div class="header-right">
@@ -793,7 +667,7 @@
     <div class="math-content">
         <!-- Sidebar Toggle -->
         <button class="toggle-sidebar" id="toggleSidebar">
-            <i class="fas fa-chevron-right" id="sidebarIcon"></i>
+            <i class="fas fa-chevron-left" id="sidebarIcon"></i>
         </button>
 
         <!-- Sidebar with Assignments -->
@@ -801,10 +675,7 @@
             <div class="assignments-section">
                 <h3><i class="fas fa-tasks"></i> Your Assignments</h3>
                 <div class="assignment-list" id="assignmentList">
-                    <div class="loading-assignments" id="loadingAssignments">
-                        <div class="loading-spinner"></div>
-                        <p>Loading assignments...</p>
-                    </div>
+                    <!-- Assignments will be loaded here -->
                 </div>
             </div>
 
@@ -812,19 +683,17 @@
                 <h4><i class="fas fa-check-circle"></i> Selected Assignment</h4>
                 <div id="assignmentDetails"></div>
             </div>
-
-            <div class="assignment-prompt" id="assignmentPrompt" style="display: none;">
-                <h4><i class="fas fa-info-circle"></i> Assignment Required</h4>
-                <p>Please select an assignment to start asking questions</p>
-            </div>
         </div>
 
         <!-- Main Chat Area -->
         <div class="chat-area">
             <div class="chat-messages" id="chatMessages">
                 <div class="empty-state" id="emptyState">
-                    <div class="icon">🧮</div>
-                    <h3>Welcome to DOER</h3>
+                    <div class="icon">
+                      <i class="fa-solid fa-calculator"></i>
+                    </div>
+
+                    <h3>Welcome to Assignment Assistant</h3>
                     <p>Select an assignment and start asking any questions!</p>
                 </div>
             </div>
@@ -840,7 +709,7 @@
                     <textarea 
                         id="chatInput" 
                         class="chat-input" 
-                        placeholder="Ask a quiz based on assignment..."
+                        placeholder="Ask a math question or request step-by-step solution..."
                         rows="1"
                     ></textarea>
                     <button id="sendButton" class="send-button" onclick="sendMessage()">
@@ -851,19 +720,6 @@
         </div>
     </div>
 
-    <!-- Mobile Menu -->
-    <div class="mobile-menu">
-        <button onclick="toggleSidebarView()" title="Toggle Sidebar">
-            <i class="fas fa-bars"></i>
-        </button>
-        <button onclick="loadAssignments()" title="Refresh Assignments">
-            <i class="fas fa-sync-alt"></i>
-        </button>
-        <button onclick="clearHistory()" title="Clear History">
-            <i class="fas fa-trash"></i>
-        </button>
-    </div>
-
     <!-- Scroll to bottom button -->
     <button class="scroll-to-bottom" id="scrollToBottom">
         <i class="fas fa-arrow-down"></i>
@@ -872,33 +728,17 @@
     <script>
         let currentAssignmentId = null;
         let isProcessing = false;
-        let isSidebarCollapsed = window.innerWidth <= 968; // Collapse on mobile by default
+        let isSidebarCollapsed = false;
         let isUserScrolling = false;
         let scrollTimeout = null;
-        let assignmentsLoaded = false;
-        let chatHistoryLoaded = false;
 
         // Initialize when page loads
         document.addEventListener('DOMContentLoaded', function() {
-            initializeApp();
-        });
-
-        function initializeApp() {
-            updateSidebarState();
-            setupEventListeners();
-            setupScrollHandler();
-            
-            // Load data immediately - don't wait for sidebar state
             loadAssignments();
             loadChatHistory();
-            
-            // Show assignment prompt if no assignment is selected
-            setTimeout(() => {
-                if (!currentAssignmentId) {
-                    document.getElementById('assignmentPrompt').style.display = 'block';
-                }
-            }, 1000);
-        }
+            setupEventListeners();
+            setupScrollHandler();
+        });
 
         function setupEventListeners() {
             const chatInput = document.getElementById('chatInput');
@@ -926,29 +766,6 @@
             // Scroll to bottom button
             scrollToBottomBtn.addEventListener('click', function() {
                 scrollToBottom(true);
-            });
-
-            // Close sidebar when clicking outside on mobile
-            document.addEventListener('click', function(e) {
-                if (window.innerWidth <= 968 && !isSidebarCollapsed) {
-                    const sidebar = document.getElementById('sidebar');
-                    const toggleBtn = document.getElementById('toggleSidebar');
-                    
-                    if (!sidebar.contains(e.target) && !toggleBtn.contains(e.target)) {
-                        toggleSidebarView();
-                    }
-                }
-            });
-
-            // Handle window resize
-            window.addEventListener('resize', function() {
-                // Update sidebar state on resize
-                const wasCollapsed = isSidebarCollapsed;
-                isSidebarCollapsed = window.innerWidth <= 968;
-                
-                if (wasCollapsed !== isSidebarCollapsed) {
-                    updateSidebarState();
-                }
             });
         }
 
@@ -982,19 +799,11 @@
         }
 
         function toggleSidebarView() {
-            isSidebarCollapsed = !isSidebarCollapsed;
-            updateSidebarState();
-            
-            // Load assignments if sidebar is opened and they haven't been loaded yet
-            if (!isSidebarCollapsed && !assignmentsLoaded) {
-                loadAssignments();
-            }
-        }
-
-        function updateSidebarState() {
             const sidebar = document.getElementById('sidebar');
             const toggleBtn = document.getElementById('toggleSidebar');
             const sidebarIcon = document.getElementById('sidebarIcon');
+            
+            isSidebarCollapsed = !isSidebarCollapsed;
             
             if (isSidebarCollapsed) {
                 sidebar.classList.add('collapsed');
@@ -1008,51 +817,28 @@
         }
 
         async function loadAssignments() {
-            const assignmentList = document.getElementById('assignmentList');
-            const loadingElement = document.getElementById('loadingAssignments');
-            
-            // Show loading state
-            if (!assignmentsLoaded) {
-                assignmentList.innerHTML = '';
-                assignmentList.appendChild(loadingElement);
-                loadingElement.style.display = 'flex';
-            }
-            
             try {
                 const response = await fetch('/math/assignments');
                 const data = await response.json();
                 
                 if (data.success) {
-                    assignmentsLoaded = true;
                     displayAssignments(data.assignments);
-                    
-                    // Auto-select first assignment if none is selected
-                    if (!currentAssignmentId && data.assignments.length > 0) {
-                        setTimeout(() => {
-                            selectAssignment(data.assignments[0].id);
-                        }, 500);
-                    }
+                    showNotification('Assignments loaded successfully', 'success');
                 } else {
-                    console.error('Failed to load assignments:', data.error);
-                    assignmentList.innerHTML = '<div class="empty-state">Failed to load assignments</div>';
+                    console.error('Failed to load assignments');
                     showNotification('Failed to load assignments', 'error');
                 }
             } catch (error) {
                 console.error('Error loading assignments:', error);
-                assignmentList.innerHTML = '<div class="empty-state">Error loading assignments</div>';
                 showNotification('Error loading assignments', 'error');
-            } finally {
-                loadingElement.style.display = 'none';
             }
         }
 
         function displayAssignments(assignments) {
             const assignmentList = document.getElementById('assignmentList');
-            const assignmentPrompt = document.getElementById('assignmentPrompt');
             
             if (assignments.length === 0) {
                 assignmentList.innerHTML = '<div class="empty-state">No assignments found</div>';
-                assignmentPrompt.style.display = 'block';
                 return;
             }
 
@@ -1069,9 +855,6 @@
                     </div>
                 </div>
             `).join('');
-            
-            // Hide assignment prompt since we have assignments
-            assignmentPrompt.style.display = 'none';
         }
 
         async function selectAssignment(assignmentId) {
@@ -1079,11 +862,7 @@
             document.querySelectorAll('.assignment-item').forEach(item => {
                 item.classList.remove('active');
             });
-            
-            const selectedItem = document.querySelector(`[data-assignment-id="${assignmentId}"]`);
-            if (selectedItem) {
-                selectedItem.classList.add('active');
-            }
+            document.querySelector(`[data-assignment-id="${assignmentId}"]`).classList.add('active');
 
             // Load assignment details
             try {
@@ -1094,16 +873,6 @@
                     currentAssignmentId = assignmentId;
                     displayAssignmentDetails(data.assignment);
                     showNotification(`Selected: ${data.assignment.title || 'Assignment'}`, 'success');
-                    
-                    // Hide assignment prompt
-                    document.getElementById('assignmentPrompt').style.display = 'none';
-                    
-                    // Auto-close sidebar on mobile after selection
-                    if (window.innerWidth <= 968) {
-                        toggleSidebarView();
-                    }
-                } else {
-                    showNotification('Failed to load assignment details', 'error');
                 }
             } catch (error) {
                 console.error('Error loading assignment details:', error);
@@ -1129,19 +898,12 @@
         }
 
         async function loadChatHistory() {
-            if (chatHistoryLoaded) return;
-            
             try {
                 const response = await fetch('/math/data');
                 const data = await response.json();
                 
-                if (data.success) {
-                    chatHistoryLoaded = true;
-                    if (data.conversations && data.conversations.length > 0) {
-                        displayChatHistory(data.conversations);
-                    }
-                } else {
-                    console.error('Failed to load chat history:', data.error);
+                if (data.success && data.conversations.length > 0) {
+                    displayChatHistory(data.conversations);
                 }
             } catch (error) {
                 console.error('Error loading chat history:', error);
@@ -1155,16 +917,10 @@
             if (conversations.length > 0) {
                 emptyState.style.display = 'none';
                 
-                // Clear any existing messages
-                chatMessages.innerHTML = '';
-                
                 conversations.reverse().forEach(conv => {
                     addMessageToChat(conv.user_message, 'user', false);
                     addMessageToChat(conv.ai_response, 'ai', false);
                 });
-                
-                // Scroll to bottom after loading history
-                setTimeout(() => scrollToBottom(), 100);
             }
         }
 
@@ -1176,10 +932,6 @@
 
             if (!currentAssignmentId) {
                 showNotification('Please select an assignment first.', 'warning');
-                // Open sidebar on mobile to show assignment prompt
-                if (window.innerWidth <= 968 && isSidebarCollapsed) {
-                    toggleSidebarView();
-                }
                 return;
             }
 
@@ -1202,7 +954,7 @@
                 
                 let aiResponse = '';
                 hideTypingIndicator();
-                const messageElement = addMessageToChat('', 'ai', true, true); // Create empty AI message for streaming
+                const messageElement = addMessageToChat('', 'ai', true, true);
 
                 while (true) {
                     const { done, value } = await reader.read();
@@ -1218,7 +970,6 @@
                                 aiResponse += data;
                                 updateStreamingMessage(messageElement, aiResponse);
                                 
-                                // Render math dynamically as content streams
                                 renderMathInElement(messageElement, {
                                     delimiters: [
                                         {left: '$$', right: '$$', display: true},
@@ -1233,7 +984,6 @@
                     }
                 }
 
-                // Final math render after complete response
                 renderMath();
                 showNotification('Response received', 'success');
 
@@ -1273,7 +1023,6 @@
 
             chatMessages.appendChild(messageDiv);
             
-            // Only scroll to bottom if user is already at bottom or it's a new message
             if (!isUserScrolling) {
                 scrollToBottom();
             }
@@ -1289,7 +1038,6 @@
             if (messageElement) {
                 messageElement.querySelector('.message-content').innerHTML = formatContent(content);
                 
-                // Only scroll to bottom if user is already at bottom
                 if (!isUserScrolling) {
                     scrollToBottom();
                 }
@@ -1299,7 +1047,6 @@
         function formatContent(content) {
             if (!content) return '';
             
-            // Basic formatting
             let formatted = content
                 .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
                 .replace(/\*(.*?)\*/g, '<em>$1</em>')
@@ -1313,20 +1060,16 @@
                 .replace(/^> (.*$)/gim, '<blockquote>$1</blockquote>')
                 .replace(/\n/g, '<br>');
 
-            // Wrap lists
             formatted = formatted.replace(/(<li>.*?<\/li>)/g, '<ul>$1</ul>');
             
-            // Handle code blocks
             formatted = formatted.replace(/```(\w+)?\n([\s\S]*?)```/g, '<pre><code class="language-$1">$2</code></pre>');
             
-            // Handle step solutions
             formatted = formatted.replace(/\*\*Step \d+:\*\*/g, '<div class="step-solution"><strong>$&</strong>');
             
             return formatted;
         }
 
         function renderMath() {
-            // Render KaTeX
             if (typeof renderMathInElement !== 'undefined') {
                 renderMathInElement(document.body, {
                     delimiters: [
@@ -1339,7 +1082,6 @@
                 });
             }
 
-            // Render MathJax if available
             if (typeof MathJax !== 'undefined') {
                 MathJax.typesetPromise();
             }
@@ -1361,7 +1103,6 @@
                 const chatMessages = document.getElementById('chatMessages');
                 chatMessages.scrollTop = chatMessages.scrollHeight;
                 
-                // Hide scroll to bottom button when we scroll to bottom
                 document.getElementById('scrollToBottom').classList.remove('visible');
             }
         }
@@ -1377,9 +1118,8 @@
                 
                 if (data.success) {
                     const chatMessages = document.getElementById('chatMessages');
-                    chatMessages.innerHTML = '<div class="empty-state" id="emptyState"><div class="icon">🧮</div><h3>Welcome to Math Assistant</h3><p>Select an assignment and start asking math questions!</p></div>';
+                    chatMessages.innerHTML = '<div class="empty-state" id="emptyState"><div class="icon"><i class="fa-solid fa-calculator"></i></div><h3>Welcome to Assignment Assistant</h3><p>Select an assignment and start asking any questions!</p></div>';
                     showNotification('History cleared successfully', 'success');
-                    chatHistoryLoaded = false;
                 } else {
                     showNotification('Failed to clear history', 'error');
                 }
@@ -1389,7 +1129,6 @@
             }
         }
 
-        // Notification system
         function showNotification(message, type = 'info') {
             const notification = document.createElement('div');
             notification.style.cssText = `
@@ -1411,10 +1150,8 @@
             notification.textContent = message;
             document.body.appendChild(notification);
 
-            // Animate in
             setTimeout(() => notification.style.transform = 'translateX(0)', 100);
 
-            // Remove after 3 seconds
             setTimeout(() => {
                 notification.style.transform = 'translateX(100%)';
                 setTimeout(() => notification.remove(), 300);
