@@ -9,6 +9,20 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+    
+    <script>
+        window.addEventListener('load', function() {
+            if (typeof renderMathInElement === 'undefined') {
+                console.warn('KaTeX auto-render not loaded, loading fallback...');
+                const script = document.createElement('script');
+                script.src = 'https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js';
+                script.onload = function() {
+                    console.log('KaTeX auto-render loaded via fallback');
+                };
+                document.head.appendChild(script);
+            }
+        });
+    </script>    
     <style>
         :root {
             --primary: #3b82f6;
@@ -1173,7 +1187,6 @@
             </div>
         </div>
     </div>
-
     <script>
         // DOM Elements
         const chatBox = document.getElementById('chat-box');
@@ -1186,6 +1199,7 @@
         const mainChat = document.getElementById('mainChat');
         const historyList = document.getElementById('historyList');
         const usernameSpan = document.getElementById('username');
+
         let currentConversationId = null;
         let isAutoScrollEnabled = true;
         let currentStreamingMessage = null;
@@ -1193,13 +1207,32 @@
         let isMobile = window.innerWidth <= 768;
         let sidebarOpen = false;
         let userData = null;
+        let currentEventSource = null;
+
+        // Initialize KaTeX when DOM is loaded
+        function initKaTeX() {
+            if (typeof renderMathInElement !== 'undefined') {
+                console.log('KaTeX auto-render is available');
+            } else {
+                console.warn('KaTeX auto-render not available, retrying...');
+                // Try to load KaTeX auto-render if not available
+                setTimeout(() => {
+                    if (typeof renderMathInElement !== 'undefined') {
+                        console.log('KaTeX auto-render loaded on retry');
+                    }
+                }, 1000);
+            }
+        }
 
         // Initialize the application
         async function initApp() {
             try {
+                // Initialize KaTeX first
+                initKaTeX();
+
                 const response = await fetch('/gemini/data');
                 const data = await response.json();
-                
+
                 if (data.success) {
                     userData = data.user;
                     usernameSpan.textContent = userData.username;
@@ -1228,7 +1261,7 @@
 
             // Add conversations in chronological order (oldest first)
             const sortedConversations = [...conversations].reverse();
-            
+
             for (const conv of sortedConversations) {
                 addMessage(conv.user_message, true, false, formatTime(conv.created_at));
                 addMessage(conv.ai_response, false, false, formatTime(conv.created_at), conv.user_message);
@@ -1236,7 +1269,7 @@
 
             // Update sidebar history
             updateSidebarHistory(conversations);
-            
+
             scrollToBottom();
         }
 
@@ -1253,7 +1286,7 @@
         // Update sidebar history
         function updateSidebarHistory(conversations) {
             historyList.innerHTML = '';
-            
+
             if (conversations.length === 0) {
                 historyList.innerHTML = '<div style="text-align: center; color: var(--text-secondary); padding: 2rem;">No conversations yet</div>';
                 return;
@@ -1262,7 +1295,7 @@
             for (const conv of conversations) {
                 const promptPreview = conv.user_message.length > 60 ? 
                     conv.user_message.substring(0, 60) + '...' : conv.user_message;
-                
+
                 const historyItem = document.createElement('div');
                 historyItem.className = 'history-item';
                 historyItem.dataset.convId = conv.id;
@@ -1288,7 +1321,7 @@
         messageInput.addEventListener('input', function() {
             this.style.height = 'auto';
             this.style.height = Math.min(this.scrollHeight, 120) + 'px';
-            
+
             sendButton.disabled = this.value.trim().length === 0 || isStreaming;
         });
 
@@ -1308,7 +1341,7 @@
         // History toggle function
         function toggleHistoryPanel() {
             sidebarOpen = !sidebarOpen;
-            
+
             if (sidebarOpen) {
                 historyPanel.classList.add('active');
                 historyBackdrop.classList.add('active');
@@ -1350,14 +1383,14 @@
                 closeHistoryPanel();
             }
         });
-        
+
         // Load conversation history when clicking history items
         historyList.addEventListener('click', function(e) {
             const historyItem = e.target.closest('.history-item');
             if (historyItem) {
                 const convId = historyItem.dataset.convId;
                 loadConversation(convId);
-                
+
                 if (isMobile) {
                     closeHistoryPanel();
                 }
@@ -1402,11 +1435,20 @@
                             {left: '\\[', right: '\\]', display: true}
                         ],
                         throwOnError: false,
-                        output: 'html'
+                        output: 'html',
+                        strict: false
                     });
                 } catch (error) {
                     console.warn('KaTeX rendering error:', error);
                 }
+            } else {
+                console.warn('KaTeX auto-render not available');
+                // Retry after a short delay
+                setTimeout(() => {
+                    if (typeof renderMathInElement !== 'undefined') {
+                        renderMath(element);
+                    }
+                }, 500);
             }
         }
 
@@ -1416,22 +1458,22 @@
             text = text.replace(/\$\$([^$]+)\$\$/g, function(match, mathContent) {
                 return `<div class="math-display">${mathContent}</div>`;
             });
-            
+
             // Process inline math ($...$)
             text = text.replace(/\$([^$]+)\$/g, function(match, mathContent) {
                 return `<span class="math-inline">${mathContent}</span>`;
             });
-            
+
             // Process LaTeX display math (\[...\])
             text = text.replace(/\\\[([^\]]+)\\\]/g, function(match, mathContent) {
                 return `<div class="math-display">${mathContent}</div>`;
             });
-            
+
             // Process LaTeX inline math (\(...\))
             text = text.replace(/\\\(([^)]+)\\\)/g, function(match, mathContent) {
                 return `<span class="math-inline">${mathContent}</span>`;
             });
-            
+
             return text;
         }
 
@@ -1486,15 +1528,15 @@
                 // Tables (improved implementation)
                 .replace(/\|(.+)\|/g, (match) => {
                     const cells = match.split('|').filter(cell => cell.trim() !== '');
-                    
+
                     if (cells.length >= 2) {
                         const lines = text.split('\n');
                         const currentLineIndex = lines.findIndex(line => line.includes(match));
-                        
+
                         if (currentLineIndex >= 0) {
                             const nextLine = lines[currentLineIndex + 1];
                             const isHeader = nextLine && /^[\s|:-]+$/.test(nextLine);
-                            
+
                             let rowHTML = '<tr>';
                             cells.forEach(cell => {
                                 const cellContent = cell.trim();
@@ -1505,11 +1547,11 @@
                                 }
                             });
                             rowHTML += '</tr>';
-                            
+
                             if (isHeader) {
                                 return `<table>${rowHTML}`;
                             }
-                            
+
                             return rowHTML;
                         }
                     }
@@ -1534,11 +1576,11 @@
             
             return formatted;
         }
-        
+
         // Update button states based on streaming status
         function updateButtonStates() {
             sendButton.disabled = isStreaming || messageInput.value.trim().length === 0;
-            
+
             document.querySelectorAll('.regenerate-button').forEach(btn => {
                 btn.disabled = isStreaming;
             });
@@ -1548,7 +1590,7 @@
         function addMessage(content, isUser = false, isInfo = false, timestamp = null, prompt = null, isHidden = false) {
             const messageDiv = document.createElement('div');
             const messageTime = timestamp || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            
+
             if (isInfo) {
                 messageDiv.className = 'message info-message';
                 messageDiv.innerHTML = `
@@ -1559,7 +1601,7 @@
                 `;
             } else {
                 messageDiv.className = isUser ? 'message user-message' : 'message ai-message';
-                
+
                 if (isUser) {
                     messageDiv.innerHTML = `
                         <div class="message-content">
@@ -1587,22 +1629,22 @@
                     if (prompt) {
                         messageDiv.dataset.prompt = prompt;
                     }
-                    
+
                     if (isHidden) {
                         messageDiv.classList.add('hidden');
                     }
                 }
             }
-            
+
             chatBox.appendChild(messageDiv);
-            
+
             // Render math expressions if not a user message
             if (!isUser && !isInfo) {
                 setTimeout(() => {
                     renderMath(messageDiv);
                 }, 100);
             }
-            
+
             scrollToBottom();
             return messageDiv;
         }
@@ -1614,7 +1656,7 @@
                 const messageDiv = e.target.closest('.message');
                 const messageContent = messageDiv.querySelector('.message-content');
                 const textToCopy = messageContent.textContent.replace(/CopyRegenerate/g, '').trim();
-                
+
                 navigator.clipboard.writeText(textToCopy).then(() => {
                     const copyBtn = e.target.closest('.copy-button');
                     const originalText = copyBtn.innerHTML;
@@ -1624,7 +1666,7 @@
                     }, 2000);
                 });
             }
-            
+
             // Regenerate button
             if (e.target.closest('.regenerate-button') && !isStreaming) {
                 const messageDiv = e.target.closest('.message');
@@ -1669,7 +1711,7 @@
                 document.querySelectorAll('.history-item').forEach(item => {
                     item.classList.remove('active');
                 });
-                
+
                 // Set active state
                 const clickedItem = document.querySelector(`.history-item[data-conv-id="${convId}"]`);
                 if (clickedItem) {
@@ -1678,17 +1720,17 @@
 
                 const response = await fetch(`/gemini/get-conversation/${convId}`);
                 const data = await response.json();
-                
+
                 if (data.success) {
                     const welcomeContainer = chatBox.querySelector('.welcome-container');
                     chatBox.innerHTML = '';
                     if (welcomeContainer) {
                         chatBox.appendChild(welcomeContainer);
                     }
-                    
+
                     addMessage(data.conversation.prompt, true, false, data.conversation.timestamp);
                     addMessage(data.conversation.response, false, false, data.conversation.timestamp, data.conversation.prompt);
-                    
+
                     currentConversationId = convId;
                     scrollToBottom();
                 } else {
@@ -1717,7 +1759,12 @@
             showTypingIndicator();
 
             try {
-                const eventSource = new EventSource(`/gemini/stream?prompt=${encodeURIComponent(message)}`);
+                // Close any existing EventSource
+                if (currentEventSource) {
+                    currentEventSource.close();
+                }
+
+                currentEventSource = new EventSource(`/gemini/stream?prompt=${encodeURIComponent(message)}`);
 
                 currentStreamingMessage = addMessage('', false, false, null, message, true);
                 const messageContent = currentStreamingMessage.querySelector('.message-content');
@@ -1727,13 +1774,14 @@
                 let fullResponse = '';
                 let hasReceivedData = false;
 
-                eventSource.onmessage = function(event) {
+                currentEventSource.onmessage = function(event) {
                     hideTypingIndicator();
-                    
+
                     if (event.data.startsWith('❌')) {
                         formattedContent.innerHTML = event.data;
                         messageContent.classList.remove('streaming-message');
-                        eventSource.close();
+                        currentEventSource.close();
+                        currentEventSource = null;
                         return;
                     }
 
@@ -1744,28 +1792,37 @@
 
                     fullResponse += event.data;
                     formattedContent.innerHTML = formatText(fullResponse);
-                    
+
                     // Render math expressions as they stream in
                     setTimeout(() => {
                         renderMath(currentStreamingMessage);
                     }, 100);
-                    
+
                     if (isAutoScrollEnabled) {
                         scrollToBottom();
                     }
                 };
 
-                eventSource.onerror = function(event) {
-                    eventSource.close();
+                currentEventSource.onerror = function(event) {
+                    console.log('EventSource error, closing connection');
+                    if (currentEventSource) {
+                        currentEventSource.close();
+                        currentEventSource = null;
+                    }
+
                     messageContent.classList.remove('streaming-message');
                     hideTypingIndicator();
                     messageInput.focus();
                     isStreaming = false;
                     updateButtonStates();
                     currentStreamingMessage = null;
-                    
-                    // Reload conversation history to get updated data
-                    initApp();
+
+                    // Only reload conversation history if we have a complete response
+                    if (fullResponse.length > 0) {
+                        setTimeout(() => {
+                            updateConversationHistory();
+                        }, 1000);
+                    }
                 };
 
             } catch (error) {
@@ -1776,6 +1833,21 @@
                 isStreaming = false;
                 updateButtonStates();
                 currentStreamingMessage = null;
+                currentEventSource = null;
+            }
+        }
+
+        // Update conversation history without full page reload
+        async function updateConversationHistory() {
+            try {
+                const response = await fetch('/gemini/data');
+                const data = await response.json();
+
+                if (data.success) {
+                    updateSidebarHistory(data.conversations);
+                }
+            } catch (error) {
+                console.error('Error updating conversation history:', error);
             }
         }
 
@@ -1785,7 +1857,10 @@
         }
 
         // Initialize the application when DOM is loaded
-        document.addEventListener('DOMContentLoaded', initApp);
+        document.addEventListener('DOMContentLoaded', function() {
+            // Wait a bit longer for KaTeX to load
+            setTimeout(initApp, 500);
+        });
 
         // Initial scroll to bottom
         scrollToBottom();

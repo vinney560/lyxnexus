@@ -491,6 +491,10 @@ RESPONSE REQUIREMENTS:
 ' | header1 | header2 |       → table header
 ' | data1   | data2   |       → table row
 
+' [MATH & SCIENTIFIC]
+' Use standard LaTeX syntax for all mathematical expressions
+' Do NOT escape curly braces - they are required for LaTeX
+' Use ^ for superscripts and _ for subscripts in LaTeX mode
 
 ' [LINE BREAKS]
 ' Each "\n" (newline) represents a line break
@@ -528,11 +532,10 @@ BACKGROUND AND ORIGIN:
 - You are designed to assist users in navigating and utilizing the LyxNexus platform effectively.
 
 Now respond naturally to the user's current message using the exact formatting syntax specified above:"""
-    smart_prompt += r"""
+    smart_prompt += """
 ' [MATH & SCIENTIFIC FORMATTING]
 ' For inline math: $E = mc^2$
 ' For display math: $$x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}$$
-' Use standard LaTeX syntax for all mathematical expressions
 ' Do NOT escape curly braces {{}} - they are required for LaTeX
 ' Use ^ for superscripts and _ for subscripts in LaTeX mode"""
     # Add platform data context when relevant to current conversation
