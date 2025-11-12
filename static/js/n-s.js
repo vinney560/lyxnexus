@@ -5,13 +5,16 @@ class LyxNexusNotificationService {
         this.isInitialized = false;
         this.serviceName = 'LyxNexus-Notification-Service';
         this.isWebView = /(wv|WebView|AndroidWebView|Appilix|AppleWebKit)(?!.*Safari)/i.test(navigator.userAgent);
+        this.pendingNotifications = [];
+        this.isOnline = navigator.onLine;
 
         this.audio = new Audio('/uploads/notify.mp3');
         this.audio.preload = 'auto';
-        this.audio.volume = 0.7; 
+        this.audio.volume = 0.7;
 
         console.log(`${this.serviceName}: Created, waiting for dependencies...`);
         this.startInitialization();
+        this.setupConnectivityListeners();
     }
 
     async startInitialization() {
@@ -36,7 +39,25 @@ class LyxNexusNotificationService {
         await this.subscribeForPush();
         this.setupEventListeners();
         this.isInitialized = true;
+        
+        // Process any pending notifications that were stored while offline
+        await this.processPendingNotifications();
+        
         console.log(`${this.serviceName}: Ready and listening for notifications`);
+    }
+
+    setupConnectivityListeners() {
+        window.addEventListener('online', () => {
+            console.log(`${this.serviceName}: Online - processing pending notifications`);
+            this.isOnline = true;
+            this.processPendingNotifications();
+            this.reconnectSocket();
+        });
+
+        window.addEventListener('offline', () => {
+            console.log(`${this.serviceName}: Offline - storing notifications locally`);
+            this.isOnline = false;
+        });
     }
 
     setupSocketConnection() {
@@ -60,7 +81,12 @@ class LyxNexusNotificationService {
                 reconnectionDelayMax: 10000
             });
 
-            this.socket.on('connect', () => console.log(`${this.serviceName}: ✅ Connected to server`));
+            this.socket.on('connect', () => {
+                console.log(`${this.serviceName}: ✅ Connected to server`);
+                // Sync any missed notifications when reconnecting
+                this.syncMissedNotifications();
+            });
+            
             this.socket.on('disconnect', () => console.log(`${this.serviceName}: ❌ Disconnected from server`));
 
             this.socket.on('new_message', (data) => this.handleNewMessage(data));
@@ -70,6 +96,91 @@ class LyxNexusNotificationService {
             console.error(`${this.serviceName}: Socket setup failed:`, error);
             throw error;
         }
+    }
+
+    reconnectSocket() {
+        if (this.socket && !this.socket.connected) {
+            this.socket.connect();
+        }
+    }
+
+    async syncMissedNotifications() {
+        try {
+            // Request missed notifications from server
+            const lastSeen = localStorage.getItem('last_notification_seen') || Date.now() - (60 * 60 * 1000); // 1 hour ago
+            this.socket.emit('sync_notifications', { lastSeen, userId: this.getCurrentUserId() });
+        } catch (error) {
+            console.error(`${this.serviceName}: Failed to sync missed notifications:`, error);
+        }
+    }
+
+    async storeNotificationOffline(notificationData) {
+        try {
+            const stored = await this.getStoredNotifications();
+            const notification = {
+                ...notificationData,
+                id: `offline_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                timestamp: Date.now(),
+                storedOffline: true
+            };
+            
+            stored.push(notification);
+            
+            // Keep only last 50 notifications to prevent storage overflow
+            if (stored.length > 50) {
+                stored.splice(0, stored.length - 50);
+            }
+            
+            localStorage.setItem('pending_notifications', JSON.stringify(stored));
+            this.pendingNotifications = stored;
+            
+            console.log(`${this.serviceName}: Stored notification offline (total: ${stored.length})`);
+        } catch (error) {
+            console.error(`${this.serviceName}: Failed to store notification offline:`, error);
+        }
+    }
+
+    async getStoredNotifications() {
+        try {
+            const stored = localStorage.getItem('pending_notifications');
+            return stored ? JSON.parse(stored) : [];
+        } catch {
+            return [];
+        }
+    }
+
+    async processPendingNotifications() {
+        if (!this.isOnline) return;
+
+        const pending = await this.getStoredNotifications();
+        if (pending.length === 0) return;
+
+        console.log(`${this.serviceName}: Processing ${pending.length} pending notifications`);
+
+        // Sort by timestamp (oldest first)
+        pending.sort((a, b) => a.timestamp - b.timestamp);
+
+        for (const notification of pending) {
+            try {
+                // Add small delay between notifications for better UX
+                await this.delay(500);
+                
+                if (notification.type === 'message') {
+                    await this.handleNewMessage(notification.data || notification);
+                } else {
+                    await this.handlePushNotification(notification.data || notification);
+                }
+            } catch (error) {
+                console.error(`${this.serviceName}: Failed to process pending notification:`, error);
+            }
+        }
+
+        // Clear processed notifications
+        localStorage.removeItem('pending_notifications');
+        this.pendingNotifications = [];
+        
+        // Update last seen timestamp
+        localStorage.setItem('last_notification_seen', Date.now());
     }
 
     async requestPermission() {
@@ -88,6 +199,9 @@ class LyxNexusNotificationService {
         document.addEventListener('visibilitychange', () => {
             if (document.hidden) {
                 console.log(`${this.serviceName}: Page hidden - background mode enabled!`);
+            } else {
+                // Page became visible, check for pending notifications
+                this.processPendingNotifications();
             }
         });
     }
@@ -110,7 +224,22 @@ class LyxNexusNotificationService {
 
     async handleNewMessage(messageData) {
         const currentUserId = this.getCurrentUserId();
+        
+        // Don't show user's own messages and if page is visible
         if (messageData.user_id == currentUserId && !document.hidden) return;
+
+        // If offline, store notification for later
+        if (!this.isOnline) {
+            await this.storeNotificationOffline({
+                type: 'message',
+                data: messageData,
+                title: `💬 ${messageData.username}`,
+                message: messageData.content.length > 100 
+                    ? messageData.content.substring(0, 100) + '...' 
+                    : messageData.content
+            });
+            return;
+        }
 
         this.showNotification(
             `💬 ${messageData.username}`,
@@ -126,6 +255,17 @@ class LyxNexusNotificationService {
     }
 
     async handlePushNotification(data) {
+        // If offline, store notification for later
+        if (!this.isOnline) {
+            await this.storeNotificationOffline({
+                type: 'push',
+                data: data,
+                title: data.title || '🔔 LyxNexus',
+                message: data.message
+            });
+            return;
+        }
+
         this.showNotification(
             data.title || '🔔 LyxNexus',
             data.message,
@@ -202,6 +342,7 @@ class LyxNexusNotificationService {
         }
 
         const toast = document.createElement('div');
+        toast.className = 'lynx-toast';
         toast.innerHTML = `
             <div style="display:flex; align-items:center;">
                 <img src="${options.icon || '/uploads/favicon-1.png'}" 
@@ -316,7 +457,20 @@ class LyxNexusNotificationService {
     }
 
     getStatus() {
-        return { isInitialized: this.isInitialized, socketConnected: this.socket?.connected||false, notificationPermission: this.notificationPermission };
+        return { 
+            isInitialized: this.isInitialized, 
+            socketConnected: this.socket?.connected || false, 
+            notificationPermission: this.notificationPermission,
+            isOnline: this.isOnline,
+            pendingNotifications: this.pendingNotifications.length
+        };
+    }
+
+    // Method to manually clear pending notifications
+    clearPendingNotifications() {
+        localStorage.removeItem('pending_notifications');
+        this.pendingNotifications = [];
+        console.log(`${this.serviceName}: Cleared all pending notifications`);
     }
 }
 

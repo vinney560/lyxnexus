@@ -127,6 +127,9 @@
         position: relative;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         width: fit-content;
+        user-select: none;
+        -webkit-user-select: none;
+        touch-action: pan-y;
     }
     
     .message.user-message {
@@ -157,6 +160,12 @@
         color: #94a3b8;
         font-style: italic;
         border: 1px solid rgba(100, 116, 139, 0.2);
+    }
+    
+    .message.selected {
+        background: rgba(59, 130, 246, 0.4);
+        border: 1px solid rgba(59, 130, 246, 0.7);
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
     }
     
     .reply-message {
@@ -882,35 +891,35 @@
     
     .floating-action-btn {
         position: fixed;
-        bottom: 30px;
+        bottom: 80px;
         right: 30px;
-        width: 60px;
-        height: 60px;
+        width: 40px;
+        height: 40px;
         border-radius: 50%;
-        background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-        color: white;
+        background: transparent;
+        color: #3b82f6;
         display: flex;
         align-items: center;
         justify-content: center;
         font-size: 1.2em;
-        box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
         cursor: pointer;
         z-index: 80;
         transition: all 0.3s ease;
         border: none;
+        box-shadow: none;
     }
     
     .floating-action-btn:hover {
         transform: scale(1.1);
-        box-shadow: 0 8px 25px rgba(59, 130, 246, 0.5);
+        color: #1d4ed8;
     }
     
     @media (max-width: 768px) {
         .floating-action-btn {
-            bottom: 20px;
+            bottom: 70px;
             right: 20px;
-            width: 50px;
-            height: 50px;
+            width: 35px;
+            height: 35px;
         }
     }
     
@@ -1161,7 +1170,8 @@
     @keyframes pulse {
         0% { opacity: 1; }
         50% { opacity: 0.5; }
-        100% { opacity: 1; }
+        100% { opacity: 1;
+        }
     }
 
     .pulse {
@@ -1188,6 +1198,189 @@
         box-shadow: 0 7px 15px rgba(0, 200, 255, 0.119);
         border-color: rgba(59, 130, 246, 0.5);
     }
+
+    /* New features styles */
+    .swipe-indicator {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border-radius: 16px;
+        background: rgba(59, 130, 246, 0.2);
+        display: flex;
+        align-items: center;
+        padding-left: 15px;
+        color: #3b82f6;
+        font-size: 0.9em;
+        opacity: 0;
+        transition: opacity 0.3s;
+        pointer-events: none;
+    }
+    
+    .swipe-indicator.show {
+        opacity: 1;
+    }
+    
+    .emoji-picker {
+        position: fixed;
+        background: var(--sidebar-bg);
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        border-radius: 12px;
+        padding: 10px;
+        display: flex;
+        gap: 8px;
+        z-index: 1000;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        transform: scale(0);
+        transition: transform 0.2s ease;
+    }
+    
+    .emoji-picker.show {
+        transform: scale(1);
+    }
+    
+    .emoji-option {
+        font-size: 1.2em;
+        cursor: pointer;
+        padding: 5px;
+        border-radius: 6px;
+        transition: all 0.2s;
+    }
+    
+    .emoji-option:hover {
+        background: rgba(59, 130, 246, 0.2);
+        transform: scale(1.2);
+    }
+    
+    .selection-mode .message {
+        cursor: pointer;
+    }
+    
+    .selection-mode .message.selected::before {
+        content: "✓";
+        position: absolute;
+        top: 8px;
+        left: 8px;
+        width: 20px;
+        height: 20px;
+        background: #3b82f6;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8em;
+        color: white;
+    }
+    
+    .selection-toolbar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: var(--sidebar-bg);
+        padding: 15px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-top: 1px solid rgba(59, 130, 246, 0.3);
+        transform: translateY(100%);
+        transition: transform 0.3s ease;
+        z-index: 90;
+    }
+    
+    .selection-toolbar.show {
+        transform: translateY(0);
+    }
+    
+    .selection-info {
+        font-size: 0.9em;
+        color: #94a3b8;
+    }
+    
+    .selection-actions {
+        display: flex;
+        gap: 10px;
+    }
+    
+    .selection-btn {
+        background: transparent;
+        border: 1px solid #3b82f6;
+        color: #3b82f6;
+        padding: 8px 15px;
+        border-radius: 20px;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-size: 0.9em;
+    }
+    
+    .selection-btn:hover {
+        background: #3b82f6;
+        color: white;
+    }
+    
+    .selection-btn.delete {
+        border-color: #ef4444;
+        color: #ef4444;
+    }
+    
+    .selection-btn.delete:hover {
+        background: #ef4444;
+        color: white;
+    }
+    
+    .loading-indicator {
+        text-align: center;
+        padding: 10px;
+        color: #94a3b8;
+        font-size: 0.9em;
+    }
+    
+    .loading-indicator i {
+        margin-right: 5px;
+        animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    .retry-btn {
+        background: rgba(59, 130, 246, 0.2);
+        border: 1px solid rgba(59, 130, 246, 0.5);
+        color: #3b82f6;
+        padding: 5px 10px;
+        border-radius: 15px;
+        cursor: pointer;
+        font-size: 0.8em;
+        margin-left: 10px;
+        transition: all 0.2s;
+    }
+    
+    .retry-btn:hover {
+        background: rgba(59, 130, 246, 0.3);
+    }
+    
+    .select-mode-btn {
+        background: transparent;
+        border: none;
+        color: #94a3b8;
+        font-size: 1.1em;
+        cursor: pointer;
+        transition: color 0.2s;
+        padding: 5px;
+        border-radius: 5px;
+    }
+    
+    .select-mode-btn:hover {
+        color: #3b82f6;
+    }
+    
+    .select-mode-btn.active {
+        color: #3b82f6;
+        background: rgba(59, 130, 246, 0.1);
+    }
 </style>
 <body>
     <header class="glass-morph sticky top-0 z-50">
@@ -1207,6 +1400,9 @@
                     {% if unread_count > 0 %}
                     <span class="unread-badge">{{ unread_count }}</span>
                     {% endif %}
+                    <button class="select-mode-btn" id="selectModeBtn" title="Select messages">
+                        <i class="fas fa-check-square"></i>
+                    </button>
                     <button id="backBtn" class="btn-outline">
                         <i class="fas fa-arrow-left mr-2"></i>
                     </button>
@@ -1215,13 +1411,22 @@
         </div>
     </header>
 
+    <!-- Selection Toolbar -->
+    <div class="selection-toolbar" id="selectionToolbar">
+        <div class="selection-info" id="selectionInfo">0 messages selected</div>
+        <div class="selection-actions">
+            <button class="selection-btn" id="replySelectedBtn">Reply</button>
+            <button class="selection-btn delete" id="deleteSelectedBtn">Delete</button>
+            <button class="selection-btn" id="cancelSelectionBtn">Cancel</button>
+        </div>
+    </div>
+
     <!-- Sidebar Toggle Button -->
     <button class="sidebar-toggle" id="sidebarToggle">
         <i class="fas fa-bars"></i>
     </button>
 
     <div class="main-container">
-        
         
         <!-- Private Room Modal -->
         <div class="private-lnm-container" id="privateLNM">
@@ -1261,7 +1466,6 @@
                 <div class="status-message" id="privateRoomStatus"></div>
             </div>
         </div> 
-        
         
         <!-- Sidebar -->
         <div class="sidebar" id="sidebar">
@@ -1304,9 +1508,15 @@
         <div class="chat-container">
             <div class="message-container chat-background">
                 <div class="messages-list" id="messagesList">
+                    <div class="loading-indicator" id="loadingIndicator" style="display: none;">
+                        <i class="fas fa-spinner"></i> Loading messages...
+                    </div>
                     {% for message in messages %}
                     <div class="message {% if message.user_id == current_user.id %}user-message{% elif message.is_admin_message %}admin-message{% else %}other-message{% endif %} {% if message.is_deleted %}deleted{% endif %}" 
                          data-message-id="{{ message.id }}">
+                        <div class="swipe-indicator">
+                            <i class="fas fa-reply mr-2"></i> Swipe to reply
+                        </div>
                         <div class="message-header">
                             <div class="flex items-center">
                                 <span class="username">
@@ -1430,6 +1640,13 @@
         const sidebar = document.getElementById('sidebar');
         const sidebarToggle = document.getElementById('sidebarToggle');
         const scrollToBottomBtn = document.getElementById('scrollToBottomBtn');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const selectModeBtn = document.getElementById('selectModeBtn');
+        const selectionToolbar = document.getElementById('selectionToolbar');
+        const selectionInfo = document.getElementById('selectionInfo');
+        const replySelectedBtn = document.getElementById('replySelectedBtn');
+        const deleteSelectedBtn = document.getElementById('deleteSelectedBtn');
+        const cancelSelectionBtn = document.getElementById('cancelSelectionBtn');
         
         let currentRoom = 'general';
         let onlineUsers = {};
@@ -1445,6 +1662,12 @@
             quality: 'good'
         };
         let replyingToMessage = null;
+        let isSelectionMode = false;
+        let selectedMessages = new Set();
+        let longPressTimer = null;
+        let swipeStartX = 0;
+        let swipeStartY = 0;
+        let isSwiping = false;
 
         // Back button handler
         const isAdmin = {{ 'true' if current_user.is_admin else 'false' }};
@@ -1495,6 +1718,234 @@
         const inputNameJoin = document.getElementById('inputNameJoin');
         const inputKeyJoin = document.getElementById('inputKeyJoin');
         const privateRoomStatus = document.getElementById('privateRoomStatus');
+
+        // Selection mode handlers
+        selectModeBtn.addEventListener('click', toggleSelectionMode);
+        cancelSelectionBtn.addEventListener('click', cancelSelectionMode);
+        replySelectedBtn.addEventListener('click', replyToSelectedMessages);
+        deleteSelectedBtn.addEventListener('click', deleteSelectedMessages);
+
+        function toggleSelectionMode() {
+            isSelectionMode = !isSelectionMode;
+            if (isSelectionMode) {
+                document.body.classList.add('selection-mode');
+                selectionToolbar.classList.add('show');
+                selectModeBtn.classList.add('active');
+                updateSelectionInfo();
+            } else {
+                cancelSelectionMode();
+            }
+        }
+
+        function cancelSelectionMode() {
+            isSelectionMode = false;
+            document.body.classList.remove('selection-mode');
+            selectionToolbar.classList.remove('show');
+            selectModeBtn.classList.remove('active');
+            selectedMessages.clear();
+            document.querySelectorAll('.message.selected').forEach(msg => {
+                msg.classList.remove('selected');
+            });
+        }
+
+        function updateSelectionInfo() {
+            const count = selectedMessages.size;
+            selectionInfo.textContent = `${count} message${count !== 1 ? 's' : ''} selected`;
+            
+            // Enable/disable buttons based on selection
+            replySelectedBtn.disabled = count === 0;
+            deleteSelectedBtn.disabled = count === 0;
+        }
+
+        function toggleMessageSelection(messageId) {
+            const messageElement = document.querySelector(`[data-message-id="${messageId}"]`);
+            if (!messageElement) return;
+            
+            if (selectedMessages.has(messageId)) {
+                selectedMessages.delete(messageId);
+                messageElement.classList.remove('selected');
+            } else {
+                selectedMessages.add(messageId);
+                messageElement.classList.add('selected');
+            }
+            
+            updateSelectionInfo();
+        }
+
+        function replyToSelectedMessages() {
+            if (selectedMessages.size === 0) return;
+            
+            // For now, we'll just reply to the first selected message
+            const firstMessageId = Array.from(selectedMessages)[0];
+            const messageElement = document.querySelector(`[data-message-id="${firstMessageId}"]`);
+            
+            if (messageElement) {
+                const username = messageElement.querySelector('.username').textContent;
+                const content = messageElement.querySelector('.message-content').textContent;
+                
+                startReply({
+                    id: parseInt(firstMessageId),
+                    username: username,
+                    content: content
+                });
+                
+                cancelSelectionMode();
+            }
+        }
+
+        function deleteSelectedMessages() {
+            if (selectedMessages.size === 0) return;
+            
+            if (!confirm(`Are you sure you want to delete ${selectedMessages.size} message${selectedMessages.size !== 1 ? 's' : ''}?`)) {
+                return;
+            }
+            
+            selectedMessages.forEach(messageId => {
+                deleteMessage(messageId);
+            });
+            
+            cancelSelectionMode();
+        }
+
+        // Swipe to reply functionality
+        function setupSwipeEvents(messageElement) {
+            let startX, startY, distX, distY;
+            const swipeThreshold = 50;
+            const messageId = messageElement.dataset.messageId;
+            
+            messageElement.addEventListener('touchstart', function(e) {
+                if (isSelectionMode) return;
+                
+                const touch = e.touches[0];
+                startX = touch.clientX;
+                startY = touch.clientY;
+                swipeStartX = startX;
+                swipeStartY = startY;
+                isSwiping = false;
+                
+                // Start long press timer for emoji picker
+                longPressTimer = setTimeout(() => {
+                    showEmojiPicker(messageElement, touch.clientX, touch.clientY);
+                }, 500);
+            }, { passive: true });
+            
+            messageElement.addEventListener('touchmove', function(e) {
+                if (isSelectionMode || !startX || !startY) return;
+                
+                const touch = e.touches[0];
+                distX = touch.clientX - startX;
+                distY = touch.clientY - startY;
+                
+                // Only consider it a swipe if horizontal movement is dominant
+                if (Math.abs(distX) > Math.abs(distY) && Math.abs(distX) > 5) {
+                    isSwiping = true;
+                    clearTimeout(longPressTimer);
+                    
+                    // Show swipe indicator for right-to-left swipe
+                    if (distX < 0) {
+                        const indicator = messageElement.querySelector('.swipe-indicator');
+                        indicator.classList.add('show');
+                        indicator.style.transform = `translateX(${Math.max(distX, -100)}px)`;
+                    }
+                }
+            }, { passive: true });
+            
+            messageElement.addEventListener('touchend', function(e) {
+                clearTimeout(longPressTimer);
+                
+                if (isSwiping && distX < -swipeThreshold) {
+                    // Swipe to reply
+                    const username = messageElement.querySelector('.username').textContent;
+                    const content = messageElement.querySelector('.message-content').textContent;
+                    
+                    startReply({
+                        id: parseInt(messageId),
+                        username: username,
+                        content: content
+                    });
+                }
+                
+                // Reset swipe indicator
+                const indicator = messageElement.querySelector('.swipe-indicator');
+                indicator.classList.remove('show');
+                indicator.style.transform = '';
+                
+                // Reset variables
+                startX = null;
+                startY = null;
+                distX = 0;
+                distY = 0;
+                isSwiping = false;
+            }, { passive: true });
+            
+            // Click handler for selection mode
+            messageElement.addEventListener('click', function(e) {
+                if (isSelectionMode && !e.target.closest('.message-actions')) {
+                    toggleMessageSelection(messageId);
+                }
+            });
+        }
+
+        // Emoji picker for quick reactions
+        function showEmojiPicker(messageElement, x, y) {
+            const emojis = ['👍', '❤️', '😂', '😮', '😢', '🙏'];
+            const messageId = messageElement.dataset.messageId;
+            
+            // Remove existing emoji picker
+            const existingPicker = document.querySelector('.emoji-picker');
+            if (existingPicker) {
+                existingPicker.remove();
+            }
+            
+            // Create emoji picker
+            const emojiPicker = document.createElement('div');
+            emojiPicker.className = 'emoji-picker';
+            emojiPicker.style.left = `${x}px`;
+            emojiPicker.style.top = `${y}px`;
+            
+            emojis.forEach(emoji => {
+                const emojiOption = document.createElement('div');
+                emojiOption.className = 'emoji-option';
+                emojiOption.textContent = emoji;
+                emojiOption.addEventListener('click', function() {
+                    // Send quick reply with emoji
+                    const quickReply = {
+                        content: emoji,
+                        room: currentRoom,
+                        parent_id: parseInt(messageId)
+                    };
+                    
+                    if (isConnected) {
+                        socket.emit('send_message', quickReply);
+                    } else {
+                        addToMessageQueue(quickReply);
+                    }
+                    
+                    emojiPicker.remove();
+                });
+                
+                emojiPicker.appendChild(emojiOption);
+            });
+            
+            document.body.appendChild(emojiPicker);
+            
+            // Show with animation
+            setTimeout(() => {
+                emojiPicker.classList.add('show');
+            }, 10);
+            
+            // Close emoji picker when clicking outside
+            const closePicker = function(e) {
+                if (!emojiPicker.contains(e.target)) {
+                    emojiPicker.remove();
+                    document.removeEventListener('click', closePicker);
+                }
+            };
+            
+            setTimeout(() => {
+                document.addEventListener('click', closePicker);
+            }, 100);
+        }
 
         // Private Room Event Listeners
         pToggle.addEventListener('click', () => {
@@ -1864,6 +2315,9 @@
             }
             
             messageDiv.innerHTML = `
+                <div class="swipe-indicator">
+                    <i class="fas fa-reply mr-2"></i> Swipe to reply
+                </div>
                 <div class="message-header">
                     <div class="flex items-center">
                         <span class="username">${messageData.username.slice(0, 7)}</span>
@@ -1880,6 +2334,9 @@
             `;
             
             messagesList.appendChild(messageDiv);
+            
+            // Set up swipe events for the new message
+            setupSwipeEvents(messageDiv);
             
             if (animate) {
                 setTimeout(() => {
@@ -2051,45 +2508,91 @@
         }
         
         function loadMessages(room, sinceId = 0) {
+            loadingIndicator.style.display = 'block';
+            
             const cachedMessages = getCachedMessages(room);
             if (cachedMessages.length > 0) {
                 displayMessages(cachedMessages, false);
             }
             
-            fetch(`/api/messages?room=${room}&since_id=${sinceId}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        const messages = data.messages || [];
+            // Add retry mechanism for poor connections
+            let retryCount = 0;
+            const maxRetries = 3;
+            
+            function attemptLoad() {
+                fetch(`/api/messages?room=${room}&since_id=${sinceId}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        loadingIndicator.style.display = 'none';
                         
-                        cacheMessages(room, messages);
-                        
-                        const allMessages = getCachedMessages(room);
-                        if (sinceId > 0) {
-                            const newToDisplay = allMessages.filter(msg => msg.id > sinceId);
-                            displayMessages(newToDisplay, false);
+                        if (data.success) {
+                            const messages = data.messages || [];
+                            
+                            cacheMessages(room, messages);
+                            
+                            const allMessages = getCachedMessages(room);
+                            if (sinceId > 0) {
+                                const newToDisplay = allMessages.filter(msg => msg.id > sinceId);
+                                displayMessages(newToDisplay, false);
+                            } else {
+                                displayMessages(allMessages, true);
+                            }
+                            
+                            if (messages.length > 0) {
+                                lastMessageId = Math.max(...messages.map(msg => msg.id));
+                            }
                         } else {
-                            displayMessages(allMessages, true);
+                            console.error('Failed to load messages:', data.error);
+                            showLoadError('Failed to load messages: ' + data.error);
                         }
+                    })
+                    .catch(error => {
+                        console.error('Failed to load messages:', error);
                         
-                        if (messages.length > 0) {
-                            lastMessageId = Math.max(...messages.map(msg => msg.id));
+                        if (retryCount < maxRetries) {
+                            retryCount++;
+                            console.log(`Retrying load (${retryCount}/${maxRetries})...`);
+                            setTimeout(attemptLoad, 1000 * retryCount);
+                        } else {
+                            loadingIndicator.style.display = 'none';
+                            showLoadError('Failed to load messages. Please check your connection.');
+                            
+                            if (sinceId === 0) {
+                                displayMessages(getCachedMessages(room), true);
+                            }
                         }
-                    } else {
-                        console.error('Failed to load messages:', data.error);
-                    }
-                })
-                .catch(error => {
-                    console.error('Failed to load messages:', error);
-                    if (sinceId === 0) {
-                        displayMessages(getCachedMessages(room), true);
-                    }
-                });
+                    });
+            }
+            
+            attemptLoad();
+        }
+        
+        function showLoadError(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'loading-indicator';
+            errorDiv.innerHTML = `
+                <i class="fas fa-exclamation-triangle"></i> ${message}
+                <button class="retry-btn" id="retryLoadBtn">Retry</button>
+            `;
+            
+            messagesList.appendChild(errorDiv);
+            
+            document.getElementById('retryLoadBtn').addEventListener('click', function() {
+                errorDiv.remove();
+                loadMessages(currentRoom, lastMessageId);
+            });
         }
         
         function displayMessages(messages, clear = true) {
             if (clear) {
                 messagesList.innerHTML = '';
+                // Re-add loading indicator at top
+                messagesList.appendChild(loadingIndicator);
             }
             
             // Filter messages to only show those from the current room
@@ -2098,6 +2601,9 @@
             roomMessages.forEach(message => {
                 addMessage(message, !clear);
             });
+            
+            // Set up swipe events for existing messages
+            document.querySelectorAll('.message').forEach(setupSwipeEvents);
             
             autoScrollToBottom();
         }
@@ -2388,11 +2894,16 @@
                     deleteMessage(parseInt(messageId));
                 });
             });
+            
+            // Set up swipe events for initial messages
+            document.querySelectorAll('.message').forEach(setupSwipeEvents);
         });
         
         window.addEventListener('load', () => {
             // Clear initial messages and load only current room messages
             messagesList.innerHTML = '';
+            // Add loading indicator
+            messagesList.appendChild(loadingIndicator);
             scrollToBottom();
             adjustTextareaHeight();
             

@@ -1,5 +1,6 @@
-const CACHE_NAME = 'lyxnexus-static-v3';
-const DYNAMIC_CACHE = 'lyxnexus-dynamic-v2';
+const CACHE_NAME = 'lyxnexus-static-v4';
+const DYNAMIC_CACHE = 'lyxnexus-dynamic-v3';
+const NOTIFICATION_CACHE = 'lyxnexus-notifications-v1';
 const OFFLINE_URL = '/offline.html';
 
 const STATIC_ASSETS = [
@@ -25,6 +26,121 @@ async function broadcast(type, payload = {}) {
   }
 }
 
+/* ------------------ Notification Storage ------------------ */
+async function storeNotificationForOffline(notificationData) {
+  try {
+    const cache = await caches.open(NOTIFICATION_CACHE);
+    const notificationId = `notification_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const notification = {
+      ...notificationData,
+      id: notificationId,
+      timestamp: Date.now(),
+      storedOffline: true
+    };
+
+    const response = new Response(JSON.stringify(notification), {
+      headers: { 'Content-Type': 'application/json' }
+    });
+
+    await cache.put(`/notification/${notificationId}`, response);
+    console.log('[ServiceWorker] Stored notification for offline delivery:', notificationId);
+    
+    return notificationId;
+  } catch (error) {
+    console.error('[ServiceWorker] Failed to store notification:', error);
+  }
+}
+
+async function getStoredNotifications() {
+  try {
+    const cache = await caches.open(NOTIFICATION_CACHE);
+    const keys = await cache.keys();
+    const notifications = [];
+
+    for (const request of keys) {
+      if (request.url.includes('/notification/')) {
+        const response = await cache.match(request);
+        if (response) {
+          const notification = await response.json();
+          notifications.push(notification);
+        }
+      }
+    }
+
+    // Sort by timestamp (oldest first)
+    return notifications.sort((a, b) => a.timestamp - b.timestamp);
+  } catch (error) {
+    console.error('[ServiceWorker] Failed to get stored notifications:', error);
+    return [];
+  }
+}
+
+async function clearStoredNotification(notificationId) {
+  try {
+    const cache = await caches.open(NOTIFICATION_CACHE);
+    await cache.delete(`/notification/${notificationId}`);
+  } catch (error) {
+    console.error('[ServiceWorker] Failed to clear notification:', error);
+  }
+}
+
+async function clearAllStoredNotifications() {
+  try {
+    const cache = await caches.open(NOTIFICATION_CACHE);
+    const keys = await cache.keys();
+    
+    for (const request of keys) {
+      if (request.url.includes('/notification/')) {
+        await cache.delete(request);
+      }
+    }
+    console.log('[ServiceWorker] Cleared all stored notifications');
+  } catch (error) {
+    console.error('[ServiceWorker] Failed to clear all notifications:', error);
+  }
+}
+
+async function deliverStoredNotifications() {
+  if (!onlineStatus) return;
+
+  const notifications = await getStoredNotifications();
+  if (notifications.length === 0) return;
+
+  console.log(`[ServiceWorker] Delivering ${notifications.length} stored notifications`);
+
+  for (const notification of notifications) {
+    try {
+      // Show the notification
+      await self.registration.showNotification(
+        notification.title || '🔔 LyxNexus',
+        {
+          body: notification.body || notification.message,
+          icon: notification.icon || '/uploads/favicon-1.png',
+          badge: '/uploads/favicon-1.png',
+          data: notification.data || {},
+          tag: notification.tag || `stored-${notification.id}`
+        }
+      );
+
+      // Broadcast to clients
+      await broadcast('STORED_NOTIFICATION_DELIVERED', {
+        title: notification.title,
+        body: notification.body || notification.message,
+        data: notification.data
+      });
+
+      // Remove from storage after successful delivery
+      await clearStoredNotification(notification.id);
+      
+      // Small delay between notifications
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+    } catch (error) {
+      console.error('[ServiceWorker] Failed to deliver stored notification:', error);
+    }
+  }
+}
+
 /* ------------------ Install: Precache core assets ------------------ */
 self.addEventListener('install', event => {
   event.waitUntil(
@@ -39,7 +155,7 @@ self.addEventListener('activate', event => {
   event.waitUntil((async () => {
     const keys = await caches.keys();
     for (const key of keys) {
-      if (![CACHE_NAME, DYNAMIC_CACHE].includes(key)) {
+      if (![CACHE_NAME, DYNAMIC_CACHE, NOTIFICATION_CACHE].includes(key)) {
         await caches.delete(key);
       }
     }
@@ -49,6 +165,9 @@ self.addEventListener('activate', event => {
     for (const client of clients) {
       client.navigate(client.url);
     }
+    
+    // Deliver any stored notifications that accumulated during update
+    await deliverStoredNotifications();
   })());
   self.clients.claim();
 });
@@ -109,6 +228,11 @@ function updateNetworkStatus(status) {
     clearTimeout(debounceTimer);
     debounceTimer = setTimeout(() => {
       broadcast(status ? 'ONLINE' : 'OFFLINE');
+      
+      // If coming online, deliver stored notifications
+      if (status) {
+        deliverStoredNotifications();
+      }
     }, DEBOUNCE_DELAY);
   }
 }
@@ -125,16 +249,32 @@ self.addEventListener('push', event => {
   const clickUrl = data.url || '/';
 
   event.waitUntil(
-    self.registration.showNotification(title, {
-      body,
-      icon,
-      badge: icon,
-      data: { ...data, url: clickUrl },
-      tag
-    })
-  );
+    (async () => {
+      // If offline, store the notification for later delivery
+      if (!onlineStatus) {
+        console.log('[ServiceWorker] Offline - storing push notification');
+        await storeNotificationForOffline({
+          title,
+          body,
+          icon,
+          tag,
+          data: { ...data, url: clickUrl }
+        });
+        return;
+      }
 
-  broadcast('PUSH_RECEIVED', { title, body });
+      // If online, show immediately
+      await self.registration.showNotification(title, {
+        body,
+        icon,
+        badge: icon,
+        data: { ...data, url: clickUrl },
+        tag
+      });
+
+      broadcast('PUSH_RECEIVED', { title, body });
+    })()
+  );
 });
 
 /* ------------------ Notification Click Behavior ------------------ */
@@ -154,9 +294,17 @@ self.addEventListener('notificationclick', event => {
   );
 });
 
+/* ------------------ Background Sync for Notifications ------------------ */
+self.addEventListener('sync', event => {
+  if (event.tag === 'notification-sync') {
+    console.log('[ServiceWorker] Background sync for notifications');
+    event.waitUntil(deliverStoredNotifications());
+  }
+});
+
 /* ------------------ Messaging From Client Pages ------------------ */
 self.addEventListener('message', event => {
-  const { type } = event.data || {};
+  const { type, data } = event.data || {};
 
   switch (type) {
     case 'PING':
@@ -168,9 +316,37 @@ self.addEventListener('message', event => {
         (async () => {
           await caches.delete(DYNAMIC_CACHE);
           await caches.delete(CACHE_NAME);
+          await clearAllStoredNotifications();
           broadcast('CACHE_CLEARED');
         })()
       );
+      break;
+
+    case 'GET_PENDING_NOTIFICATIONS':
+      event.waitUntil(
+        (async () => {
+          const notifications = await getStoredNotifications();
+          event.source.postMessage({ 
+            type: 'PENDING_NOTIFICATIONS', 
+            data: notifications 
+          });
+        })()
+      );
+      break;
+
+    case 'STORE_NOTIFICATION_OFFLINE':
+      event.waitUntil(
+        (async () => {
+          await storeNotificationForOffline(data);
+          event.source.postMessage({ 
+            type: 'NOTIFICATION_STORED' 
+          });
+        })()
+      );
+      break;
+
+    case 'DELIVER_STORED_NOTIFICATIONS':
+      event.waitUntil(deliverStoredNotifications());
       break;
 
     default:
