@@ -10,6 +10,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/contrib/auto-render.min.js"></script>
     
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     
@@ -19,6 +22,9 @@
             --text-color: #f1f5f9;
             --accent-color: #3b82f6;
             --secondary-color: #8b5cf6;
+            --success-color: #22c55e;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
         }
 
         * {
@@ -32,7 +38,9 @@
             background: var(--bg-color);
             color: var(--text-color);
             min-height: 100vh;
-            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
         }
 
         .gradient-text {
@@ -65,45 +73,41 @@
             box-shadow: 0 12px 40px rgba(2, 8, 32, 0.4);
         }
 
-        .math-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            border-radius: 20px;
-            overflow: hidden;
-            min-height: 90vh;
-        }
-
         .math-header {
             background: rgba(15, 23, 42, 0.9);
-            padding: 30px;
+            padding: 20px 30px;
             text-align: center;
             border-bottom: 1px solid rgba(59, 130, 246, 0.3);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
         .math-header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
+            font-size: 2.2em;
+            margin-bottom: 8px;
             font-weight: 600;
         }
 
         .math-header p {
             opacity: 0.8;
-            font-size: 1.2em;
+            font-size: 1.1em;
             color: #cbd5e1;
         }
 
         .math-content {
             display: flex;
-            height: calc(90vh - 160px);
+            flex: 1;
             gap: 20px;
             padding: 20px;
+            height: auto;
         }
 
         .sidebar {
-            width: 320px;
+            width: 280px;
             border-radius: 16px;
             padding: 20px;
             overflow-y: auto;
+            display: flex;
+            flex-direction: column;
         }
 
         .assignments-section h3 {
@@ -114,8 +118,9 @@
         }
 
         .assignment-list {
-            max-height: 400px;
+            flex: 1;
             overflow-y: auto;
+            margin-bottom: 20px;
         }
 
         .assignment-item {
@@ -169,6 +174,12 @@
         .message {
             margin-bottom: 25px;
             max-width: 85%;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .user-message {
@@ -313,6 +324,10 @@
             font-weight: 600;
             transition: all 0.3s ease;
             min-width: 110px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
 
         .send-button:hover:not(:disabled) {
@@ -334,6 +349,13 @@
             background: rgba(30, 41, 59, 0.6);
             border-radius: 14px;
             margin: 10px 0;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
         }
 
         .typing-dots {
@@ -364,12 +386,21 @@
             border-radius: 12px;
             padding: 16px;
             margin-bottom: 20px;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .current-assignment h4 {
             color: #22c55e;
             margin-bottom: 10px;
             font-size: 1.1em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .empty-state {
@@ -382,6 +413,13 @@
             font-size: 4em;
             margin-bottom: 20px;
             opacity: 0.7;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
         }
 
         .empty-state h3 {
@@ -403,6 +441,10 @@
             transition: all 0.3s ease;
             width: 100%;
             margin-top: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
 
         .control-button:hover {
@@ -424,6 +466,7 @@
         @media (max-width: 968px) {
             .math-content {
                 flex-direction: column;
+                overflow-y: scroll;
                 height: auto;
             }
             
@@ -437,7 +480,7 @@
             }
             
             body {
-                padding: 10px;
+                padding: 0;
             }
 
             .math-header h1 {
@@ -457,6 +500,14 @@
             
             .message {
                 max-width: 100%;
+            }
+            
+            .math-header {
+                padding: 15px 20px;
+            }
+            
+            .math-header h1 {
+                font-size: 1.8em;
             }
         }
 
@@ -490,82 +541,151 @@
             outline: 2px solid var(--accent-color);
             outline-offset: 2px;
         }
+        
+        /* Floating action button for mobile */
+        .mobile-fab {
+            display: none;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-color), var(--secondary-color));
+            color: white;
+            border: none;
+            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4);
+            cursor: pointer;
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            transition: all 0.3s ease;
+        }
+        
+        .mobile-fab:hover {
+            transform: scale(1.1);
+        }
+        
+        @media (max-width: 968px) {
+            .mobile-fab {
+                display: flex;
+            }
+            
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: -100%;
+                width: 320px;
+                height: 100vh;
+                z-index: 99;
+                transition: left 0.3s ease;
+            }
+            
+            .sidebar.active {
+                left: 0;
+            }
+            
+            .overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 98;
+            }
+            
+            .overlay.active {
+                display: block;
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="math-container glass-morph">
-        <div class="math-header">
-            <h1 class="gradient-text">Math Assignment Assistant</h1>
-            <p>Get step-by-step solutions and mathematical guidance</p>
-        </div>
+    <div class="math-header">
+        <h1 class="gradient-text"><i class="fas fa-square-root-alt"></i> Math Assignment Assistant</h1>
+        <p>Get step-by-step solutions and mathematical guidance</p>
+    </div>
 
-        <div class="math-content">
-            <!-- Sidebar with Assignments -->
-            <div class="sidebar glass-morph">
-                <div class="assignments-section">
-                    <h3>Your Assignments</h3>
-                    <div class="assignment-list" id="assignmentList">
-                        <!-- Assignments will be loaded here -->
-                    </div>
-                </div>
-
-                <div id="currentAssignment" class="current-assignment" style="display: none;">
-                    <h4>Selected Assignment</h4>
-                    <div id="assignmentDetails"></div>
-                </div>
-
-                <div class="chat-controls">
-                    <button class="control-button" onclick="loadAssignments()">
-                        🔄 Refresh Assignments
-                    </button>
-                    <button class="control-button danger" onclick="clearHistory()">
-                        🗑️ Clear History
-                    </button>
+    <div class="math-content">
+        <!-- Sidebar with Assignments -->
+        <div class="sidebar glass-morph">
+            <div class="assignments-section">
+                <h3><i class="fas fa-tasks"></i> Your Assignments</h3>
+                <div class="assignment-list" id="assignmentList">
+                    <!-- Assignments will be loaded here -->
                 </div>
             </div>
 
-            <!-- Main Chat Area -->
-            <div class="chat-area glass-morph">
-                <div class="chat-messages" id="chatMessages">
-                    <div class="empty-state" id="emptyState">
-                        <div class="icon">🧮</div>
-                        <h3>Welcome to Math Assistant</h3>
-                        <p>Select an assignment and start asking math questions!</p>
-                    </div>
-                </div>
+            <div id="currentAssignment" class="current-assignment" style="display: none;">
+                <h4><i class="fas fa-check-circle"></i> Selected Assignment</h4>
+                <div id="assignmentDetails"></div>
+            </div>
 
-                <div class="typing-indicator" id="typingIndicator">
-                    <div class="typing-dots">
-                        Math Assistant is thinking <span>.</span><span>.</span><span>.</span>
-                    </div>
-                </div>
+            <div class="chat-controls">
+                <button class="control-button" onclick="loadAssignments()">
+                    <i class="fas fa-sync-alt"></i> Refresh Assignments
+                </button>
+                <button class="control-button danger" onclick="clearHistory()">
+                    <i class="fas fa-trash"></i> Clear History
+                </button>
+            </div>
+        </div>
 
-                <div class="chat-input-container">
-                    <div class="chat-input-wrapper">
-                        <textarea 
-                            id="chatInput" 
-                            class="chat-input" 
-                            placeholder="Ask a math question or request step-by-step solution..."
-                            rows="1"
-                        ></textarea>
-                        <button id="sendButton" class="send-button" onclick="sendMessage()">
-                            Send
-                        </button>
-                    </div>
+        <!-- Main Chat Area -->
+        <div class="chat-area glass-morph">
+            <div class="chat-messages" id="chatMessages">
+                <div class="empty-state" id="emptyState">
+                    <div class="icon"><i class="fas fa-calculator"></i></div>
+                    <h3>Welcome to Math Assistant</h3>
+                    <p>Select an assignment and start asking math questions!</p>
+                </div>
+            </div>
+
+            <div class="typing-indicator" id="typingIndicator">
+                <div class="typing-dots">
+                    <i class="fas fa-robot"></i> Math Assistant is thinking <span>.</span><span>.</span><span>.</span>
+                </div>
+            </div>
+
+            <div class="chat-input-container">
+                <div class="chat-input-wrapper">
+                    <textarea 
+                        id="chatInput" 
+                        class="chat-input" 
+                        placeholder="Ask a math question or request step-by-step solution..."
+                        rows="1"
+                    ></textarea>
+                    <button id="sendButton" class="send-button" onclick="sendMessage()">
+                        <i class="fas fa-paper-plane"></i> Send
+                    </button>
                 </div>
             </div>
         </div>
     </div>
+    
+    <!-- Mobile Floating Action Button -->
+    <button class="mobile-fab" id="mobileFab">
+        <i class="fas fa-bars"></i>
+    </button>
+    
+    <!-- Mobile Overlay -->
+    <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
 
     <script>
         let currentAssignmentId = null;
         let isProcessing = false;
+        let isAutoScroll = true;
+        let mathElements = [];
 
         // Initialize when page loads
         document.addEventListener('DOMContentLoaded', function() {
             loadAssignments();
             loadChatHistory();
             setupEventListeners();
+            setupMobileUI();
         });
 
         function setupEventListeners() {
@@ -582,6 +702,30 @@
                 this.style.height = 'auto';
                 this.style.height = Math.min(this.scrollHeight, 120) + 'px';
             });
+            
+            // Check if user is scrolling manually
+            const chatMessages = document.getElementById('chatMessages');
+            chatMessages.addEventListener('scroll', function() {
+                const threshold = 100;
+                const position = chatMessages.scrollTop + chatMessages.clientHeight;
+                const height = chatMessages.scrollHeight;
+                
+                isAutoScroll = (height - position) <= threshold;
+            });
+        }
+        
+        function setupMobileUI() {
+            const mobileFab = document.getElementById('mobileFab');
+            const overlay = document.getElementById('overlay');
+            const sidebar = document.querySelector('.sidebar');
+            
+            mobileFab.addEventListener('click', toggleSidebar);
+            overlay.addEventListener('click', toggleSidebar);
+            
+            function toggleSidebar() {
+                sidebar.classList.toggle('active');
+                overlay.classList.toggle('active');
+            }
         }
 
         async function loadAssignments() {
@@ -605,18 +749,18 @@
             const assignmentList = document.getElementById('assignmentList');
             
             if (assignments.length === 0) {
-                assignmentList.innerHTML = '<div class="empty-state">No assignments found</div>';
+                assignmentList.innerHTML = '<div class="empty-state"><i class="fas fa-folder-open"></i><p>No assignments found</p></div>';
                 return;
             }
 
             assignmentList.innerHTML = assignments.map(assignment => `
                 <div class="assignment-item" onclick="selectAssignment(${assignment.id})" 
                      data-assignment-id="${assignment.id}">
-                    <div class="assignment-title">${assignment.title || 'Untitled Assignment'}</div>
+                    <div class="assignment-title"><i class="fas fa-file-alt"></i> ${assignment.title || 'Untitled Assignment'}</div>
                     <div class="assignment-meta">
-                        ${assignment.topic_name ? `📚 ${assignment.topic_name}` : ''}
-                        ${assignment.due_date ? `<br>⏰ Due: ${new Date(assignment.due_date).toLocaleDateString()}` : ''}
-                        ${assignment.has_file ? '<br>📎 Has attachment' : ''}
+                        ${assignment.topic_name ? `<i class="fas fa-book"></i> ${assignment.topic_name}` : ''}
+                        ${assignment.due_date ? `<br><i class="fas fa-clock"></i> Due: ${new Date(assignment.due_date).toLocaleDateString()}` : ''}
+                        ${assignment.has_file ? '<br><i class="fas fa-paperclip"></i> Has attachment' : ''}
                     </div>
                 </div>
             `).join('');
@@ -638,6 +782,11 @@
                     currentAssignmentId = assignmentId;
                     displayAssignmentDetails(data.assignment);
                     showNotification(`Selected: ${data.assignment.title || 'Assignment'}`, 'success');
+                    
+                    // Close sidebar on mobile after selection
+                    if (window.innerWidth <= 968) {
+                        toggleSidebar();
+                    }
                 }
             } catch (error) {
                 console.error('Error loading assignment details:', error);
@@ -653,9 +802,9 @@
                 <strong>${assignment.title || 'Untitled Assignment'}</strong>
                 <div style="margin-top: 12px; font-size: 0.95em; color: #cbd5e1;">
                     ${assignment.description ? `<p>${assignment.description}</p>` : ''}
-                    ${assignment.topic_name ? `<div>📚 ${assignment.topic_name}</div>` : ''}
-                    ${assignment.due_date ? `<div>⏰ Due: ${new Date(assignment.due_date).toLocaleDateString()}</div>` : ''}
-                    ${assignment.has_file ? `<div>📎 Contains attachment</div>` : ''}
+                    ${assignment.topic_name ? `<div><i class="fas fa-book"></i> ${assignment.topic_name}</div>` : ''}
+                    ${assignment.due_date ? `<div><i class="fas fa-clock"></i> Due: ${new Date(assignment.due_date).toLocaleDateString()}</div>` : ''}
+                    ${assignment.has_file ? `<div><i class="fas fa-paperclip"></i> Contains attachment</div>` : ''}
                 </div>
             `;
             
@@ -736,12 +885,15 @@
                             if (data && !data.includes('❌')) {
                                 aiResponse += data;
                                 updateLastMessage(aiResponse);
+                                
+                                // Render math dynamically during streaming
+                                renderMath();
                             }
                         }
                     }
                 }
 
-                // Render math after complete response
+                // Final render after complete response
                 renderMath();
                 showNotification('Response received', 'success');
 
@@ -776,7 +928,11 @@
             }
 
             chatMessages.appendChild(messageDiv);
-            scrollToBottom();
+            
+            // Only scroll to bottom if auto-scroll is enabled
+            if (isAutoScroll) {
+                scrollToBottom();
+            }
 
             if (!isStreaming) {
                 renderMath();
@@ -787,7 +943,11 @@
             const streamingMessage = document.getElementById('streamingMessage');
             if (streamingMessage) {
                 streamingMessage.querySelector('.message-content').innerHTML = formatContent(content);
-                scrollToBottom();
+                
+                // Only scroll to bottom if auto-scroll is enabled
+                if (isAutoScroll) {
+                    scrollToBottom();
+                }
             }
         }
 
@@ -821,20 +981,46 @@
         }
 
         function renderMath() {
-            // Render KaTeX
-            if (typeof renderMathInElement !== 'undefined') {
-                renderMathInElement(document.body, {
-                    delimiters: [
-                        {left: '$$', right: '$$', display: true},
-                        {left: '$', right: '$', display: false},
-                        {left: '\\(', right: '\\)', display: false},
-                        {left: '\\[', right: '\\]', display: true}
-                    ],
-                    throwOnError: false
+            // Clear previous math elements
+            mathElements.forEach(el => {
+                if (el._katexRendered) {
+                    el._katexRendered = false;
+                }
+            });
+            mathElements = [];
+            
+            // Find all elements with math content
+            const messageContents = document.querySelectorAll('.message-content');
+            messageContents.forEach(content => {
+                // Find inline math expressions
+                const inlineMatches = content.innerHTML.match(/\$([^$]+)\$/g) || [];
+                const displayMatches = content.innerHTML.match(/\$\$([^$]+)\$\$/g) || [];
+                
+                // Process math expressions
+                [...inlineMatches, ...displayMatches].forEach(match => {
+                    const isDisplay = match.startsWith('$$');
+                    const mathContent = match.replace(/\$/g, '');
+                    
+                    try {
+                        const mathSpan = document.createElement('span');
+                        mathSpan.className = isDisplay ? 'math-display' : 'math-inline';
+                        
+                        katex.render(mathContent, mathSpan, {
+                            displayMode: isDisplay,
+                            throwOnError: false,
+                            output: 'html'
+                        });
+                        
+                        content.innerHTML = content.innerHTML.replace(match, mathSpan.outerHTML);
+                        mathElements.push(mathSpan);
+                        mathSpan._katexRendered = true;
+                    } catch (e) {
+                        console.error('KaTeX rendering error:', e);
+                    }
                 });
-            }
-
-            // Render MathJax if available
+            });
+            
+            // Render with MathJax if available
             if (typeof MathJax !== 'undefined') {
                 MathJax.typesetPromise();
             }
@@ -842,7 +1028,9 @@
 
         function showTypingIndicator() {
             document.getElementById('typingIndicator').style.display = 'block';
-            scrollToBottom();
+            if (isAutoScroll) {
+                scrollToBottom();
+            }
         }
 
         function hideTypingIndicator() {
@@ -865,7 +1053,7 @@
                 
                 if (data.success) {
                     const chatMessages = document.getElementById('chatMessages');
-                    chatMessages.innerHTML = '<div class="empty-state" id="emptyState"><div class="icon">🧮</div><h3>Welcome to Math Assistant</h3><p>Select an assignment and start asking math questions!</p></div>';
+                    chatMessages.innerHTML = '<div class="empty-state" id="emptyState"><div class="icon"><i class="fas fa-calculator"></i></div><h3>Welcome to Math Assistant</h3><p>Select an assignment and start asking math questions!</p></div>';
                     showNotification('History cleared successfully', 'success');
                 } else {
                     showNotification('Failed to clear history', 'error');
@@ -874,6 +1062,13 @@
                 console.error('Error clearing history:', error);
                 showNotification('Error clearing history', 'error');
             }
+        }
+        
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.getElementById('overlay');
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
         }
 
         // Notification system
@@ -890,12 +1085,21 @@
                 z-index: 1000;
                 transform: translateX(100%);
                 transition: transform 0.3s ease;
+                display: flex;
+                align-items: center;
+                gap: 10px;
                 ${type === 'success' ? 'background: #22c55e;' : ''}
                 ${type === 'error' ? 'background: #ef4444;' : ''}
                 ${type === 'warning' ? 'background: #f59e0b;' : ''}
                 ${type === 'info' ? 'background: var(--accent-color);' : ''}
             `;
-            notification.textContent = message;
+            
+            let icon = 'fas fa-info-circle';
+            if (type === 'success') icon = 'fas fa-check-circle';
+            if (type === 'error') icon = 'fas fa-exclamation-circle';
+            if (type === 'warning') icon = 'fas fa-exclamation-triangle';
+            
+            notification.innerHTML = `<i class="${icon}"></i> ${message}`;
             document.body.appendChild(notification);
 
             // Animate in
