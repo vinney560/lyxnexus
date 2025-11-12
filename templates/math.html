@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Math Assignment Assistant - LyxNexus</title>
+    <title>Assignment Assistant | LyxNexus</title>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- Math Rendering Libraries -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css">
@@ -19,6 +22,18 @@
             --text-color: #f1f5f9;
             --accent-color: #3b82f6;
             --secondary-color: #8b5cf6;
+            --sidebar-width: 320px;
+
+            @media (max-width: 768px) {
+              --sidebar-width: 290px;
+            }
+
+            @media (max-width: 480px) {
+              --sidebar-width: 300px;
+            }
+
+            --header-height: 80px;
+            --input-height: 70px;
         }
 
         * {
@@ -31,8 +46,10 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: var(--bg-color);
             color: var(--text-color);
-            min-height: 100vh;
-            padding: 20px;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
         }
 
         .gradient-text {
@@ -65,45 +82,107 @@
             box-shadow: 0 12px 40px rgba(2, 8, 32, 0.4);
         }
 
-        .math-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            border-radius: 20px;
-            overflow: hidden;
-            min-height: 90vh;
-        }
-
         .math-header {
+            height: var(--header-height);
             background: rgba(15, 23, 42, 0.9);
-            padding: 30px;
-            text-align: center;
+            padding: 0 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
             border-bottom: 1px solid rgba(59, 130, 246, 0.3);
+            flex-shrink: 0;
         }
 
-        .math-header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
+        .header-left h1 {
+            font-size: 1.8em;
             font-weight: 600;
+            margin-bottom: 5px;
         }
 
-        .math-header p {
+        .header-left p {
             opacity: 0.8;
-            font-size: 1.2em;
+            font-size: 1em;
             color: #cbd5e1;
+        }
+
+        .header-right {
+            display: flex;
+            gap: 15px;
+        }
+
+        .header-button {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            color: var(--accent-color);
+            border-radius: 10px;
+            padding: 10px 15px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .header-button:hover {
+            background: rgba(59, 130, 246, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .header-button.danger {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: rgba(239, 68, 68, 0.3);
+            color: #ef4444;
+        }
+
+        .header-button.danger:hover {
+            background: rgba(239, 68, 68, 0.2);
         }
 
         .math-content {
             display: flex;
-            height: calc(90vh - 160px);
-            gap: 20px;
-            padding: 20px;
+            flex: 1;
+            height: calc(100vh - var(--header-height));
+            overflow: hidden;
         }
 
         .sidebar {
-            width: 320px;
-            border-radius: 16px;
+            width: var(--sidebar-width);
+            background: rgba(15, 23, 42, 0.8);
+            border-right: 1px solid rgba(59, 130, 246, 0.2);
             padding: 20px;
             overflow-y: auto;
+            flex-shrink: 0;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar.collapsed {
+            width: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        .toggle-sidebar {
+            position: absolute;
+            top: 90px;
+            left: var(--sidebar-width);
+            background: rgba(59, 130, 246, 0.8);
+            color: white;
+            border: none;
+            border-radius: 0 8px 8px 0;
+            width: 24px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-sidebar.collapsed {
+            left: 0;
         }
 
         .assignments-section h3 {
@@ -111,10 +190,13 @@
             margin-bottom: 20px;
             font-weight: 500;
             font-size: 1.3em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .assignment-list {
-            max-height: 400px;
+            max-height: calc(100vh - 300px);
             overflow-y: auto;
         }
 
@@ -126,6 +208,12 @@
             margin-bottom: 12px;
             cursor: pointer;
             transition: all 0.3s ease;
+            animation: slideIn 0.4s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
         }
 
         .assignment-item:hover {
@@ -151,11 +239,33 @@
             color: #94a3b8;
         }
 
+        .current-assignment {
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 20px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .current-assignment h4 {
+            color: #22c55e;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
         .chat-area {
             flex: 1;
             display: flex;
             flex-direction: column;
-            border-radius: 16px;
             overflow: hidden;
         }
 
@@ -164,11 +274,19 @@
             padding: 25px;
             overflow-y: auto;
             background: rgba(15, 23, 42, 0.6);
+            display: flex;
+            flex-direction: column;
         }
 
         .message {
             margin-bottom: 25px;
             max-width: 85%;
+            animation: messageAppear 0.4s ease;
+        }
+
+        @keyframes messageAppear {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .user-message {
@@ -269,6 +387,7 @@
             padding: 20px 25px;
             border-top: 1px solid rgba(59, 130, 246, 0.2);
             background: rgba(15, 23, 42, 0.8);
+            flex-shrink: 0;
         }
 
         .chat-input-wrapper {
@@ -313,6 +432,10 @@
             font-weight: 600;
             transition: all 0.3s ease;
             min-width: 110px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
 
         .send-button:hover:not(:disabled) {
@@ -334,6 +457,14 @@
             background: rgba(30, 41, 59, 0.6);
             border-radius: 14px;
             margin: 10px 0;
+            max-width: 200px;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
         }
 
         .typing-dots {
@@ -358,30 +489,28 @@
             30% { opacity: 1; }
         }
 
-        .current-assignment {
-            background: rgba(34, 197, 94, 0.1);
-            border: 1px solid rgba(34, 197, 94, 0.3);
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 20px;
-        }
-
-        .current-assignment h4 {
-            color: #22c55e;
-            margin-bottom: 10px;
-            font-size: 1.1em;
-        }
-
         .empty-state {
             text-align: center;
             color: #94a3b8;
             padding: 50px 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
         }
 
         .empty-state .icon {
             font-size: 4em;
             margin-bottom: 20px;
             opacity: 0.7;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
         }
 
         .empty-state h3 {
@@ -390,74 +519,36 @@
             font-size: 1.4em;
         }
 
-        /* Control buttons */
-        .control-button {
-            background: rgba(59, 130, 246, 0.1);
-            border: 1px solid rgba(59, 130, 246, 0.3);
-            color: var(--accent-color);
-            border-radius: 10px;
-            padding: 12px 20px;
+        /* Scroll to bottom button */
+        .scroll-to-bottom {
+            position: fixed;
+            bottom: 100px;
+            right: 30px;
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
             transition: all 0.3s ease;
-            width: 100%;
-            margin-top: 10px;
+            opacity: 0;
+            transform: translateY(20px);
+            z-index: 100;
         }
 
-        .control-button:hover {
-            background: rgba(59, 130, 246, 0.2);
-            transform: translateY(-1px);
+        .scroll-to-bottom.visible {
+            opacity: 1;
+            transform: translateY(0);
         }
 
-        .control-button.danger {
-            background: rgba(239, 68, 68, 0.1);
-            border-color: rgba(239, 68, 68, 0.3);
-            color: #ef4444;
-        }
-
-        .control-button.danger:hover {
-            background: rgba(239, 68, 68, 0.2);
-        }
-
-        /* Responsive Design */
-        @media (max-width: 968px) {
-            .math-content {
-                flex-direction: column;
-                height: auto;
-            }
-            
-            .sidebar {
-                width: 100%;
-                max-height: 400px;
-            }
-            
-            .message {
-                max-width: 95%;
-            }
-            
-            body {
-                padding: 10px;
-            }
-
-            .math-header h1 {
-                font-size: 2em;
-            }
-        }
-
-        @media (max-width: 640px) {
-            .math-content {
-                padding: 10px;
-                gap: 15px;
-            }
-            
-            .chat-messages {
-                padding: 15px;
-            }
-            
-            .message {
-                max-width: 100%;
-            }
+        .scroll-to-bottom:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.6);
         }
 
         /* Scrollbar Styling */
@@ -490,87 +581,171 @@
             outline: 2px solid var(--accent-color);
             outline-offset: 2px;
         }
+
+        /* Responsive Design */
+        @media (max-width: 968px) {
+            .sidebar {
+                position: absolute;
+                height: 100%;
+                z-index: 5;
+                box-shadow: 5px 0 15px rgba(0, 0, 0, 0.2);
+            }
+            
+            .sidebar:not(.collapsed) {
+                width: 100%;
+                max-width: 400px;
+            }
+            
+            .toggle-sidebar {
+                display: flex;
+            }
+            
+            .message {
+                max-width: 95%;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .math-header {
+                padding: 0 15px;
+                flex-direction: column;
+                height: auto;
+                padding: 15px;
+            }
+            
+            .header-left, .header-right {
+                width: 100%;
+            }
+            
+            .header-right {
+                margin-top: 10px;
+                justify-content: space-between;
+            }
+            
+            .header-button {
+                flex: 1;
+                justify-content: center;
+            }
+            
+            .chat-messages {
+                padding: 15px;
+            }
+            
+            .message {
+                max-width: 100%;
+            }
+            
+            .chat-input-container {
+                padding: 15px;
+            }
+            
+            .scroll-to-bottom {
+                bottom: 80px;
+                right: 15px;
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="math-container glass-morph">
-        <div class="math-header">
-            <h1 class="gradient-text">Math Assignment Assistant</h1>
+    <!-- Header -->
+    <div class="math-header">
+        <div class="header-left">
+            <h1 class="gradient-text">Doer</h1>
             <p>Get step-by-step solutions and mathematical guidance</p>
         </div>
+        <div class="header-right">
+            <button class="header-button" onclick="loadAssignments()">
+                <i class="fas fa-sync-alt"></i> Refresh
+            </button>
+            <button class="header-button danger" onclick="clearHistory()">
+                <i class="fas fa-trash"></i> Clear History
+            </button>
+        </div>
+    </div>
 
-        <div class="math-content">
-            <!-- Sidebar with Assignments -->
-            <div class="sidebar glass-morph">
-                <div class="assignments-section">
-                    <h3>Your Assignments</h3>
-                    <div class="assignment-list" id="assignmentList">
-                        <!-- Assignments will be loaded here -->
-                    </div>
-                </div>
+    <!-- Main Content -->
+    <div class="math-content">
+        <!-- Sidebar Toggle -->
+        <button class="toggle-sidebar" id="toggleSidebar">
+            <i class="fas fa-chevron-left" id="sidebarIcon"></i>
+        </button>
 
-                <div id="currentAssignment" class="current-assignment" style="display: none;">
-                    <h4>Selected Assignment</h4>
-                    <div id="assignmentDetails"></div>
-                </div>
-
-                <div class="chat-controls">
-                    <button class="control-button" onclick="loadAssignments()">
-                        🔄 Refresh Assignments
-                    </button>
-                    <button class="control-button danger" onclick="clearHistory()">
-                        🗑️ Clear History
-                    </button>
+        <!-- Sidebar with Assignments -->
+        <div class="sidebar" id="sidebar">
+            <div class="assignments-section">
+                <h3><i class="fas fa-tasks"></i> Your Assignments</h3>
+                <div class="assignment-list" id="assignmentList">
+                    <!-- Assignments will be loaded here -->
                 </div>
             </div>
 
-            <!-- Main Chat Area -->
-            <div class="chat-area glass-morph">
-                <div class="chat-messages" id="chatMessages">
-                    <div class="empty-state" id="emptyState">
-                        <div class="icon">🧮</div>
-                        <h3>Welcome to Math Assistant</h3>
-                        <p>Select an assignment and start asking math questions!</p>
-                    </div>
-                </div>
+            <div id="currentAssignment" class="current-assignment" style="display: none;">
+                <h4><i class="fas fa-check-circle"></i> Selected Assignment</h4>
+                <div id="assignmentDetails"></div>
+            </div>
+        </div>
 
-                <div class="typing-indicator" id="typingIndicator">
-                    <div class="typing-dots">
-                        Math Assistant is thinking <span>.</span><span>.</span><span>.</span>
+        <!-- Main Chat Area -->
+        <div class="chat-area">
+            <div class="chat-messages" id="chatMessages">
+                <div class="empty-state" id="emptyState">
+                    <div class="icon">
+                      <i class="fa-solid fa-calculator"></i>
                     </div>
-                </div>
 
-                <div class="chat-input-container">
-                    <div class="chat-input-wrapper">
-                        <textarea 
-                            id="chatInput" 
-                            class="chat-input" 
-                            placeholder="Ask a math question or request step-by-step solution..."
-                            rows="1"
-                        ></textarea>
-                        <button id="sendButton" class="send-button" onclick="sendMessage()">
-                            Send
-                        </button>
-                    </div>
+                    <h3>Welcome to Assignment Assistant</h3>
+                    <p>Select an assignment and start asking any questions!</p>
+                </div>
+            </div>
+
+            <div class="typing-indicator" id="typingIndicator">
+                <div class="typing-dots">
+                    <i class="fas fa-circle-notch fa-spin"></i> Doer is thinking <span>.</span><span>.</span><span>.</span>
+                </div>
+            </div>
+
+            <div class="chat-input-container">
+                <div class="chat-input-wrapper">
+                    <textarea 
+                        id="chatInput" 
+                        class="chat-input" 
+                        placeholder="Ask a math question or request step-by-step solution..."
+                        rows="1"
+                    ></textarea>
+                    <button id="sendButton" class="send-button" onclick="sendMessage()">
+                        <i class="fas fa-paper-plane"></i> Send
+                    </button>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Scroll to bottom button -->
+    <button class="scroll-to-bottom" id="scrollToBottom">
+        <i class="fas fa-arrow-down"></i>
+    </button>
+
     <script>
         let currentAssignmentId = null;
         let isProcessing = false;
+        let isSidebarCollapsed = false;
+        let isUserScrolling = false;
+        let scrollTimeout = null;
 
         // Initialize when page loads
         document.addEventListener('DOMContentLoaded', function() {
             loadAssignments();
             loadChatHistory();
             setupEventListeners();
+            setupScrollHandler();
         });
 
         function setupEventListeners() {
             const chatInput = document.getElementById('chatInput');
+            const toggleSidebar = document.getElementById('toggleSidebar');
+            const scrollToBottomBtn = document.getElementById('scrollToBottom');
             
+            // Chat input handling
             chatInput.addEventListener('keypress', function(e) {
                 if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();
@@ -582,6 +757,63 @@
                 this.style.height = 'auto';
                 this.style.height = Math.min(this.scrollHeight, 120) + 'px';
             });
+
+            // Sidebar toggle
+            toggleSidebar.addEventListener('click', function() {
+                toggleSidebarView();
+            });
+
+            // Scroll to bottom button
+            scrollToBottomBtn.addEventListener('click', function() {
+                scrollToBottom(true);
+            });
+        }
+
+        function setupScrollHandler() {
+            const chatMessages = document.getElementById('chatMessages');
+            const scrollToBottomBtn = document.getElementById('scrollToBottom');
+            
+            chatMessages.addEventListener('scroll', function() {
+                // Check if user is near the bottom
+                const isNearBottom = chatMessages.scrollHeight - chatMessages.scrollTop - chatMessages.clientHeight < 100;
+                
+                if (!isNearBottom) {
+                    // User is scrolling up, show the scroll to bottom button
+                    scrollToBottomBtn.classList.add('visible');
+                    isUserScrolling = true;
+                    
+                    // Clear any existing timeout
+                    if (scrollTimeout) clearTimeout(scrollTimeout);
+                    
+                    // Hide button after 3 seconds of inactivity
+                    scrollTimeout = setTimeout(() => {
+                        scrollToBottomBtn.classList.remove('visible');
+                        isUserScrolling = false;
+                    }, 3000);
+                } else {
+                    // User is at the bottom, hide the button
+                    scrollToBottomBtn.classList.remove('visible');
+                    isUserScrolling = false;
+                }
+            });
+        }
+
+        function toggleSidebarView() {
+            const sidebar = document.getElementById('sidebar');
+            const toggleBtn = document.getElementById('toggleSidebar');
+            const sidebarIcon = document.getElementById('sidebarIcon');
+            
+            isSidebarCollapsed = !isSidebarCollapsed;
+            
+            if (isSidebarCollapsed) {
+                sidebar.classList.add('collapsed');
+                toggleBtn.classList.add('collapsed');
+                sidebarIcon.className = 'fas fa-chevron-right';
+            } else {
+                sidebar.classList.remove('collapsed');
+                toggleBtn.classList.remove('collapsed');
+                sidebarIcon.className = 'fas fa-chevron-left';
+            }
         }
 
         async function loadAssignments() {
@@ -591,6 +823,7 @@
                 
                 if (data.success) {
                     displayAssignments(data.assignments);
+                    showNotification('Assignments loaded successfully', 'success');
                 } else {
                     console.error('Failed to load assignments');
                     showNotification('Failed to load assignments', 'error');
@@ -612,11 +845,13 @@
             assignmentList.innerHTML = assignments.map(assignment => `
                 <div class="assignment-item" onclick="selectAssignment(${assignment.id})" 
                      data-assignment-id="${assignment.id}">
-                    <div class="assignment-title">${assignment.title || 'Untitled Assignment'}</div>
+                    <div class="assignment-title">
+                        <i class="fas fa-file-alt"></i> ${assignment.title || 'Untitled Assignment'}
+                    </div>
                     <div class="assignment-meta">
-                        ${assignment.topic_name ? `📚 ${assignment.topic_name}` : ''}
-                        ${assignment.due_date ? `<br>⏰ Due: ${new Date(assignment.due_date).toLocaleDateString()}` : ''}
-                        ${assignment.has_file ? '<br>📎 Has attachment' : ''}
+                        ${assignment.topic_name ? `<div><i class="fas fa-book"></i> ${assignment.topic_name}</div>` : ''}
+                        ${assignment.due_date ? `<div><i class="fas fa-clock"></i> Due: ${new Date(assignment.due_date).toLocaleDateString()}</div>` : ''}
+                        ${assignment.has_file ? '<div><i class="fas fa-paperclip"></i> Has attachment</div>' : ''}
                     </div>
                 </div>
             `).join('');
@@ -653,9 +888,9 @@
                 <strong>${assignment.title || 'Untitled Assignment'}</strong>
                 <div style="margin-top: 12px; font-size: 0.95em; color: #cbd5e1;">
                     ${assignment.description ? `<p>${assignment.description}</p>` : ''}
-                    ${assignment.topic_name ? `<div>📚 ${assignment.topic_name}</div>` : ''}
-                    ${assignment.due_date ? `<div>⏰ Due: ${new Date(assignment.due_date).toLocaleDateString()}</div>` : ''}
-                    ${assignment.has_file ? `<div>📎 Contains attachment</div>` : ''}
+                    ${assignment.topic_name ? `<div><i class="fas fa-book"></i> ${assignment.topic_name}</div>` : ''}
+                    ${assignment.due_date ? `<div><i class="fas fa-clock"></i> Due: ${new Date(assignment.due_date).toLocaleDateString()}</div>` : ''}
+                    ${assignment.has_file ? `<div><i class="fas fa-paperclip"></i> Contains attachment</div>` : ''}
                 </div>
             `;
             
@@ -683,11 +918,12 @@
                 emptyState.style.display = 'none';
                 
                 conversations.reverse().forEach(conv => {
-                    addMessageToChat(conv.user_message, 'user');
-                    addMessageToChat(conv.ai_response, 'ai');
+                    addMessageToChat(conv.user_message, 'user', false);
+                    addMessageToChat(conv.ai_response, 'ai', false);
                 });
                 
-                scrollToBottom();
+                // Don't force scroll to bottom when loading history
+                // scrollToBottom();
             }
         }
 
@@ -709,7 +945,7 @@
             document.getElementById('sendButton').disabled = true;
 
             // Add user message to chat
-            addMessageToChat(message, 'user');
+            addMessageToChat(message, 'user', true);
 
             // Show typing indicator
             showTypingIndicator();
@@ -721,7 +957,7 @@
                 
                 let aiResponse = '';
                 hideTypingIndicator();
-                addMessageToChat('', 'ai', true); // Create empty AI message for streaming
+                const messageElement = addMessageToChat('', 'ai', true, true); // Create empty AI message for streaming
 
                 while (true) {
                     const { done, value } = await reader.read();
@@ -735,20 +971,31 @@
                             const data = line.slice(6);
                             if (data && !data.includes('❌')) {
                                 aiResponse += data;
-                                updateLastMessage(aiResponse);
+                                updateStreamingMessage(messageElement, aiResponse);
+                                
+                                // Render math dynamically as content streams
+                                renderMathInElement(messageElement, {
+                                    delimiters: [
+                                        {left: '$$', right: '$$', display: true},
+                                        {left: '$', right: '$', display: false},
+                                        {left: '\\(', right: '\\)', display: false},
+                                        {left: '\\[', right: '\\]', display: true}
+                                    ],
+                                    throwOnError: false
+                                });
                             }
                         }
                     }
                 }
 
-                // Render math after complete response
+                // Final math render after complete response
                 renderMath();
                 showNotification('Response received', 'success');
 
             } catch (error) {
                 console.error('Error streaming response:', error);
                 hideTypingIndicator();
-                addMessageToChat('Sorry, I encountered an error while processing your math question. Please try again.', 'ai');
+                addMessageToChat('Sorry, I encountered an error while processing your math question. Please try again.', 'ai', true);
                 showNotification('Error generating response', 'error');
             } finally {
                 isProcessing = false;
@@ -757,7 +1004,7 @@
             }
         }
 
-        function addMessageToChat(content, sender, isStreaming = false) {
+        function addMessageToChat(content, sender, animate = true, isStreaming = false) {
             const chatMessages = document.getElementById('chatMessages');
             const emptyState = document.getElementById('emptyState');
             
@@ -767,6 +1014,10 @@
 
             const messageDiv = document.createElement('div');
             messageDiv.className = `message ${sender}-message`;
+            if (!animate) {
+                messageDiv.style.animation = 'none';
+            }
+            
             messageDiv.innerHTML = `
                 <div class="message-content">${formatContent(content)}</div>
             `;
@@ -776,18 +1027,27 @@
             }
 
             chatMessages.appendChild(messageDiv);
-            scrollToBottom();
+            
+            // Only scroll to bottom if user is already at bottom or it's a new message
+            if (!isUserScrolling) {
+                scrollToBottom();
+            }
 
             if (!isStreaming) {
                 renderMath();
             }
+            
+            return messageDiv;
         }
 
-        function updateLastMessage(content) {
-            const streamingMessage = document.getElementById('streamingMessage');
-            if (streamingMessage) {
-                streamingMessage.querySelector('.message-content').innerHTML = formatContent(content);
-                scrollToBottom();
+        function updateStreamingMessage(messageElement, content) {
+            if (messageElement) {
+                messageElement.querySelector('.message-content').innerHTML = formatContent(content);
+                
+                // Only scroll to bottom if user is already at bottom
+                if (!isUserScrolling) {
+                    scrollToBottom();
+                }
             }
         }
 
@@ -842,16 +1102,23 @@
 
         function showTypingIndicator() {
             document.getElementById('typingIndicator').style.display = 'block';
-            scrollToBottom();
+            if (!isUserScrolling) {
+                scrollToBottom();
+            }
         }
 
         function hideTypingIndicator() {
             document.getElementById('typingIndicator').style.display = 'none';
         }
 
-        function scrollToBottom() {
-            const chatMessages = document.getElementById('chatMessages');
-            chatMessages.scrollTop = chatMessages.scrollHeight;
+        function scrollToBottom(force = false) {
+            if (force || !isUserScrolling) {
+                const chatMessages = document.getElementById('chatMessages');
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+                
+                // Hide scroll to bottom button when we scroll to bottom
+                document.getElementById('scrollToBottom').classList.remove('visible');
+            }
         }
 
         async function clearHistory() {

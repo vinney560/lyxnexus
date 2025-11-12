@@ -2567,6 +2567,44 @@
                 }, 1200);
             };
 
+            // Create Assignment Doer button
+            const DoerButton = document.createElement('button');
+            DoerButton.innerHTML = '<i class="fas fa-question-circle"></i> Assignment Doer';
+            DoerButton.style.cssText = `
+                padding: 15px 20px;
+                background: linear-gradient(135deg, #4facfe, #00f2fe);
+                color: white;
+                border: none;
+                border-radius: 8px;
+                font-size: 16px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 10px;
+            `;
+            
+            DoerButton.onmouseover = () => DoerButton.style.transform = 'translateY(-2px)';
+            DoerButton.onmouseout = () => DoerButton.style.transform = 'translateY(0)';
+            DoerButton.onclick = () => {
+                DoerButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Opening...';
+                setTimeout(() => {
+                    DoerButton.style.opacity = '0.5';
+                    window.location.href = '/math';
+                }, 200);
+                setTimeout(() => {
+                    DoerButton.style.opacity = '0';
+                }, 500);
+                setTimeout(() => {
+                    DoerButton.style.opacity = '1';
+                    DoerButton.innerHTML = '<i class="fas fa-question-circle"></i> Assignment Doer';
+                }, 2000);
+                setInterval(() => {
+                    window.location.href = '/math';
+                }, 1200);
+            };
+
             // Create close button
             const closeButton = document.createElement('button');
             closeButton.textContent = 'Close';
@@ -2589,6 +2627,7 @@
             // Assemble modal
             buttonsContainer.appendChild(marionButton);
             buttonsContainer.appendChild(novaButton);
+            buttonsContainer.appendChild(DoerButton);
             modalContent.appendChild(modalHeader);
             modalContent.appendChild(buttonsContainer);
             modalContent.appendChild(closeButton);
