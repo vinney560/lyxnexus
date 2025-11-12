@@ -596,13 +596,25 @@
             display: inline-block;
             margin: 0 2px;
         }
+        .btn-refresh {
+            background: var(--accent-color);
+            width: fit-content;
+            height: fit-content;
+            padding: 10px;
+            border-radius: 12px;
+            border: 1px solid var(--accent-color);
+            margin-top: 5px;
+        }
     </style>
 </head>
 <body>
     <div class="math-container glass-morph">
         <div class="math-header">
             <h1 class="gradient-text">Assignment DOER</h1>
-            <p>Get step-by-step solutions and guidance</p>
+            <p>Get step-by-step solutions and guidance.</p>
+            <small><span>*</span> Please do yourself a favour and refresh the page is you asked for a sln in math.</small>
+            <button class="control-button" id="refreshPage"><i class="fas fa-sync-alt"></i> Refresh Page</button>
+            <button class="control-button danger" id="backBtn"><i class="fas fa-arrow-left"></i> Back</button>
         </div>
 
         <div class="math-content">
@@ -1098,6 +1110,29 @@
                 setTimeout(() => notification.remove(), 300);
             }, 3000);
         }
+        refreshPage = document.getElementById('refreshPage');
+        refreshPage.addEventListener('click', () => {
+            refreshPage.innerHTML = '';
+            refreshPage.innerHTML = '<i class="fas fa-spin fa-spinner"></i> Refreshing...'
+            refreshPage.disabled = true;
+            setTimeout(() => {
+                loadChatHistory()
+                loadAssignments()
+            }, 200);
+            setTimeout(() => {
+                refreshPage.innerHTML = '<i class="fas fa-sync-alt"></i> Refresh Page';
+                refreshPage.disabled = false;
+            }, 1000);
+        });
+        
+        backBtn = document.getElementById('backBtn');
+        backBtn.addEventListener('click', () => {
+            backBtn.innerHTML = '<i class="fas fa-spin fa-spinner"></i> exiting...'
+            backBtn.disabled = true;
+        });
+        setTimeout(() => {
+            window.history.back(-1);
+        }, 500);
     </script>
 </body>
 </html>
