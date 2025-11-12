@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Math Assignment Assistant - LyxNexus</title>
+    <title>Assignment DOER - LyxNexus</title>
     
     <!-- Math Rendering Libraries -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css">
@@ -601,8 +601,8 @@
 <body>
     <div class="math-container glass-morph">
         <div class="math-header">
-            <h1 class="gradient-text">Math Assignment Assistant</h1>
-            <p>Get step-by-step solutions and mathematical guidance</p>
+            <h1 class="gradient-text">Assignment DOER</h1>
+            <p>Get step-by-step solutions and guidance</p>
         </div>
 
         <div class="math-content">
@@ -634,9 +634,11 @@
             <div class="chat-area glass-morph">
                 <div class="chat-messages" id="chatMessages">
                     <div class="empty-state" id="emptyState">
-                        <div class="icon">🧮</div>
-                        <h3>Welcome to Math Assistant</h3>
-                        <p>Select an assignment and start asking math questions!</p>
+                        <div class="icon">
+                          <i class="fas fa-calculator"></i>
+                        </div>
+                        <h3>Welcome to Assistant DOER</h3>
+                        <p>Select an assignment and start asking any questions!</p>
                     </div>
                 </div>
 
@@ -646,7 +648,7 @@
 
                 <div class="typing-indicator" id="typingIndicator">
                     <div class="typing-dots">
-                        <i class="fas fa-robot"></i> Math Assistant is thinking <span>.</span><span>.</span><span>.</span>
+                        <i class="fas fa-robot"></i> DOER is thinking <span>.</span><span>.</span><span>.</span>
                     </div>
                 </div>
 
@@ -655,7 +657,7 @@
                         <textarea 
                             id="chatInput" 
                             class="chat-input" 
-                            placeholder="Ask a math question or request step-by-step solution..."
+                            placeholder="Ask for solution..."
                             rows="1"
                         ></textarea>
                         <button id="sendButton" class="send-button" onclick="sendMessage()">
