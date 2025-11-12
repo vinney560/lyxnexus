@@ -2649,7 +2649,7 @@ from quizAI import _quiz_AI
 from db_fix import db_tools
 from storage import cloud_migration_bp
 from dashboard_bp import dashboard_bp
-from math import math_bp
+from math_bp import math_bp
 from test import test_routes
 from chloe import _chloe_ai
 
