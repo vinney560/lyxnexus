@@ -760,10 +760,11 @@ def generate_stream(prompt, history, user_context):
         print(f"Streaming error: {e}")
         yield "data: ❌ An error occurred while generating the response.\n\n"
 
+from flask import render_template
 @gemini_bp.route('/')
 @login_required
 def gemini_chat():
-    """Render the Gemini chat interface - returns raw data only"""
+    """Render the Gemini chat interface"""
     from app import db
     db_service = ReadOnlyDatabaseQueryService(db)
 
@@ -781,17 +782,8 @@ def gemini_chat():
         session['gemini_history'].append(conv['ai_response'])
     session.modified = True
 
-    # Return raw data - frontend handles all rendering
-    return jsonify({
-        'success': True,
-        'user': {
-            'username': current_user.username,
-            'id': current_user.id,
-            'is_admin': current_user.is_admin
-        },
-        'conversations': conversation_history,
-        'total_conversations': len(conversation_history)
-    })
+    # Return the HTML template - frontend will handle data loading via API
+    return render_template('ai_assist.html', current_user=current_user)
 
 @gemini_bp.route('/stream')
 @login_required
