@@ -14,6 +14,13 @@
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     
     <style>
+        :root {
+            --bg-color: #0f172a;
+            --text-color: #f1f5f9;
+            --accent-color: #3b82f6;
+            --secondary-color: #8b5cf6;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -22,56 +29,88 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--bg-color);
+            color: var(--text-color);
             min-height: 100vh;
             padding: 20px;
+        }
+
+        .gradient-text {
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent;
+            background-size: 200% auto;
+            animation: gradient-shift 3s ease infinite;
+        }
+        
+        @keyframes gradient-shift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .glass-morph {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            box-shadow: 0 8px 32px rgba(2, 8, 32, 0.3);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .glass-morph:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 40px rgba(2, 8, 32, 0.4);
         }
 
         .math-container {
             max-width: 1200px;
             margin: 0 auto;
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            border-radius: 20px;
             overflow: hidden;
             min-height: 90vh;
         }
 
         .math-header {
-            background: linear-gradient(135deg, #2c3e50, #34495e);
-            color: white;
-            padding: 25px 30px;
+            background: rgba(15, 23, 42, 0.9);
+            padding: 30px;
             text-align: center;
+            border-bottom: 1px solid rgba(59, 130, 246, 0.3);
         }
 
         .math-header h1 {
-            font-size: 2.2em;
-            margin-bottom: 8px;
-            font-weight: 300;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 600;
         }
 
         .math-header p {
-            opacity: 0.9;
-            font-size: 1.1em;
+            opacity: 0.8;
+            font-size: 1.2em;
+            color: #cbd5e1;
         }
 
         .math-content {
             display: flex;
-            height: calc(90vh - 140px);
+            height: calc(90vh - 160px);
+            gap: 20px;
+            padding: 20px;
         }
 
         .sidebar {
-            width: 300px;
-            background: #f8f9fa;
-            border-right: 1px solid #e9ecef;
+            width: 320px;
+            border-radius: 16px;
             padding: 20px;
             overflow-y: auto;
         }
 
         .assignments-section h3 {
-            color: #2c3e50;
-            margin-bottom: 15px;
+            color: var(--text-color);
+            margin-bottom: 20px;
             font-weight: 500;
+            font-size: 1.3em;
         }
 
         .assignment-list {
@@ -80,49 +119,51 @@
         }
 
         .assignment-item {
-            background: white;
-            border: 1px solid #e9ecef;
-            border-radius: 8px;
-            padding: 12px;
-            margin-bottom: 10px;
+            background: rgba(51, 65, 85, 0.6);
+            border: 1px solid rgba(100, 116, 139, 0.3);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
             cursor: pointer;
             transition: all 0.3s ease;
         }
 
         .assignment-item:hover {
-            border-color: #667eea;
+            border-color: var(--accent-color);
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+            background: rgba(59, 130, 246, 0.1);
         }
 
         .assignment-item.active {
-            border-color: #667eea;
-            background: #f0f4ff;
+            border-color: var(--accent-color);
+            background: rgba(59, 130, 246, 0.15);
         }
 
         .assignment-title {
             font-weight: 600;
-            color: #2c3e50;
-            margin-bottom: 5px;
+            color: var(--text-color);
+            margin-bottom: 8px;
+            font-size: 1.1em;
         }
 
         .assignment-meta {
-            font-size: 0.85em;
-            color: #6c757d;
+            font-size: 0.9em;
+            color: #94a3b8;
         }
 
         .chat-area {
             flex: 1;
             display: flex;
             flex-direction: column;
-            background: white;
+            border-radius: 16px;
+            overflow: hidden;
         }
 
         .chat-messages {
             flex: 1;
             padding: 25px;
             overflow-y: auto;
-            background: #fafbfc;
+            background: rgba(15, 23, 42, 0.6);
         }
 
         .message {
@@ -132,136 +173,151 @@
 
         .user-message {
             margin-left: auto;
-            background: linear-gradient(135deg, #667eea, #764ba2);
+            background: rgba(59, 130, 246, 0.9);
             color: white;
-            padding: 15px 20px;
-            border-radius: 18px 18px 5px 18px;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            padding: 18px 22px;
+            border-radius: 20px 20px 6px 20px;
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+            border: 1px solid rgba(59, 130, 246, 0.4);
         }
 
         .ai-message {
-            background: white;
-            border: 1px solid #e9ecef;
-            padding: 20px;
-            border-radius: 18px 18px 18px 5px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            background: rgba(255, 255, 255, 0.95);
+            color: #1e293b;
+            padding: 22px;
+            border-radius: 20px 20px 20px 6px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         .message-content {
-            line-height: 1.6;
+            line-height: 1.7;
+            font-size: 15px;
         }
 
         .message-content p {
-            margin-bottom: 10px;
+            margin-bottom: 12px;
         }
 
         .message-content ul, .message-content ol {
-            margin: 10px 0 10px 20px;
+            margin: 12px 0 12px 24px;
         }
 
         .message-content li {
-            margin-bottom: 5px;
+            margin-bottom: 6px;
         }
 
         .message-content code {
-            background: #f4f4f4;
-            padding: 2px 6px;
-            border-radius: 4px;
+            background: #f1f5f9;
+            color: #0f172a;
+            padding: 3px 8px;
+            border-radius: 6px;
             font-family: 'Courier New', monospace;
             font-size: 0.9em;
+            border: 1px solid #e2e8f0;
         }
 
         .message-content pre {
-            background: #2d2d2d;
-            color: #f8f8f2;
-            padding: 15px;
-            border-radius: 8px;
+            background: #1e293b;
+            color: #f8fafc;
+            padding: 18px;
+            border-radius: 10px;
             overflow-x: auto;
-            margin: 15px 0;
+            margin: 18px 0;
+            border: 1px solid #334155;
         }
 
         .message-content blockquote {
-            border-left: 4px solid #667eea;
-            padding-left: 15px;
-            margin: 15px 0;
-            color: #6c757d;
+            border-left: 4px solid var(--accent-color);
+            padding-left: 18px;
+            margin: 18px 0;
+            color: #64748b;
             font-style: italic;
         }
 
         /* Math specific styles */
         .math-expression {
-            margin: 15px 0;
+            margin: 18px 0;
             text-align: center;
         }
 
         .katex-display {
-            margin: 20px 0;
+            margin: 22px 0;
             overflow-x: auto;
             overflow-y: hidden;
         }
 
         .step-solution {
-            background: #f8f9fa;
-            border-left: 4px solid #28a745;
-            padding: 15px;
-            margin: 15px 0;
-            border-radius: 0 8px 8px 0;
+            background: rgba(34, 197, 94, 0.1);
+            border-left: 4px solid #22c55e;
+            padding: 18px;
+            margin: 18px 0;
+            border-radius: 0 10px 10px 0;
+            color: #1e293b;
         }
 
         .theorem {
-            background: #fff3cd;
-            border-left: 4px solid #ffc107;
-            padding: 15px;
-            margin: 15px 0;
-            border-radius: 0 8px 8px 0;
+            background: rgba(245, 158, 11, 0.1);
+            border-left: 4px solid #f59e0b;
+            padding: 18px;
+            margin: 18px 0;
+            border-radius: 0 10px 10px 0;
+            color: #1e293b;
         }
 
         .chat-input-container {
             padding: 20px 25px;
-            border-top: 1px solid #e9ecef;
-            background: white;
+            border-top: 1px solid rgba(59, 130, 246, 0.2);
+            background: rgba(15, 23, 42, 0.8);
         }
 
         .chat-input-wrapper {
             display: flex;
-            gap: 12px;
+            gap: 15px;
             align-items: flex-end;
         }
 
         .chat-input {
             flex: 1;
-            border: 2px solid #e9ecef;
-            border-radius: 12px;
-            padding: 15px 20px;
+            background: rgba(30, 41, 59, 0.8);
+            border: 2px solid rgba(59, 130, 246, 0.3);
+            border-radius: 14px;
+            padding: 16px 20px;
             font-size: 16px;
+            color: var(--text-color);
             resize: none;
             min-height: 60px;
             max-height: 120px;
             font-family: inherit;
-            transition: border-color 0.3s ease;
+            transition: all 0.3s ease;
         }
 
         .chat-input:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .chat-input::placeholder {
+            color: #94a3b8;
         }
 
         .send-button {
-            background: linear-gradient(135deg, #667eea, #764ba2);
+            background: linear-gradient(135deg, var(--accent-color), var(--secondary-color));
             color: white;
             border: none;
-            border-radius: 12px;
-            padding: 15px 25px;
+            border-radius: 14px;
+            padding: 16px 28px;
             cursor: pointer;
             font-size: 16px;
             font-weight: 600;
             transition: all 0.3s ease;
-            min-width: 100px;
+            min-width: 110px;
         }
 
         .send-button:hover:not(:disabled) {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
         }
 
         .send-button:disabled {
@@ -272,9 +328,12 @@
 
         .typing-indicator {
             display: none;
-            padding: 15px 20px;
-            color: #6c757d;
+            padding: 18px 22px;
+            color: #94a3b8;
             font-style: italic;
+            background: rgba(30, 41, 59, 0.6);
+            border-radius: 14px;
+            margin: 10px 0;
         }
 
         .typing-dots {
@@ -300,32 +359,69 @@
         }
 
         .current-assignment {
-            background: #e8f5e8;
-            border: 1px solid #28a745;
-            border-radius: 8px;
-            padding: 12px;
-            margin-bottom: 15px;
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 20px;
         }
 
         .current-assignment h4 {
-            color: #28a745;
-            margin-bottom: 8px;
+            color: #22c55e;
+            margin-bottom: 10px;
+            font-size: 1.1em;
         }
 
         .empty-state {
             text-align: center;
-            color: #6c757d;
-            padding: 40px 20px;
+            color: #94a3b8;
+            padding: 50px 20px;
         }
 
-        .empty-state i {
-            font-size: 3em;
-            margin-bottom: 15px;
-            opacity: 0.5;
+        .empty-state .icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+            opacity: 0.7;
+        }
+
+        .empty-state h3 {
+            color: var(--text-color);
+            margin-bottom: 10px;
+            font-size: 1.4em;
+        }
+
+        /* Control buttons */
+        .control-button {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            color: var(--accent-color);
+            border-radius: 10px;
+            padding: 12px 20px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .control-button:hover {
+            background: rgba(59, 130, 246, 0.2);
+            transform: translateY(-1px);
+        }
+
+        .control-button.danger {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: rgba(239, 68, 68, 0.3);
+            color: #ef4444;
+        }
+
+        .control-button.danger:hover {
+            background: rgba(239, 68, 68, 0.2);
         }
 
         /* Responsive Design */
-        @media (max-width: 768px) {
+        @media (max-width: 968px) {
             .math-content {
                 flex-direction: column;
                 height: auto;
@@ -333,7 +429,7 @@
             
             .sidebar {
                 width: 100%;
-                max-height: 300px;
+                max-height: 400px;
             }
             
             .message {
@@ -343,37 +439,69 @@
             body {
                 padding: 10px;
             }
+
+            .math-header h1 {
+                font-size: 2em;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .math-content {
+                padding: 10px;
+                gap: 15px;
+            }
+            
+            .chat-messages {
+                padding: 15px;
+            }
+            
+            .message {
+                max-width: 100%;
+            }
         }
 
         /* Scrollbar Styling */
         ::-webkit-scrollbar {
-            width: 6px;
+            width: 8px;
         }
 
         ::-webkit-scrollbar-track {
-            background: #f1f1f1;
+            background: rgba(30, 41, 59, 0.6);
+            border-radius: 4px;
         }
 
         ::-webkit-scrollbar-thumb {
-            background: #c1c1c1;
-            border-radius: 3px;
+            background: rgba(59, 130, 246, 0.4);
+            border-radius: 4px;
         }
 
         ::-webkit-scrollbar-thumb:hover {
-            background: #a8a8a8;
+            background: rgba(59, 130, 246, 0.6);
+        }
+
+        /* Selection color */
+        ::selection {
+            background: rgba(59, 130, 246, 0.3);
+            color: var(--text-color);
+        }
+
+        /* Focus styles */
+        button:focus, textarea:focus {
+            outline: 2px solid var(--accent-color);
+            outline-offset: 2px;
         }
     </style>
 </head>
 <body>
-    <div class="math-container">
+    <div class="math-container glass-morph">
         <div class="math-header">
-            <h1>Math Assignment Assistant</h1>
+            <h1 class="gradient-text">Math Assignment Assistant</h1>
             <p>Get step-by-step solutions and mathematical guidance</p>
         </div>
 
         <div class="math-content">
             <!-- Sidebar with Assignments -->
-            <div class="sidebar">
+            <div class="sidebar glass-morph">
                 <div class="assignments-section">
                     <h3>Your Assignments</h3>
                     <div class="assignment-list" id="assignmentList">
@@ -387,17 +515,20 @@
                 </div>
 
                 <div class="chat-controls">
-                    <button class="send-button" onclick="clearHistory()" style="background: #dc3545; margin-top: 10px; width: 100%;">
-                        Clear History
+                    <button class="control-button" onclick="loadAssignments()">
+                        🔄 Refresh Assignments
+                    </button>
+                    <button class="control-button danger" onclick="clearHistory()">
+                        🗑️ Clear History
                     </button>
                 </div>
             </div>
 
             <!-- Main Chat Area -->
-            <div class="chat-area">
+            <div class="chat-area glass-morph">
                 <div class="chat-messages" id="chatMessages">
                     <div class="empty-state" id="emptyState">
-                        <div>🧮</div>
+                        <div class="icon">🧮</div>
                         <h3>Welcome to Math Assistant</h3>
                         <p>Select an assignment and start asking math questions!</p>
                     </div>
@@ -462,9 +593,11 @@
                     displayAssignments(data.assignments);
                 } else {
                     console.error('Failed to load assignments');
+                    showNotification('Failed to load assignments', 'error');
                 }
             } catch (error) {
                 console.error('Error loading assignments:', error);
+                showNotification('Error loading assignments', 'error');
             }
         }
 
@@ -481,8 +614,9 @@
                      data-assignment-id="${assignment.id}">
                     <div class="assignment-title">${assignment.title || 'Untitled Assignment'}</div>
                     <div class="assignment-meta">
-                        ${assignment.topic_name ? `Topic: ${assignment.topic_name}` : ''}
-                        ${assignment.due_date ? ` • Due: ${new Date(assignment.due_date).toLocaleDateString()}` : ''}
+                        ${assignment.topic_name ? `📚 ${assignment.topic_name}` : ''}
+                        ${assignment.due_date ? `<br>⏰ Due: ${new Date(assignment.due_date).toLocaleDateString()}` : ''}
+                        ${assignment.has_file ? '<br>📎 Has attachment' : ''}
                     </div>
                 </div>
             `).join('');
@@ -503,9 +637,11 @@
                 if (data.success) {
                     currentAssignmentId = assignmentId;
                     displayAssignmentDetails(data.assignment);
+                    showNotification(`Selected: ${data.assignment.title || 'Assignment'}`, 'success');
                 }
             } catch (error) {
                 console.error('Error loading assignment details:', error);
+                showNotification('Error loading assignment details', 'error');
             }
         }
 
@@ -515,11 +651,11 @@
             
             details.innerHTML = `
                 <strong>${assignment.title || 'Untitled Assignment'}</strong>
-                <div style="margin-top: 8px; font-size: 0.9em;">
+                <div style="margin-top: 12px; font-size: 0.95em; color: #cbd5e1;">
                     ${assignment.description ? `<p>${assignment.description}</p>` : ''}
-                    ${assignment.topic_name ? `<div>Topic: ${assignment.topic_name}</div>` : ''}
-                    ${assignment.due_date ? `<div>Due: ${new Date(assignment.due_date).toLocaleDateString()}</div>` : ''}
-                    ${assignment.has_file ? `<div>📎 Has attachment</div>` : ''}
+                    ${assignment.topic_name ? `<div>📚 ${assignment.topic_name}</div>` : ''}
+                    ${assignment.due_date ? `<div>⏰ Due: ${new Date(assignment.due_date).toLocaleDateString()}</div>` : ''}
+                    ${assignment.has_file ? `<div>📎 Contains attachment</div>` : ''}
                 </div>
             `;
             
@@ -562,7 +698,7 @@
             if (!message || isProcessing) return;
 
             if (!currentAssignmentId) {
-                alert('Please select an assignment first.');
+                showNotification('Please select an assignment first.', 'warning');
                 return;
             }
 
@@ -607,11 +743,13 @@
 
                 // Render math after complete response
                 renderMath();
+                showNotification('Response received', 'success');
 
             } catch (error) {
                 console.error('Error streaming response:', error);
                 hideTypingIndicator();
-                addMessageToChat('Sorry, I encountered an error. Please try again.', 'ai');
+                addMessageToChat('Sorry, I encountered an error while processing your math question. Please try again.', 'ai');
+                showNotification('Error generating response', 'error');
             } finally {
                 isProcessing = false;
                 document.getElementById('sendButton').disabled = false;
@@ -676,6 +814,9 @@
             // Handle code blocks
             formatted = formatted.replace(/```(\w+)?\n([\s\S]*?)```/g, '<pre><code class="language-$1">$2</code></pre>');
             
+            // Handle step solutions
+            formatted = formatted.replace(/\*\*Step \d+:\*\*/g, '<div class="step-solution"><strong>$&</strong>');
+            
             return formatted;
         }
 
@@ -724,14 +865,47 @@
                 
                 if (data.success) {
                     const chatMessages = document.getElementById('chatMessages');
-                    chatMessages.innerHTML = '<div class="empty-state" id="emptyState"><div>🧮</div><h3>Welcome to Math Assistant</h3><p>Select an assignment and start asking math questions!</p></div>';
+                    chatMessages.innerHTML = '<div class="empty-state" id="emptyState"><div class="icon">🧮</div><h3>Welcome to Math Assistant</h3><p>Select an assignment and start asking math questions!</p></div>';
+                    showNotification('History cleared successfully', 'success');
                 } else {
-                    alert('Failed to clear history');
+                    showNotification('Failed to clear history', 'error');
                 }
             } catch (error) {
                 console.error('Error clearing history:', error);
-                alert('Error clearing history');
+                showNotification('Error clearing history', 'error');
             }
+        }
+
+        // Notification system
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 12px 20px;
+                border-radius: 10px;
+                color: white;
+                font-weight: 500;
+                z-index: 1000;
+                transform: translateX(100%);
+                transition: transform 0.3s ease;
+                ${type === 'success' ? 'background: #22c55e;' : ''}
+                ${type === 'error' ? 'background: #ef4444;' : ''}
+                ${type === 'warning' ? 'background: #f59e0b;' : ''}
+                ${type === 'info' ? 'background: var(--accent-color);' : ''}
+            `;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+
+            // Animate in
+            setTimeout(() => notification.style.transform = 'translateX(0)', 100);
+
+            // Remove after 3 seconds
+            setTimeout(() => {
+                notification.style.transform = 'translateX(100%)';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
         }
     </script>
 </body>

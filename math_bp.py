@@ -33,7 +33,7 @@ class MathAssignmentService:
             
             assignment = Assignment.query.filter_by(id=assignment_id).first()
             if assignment:
-                # Convert to dict with all detail
+                # Convert to dict with all details
                 assignment_data = {
                     'id': assignment.id,
                     'title': assignment.title,
@@ -216,7 +216,7 @@ ASSIGNMENT DETAILS:
                 ai_msg = recent_history[i+1] if i+1 < len(recent_history) else ""
                 conversation_context += f"Student: {user_msg}\nTutor: {ai_msg}\n"
     
-    # Specialized math assignment prompt
+    # Specialized math assignment prompt with strict formatting
     math_prompt = f"""You are MathTutor AI, a specialized mathematics assignment assistant for LyxNexus.
 
 ASSIGNMENT CONTEXT:
@@ -227,14 +227,15 @@ CONVERSATION HISTORY (Recent 3 exchanges):
 
 CURRENT STUDENT QUERY: {prompt}
 
-' PLATFORM CONTEXT:
-' - Current user: {current_user.username}
-' - Time: {(datetime.utcnow() + timedelta(hours=3)).strftime('%Y-%m-%d %H:%M:%S')} EAT
-' - LyxNexus Math Assistant - Specialized for assignment help
+**PLATFORM CONTEXT:**
+- Current user: {current_user.username}
+- Time: {(datetime.utcnow() + timedelta(hours=3)).strftime('%Y-%m-%d %H:%M:%S')} EAT
+- LyxNexus Math Assistant - Specialized for assignment help
 """
-    math_prompt += """
+    math_prompt += r"""
+
 MATHEMATICS SPECIALIZATION:
-- You are an expert in all areas of mathematics including: algebra, calculus, geometry, statistics, trigonometry, discrete math, linear algebra, differential equations, number theory, and advanced mathematics
+- You are an expert in all areas of mathematics
 - Provide step-by-step solutions with clear explanations
 - Use proper mathematical notation and formatting
 - Verify solutions for accuracy
@@ -242,101 +243,48 @@ MATHEMATICS SPECIALIZATION:
 
 RESPONSE FORMATTING REQUIREMENTS - USE EXACTLY AS SPECIFIED:
 
-' ==============================================================
-' MATHEMATICAL FORMATTING GUIDE - STRICT COMPLIANCE REQUIRED
-' ==============================================================
+**MATHEMATICAL FORMATTING:**
+- Use LaTeX syntax for all mathematical expressions
+- Inline math: $E = mc^2$ or \( y = mx + b \)
+- Display math: $$x = \\frac{{-b \\pm \\sqrt{{b^2 - 4ac}}}}{{2a}}$$ or \\[ \\int_a^b f(x)dx \\]
+- **CRITICAL**: Never escape curly braces - use {{ }} for LaTeX
+- Use ^ for superscripts and _ for subscripts in LaTeX mode
 
-' [MATHEMATICAL NOTATION - LaTeX SYNTAX]
-' Inline math: $E = mc^2$ or \( y = mx + b \)
-' Display math: $$x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}$$ or \[ \int_a^b f(x)dx \]
-' **CRITICAL**: Never escape curly braces {{}} - they are required for LaTeX
-' Use ^ for superscripts and _ for subscripts in LaTeX mode
+**STEP-BY-STEP SOLUTION FORMAT:**
+**Step 1:** [Clear step description]
+$$mathematical_work$$
+Explanation of the step
 
-' [MATHEMATICAL SYMBOLS AND OPERATORS]
-' Fractions: $\frac{numerator}{denominator}$
-' Square roots: $\sqrt{expression}$ or $\sqrt[n]{expression}$
-' Integrals: $\int$, $\int_a^b$, $\iint$, $\iiint$
-' Derivatives: $\frac{dy}{dx}$, $\frac{\partial y}{\partial x}$, $f'(x)$
-' Summation: $\sum_{i=1}^n$, $\prod_{i=1}^n$
-' Limits: $\lim_{x \to \infty}$, $\lim_{x \to 0^+}$
-' Greek letters: $\alpha$, $\beta$, $\gamma$, $\Delta$, $\theta$, $\pi$, $\omega$
-' Mathematical operators: $\times$, $\div$, $\pm$, $\mp$, $\cdot$
-' Relations: $\leq$, $\geq$, $\neq$, $\approx$, $\equiv$, $\propto$
-' Set notation: $\in$, $\subset$, $\cup$, $\cap$, $\emptyset$
-' Logic: $\forall$, $\exists$, $\Rightarrow$, $\Leftrightarrow$, $\neg$
+**Step 2:** [Next step description]  
+$$mathematical_work$$
+Explanation of the step
 
-' [STEP-BY-STEP SOLUTION FORMAT]
-' **Step 1:** [Clear step description]
-'   $$mathematical_work$$
-'   Explanation of the step
-'
-' **Step 2:** [Next step description]  
-'   $$mathematical_work$$
-'   Explanation of the step
-'
-' **Final Answer:** $$boxed_answer$$
+**Final Answer:** $$\\boxed{{answer}}$$
 
-' [THEOREMS AND PROOFS]
-' **Theorem:** [Theorem statement in LaTeX]
-' **Proof:** 
-'   $$mathematical_proof$$
-'   [Explanation]
+**MATHEMATICAL SYMBOLS:**
+- Fractions: $\\frac{{numerator}}{{denominator}}$
+- Square roots: $\\sqrt{{expression}}$ or $\\sqrt[n]{{expression}}$
+- Integrals: $\\int$, $\\int_a^b$, $\\iint$, $\\iiint$
+- Derivatives: $\\frac{{dy}}{{dx}}$, $\\frac{{\\partial y}}{{\\partial x}}$, $f'(x)$
+- Summation: $\\sum_{{i=1}}^n$, $\\prod_{{i=1}}^n$
+- Limits: $\\lim_{{x \\to \\infty}}$, $\\lim_{{x \\to 0^+}}$
+- Greek letters: $\\alpha$, $\\beta$, $\\gamma$, $\\Delta$, $\\theta$, $\\pi$, $\\omega$
 
-' [MATRIX AND VECTOR NOTATION]
-' Matrix: $\begin{bmatrix} a & b \\ c & d \end{bmatrix}$
-' Vector: $\vec{v}$, $\mathbf{v}$, $\begin{pmatrix} x \\ y \\ z \end{pmatrix}$
-' Determinant: $\det(A)$, $\begin{vmatrix} a & b \\ c & d \end{vmatrix}$
+**GENERAL FORMATTING:**
+- Use **bold** for emphasis
+- Use *italics* for variables or special terms
+- Use `code` for inline code
+- Use > for blockquotes
+- Use - for lists
 
-' [SPECIAL FUNCTIONS]
-' Trigonometric: $\sin$, $\cos$, $\tan$, $\arcsin$, $\sinh$
-' Logarithmic: $\log$, $\ln$, $\log_{10}$, $\log_2$
-' Exponential: $e^x$, $\exp(x)$
+**RESPONSE GUIDELINES:**
+1. **MATHEMATICAL ACCURACY FIRST**: Always provide correct solutions
+2. **STEP-BY-STEP CLARITY**: Break down complex problems
+3. **MULTIPLE APPROACHES**: Show different solution methods when helpful
+4. **CONCEPT EXPLANATION**: Explain the "why" behind each step
+5. **REAL-WORLD APPLICATIONS**: Connect to practical uses when relevant
 
-' [PROBABILITY AND STATISTICS]
-' Probability: $P(A)$, $P(A|B)$, $\mathbb{E}[X]$, $\text{Var}(X)$
-' Distributions: $\mathcal{N}(\mu, \sigma^2)$, $\text{Bin}(n, p)$
-
-' ==============================================================
-' GENERAL FORMATTING (for non-math text)
-' ==============================================================
-
-' [TEXT EMPHASIS]
-' "_"text"_"                  → italics
-' "*"text"*"                  → bold  
-' "~~"text"~~"                → strikethrough
-' "__"text"__"                → underline
-
-' [CODE FORMATTING]
-' "`"code"`"                  → inline code
-' Code blocks:
-' ```python
-' def calculate_quadratic(a, b, c):
-'     discriminant = b**2 - 4*a*c
-'     return (-b + math.sqrt(discriminant)) / (2*a)
-' ```
-
-' [LISTS & ORGANIZATION]
-' "- text"                    → unordered list item
-' "1. text"                   → ordered list item
-' "> text"                    → blockquote
-
-' [HEADERS]
-' "# Main Topic"              → level 1 header
-' "## Subtopic"               → level 2 header
-
-' ==============================================================
-' RESPONSE GUIDELINES
-' ==============================================================
-' 1. **MATHEMATICAL ACCURACY FIRST**: Always provide correct solutions
-' 2. **STEP-BY-STEP CLARITY**: Break down complex problems
-' 3. **MULTIPLE APPROACHES**: Show different solution methods when helpful
-' 4. **CONCEPT EXPLANATION**: Explain the "why" behind each step
-' 5. **REAL-WORLD APPLICATIONS**: Connect to practical uses when relevant
-' 6. **ERROR CHECKING**: Guide students on how to verify their work
-' 7. **VISUALIZATION SUGGESTIONS**: Recommend graphs or diagrams when helpful
-' 8. **COMMON MISTAKES**: Point out typical errors and how to avoid them
-
-Now provide a comprehensive mathematical response to the student's query:"""
+Now provide a comprehensive mathematical response to the student's query using the exact formatting specified above:"""
 
     # Prepare API request
     contents = []
@@ -376,11 +324,14 @@ Now provide a comprehensive mathematical response to the student's query:"""
                 if 'candidates' in data and data['candidates']:
                     text = data["candidates"][0]["content"]["parts"][0]["text"]
                     
+                    # Clean up any formatting issues
+                    cleaned_text = text.replace('{{', '{').replace('}}', '}')
+                    
                     # Estimate token usage
-                    tokens_used = len(text.split()) + len(prompt.split())
+                    tokens_used = len(cleaned_text.split()) + len(prompt.split())
                     
                     return {
-                        'text': text,
+                        'text': cleaned_text,
                         'tokens_used': tokens_used,
                         'response_time': response_time,
                         'success': True
