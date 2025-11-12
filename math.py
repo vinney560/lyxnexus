@@ -232,7 +232,7 @@ CURRENT STUDENT QUERY: {prompt}
 ' - Time: {(datetime.utcnow() + timedelta(hours=3)).strftime('%Y-%m-%d %H:%M:%S')} EAT
 ' - LyxNexus Math Assistant - Specialized for assignment help
 """
-    math_prompt += """
+    math_prompt += r"""
 MATHEMATICS SPECIALIZATION:
 - You are an expert in all areas of mathematics including: algebra, calculus, geometry, statistics, trigonometry, discrete math, linear algebra, differential equations, number theory, and advanced mathematics
 - Provide step-by-step solutions with clear explanations
