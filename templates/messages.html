@@ -1216,7 +1216,6 @@
         border-color: rgba(59, 130, 246, 0.5);
     }
 
-    /* New features styles */
     .swipe-indicator {
         position: absolute;
         top: 0;
@@ -1242,21 +1241,25 @@
     
     .context-menu {
         position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) scale(0.8); 
+        opacity: 0; 
         background: var(--sidebar-bg);
         border: 1px solid rgba(59, 130, 246, 0.3);
         border-radius: 12px;
         padding: 8px 0;
         z-index: 1000;
         box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
-        transform: scale(0);
-        transition: transform 0.2s ease;
+        transition: transform 0.2s ease, opacity 0.2s ease;
         min-width: 180px;
     }
-    
+
     .context-menu.show {
-        transform: scale(1);
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1; 
     }
-    
+
     .context-menu-item {
         padding: 10px 16px;
         cursor: pointer;
@@ -1351,6 +1354,97 @@
         border-radius: 8px;
         font-size: 0.7em;
     }
+
+    /* Selection mode styles */
+    .select-mode-btn {
+        background: transparent;
+        border: none;
+        color: #94a3b8;
+        font-size: 1.1em;
+        cursor: pointer;
+        transition: color 0.2s;
+        padding: 5px;
+        border-radius: 5px;
+    }
+
+    .select-mode-btn:hover {
+        color: #3b82f6;
+    }
+
+    .select-mode-btn.active {
+        color: #3b82f6;
+        background: rgba(59, 130, 246, 0.1);
+    }
+
+    .selection-toolbar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: var(--sidebar-bg);
+        padding: 15px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-top: 1px solid rgba(59, 130, 246, 0.3);
+        transform: translateY(100%);
+        transition: transform 0.3s ease;
+        z-index: 90;
+    }
+
+    .selection-toolbar.show {
+        transform: translateY(0);
+    }
+
+    .selection-info {
+        font-size: 0.9em;
+        color: #94a3b8;
+    }
+
+    .selection-actions {
+        display: flex;
+        gap: 10px;
+    }
+
+    .selection-btn {
+        background: transparent;
+        border: 1px solid #3b82f6;
+        color: #3b82f6;
+        padding: 8px 15px;
+        border-radius: 20px;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-size: 0.9em;
+    }
+
+    .selection-btn:hover {
+        background: #3b82f6;
+        color: white;
+    }
+
+    .selection-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    .selection-btn:disabled:hover {
+        background: transparent;
+        color: #3b82f6;
+    }
+
+    .selection-btn.delete {
+        border-color: #ef4444;
+        color: #ef4444;
+    }
+
+    .selection-btn.delete:hover {
+        background: #ef4444;
+        color: white;
+    }
+
+    .selection-mode .message {
+        cursor: pointer;
+    }
 </style>
 <body>
     <header class="glass-morph sticky top-0 z-50">
@@ -1370,6 +1464,9 @@
                     {% if unread_count > 0 %}
                     <span class="unread-badge">{{ unread_count }}</span>
                     {% endif %}
+                    <button class="select-mode-btn" id="selectModeBtn">
+                        <i class="fas fa-check-square"></i>
+                    </button>
                     <button id="backBtn" class="btn-outline">
                         <i class="fas fa-arrow-left mr-2"></i>
                     </button>
@@ -1574,6 +1671,17 @@
         <i class="fas fa-arrow-down"></i>
     </button>
 
+    <!-- Selection Toolbar -->
+    <div class="selection-toolbar" id="selectionToolbar">
+        <div class="selection-info" id="selectionInfo">0 messages selected</div>
+        <div class="selection-actions">
+            <button class="selection-btn" id="replySelectedBtn">Reply</button>
+            <button class="selection-btn" id="copySelectedBtn">Copy</button>
+            <button class="selection-btn delete" id="deleteSelectedBtn">Delete</button>
+            <button class="selection-btn" id="cancelSelectionBtn">Cancel</button>
+        </div>
+    </div>
+
     <script>
         const socket = io({
             reconnection: true,
@@ -1607,6 +1715,15 @@
         const loadingIndicator = document.getElementById('loadingIndicator');
         const networkOptimization = document.getElementById('networkOptimization');
         
+        // Selection mode elements
+        const selectModeBtn = document.getElementById('selectModeBtn');
+        const selectionToolbar = document.getElementById('selectionToolbar');
+        const selectionInfo = document.getElementById('selectionInfo');
+        const replySelectedBtn = document.getElementById('replySelectedBtn');
+        const copySelectedBtn = document.getElementById('copySelectedBtn');
+        const deleteSelectedBtn = document.getElementById('deleteSelectedBtn');
+        const cancelSelectionBtn = document.getElementById('cancelSelectionBtn');
+        
         let currentRoom = 'general';
         let onlineUsers = {};
         let typingTimer;
@@ -1631,6 +1748,114 @@
             lazyLoading: true,
             prefetching: true
         };
+
+        // Selection mode variables
+        let isSelectionMode = false;
+
+        // Selection mode functions
+        function toggleSelectionMode() {
+            isSelectionMode = !isSelectionMode;
+            if (isSelectionMode) {
+                document.body.classList.add('selection-mode');
+                selectionToolbar.classList.add('show');
+                selectModeBtn.classList.add('active');
+                updateSelectionInfo();
+            } else {
+                cancelSelectionMode();
+            }
+        }
+
+        function cancelSelectionMode() {
+            isSelectionMode = false;
+            document.body.classList.remove('selection-mode');
+            selectionToolbar.classList.remove('show');
+            selectModeBtn.classList.remove('active');
+            selectedMessages.clear();
+            document.querySelectorAll('.message.selected').forEach(msg => {
+                msg.classList.remove('selected');
+            });
+        }
+
+        function toggleMessageSelection(messageId) {
+            const messageElement = document.querySelector(`[data-message-id="${messageId}"]`);
+            if (!messageElement) return;
+            
+            if (selectedMessages.has(messageId)) {
+                selectedMessages.delete(messageId);
+                messageElement.classList.remove('selected');
+            } else {
+                selectedMessages.add(messageId);
+                messageElement.classList.add('selected');
+            }
+            
+            updateSelectionInfo();
+        }
+
+        function updateSelectionInfo() {
+            const count = selectedMessages.size;
+            selectionInfo.textContent = `${count} message${count !== 1 ? 's' : ''} selected`;
+            
+            // Enable/disable buttons based on selection
+            replySelectedBtn.disabled = count === 0;
+            copySelectedBtn.disabled = count === 0;
+            deleteSelectedBtn.disabled = count === 0;
+        }
+
+        // Selection actions
+        function replyToSelectedMessages() {
+            if (selectedMessages.size === 0) return;
+            
+            // For now, reply to the first selected message
+            const firstMessageId = Array.from(selectedMessages)[0];
+            const messageElement = document.querySelector(`[data-message-id="${firstMessageId}"]`);
+            
+            if (messageElement) {
+                const username = messageElement.querySelector('.username').textContent;
+                const content = messageElement.querySelector('.message-content').textContent;
+                
+                startReply({
+                    id: parseInt(firstMessageId),
+                    username: username,
+                    content: content
+                });
+                
+                cancelSelectionMode();
+            }
+        }
+
+        function copySelectedMessages() {
+            if (selectedMessages.size === 0) return;
+            
+            let textToCopy = '';
+            selectedMessages.forEach(messageId => {
+                const messageElement = document.querySelector(`[data-message-id="${messageId}"]`);
+                if (messageElement) {
+                    const username = messageElement.querySelector('.username').textContent;
+                    const content = messageElement.querySelector('.message-content').textContent;
+                    const timestamp = messageElement.querySelector('.timestamp').textContent;
+                    textToCopy += `[${timestamp}] ${username}: ${content}\n`;
+                }
+            });
+            
+            navigator.clipboard.writeText(textToCopy.trim()).then(() => {
+                showToast('Selected messages copied to clipboard');
+                cancelSelectionMode();
+            });
+        }
+
+        function deleteSelectedMessages() {
+            if (selectedMessages.size === 0) return;
+            
+            if (!confirm(`Are you sure you want to delete ${selectedMessages.size} message${selectedMessages.size !== 1 ? 's' : ''}?`)) {
+                return;
+            }
+            
+            selectedMessages.forEach(messageId => {
+                deleteMessage(messageId);
+            });
+            
+            cancelSelectionMode();
+        }
 
         // Network optimization functions
         function enableNetworkOptimizations() {
@@ -1867,6 +2092,7 @@
             let startX, startY, distX, distY;
             const swipeThreshold = 50;
             const messageId = messageElement.dataset.messageId;
+            let isLongPress = false;
             
             messageElement.addEventListener('touchstart', function(e) {
                 const touch = e.touches[0];
@@ -1875,9 +2101,11 @@
                 swipeStartX = startX;
                 swipeStartY = startY;
                 isSwiping = false;
+                isLongPress = false;
                 
                 // Start long press timer for context menu
                 longPressTimer = setTimeout(() => {
+                    isLongPress = true;
                     showContextMenu(startX, startY, messageId);
                 }, 500);
             }, { passive: true });
@@ -1928,6 +2156,20 @@
                 distY = 0;
                 isSwiping = false;
             }, { passive: true });
+            
+            // Regular click/tap behavior
+            messageElement.addEventListener('click', function(e) {
+                // Only handle clicks that aren't on action buttons
+                if (!e.target.closest('.message-actions') && !isLongPress && !isSwiping) {
+                    if (isSelectionMode) {
+                        // In selection mode - toggle selection
+                        toggleMessageSelection(messageId);
+                    } else {
+                        // Regular mode - just do nothing or focus input
+                        messageInput.focus();
+                    }
+                }
+            });
             
             // Right-click for context menu on desktop
             messageElement.addEventListener('contextmenu', function(e) {
@@ -2881,6 +3123,13 @@
                 switchRoom(this.dataset.room);
             });
         });
+
+        // Selection mode event listeners
+        selectModeBtn.addEventListener('click', toggleSelectionMode);
+        replySelectedBtn.addEventListener('click', replyToSelectedMessages);
+        copySelectedBtn.addEventListener('click', copySelectedMessages);
+        deleteSelectedBtn.addEventListener('click', deleteSelectedMessages);
+        cancelSelectionBtn.addEventListener('click', cancelSelectionMode);
         
         document.addEventListener('DOMContentLoaded', function() {
             document.querySelectorAll('.message-action-btn.reply').forEach(btn => {
