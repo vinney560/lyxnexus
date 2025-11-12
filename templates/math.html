@@ -587,7 +587,7 @@
             outline-offset: 2px;
         }
 
-        /* Math rendering improvements */
+        /* Math rendering */
         .katex, .mjx-math {
             font-size: 1.1em !important;
         }
@@ -596,6 +596,7 @@
             display: inline-block;
             margin: 0 2px;
         }
+        /* refreshPage mock btn */
         .btn-refresh {
             background: var(--accent-color);
             width: fit-content;
@@ -686,7 +687,30 @@
         let isProcessing = false;
         let isNearBottom = true;
         let mathRenderInterval = null;
+        // Manual Load since automatic refresh chat is not working
+        const refreshPage = document.getElementById('refreshPage');
+        refreshPage.addEventListener('click', () => {
+            refreshPage.innerHTML = '';
+            refreshPage.innerHTML = '<i class="fas fa-spin fa-spinner"></i> Refreshing...'
+            refreshPage.disabled = true;
+            setTimeout(() => {
+                loadChatHistory()
+                loadAssignments()
+            }, 200);
+            setTimeout(() => {
+                refreshPage.innerHTML = '<i class="fas fa-sync-alt"></i> Refresh Page';
+                refreshPage.disabled = false;
+            }, 1000);
+        });
 
+        const backBtn = document.getElementById('backBtn');
+        backBtn.addEventListener('click', () => {
+            backBtn.innerHTML = '<i class="fas fa-spin fa-spinner"></i> exiting...'
+            backBtn.disabled = true;
+            setTimeout(() => {
+                window.history.back();
+            }, 500);
+        });
         // Initialize when page loads
         document.addEventListener('DOMContentLoaded', function() {
             loadAssignments();
@@ -1110,29 +1134,6 @@
                 setTimeout(() => notification.remove(), 300);
             }, 3000);
         }
-        refreshPage = document.getElementById('refreshPage');
-        refreshPage.addEventListener('click', () => {
-            refreshPage.innerHTML = '';
-            refreshPage.innerHTML = '<i class="fas fa-spin fa-spinner"></i> Refreshing...'
-            refreshPage.disabled = true;
-            setTimeout(() => {
-                loadChatHistory()
-                loadAssignments()
-            }, 200);
-            setTimeout(() => {
-                refreshPage.innerHTML = '<i class="fas fa-sync-alt"></i> Refresh Page';
-                refreshPage.disabled = false;
-            }, 1000);
-        });
-        
-        backBtn = document.getElementById('backBtn');
-        backBtn.addEventListener('click', () => {
-            backBtn.innerHTML = '<i class="fas fa-spin fa-spinner"></i> exiting...'
-            backBtn.disabled = true;
-        });
-        setTimeout(() => {
-            window.history.back(-1);
-        }, 500);
     </script>
 </body>
 </html>
