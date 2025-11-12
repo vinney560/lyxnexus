@@ -22,9 +22,22 @@
             --text-color: #f1f5f9;
             --accent-color: #3b82f6;
             --secondary-color: #8b5cf6;
-            --sidebar-width: 100%;
-            --header-height: 70px;
+            --sidebar-width: 320px;
+            --header-height: 80px;
             --input-height: 70px;
+        }
+
+        @media (max-width: 768px) {
+            :root {
+                --sidebar-width: min(90vw, 400px);
+            }
+        }
+
+        @media (max-width: 480px) {
+            :root {
+                --sidebar-width: 100vw;
+                --header-height: auto;
+            }
         }
 
         * {
@@ -41,6 +54,7 @@
             overflow: hidden;
             display: flex;
             flex-direction: column;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .gradient-text {
@@ -76,46 +90,45 @@
         .math-header {
             height: var(--header-height);
             background: rgba(15, 23, 42, 0.9);
-            padding: 0 15px;
+            padding: 0 30px;
             display: flex;
             align-items: center;
             justify-content: space-between;
             border-bottom: 1px solid rgba(59, 130, 246, 0.3);
             flex-shrink: 0;
-            position: relative;
-            z-index: 20;
         }
 
         .header-left h1 {
-            font-size: 1.5em;
+            font-size: 1.8em;
             font-weight: 600;
-            margin-bottom: 2px;
+            margin-bottom: 5px;
         }
 
         .header-left p {
             opacity: 0.8;
-            font-size: 0.85em;
+            font-size: 1em;
             color: #cbd5e1;
         }
 
         .header-right {
             display: flex;
-            gap: 10px;
+            gap: 15px;
         }
 
         .header-button {
             background: rgba(59, 130, 246, 0.1);
             border: 1px solid rgba(59, 130, 246, 0.3);
             color: var(--accent-color);
-            border-radius: 8px;
-            padding: 8px 12px;
+            border-radius: 10px;
+            padding: 10px 15px;
             cursor: pointer;
-            font-size: 12px;
+            font-size: 14px;
             font-weight: 500;
             transition: all 0.3s ease;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
+            min-width: fit-content;
         }
 
         .header-button:hover {
@@ -138,37 +151,34 @@
             flex: 1;
             height: calc(100vh - var(--header-height));
             overflow: hidden;
-            position: relative;
         }
 
         .sidebar {
-            position: fixed;
-            top: var(--header-height);
-            left: 0;
             width: var(--sidebar-width);
-            height: calc(100vh - var(--header-height));
-            background: rgba(15, 23, 42, 0.95);
+            background: rgba(15, 23, 42, 0.8);
             border-right: 1px solid rgba(59, 130, 246, 0.2);
-            padding: 15px;
+            padding: 20px;
             overflow-y: auto;
-            z-index: 15;
-            transform: translateX(-100%);
-            transition: transform 0.3s ease;
+            flex-shrink: 0;
+            transition: all 0.3s ease;
         }
 
-        .sidebar.active {
-            transform: translateX(0);
+        .sidebar.collapsed {
+            width: 0;
+            padding: 0;
+            overflow: hidden;
+            border-right: none;
         }
 
         .toggle-sidebar {
-            position: fixed;
-            top: calc(var(--header-height) + 15px);
-            left: 15px;
-            background: rgba(59, 130, 246, 0.9);
+            position: absolute;
+            top: 90px;
+            left: var(--sidebar-width);
+            background: rgba(59, 130, 246, 0.8);
             color: white;
             border: none;
-            border-radius: 8px;
-            width: 40px;
+            border-radius: 0 8px 8px 0;
+            width: 24px;
             height: 40px;
             display: flex;
             align-items: center;
@@ -176,17 +186,20 @@
             cursor: pointer;
             z-index: 10;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .toggle-sidebar.collapsed {
+            left: 0;
         }
 
         .assignments-section h3 {
             color: var(--text-color);
-            margin-bottom: 15px;
+            margin-bottom: 20px;
             font-weight: 500;
-            font-size: 1.2em;
+            font-size: 1.3em;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
         }
 
         .assignment-list {
@@ -197,9 +210,9 @@
         .assignment-item {
             background: rgba(51, 65, 85, 0.6);
             border: 1px solid rgba(100, 116, 139, 0.3);
-            border-radius: 10px;
-            padding: 12px;
-            margin-bottom: 10px;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
             cursor: pointer;
             transition: all 0.3s ease;
             animation: slideIn 0.4s ease;
@@ -224,21 +237,21 @@
         .assignment-title {
             font-weight: 600;
             color: var(--text-color);
-            margin-bottom: 6px;
-            font-size: 1em;
+            margin-bottom: 8px;
+            font-size: 1.1em;
         }
 
         .assignment-meta {
-            font-size: 0.85em;
+            font-size: 0.9em;
             color: #94a3b8;
         }
 
         .current-assignment {
             background: rgba(34, 197, 94, 0.1);
             border: 1px solid rgba(34, 197, 94, 0.3);
-            border-radius: 10px;
-            padding: 12px;
-            margin-bottom: 15px;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 20px;
             animation: fadeIn 0.5s ease;
         }
 
@@ -249,11 +262,11 @@
 
         .current-assignment h4 {
             color: #22c55e;
-            margin-bottom: 8px;
-            font-size: 1em;
+            margin-bottom: 10px;
+            font-size: 1.1em;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
         }
 
         .chat-area {
@@ -262,22 +275,20 @@
             flex-direction: column;
             overflow: hidden;
             position: relative;
-            width: 100%;
         }
 
         .chat-messages {
             flex: 1;
-            padding: 15px;
+            padding: 25px;
             overflow-y: auto;
             background: rgba(15, 23, 42, 0.6);
             display: flex;
             flex-direction: column;
-            padding-bottom: 80px;
         }
 
         .message {
-            margin-bottom: 20px;
-            max-width: 95%;
+            margin-bottom: 25px;
+            max-width: 85%;
             animation: messageAppear 0.4s ease;
         }
 
@@ -290,75 +301,74 @@
             margin-left: auto;
             background: rgba(59, 130, 246, 0.9);
             color: white;
-            padding: 14px 18px;
-            border-radius: 18px 18px 6px 18px;
-            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.3);
+            padding: 18px 22px;
+            border-radius: 20px 20px 6px 20px;
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
             border: 1px solid rgba(59, 130, 246, 0.4);
         }
 
         .ai-message {
             background: rgba(255, 255, 255, 0.95);
             color: #1e293b;
-            padding: 18px;
-            border-radius: 18px 18px 18px 6px;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+            padding: 22px;
+            border-radius: 20px 20px 20px 6px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         .message-content {
-            line-height: 1.6;
-            font-size: 14px;
+            line-height: 1.7;
+            font-size: 15px;
         }
 
         .message-content p {
-            margin-bottom: 10px;
+            margin-bottom: 12px;
         }
 
         .message-content ul, .message-content ol {
-            margin: 10px 0 10px 20px;
+            margin: 12px 0 12px 24px;
         }
 
         .message-content li {
-            margin-bottom: 5px;
+            margin-bottom: 6px;
         }
 
         .message-content code {
             background: #f1f5f9;
             color: #0f172a;
-            padding: 2px 6px;
-            border-radius: 5px;
+            padding: 3px 8px;
+            border-radius: 6px;
             font-family: 'Courier New', monospace;
-            font-size: 0.85em;
+            font-size: 0.9em;
             border: 1px solid #e2e8f0;
         }
 
         .message-content pre {
             background: #1e293b;
             color: #f8fafc;
-            padding: 14px;
-            border-radius: 8px;
+            padding: 18px;
+            border-radius: 10px;
             overflow-x: auto;
-            margin: 14px 0;
+            margin: 18px 0;
             border: 1px solid #334155;
-            font-size: 0.9em;
         }
 
         .message-content blockquote {
             border-left: 4px solid var(--accent-color);
-            padding-left: 14px;
-            margin: 14px 0;
+            padding-left: 18px;
+            margin: 18px 0;
             color: #64748b;
             font-style: italic;
         }
 
         /* Math specific styles */
         .math-expression {
-            margin: 14px 0;
+            margin: 18px 0;
             text-align: center;
         }
 
         .katex-display {
-            margin: 18px 0;
+            margin: 22px 0;
             overflow-x: auto;
             overflow-y: hidden;
         }
@@ -366,36 +376,34 @@
         .step-solution {
             background: rgba(34, 197, 94, 0.1);
             border-left: 4px solid #22c55e;
-            padding: 14px;
-            margin: 14px 0;
-            border-radius: 0 8px 8px 0;
+            padding: 18px;
+            margin: 18px 0;
+            border-radius: 0 10px 10px 0;
             color: #1e293b;
         }
 
         .theorem {
             background: rgba(245, 158, 11, 0.1);
             border-left: 4px solid #f59e0b;
-            padding: 14px;
-            margin: 14px 0;
-            border-radius: 0 8px 8px 0;
+            padding: 18px;
+            margin: 18px 0;
+            border-radius: 0 10px 10px 0;
             color: #1e293b;
         }
 
         .chat-input-container {
-            padding: 15px;
+            padding: 20px 25px;
             border-top: 1px solid rgba(59, 130, 246, 0.2);
-            background: rgba(15, 23, 42, 0.95);
+            background: rgba(15, 23, 42, 0.9);
             flex-shrink: 0;
-            position: fixed;
+            position: sticky;
             bottom: 0;
-            left: 0;
-            right: 0;
-            z-index: 10;
+            z-index: 5;
         }
 
         .chat-input-wrapper {
             display: flex;
-            gap: 10px;
+            gap: 15px;
             align-items: flex-end;
         }
 
@@ -403,13 +411,13 @@
             flex: 1;
             background: rgba(30, 41, 59, 0.8);
             border: 2px solid rgba(59, 130, 246, 0.3);
-            border-radius: 12px;
-            padding: 14px 16px;
-            font-size: 15px;
+            border-radius: 14px;
+            padding: 16px 20px;
+            font-size: 16px;
             color: var(--text-color);
             resize: none;
-            min-height: 50px;
-            max-height: 100px;
+            min-height: 60px;
+            max-height: 120px;
             font-family: inherit;
             transition: all 0.3s ease;
         }
@@ -428,22 +436,22 @@
             background: linear-gradient(135deg, var(--accent-color), var(--secondary-color));
             color: white;
             border: none;
-            border-radius: 12px;
-            padding: 14px 20px;
+            border-radius: 14px;
+            padding: 16px 28px;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 16px;
             font-weight: 600;
             transition: all 0.3s ease;
-            min-width: 90px;
+            min-width: 110px;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 6px;
+            gap: 8px;
         }
 
         .send-button:hover:not(:disabled) {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
         }
 
         .send-button:disabled {
@@ -454,13 +462,13 @@
 
         .typing-indicator {
             display: none;
-            padding: 14px 18px;
+            padding: 18px 22px;
             color: #94a3b8;
             font-style: italic;
             background: rgba(30, 41, 59, 0.6);
-            border-radius: 12px;
-            margin: 8px 0;
-            max-width: 180px;
+            border-radius: 14px;
+            margin: 10px 0;
+            max-width: 200px;
             animation: pulse 1.5s infinite;
         }
 
@@ -495,7 +503,7 @@
         .empty-state {
             text-align: center;
             color: #94a3b8;
-            padding: 40px 15px;
+            padding: 50px 20px;
             flex: 1;
             display: flex;
             flex-direction: column;
@@ -504,40 +512,40 @@
         }
 
         .empty-state .icon {
-            font-size: 3em;
-            margin-bottom: 15px;
+            font-size: 4em;
+            margin-bottom: 20px;
             opacity: 0.7;
             animation: bounce 2s infinite;
         }
 
         @keyframes bounce {
             0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-            40% { transform: translateY(-8px); }
-            60% { transform: translateY(-4px); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
         }
 
         .empty-state h3 {
             color: var(--text-color);
-            margin-bottom: 8px;
-            font-size: 1.2em;
+            margin-bottom: 10px;
+            font-size: 1.4em;
         }
 
         /* Scroll to bottom button */
         .scroll-to-bottom {
             position: fixed;
-            bottom: 80px;
-            right: 15px;
+            bottom: 100px;
+            right: 30px;
             background: var(--accent-color);
             color: white;
             border: none;
             border-radius: 50%;
-            width: 45px;
-            height: 45px;
+            width: 50px;
+            height: 50px;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
             transition: all 0.3s ease;
             opacity: 0;
             transform: translateY(20px);
@@ -551,22 +559,22 @@
 
         .scroll-to-bottom:hover {
             transform: translateY(-5px);
-            box-shadow: 0 6px 16px rgba(59, 130, 246, 0.6);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.6);
         }
 
         /* Scrollbar Styling */
         ::-webkit-scrollbar {
-            width: 6px;
+            width: 8px;
         }
 
         ::-webkit-scrollbar-track {
             background: rgba(30, 41, 59, 0.6);
-            border-radius: 3px;
+            border-radius: 4px;
         }
 
         ::-webkit-scrollbar-thumb {
             background: rgba(59, 130, 246, 0.4);
-            border-radius: 3px;
+            border-radius: 4px;
         }
 
         ::-webkit-scrollbar-thumb:hover {
@@ -585,84 +593,353 @@
             outline-offset: 2px;
         }
 
-        /* Mobile menu overlay */
-        .sidebar-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 12;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s ease;
+        /* Responsive Design */
+        @media (max-width: 968px) {
+            .sidebar {
+                position: fixed;
+                height: 100%;
+                z-index: 5;
+                box-shadow: 5px 0 15px rgba(0, 0, 0, 0.2);
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+            
+            .sidebar:not(.collapsed) {
+                transform: translateX(0);
+                width: var(--sidebar-width);
+                max-width: 400px;
+            }
+            
+            .toggle-sidebar {
+                display: flex;
+            }
+            
+            .message {
+                max-width: 90%;
+            }
+            
+            /* Fix for when sidebar is collapsed on mobile */
+            .sidebar.collapsed {
+                transform: translateX(-100%);
+                width: 0;
+                padding: 0;
+                overflow: hidden;
+            }
+
+            .assignment-list {
+                max-height: calc(100vh - 250px);
+            }
         }
 
-        .sidebar-overlay.active {
-            opacity: 1;
-            visibility: visible;
+        @media (max-width: 768px) {
+            .math-header {
+                padding: 0 20px;
+            }
+            
+            .header-left h1 {
+                font-size: 1.6em;
+            }
+            
+            .header-left p {
+                font-size: 0.9em;
+            }
+            
+            .chat-messages {
+                padding: 20px;
+            }
+            
+            .message {
+                max-width: 88%;
+            }
         }
 
-        /* Assignment selector in header for mobile */
-        .assignment-selector {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            background: rgba(15, 23, 42, 0.95);
-            border-bottom: 1px solid rgba(59, 130, 246, 0.3);
-            padding: 10px 15px;
-            z-index: 18;
-            transform: translateY(-100%);
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s ease;
+        @media (max-width: 640px) {
+            .math-header {
+                padding: 15px 20px;
+                height: auto;
+                min-height: 80px;
+                flex-direction: row;
+                align-items: flex-start;
+            }
+            
+            .header-left {
+                flex: 1;
+            }
+            
+            .header-right {
+                flex-wrap: wrap;
+                justify-content: flex-end;
+                gap: 10px;
+                margin-top: 0;
+            }
+            
+            .header-button {
+                padding: 8px 12px;
+                font-size: 13px;
+                min-width: auto;
+                flex: none;
+            }
+            
+            .header-left h1 {
+                font-size: 1.5em;
+                margin-bottom: 4px;
+            }
+            
+            .header-left p {
+                font-size: 0.85em;
+            }
+            
+            .chat-messages {
+                padding: 15px;
+                padding-bottom: 100px;
+            }
+            
+            .message {
+                max-width: 92%;
+                margin-bottom: 20px;
+            }
+            
+            .user-message, .ai-message {
+                padding: 14px 18px;
+            }
+            
+            .message-content {
+                font-size: 14px;
+                line-height: 1.6;
+            }
+            
+            .chat-input-container {
+                padding: 15px;
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                z-index: 10;
+                background: rgba(15, 23, 42, 0.95);
+                backdrop-filter: blur(10px);
+            }
+            
+            .chat-input-wrapper {
+                gap: 10px;
+            }
+            
+            .chat-input {
+                padding: 14px 16px;
+                min-height: 54px;
+                font-size: 15px;
+            }
+            
+            .send-button {
+                padding: 14px 20px;
+                min-width: 90px;
+                font-size: 15px;
+            }
+            
+            .scroll-to-bottom {
+                bottom: 90px;
+                right: 20px;
+                width: 45px;
+                height: 45px;
+            }
+            
+            .toggle-sidebar {
+                top: 85px;
+                z-index: 15;
+            }
+            
+            .empty-state {
+                padding: 30px 15px;
+            }
+            
+            .empty-state .icon {
+                font-size: 3em;
+            }
+            
+            .empty-state h3 {
+                font-size: 1.2em;
+            }
+            
+            .assignment-list {
+                max-height: calc(100vh - 220px);
+            }
         }
 
-        .assignment-selector.active {
-            transform: translateY(0);
-            opacity: 1;
-            visibility: visible;
+        @media (max-width: 480px) {
+            .math-header {
+                padding: 12px 15px;
+                flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
+            }
+            
+            .header-left, .header-right {
+                width: 100%;
+            }
+            
+            .header-right {
+                justify-content: space-between;
+            }
+            
+            .header-button {
+                flex: 1;
+                justify-content: center;
+                padding: 10px 8px;
+                font-size: 12px;
+            }
+            
+            .header-left h1 {
+                font-size: 1.4em;
+                text-align: center;
+            }
+            
+            .header-left p {
+                text-align: center;
+                font-size: 0.8em;
+            }
+            
+            .chat-messages {
+                padding: 12px;
+                padding-bottom: 100px;
+            }
+            
+            .message {
+                max-width: 95%;
+            }
+            
+            .user-message, .ai-message {
+                padding: 12px 16px;
+                border-radius: 16px;
+            }
+            
+            .message-content {
+                font-size: 13px;
+            }
+            
+            .chat-input-container {
+                padding: 12px;
+            }
+            
+            .chat-input {
+                padding: 12px 14px;
+                min-height: 50px;
+                font-size: 14px;
+                border-radius: 12px;
+            }
+            
+            .send-button {
+                padding: 12px 16px;
+                min-width: 80px;
+                font-size: 14px;
+                border-radius: 12px;
+            }
+            
+            .scroll-to-bottom {
+                bottom: 85px;
+                right: 15px;
+                width: 40px;
+                height: 40px;
+            }
+            
+            .toggle-sidebar {
+                top: 75px;
+                width: 20px;
+                height: 35px;
+            }
+            
+            .sidebar:not(.collapsed) {
+                width: 100vw;
+            }
+            
+            .assignment-item {
+                padding: 14px;
+                margin-bottom: 10px;
+            }
+            
+            .assignment-title {
+                font-size: 1em;
+            }
+            
+            .assignment-meta {
+                font-size: 0.85em;
+            }
+            
+            .current-assignment {
+                padding: 14px;
+                margin-bottom: 15px;
+            }
+            
+            .empty-state {
+                padding: 20px 10px;
+            }
+            
+            .empty-state .icon {
+                font-size: 2.5em;
+            }
+            
+            .empty-state h3 {
+                font-size: 1.1em;
+            }
+            
+            .empty-state p {
+                font-size: 0.9em;
+            }
         }
 
-        .assignment-selector-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
+        @media (max-width: 360px) {
+            .header-button {
+                padding: 8px 6px;
+                font-size: 11px;
+                gap: 4px;
+            }
+            
+            .header-button i {
+                font-size: 12px;
+            }
+            
+            .chat-input-wrapper {
+                gap: 8px;
+            }
+            
+            .send-button {
+                min-width: 70px;
+                padding: 10px 12px;
+                font-size: 13px;
+            }
+            
+            .message {
+                max-width: 98%;
+            }
         }
 
-        .assignment-selector-header h3 {
-            font-size: 1.1em;
-            color: var(--text-color);
-        }
-
-        .close-selector {
-            background: none;
-            border: none;
-            color: var(--text-color);
-            font-size: 1.2em;
-            cursor: pointer;
-        }
-
-        /* Hide desktop-specific elements */
-        .toggle-sidebar.desktop {
-            display: none;
-        }
-
-        /* Ensure all elements are properly sized for mobile */
-        .header-left, .header-right {
-            width: auto;
-        }
-
-        .header-right {
-            margin-top: 0;
-            justify-content: flex-end;
-        }
-
-        .header-button {
-            flex: none;
+        /* Touch device improvements */
+        @media (hover: none) and (pointer: coarse) {
+            .header-button:hover {
+                transform: none;
+            }
+            
+            .assignment-item:hover {
+                transform: none;
+            }
+            
+            .send-button:hover:not(:disabled) {
+                transform: none;
+            }
+            
+            .scroll-to-bottom:hover {
+                transform: none;
+            }
+            
+            /* Larger tap targets for mobile */
+            .header-button,
+            .assignment-item,
+            .send-button {
+                min-height: 44px;
+            }
+            
+            .toggle-sidebar {
+                width: 44px;
+                height: 44px;
+            }
         }
     </style>
 </head>
@@ -670,42 +947,26 @@
     <!-- Header -->
     <div class="math-header">
         <div class="header-left">
-            <button class="header-button" id="mobileMenuToggle">
-                <i class="fas fa-bars"></i> Assignments
-            </button>
-            <div style="margin-left: 10px;">
-                <h1 class="gradient-text">Doer</h1>
-                <p>Math assignment assistant</p>
-            </div>
+            <h1 class="gradient-text">Doer</h1>
+            <p>Get step-by-step solutions and mathematical guidance</p>
         </div>
         <div class="header-right">
             <button class="header-button" onclick="loadAssignments()">
-                <i class="fas fa-sync-alt"></i>
+                <i class="fas fa-sync-alt"></i> Refresh
             </button>
             <button class="header-button danger" onclick="clearHistory()">
-                <i class="fas fa-trash"></i>
+                <i class="fas fa-trash"></i> Clear History
             </button>
-        </div>
-        
-        <!-- Mobile assignment selector -->
-        <div class="assignment-selector" id="assignmentSelector">
-            <div class="assignment-selector-header">
-                <h3>Select Assignment</h3>
-                <button class="close-selector" id="closeSelector">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="assignment-list" id="mobileAssignmentList">
-                <!-- Mobile assignments will be loaded here -->
-            </div>
         </div>
     </div>
 
-    <!-- Sidebar overlay for mobile -->
-    <div class="sidebar-overlay" id="sidebarOverlay"></div>
-
     <!-- Main Content -->
     <div class="math-content">
+        <!-- Sidebar Toggle -->
+        <button class="toggle-sidebar" id="toggleSidebar">
+            <i class="fas fa-chevron-left" id="sidebarIcon"></i>
+        </button>
+
         <!-- Sidebar with Assignments -->
         <div class="sidebar" id="sidebar">
             <div class="assignments-section">
@@ -764,7 +1025,7 @@
     <script>
         let currentAssignmentId = null;
         let isProcessing = false;
-        let isSidebarCollapsed = true;
+        let isSidebarCollapsed = false;
         let isUserScrolling = false;
         let scrollTimeout = null;
 
@@ -774,13 +1035,12 @@
             loadChatHistory();
             setupEventListeners();
             setupScrollHandler();
+            setupMobileEnhancements();
         });
 
         function setupEventListeners() {
             const chatInput = document.getElementById('chatInput');
-            const mobileMenuToggle = document.getElementById('mobileMenuToggle');
-            const sidebarOverlay = document.getElementById('sidebarOverlay');
-            const closeSelector = document.getElementById('closeSelector');
+            const toggleSidebar = document.getElementById('toggleSidebar');
             const scrollToBottomBtn = document.getElementById('scrollToBottom');
             
             // Chat input handling
@@ -793,27 +1053,51 @@
 
             chatInput.addEventListener('input', function() {
                 this.style.height = 'auto';
-                this.style.height = Math.min(this.scrollHeight, 100) + 'px';
+                this.style.height = Math.min(this.scrollHeight, 120) + 'px';
             });
 
-            // Mobile menu toggle
-            mobileMenuToggle.addEventListener('click', function() {
-                toggleMobileAssignmentSelector();
-            });
-
-            // Sidebar overlay
-            sidebarOverlay.addEventListener('click', function() {
-                toggleMobileAssignmentSelector();
-            });
-
-            // Close selector button
-            closeSelector.addEventListener('click', function() {
-                toggleMobileAssignmentSelector();
+            // Sidebar toggle
+            toggleSidebar.addEventListener('click', function() {
+                toggleSidebarView();
             });
 
             // Scroll to bottom button
             scrollToBottomBtn.addEventListener('click', function() {
                 scrollToBottom(true);
+            });
+
+            // Close sidebar when clicking on overlay (mobile)
+            document.addEventListener('click', function(e) {
+                if (window.innerWidth <= 968 && !isSidebarCollapsed) {
+                    const sidebar = document.getElementById('sidebar');
+                    const toggleBtn = document.getElementById('toggleSidebar');
+                    if (!sidebar.contains(e.target) && !toggleBtn.contains(e.target)) {
+                        toggleSidebarView();
+                    }
+                }
+            });
+        }
+
+        function setupMobileEnhancements() {
+            // Prevent zoom on double-tap for mobile
+            let lastTouchEnd = 0;
+            document.addEventListener('touchend', function (event) {
+                const now = (new Date()).getTime();
+                if (now - lastTouchEnd <= 300) {
+                    event.preventDefault();
+                }
+                lastTouchEnd = now;
+            }, false);
+
+            // Better touch handling for buttons
+            const buttons = document.querySelectorAll('button');
+            buttons.forEach(button => {
+                button.addEventListener('touchstart', function() {
+                    this.style.transform = 'scale(0.95)';
+                });
+                button.addEventListener('touchend', function() {
+                    this.style.transform = '';
+                });
             });
         }
 
@@ -846,16 +1130,52 @@
             });
         }
 
-        function toggleMobileAssignmentSelector() {
-            const assignmentSelector = document.getElementById('assignmentSelector');
-            const sidebarOverlay = document.getElementById('sidebarOverlay');
+        function toggleSidebarView() {
+            const sidebar = document.getElementById('sidebar');
+            const toggleBtn = document.getElementById('toggleSidebar');
+            const sidebarIcon = document.getElementById('sidebarIcon');
             
-            if (assignmentSelector.classList.contains('active')) {
-                assignmentSelector.classList.remove('active');
-                sidebarOverlay.classList.remove('active');
+            isSidebarCollapsed = !isSidebarCollapsed;
+            
+            if (isSidebarCollapsed) {
+                sidebar.classList.add('collapsed');
+                toggleBtn.classList.add('collapsed');
+                sidebarIcon.className = 'fas fa-chevron-right';
             } else {
-                assignmentSelector.classList.add('active');
-                sidebarOverlay.classList.add('active');
+                sidebar.classList.remove('collapsed');
+                toggleBtn.classList.remove('collapsed');
+                sidebarIcon.className = 'fas fa-chevron-left';
+                
+                // On mobile, add overlay when sidebar is open
+                if (window.innerWidth <= 968) {
+                    createOverlay();
+                }
+            }
+        }
+
+        function createOverlay() {
+            let overlay = document.getElementById('sidebarOverlay');
+            if (!overlay) {
+                overlay = document.createElement('div');
+                overlay.id = 'sidebarOverlay';
+                overlay.style.cssText = `
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: rgba(0, 0, 0, 0.5);
+                    z-index: 4;
+                    display: none;
+                `;
+                overlay.addEventListener('click', toggleSidebarView);
+                document.body.appendChild(overlay);
+            }
+            overlay.style.display = 'block';
+            
+            // Remove overlay when sidebar is collapsed
+            if (isSidebarCollapsed) {
+                overlay.style.display = 'none';
             }
         }
 
@@ -866,7 +1186,7 @@
                 
                 if (data.success) {
                     displayAssignments(data.assignments);
-                    showNotification('Assignments loaded', 'success');
+                    showNotification('Assignments loaded successfully', 'success');
                 } else {
                     console.error('Failed to load assignments');
                     showNotification('Failed to load assignments', 'error');
@@ -879,15 +1199,13 @@
 
         function displayAssignments(assignments) {
             const assignmentList = document.getElementById('assignmentList');
-            const mobileAssignmentList = document.getElementById('mobileAssignmentList');
             
             if (assignments.length === 0) {
                 assignmentList.innerHTML = '<div class="empty-state">No assignments found</div>';
-                mobileAssignmentList.innerHTML = '<div class="empty-state">No assignments found</div>';
                 return;
             }
 
-            const assignmentHTML = assignments.map(assignment => `
+            assignmentList.innerHTML = assignments.map(assignment => `
                 <div class="assignment-item" onclick="selectAssignment(${assignment.id})" 
                      data-assignment-id="${assignment.id}">
                     <div class="assignment-title">
@@ -900,9 +1218,6 @@
                     </div>
                 </div>
             `).join('');
-
-            assignmentList.innerHTML = assignmentHTML;
-            mobileAssignmentList.innerHTML = assignmentHTML;
         }
 
         async function selectAssignment(assignmentId) {
@@ -910,12 +1225,7 @@
             document.querySelectorAll('.assignment-item').forEach(item => {
                 item.classList.remove('active');
             });
-            document.querySelectorAll(`[data-assignment-id="${assignmentId}"]`).forEach(item => {
-                item.classList.add('active');
-            });
-
-            // Close mobile selector
-            toggleMobileAssignmentSelector();
+            document.querySelector(`[data-assignment-id="${assignmentId}"]`).classList.add('active');
 
             // Load assignment details
             try {
@@ -926,6 +1236,11 @@
                     currentAssignmentId = assignmentId;
                     displayAssignmentDetails(data.assignment);
                     showNotification(`Selected: ${data.assignment.title || 'Assignment'}`, 'success');
+                    
+                    // Auto-close sidebar on mobile after selection
+                    if (window.innerWidth <= 968) {
+                        toggleSidebarView();
+                    }
                 }
             } catch (error) {
                 console.error('Error loading assignment details:', error);
@@ -939,7 +1254,7 @@
             
             details.innerHTML = `
                 <strong>${assignment.title || 'Untitled Assignment'}</strong>
-                <div style="margin-top: 10px; font-size: 0.9em; color: #cbd5e1;">
+                <div style="margin-top: 12px; font-size: 0.95em; color: #cbd5e1;">
                     ${assignment.description ? `<p>${assignment.description}</p>` : ''}
                     ${assignment.topic_name ? `<div><i class="fas fa-book"></i> ${assignment.topic_name}</div>` : ''}
                     ${assignment.due_date ? `<div><i class="fas fa-clock"></i> Due: ${new Date(assignment.due_date).toLocaleDateString()}</div>` : ''}
@@ -985,8 +1300,6 @@
 
             if (!currentAssignmentId) {
                 showNotification('Please select an assignment first.', 'warning');
-                // Open assignment selector
-                toggleMobileAssignmentSelector();
                 return;
             }
 
@@ -1209,6 +1522,8 @@
                 z-index: 1000;
                 transform: translateX(100%);
                 transition: transform 0.3s ease;
+                max-width: calc(100vw - 40px);
+                word-wrap: break-word;
                 ${type === 'success' ? 'background: #22c55e;' : ''}
                 ${type === 'error' ? 'background: #ef4444;' : ''}
                 ${type === 'warning' ? 'background: #f59e0b;' : ''}
@@ -1226,6 +1541,15 @@
                 setTimeout(() => notification.remove(), 300);
             }, 3000);
         }
+
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            // Auto-collapse sidebar on mobile when switching to desktop
+            if (window.innerWidth > 968 && isSidebarCollapsed) {
+                const overlay = document.getElementById('sidebarOverlay');
+                if (overlay) overlay.style.display = 'none';
+            }
+        });
     </script>
 </body>
 </html>
