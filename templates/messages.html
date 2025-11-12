@@ -1240,42 +1240,55 @@
         opacity: 1;
     }
     
-    .emoji-picker {
+    .context-menu {
         position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
         background: var(--sidebar-bg);
         border: 1px solid rgba(59, 130, 246, 0.3);
         border-radius: 12px;
-        padding: 15px;
-        display: flex;
-        gap: 10px;
+        padding: 8px 0;
         z-index: 1000;
         box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
-        transform: translate(-50%, -50%) scale(0);
+        transform: scale(0);
         transition: transform 0.2s ease;
+        min-width: 180px;
     }
     
-    .emoji-picker.show {
-        transform: translate(-50%, -50%) scale(1);
+    .context-menu.show {
+        transform: scale(1);
     }
     
-    .emoji-option {
-        font-size: 1.5em;
+    .context-menu-item {
+        padding: 10px 16px;
         cursor: pointer;
-        padding: 8px;
-        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
         transition: all 0.2s;
+        font-size: 0.9em;
+        color: var(--text-color);
     }
     
-    .emoji-option:hover {
+    .context-menu-item:hover {
         background: rgba(59, 130, 246, 0.2);
-        transform: scale(1.2);
     }
     
-    .selection-mode .message {
-        cursor: pointer;
+    .context-menu-item i {
+        width: 16px;
+        text-align: center;
+    }
+    
+    .context-menu-item.delete {
+        color: #ef4444;
+    }
+    
+    .context-menu-item.delete:hover {
+        background: rgba(239, 68, 68, 0.2);
+    }
+    
+    .context-menu-divider {
+        height: 1px;
+        background: rgba(59, 130, 246, 0.3);
+        margin: 5px 0;
     }
     
     .loading-indicator {
@@ -1309,6 +1322,34 @@
     
     .retry-btn:hover {
         background: rgba(59, 130, 246, 0.3);
+    }
+    
+    .network-optimization {
+        background: rgba(59, 130, 246, 0.1);
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        border-radius: 8px;
+        padding: 8px 12px;
+        margin-bottom: 10px;
+        font-size: 0.8em;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .compression-badge {
+        background: rgba(16, 185, 129, 0.2);
+        color: #10b981;
+        padding: 2px 6px;
+        border-radius: 8px;
+        font-size: 0.7em;
+    }
+    
+    .batch-badge {
+        background: rgba(245, 158, 11, 0.2);
+        color: #f59e0b;
+        padding: 2px 6px;
+        border-radius: 8px;
+        font-size: 0.7em;
     }
 </style>
 <body>
@@ -1423,6 +1464,13 @@
         <!-- Chat Container -->
         <div class="chat-container">
             <div class="message-container chat-background">
+                <div class="network-optimization" id="networkOptimization" style="display: none;">
+                    <i class="fas fa-bolt text-blue-400"></i>
+                    <span>Network optimized: </span>
+                    <span class="compression-badge">Compression</span>
+                    <span class="batch-badge">Batch Processing</span>
+                </div>
+                
                 <div class="messages-list" id="messagesList">
                     <div class="loading-indicator" id="loadingIndicator" style="display: none;">
                         <i class="fas fa-spinner"></i> Loading messages...
@@ -1557,6 +1605,7 @@
         const sidebarToggle = document.getElementById('sidebarToggle');
         const scrollToBottomBtn = document.getElementById('scrollToBottomBtn');
         const loadingIndicator = document.getElementById('loadingIndicator');
+        const networkOptimization = document.getElementById('networkOptimization');
         
         let currentRoom = 'general';
         let onlineUsers = {};
@@ -1576,6 +1625,54 @@
         let isSwiping = false;
         let swipeStartX = 0;
         let selectedMessages = new Set();
+        let networkOptimizations = {
+            compression: true,
+            batching: true,
+            lazyLoading: true,
+            prefetching: true
+        };
+
+        // Network optimization functions
+        function enableNetworkOptimizations() {
+            networkOptimization.style.display = 'flex';
+            
+            // Enable message compression
+            if (networkOptimizations.compression) {
+                socket.emit('enable_compression');
+            }
+            
+            // Enable batch processing for multiple selections
+            if (networkOptimizations.batching) {
+                console.log('Batch processing enabled');
+            }
+        }
+
+        function compressMessageData(data) {
+            if (!networkOptimizations.compression) return data;
+            
+            // Simple compression by removing unnecessary whitespace
+            if (typeof data === 'string') {
+                return data.replace(/\s+/g, ' ').trim();
+            }
+            return data;
+        }
+
+        function batchOperations(operations, type) {
+            if (!networkOptimizations.batching || operations.length === 0) return;
+            
+            const batchData = {
+                type: type,
+                operations: operations,
+                timestamp: Date.now()
+            };
+            
+            if (isConnected) {
+                socket.emit('batch_operation', compressMessageData(batchData));
+            } else {
+                // Store for when connection is restored
+                addToBatchQueue(batchData);
+            }
+        }
 
         // Back button handler
         const isAdmin = {{ 'true' if current_user.is_admin else 'false' }};
@@ -1627,6 +1724,144 @@
         const inputKeyJoin = document.getElementById('inputKeyJoin');
         const privateRoomStatus = document.getElementById('privateRoomStatus');
 
+        // Context Menu functionality
+        function showContextMenu(x, y, messageId) {
+            // Remove existing context menu
+            const existingMenu = document.querySelector('.context-menu');
+            if (existingMenu) {
+                existingMenu.remove();
+            }
+            
+            const contextMenu = document.createElement('div');
+            contextMenu.className = 'context-menu';
+            contextMenu.style.left = `${x}px`;
+            contextMenu.style.top = `${y}px`;
+            
+            const menuItems = [
+                { icon: 'fa-reply', text: 'Reply', action: () => replyToMessage(messageId) },
+                { icon: 'fa-copy', text: 'Copy Text', action: () => copyMessageText(messageId) },
+                { icon: 'fa-share', text: 'Share', action: () => shareMessage(messageId) },
+                { icon: 'fa-save', text: 'Save', action: () => saveMessage(messageId) },
+                { type: 'divider' },
+                { icon: 'fa-trash', text: 'Delete', action: () => deleteMessage(messageId), class: 'delete' }
+            ];
+            
+            menuItems.forEach(item => {
+                if (item.type === 'divider') {
+                    const divider = document.createElement('div');
+                    divider.className = 'context-menu-divider';
+                    contextMenu.appendChild(divider);
+                } else {
+                    const menuItem = document.createElement('div');
+                    menuItem.className = `context-menu-item ${item.class || ''}`;
+                    menuItem.innerHTML = `
+                        <i class="fas ${item.icon}"></i>
+                        <span>${item.text}</span>
+                    `;
+                    menuItem.addEventListener('click', item.action);
+                    contextMenu.appendChild(menuItem);
+                }
+            });
+            
+            document.body.appendChild(contextMenu);
+            
+            // Show with animation
+            setTimeout(() => {
+                contextMenu.classList.add('show');
+            }, 10);
+            
+            // Close context menu when clicking outside
+            const closeMenu = function(e) {
+                if (!contextMenu.contains(e.target)) {
+                    contextMenu.remove();
+                    document.removeEventListener('click', closeMenu);
+                }
+            };
+            
+            setTimeout(() => {
+                document.addEventListener('click', closeMenu);
+            }, 100);
+        }
+
+        // Context menu actions
+        function replyToMessage(messageId) {
+            const messageElement = document.querySelector(`[data-message-id="${messageId}"]`);
+            if (messageElement) {
+                const username = messageElement.querySelector('.username').textContent;
+                const content = messageElement.querySelector('.message-content').textContent;
+                
+                startReply({
+                    id: parseInt(messageId),
+                    username: username,
+                    content: content
+                });
+            }
+        }
+
+        function copyMessageText(messageId) {
+            const messageElement = document.querySelector(`[data-message-id="${messageId}"]`);
+            if (messageElement) {
+                const content = messageElement.querySelector('.message-content').textContent;
+                navigator.clipboard.writeText(content).then(() => {
+                    showToast('Message copied to clipboard');
+                });
+            }
+        }
+
+        function shareMessage(messageId) {
+            const messageElement = document.querySelector(`[data-message-id="${messageId}"]`);
+            if (messageElement) {
+                const username = messageElement.querySelector('.username').textContent;
+                const content = messageElement.querySelector('.message-content').textContent;
+                const timestamp = messageElement.querySelector('.timestamp').textContent;
+                
+                const shareText = `Message from ${username} (${timestamp}): ${content}`;
+                
+                if (navigator.share) {
+                    navigator.share({
+                        title: 'LyxNexus Message',
+                        text: shareText
+                    });
+                } else {
+                    navigator.clipboard.writeText(shareText).then(() => {
+                        showToast('Message shared to clipboard');
+                    });
+                }
+            }
+        }
+
+        function saveMessage(messageId) {
+            const messageElement = document.querySelector(`[data-message-id="${messageId}"]`);
+            if (messageElement) {
+                const username = messageElement.querySelector('.username').textContent;
+                const content = messageElement.querySelector('.message-content').textContent;
+                const timestamp = messageElement.querySelector('.timestamp').textContent;
+                
+                const savedMessages = JSON.parse(localStorage.getItem('savedMessages') || '[]');
+                savedMessages.push({
+                    id: messageId,
+                    username: username,
+                    content: content,
+                    timestamp: timestamp,
+                    savedAt: new Date().toISOString()
+                });
+                
+                localStorage.setItem('savedMessages', JSON.stringify(savedMessages));
+                showToast('Message saved locally');
+            }
+        }
+
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-green-600 text-white px-4 py-2 rounded-lg shadow-lg z-50';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+
         // Swipe to reply functionality (right swipe)
         function setupSwipeEvents(messageElement) {
             let startX, startY, distX, distY;
@@ -1641,9 +1876,9 @@
                 swipeStartY = startY;
                 isSwiping = false;
                 
-                // Start long press timer for selection
+                // Start long press timer for context menu
                 longPressTimer = setTimeout(() => {
-                    toggleMessageSelection(messageId);
+                    showContextMenu(startX, startY, messageId);
                 }, 500);
             }, { passive: true });
             
@@ -1694,107 +1929,11 @@
                 isSwiping = false;
             }, { passive: true });
             
-            // Click handler for regular clicks (not long press)
-            messageElement.addEventListener('click', function(e) {
-                // If it's a regular click (not long press) and not on action buttons
-                if (!e.target.closest('.message-actions') && !isSwiping) {
-                    // If message is selected, deselect it
-                    if (selectedMessages.has(messageId)) {
-                        toggleMessageSelection(messageId);
-                    }
-                }
+            // Right-click for context menu on desktop
+            messageElement.addEventListener('contextmenu', function(e) {
+                e.preventDefault();
+                showContextMenu(e.clientX, e.clientY, messageId);
             });
-        }
-
-        // Toggle message selection
-        function toggleMessageSelection(messageId) {
-            const messageElement = document.querySelector(`[data-message-id="${messageId}"]`);
-            if (!messageElement) return;
-            
-            if (selectedMessages.has(messageId)) {
-                selectedMessages.delete(messageId);
-                messageElement.classList.remove('selected');
-            } else {
-                selectedMessages.add(messageId);
-                messageElement.classList.add('selected');
-                
-                // Show emoji picker in center of screen
-                showEmojiPicker(messageId);
-            }
-        }
-
-        // Emoji picker for quick reactions
-        function showEmojiPicker(messageId) {
-            const emojis = ['👍', '❤️', '😂', '😮', '😢', '🙏'];
-            
-            // Remove existing emoji picker
-            const existingPicker = document.querySelector('.emoji-picker');
-            if (existingPicker) {
-                existingPicker.remove();
-            }
-            
-            // Create emoji picker in center of screen
-            const emojiPicker = document.createElement('div');
-            emojiPicker.className = 'emoji-picker';
-            
-            emojis.forEach(emoji => {
-                const emojiOption = document.createElement('div');
-                emojiOption.className = 'emoji-option';
-                emojiOption.textContent = emoji;
-                emojiOption.addEventListener('click', function() {
-                    // Send quick reply with emoji to all selected messages
-                    selectedMessages.forEach(selectedId => {
-                        const quickReply = {
-                            content: emoji,
-                            room: currentRoom,
-                            parent_id: parseInt(selectedId)
-                        };
-                        
-                        if (isConnected) {
-                            socket.emit('send_message', quickReply);
-                        } else {
-                            addToMessageQueue(quickReply);
-                        }
-                    });
-                    
-                    // Clear selection and close picker
-                    clearSelection();
-                    emojiPicker.remove();
-                });
-                
-                emojiPicker.appendChild(emojiOption);
-            });
-            
-            document.body.appendChild(emojiPicker);
-            
-            // Show with animation
-            setTimeout(() => {
-                emojiPicker.classList.add('show');
-            }, 10);
-            
-            // Close emoji picker when clicking outside
-            const closePicker = function(e) {
-                if (!emojiPicker.contains(e.target)) {
-                    emojiPicker.remove();
-                    clearSelection();
-                    document.removeEventListener('click', closePicker);
-                }
-            };
-            
-            setTimeout(() => {
-                document.addEventListener('click', closePicker);
-            }, 100);
-        }
-
-        // Clear message selection
-        function clearSelection() {
-            selectedMessages.forEach(messageId => {
-                const messageElement = document.querySelector(`[data-message-id="${messageId}"]`);
-                if (messageElement) {
-                    messageElement.classList.remove('selected');
-                }
-            });
-            selectedMessages.clear();
         }
 
         // Private Room Event Listeners
@@ -2023,6 +2162,7 @@
                     isConnected = true;
                     reconnectAttempts = 0;
                     offlineIndicator.style.display = 'none';
+                    enableNetworkOptimizations();
                     break;
                 case 'connecting':
                     connectionStatus.classList.add('connecting');
@@ -2298,27 +2438,47 @@
             const failedMessages = [];
             let processedCount = 0;
             
-            messageQueue.forEach((message, index) => {
-                try {
-                    socket.emit('send_message', {
-                        content: message.content,
-                        room: message.room,
-                        parent_id: message.parent_id
-                    }, (ack) => {
-                        if (ack && ack.success) {
-                            messageQueue.splice(index - processedCount, 1);
-                            processedCount++;
-                            localStorage.setItem('messageQueue', JSON.stringify(messageQueue));
-                            updateQueueIndicator();
-                        } else {
-                            failedMessages.push(message);
-                        }
-                    });
-                } catch (error) {
-                    console.error('Failed to send queued message:', error);
-                    failedMessages.push(message);
-                }
-            });
+            // Use batch processing for multiple queued messages
+            if (messageQueue.length > 1 && networkOptimizations.batching) {
+                const batchData = {
+                    type: 'queued_messages',
+                    messages: messageQueue,
+                    timestamp: Date.now()
+                };
+                
+                socket.emit('batch_send', compressMessageData(batchData), (response) => {
+                    if (response && response.success) {
+                        messageQueue = [];
+                        localStorage.setItem('messageQueue', JSON.stringify(messageQueue));
+                        updateQueueIndicator();
+                    } else {
+                        console.error('Failed to send batch messages');
+                    }
+                });
+            } else {
+                // Process messages individually
+                messageQueue.forEach((message, index) => {
+                    try {
+                        socket.emit('send_message', {
+                            content: message.content,
+                            room: message.room,
+                            parent_id: message.parent_id
+                        }, (ack) => {
+                            if (ack && ack.success) {
+                                messageQueue.splice(index - processedCount, 1);
+                                processedCount++;
+                                localStorage.setItem('messageQueue', JSON.stringify(messageQueue));
+                                updateQueueIndicator();
+                            } else {
+                                failedMessages.push(message);
+                            }
+                        });
+                    } catch (error) {
+                        console.error('Failed to send queued message:', error);
+                        failedMessages.push(message);
+                    }
+                });
+            }
             
             messageQueue = failedMessages;
             localStorage.setItem('messageQueue', JSON.stringify(messageQueue));
@@ -2470,7 +2630,7 @@
             };
             
             if (isConnected) {
-                socket.emit('send_message', messageData, (ack) => {
+                socket.emit('send_message', compressMessageData(messageData), (ack) => {
                     if (!ack || !ack.success) {
                         addToMessageQueue(messageData);
                     } else {

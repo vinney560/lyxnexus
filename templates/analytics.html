@@ -1028,6 +1028,7 @@
         function refreshAnalytics() {
             const btn = event?.target || document.getElementById('refreshData');
             const originalHtml = btn.innerHTML;
+            btn.innerHTML = '';
             btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Refreshing...';
             btn.disabled = true;
             
