@@ -512,20 +512,37 @@ Here's a comparison of different AI models:
 ' [LINE BREAKS]
 ' Each "\n" (newline) represents a line break
 
-' ==============================================================
-' [MATH & SCIENTIFIC RENDERING PROMPT TEMPLATE]
-' ==============================================================
-
+'==============================================================
+'[MATH & SCIENTIFIC RENDERING & FORMATS]
+'==============================================================
+'
 ' Instructions for AI:
-' 1. Solve the math problem provided.
-' 2. Output the solution in LaTeX format using:
-'    - $...$ for inline math
-'    - $$...$$ for display math
-' 3. Do not use LaTeX delimiters like \( \), \[ \], or extra $$ in your input.
-' 4. Do not escape characters or double backslashes in math expressions.
-' 5. Input may contain ^ for exponents and ~ for subscripts; preserve them as-is.
-' 6. Do not output plain text equations — all math must be in LaTeX.
-' 7. The output should be ready for MathJax or KaTeX to render automatically.
+' 
+' 1. Solve the math/science problem given.
+' 2. Output **only LaTeX-ready math**, formatted for KaTeX.
+' 3. Do **not** wrap expressions in `$...$` or `$$...$$`.
+' 4. Do **not** escape characters or double backslashes.
+' 5. Input may contain `^` for superscripts and `~` for subscripts; preserve them as-is.
+' 6. Inline and display math can be written naturally using LaTeX syntax (e.g., \frac, \sqrt, \int, etc.).
+' 7. Do **not** output plain text equations — all math should be in proper LaTeX format.
+' 8. Avoid explanations outside the equations unless explicitly asked.
+' 9. Rendering engines like KaTeX will interpret the output automatically in the chat.
+' 
+' Example input: "Solve x^2 - 5x + 6 = 0"
+' 
+' Example AI output:
+' 
+' x^2 - 5x + 6 = 0
+' 
+' x = \frac{-(-5) \pm \sqrt{(-5)^2 - 4(1)(6)}}{2(1)}
+' 
+' x = \frac{5 \pm \sqrt{25 - 24}}{2}
+' 
+' x = \frac{5 \pm 1}{2}
+' 
+' Solutions:
+' 
+' x = 3  or  x = 2
 
 ' ==============================================================
 ' [NOTES FOR AI]
@@ -809,24 +826,24 @@ def gemini_chat():
     def format_text(text):
         """Format text using custom markdown-like syntax with math-safe rendering."""
         import re
-
+    
         formatted = text
-
+    
         # Code blocks with language
         formatted = re.sub(
             r'```(\w+)?\n([\s\S]*?)```',
             lambda m: f'<pre data-language="{m.group(1) or "text"}"><code>{m.group(2).strip()}</code></pre>',
             formatted
         )
-
+    
         # Inline code
         formatted = re.sub(r'`([^`]+)`', r'<code>\1</code>', formatted)
-
+    
         # Headers
         formatted = re.sub(r'^### (.*$)', r'<h3>\1</h3>', formatted, flags=re.MULTILINE)
         formatted = re.sub(r'^## (.*$)', r'<h2>\1</h2>', formatted, flags=re.MULTILINE)
         formatted = re.sub(r'^# (.*$)', r'<h1>\1</h1>', formatted, flags=re.MULTILINE)
-
+    
         # Bold / Italic / Underline / Highlight / Strikethrough
         formatted = re.sub(r'\*\*(.*?)\*\*', r'<strong>\1</strong>', formatted)
         formatted = re.sub(r'\*(.*?)\*', r'<em>\1</em>', formatted)
@@ -834,18 +851,18 @@ def gemini_chat():
         formatted = re.sub(r'__(.*?)__', r'<span class="underline">\1</span>', formatted)
         formatted = re.sub(r'==(.*?)==', r'<span class="highlight">\1</span>', formatted)
         formatted = re.sub(r'~~(.*?)~~', r'<span class="strikethrough">\1</span>', formatted)
-
+    
         # Blockquotes
         formatted = re.sub(r'^> (.*$)', r'<blockquote>\1</blockquote>', formatted, flags=re.MULTILINE)
-
+    
         # Horizontal rules
         formatted = re.sub(r'^(?:\*\*\*|---|___)$', r'<hr>', formatted, flags=re.MULTILINE)
-
+    
         # Lists
         formatted = re.sub(r'^\s*[-*+] (.*$)', r'<li>\1</li>', formatted, flags=re.MULTILINE)
         formatted = re.sub(r'^\s*\d+\. (.*$)', r'<li>\1</li>', formatted, flags=re.MULTILINE)
         formatted = re.sub(r'(<li>.*</li>)', r'<ul>\1</ul>', formatted, flags=re.DOTALL)
-
+    
         # Tables
         def format_table(match):
             row = match.group(1)
@@ -854,24 +871,24 @@ def gemini_chat():
                 table_html = '<table><tr>' + ''.join(f'<td>{cell}</td>' for cell in cells) + '</tr></table>'
                 return table_html
             return match.group(0)
-
+    
         formatted = re.sub(r'\|(.+)\|', format_table, formatted)
-
+    
         # Math-safe: subscripts and superscripts
         # Do not escape math syntax (^ or ~); wrap them lightly for CSS/MathJax/KaTeX rendering.
         formatted = re.sub(r'~(.+?)~', r'<span class="subscript">\1</span>', formatted)
         formatted = re.sub(r'\^(.+?)\^', r'<span class="superscript">\1</span>', formatted)
-
+    
         # Line breaks
         formatted = formatted.replace('\n', '<br>')
-
+    
         # URLs
         formatted = re.sub(
             r'(https?://[^\s]+)',
             r'<a href="\1" target="_blank" rel="noopener noreferrer">\1</a>',
             formatted
         )
-
+    
         # Prevent escaping math or special characters — let KaTeX/MathJax handle inline math
         # Example: y^3 + 8y - 15 = 0 should remain as-is
         return formatted
