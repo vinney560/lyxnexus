@@ -13,7 +13,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/contrib/auto-render.min.js"></script>
     
-    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     
     <style>
@@ -22,8 +22,8 @@
             --text-color: #f1f5f9;
             --accent-color: #3b82f6;
             --secondary-color: #8b5cf6;
-            --sidebar-width: 320px;
-            --header-height: 80px;
+            --sidebar-width: 100%;
+            --header-height: auto;
             --input-height: 70px;
         }
 
@@ -41,6 +41,7 @@
             overflow: hidden;
             display: flex;
             flex-direction: column;
+            font-size: 14px;
         }
 
         .gradient-text {
@@ -76,45 +77,58 @@
         .math-header {
             height: var(--header-height);
             background: rgba(15, 23, 42, 0.9);
-            padding: 0 30px;
+            padding: 12px 15px;
             display: flex;
+            flex-direction: column;
             align-items: center;
-            justify-content: space-between;
             border-bottom: 1px solid rgba(59, 130, 246, 0.3);
             flex-shrink: 0;
             z-index: 100;
+            gap: 10px;
+        }
+
+        .header-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            width: 100%;
         }
 
         .header-left h1 {
-            font-size: 1.8em;
+            font-size: 1.5em;
             font-weight: 600;
-            margin-bottom: 5px;
+            margin-bottom: 4px;
         }
 
         .header-left p {
             opacity: 0.8;
-            font-size: 1em;
+            font-size: 0.9em;
             color: #cbd5e1;
         }
 
         .header-right {
             display: flex;
-            gap: 15px;
+            gap: 8px;
+            width: 100%;
+            justify-content: space-between;
         }
 
         .header-button {
             background: rgba(59, 130, 246, 0.1);
             border: 1px solid rgba(59, 130, 246, 0.3);
             color: var(--accent-color);
-            border-radius: 10px;
-            padding: 10px 15px;
+            border-radius: 8px;
+            padding: 8px 12px;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 12px;
             font-weight: 500;
             transition: all 0.3s ease;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
+            flex: 1;
+            justify-content: center;
         }
 
         .header-button:hover {
@@ -141,32 +155,31 @@
         }
 
         .sidebar {
+            position: fixed;
             width: var(--sidebar-width);
-            background: rgba(15, 23, 42, 0.95);
-            border-right: 1px solid rgba(59, 130, 246, 0.2);
-            padding: 20px;
-            overflow-y: auto;
-            flex-shrink: 0;
-            transition: all 0.3s ease;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.98);
             z-index: 50;
+            box-shadow: 5px 0 15px rgba(0, 0, 0, 0.3);
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+            padding: 20px 15px;
+            overflow-y: auto;
         }
 
-        .sidebar.collapsed {
-            transform: translateX(-100%);
-            width: 0;
-            padding: 0;
-            border-right: none;
+        .sidebar:not(.collapsed) {
+            transform: translateX(0);
         }
 
         .toggle-sidebar {
-            position: absolute;
-            top: 20px;
-            left: var(--sidebar-width);
+            position: fixed;
+            top: 15px;
+            left: 15px;
             background: rgba(59, 130, 246, 0.9);
             color: white;
             border: none;
-            border-radius: 0 8px 8px 0;
-            width: 24px;
+            border-radius: 8px;
+            width: 40px;
             height: 40px;
             display: flex;
             align-items: center;
@@ -176,36 +189,32 @@
             transition: all 0.3s ease;
         }
 
-        .toggle-sidebar.collapsed {
-            left: 0;
-        }
-
         .toggle-sidebar:hover {
             background: rgba(59, 130, 246, 1);
-            width: 28px;
         }
 
         .assignments-section h3 {
             color: var(--text-color);
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             font-weight: 500;
-            font-size: 1.3em;
+            font-size: 1.2em;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
         }
 
         .assignment-list {
-            max-height: calc(100vh - 300px);
+            max-height: calc(100vh - 200px);
             overflow-y: auto;
+            margin-bottom: 15px;
         }
 
         .assignment-item {
             background: rgba(51, 65, 85, 0.6);
             border: 1px solid rgba(100, 116, 139, 0.3);
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 12px;
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 10px;
             cursor: pointer;
             transition: all 0.3s ease;
             animation: slideIn 0.4s ease;
@@ -231,33 +240,33 @@
         .assignment-title {
             font-weight: 600;
             color: var(--text-color);
-            margin-bottom: 8px;
-            font-size: 1.1em;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .assignment-meta {
-            font-size: 0.9em;
-            color: #94a3b8;
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-
-        .assignment-meta div {
+            margin-bottom: 6px;
+            font-size: 1em;
             display: flex;
             align-items: center;
             gap: 6px;
         }
 
+        .assignment-meta {
+            font-size: 0.85em;
+            color: #94a3b8;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .assignment-meta div {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
         .current-assignment {
             background: rgba(34, 197, 94, 0.1);
             border: 1px solid rgba(34, 197, 94, 0.3);
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 20px;
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 15px;
             animation: fadeIn 0.5s ease;
         }
 
@@ -268,11 +277,11 @@
 
         .current-assignment h4 {
             color: #22c55e;
-            margin-bottom: 10px;
-            font-size: 1.1em;
+            margin-bottom: 8px;
+            font-size: 1em;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
         }
 
         .chat-area {
@@ -281,21 +290,22 @@
             flex-direction: column;
             overflow: hidden;
             position: relative;
+            width: 100%;
         }
 
         .chat-messages {
             flex: 1;
-            padding: 25px;
+            padding: 15px;
             overflow-y: auto;
             background: rgba(15, 23, 42, 0.6);
             display: flex;
             flex-direction: column;
-            padding-bottom: 0; /* Remove bottom padding to prevent overlap */
+            padding-bottom: 0;
         }
 
         .message {
-            margin-bottom: 25px;
-            max-width: 85%;
+            margin-bottom: 20px;
+            max-width: 92%;
             animation: messageAppear 0.4s ease;
         }
 
@@ -308,98 +318,104 @@
             margin-left: auto;
             background: rgba(59, 130, 246, 0.9);
             color: white;
-            padding: 18px 22px;
-            border-radius: 20px 20px 6px 20px;
-            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+            padding: 14px 16px;
+            border-radius: 16px 16px 4px 16px;
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.3);
             border: 1px solid rgba(59, 130, 246, 0.4);
+            font-size: 0.95em;
         }
 
         .ai-message {
             background: rgba(255, 255, 255, 0.95);
             color: #1e293b;
-            padding: 22px;
-            border-radius: 20px 20px 20px 6px;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            padding: 16px;
+            border-radius: 16px 16px 16px 4px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
             border: 1px solid rgba(255, 255, 255, 0.2);
+            font-size: 0.95em;
         }
 
         .message-content {
-            line-height: 1.7;
-            font-size: 15px;
+            line-height: 1.6;
+            font-size: 14px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
         }
 
         .message-content p {
-            margin-bottom: 12px;
+            margin-bottom: 10px;
         }
 
         .message-content ul, .message-content ol {
-            margin: 12px 0 12px 24px;
+            margin: 10px 0 10px 20px;
         }
 
         .message-content li {
-            margin-bottom: 6px;
+            margin-bottom: 5px;
         }
 
         .message-content code {
             background: #f1f5f9;
             color: #0f172a;
-            padding: 3px 8px;
-            border-radius: 6px;
+            padding: 2px 6px;
+            border-radius: 4px;
             font-family: 'Courier New', monospace;
-            font-size: 0.9em;
+            font-size: 0.85em;
             border: 1px solid #e2e8f0;
         }
 
         .message-content pre {
             background: #1e293b;
             color: #f8fafc;
-            padding: 18px;
-            border-radius: 10px;
+            padding: 14px;
+            border-radius: 8px;
             overflow-x: auto;
-            margin: 18px 0;
+            margin: 14px 0;
             border: 1px solid #334155;
+            font-size: 0.85em;
         }
 
         .message-content blockquote {
-            border-left: 4px solid var(--accent-color);
-            padding-left: 18px;
-            margin: 18px 0;
+            border-left: 3px solid var(--accent-color);
+            padding-left: 14px;
+            margin: 14px 0;
             color: #64748b;
             font-style: italic;
         }
 
         /* Math specific styles */
         .math-expression {
-            margin: 18px 0;
+            margin: 14px 0;
             text-align: center;
+            overflow-x: auto;
         }
 
         .katex-display {
-            margin: 22px 0;
+            margin: 16px 0;
             overflow-x: auto;
             overflow-y: hidden;
         }
 
         .step-solution {
             background: rgba(34, 197, 94, 0.1);
-            border-left: 4px solid #22c55e;
-            padding: 18px;
-            margin: 18px 0;
-            border-radius: 0 10px 10px 0;
+            border-left: 3px solid #22c55e;
+            padding: 14px;
+            margin: 14px 0;
+            border-radius: 0 8px 8px 0;
             color: #1e293b;
         }
 
         .theorem {
             background: rgba(245, 158, 11, 0.1);
-            border-left: 4px solid #f59e0b;
-            padding: 18px;
-            margin: 18px 0;
-            border-radius: 0 10px 10px 0;
+            border-left: 3px solid #f59e0b;
+            padding: 14px;
+            margin: 14px 0;
+            border-radius: 0 8px 8px 0;
             color: #1e293b;
         }
 
         .chat-input-container {
-            padding: 20px 25px;
+            padding: 15px;
             border-top: 1px solid rgba(59, 130, 246, 0.2);
             background: rgba(15, 23, 42, 0.95);
             flex-shrink: 0;
@@ -409,7 +425,7 @@
 
         .chat-input-wrapper {
             display: flex;
-            gap: 15px;
+            gap: 10px;
             align-items: flex-end;
         }
 
@@ -417,13 +433,13 @@
             flex: 1;
             background: rgba(30, 41, 59, 0.9);
             border: 2px solid rgba(59, 130, 246, 0.3);
-            border-radius: 14px;
-            padding: 16px 20px;
-            font-size: 16px;
+            border-radius: 12px;
+            padding: 14px 16px;
+            font-size: 14px;
             color: var(--text-color);
             resize: none;
-            min-height: 60px;
-            max-height: 120px;
+            min-height: 50px;
+            max-height: 100px;
             font-family: inherit;
             transition: all 0.3s ease;
         }
@@ -442,22 +458,22 @@
             background: linear-gradient(135deg, var(--accent-color), var(--secondary-color));
             color: white;
             border: none;
-            border-radius: 14px;
-            padding: 16px 28px;
+            border-radius: 12px;
+            padding: 14px 20px;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 14px;
             font-weight: 600;
             transition: all 0.3s ease;
-            min-width: 110px;
+            min-width: 80px;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            gap: 6px;
         }
 
         .send-button:hover:not(:disabled) {
             transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
         }
 
         .send-button:disabled {
@@ -468,14 +484,15 @@
 
         .typing-indicator {
             display: none;
-            padding: 18px 22px;
+            padding: 14px 16px;
             color: #94a3b8;
             font-style: italic;
             background: rgba(30, 41, 59, 0.6);
-            border-radius: 14px;
-            margin: 10px 0;
-            max-width: 200px;
+            border-radius: 12px;
+            margin: 8px 0;
+            max-width: 180px;
             animation: pulse 1.5s infinite;
+            font-size: 0.9em;
         }
 
         @keyframes pulse {
@@ -509,7 +526,7 @@
         .empty-state {
             text-align: center;
             color: #94a3b8;
-            padding: 50px 20px;
+            padding: 40px 15px;
             flex: 1;
             display: flex;
             flex-direction: column;
@@ -518,22 +535,22 @@
         }
 
         .empty-state .icon {
-            font-size: 4em;
-            margin-bottom: 20px;
+            font-size: 3em;
+            margin-bottom: 15px;
             opacity: 0.7;
             animation: bounce 2s infinite;
         }
 
         @keyframes bounce {
             0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-            40% { transform: translateY(-10px); }
-            60% { transform: translateY(-5px); }
+            40% { transform: translateY(-8px); }
+            60% { transform: translateY(-4px); }
         }
 
         .empty-state h3 {
             color: var(--text-color);
-            margin-bottom: 10px;
-            font-size: 1.4em;
+            margin-bottom: 8px;
+            font-size: 1.2em;
         }
 
         .loading-assignments {
@@ -541,18 +558,18 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 30px;
+            padding: 25px;
             color: #94a3b8;
         }
 
         .loading-spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid rgba(59, 130, 246, 0.3);
-            border-left: 4px solid var(--accent-color);
+            width: 35px;
+            height: 35px;
+            border: 3px solid rgba(59, 130, 246, 0.3);
+            border-left: 3px solid var(--accent-color);
             border-radius: 50%;
             animation: spin 1s linear infinite;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
         }
 
         @keyframes spin {
@@ -563,19 +580,19 @@
         /* Scroll to bottom button */
         .scroll-to-bottom {
             position: fixed;
-            bottom: 100px;
-            right: 30px;
+            bottom: 80px;
+            right: 15px;
             background: var(--accent-color);
             color: white;
             border: none;
             border-radius: 50%;
-            width: 50px;
-            height: 50px;
+            width: 45px;
+            height: 45px;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
             transition: all 0.3s ease;
             opacity: 0;
             transform: translateY(20px);
@@ -589,52 +606,59 @@
 
         .scroll-to-bottom:hover {
             transform: translateY(-5px);
-            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.6);
+            box-shadow: 0 6px 16px rgba(59, 130, 246, 0.6);
         }
 
         /* Assignment selection prompt */
         .assignment-prompt {
             background: rgba(245, 158, 11, 0.1);
             border: 1px solid rgba(245, 158, 11, 0.3);
-            border-radius: 12px;
-            padding: 16px;
-            margin: 20px 0;
+            border-radius: 10px;
+            padding: 12px;
+            margin: 15px 0;
             text-align: center;
             animation: fadeIn 0.5s ease;
         }
 
         .assignment-prompt h4 {
             color: #f59e0b;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            gap: 6px;
+            font-size: 1em;
         }
 
         /* Mobile menu */
         .mobile-menu {
-            display: none;
             position: fixed;
-            bottom: 20px;
+            bottom: 15px;
             left: 50%;
             transform: translateX(-50%);
             background: rgba(59, 130, 246, 0.9);
             border-radius: 50px;
-            padding: 12px 20px;
+            padding: 10px 18px;
             z-index: 100;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            display: flex;
+            gap: 8px;
         }
 
         .mobile-menu button {
             background: transparent;
             border: none;
             color: white;
-            font-size: 1.2em;
-            padding: 8px 15px;
+            font-size: 1.1em;
+            padding: 8px 12px;
             cursor: pointer;
             border-radius: 50%;
             transition: all 0.3s ease;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .mobile-menu button:hover {
@@ -643,17 +667,17 @@
 
         /* Scrollbar Styling */
         ::-webkit-scrollbar {
-            width: 8px;
+            width: 6px;
         }
 
         ::-webkit-scrollbar-track {
             background: rgba(30, 41, 59, 0.6);
-            border-radius: 4px;
+            border-radius: 3px;
         }
 
         ::-webkit-scrollbar-thumb {
             background: rgba(59, 130, 246, 0.4);
-            border-radius: 4px;
+            border-radius: 3px;
         }
 
         ::-webkit-scrollbar-thumb:hover {
@@ -672,100 +696,77 @@
             outline-offset: 2px;
         }
 
-        /* Responsive Design */
-        @media (max-width: 968px) {
-            .sidebar {
-                position: fixed;
-                height: 100%;
-                z-index: 50;
-                box-shadow: 5px 0 15px rgba(0, 0, 0, 0.3);
-                transform: translateX(-100%);
-            }
-            
-            .sidebar:not(.collapsed) {
-                transform: translateX(0);
-                width: 100%;
-                max-width: 400px;
-            }
-            
-            .toggle-sidebar {
-                display: flex;
-            }
-            
-            .message {
-                max-width: 90%;
-            }
-
-            .mobile-menu {
-                display: flex;
-                gap: 10px;
-            }
-        }
-
-        @media (max-width: 640px) {
+        /* Extra small devices */
+        @media (max-width: 360px) {
             .math-header {
-                padding: 0 15px;
-                flex-direction: column;
-                height: auto;
-                padding: 15px;
+                padding: 10px 12px;
             }
             
-            .header-left, .header-right {
-                width: 100%;
-            }
-            
-            .header-right {
-                margin-top: 10px;
-                justify-content: space-between;
+            .header-left h1 {
+                font-size: 1.3em;
             }
             
             .header-button {
-                flex: 1;
-                justify-content: center;
-                font-size: 12px;
-                padding: 8px 12px;
+                padding: 6px 8px;
+                font-size: 11px;
             }
             
             .chat-messages {
-                padding: 15px;
-            }
-            
-            .message {
-                max-width: 95%;
-            }
-            
-            .chat-input-container {
-                padding: 15px;
-            }
-            
-            .scroll-to-bottom {
-                bottom: 90px;
-                right: 15px;
-                width: 45px;
-                height: 45px;
-            }
-
-            .mobile-menu {
-                bottom: 15px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .sidebar:not(.collapsed) {
-                width: 100%;
-            }
-            
-            .assignment-item {
                 padding: 12px;
             }
             
-            .chat-input-wrapper {
-                gap: 10px;
+            .message {
+                max-width: 96%;
+            }
+            
+            .user-message, .ai-message {
+                padding: 12px 14px;
+            }
+            
+            .chat-input-container {
+                padding: 12px;
+            }
+            
+            .chat-input {
+                padding: 12px 14px;
+                font-size: 13px;
             }
             
             .send-button {
-                min-width: 80px;
-                padding: 12px 20px;
+                padding: 12px 16px;
+                min-width: 70px;
+                font-size: 13px;
+            }
+            
+            .mobile-menu {
+                padding: 8px 15px;
+            }
+            
+            .mobile-menu button {
+                width: 36px;
+                height: 36px;
+                font-size: 1em;
+            }
+            
+            .scroll-to-bottom {
+                width: 40px;
+                height: 40px;
+                bottom: 70px;
+            }
+        }
+
+        /* Height adjustments for very short screens */
+        @media (max-height: 600px) {
+            .assignment-list {
+                max-height: calc(100vh - 150px);
+            }
+            
+            .empty-state {
+                padding: 20px 15px;
+            }
+            
+            .empty-state .icon {
+                font-size: 2.5em;
             }
         }
     </style>
@@ -773,17 +774,19 @@
 <body>
     <!-- Header -->
     <div class="math-header">
-        <div class="header-left">
-            <h1 class="gradient-text">Math Assignment Assistant</h1>
-            <p>Get step-by-step solutions and mathematical guidance</p>
-        </div>
-        <div class="header-right">
-            <button class="header-button" onclick="loadAssignments()">
-                <i class="fas fa-sync-alt"></i> Refresh
-            </button>
-            <button class="header-button danger" onclick="clearHistory()">
-                <i class="fas fa-trash"></i> Clear History
-            </button>
+        <div class="header-content">
+            <div class="header-left">
+                <h1 class="gradient-text">Math Assistant</h1>
+                <p>Step-by-step math solutions</p>
+            </div>
+            <div class="header-right">
+                <button class="header-button" onclick="loadAssignments()">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                </button>
+                <button class="header-button danger" onclick="clearHistory()">
+                    <i class="fas fa-trash"></i> Clear
+                </button>
+            </div>
         </div>
     </div>
 
@@ -791,7 +794,7 @@
     <div class="math-content">
         <!-- Sidebar Toggle -->
         <button class="toggle-sidebar" id="toggleSidebar">
-            <i class="fas fa-chevron-right" id="sidebarIcon"></i>
+            <i class="fas fa-bars" id="sidebarIcon"></i>
         </button>
 
         <!-- Sidebar with Assignments -->
@@ -813,7 +816,7 @@
 
             <div class="assignment-prompt" id="assignmentPrompt" style="display: none;">
                 <h4><i class="fas fa-info-circle"></i> Assignment Required</h4>
-                <p>Please select an assignment to start asking math questions</p>
+                <p>Select an assignment to start asking math questions</p>
             </div>
         </div>
 
@@ -829,7 +832,7 @@
 
             <div class="typing-indicator" id="typingIndicator">
                 <div class="typing-dots">
-                    <i class="fas fa-circle-notch fa-spin"></i> Math Assistant is thinking <span>.</span><span>.</span><span>.</span>
+                    <i class="fas fa-circle-notch fa-spin"></i> Thinking <span>.</span><span>.</span><span>.</span>
                 </div>
             </div>
 
@@ -838,7 +841,7 @@
                     <textarea 
                         id="chatInput" 
                         class="chat-input" 
-                        placeholder="Ask a math question or request step-by-step solution..."
+                        placeholder="Ask a math question..."
                         rows="1"
                     ></textarea>
                     <button id="sendButton" class="send-button" onclick="sendMessage()">
@@ -870,18 +873,15 @@
     <script>
         let currentAssignmentId = null;
         let isProcessing = false;
-        let isSidebarCollapsed = true; // Start with sidebar collapsed on mobile
+        let isSidebarCollapsed = true;
         let isUserScrolling = false;
         let scrollTimeout = null;
         let assignmentsLoaded = false;
 
         // Initialize when page loads
         document.addEventListener('DOMContentLoaded', function() {
-            // Check if we're on a mobile device
-            if (window.innerWidth <= 968) {
-                isSidebarCollapsed = true;
-                updateSidebarState();
-            }
+            isSidebarCollapsed = true;
+            updateSidebarState();
             
             loadAssignments();
             loadChatHistory();
@@ -911,7 +911,7 @@
 
             chatInput.addEventListener('input', function() {
                 this.style.height = 'auto';
-                this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+                this.style.height = Math.min(this.scrollHeight, 100) + 'px';
             });
 
             // Sidebar toggle
@@ -926,23 +926,21 @@
 
             // Close sidebar when clicking outside on mobile
             document.addEventListener('click', function(e) {
-                if (window.innerWidth <= 968 && !isSidebarCollapsed) {
-                    const sidebar = document.getElementById('sidebar');
-                    const toggleBtn = document.getElementById('toggleSidebar');
-                    
-                    if (!sidebar.contains(e.target) && !toggleBtn.contains(e.target)) {
-                        toggleSidebarView();
-                    }
+                const sidebar = document.getElementById('sidebar');
+                const toggleBtn = document.getElementById('toggleSidebar');
+                
+                if (!sidebar.contains(e.target) && !toggleBtn.contains(e.target) && !isSidebarCollapsed) {
+                    toggleSidebarView();
                 }
             });
 
             // Handle window resize
             window.addEventListener('resize', function() {
-                if (window.innerWidth > 968) {
-                    // On larger screens, ensure sidebar is visible
-                    if (isSidebarCollapsed) {
-                        toggleSidebarView();
-                    }
+                // Adjust layout for very small screens
+                if (window.innerWidth < 360) {
+                    document.body.style.fontSize = '13px';
+                } else {
+                    document.body.style.fontSize = '14px';
                 }
             });
         }
@@ -953,7 +951,7 @@
             
             chatMessages.addEventListener('scroll', function() {
                 // Check if user is near the bottom
-                const isNearBottom = chatMessages.scrollHeight - chatMessages.scrollTop - chatMessages.clientHeight < 100;
+                const isNearBottom = chatMessages.scrollHeight - chatMessages.scrollTop - chatMessages.clientHeight < 80;
                 
                 if (!isNearBottom) {
                     // User is scrolling up, show the scroll to bottom button
@@ -977,10 +975,6 @@
         }
 
         function toggleSidebarView() {
-            const sidebar = document.getElementById('sidebar');
-            const toggleBtn = document.getElementById('toggleSidebar');
-            const sidebarIcon = document.getElementById('sidebarIcon');
-            
             isSidebarCollapsed = !isSidebarCollapsed;
             updateSidebarState();
             
@@ -997,12 +991,10 @@
             
             if (isSidebarCollapsed) {
                 sidebar.classList.add('collapsed');
-                toggleBtn.classList.add('collapsed');
-                sidebarIcon.className = 'fas fa-chevron-right';
+                sidebarIcon.className = 'fas fa-bars';
             } else {
                 sidebar.classList.remove('collapsed');
-                toggleBtn.classList.remove('collapsed');
-                sidebarIcon.className = 'fas fa-chevron-left';
+                sidebarIcon.className = 'fas fa-times';
             }
         }
 
@@ -1016,13 +1008,14 @@
             loadingElement.style.display = 'flex';
             
             try {
+                // Simulate API call - replace with actual endpoint
                 const response = await fetch('/math/assignments');
                 const data = await response.json();
                 
                 if (data.success) {
                     assignmentsLoaded = true;
                     displayAssignments(data.assignments);
-                    showNotification('Assignments loaded successfully', 'success');
+                    showNotification('Assignments loaded', 'success');
                 } else {
                     console.error('Failed to load assignments');
                     assignmentList.innerHTML = '<div class="empty-state">Failed to load assignments</div>';
@@ -1085,10 +1078,8 @@
                     // Hide assignment prompt
                     document.getElementById('assignmentPrompt').style.display = 'none';
                     
-                    // Auto-close sidebar on mobile after selection
-                    if (window.innerWidth <= 968) {
-                        toggleSidebarView();
-                    }
+                    // Auto-close sidebar after selection
+                    toggleSidebarView();
                 }
             } catch (error) {
                 console.error('Error loading assignment details:', error);
@@ -1102,7 +1093,7 @@
             
             details.innerHTML = `
                 <strong>${assignment.title || 'Untitled Assignment'}</strong>
-                <div style="margin-top: 12px; font-size: 0.95em; color: #cbd5e1;">
+                <div style="margin-top: 8px; font-size: 0.9em; color: #cbd5e1;">
                     ${assignment.description ? `<p>${assignment.description}</p>` : ''}
                     ${assignment.topic_name ? `<div><i class="fas fa-book"></i> ${assignment.topic_name}</div>` : ''}
                     ${assignment.due_date ? `<div><i class="fas fa-clock"></i> Due: ${new Date(assignment.due_date).toLocaleDateString()}</div>` : ''}
@@ -1148,8 +1139,8 @@
 
             if (!currentAssignmentId) {
                 showNotification('Please select an assignment first.', 'warning');
-                // Open sidebar on mobile to show assignment prompt
-                if (window.innerWidth <= 968 && isSidebarCollapsed) {
+                // Open sidebar to show assignment prompt
+                if (isSidebarCollapsed) {
                     toggleSidebarView();
                 }
                 return;
@@ -1174,7 +1165,7 @@
                 
                 let aiResponse = '';
                 hideTypingIndicator();
-                const messageElement = addMessageToChat('', 'ai', true, true); // Create empty AI message for streaming
+                const messageElement = addMessageToChat('', 'ai', true, true);
 
                 while (true) {
                     const { done, value } = await reader.read();
@@ -1271,16 +1262,16 @@
         function formatContent(content) {
             if (!content) return '';
             
-            // Basic formatting
+            // Basic formatting optimized for small screens
             let formatted = content
                 .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
                 .replace(/\*(.*?)\*/g, '<em>$1</em>')
                 .replace(/~~(.*?)~~/g, '<del>$1</del>')
                 .replace(/__(.*?)__/g, '<u>$1</u>')
                 .replace(/`(.*?)`/g, '<code>$1</code>')
-                .replace(/^# (.*$)/gim, '<h3>$1</h3>')
-                .replace(/^## (.*$)/gim, '<h4>$1</h4>')
-                .replace(/^### (.*$)/gim, '<h5>$1</h5>')
+                .replace(/^# (.*$)/gim, '<h4>$1</h4>')
+                .replace(/^## (.*$)/gim, '<h5>$1</h5>')
+                .replace(/^### (.*$)/gim, '<h6>$1</h6>')
                 .replace(/^- (.*$)/gim, '<li>$1</li>')
                 .replace(/^> (.*$)/gim, '<blockquote>$1</blockquote>')
                 .replace(/\n/g, '<br>');
@@ -1339,7 +1330,7 @@
         }
 
         async function clearHistory() {
-            if (!confirm('Are you sure you want to clear all math conversation history?')) {
+            if (!confirm('Clear all math conversation history?')) {
                 return;
             }
 
@@ -1350,7 +1341,7 @@
                 if (data.success) {
                     const chatMessages = document.getElementById('chatMessages');
                     chatMessages.innerHTML = '<div class="empty-state" id="emptyState"><div class="icon">🧮</div><h3>Welcome to Math Assistant</h3><p>Select an assignment and start asking math questions!</p></div>';
-                    showNotification('History cleared successfully', 'success');
+                    showNotification('History cleared', 'success');
                 } else {
                     showNotification('Failed to clear history', 'error');
                 }
@@ -1365,15 +1356,17 @@
             const notification = document.createElement('div');
             notification.style.cssText = `
                 position: fixed;
-                top: 20px;
-                right: 20px;
-                padding: 12px 20px;
-                border-radius: 10px;
+                top: 15px;
+                right: 15px;
+                padding: 10px 16px;
+                border-radius: 8px;
                 color: white;
                 font-weight: 500;
                 z-index: 1000;
                 transform: translateX(100%);
                 transition: transform 0.3s ease;
+                font-size: 0.9em;
+                max-width: 80%;
                 ${type === 'success' ? 'background: #22c55e;' : ''}
                 ${type === 'error' ? 'background: #ef4444;' : ''}
                 ${type === 'warning' ? 'background: #f59e0b;' : ''}
