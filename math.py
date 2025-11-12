@@ -33,7 +33,7 @@ class MathAssignmentService:
             
             assignment = Assignment.query.filter_by(id=assignment_id).first()
             if assignment:
-                # Convert to dict with all details
+                # Convert to dict with all detail
                 assignment_data = {
                     'id': assignment.id,
                     'title': assignment.title,
