@@ -509,12 +509,21 @@ Here's a comparison of different AI models:
 | Llama 2 | Meta | 70B | Open-source, research |
 | Mixtral | Mistral AI | 47B | Multilingual, efficient |
 
-
 ' [LINE BREAKS]
 ' Each "\n" (newline) represents a line break
 
 ' ==============================================================
-' NOTES FOR AI:
+' [MATH & SCIENTIFIC RENDERING]
+' ==============================================================
+' Do not use LaTeX delimiters (\( \), \[ \], $$, etc.).
+' Do not escape characters or double backslashes in math expressions.
+' Math expressions should appear as written, using ^ and ~ for exponents and subscripts.
+' Example: H~2~O, y^3 + 8y - 15 = 0
+' Rendering engines like MathJax or KaTeX will interpret these automatically.
+
+' ==============================================================
+' [NOTES FOR AI]
+' ==============================================================
 ' 1. Read from top to bottom — handle complex patterns (like code blocks) first.
 ' 2. Keep all original text content unchanged.
 ' 3. Apply formatting logically, not visually.
@@ -792,79 +801,73 @@ def gemini_chat():
 
     # Format text function for server-side formatting
     def format_text(text):
-        """Format text with markdown-like syntax (matches client-side formatting)"""
+        """Format text using custom markdown-like syntax with math-safe rendering."""
         import re
-        
+    
         formatted = text
+    
         # Code blocks with language
-        formatted = re.sub(r'```(\w+)?\n([\s\S]*?)```', 
-                          lambda m: f'<pre data-language="{m.group(1) or "text"}"><code>{m.group(2).strip()}</code></pre>', 
-                          formatted)
-        
+        formatted = re.sub(
+            r'```(\w+)?\n([\s\S]*?)```',
+            lambda m: f'<pre data-language="{m.group(1) or "text"}"><code>{m.group(2).strip()}</code></pre>',
+            formatted
+        )
+    
         # Inline code
         formatted = re.sub(r'`([^`]+)`', r'<code>\1</code>', formatted)
-        
+    
         # Headers
         formatted = re.sub(r'^### (.*$)', r'<h3>\1</h3>', formatted, flags=re.MULTILINE)
         formatted = re.sub(r'^## (.*$)', r'<h2>\1</h2>', formatted, flags=re.MULTILINE)
         formatted = re.sub(r'^# (.*$)', r'<h1>\1</h1>', formatted, flags=re.MULTILINE)
-        
-        # Bold and Italic
+    
+        # Bold / Italic / Underline / Highlight / Strikethrough
         formatted = re.sub(r'\*\*(.*?)\*\*', r'<strong>\1</strong>', formatted)
         formatted = re.sub(r'\*(.*?)\*', r'<em>\1</em>', formatted)
         formatted = re.sub(r'_(.*?)_', r'<em>\1</em>', formatted)
-        
-        # Strikethrough
-        formatted = re.sub(r'~~(.*?)~~', r'<span class="strikethrough">\1</span>', formatted)
-        
-        # Underline
         formatted = re.sub(r'__(.*?)__', r'<span class="underline">\1</span>', formatted)
-        
-        # Highlight
         formatted = re.sub(r'==(.*?)==', r'<span class="highlight">\1</span>', formatted)
-        
+        formatted = re.sub(r'~~(.*?)~~', r'<span class="strikethrough">\1</span>', formatted)
+    
         # Blockquotes
         formatted = re.sub(r'^> (.*$)', r'<blockquote>\1</blockquote>', formatted, flags=re.MULTILINE)
-        
+    
         # Horizontal rules
-        formatted = re.sub(r'^\*\*\*$', r'<hr>', formatted, flags=re.MULTILINE)
-        formatted = re.sub(r'^---$', r'<hr>', formatted, flags=re.MULTILINE)
-        formatted = re.sub(r'^___$', r'<hr>', formatted, flags=re.MULTILINE)
-        
-        # Lists - unordered
+        formatted = re.sub(r'^(?:\*\*\*|---|___)$', r'<hr>', formatted, flags=re.MULTILINE)
+    
+        # Lists
         formatted = re.sub(r'^\s*[-*+] (.*$)', r'<li>\1</li>', formatted, flags=re.MULTILINE)
-        
-        # Lists - ordered
         formatted = re.sub(r'^\s*\d+\. (.*$)', r'<li>\1</li>', formatted, flags=re.MULTILINE)
-        
-        # Wrap list items in ul/ol
         formatted = re.sub(r'(<li>.*</li>)', r'<ul>\1</ul>', formatted, flags=re.DOTALL)
-        
-        # Tables (basic)
+    
+        # Tables
         def format_table(match):
             row = match.group(1)
             cells = [cell.strip() for cell in row.split('|') if cell.strip()]
             if len(cells) > 1:
-                table_html = '<table><tr>'
-                for cell in cells:
-                    table_html += f'<td>{cell}</td>'
-                table_html += '</tr></table>'
+                table_html = '<table><tr>' + ''.join(f'<td>{cell}</td>' for cell in cells) + '</tr></table>'
                 return table_html
             return match.group(0)
-        
+    
         formatted = re.sub(r'\|(.+)\|', format_table, formatted)
-        
-        # Subscript and superscript
+    
+        # Math-safe: subscripts and superscripts
+        # Do not escape math syntax (^ or ~); wrap them lightly for CSS/MathJax/KaTeX rendering.
         formatted = re.sub(r'~(.+?)~', r'<span class="subscript">\1</span>', formatted)
         formatted = re.sub(r'\^(.+?)\^', r'<span class="superscript">\1</span>', formatted)
-        
+    
         # Line breaks
         formatted = formatted.replace('\n', '<br>')
-        
-        # Convert URLs to clickable links
-        url_regex = r'(https?://[^\s]+)'
-        formatted = re.sub(url_regex, r'<a href="\1" target="_blank" rel="noopener noreferrer">\1</a>', formatted)
-        
+    
+        # URLs
+        formatted = re.sub(
+            r'(https?://[^\s]+)',
+            r'<a href="\1" target="_blank" rel="noopener noreferrer">\1</a>',
+            formatted
+        )
+    
+        # Prevent escaping math or special characters — let KaTeX/MathJax handle inline math
+        # Example: y^3 + 8y - 15 = 0 should remain as-is
         return formatted
 
     # Generate HTML for main chat with formatting

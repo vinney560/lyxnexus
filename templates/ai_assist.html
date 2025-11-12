@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Marion AI Assistant | LyxNexus</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- KaTeX for math rendering -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
     <style>
         :root {
             --primary: #3b82f6;
@@ -555,6 +559,9 @@
         .formatted-text {
             white-space: pre-wrap;
             word-wrap: break-word;
+            overflow-wrap: break-word;
+            word-break: break-word;
+            hyphens: auto;
         }
 
         .formatted-text strong, .formatted-text .bold {
@@ -648,6 +655,42 @@
             background-color: rgba(59, 130, 246, 0.3);
             padding: 0.1rem 0.3rem;
             border-radius: 3px;
+        }
+
+        /* Math expressions styling */
+        .math-container {
+            display: inline-block;
+            margin: 0.25rem 0;
+            text-align: center;
+            max-width: 100%;
+            overflow-x: auto;
+        }
+
+        .math-inline {
+            display: inline-block;
+            padding: 0 0.2rem;
+        }
+
+        .math-display {
+            display: block;
+            margin: 0.5rem 0;
+            padding: 0.5rem;
+            text-align: center;
+            overflow-x: auto;
+        }
+
+        .katex {
+            font-size: 1.1em !important;
+        }
+
+        .katex-display {
+            margin: 0.75rem 0 !important;
+        }
+
+        .katex-display > .katex {
+            max-width: 100%;
+            overflow-x: auto;
+            overflow-y: hidden;
         }
 
         /* Table Styling */
@@ -871,6 +914,15 @@
             .message-actions {
                 opacity: 1;
                 transform: translateY(0);
+            }
+
+            /* Math expressions on mobile */
+            .katex {
+                font-size: 1em !important;
+            }
+
+            .math-display {
+                padding: 0.25rem;
             }
 
             /* Remove margin-left for mobile */
@@ -1098,9 +1150,9 @@
                         </div>
                         <div class="capability-item">
                             <div class="capability-icon">
-                                <i class="fas fa-shield-alt"></i>
+                                <i class="fas fa-square-root-variable"></i>
                             </div>
-                            <div class="capability-text">Privacy Focused</div>
+                            <div class="capability-text">Math Support</div>
                         </div>
                     </div>
                 </div>
@@ -1264,6 +1316,51 @@
             return text.replace(urlRegex, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>');
         }
 
+        // Function to render math expressions with KaTeX
+        function renderMath(element) {
+            if (typeof renderMathInElement !== 'undefined') {
+                try {
+                    renderMathInElement(element, {
+                        delimiters: [
+                            {left: '$$', right: '$$', display: true},
+                            {left: '$', right: '$', display: false},
+                            {left: '\\(', right: '\\)', display: false},
+                            {left: '\\[', right: '\\]', display: true}
+                        ],
+                        throwOnError: false,
+                        output: 'html'
+                    });
+                } catch (error) {
+                    console.warn('KaTeX rendering error:', error);
+                }
+            }
+        }
+
+        // Function to process math expressions in text
+        function processMathExpressions(text) {
+            // Process display math ($$...$$)
+            text = text.replace(/\$\$([^$]+)\$\$/g, function(match, mathContent) {
+                return `<div class="math-display">${mathContent}</div>`;
+            });
+            
+            // Process inline math ($...$)
+            text = text.replace(/\$([^$]+)\$/g, function(match, mathContent) {
+                return `<span class="math-inline">${mathContent}</span>`;
+            });
+            
+            // Process LaTeX display math (\[...\])
+            text = text.replace(/\\\[([^\]]+)\\\]/g, function(match, mathContent) {
+                return `<div class="math-display">${mathContent}</div>`;
+            });
+            
+            // Process LaTeX inline math (\(...\))
+            text = text.replace(/\\\(([^)]+)\\\)/g, function(match, mathContent) {
+                return `<span class="math-inline">${mathContent}</span>`;
+            });
+            
+            return text;
+        }
+
         // Function to format text with markdown-like syntax
         function formatText(text) {
             let formatted = text
@@ -1359,6 +1456,9 @@
                 // Line breaks
                 .replace(/\n/g, '<br>');
             
+            // Process math expressions
+            formatted = processMathExpressions(formatted);
+            
             // Convert URLs to clickable links
             formatted = linkify(formatted);
             
@@ -1425,6 +1525,14 @@
             }
             
             chatBox.appendChild(messageDiv);
+            
+            // Render math expressions if not a user message
+            if (!isUser && !isInfo) {
+                setTimeout(() => {
+                    renderMath(messageDiv);
+                }, 100);
+            }
+            
             scrollToBottom();
             return messageDiv;
         }
@@ -1564,6 +1672,11 @@
 
                     fullResponse += event.data;
                     formattedContent.innerHTML = formatText(fullResponse);
+                    
+                    // Render math expressions as they stream in
+                    setTimeout(() => {
+                        renderMath(currentStreamingMessage);
+                    }, 100);
                     
                     if (isAutoScrollEnabled) {
                         scrollToBottom();
