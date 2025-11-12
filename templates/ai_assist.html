@@ -1197,7 +1197,7 @@
         // Initialize the application
         async function initApp() {
             try {
-                const response = await fetch('/gemini/');
+                const response = await fetch('/gemini/data');
                 const data = await response.json();
                 
                 if (data.success) {
