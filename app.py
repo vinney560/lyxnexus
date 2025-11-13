@@ -3204,19 +3204,34 @@ def access_share(share_id):
     """Handle access to shared link"""
     share = shares.get(share_id)
     if not share:
-        return "Invalid or expired link", 404
+        return render_template(
+            'share_status.html',
+            message="Invalid or expired link",
+            link="/",
+            link_text="Go Home"
+        ), 404
 
     # Check if link expired
     if datetime.utcnow() > share['created_at'] + timedelta(hours=LINK_EXPIRY_HOURS):
         shares.pop(share_id)  # remove expired link
-        return "Link expired after 2 hours", 410
+        return render_template(
+            'share_status.html',
+            message="Link expired after 2 hours",
+            link="/",
+            link_text="Go Home"
+        ), 410
 
     # Mark as used and allow download for owner
     share['used'] = True
     owner_id = share['owner']
     users_downloads[owner_id] = max(0, users_downloads.get(owner_id, 0) - 1)  # restore one download
 
-    return f"Thank you for sharing! Your download limit has been updated. You can now download more files."
+    return render_template(
+        'share_status.html',
+        message="Thank you for sharing! Your download limit has been updated. You can now download more files.",
+        link="/",
+        link_text="Return Home"
+    )
 
 @app.route('/api/files/<int:id>', methods=['DELETE'])
 @login_required
