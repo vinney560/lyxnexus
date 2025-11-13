@@ -798,7 +798,6 @@
         transform: translateY(0);
     }
 
-    /* New styles for smooth updates */
     .content-updating {
         position: relative;
     }
@@ -994,7 +993,7 @@
                     <button class="nav-btn" data-section="profile">
                         <i class="fas fa-user mr-2"></i>Profile
                     </button>
-                    <button class="nav-btn" onclick="location.href='/files'">
+                    <button class="nav-btn" onclick="location.href='/files'" id="files">
                         <i class="fas fa-folder mr-2"></i>Files
                     </button>
                     <button class="nav-btn" onclick="location.href='/dashboard'">
@@ -1208,7 +1207,7 @@
                 <i class="fas fa-tachometer-alt"></i>
                 <span>Dashboard</span>
             </button>
-            <button class="mobile-nav-btn" onclick="location.href='/files'">
+            <button class="mobile-nav-btn" onclick="location.href='/files'" id="files">
                 <i class="fas fa-folder"></i>
                 <span>Files</span>
             </button>
@@ -1271,7 +1270,6 @@
             }, 2000);
         });
         
-        // Global state
         let currentUser = null;
         let announcements = [];
         let assignments = [];
@@ -1366,16 +1364,15 @@
                     this.trackPageExit();
                 });
             
-                // Track file downloads
+                // Track file visit
                 document.addEventListener('click', (e) => {
-                    if (e.target.closest('a[href*="/files"]') || e.target.closest('a[download]')) {
+                    if (e.target.closest('a[href*="/files"]') || e.target.closest('#files')) {
                         this.trackActivity('file_download', e.target.href || 'unknown_file');
                     }
                 });
             }
         }
         
-        // Initialize analytics
         const analytics = new AnalyticsTracker();        
 
         // Modern Toast System
@@ -1466,7 +1463,6 @@
         // Initialize toast system
         const toastSystem = new ToastSystem();
 
-        // Enhanced fetch with toast notifications
         async function fetchDataWithToast(endpoint, options = {}) {
             const showToast = options.showToast !== false;
             const loadingToast = showToast ? toastSystem.info('Loading data...', 'Loading', 0) : null;
@@ -2248,7 +2244,7 @@
             } else {
                 // Run only global functions on other pages
                 checkForFlaskMessages();
-                loadUserData(); // Still load user data if needed
+                loadUserData(); 
             }
         });        
 

@@ -950,7 +950,10 @@
                 <input type="text" id="timetable-room" class="form-input" placeholder="Room">
                 <input type="text" id="timetable-teacher" class="form-input" placeholder="Teacher">
                 <select id="timetable-topic" class="form-input">
-                    <option value="">Select Topic (Optional)</option>
+                  <option value="">Select Topic (Optional)</option>
+                    {% for topic in topics %}
+                        <option value="{{ topic.id }}">{{ topic.name }}</option>
+                    {% endfor %}
                 </select>
                 <div class="flex flex-col-reverse sm:flex-row justify-end space-y-4 sm:space-y-0 space-y-reverse sm:space-x-3 mt-4">
                     <button type="button" class="btn bg-gray-600 hover:bg-gray-700 w-full sm:w-auto" onclick="closeModal('timetable-modal')">Cancel</button>

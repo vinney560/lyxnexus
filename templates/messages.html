@@ -255,13 +255,13 @@
     }
 
     .username:hover {
-      transform: scale(1.05);
+      transform: scale(1.02);
       filter: brightness(1.2);
     }
 
     .username:hover::after {
       opacity: 1;
-      transform: scaleX(1.05);
+      transform: scaleX(1.02);
     }
 
     @media (prefers-color-scheme: dark) {
@@ -2076,15 +2076,23 @@
             
             // Close context menu when clicking outside
             const closeMenu = function(e) {
-                if (!contextMenu.contains(e.target)) {
+                if (contextMenu.contains(e.target)) {
+                    // Clicked inside: delay closing
+                    setTimeout(() => {
+                        contextMenu.remove();
+                    }, 700);
+                } else {
+                    // Clicked outside: close immediately
                     contextMenu.remove();
-                    document.removeEventListener('click', closeMenu);
                 }
-            };
             
+                document.removeEventListener('click', closeMenu);
+            };
+
+            // Delay adding the listener so the opening click doesn't trigger close
             setTimeout(() => {
                 document.addEventListener('click', closeMenu);
-            }, 100);
+            }, 200);
         }
 
         // Context menu actions
@@ -2186,7 +2194,7 @@
                 longPressTimer = setTimeout(() => {
                     isLongPress = true;
                     showContextMenu(startX, startY, messageId);
-                }, 500);
+                }, 2500);
             }, { passive: true });
             
             messageElement.addEventListener('touchmove', function(e) {

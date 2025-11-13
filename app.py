@@ -3672,7 +3672,7 @@ def join_private_room():
 
 def cleanup_disconnected_users():
     """Remove users who haven't been seen for more than 30 seconds"""
-    current_time = datetime.utcnow()
+    current_time = datetime.utcnow() + timedelta(hours=3)
     disconnected_users = []
     
     for user_id, user_data in online_users.items():
@@ -3704,7 +3704,7 @@ def update_user_presence(user_id, username, is_admin=False, room='general'):
         'username': username,
         'is_admin': is_admin,
         'current_room': room,
-        'last_seen': datetime.utcnow().isoformat()
+        'last_seen': (datetime.utcnow() + timedelta(hours=3)).isoformat()
     }
     
     room_users = []
