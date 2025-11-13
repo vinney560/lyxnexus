@@ -3337,9 +3337,9 @@ def access_share(share_id):
 
     return render_template(
         'share_status.html',
-        message="Thank you for sharing! Your download limit has been updated. You can now download more files.",
+        message="Hey! Welcome LyxNexus, a modern learning platform that simplifies class notes, assignments, and discussions.",
         link="/",
-        link_text="Return Home"
+        link_text="Go Home"
     )
 
 @app.route('/api/files/<int:id>', methods=['DELETE'])
