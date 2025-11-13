@@ -2305,21 +2305,13 @@
             installBtn.style.display = "inline-flex";
           });
       
-          installBtn.addEventListener("click", () => {
+          installBtn.addEventListener("click", async () => {
             if (isAndroid) {
               toastSystem.info("Downloading the LyxNexus App…", "Install App");
-          
-              // Create a temporary link to force download
-              const link = document.createElement('a');
-              link.href = '/uploads/LN.apk';
-              link.download = 'LyxNexus.apk'; // filename for download
-              document.body.appendChild(link);
-              link.click();
-              document.body.removeChild(link);
-          
+              window.location.href = "/uploads/LN.apk";
               return;
             }
-          
+        
             if (isIOS) {
               toastSystem.info("To install LyxNexus, tap Share → Add to Home Screen", "Install App");
               alert(
