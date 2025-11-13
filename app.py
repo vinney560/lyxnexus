@@ -3178,26 +3178,26 @@ def upload_file():
 from uuid import uuid4
 from datetime import datetime, timedelta
 
+# ---------------- SETTINGS ----------------
 MAX_DOWNLOADS = 5
+LINK_EXPIRY_HOURS = 2
 
+# Track downloads per user in memory
+users_downloads = {}  # user_id -> count of downloads
+
+# ---------------- DOWNLOAD ROUTE ----------------
 @app.route('/api/files/<int:id>/download')
 @login_required
 def download_file(id):
-    """Download file with limiter and share system"""
+    """Download a file with limiter and share system."""
     user_id = current_user.id
-
-    # Count downloads by session or DB (you can adjust)
-    count = current_user.download_count if hasattr(current_user, 'download_count') else 0
+    count = users_downloads.get(user_id, 0)
 
     if count < MAX_DOWNLOADS:
-        # Increment count
-        if hasattr(current_user, 'download_count'):
-            current_user.download_count += 1
-        else:
-            current_user.download_count = 1
-        db.session.commit()
+        # Allow download and increment count
+        users_downloads[user_id] = count + 1
 
-        # Get file from DB
+        # Fetch file from DB
         file = File.query.get_or_404(id)
         return send_file(
             BytesIO(file.file_data),
@@ -3206,11 +3206,13 @@ def download_file(id):
             mimetype=file.file_type
         )
     else:
-        # Create share link
+        # User reached limit -> create share link
         share_uuid = str(uuid4())
         new_share = Share(
             share_id=share_uuid,
-            owner_id=user_id
+            owner_id=user_id,
+            used=False,
+            created_at=datetime.utcnow()
         )
         db.session.add(new_share)
         db.session.commit()
@@ -3220,9 +3222,10 @@ def download_file(id):
             share_link=f'https://lyxnexus.onrender.com/share/{share_uuid}'
         )
 
+# ---------------- SHARE LINK ROUTE ----------------
 @app.route('/share/<share_id>')
 def access_share(share_id):
-    """Access a shared link"""
+    """Access a shared link to restore one download for the owner."""
     share = Share.query.filter_by(share_id=share_id).first()
     if not share:
         return render_template(
@@ -3232,7 +3235,8 @@ def access_share(share_id):
             link_text="Go Home"
         ), 404
 
-    if share.is_expired():
+    # Check if link expired
+    if datetime.utcnow() > share.created_at + timedelta(hours=LINK_EXPIRY_HOURS):
         db.session.delete(share)
         db.session.commit()
         return render_template(
@@ -3242,11 +3246,11 @@ def access_share(share_id):
             link_text="Go Home"
         ), 410
 
+    # Mark as used and restore one download to owner
     if not share.used:
         share.used = True
-        # Restore one download for owner
-        if hasattr(share.owner, 'download_count'):
-            share.owner.download_count = max(0, share.owner.download_count - 1)
+        owner_id = share.owner_id
+        users_downloads[owner_id] = max(0, users_downloads.get(owner_id, 0) - 1)
         db.session.commit()
 
     return render_template(
