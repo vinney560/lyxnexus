@@ -3159,18 +3159,47 @@ def upload_file():
         print(f'Error Saving Files: {e}')
         return jsonify({'error': 'Failed to upload file'}), 500
 
+from uuid import uuid4
+
+users_downloads = {}
+shares = {}         
+MAX_DOWNLOADS = 5
+
 @app.route('/api/files/<int:id>/download')
 @login_required
 def download_file(id):
-    """Download a file"""
-    file = File.query.get_or_404(id)
-    
-    return send_file(
-        BytesIO(file.file_data),
-        download_name=file.filename,
-        as_attachment=True,
-        mimetype=file.file_type
-    )
+    """Download file with limiter and modern template on limit reached"""
+    user_id = current_user.id
+    count = users_downloads.get(user_id, 0)
+
+    if count < MAX_DOWNLOADS:
+        # Increment count and allow download
+        users_downloads[user_id] = count + 1
+
+        file = File.query.get_or_404(id)
+        return send_file(
+            BytesIO(file.file_data),
+            download_name=file.filename,
+            as_attachment=True,
+            mimetype=file.file_type
+        )
+    else:
+        # Generate share link
+        share_id = str(uuid4())
+        shares[share_id] = {'owner': user_id, 'used': False}
+
+        return render_template(
+            'download_limit.html',
+            share_link=f'https://lyxnexus.onrender.com/share/{share_id}'
+        )
+
+@app.route('/share/<share_id>')
+def open_share(share_id):
+    """Mark share link as opened by another user"""
+    if share_id in shares:
+        shares[share_id]['used'] = True
+        return "Thank you! The original user can now download again."
+    return "Invalid or expired link."
 
 @app.route('/api/files/<int:id>', methods=['DELETE'])
 @login_required

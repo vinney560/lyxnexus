@@ -895,6 +895,11 @@
             font-size: 0.75em;
         }
         
+        .select-mode-btn {
+            margin-right: 0;
+            font-size: 0.75em;
+        }
+
         .header-title h1 {
             font-size: 1.5rem;
             white-space: nowrap;
@@ -2194,7 +2199,7 @@
                 longPressTimer = setTimeout(() => {
                     isLongPress = true;
                     showContextMenu(startX, startY, messageId);
-                }, 2500);
+                }, 4500);
             }, { passive: true });
             
             messageElement.addEventListener('touchmove', function(e) {
