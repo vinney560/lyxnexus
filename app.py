@@ -853,6 +853,84 @@ if not scheduler.running:
 
 atexit.register(lambda: scheduler.shutdown(wait=False))
 
+#==============================================================
+#            SCHEDULAR FOR NOTIFICATION ON UPCOMING CLASSES
+#==============================================================
+"""
+Request from Edmond, notifier --> Courtesy of Lyxin
+"""
+
+# in-memory --> only < 400 stds 
+sent_notifications = set()
+
+def get_timetable_and_notify():
+    """Check for upcoming classes and send webpush notifications once per class."""
+    now = datetime.utcnow() + timedelta(hours=3)
+    current_day = now.strftime("%A")
+
+    # Fetch today's timetable
+    today_classes = Timetable.query.filter_by(day_of_week=current_day).all()
+
+    for timetable in today_classes:
+        # Combine today's date with class start time
+        class_start = datetime.combine(now.date(), timetable.start_time)
+        time_diff = class_start - now
+
+        # If class starts within 30 minutes and not notified yet
+        if timedelta(0) <= time_diff <= timedelta(minutes=30) and timetable.id not in sent_notifications:
+            data = {
+                'title': 'Upcoming Class Reminder',
+                'message': (
+                    f"Class: {timetable.subject}\n"
+                    f"Teacher: {timetable.teacher or 'TBA'}\n"
+                    f"Room: {timetable.room or 'Online'}\n"
+                    f"Starts at: {timetable.start_time.strftime('%I:%M %p')}"
+                ),
+                'type': 'Upcoming Class',
+                'timetable_id': timetable.id,
+                'timestamp': datetime.utcnow().isoformat()
+            }
+            send_webpush(data)
+
+            # Mark class as notified to prevent duplicates --> from ViewTv
+            sent_notifications.add(timetable.id)
+
+        # Reset notifications for next day (after classes end) --> smart exist 
+        elif now.hour > 23 and timetable.id in sent_notifications:
+            sent_notifications.remove(timetable.id)
+
+from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.triggers.interval import IntervalTrigger
+from datetime import datetime
+import atexit
+
+# ==============================================================
+#             SCHEDULER RUNNER FOR UPCOMING CLASS NOTIFICATIONS 
+# ==============================================================
+"""
+Not sure if its a must to run it inside app_context but to be safe lets just use it.
+"""
+
+with app.app_context():
+    try:
+        scheduler = BackgroundScheduler()
+        scheduler.add_job(
+            func=get_timetable_and_notify,
+            trigger=IntervalTrigger(minutes=5),
+            id="Upcoming_Class_Notifier",
+            replace_existing=True
+        )
+        scheduler.start()
+
+        atexit.register(lambda: scheduler.shutdown(wait=False))
+
+        now = (datetime.utcnow() + timedelta(hours=3)).strftime('%Y-%m-%d %H:%M:%S UTC')
+        print(f"[{now}] Upcoming class notifier started (runs every 5 minutes).")
+
+    except Exception as e:
+        print('X' * 70)
+        print(f"Error initializing Upcoming Class scheduler ==>> {e}")
+
 #==========================================
 #                  NORMAL ROUTES
 #==========================================
