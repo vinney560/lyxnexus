@@ -3160,10 +3160,12 @@ def upload_file():
         return jsonify({'error': 'Failed to upload file'}), 500
 
 from uuid import uuid4
+from datetime import datetime, timedelta
 
 users_downloads = {}
-shares = {}         
+shares = {}
 MAX_DOWNLOADS = 5
+LINK_EXPIRY_HOURS = 2
 
 @app.route('/api/files/<int:id>/download')
 @login_required
@@ -3184,9 +3186,13 @@ def download_file(id):
             mimetype=file.file_type
         )
     else:
-        # Generate share link
+        # Generate share link with timestamp
         share_id = str(uuid4())
-        shares[share_id] = {'owner': user_id, 'used': False}
+        shares[share_id] = {
+            'owner': user_id,
+            'used': False,
+            'created_at': datetime.utcnow()  # timestamp for expiry
+        }
 
         return render_template(
             'download_limit.html',
@@ -3194,12 +3200,23 @@ def download_file(id):
         )
 
 @app.route('/share/<share_id>')
-def open_share(share_id):
-    """Mark share link as opened by another user"""
-    if share_id in shares:
-        shares[share_id]['used'] = True
-        return "Thank you! The original user can now download again."
-    return "Invalid or expired link."
+def access_share(share_id):
+    """Handle access to shared link"""
+    share = shares.get(share_id)
+    if not share:
+        return "Invalid or expired link", 404
+
+    # Check if link expired
+    if datetime.utcnow() > share['created_at'] + timedelta(hours=LINK_EXPIRY_HOURS):
+        shares.pop(share_id)  # remove expired link
+        return "Link expired after 2 hours", 410
+
+    # Mark as used and allow download for owner
+    share['used'] = True
+    owner_id = share['owner']
+    users_downloads[owner_id] = max(0, users_downloads.get(owner_id, 0) - 1)  # restore one download
+
+    return f"Thank you for sharing! Your download limit has been updated. You can now download more files."
 
 @app.route('/api/files/<int:id>', methods=['DELETE'])
 @login_required
@@ -4253,7 +4270,7 @@ def get_users():
     
     # Apply pagination
     users = (
-        query.order_by(User.username.asc())
+        query.order_by(User.created_at.desc())
         .offset((page - 1) * per_page)
         .limit(per_page)
         .all()

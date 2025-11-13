@@ -2,132 +2,452 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Download Limit Reached</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Download Limit Reached | LyxNexus</title>
+    
+    <!-- SEO Meta -->
+    <meta name="description" content="LyxNexus is a simple yet powerful class hub designed to keep everything in one place — from announcements and assignments to topics and class discussions." />
+    <meta name="keywords" content="education, coding, programming, web development, technology, online courses, learn to code" />
+    <meta name="author" content="Vincent Kipngetich" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://lyxnexus.onrender.com/" />
+    <link rel="icon" href="https://lyxnexus.onrender.com/uploads/favicon-1.png"/>
+    
+    <meta property="og:title" content="Download Limit Reached | LyxNexus" />
+    <meta property="og:description" content="LyxNexus is a simple yet powerful class hub designed to keep everything in one place — from announcements and assignments to topics and class discussions." />
+    <meta property="og:image" content="https://lyxnexus.onrender.com/favicon.ico" />
+    <meta property="og:url" content="https://lyxnexus.onrender.com/" />
+    
+    <meta name="twitter:card" content="summary" />
+
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
         :root {
             --bg-color: #0f172a;
-            --text-color: #f1f5f9;
+            --text-color: #f8fafc;
             --accent-color: #3b82f6;
             --secondary-color: #8b5cf6;
-            --card-bg: rgba(30, 41, 59, 0.7);
-            --border-color: rgba(59, 130, 246, 0.2);
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --card-bg: rgba(30, 41, 59, 0.85);
+            --border-color: rgba(59, 130, 246, 0.3);
+            --card-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
         body {
             font-family: 'Inter', sans-serif;
             background-color: var(--bg-color);
             color: var(--text-color);
-            overflow-x: hidden;
-            line-height: 1.6;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            margin: 0;
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.6;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(59, 130, 246, 0.05) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(139, 92, 246, 0.05) 0%, transparent 20%);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        .glass-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: 24px;
+            border: 1px solid var(--border-color);
+            padding: 40px 30px;
+            width: 100%;
+            text-align: center;
+            box-shadow: var(--card-shadow);
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+            transition: left 0.7s;
+        }
+
+        .glass-card:hover::before {
+            left: 100%;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
+            border-color: rgba(59, 130, 246, 0.5);
+        }
+
+        .icon-container {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 25px;
+            background: linear-gradient(135deg, var(--accent-color), var(--secondary-color));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+            animation: bounceIn 0.8s ease-out;
+        }
+
+        .icon-container i {
+            font-size: 2.2rem;
+            color: white;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            line-height: 1.2;
         }
 
         .gradient-text {
             background: linear-gradient(90deg, var(--accent-color), var(--secondary-color));
             -webkit-background-clip: text;
-            background-clip: text;
             -webkit-text-fill-color: transparent;
+            background-clip: text;
             color: transparent;
+            background-size: 200% 200%;
+            animation: gradient-shift 3s ease infinite;
         }
 
-        .glass-morph {
-            background: var(--card-bg);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 30px;
-            max-width: 400px;
-            font-weight: 700;
-            width: 90%;
-            text-align: center;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        @keyframes gradient-shift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
 
-        .glass-morph:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+        .description {
+            font-size: 1.05rem;
+            margin-bottom: 30px;
+            color: #e2e8f0;
+            line-height: 1.6;
         }
 
-        input {
+        .input-group {
+            position: relative;
+            margin-bottom: 25px;
+        }
+
+        .input-group input {
             width: 100%;
-            padding: 12px;
-            border-radius: 10px;
+            padding: 16px 20px;
+            border-radius: 14px;
             border: 1px solid var(--border-color);
-            background: rgba(30,41,59,0.5);
+            background: rgba(15, 23, 42, 0.6);
             color: var(--text-color);
-            margin-bottom: 15px;
-            font-size: 0.95rem;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            font-family: 'Inter', monospace;
+            padding-right: 50px;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+
+        .copy-btn {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(59, 130, 246, 0.2);
+            border: none;
+            border-radius: 10px;
+            color: var(--accent-color);
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .copy-btn:hover {
+            background: rgba(59, 130, 246, 0.3);
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
         }
 
         .btn {
-            background: linear-gradient(90deg, var(--accent-color), var(--secondary-color));
-            color: white;
-            border: none;
-            padding: 12px 28px;
-            border-radius: 10px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
-            cursor: pointer;
-            font-size: 0.95rem;
-            display: inline-flex;
+            flex: 1;
+            min-width: 160px;
+            display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
-            min-height: 48px;
+            gap: 10px;
+            padding: 16px 24px;
+            font-weight: 600;
+            font-size: 1rem;
+            border-radius: 14px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: white;
+            position: relative;
+            overflow: hidden;
         }
 
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
         }
 
-        h2 {
-            margin-bottom: 15px;
+        .btn:hover::before {
+            left: 100%;
         }
 
-        p {
-            margin-bottom: 20px;
+        .btn-copy {
+            background: linear-gradient(90deg, var(--accent-color), var(--secondary-color));
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
         }
 
-        #copyIcon {
-            display: none;
+        .btn-copy:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 25px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn-whatsapp {
+            background: linear-gradient(90deg, #25D366, #128C7E);
+            box-shadow: 0 8px 20px rgba(37, 211, 102, 0.3);
+        }
+
+        .btn-whatsapp:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 25px rgba(37, 211, 102, 0.4);
+        }
+
+        .timer-info {
+            margin-top: 25px;
+            padding: 15px;
+            background: rgba(59, 130, 246, 0.1);
+            border-radius: 12px;
+            font-size: 0.95rem;
+            color: #cbd5e1;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+
+        .timer-info i {
+            color: var(--accent-color);
+            margin-right: 8px;
+        }
+
+        .success-message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--success-color);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transform: translateX(150%);
+            transition: transform 0.4s ease;
+            z-index: 1000;
+        }
+
+        .success-message.show {
+            transform: translateX(0);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes bounceIn {
+            0% { opacity: 0; transform: scale(0.3); }
+            50% { opacity: 1; transform: scale(1.05); }
+            70% { transform: scale(0.9); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        @media (max-width: 576px) {
+            .glass-card {
+                padding: 30px 20px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .description {
+                font-size: 1rem;
+            }
+            
+            .btn {
+                flex: 1 1 100%;
+                min-width: auto;
+            }
+            
+            .btn-group {
+                gap: 12px;
+            }
+            
+            .icon-container {
+                width: 70px;
+                height: 70px;
+            }
+            
+            .icon-container i {
+                font-size: 1.8rem;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .glass-card {
+                padding: 25px 15px;
+            }
+            
+            h1 {
+                font-size: 1.6rem;
+            }
+            
+            .description {
+                font-size: 0.95rem;
+            }
+            
+            .input-group input {
+                padding: 14px 16px;
+                font-size: 0.9rem;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="glass-morph">
-        <h2 class="gradient-text">Download Limit Reached</h2>
-        <p>Share this link with others to unlock more downloads:</p>
-        <input type="text" value="{{ share_link }}" id="shareLink" readonly />
-        <button class="btn" onclick="copyLink()">
-            <i class="fas fa-check" id="copyIcon"></i> Copy Link
-        </button>
+    <div class="container">
+        <div class="glass-card">
+            <div class="icon-container">
+                <i class="fas fa-download"></i>
+            </div>
+            
+            <h1 class="gradient-text">Download Limit Reached</h1>
+            
+            <p class="description">
+                You've reached the download limit for this content. The link will expire in two hours, after which you'll be able to download again. To continue downloading immediately, share this link with others.
+            </p>
+
+            <div class="input-group">
+                <input type="text" value="{{ share_link }}" id="shareLink" readonly />
+                <button class="copy-btn" onclick="copyLink()">
+                    <i class="fas fa-copy"></i>
+                </button>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-copy" onclick="copyLink()">
+                    <i class="fas fa-copy"></i>
+                    <span>Copy Link</span>
+                </button>
+
+                <a class="btn btn-whatsapp" 
+                   href="https://api.whatsapp.com/send?text=Hey! Check out LyxNexus, a modern learning platform to access the latest class announcements, assignments, timetable, notes, and messaging rooms. Join here: {{ share_link }}" 
+                   target="_blank" rel="noopener">
+                    <i class="fab fa-whatsapp"></i>
+                    <span>Share on WhatsApp</span>
+                </a>
+            </div>
+            
+            <div class="timer-info">
+                <i class="fas fa-clock"></i>
+                <span>Link expires in: <strong>2 hours</strong></span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="success-message" id="successMessage">
+        <i class="fas fa-check-circle"></i>
+        <span>Link copied to clipboard!</span>
     </div>
 
     <script>
         function copyLink() {
             const input = document.getElementById('shareLink');
             input.select();
-            document.execCommand('copy');
-
-            const icon = document.getElementById('copyIcon');
-            icon.style.display = 'inline-block';
-
-            setTimeout(() => {
-                icon.style.display = 'none';
-            }, 15000);
-
-            alert('Link copied! Share it to unlock more downloads.');
+            input.setSelectionRange(0, 99999); // For mobile devices
+            
+            navigator.clipboard.writeText(input.value).then(() => {
+                showSuccessMessage();
+                
+                // Add visual feedback to the card
+                const card = document.querySelector('.glass-card');
+                card.style.transform = 'scale(1.02)';
+                setTimeout(() => {
+                    card.style.transform = '';
+                }, 200);
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+                // Fallback for older browsers
+                document.execCommand('copy');
+                showSuccessMessage();
+            });
         }
+        
+        function showSuccessMessage() {
+            const message = document.getElementById('successMessage');
+            message.classList.add('show');
+            
+            setTimeout(() => {
+                message.classList.remove('show');
+            }, 3000);
+        }
+        
+        // Add some interactive effects
+        document.addEventListener('DOMContentLoaded', function() {
+            const card = document.querySelector('.glass-card');
+            
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-8px)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
     </script>
 </body>
 </html>
