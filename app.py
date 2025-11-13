@@ -5652,7 +5652,7 @@ def get_visit_analytics():
         User.username
     ).join(User).filter(
         UserActivity.timestamp >= cutoff_time
-    ).order_by(UserActivity.timestamp.desc()).limit(50).all()
+    ).order_by(UserActivity.timestamp.desc()).limit(150).all()
     
     return jsonify({
         'total_visits': total_visits,
