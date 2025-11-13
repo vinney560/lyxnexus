@@ -78,21 +78,27 @@
 
   "shortcuts": [
     {
+      "name": "Files",
+      "short_name": "files",
+      "url": "/files",
+      "icons": [{ "src": "/uploads/favicon.png", "sizes": "96x96" }]
+    },
+    {
       "name": "Announcements",
-      "short_name": "News",
+      "short_name": "announce",
       "url": "/main-page",
       "icons": [{ "src": "/uploads/favicon.png", "sizes": "96x96" }]
     },
     {
-      "name": "Assignments",
-      "short_name": "Tasks",
-      "url": "/main-page",
+      "name": "Dashboard",
+      "short_name": "Board",
+      "url": "/dashboard",
       "icons": [{ "src": "/uploads/favicon.png", "sizes": "96x96" }]
     },
     {
-      "name": "Topics",
-      "short_name": "Learn",
-      "url": "/main-page",
+      "name": "Messages",
+      "short_name": "texts",
+      "url": "/messages",
       "icons": [{ "src": "/uploads/favicon.png", "sizes": "96x96" }]
     }
   ]

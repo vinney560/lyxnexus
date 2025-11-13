@@ -1229,7 +1229,12 @@
                   </h3>
                   <span class="text-blue-400 text-sm">Posted: ${formatDate(announcement.created_at)}</span>
                 </div>
-                <p class="mb-3 break-all hyphens-auto text-slate-300 leading-relaxed list-inside formatted-text">${formatText(announcement.content)}</p>
+                <p class="mb-3 break-all hyphens-auto text-slate-300 leading-relaxed list-inside formatted-text">
+                  ${formatText(announcement.content).length > 200 
+                    ? formatText(announcement.content).substring(0, 200) + "..." 
+                    : formatText(announcement.content)
+                  }
+                </p>                
                 <div class="flex justify-between items-center">
                   <span class="text-slate-400 text-sm">By: ${announcement.author?.username || 'Unknown'}</span>
                   <button class="view-details-btn text-blue-400 hover:text-blue-300 text-sm flex items-center gap-1">
@@ -1242,7 +1247,7 @@
             container.addEventListener('click', (e) => {
               const btn = e.target.closest('.view-details-btn');
               if (btn) {
-                window.location.href = '/check-login';
+                window.location.href = '/login';
               }
             });
           } catch (error) {

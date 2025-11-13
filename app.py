@@ -859,9 +859,6 @@ atexit.register(lambda: scheduler.shutdown(wait=False))
 """
 Request from Edmond, notifier --> Courtesy of Lyxin
 """
-# ==============================================================
-#     UPCOMING CLASS NOTIFICATION SCHEDULER (LYXNEXUS VERSION)
-# ==============================================================
 
 from datetime import datetime, timedelta
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -913,7 +910,6 @@ def get_timetable_and_notify():
 
         except Exception as e:
             print(f"[ERROR] Failed to process timetable notifications: {e}")
-
 
 # ==============================================================
 #         SCHEDULER RUNNER FOR UPCOMING CLASS NOTIFICATIONS
