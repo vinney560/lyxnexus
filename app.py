@@ -465,6 +465,22 @@ class PushSubscription(db.Model):
         }
     
 #==========================================  
+class Share(db.Model):
+    __tablename__ = 'shares'
+
+    id = db.Column(db.Integer, primary_key=True)
+    share_id = db.Column(db.String(36), unique=True, nullable=False)  # uuid4 string
+    owner_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    used = db.Column(db.Boolean, default=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+    owner = db.relationship('User', backref='shares')
+
+    def is_expired(self):
+        from datetime import timedelta, datetime
+        return datetime.utcnow() > self.created_at + timedelta(hours=2)
+#==============================================
+
 # Master key for Admin Access  
 def initialize_admin_code():
     """Initialize the admin code system if no code exists"""
@@ -3162,22 +3178,26 @@ def upload_file():
 from uuid import uuid4
 from datetime import datetime, timedelta
 
-users_downloads = {}
-shares = {}
 MAX_DOWNLOADS = 5
-LINK_EXPIRY_HOURS = 2
 
 @app.route('/api/files/<int:id>/download')
 @login_required
 def download_file(id):
-    """Download file with limiter and modern template on limit reached"""
+    """Download file with limiter and share system"""
     user_id = current_user.id
-    count = users_downloads.get(user_id, 0)
+
+    # Count downloads by session or DB (you can adjust)
+    count = current_user.download_count if hasattr(current_user, 'download_count') else 0
 
     if count < MAX_DOWNLOADS:
-        # Increment count and allow download
-        users_downloads[user_id] = count + 1
+        # Increment count
+        if hasattr(current_user, 'download_count'):
+            current_user.download_count += 1
+        else:
+            current_user.download_count = 1
+        db.session.commit()
 
+        # Get file from DB
         file = File.query.get_or_404(id)
         return send_file(
             BytesIO(file.file_data),
@@ -3186,23 +3206,24 @@ def download_file(id):
             mimetype=file.file_type
         )
     else:
-        # Generate share link with timestamp
-        share_id = str(uuid4())
-        shares[share_id] = {
-            'owner': user_id,
-            'used': False,
-            'created_at': datetime.utcnow()  # timestamp for expiry
-        }
+        # Create share link
+        share_uuid = str(uuid4())
+        new_share = Share(
+            share_id=share_uuid,
+            owner_id=user_id
+        )
+        db.session.add(new_share)
+        db.session.commit()
 
         return render_template(
             'download_limit.html',
-            share_link=f'https://lyxnexus.onrender.com/share/{share_id}'
+            share_link=f'https://lyxnexus.onrender.com/share/{share_uuid}'
         )
 
 @app.route('/share/<share_id>')
 def access_share(share_id):
-    """Handle access to shared link"""
-    share = shares.get(share_id)
+    """Access a shared link"""
+    share = Share.query.filter_by(share_id=share_id).first()
     if not share:
         return render_template(
             'share_status.html',
@@ -3211,9 +3232,9 @@ def access_share(share_id):
             link_text="Go Home"
         ), 404
 
-    # Check if link expired
-    if datetime.utcnow() > share['created_at'] + timedelta(hours=LINK_EXPIRY_HOURS):
-        shares.pop(share_id)  # remove expired link
+    if share.is_expired():
+        db.session.delete(share)
+        db.session.commit()
         return render_template(
             'share_status.html',
             message="Link expired after 2 hours",
@@ -3221,10 +3242,12 @@ def access_share(share_id):
             link_text="Go Home"
         ), 410
 
-    # Mark as used and allow download for owner
-    share['used'] = True
-    owner_id = share['owner']
-    users_downloads[owner_id] = max(0, users_downloads.get(owner_id, 0) - 1)  # restore one download
+    if not share.used:
+        share.used = True
+        # Restore one download for owner
+        if hasattr(share.owner, 'download_count'):
+            share.owner.download_count = max(0, share.owner.download_count - 1)
+        db.session.commit()
 
     return render_template(
         'share_status.html',
