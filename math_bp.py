@@ -8,7 +8,6 @@ import json
 import time
 import random
 
-# Create blueprint
 math_bp = Blueprint('math', __name__, url_prefix='/math')
 
 # API Keys and Model
@@ -298,20 +297,18 @@ Now provide a comprehensive mathematical response to the student's query using t
                 if i + 1 < len(recent_exchanges):
                     contents.append({"role": "model", "parts": [{"text": recent_exchanges[i + 1]}]})
     
-    # Add current math prompt
     contents.append({"role": "user", "parts": [{"text": math_prompt}]})
     
-    # Use standard API
     for api_key in API_KEYS:
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{MODEL}:generateContent?key={api_key}"
         headers = {"Content-Type": "application/json"}
         payload = {
             "contents": contents,
             "generationConfig": {
-                "temperature": 0.3,  # Lower temperature for mathematical accuracy
+                "temperature": 0.3,  # Lower temperature for mathematical accuracy (As per google recommd)
                 "topK": 20,
                 "topP": 0.8,
-                "maxOutputTokens": 2048,  # More tokens for detailed math solutions
+                "maxOutputTokens": 2048,
             }
         }
         

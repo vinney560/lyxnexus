@@ -27,6 +27,10 @@
 
     <script src="{{ url_for('static', filename='js/n-s.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/typed.js@2.0.12"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
+
 </head>
 <style>
     :root {
@@ -1228,6 +1232,23 @@
         });
     </script>
     <script>
+      function formatMath(text) {
+        const container = document.createElement("span");
+        container.textContent = text; // preserve raw LaTeX
+
+        renderMathInElement(container, {
+          delimiters: [
+            { left: "$$", right: "$$", display: true },
+            { left: "\\(", right: "\\)", display: false },
+            { left: "\\[", right: "\\]", display: true }
+          ],
+          throwOnError: false
+        });
+
+        return container.innerHTML;
+      }
+    </script>
+    <script>
         window.currentUserId = {{ current_user.id }};
         console.log('User ID:', window.currentUserId);
         const API_BASE = '/api';
@@ -2048,7 +2069,7 @@
                     <div 
                       class="mb-4 text-gray-300 text-sm leading-relaxed whitespace-pre-line list-inside"
                     >
-                      ${assignment.description}
+                      ${formatMath(assignment.description)}
                     </div>
                     
                 

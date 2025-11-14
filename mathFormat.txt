@@ -1,0 +1,210 @@
+===============================
+  KATEX / LATEX MATH CHEAT-SHEET
+===============================
+
+-------------------------------
+1. MATH MODES
+-------------------------------
+Inline math:
+\( a^2 + b^2 = c^2 \)
+
+Block/Display:
+$$ a^2 + b^2 = c^2 $$
+
+
+-------------------------------
+2. SUPERSCRIPTS & SUBSCRIPTS
+-------------------------------
+x^2
+x^{10}
+a_1
+x_{i+1}
+x_2^{10}
+
+
+-------------------------------
+3. FRACTIONS
+-------------------------------
+\frac{a}{b}
+\frac{x+1}{2x-5}
+\frac{\frac{1}{x}}{x+1}
+
+
+-------------------------------
+4. ROOTS
+-------------------------------
+\sqrt{x}
+\sqrt{a^2 + b^2}
+\sqrt[n]{x}
+
+
+-------------------------------
+5. BRACKETS
+-------------------------------
+(a+b)
+\left( \frac{a}{b} \right)
+\left[ x^2 + y^2 \right]
+\left| x \right|
+\left\langle v \right\rangle
+
+
+-------------------------------
+6. GREEK LETTERS
+-------------------------------
+Lowercase:
+\alpha \beta \gamma \delta \epsilon \theta \lambda \mu \pi \rho \sigma \omega
+
+Uppercase:
+\Gamma \Delta \Theta \Lambda \Pi \Sigma \Omega
+
+
+-------------------------------
+7. TRIG FUNCTIONS
+-------------------------------
+\sin x
+\cos x
+\tan x
+\cot x
+\sec x
+\csc x
+
+
+-------------------------------
+8. EXPONENTIALS & LOGS
+-------------------------------
+e^x
+\ln x
+\log_{10} x
+
+
+-------------------------------
+9. SUMMATIONS & PRODUCTS
+-------------------------------
+\sum_{n=1}^{\infty} n^2
+\sum_{i=0}^k x_i
+\prod_{i=1}^{n} a_i
+
+
+-------------------------------
+10. LIMITS
+-------------------------------
+\lim_{x \to 0} \frac{\sin x}{x}
+\lim_{n \to \infty} a_n
+
+
+-------------------------------
+11. INTEGRALS
+-------------------------------
+\int_0^1 x^2 \, dx
+\int_{-\infty}^{\infty} e^{-x^2} dx
+\iint_R f(x,y)\,dA
+\oint_C F \cdot dr
+
+
+-------------------------------
+12. MATRICES
+-------------------------------
+\begin{pmatrix}
+1 & 2 \\
+3 & 4
+\end{pmatrix}
+
+\begin{bmatrix}
+a & b \\
+c & d
+\end{bmatrix}
+
+
+-------------------------------
+13. VECTORS & BOLD
+-------------------------------
+\vec{v}
+\hat{n}
+\mathbf{A}
+\overline{AB}
+
+
+-------------------------------
+14. ARROWS
+-------------------------------
+\rightarrow
+\leftarrow
+\Rightarrow
+\Leftarrow
+\leftrightarrow
+\Longrightarrow
+
+
+-------------------------------
+15. SETS & RELATIONS
+-------------------------------
+\in
+\notin
+\subset
+\subseteq
+\supset
+\cup
+\cap
+\emptyset
+\forall
+\exists
+
+
+-------------------------------
+16. SPECIAL SYMBOLS
+-------------------------------
+\infty
+\approx
+\neq
+\leq
+\geq
+\cdot
+\circ
+\pm
+\mp
+
+
+-------------------------------
+17. TEXT IN MATH
+-------------------------------
+\text{Hello}
+\text{area} = \pi r^2
+
+
+-------------------------------
+18. COMMON FORMULAS
+-------------------------------
+Quadratic Formula:
+x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}
+
+Pythagorean Theorem:
+a^2 + b^2 = c^2
+
+Euler Identity:
+e^{i\pi} + 1 = 0
+
+Distance Formula:
+d = \sqrt{(x_2 - x_1)^2 + (y_2 - y_1)^2}
+
+
+-------------------------------
+19. DERIVATIVES (BASICS)
+-------------------------------
+\frac{d}{dx}(x^n) = nx^{n-1}
+\frac{d}{dx}(e^x) = e^x
+\frac{d}{dx}(\ln x) = \frac{1}{x}
+\frac{d}{dx}(\sin x) = \cos x
+
+
+-------------------------------
+20. INTEGRALS (BASICS)
+-------------------------------
+\int x^n \, dx = \frac{x^{n+1}}{n+1} + C
+\int e^x \, dx = e^x + C
+\int \frac{1}{x} \, dx = \ln|x| + C
+\int \sin x \, dx = -\cos x + C
+
+
+-------------------------------
+END OF CHEAT-SHEET
+-------------------------------

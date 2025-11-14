@@ -47,7 +47,7 @@ def activities():
             user_id=current_user.id
         ).order_by(
             desc(UserActivity.timestamp)
-        ).limit(25).all()
+        ).limit(150).all()
         
         # Format activities for JSON response
         activities_data = []
