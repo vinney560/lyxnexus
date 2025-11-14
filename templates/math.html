@@ -96,6 +96,8 @@
             justify-content: space-between;
             border-bottom: 1px solid rgba(59, 130, 246, 0.3);
             flex-shrink: 0;
+            z-index: 100;
+            position: relative;
         }
 
         .header-left h1 {
@@ -151,16 +153,19 @@
             flex: 1;
             height: calc(100vh - var(--header-height));
             overflow: hidden;
+            position: relative;
         }
 
         .sidebar {
             width: var(--sidebar-width);
-            background: rgba(15, 23, 42, 0.8);
+            background: rgba(15, 23, 42, 0.95);
             border-right: 1px solid rgba(59, 130, 246, 0.2);
             padding: 20px;
             overflow-y: auto;
             flex-shrink: 0;
             transition: all 0.3s ease;
+            z-index: 50;
+            position: relative;
         }
 
         .sidebar.collapsed {
@@ -173,7 +178,7 @@
         .toggle-sidebar {
             position: absolute;
             top: 90px;
-            left: var(--sidebar-width);
+            left: 0;
             background: rgba(59, 130, 246, 0.8);
             color: white;
             border: none;
@@ -184,7 +189,7 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            z-index: 10;
+            z-index: 60;
             transition: all 0.3s ease;
         }
 
@@ -275,6 +280,7 @@
             flex-direction: column;
             overflow: hidden;
             position: relative;
+            z-index: 1;
         }
 
         .chat-messages {
@@ -284,6 +290,8 @@
             background: rgba(15, 23, 42, 0.6);
             display: flex;
             flex-direction: column;
+            position: relative;
+            z-index: 1;
         }
 
         .message {
@@ -398,7 +406,7 @@
             flex-shrink: 0;
             position: sticky;
             bottom: 0;
-            z-index: 5;
+            z-index: 10;
         }
 
         .chat-input-wrapper {
@@ -562,6 +570,22 @@
             box-shadow: 0 6px 20px rgba(59, 130, 246, 0.6);
         }
 
+        /* Overlay for mobile sidebar */
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 45;
+            display: none;
+        }
+
+        .sidebar-overlay.active {
+            display: block;
+        }
+
         /* Scrollbar Styling */
         ::-webkit-scrollbar {
             width: 8px;
@@ -598,16 +622,16 @@
             .sidebar {
                 position: fixed;
                 height: 100%;
-                z-index: 5;
+                z-index: 50;
                 box-shadow: 5px 0 15px rgba(0, 0, 0, 0.2);
                 transform: translateX(-100%);
                 transition: transform 0.3s ease;
+                width: var(--sidebar-width);
+                max-width: 400px;
             }
             
             .sidebar:not(.collapsed) {
                 transform: translateX(0);
-                width: var(--sidebar-width);
-                max-width: 400px;
             }
             
             .toggle-sidebar {
@@ -628,6 +652,13 @@
 
             .assignment-list {
                 max-height: calc(100vh - 250px);
+            }
+            
+            /* Ensure chat area is fully accessible when sidebar is closed */
+            .chat-area.sidebar-open {
+                transform: none;
+                filter: none;
+                pointer-events: all;
             }
         }
 
@@ -743,8 +774,8 @@
             }
             
             .toggle-sidebar {
-                top: 85px;
-                z-index: 15;
+                top: 65px;
+                z-index: 60;
             }
             
             .empty-state {
@@ -841,7 +872,7 @@
             }
             
             .toggle-sidebar {
-                top: 75px;
+                top: 10px;
                 width: 20px;
                 height: 35px;
             }
@@ -960,6 +991,9 @@
         </div>
     </div>
 
+    <!-- Overlay for mobile sidebar -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
     <!-- Main Content -->
     <div class="math-content">
         <!-- Sidebar Toggle -->
@@ -983,7 +1017,7 @@
         </div>
 
         <!-- Main Chat Area -->
-        <div class="chat-area">
+        <div class="chat-area" id="chatArea">
             <div class="chat-messages" id="chatMessages">
                 <div class="empty-state" id="emptyState">
                     <div class="icon">
@@ -1036,12 +1070,21 @@
             setupEventListeners();
             setupScrollHandler();
             setupMobileEnhancements();
+            
+            // Initialize sidebar state based on screen size
+            if (window.innerWidth <= 968) {
+                isSidebarCollapsed = true;
+                document.getElementById('sidebar').classList.add('collapsed');
+                document.getElementById('toggleSidebar').classList.add('collapsed');
+                document.getElementById('sidebarIcon').className = 'fas fa-chevron-right';
+            }
         });
 
         function setupEventListeners() {
             const chatInput = document.getElementById('chatInput');
             const toggleSidebar = document.getElementById('toggleSidebar');
             const scrollToBottomBtn = document.getElementById('scrollToBottom');
+            const sidebarOverlay = document.getElementById('sidebarOverlay');
             
             // Chat input handling
             chatInput.addEventListener('keypress', function(e) {
@@ -1059,6 +1102,13 @@
             // Sidebar toggle
             toggleSidebar.addEventListener('click', function() {
                 toggleSidebarView();
+            });
+
+            // Overlay click to close sidebar
+            sidebarOverlay.addEventListener('click', function() {
+                if (window.innerWidth <= 968 && !isSidebarCollapsed) {
+                    toggleSidebarView();
+                }
             });
 
             // Scroll to bottom button
@@ -1134,6 +1184,8 @@
             const sidebar = document.getElementById('sidebar');
             const toggleBtn = document.getElementById('toggleSidebar');
             const sidebarIcon = document.getElementById('sidebarIcon');
+            const overlay = document.getElementById('sidebarOverlay');
+            const chatArea = document.getElementById('chatArea');
             
             isSidebarCollapsed = !isSidebarCollapsed;
             
@@ -1141,6 +1193,12 @@
                 sidebar.classList.add('collapsed');
                 toggleBtn.classList.add('collapsed');
                 sidebarIcon.className = 'fas fa-chevron-right';
+                overlay.classList.remove('active');
+                chatArea.classList.remove('sidebar-open');
+                
+                // Enable body scroll on mobile
+                document.body.style.overflow = 'hidden';
+                document.getElementById('chatMessages').style.overflowY = 'auto';
             } else {
                 sidebar.classList.remove('collapsed');
                 toggleBtn.classList.remove('collapsed');
@@ -1148,34 +1206,13 @@
                 
                 // On mobile, add overlay when sidebar is open
                 if (window.innerWidth <= 968) {
-                    createOverlay();
+                    overlay.classList.add('active');
+                    chatArea.classList.add('sidebar-open');
+                    
+                    // Prevent body scroll when sidebar is open on mobile
+                    document.body.style.overflow = 'hidden';
+                    document.getElementById('chatMessages').style.overflowY = 'hidden';
                 }
-            }
-        }
-
-        function createOverlay() {
-            let overlay = document.getElementById('sidebarOverlay');
-            if (!overlay) {
-                overlay = document.createElement('div');
-                overlay.id = 'sidebarOverlay';
-                overlay.style.cssText = `
-                    position: fixed;
-                    top: 0;
-                    left: 0;
-                    right: 0;
-                    bottom: 0;
-                    background: rgba(0, 0, 0, 0.5);
-                    z-index: 4;
-                    display: none;
-                `;
-                overlay.addEventListener('click', toggleSidebarView);
-                document.body.appendChild(overlay);
-            }
-            overlay.style.display = 'block';
-            
-            // Remove overlay when sidebar is collapsed
-            if (isSidebarCollapsed) {
-                overlay.style.display = 'none';
             }
         }
 
@@ -1545,9 +1582,17 @@
         // Handle window resize
         window.addEventListener('resize', function() {
             // Auto-collapse sidebar on mobile when switching to desktop
-            if (window.innerWidth > 968 && isSidebarCollapsed) {
+            if (window.innerWidth > 968) {
                 const overlay = document.getElementById('sidebarOverlay');
-                if (overlay) overlay.style.display = 'none';
+                if (overlay) overlay.classList.remove('active');
+                document.getElementById('chatArea').classList.remove('sidebar-open');
+                document.body.style.overflow = 'hidden';
+                document.getElementById('chatMessages').style.overflowY = 'auto';
+            } else {
+                // On mobile, ensure sidebar is collapsed by default
+                if (!isSidebarCollapsed) {
+                    toggleSidebarView();
+                }
             }
         });
     </script>
