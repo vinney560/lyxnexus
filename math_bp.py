@@ -61,7 +61,7 @@ class MathAssignmentService:
             print(f"Error getting assignment: {e}")
             return None
     
-    def get_user_assignments(self, user_id=None, limit=50):
+    def _assignments(self, limit=50):
         """Get assignments with optional user filter"""
         try:
             from app import Assignment, Topic
@@ -69,8 +69,6 @@ class MathAssignmentService:
             print("Getting Assignment by Specific user")
             query = Assignment.query
             
-            if user_id:
-                query = query.filter_by(user_id=user_id)
             
             assignments = query.order_by(
                 Assignment.created_at.desc()
@@ -736,7 +734,7 @@ def get_assignments():
         from app import db
         math_service = MathAssignmentService(db)
         
-        assignments = math_service.get_user_assignments(
+        assignments = math_service._assignments(
             user_id=current_user.id,
             limit=50
         )
