@@ -1232,22 +1232,30 @@
         });
     </script>
     <script>
-      function formatMath(text) {
-        const container = document.createElement("span");
-        container.textContent = text; // preserve raw LaTeX
-
-        renderMathInElement(container, {
-          delimiters: [
-            { left: "$$", right: "$$", display: true },
-            { left: "\\(", right: "\\)", display: false },
-            { left: "\\[", right: "\\]", display: true }
-          ],
-          throwOnError: false
-        });
-
-        return container.innerHTML;
-      }
+        function formatMath(text) {
+            try {
+                // Use a span to wrap the LaTeX
+                const container = document.createElement("span");
+                container.innerHTML = text; // raw LaTeX goes here
+            
+                renderMathInElement(container, {
+                    delimiters: [
+                        { left: "$$", right: "$$", display: true },
+                        { left: "\\[", right: "\\]", display: true },
+                        { left: "$", right: "$", display: false },
+                        { left: "\\(", right: "\\)", display: false }
+                    ],
+                    throwOnError: false
+                });
+            
+                return container.innerHTML;
+            } catch (err) {
+                console.error("KaTeX render error:", err);
+                return text; // fallback
+            }
+        }
     </script>
+
     <script>
         window.currentUserId = {{ current_user.id }};
         console.log('User ID:', window.currentUserId);
