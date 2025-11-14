@@ -62,54 +62,11 @@ class MathAssignmentService:
             return None
     
     def _assignments(self, limit=50):
-        """Get assignments with optional user filter"""
+        """Get assignments without user filtering"""
         try:
             from app import Assignment, Topic
             
-            print("Getting Assignment by Specific user")
-            query = Assignment.query
-            
-            
-            assignments = query.order_by(
-                Assignment.created_at.desc()
-            ).limit(limit).all()
-            
-            result = []
-            for assignment in assignments:
-                assignment_data = {
-                    'id': assignment.id,
-                    'title': assignment.title,
-                    'description': assignment.description,
-                    'due_date': assignment.due_date.isoformat() if assignment.due_date else None,
-                    'created_at': assignment.created_at.isoformat() if assignment.created_at else None,
-                    'file_name': assignment.file_name,
-                    'file_type': assignment.file_type,
-                    'topic_id': assignment.topic_id,
-                    'user_id': assignment.user_id,
-                    'has_file': bool(assignment.file_data)
-                }
-                
-                # Add topic info if available
-                if assignment.topic_id:
-                    topic = Topic.query.filter_by(id=assignment.topic_id).first()
-                    if topic:
-                        assignment_data['topic_name'] = topic.name
-                        assignment_data['topic_description'] = topic.description
-                
-                result.append(assignment_data)
-            
-            return result
-            
-        except Exception as e:
-            print(f"Error getting assignments: {e}")
-            return []
-    
-    def _assignments(self, limit=50):
-        """Get assignments with optional user filter"""
-        try:
-            from app import Assignment, Topic
-            
-            print("Getting Assignment")
+            print("Getting All Assignments")
             query = Assignment.query
             
             assignments = query.order_by(
@@ -217,7 +174,7 @@ class MathAssignmentService:
         try:
             from app import AIConverse
             
-            print("Getting MAth history")
+            print("Getting Math history")
             conversations = AIConverse.query.filter_by(
                 user_id=user_id,
                 context_used='math_assignment'
@@ -529,10 +486,8 @@ def math_data():
     from app import db
     math_service = MathAssignmentService(db)
 
-    # Load user's assignments
-    user_assignments = math_service._assignments(
-        limit=50
-    )
+    # Load assignments without user filtering
+    user_assignments = math_service._assignments(limit=50)
 
     # Load math conversation history
     conversation_history = math_service.get_math_conversation_history(
@@ -734,10 +689,8 @@ def get_assignments():
         from app import db
         math_service = MathAssignmentService(db)
         
-        assignments = math_service._assignments(
-            user_id=current_user.id,
-            limit=50
-        )
+        # Get all assignments without user filtering
+        assignments = math_service._assignments(limit=50)
         
         return jsonify({
             'success': True,
