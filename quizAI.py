@@ -18,7 +18,7 @@ class QuizGenerator:
         self.current_key_index = 0
         self.model_name = "gemini-2.5-flash-lite"
         
-        # Comprehensive University Course Database
+        # Comprehensive University Course Database with updated valid sources
         self.university_courses = {
             'ZOOL 143': {
                 'name': 'BIOLOGY OF HIV/AIDS',
@@ -26,7 +26,7 @@ class QuizGenerator:
                 'level': 'First Year University',
                 'description': 'Comprehensive study of HIV virology, immunology, transmission, prevention, and global impact',
                 'topics': ['HIV structure', 'viral replication', 'immune response', 'ART therapy', 'epidemiology'],
-                'sources': ['Open University', 'Medical textbooks', 'WHO guidelines', 'Academic research papers']
+                'sources': ['WHO HIV/AIDS Fact Sheets', 'CDC HIV Guidelines', 'Medical Microbiology by Murray et al.', 'The Lancet HIV Journal']
             },
             'MATH 112': {
                 'name': 'COLLEGE ALGEBRA', 
@@ -34,7 +34,7 @@ class QuizGenerator:
                 'level': 'First Year University',
                 'description': 'Fundamental algebraic concepts, functions, equations, and mathematical modeling',
                 'topics': ['linear equations', 'quadratic functions', 'polynomials', 'exponents', 'matrices'],
-                'sources': ['Reed College', 'OpenStax Algebra', 'Khan Academy', 'University curriculum']
+                'sources': ['OpenStax College Algebra', 'Khan Academy Algebra', 'Schaum\'s Outline of College Algebra', 'University Math Curriculum']
             },
             'PHIL 104': {
                 'name': 'INTRODUCTION TO PHILOSOPHY',
@@ -42,7 +42,7 @@ class QuizGenerator:
                 'level': 'First Year University',
                 'description': 'Foundational philosophical concepts, ethics, logic, and major philosophical traditions',
                 'topics': ['metaphysics', 'epistemology', 'ethics', 'logic', 'political philosophy'],
-                'sources': ['Chuka University', 'Stanford Encyclopedia', 'Philosophy textbooks', 'Classical works']
+                'sources': ['Stanford Encyclopedia of Philosophy', 'Introduction to Philosophy by John Perry', 'Philosophy: The Basics by Nigel Warburton', 'University Philosophy Curriculum']
             },
             'COMS 101': {
                 'name': 'INTRODUCTION TO COMMUNICATION STUDIES',
@@ -50,23 +50,23 @@ class QuizGenerator:
                 'level': 'First Year University', 
                 'description': 'Principles of human communication, media studies, and interpersonal interaction',
                 'topics': ['communication models', 'verbal/nonverbal', 'public speaking', 'media literacy'],
-                'sources': ['Chuka University', 'Communication theory texts', 'Academic journals', 'Case studies']
+                'sources': ['University Communication Textbooks', 'Communication Theory by F. Jablin', 'APA Communication Guidelines', 'Chuka University Lecture Notes']
+            },
+            'COMP 107': {
+                'name': 'INTRODUCTION TO COMPUTING', 
+                'department': 'Computer Science',
+                'level': 'First Year University',
+                'description': 'Fundamentals of computer systems, networking, databases, problem-solving techniques, and basic programming concepts',
+                'topics': ['computer hardware', 'software systems', 'networking', 'databases', 'cybersecurity', 'programming basics'],
+                'sources': ['MIT OpenCourseWare – Introduction to Computer Science', 'NIST Computer Science Resources', 'OpenStax Introduction to Computer Science', 'Python.org Documentation']
             },
             'BIT 100': {
                 'name': 'INTRODUCTION TO INFORMATION TECHNOLOGY',
                 'department': 'Business Information Technology',
                 'level': 'First Year University',
-                'description': 'Fundamentals of computer systems, networking, databases, and IT infrastructure',
-                'topics': ['computer hardware', 'software systems', 'networking', 'databases', 'cybersecurity'],
-                'sources': ['IT textbooks', 'Industry standards', 'Technical documentation']
-            },
-            'COMP 107': {
-                'name': 'INTRODUCTION TO COMPUTER PROGRAMMING',
-                'department': 'Computer Science',
-                'level': 'First Year University',
-                'description': 'Basic programming concepts, algorithm development, and problem-solving techniques',
+                'description': 'IT infrastructure, algorithm development, variables in coding, basics of programming languages, and problem-solving techniques',
                 'topics': ['programming basics', 'algorithms', 'data types', 'control structures', 'debugging'],
-                'sources': ['Programming textbooks', 'Online courses', 'Coding standards']
+                'sources': ['Computer Science: An Overview by J. Glenn Brookshear', 'IT Fundamentals by Pearson', 'Online IT Courses (Coursera, edX)', 'Industry Coding Standards']
             },
             'CUSTOM': {
                 'name': 'CUSTOM TOPIC',
@@ -164,6 +164,7 @@ class QuizGenerator:
         difficulty_info = self.difficulty_levels.get(difficulty.lower(), self.difficulty_levels['medium'])
         method_info = self.answer_methods.get(answer_method.lower(), self.answer_methods['multiple_choice'])
         
+        # Note: Removed JSON comments for valid JSON
         prompt = f"""
         ACADEMIC QUIZ GENERATION PROTOCOL - LyxNexus University System
         ==============================================================
@@ -206,7 +207,7 @@ class QuizGenerator:
         [
           {{
             "question": "Clear, academically rigorous question",
-            "options": ["Option1", "Option2", ...] // {method_info['options_count']} options for multiple choice, empty for others
+            "options": [],
             "correct": "Exactly correct answer",
             "explanation": "Comprehensive academic explanation with source references",
             "source": "Primary academic source or reference",
@@ -217,7 +218,7 @@ class QuizGenerator:
         ]
 
         SPECIAL FORMATS:
-        - Multiple Choice: Provide {method_info['options_count']} plausible options
+        - Multiple Choice: Provide {method_info['options_count']} plausible options in "options" array
         - True/False: Use options ["True", "False"] 
         - Fill-in-Blank: Include exact expected answer in "correct"
         - Short Answer: Focus on concise, precise responses
