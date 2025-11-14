@@ -30,6 +30,7 @@ class MathAssignmentService:
         try:
             from app import Assignment, Topic
             
+            print("Getting Assignment by Id")
             assignment = Assignment.query.filter_by(id=assignment_id).first()
             if assignment:
                 # Convert to dict with all details
@@ -65,10 +66,53 @@ class MathAssignmentService:
         try:
             from app import Assignment, Topic
             
+            print("Getting Assignment by Specific user")
             query = Assignment.query
             
             if user_id:
                 query = query.filter_by(user_id=user_id)
+            
+            assignments = query.order_by(
+                Assignment.created_at.desc()
+            ).limit(limit).all()
+            
+            result = []
+            for assignment in assignments:
+                assignment_data = {
+                    'id': assignment.id,
+                    'title': assignment.title,
+                    'description': assignment.description,
+                    'due_date': assignment.due_date.isoformat() if assignment.due_date else None,
+                    'created_at': assignment.created_at.isoformat() if assignment.created_at else None,
+                    'file_name': assignment.file_name,
+                    'file_type': assignment.file_type,
+                    'topic_id': assignment.topic_id,
+                    'user_id': assignment.user_id,
+                    'has_file': bool(assignment.file_data)
+                }
+                
+                # Add topic info if available
+                if assignment.topic_id:
+                    topic = Topic.query.filter_by(id=assignment.topic_id).first()
+                    if topic:
+                        assignment_data['topic_name'] = topic.name
+                        assignment_data['topic_description'] = topic.description
+                
+                result.append(assignment_data)
+            
+            return result
+            
+        except Exception as e:
+            print(f"Error getting assignments: {e}")
+            return []
+    
+    def _assignments(self, limit=50):
+        """Get assignments with optional user filter"""
+        try:
+            from app import Assignment, Topic
+            
+            print("Getting Assignment")
+            query = Assignment.query
             
             assignments = query.order_by(
                 Assignment.created_at.desc()
@@ -109,6 +153,7 @@ class MathAssignmentService:
         try:
             from app import Assignment, Topic
             
+            print("Getting assignment by Topic")
             assignments = Assignment.query.filter_by(
                 topic_id=topic_id
             ).order_by(
@@ -174,6 +219,7 @@ class MathAssignmentService:
         try:
             from app import AIConverse
             
+            print("Getting MAth history")
             conversations = AIConverse.query.filter_by(
                 user_id=user_id,
                 context_used='math_assignment'
@@ -486,8 +532,7 @@ def math_data():
     math_service = MathAssignmentService(db)
 
     # Load user's assignments
-    user_assignments = math_service.get_user_assignments(
-        user_id=current_user.id,
+    user_assignments = math_service._assignments(
         limit=50
     )
 
