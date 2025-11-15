@@ -5023,14 +5023,13 @@ def download_assignment_file(id):
         as_attachment=True,
         mimetype=assignment.file_type
     )
+
 @app.route('/assignment/<int:id>')
 @login_required
 def assignment_page(id):
     """Serve the assignment file view and download page"""
     assignment = Assignment.query.get_or_404(id)
-    now = datetime.utcnow()
-    three_days = datetime.utcnow() + timedelta(days=3)
-    return render_template('assignment.html', assignment=assignment, now=now, three_days=three_days)
+    return render_template('assignment.html', assignment=assignment)
 
 @app.route("/api/preview")
 def preview():

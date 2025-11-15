@@ -11,7 +11,7 @@
     <link rel="canonical" href="https://lyxnexus.onrender.com/" />
     <link rel="icon" href="https://lyxnexus.onrender.com/uploads/favicon-1.png"/>
 
-    <meta property="og:title" content="LyxNexus - Class Portal" />
+    <meta property="og:title" content="Assignment | LyxNexus" />
     <meta property="og:description" content="LyxNexus is a simple yet powerful class hub designed to keep everything in one place — from announcements and assignments to topics and class discussions." />
     <meta property="og:image" content="https://lyxnexus.onrender.com/favicon.ico" />
     <meta property="og:url" content="https://lyxnexus.onrender.com/" />
@@ -215,21 +215,11 @@
         {% if assignment %}
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div class="assignment-detail-card">
-                <div class="flex justify-between items-start mb-4 ">
+                <div class="flex justify-between items-start mb-4">
                     <h2 class="text-2xl font-bold">{{ assignment.title }}</h2>
-                    {% set today = now %}
-                    {% set three_days = three_days %}
-                    <span class="status-badge
-                        {% if assignment.due_date < today %}status-overdue
-                        {% elif assignment.due_date < three_days %}status-due-soon
-                        {% else %}status-upcoming
-                        {% endif %}">
-                        {% if assignment.due_date < today %}Overdue
-                        {% elif assignment.due_date < three_days %}Due Soon
-                        {% else %}...
-                        {% endif %}
+                    <span id="statusBadge" class="status-badge">
+                        Calculating...
                     </span>
-
                 </div>
                 
                 <p class="mb-6 text-gray-300">{{ assignment.description or 'No description provided.' }}</p>
@@ -237,13 +227,18 @@
                 <div class="space-y-3">
                     <div class="info-row">
                         <span class="info-label">Due Date:</span>
-                        <span class="info-value">
+                        <span class="info-value" id="dueDateDisplay">
                             {% if assignment.due_date %}
                                 {{ assignment.due_date.strftime('%B %d, %Y at %I:%M %p') }}
                             {% else %}
                                 No due date
                             {% endif %}
                         </span>
+                    </div>
+                    
+                    <div class="info-row">
+                        <span class="info-label">Time Remaining:</span>
+                        <span class="info-value" id="timeRemaining">Calculating...</span>
                     </div>
                     
                     <div class="info-row">
@@ -285,24 +280,73 @@
             <!-- File Preview & Download -->
             <div class="file-preview-container">
                 {% if assignment.file_name and assignment.file_data %}
-                    <i class="file-icon fas 
-                        {% if assignment.file_type == 'application/pdf' %}fa-file-pdf
-                        {% elif 'word' in assignment.file_type %}fa-file-word
-                        {% elif 'excel' in assignment.file_type %}fa-file-excel
-                        {% elif 'powerpoint' in assignment.file_type %}fa-file-powerpoint
-                        {% elif 'image' in assignment.file_type %}fa-file-image
-                        {% elif 'video' in assignment.file_type %}fa-file-video
-                        {% elif 'audio' in assignment.file_type %}fa-file-audio
-                        {% elif 'zip' in assignment.file_type %}fa-file-archive
-                        {% else %}fa-file-alt
-                        {% endif %}">
-                    </i>
-                    <h3 class="text-xl font-bold mb-2">{{ assignment.file_name }}</h3>
-                    <p class="text-gray-400 mb-6">File is ready for download</p>
-                    <a href="{{ url_for('download_assignment_file', id=assignment.id) }}" class="btn">
-                        <i class="fas fa-download mr-2"></i>Download File
-                    </a>
+                    {% if 'image' in assignment.file_type %}
+                        <!-- Image Preview -->
+                        <div class="w-full">
+                            <img src="{{ url_for('download_assignment_file', id=assignment.id) }}" 
+                                 alt="{{ assignment.file_name }}"
+                                 class="max-w-full max-h-96 object-contain mb-4 rounded-lg shadow-lg">
+                            <h3 class="text-xl font-bold mb-2">{{ assignment.file_name }}</h3>
+                            <div class="flex flex-wrap gap-4 justify-center">
+                                <button onclick="openInNewTab('{{ url_for('download_assignment_file', id=assignment.id) }}')" 
+                                        class="btn-outline">
+                                    <i class="fas fa-external-link-alt mr-2"></i>Open Full Size
+                                </button>
+                                <a href="{{ url_for('download_assignment_file', id=assignment.id) }}" 
+                                   download class="btn">
+                                    <i class="fas fa-download mr-2"></i>Download
+                                </a>
+                            </div>
+                        </div>
+                    
+                    {% elif assignment.file_type == 'application/pdf' %}
+                        <!-- PDF Preview -->
+                        <div class="w-full">
+                            <div class="relative w-full h-96 mb-4 rounded-lg overflow-hidden border border-gray-600">
+                                <iframe src="{{ url_for('download_assignment_file', id=assignment.id) }}"
+                                        width="100%" 
+                                        height="100%"
+                                        class="bg-white">
+                                    <p>Your browser does not support PDFs. 
+                                       <a href="{{ url_for('download_assignment_file', id=assignment.id) }}">Download the PDF</a>.
+                                    </p>
+                                </iframe>
+                            </div>
+                            <h3 class="text-xl font-bold mb-2">{{ assignment.file_name }}</h3>
+                            <div class="flex flex-wrap gap-4 justify-center">
+                                <a href="{{ url_for('download_assignment_file', id=assignment.id) }}" 
+                                   target="_blank" class="btn-outline">
+                                    <i class="fas fa-external-link-alt mr-2"></i>Open in New Tab
+                                </a>
+                                <a href="{{ url_for('download_assignment_file', id=assignment.id) }}" 
+                                   download class="btn">
+                                    <i class="fas fa-download mr-2"></i>Download PDF
+                                </a>
+                            </div>
+                        </div>
+                    
+                    {% else %}
+                        <!-- Other Files (Download Only) -->
+                        <i class="file-icon fas 
+                            {% if 'word' in assignment.file_type %}fa-file-word
+                            {% elif 'excel' in assignment.file_type %}fa-file-excel
+                            {% elif 'powerpoint' in assignment.file_type %}fa-file-powerpoint
+                            {% elif 'video' in assignment.file_type %}fa-file-video
+                            {% elif 'audio' in assignment.file_type %}fa-file-audio
+                            {% elif 'zip' in assignment.file_type %}fa-file-archive
+                            {% else %}fa-file-alt
+                            {% endif %}">
+                        </i>
+                        <h3 class="text-xl font-bold mb-2">{{ assignment.file_name }}</h3>
+                        <p class="text-gray-400 mb-6">Preview not available for this file type</p>
+                        <a href="{{ url_for('download_assignment_file', id=assignment.id) }}" 
+                           download class="btn">
+                            <i class="fas fa-download mr-2"></i>Download File
+                        </a>
+                    {% endif %}
+                
                 {% else %}
+                    <!-- No File Available -->
                     <i class="file-icon fas fa-file-exclamation"></i>
                     <h3 class="text-xl font-bold mb-2">No File Available</h3>
                     <p class="text-gray-400 mb-6">This assignment doesn't have an attached file yet.</p>
@@ -323,12 +367,79 @@
         </div>
         {% endif %}
     </main>
+
     <script>
-        const backBtn = document.addEventListener('click', () => {
-            backBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        // Function to open files in new tab
+        function openInNewTab(url) {
+            window.open(url, '_blank');
+        }
+
+        // Time calculation and status updates
+        document.addEventListener('DOMContentLoaded', function() {
+            {% if assignment and assignment.due_date %}
+                const dueDate = new Date("{{ assignment.due_date.strftime('%Y-%m-%dT%H:%M:%S') }}");
+                updateTimeRemaining(dueDate);
+                
+                // Update every minute
+                setInterval(() => {
+                    updateTimeRemaining(dueDate);
+                }, 60000);
+            {% else %}
+                document.getElementById('timeRemaining').textContent = 'No due date';
+                document.getElementById('statusBadge').textContent = 'No Due Date';
+                document.getElementById('statusBadge').className = 'status-badge status-upcoming';
+            {% endif %}
+        });
+
+        function updateTimeRemaining(dueDate) {
+            const now = new Date();
+            const timeRemainingElement = document.getElementById('timeRemaining');
+            const statusBadge = document.getElementById('statusBadge');
+            
+            const diffMs = dueDate - now;
+            const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+            const diffHrs = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const diffMins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+            
+            if (diffMs < 0) {
+                // Overdue
+                const overdueDays = Math.abs(diffDays);
+                const overdueHrs = Math.abs(diffHrs);
+                const overdueMins = Math.abs(diffMins);
+                
+                timeRemainingElement.textContent = `${overdueDays}d ${overdueHrs}h ${overdueMins}m ago`;
+                statusBadge.textContent = 'Overdue';
+                statusBadge.className = 'status-badge status-overdue';
+            } else if (diffDays === 0 && diffHrs < 24) {
+                // Due today
+                if (diffHrs < 3) {
+                    timeRemainingElement.textContent = `${diffHrs}h ${diffMins}m`;
+                    statusBadge.textContent = 'Due Soon';
+                    statusBadge.className = 'status-badge status-due-soon';
+                } else {
+                    timeRemainingElement.textContent = `${diffHrs}h ${diffMins}m`;
+                    statusBadge.textContent = 'Due Today';
+                    statusBadge.className = 'status-badge status-due-soon';
+                }
+            } else if (diffDays < 3) {
+                // Due soon (within 3 days)
+                timeRemainingElement.textContent = `${diffDays}d ${diffHrs}h ${diffMins}m`;
+                statusBadge.textContent = 'Due Soon';
+                statusBadge.className = 'status-badge status-due-soon';
+            } else {
+                // Upcoming
+                timeRemainingElement.textContent = `${diffDays}d ${diffHrs}h ${diffMins}m`;
+                statusBadge.textContent = 'Upcoming';
+                statusBadge.className = 'status-badge status-upcoming';
+            }
+        }
+
+        // Back button handler
+        document.getElementById('backBtn')?.addEventListener('click', function() {
+            this.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
             window.location.href = '/main-page';
             setTimeout(() => {
-                backBtn.innerHTML = '<i class="fas fa-arrow-left mr-2"></i>Back to Assignments';
+                this.innerHTML = '<i class="fas fa-arrow-left mr-2"></i>Back to Assignments';
             }, 2000);
         });
     </script>
