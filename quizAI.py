@@ -80,6 +80,7 @@ class QuizGenerator:
         
         SOURCES AND RESOURCES OF ACADEMICS ONLINE:
         - WHO HIV/AIDS Fact Sheets, CDC HIV Guidelines, Medical Microbiology by Murray et al., The Lancet HIV Journal, OpenStax College Algebra, Khan Academy Algebra, Schaum's Outline of College Algebra, University Math Curriculum, Stanford Encyclopedia of Philosophy, Introduction to Philosophy by John Perry, Philosophy: The Basics by Nigel Warburton, University Philosophy Curriculum, University Communication Textbooks, Communication Theory by F. Jablin, APA Communication Guidelines, Chuka University Lecture Notes, MIT OpenCourseWare – Introduction to Computer Science, NIST Computer Science Resources, OpenStax Introduction to Computer Science, Python.org Documentation, Computer Science: An Overview by J. Glenn Brookshear, IT Fundamentals by Pearson, Online IT Courses (Coursera, edX), Industry Coding Standards, AI-generated, Educational databases
+        
         CONTENT REQUIREMENTS:
         1. ALIGNMENT: Questions must align with standard university curriculum
         2. ACCURACY: Use only verified academic information
@@ -121,9 +122,18 @@ class QuizGenerator:
         - Personal or informal lifestyle topics
 
         Carefully analyze the provided topic.  
-        If it can reasonably be studied, taught, or analyzed in an academic context, classify it as educational.  
+        If it can reasonably be studied, taught, or analyzed in an academic context, classify it as educational and use the SOURCES AND RESOURCES OF ACADEMICS ONLINE above to source correct information then generate first year level questions and answers.  
         If it primarily belongs to casual, entertainment, or social contexts, classify it as non-educational.
 
+        NOTICE & TOPIC BREAKDOWN:
+        * These are the common Topic students will ask, understand the meaning of the unit code and then source correct academic resources for any when asked.
+        - ZOOL 143 is Biology of HIV & AIDS.
+        - COMP 107 is Fundation of computing.
+        - PHIL 104 is Philosophy & Society.
+        - BIT 100 is Barchelor in Information Technology.
+        - COMS 101 is Communication Skills.
+        - MATH 112 is College/University Mathematics
+        ## Use online tool to source information online for this Topics and generate first year level questions and Answers.
         """
     
     def _parse_response(self, response_text):
