@@ -1650,9 +1650,9 @@
 
             // Render math expressions if not a user message
             if (!isUser && !isInfo) {
-                setTimeout(() => {
+                requestAnimationFrame(() => {
                     renderMath(messageDiv);
-                }, 100);
+                });
             }
 
             scrollToBottom();
@@ -1804,9 +1804,9 @@
                     formattedContent.innerHTML = formatText(fullResponse);
 
                     // Render math expressions as they stream in
-                    setTimeout(() => {
+                    requestAnimationFrame(() => {
                         renderMath(currentStreamingMessage);
-                    }, 100);
+                    });
 
                     if (isAutoScrollEnabled) {
                         scrollToBottom();

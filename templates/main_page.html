@@ -2483,7 +2483,7 @@
             const modalContent = document.createElement('div');
             modalContent.className = 'modal-content';
             modalContent.style.cssText = `
-                background: linear-gradient(137deg, rgba(30, 41, 59, 0.8) 50%, rgba(30, 41, 59, 0.4) 50%);
+                background: linear-gradient(125deg, rgba(30, 41, 59, 0.8) 50%, rgba(30, 41, 59, 0.4) 50%);
                 padding: 30px;
                 border-radius: 12px;
                 box-shadow: 0 10px 30px rgba(0,0,0,0.3);
@@ -2630,6 +2630,44 @@
                 }, 1200);
             };
 
+            // Create Tutor button
+            const TutorButton = document.createElement('button');
+            TutorButton.innerHTML = '<i class="fas fa-question-circle"></i> Tutor AI';
+            TutorButton.style.cssText = `
+                padding: 15px 20px;
+                background: linear-gradient(135deg, #4facfe, #f093fb);
+                color: white;
+                border: none;
+                border-radius: 8px;
+                font-size: 16px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 10px;
+            `;
+            
+            TutorButton.onmouseover = () => TutorButton.style.transform = 'translateY(-2px)';
+            TutorButton.onmouseout = () => TutorButton.style.transform = 'translateY(0)';
+            TutorButton.onclick = () => {
+                TutorButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Opening...';
+                setTimeout(() => {
+                    TutorButton.style.opacity = '0.5';
+                    window.location.href = '/tutor';
+                }, 200);
+                setTimeout(() => {
+                    TutorButton.style.opacity = '0';
+                }, 500);
+                setTimeout(() => {
+                    TutorButton.style.opacity = '1';
+                    TutorButton.innerHTML = '<i class="fas fa-question-circle"></i> Tutor';
+                }, 2000);
+                setInterval(() => {
+                    window.location.href = '/tutor';
+                }, 1200);
+            };
+
             // Create close button
             const closeButton = document.createElement('button');
             closeButton.textContent = 'Close';
@@ -2653,6 +2691,7 @@
             buttonsContainer.appendChild(marionButton);
             buttonsContainer.appendChild(novaButton);
             buttonsContainer.appendChild(DoerButton);
+            buttonsContainer.appendChild(TutorButton);
             modalContent.appendChild(modalHeader);
             modalContent.appendChild(buttonsContainer);
             modalContent.appendChild(closeButton);
