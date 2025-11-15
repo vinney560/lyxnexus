@@ -128,11 +128,12 @@ class QuizGenerator:
         NOTICE & TOPIC BREAKDOWN:
         * These are the common Topic students will ask, understand the meaning of the unit code and then source correct academic resources for any when asked.
         - ZOOL 143 is Biology of HIV & AIDS.
-        - COMP 107 is Fundation of computing.
+        - COMP 107 is Fundation of computing delaing with Introduction to 
+Computers, Introduction to Computer Software , Operating System, SpreadSheet, Word Processing, Networking, Computer Classification & Harware considerations, .
         - PHIL 104 is Philosophy & Society.
-        - BIT 100 is Barchelor in Information Technology.
+        - BIT 100 is Barchelor in Information Technology dealing with INTRODUCTION TO PROGRAMMING, VARIABLES IN PROGRAMMING LANGUAGES, EXPRESSIONS & OPERATORS, PROGRAMMING CONCEPTS, PROBLEM-SOLVING ALGORITHMS 1 & 2.
         - COMS 101 is Communication Skills.
-        - MATH 112 is College/University Mathematics
+        - MATH 112 is College/University Mathematics.
         ## Use online tool to source information online for this Topics and generate first year level questions and Answers.
         """
     
