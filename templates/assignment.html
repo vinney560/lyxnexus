@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% if assignment %}{{ assignment.title }} - File{% else %}Assignment Not Found{% endif %} | LyxNexus</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- KaTeX CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" 
+          integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+    
     <meta name="keywords" content="education, coding, programming, web development, technology, online courses, learn to code" />
     <meta name="author" content="Vincent Kipngetich" />
     <meta name="robots" content="index, follow" />
@@ -20,6 +25,16 @@
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
+
+    <!-- KaTeX JS -->
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" 
+            integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" 
+            crossorigin="anonymous"></script>
+    
+    <!-- KaTeX auto-render extension -->
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" 
+            integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" 
+            crossorigin="anonymous"></script>
 
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
@@ -172,6 +187,20 @@
         color: #10B981;
     }
     
+    .math-content {
+        line-height: 1.6;
+    }
+    
+    .math-content p {
+        margin-bottom: 1rem;
+    }
+    
+    .katex-display {
+        margin: 1rem 0;
+        overflow-x: auto;
+        overflow-y: hidden;
+    }
+    
     @media (max-width: 768px) {
         .file-icon {
             font-size: 48px;
@@ -180,6 +209,10 @@
         .btn {
             padding: 8px 16px;
             font-size: 14px;
+        }
+        
+        .katex-display {
+            font-size: 0.9em;
         }
     }
 </style>
@@ -222,7 +255,9 @@
                     </span>
                 </div>
                 
-                <p class="mb-6 text-gray-300">{{ assignment.description or 'No description provided.' }}</p>
+                <div class="mb-6 text-gray-300 math-content" id="assignmentDescription">
+                    {{ assignment.description or 'No description provided.' }}
+                </div>
                 
                 <div class="space-y-3">
                     <div class="info-row">
@@ -374,23 +409,31 @@
             window.open(url, '_blank');
         }
 
-        // Time calculation and status updates
-        document.addEventListener('DOMContentLoaded', function() {
-            {% if assignment and assignment.due_date %}
-                const dueDate = new Date("{{ assignment.due_date.strftime('%Y-%m-%dT%H:%M:%S') }}");
-                updateTimeRemaining(dueDate);
-                
-                // Update every minute
-                setInterval(() => {
-                    updateTimeRemaining(dueDate);
-                }, 60000);
-            {% else %}
-                document.getElementById('timeRemaining').textContent = 'No due date';
-                document.getElementById('statusBadge').textContent = 'No Due Date';
-                document.getElementById('statusBadge').className = 'status-badge status-upcoming';
-            {% endif %}
-        });
+        // Math formatting function
+        function formatMathElements() {
+            const mathElements = document.querySelectorAll('.math-content');
+            
+            mathElements.forEach(element => {
+                try {
+                    renderMathInElement(element, {
+                        delimiters: [
+                            { left: "$$", right: "$$", display: true },
+                            { left: "\\[", right: "\\]", display: true },
+                            { left: "$", right: "$", display: false },
+                            { left: "\\(", right: "\\)", display: false }
+                        ],
+                        throwOnError: false,
+                        errorCallback: (error, context) => {
+                            console.warn("KaTeX error:", error, context);
+                        }
+                    });
+                } catch (err) {
+                    console.error("KaTeX render error:", err);
+                }
+            });
+        }
 
+        // Time calculation and status updates
         function updateTimeRemaining(dueDate) {
             const now = new Date();
             const timeRemainingElement = document.getElementById('timeRemaining');
@@ -434,13 +477,34 @@
             }
         }
 
-        // Back button handler
-        document.getElementById('backBtn')?.addEventListener('click', function() {
-            this.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-            window.location.href = '/main-page';
-            setTimeout(() => {
-                this.innerHTML = '<i class="fas fa-arrow-left mr-2"></i>Back to Assignments';
-            }, 2000);
+        // Initialize everything when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Format math in description
+            formatMathElements();
+            
+            // Handle time calculations
+            {% if assignment and assignment.due_date %}
+                const dueDate = new Date("{{ assignment.due_date.strftime('%Y-%m-%dT%H:%M:%S') }}");
+                updateTimeRemaining(dueDate);
+                
+                // Update every minute
+                setInterval(() => {
+                    updateTimeRemaining(dueDate);
+                }, 60000);
+            {% else %}
+                document.getElementById('timeRemaining').textContent = 'No due date';
+                document.getElementById('statusBadge').textContent = 'No Due Date';
+                document.getElementById('statusBadge').className = 'status-badge status-upcoming';
+            {% endif %}
+
+            // Back button handler
+            document.getElementById('backBtn')?.addEventListener('click', function() {
+                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                window.location.href = '/main-page';
+                setTimeout(() => {
+                    this.innerHTML = '<i class="fas fa-arrow-left mr-2"></i>Back to Assignments';
+                }, 2000);
+            });
         });
     </script>
 </body>
