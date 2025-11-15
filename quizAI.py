@@ -9,8 +9,8 @@ _quiz_AI = Blueprint('quizAI', __name__, url_prefix='/quiz')
 class QuizGenerator:
     def __init__(self):
         self.api_keys = [
-            'I will add when done updating',
-            'I will add when done updating'
+            'AIzaSyA3o8aKHTnVzuW9-qg10KjNy7Lcgn19N2I',
+            'AIzaSyCq8-xrPTC40k8E_i3vXZ_-PR6RiPsuOno'
         ]
         self.current_key_index = 0
         self.model_name = "gemini-2.5-flash-lite"
