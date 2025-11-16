@@ -2496,7 +2496,7 @@
             // Create modal header
             const modalHeader = document.createElement('h2');
             modalHeader.textContent = 'CHOOSE AI TO ACCESS.';
-            modalHeader.style.background = "linear-gradient(130deg, #3B82F6, #8B5CF6)";
+            modalHeader.style.background = "linear-gradient(135deg, #3B82F6, #8B5CF6)";
             modalHeader.style.webkitBackgroundClip = "text";
             modalHeader.style.backgroundClip = "text";
             modalHeader.style.webkitTextFillColor = "transparent";
@@ -2654,7 +2654,8 @@
                 TutorButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Opening...';
                 setTimeout(() => {
                     TutorButton.style.opacity = '0.5';
-                    window.location.href = '/tutor';
+                    //window.location.href = '/tutor';
+                    toastSystem.info("Coming Soon!", "Wait");
                 }, 200);
                 setTimeout(() => {
                     TutorButton.style.opacity = '0';
@@ -2663,9 +2664,9 @@
                     TutorButton.style.opacity = '1';
                     TutorButton.innerHTML = '<i class="fas fa-question-circle"></i> Tutor';
                 }, 2000);
-                setInterval(() => {
-                    window.location.href = '/tutor';
-                }, 1200);
+                //setInterval(() => {
+                //    window.location.href = '/tutor';
+                //}, 1200);
             };
 
             // Create close button

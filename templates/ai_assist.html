@@ -1875,5 +1875,80 @@
         // Initial scroll to bottom
         scrollToBottom();
     </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // AI Analytics Tracking System
+            class AIAnalyticsTracker {
+                constructor() {
+                    this.sessionId = this.generateSessionId();
+                    this.trackedAIs = new Set();
+                }
+            
+                generateSessionId() {
+                    return 'ai_session_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now().toString(36);
+                }
+            
+                async trackAIVisit(aiName) {
+                    try {
+                        await fetch('/api/track-ai-visit', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                user_id: window.currentUserId,
+                                ai_name: aiName,
+                                action: 'viewed_AI_' + aiName,
+                                session_id: this.sessionId,
+                                timestamp: new Date().toISOString()
+                            })
+                        });
+                    } catch (error) {
+                        console.log('AI visit tracking failed');
+                    }
+                }
+            
+                async trackAIUsage(aiName, action, duration = null) {
+                    try {
+                        await fetch('/api/track-ai-activity', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                user_id: window.currentUserId,
+                                ai_name: aiName,
+                                action: action,
+                                duration: duration,
+                                timestamp: new Date().toISOString()
+                            })
+                        });
+                    } catch (error) {
+                        console.log('AI activity tracking failed');
+                    }
+                }
+            
+                trackAIView(aiName) {
+                    if (!this.trackedAIs.has(aiName)) {
+                        this.trackAIVisit(aiName);
+                        this.trackedAIs.add(aiName);
+                    }
+                }
+            
+                trackAISession(aiName, startTime) {
+                    const duration = Math.round((Date.now() - startTime) / 1000);
+                    this.trackAIUsage(aiName, 'ai_session_completed', duration);
+                }
+            }
+        
+            // Initialize AI Analytics
+            window.aiAnalytics = new AIAnalyticsTracker();
+        
+            // Track Marion AI when page loads
+            window.aiAnalytics.trackAIView('Marion_AI');
+
+            // Example: Track when user sends a message to Marion AI
+            document.getElementById('send-button')?.addEventListener('click', function() {
+                window.aiAnalytics.trackAIUsage('Marion_AI', 'sent_message');
+            });
+
+        });
+    </script>    
 </body>
 </html>
