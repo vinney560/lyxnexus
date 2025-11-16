@@ -1398,10 +1398,7 @@
                     if (e.target.closest('a[href*="/files"]') || e.target.closest('#files')) {
                         this.trackActivity('file_download', e.target.href || 'unknown_file');
                     }
-                });
-
-                // Monitor when user clicks AI buttons in the robot modal
-                document.addEventListener('click', function(e) {
+                    
                     // Monitor Marion AI
                     if (e.target.closest('button') && e.target.closest('button').textContent.includes('Marion AI Assistant')) {
                         aiMonitor.captureAIAccess('Marion_AI');

@@ -1220,36 +1220,19 @@ Examples:
 
             async captureAIAccess(aiName) {
                 try {
-                    await fetch('/api/track-activity', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            user_id: window.currentUserId,
-                            action: 'accessed_AI_' + aiName,
-                            target: aiName,
-                            timestamp: new Date().toISOString()
-                        })
-                    });
-                } catch (error) {
-                    console.log('AI access capture failed');
-                }
-            }
-
-            async trackVisit(section = 'Quiz AI') {
-                try {
                     await fetch('/api/track-visit', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             user_id: window.currentUserId,
-                            page: window.location.pathname.split('/').filter(Boolean).pop() || 'Quiz AI',
-                            section: section,
+                            page: 'quiz_ai',
+                            section: aiName,
                             session_id: this.sessionId,
                             timestamp: new Date().toISOString()
                         })
                     });
                 } catch (error) {
-                    console.log('Visit tracking failed');
+                    console.log('AI access capture failed');
                 }
             }
 
@@ -1269,22 +1252,27 @@ Examples:
                     console.log('AI event registration failed');
                 }
             }
+
+            initialize() {
+                // Track initial visit
+                this.captureAIAccess('Quiz_AI');
+
+                // Track specific Marion AI interactions
+                document.addEventListener('DOMContentLoaded', () => {
+                    
+                    // Track when user asks a question
+                    document.getElementById('generateQuizBtn')?.addEventListener('click', () => {
+                        this.registerAIEvent('Quiz_AI', 'asked_question');
+                    });
+                });
+            }
         }
 
-        // Initialize AI Usage Monitor
-        const aiMonitor = new AIUsageMonitor();
-
-        // Track Marion AI page load
-        aiMonitor.captureAIAccess('QuizAI');
-
-        // Track specific Marion AI interactions
+        // Initialize AI Usage Monitor when DOM is ready
         document.addEventListener('DOMContentLoaded', function() {
+            const aiMonitor = new AIUsageMonitor();
             aiMonitor.initialize();
-            // Track when user asks a question
-            document.getElementById('generateQuizBtn')?.addEventListener('click', function() {
-                aiMonitor.registerAIEvent('QuizAI', 'asked_question');
-            });
         });
-    </script>    
+    </script>
 </body>
 </html>

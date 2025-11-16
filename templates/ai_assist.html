@@ -1889,36 +1889,19 @@
 
             async captureAIAccess(aiName) {
                 try {
-                    await fetch('/api/track-activity', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            user_id: window.currentUserId,
-                            action: 'accessed_AI_' + aiName,
-                            target: aiName,
-                            timestamp: new Date().toISOString()
-                        })
-                    });
-                } catch (error) {
-                    console.log('AI access capture failed');
-                }
-            }
-
-            async trackVisit(section = 'Marion AI') {
-                try {
                     await fetch('/api/track-visit', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             user_id: window.currentUserId,
-                            page: window.location.pathname.split('/').filter(Boolean).pop() || 'Marion AI',
-                            section: section,
+                            page: 'marion_ai',
+                            section: aiName,
                             session_id: this.sessionId,
                             timestamp: new Date().toISOString()
                         })
                     });
                 } catch (error) {
-                    console.log('Visit tracking failed');
+                    console.log('AI access capture failed');
                 }
             }
 
@@ -1938,28 +1921,37 @@
                     console.log('AI event registration failed');
                 }
             }
+
+            initialize() {
+                // Track initial visit
+                this.captureAIAccess('Marion_AI');
+
+                // Track specific Marion AI interactions
+                document.addEventListener('DOMContentLoaded', () => {
+                    // Track when user sends a message to Marion AI
+                    document.getElementById('send-button')?.addEventListener('click', () => {
+                        this.registerAIEvent('Marion_AI', 'sent_message');
+                    });
+
+                    // Track when user clears chat
+                    document.getElementById('clear-btn')?.addEventListener('click', () => {
+                        this.registerAIEvent('Marion_AI', 'cleared_chat');
+                    });
+
+                    // Track when user copies response
+                    document.addEventListener('click', (e) => {
+                        if (e.target.closest('.copy-button')) {
+                            this.registerAIEvent('Marion_AI', 'copied_response');
+                        }
+                    });
+                });
+            }
         }
 
-        // Initialize AI Usage Monitor
-        const aiMonitor = new AIUsageMonitor();
-
-        // Track Marion AI page load
-        aiMonitor.captureAIAccess('Marion');
-
-        // Track specific Marion AI interactions
+        // Initialize AI Usage Monitor when DOM is ready
         document.addEventListener('DOMContentLoaded', function() {
+            const aiMonitor = new AIUsageMonitor();
             aiMonitor.initialize();
-            // Track when user sends a message to Marion AI
-            document.getElementById('send-button')?.addEventListener('click', function() {
-                aiMonitor.registerAIEvent('Marion', 'sent_message');
-            });
-
-            // Track when user copies response
-            document.addEventListener('click', function(e) {
-                if (e.target.closest('.copy-button')) {
-                    aiMonitor.registerAIEvent('Marion', 'copied_response');
-                }
-            });
         });
     </script>
 </body>
