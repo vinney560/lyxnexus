@@ -2794,9 +2794,6 @@ def logout():
 @app.route('/main-page')
 @login_required
 def main_page():
-    if not session.get('authenticated'):
-        session['authenticated'] = True
-        print("Post-login setup completed ✅")
     return render_template('main_page.html', year=_year())
 #-----------------------------------------------------------------
 @app.route('/navigation-guide')
@@ -5307,6 +5304,7 @@ def get_timetable_by_day(day):
 #           REGISTERING ADMIN API
 #==========================================
 
+@limiter.limit("5 per minute") 
 @app.route('/api/register-admin', methods=['POST'])
 def register_admin():
     """Register a new admin user via API"""
@@ -5316,18 +5314,34 @@ def register_admin():
     username = data.get('username')
     master_key = data.get('master_key')
     
-    if master_key != MASTER_ADMIN_KEY:
+    # Validate master key using AdminCode table (same as login route)
+    admin_code_record = AdminCode.query.first()
+    if not admin_code_record or not check_password_hash(admin_code_record.code, master_key):
         return jsonify({'error': 'Invalid master authorization key'}), 403
     
-    if not mobile or len(mobile) != 10:
+    # Validate mobile number (same validation as login route)
+    if not mobile or len(mobile) != 10 or not (mobile.startswith('07') or mobile.startswith('01')):
         return jsonify({'error': 'Invalid mobile number'}), 400
     
+    # Validate username
+    if not username or len(username.strip()) == 0:
+        return jsonify({'error': 'Username is required'}), 400
+    
+    username = username.strip().lower()
+    
+    # Check if user already exists
     existing_user = User.query.filter_by(mobile=mobile).first()
     if existing_user:
         return jsonify({'error': 'User with this mobile already exists'}), 409
     
+    # Check if username is already taken
+    existing_username = User.query.filter_by(username=username).first()
+    if existing_username:
+        return jsonify({'error': 'Username already taken'}), 409
+    
+    # Create new admin user
     new_admin = User(
-        username=username.strip().lower(),
+        username=username,
         mobile=mobile,
         is_admin=True
     )
@@ -5338,9 +5352,11 @@ def register_admin():
     return jsonify({
         'message': 'Admin user created successfully',
         'user_id': new_admin.id,
-        'username': new_admin.username
+        'username': new_admin.username,
+        'mobile': new_admin.mobile
     }), 201
 
+@limiter.limit("5 per minute") 
 @app.route('/api/promote-to-admin', methods=['POST'])
 def promote_to_admin():
     """Promote an existing user to admin via API"""
@@ -5350,23 +5366,33 @@ def promote_to_admin():
     username = data.get('username')
     master_key = data.get('master_key')
     
-    if master_key != MASTER_ADMIN_KEY:
+    # Validate master key using AdminCode table
+    admin_code_record = AdminCode.query.first()
+    if not admin_code_record or not check_password_hash(admin_code_record.code, master_key):
         return jsonify({'error': 'Invalid master authorization key'}), 403
     
+    # Find user by mobile
     user = User.query.filter_by(mobile=mobile).first()
     if not user:
         return jsonify({'error': 'User not found'}), 404
     
+    # Verify username matches
     if user.username.lower() != username.strip().lower():
         return jsonify({'error': 'Username does not match existing account'}), 400
     
+    # Check if user is already admin
+    if user.is_admin:
+        return jsonify({'error': 'User is already an admin'}), 400
+    
+    # Promote to admin
     user.is_admin = True
     db.session.commit()
     
     return jsonify({
         'message': 'User promoted to admin successfully',
         'user_id': user.id,
-        'username': user.username
+        'username': user.username,
+        'mobile': user.mobile
     })
 
 @app.route('/api/check-admin', methods=['POST'])
@@ -5497,6 +5523,7 @@ def get_topic_materials(topic_id):
 
 @app.route('/api/topics/<int:topic_id>/materials', methods=['POST'])
 @login_required
+@admin_required
 def add_topic_material(topic_id):
     """Add a material to a topic"""
     try:
@@ -5553,6 +5580,7 @@ def add_topic_material(topic_id):
 
 @app.route('/api/topics/<int:topic_id>/materials/<int:material_id>', methods=['DELETE'])
 @login_required
+@admin_required
 def remove_topic_material(topic_id, material_id):
     """Remove a material from a topic"""
     try:
@@ -5649,10 +5677,12 @@ def get_available_files():
 from sqlalchemy import func, extract
 
 @app.route('/admin/analytics')
+@admin_required
 def analytics_dashboard():
     return render_template('analytics.html')
 
 @app.route('/api/track-visit', methods=['POST'])
+@login_required
 def track_visit():
     try:
         data = request.get_json()
@@ -5677,6 +5707,7 @@ def track_visit():
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
 @app.route('/api/track-activity', methods=['POST'])
+@login_required
 def track_activity():
     try:
         data = request.get_json()
