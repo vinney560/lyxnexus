@@ -90,6 +90,17 @@
             box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
         }
         
+        .btn-secondary {
+            background: rgba(59, 130, 246, 0.2);
+            color: #3B82F6;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(59, 130, 246, 0.3);
+            transform: translateY(-2px);
+        }
+        
         .analytics-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -429,6 +440,121 @@
             50% { transform: translateY(-10px); }
             100% { transform: translateY(0px); }
         }
+        
+        /* Modal styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+        
+        .modal-content {
+            background: var(--bg-color);
+            border-radius: 16px;
+            padding: 2rem;
+            max-width: 90vw;
+            max-height: 90vh;
+            overflow-y: auto;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+        }
+        
+        .user-select-container {
+            position: relative;
+        }
+        
+        .user-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: rgba(30, 30, 40, 0.95);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+        
+        .user-option {
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            transition: background 0.2s ease;
+        }
+        
+        .user-option:hover {
+            background: rgba(59, 130, 246, 0.2);
+        }
+        
+        .user-option:last-child {
+            border-bottom: none;
+        }
+        
+        .time-range-selector {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .time-range-btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 8px;
+            background: rgba(30, 30, 40, 0.7);
+            color: #9CA3AF;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .time-range-btn.active {
+            background: rgba(59, 130, 246, 0.3);
+            color: #3B82F6;
+            border-color: #3B82F6;
+        }
+        
+        .time-range-btn:hover {
+            background: rgba(59, 130, 246, 0.2);
+        }
+        
+        .user-detail-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .user-detail-card {
+            background: rgba(30, 30, 40, 0.7);
+            border-radius: 12px;
+            padding: 1rem;
+            text-align: center;
+            border-left: 4px solid #3B82F6;
+        }
+        
+        .user-detail-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .user-detail-label {
+            color: #9CA3AF;
+            font-size: 0.8rem;
+        }
     </style>
 </head>
 <body class="bg-gray-900">
@@ -453,10 +579,15 @@
                 </div>
                 
                 <div class="flex items-center space-x-3 slide-in-right">
-                    <span class="text-sm text-gray-400 hidden md:block">Last 24 hours</span>
-                    <button onclick="refreshAnalytics()" id="RefreshData" class="btn flex items-center space-x-2">
-                        <i class="fas fa-sync-alt"></i>
-                        <span>Refresh Data</span>
+                    <span class="text-sm text-gray-400 hidden md:block" id="current-range-display">Last 24 hours</span>
+                    <button onclick="showUserAnalyticsModal()" class="btn btn-secondary flex items-center space-x-2">
+                        <i class="fas fa-user mr-2"></i> User Analytics
+                    </button>
+                    <button onclick="refreshAnalytics()" id="refreshData" class="btn flex items-center space-x-2">
+                        <i class="fas fa-sync-alt mr-2"></i> Refresh Data
+                    </button>
+                    <button class="btn flex items-center space-x-2" id="backBtn">
+                        <i class="fas fa-arrow-left mr-2"></i> Back
                     </button>
                 </div>
             </div>
@@ -464,6 +595,13 @@
     </header>
 
     <div class="max-w-7xl mx-auto px-4 pb-8">
+        <!-- Time Range Selector -->
+        <div class="time-range-selector justify-center mb-6">
+            <button class="time-range-btn active" data-range="24h" onclick="switchTimeRange('24h')">24 Hours</button>
+            <button class="time-range-btn" data-range="7d" onclick="switchTimeRange('7d')">7 Days</button>
+            <button class="time-range-btn" data-range="30d" onclick="switchTimeRange('30d')">30 Days</button>
+        </div>
+
         <!-- Stats Grid -->
         <div class="analytics-grid">
             <div class="stat-card border-l-blue-500 card-hover-lift fade-in" style="animation-delay: 0.1s">
@@ -508,12 +646,12 @@
             <div class="stat-card border-l-yellow-500 card-hover-lift fade-in" style="animation-delay: 0.4s">
                 <div class="flex justify-between items-start">
                     <div>
-                        <div class="stat-number count-up" id="peak-hour">--:--</div>
-                        <div class="stat-label">Peak Activity Hour</div>
-                        <div class="stat-trend trend-up" id="peak-trend">Most active</div>
+                        <div class="stat-number count-up" id="total-duration">0</div>
+                        <div class="stat-label">Total Session Duration</div>
+                        <div class="stat-trend trend-up" id="duration-trend">↑ Loading...</div>
                     </div>
                     <div class="p-3 bg-yellow-500/20 rounded-xl">
-                        <i class="fas fa-chart-line text-yellow-400 text-xl"></i>
+                        <i class="fas fa-clock text-yellow-400 text-xl"></i>
                     </div>
                 </div>
             </div>
@@ -521,13 +659,14 @@
 
         <!-- Charts Section -->
         <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-6">
-            <!-- Visits per Hour -->
+            <!-- Visits per Time -->
             <div class="chart-container xl:col-span-2 card-hover-lift fade-in" style="animation-delay: 0.5s">
                 <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xl font-bold text-shimmer">Visits per Hour (Last 24h)</h3>
+                    <h3 class="text-xl font-bold text-shimmer" id="visits-chart-title">Visits per Hour (Last 24h)</h3>
                     <div class="flex space-x-2">
-                        <button class="text-xs px-3 py-1 bg-blue-500/20 text-blue-400 rounded-full font-medium transition-all hover:scale-105">24H</button>
-                        <button class="text-xs px-3 py-1 bg-gray-700 text-gray-400 rounded-full font-medium transition-all hover:scale-105" onclick="switchToWeeklyView()">7D</button>
+                        <button class="time-range-btn active" data-range="24h" onclick="switchTimeRange('24h')">24H</button>
+                        <button class="time-range-btn" data-range="7d" onclick="switchTimeRange('7d')">7D</button>
+                        <button class="time-range-btn" data-range="30d" onclick="switchTimeRange('30d')">30D</button>
                     </div>
                 </div>
                 <div class="chart-wrapper chart-wrapper-large">
@@ -582,8 +721,8 @@
                             <span class="font-semibold text-blue-400" id="popular-section">--</span>
                         </div>
                         <div class="flex justify-between items-center p-3 bg-gray-800/50 rounded-lg transition-all hover:bg-gray-800/70">
-                            <span class="text-gray-400">Avg. Visits/Hour</span>
-                            <span class="font-semibold text-green-400" id="avg-visits-hour">0</span>
+                            <span class="text-gray-400">Avg. Duration</span>
+                            <span class="font-semibold text-green-400" id="avg-duration">0s</span>
                         </div>
                         <div class="flex justify-between items-center p-3 bg-gray-800/50 rounded-lg transition-all hover:bg-gray-800/70">
                             <span class="text-gray-400">Data Last Updated</span>
@@ -595,10 +734,95 @@
         </div>
     </div>
 
+    <!-- User Analytics Modal -->
+    <div id="userAnalyticsModal" class="modal-overlay hidden">
+        <div class="modal-content glass-morph w-full max-w-4xl">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold gradient-text">User Analytics</h2>
+                <button onclick="hideUserAnalyticsModal()" class="text-gray-400 hover:text-white text-xl">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="user-select-container mb-6">
+                <label class="block text-gray-400 mb-2">Select User</label>
+                <input type="text" id="userSearch" placeholder="Search users..." 
+                       class="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                       onfocus="loadUsersList()" oninput="filterUsers()">
+                <div id="userDropdown" class="user-dropdown hidden"></div>
+            </div>
+            
+            <div id="userAnalyticsContent" class="hidden">
+                <!-- User Details -->
+                <div class="user-detail-grid mb-6">
+                    <div class="user-detail-card">
+                        <div class="user-detail-value" id="user-visit-count">0</div>
+                        <div class="user-detail-label">Total Visits</div>
+                    </div>
+                    <div class="user-detail-card">
+                        <div class="user-detail-value" id="user-total-duration">0s</div>
+                        <div class="user-detail-label">Session Duration</div>
+                    </div>
+                    <div class="user-detail-card">
+                        <div class="user-detail-value" id="user-favorite-section">--</div>
+                        <div class="user-detail-label">Favorite Section</div>
+                    </div>
+                    <div class="user-detail-card">
+                        <div class="user-detail-value" id="user-favorite-count">0</div>
+                        <div class="user-detail-label">Favorite Visits</div>
+                    </div>
+                </div>
+                
+                <!-- User Time Range Selector -->
+                <div class="time-range-selector mb-4">
+                    <button class="time-range-btn active" data-range="24h" onclick="switchUserTimeRange('24h')">24 Hours</button>
+                    <button class="time-range-btn" data-range="7d" onclick="switchUserTimeRange('7d')">7 Days</button>
+                    <button class="time-range-btn" data-range="30d" onclick="switchUserTimeRange('30d')">30 Days</button>
+                </div>
+                
+                <!-- User Visits Chart -->
+                <div class="chart-container mb-6">
+                    <h3 class="text-xl font-bold text-shimmer mb-4" id="user-chart-title">User Visits Pattern</h3>
+                    <div class="chart-wrapper chart-wrapper-medium">
+                        <canvas id="userVisitsChart"></canvas>
+                    </div>
+                </div>
+                
+                <!-- User Activity -->
+                <div class="chart-container">
+                    <h3 class="text-xl font-bold text-shimmer mb-4">Recent Activity</h3>
+                    <div class="activity-feed" style="max-height: 300px;" id="user-activity-feed">
+                        <div class="loading">
+                            <div class="spinner"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="userAnalyticsPlaceholder" class="text-center py-8">
+                <i class="fas fa-user-chart text-4xl text-gray-600 mb-4"></i>
+                <p class="text-gray-400">Select a user to view their analytics</p>
+            </div>
+        </div>
+    </div>
+
     <script>
-        let visitsChart, sectionsChart;
+        const backBtn = document.getElementById('backBtn');
+        backBtn.addEventListener('click', () => {
+            backBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> exiting...';
+            window.location.href = '/admin/users'
+            setTimeout(() => {
+                backBtn.innerHTML = '<i class="fas fa-arrow-left mr-2"></i> Back';
+            }, 1200);
+        });
+    </script>
+    <script>
+        let visitsChart, sectionsChart, userVisitsChart;
         let refreshInterval;
-        let currentView = '24h';
+        let currentRange = '24h';
+        let currentUserRange = '24h';
+        let selectedUserId = null;
+        let allUsers = [];
         
         // Enhanced chart configuration with animations
         const chartConfig = {
@@ -625,11 +849,11 @@
             }
         };
         
-        async function loadAnalytics() {
+        async function loadAnalytics(range = currentRange) {
             try {
                 showLoadingStates();
                 
-                const response = await fetch('/api/analytics/visits');
+                const response = await fetch(`/api/analytics/visits?range=${range}`);
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
@@ -637,9 +861,12 @@
                 
                 console.log('Analytics Data:', data); // Debug log
                 
+                // Update current range display
+                updateRangeDisplay(range);
+                
                 // Animate stats counting up
                 animateStats(data);
-                updateCharts(data);
+                updateCharts(data, range);
                 updateActivityFeed(data);
                 updateTopSections(data);
                 updateQuickStats(data);
@@ -654,6 +881,16 @@
             }
         }
         
+        function updateRangeDisplay(range) {
+            const rangeTexts = {
+                '24h': 'Last 24 hours',
+                '7d': 'Last 7 days', 
+                '30d': 'Last 30 days'
+            };
+            document.getElementById('current-range-display').textContent = rangeTexts[range] || 'Last 24 hours';
+            document.getElementById('visits-chart-title').textContent = `Visits ${range === '24h' ? 'per Hour' : 'per Day'} (${rangeTexts[range]})`;
+        }
+        
         function animateStats(data) {
             // Animate total visits
             animateValue('total-visits', 0, data.total_visits || 0, 1500);
@@ -663,10 +900,9 @@
             const activeSections = data.section_stats?.length || 0;
             document.getElementById('active-sections').textContent = activeSections;
             
-            if (data.visits_per_hour && data.visits_per_hour.length > 0) {
-                const peak = data.visits_per_hour.reduce((max, curr) => curr.count > max.count ? curr : max, data.visits_per_hour[0]);
-                document.getElementById('peak-hour').textContent = `${peak.hour.toString().padStart(2, '0')}:00`;
-            }
+            // Total duration
+            const totalDuration = data.platform_stats?.total_duration || 0;
+            document.getElementById('total-duration').textContent = formatDuration(totalDuration);
             
             updateTrends(data);
         }
@@ -715,70 +951,85 @@
             const visitsTrend = data.total_visits > 50 ? '↑ High traffic' : data.total_visits > 20 ? '↑ Normal traffic' : '↑ Low traffic';
             const visitorsTrend = data.unique_visitors > 10 ? '↑ Many users' : data.unique_visitors > 5 ? '↑ Steady growth' : '↑ Starting up';
             const sectionsTrend = data.section_stats?.length > 3 ? '↑ Good engagement' : data.section_stats?.length > 1 ? '↑ Balanced usage' : '↑ Focused usage';
+            const durationTrend = data.platform_stats?.total_duration > 3600 ? '↑ High engagement' : data.platform_stats?.total_duration > 1800 ? '↑ Good engagement' : '↑ Normal usage';
             
             document.getElementById('visits-trend').textContent = visitsTrend;
             document.getElementById('visitors-trend').textContent = visitorsTrend;
             document.getElementById('sections-trend').textContent = sectionsTrend;
+            document.getElementById('duration-trend').textContent = durationTrend;
         }
         
-        function updateCharts(data) {
-            updateVisitsChart(data);
+        function updateCharts(data, range) {
+            updateVisitsChart(data, range);
             updateSectionsChart(data);
         }
         
-        function updateVisitsChart(data) {
+        function updateVisitsChart(data, range) {
             const visitsCtx = document.getElementById('visitsChart').getContext('2d');
             if (visitsChart) visitsChart.destroy();
             
-            // Prepare visits data - ensure we have data for all 24 hours
             let visitsData = [];
-            if (data.visits_per_hour && data.visits_per_hour.length > 0) {
-                console.log('Raw visits per hour:', data.visits_per_hour); // Debug log
+            let labels = [];
+            
+            if (data.visits_per_time && data.visits_per_time.length > 0) {
+                console.log('Raw visits per time:', data.visits_per_time);
                 
-                // Create a map for easier lookup - handle both string and number hours
-                const visitsMap = new Map();
-                data.visits_per_hour.forEach(v => {
-                    const hour = typeof v.hour === 'string' ? parseInt(v.hour) : v.hour;
-                    visitsMap.set(hour, v.count);
-                });
-                
-                // Fill in all 24 hours with proper data
-                for (let hour = 0; hour < 24; hour++) {
-                    visitsData.push({
-                        hour: hour,
-                        count: visitsMap.get(hour) || 0
+                if (range === '24h') {
+                    // Create a map for 24 hours
+                    const visitsMap = new Map();
+                    data.visits_per_time.forEach(v => {
+                        const hour = typeof v.time_unit === 'string' ? parseInt(v.time_unit) : v.time_unit;
+                        visitsMap.set(hour, v.count);
+                    });
+                    
+                    // Fill in all 24 hours
+                    for (let hour = 0; hour < 24; hour++) {
+                        visitsData.push(visitsMap.get(hour) || 0);
+                        labels.push(`${hour.toString().padStart(2, '0')}:00`);
+                    }
+                } else {
+                    // For 7d and 30d, use the dates directly
+                    data.visits_per_time.forEach(v => {
+                        visitsData.push(v.count);
+                        const date = new Date(v.time_unit);
+                        labels.push(date.toLocaleDateString());
                     });
                 }
             } else {
-                // Fallback to zero data for all hours
-                visitsData = Array.from({length: 24}, (_, i) => ({
-                    hour: i,
-                    count: 0
-                }));
+                // Fallback to zero data
+                if (range === '24h') {
+                    visitsData = Array(24).fill(0);
+                    labels = Array.from({length: 24}, (_, i) => `${i.toString().padStart(2, '0')}:00`);
+                } else {
+                    const days = range === '7d' ? 7 : 30;
+                    visitsData = Array(days).fill(0);
+                    labels = Array.from({length: days}, (_, i) => {
+                        const date = new Date();
+                        date.setDate(date.getDate() - (days - i - 1));
+                        return date.toLocaleDateString();
+                    });
+                }
             }
             
-            // Sort by hour to ensure correct order
-            visitsData.sort((a, b) => a.hour - b.hour);
-            
-            console.log('Processed visits data:', visitsData); // Debug log
+            console.log('Processed visits data:', visitsData, labels);
             
             visitsChart = new Chart(visitsCtx, {
-                type: 'line',
+                type: range === '24h' ? 'line' : 'bar',
                 data: {
-                    labels: visitsData.map(v => `${v.hour.toString().padStart(2, '0')}:00`),
+                    labels: labels,
                     datasets: [{
                         label: 'Visits',
-                        data: visitsData.map(v => v.count),
+                        data: visitsData,
                         borderColor: '#3B82F6',
-                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                        borderWidth: 3,
-                        fill: true,
+                        backgroundColor: range === '24h' ? 'rgba(59, 130, 246, 0.1)' : 'rgba(59, 130, 246, 0.6)',
+                        borderWidth: range === '24h' ? 3 : 1,
+                        fill: range === '24h',
                         tension: 0.4,
                         pointBackgroundColor: '#3B82F6',
                         pointBorderColor: '#ffffff',
                         pointBorderWidth: 2,
-                        pointRadius: 4,
-                        pointHoverRadius: 6
+                        pointRadius: range === '24h' ? 4 : 3,
+                        pointHoverRadius: range === '24h' ? 6 : 5
                     }]
                 },
                 options: {
@@ -795,7 +1046,7 @@
                             displayColors: false,
                             callbacks: {
                                 title: function(tooltipItems) {
-                                    return `Hour: ${tooltipItems[0].label}`;
+                                    return `${range === '24h' ? 'Hour' : 'Date'}: ${tooltipItems[0].label}`;
                                 },
                                 label: function(context) {
                                     return `Visits: ${context.parsed.y}`;
@@ -823,8 +1074,8 @@
                             },
                             ticks: { 
                                 color: '#9CA3AF',
-                                font: { size: 9 },
-                                maxTicksLimit: 12
+                                font: { size: range === '24h' ? 9 : 8 },
+                                maxTicksLimit: range === '24h' ? 12 : 10
                             }
                         }
                     },
@@ -847,7 +1098,7 @@
             
             const sectionsData = data.section_stats || [];
             
-            console.log('Section stats:', sectionsData); // Debug log
+            console.log('Section stats:', sectionsData);
             
             // Format section names and ensure we have data
             const formattedSections = sectionsData.map(s => {
@@ -915,7 +1166,7 @@
                 feed.innerHTML = `
                     <div class="text-center py-8">
                         <i class="fas fa-inbox text-4xl text-gray-600 mb-4"></i>
-                        <p class="text-gray-400">No recent activity in the last 24 hours</p>
+                        <p class="text-gray-400">No recent activity</p>
                     </div>
                 `;
                 return;
@@ -924,16 +1175,18 @@
             feed.innerHTML = activities.map((activity, index) => `
                 <div class="activity-item glass-morph" style="animation-delay: ${index * 0.1}s">
                     <div class="flex items-center gap-4">
-                        <div class="user-avatar">
+                        <div class="user-avatar cursor-pointer" onclick="loadUserAnalytics(${activity.user_id})" title="View user analytics">
                             ${activity.username ? activity.username.charAt(0).toUpperCase() : 'U'}
                         </div>
                         <div class="flex-1 min-w-0">
                             <div class="flex items-center justify-between mb-1">
-                                <div class="font-semibold text-white truncate">${activity.username || 'Unknown User'}</div>
+                                <div class="font-semibold text-white truncate cursor-pointer hover:text-blue-400" onclick="loadUserAnalytics(${activity.user_id})">
+                                    ${activity.username || 'Unknown User'}
+                                </div>
                                 <div class="activity-time">${formatActivityTime(activity.timestamp)}</div>
                             </div>
                             <div class="text-sm text-gray-300 flex items-center flex-wrap gap-1">
-                                <span>${getActionText(activity.action, activity.target)}</span>
+                                <span>${getActionText(activity.action, activity.target, activity.duration)}</span>
                                 ${activity.target && activity.target !== 'main_page' && activity.target !== 'null' ? 
                                     `<span class="section-badge">${formatSectionName(activity.target)}</span>` : ''}
                             </div>
@@ -977,7 +1230,7 @@
         
         function updateQuickStats(data) {
             const sections = data.section_stats || [];
-            const visits = data.visits_per_hour || [];
+            const platformStats = data.platform_stats || {};
             
             // Most popular section
             if (sections.length > 0) {
@@ -987,14 +1240,9 @@
                 document.getElementById('popular-section').textContent = 'None';
             }
             
-            // Average visits per hour
-            if (visits.length > 0) {
-                const totalVisits = visits.reduce((sum, curr) => sum + curr.count, 0);
-                const avgVisits = Math.round((totalVisits / visits.length) * 10) / 10;
-                document.getElementById('avg-visits-hour').textContent = avgVisits;
-            } else {
-                document.getElementById('avg-visits-hour').textContent = '0';
-            }
+            // Average duration
+            const avgDuration = platformStats.avg_duration || 0;
+            document.getElementById('avg-duration').textContent = formatDuration(avgDuration);
         }
         
         function formatSectionName(section) {
@@ -1002,14 +1250,25 @@
             return section.charAt(0).toUpperCase() + section.slice(1);
         }
         
-        function getActionText(action, target) {
+        function getActionText(action, target, duration) {
             const actions = {
                 'page_view': `Viewed main page`,
                 'section_view': `Navigated to ${formatSectionName(target) || 'unknown section'}`,
                 'file_download': `Downloaded file`,
-                'page_exit': `Session ended`
+                'page_exit': `Session ended${duration ? ` (${formatDuration(duration)})` : ''}`
             };
             return actions[action] || `${action} ${target || ''}`;
+        }
+        
+        function formatDuration(seconds) {
+            if (!seconds) return '0s';
+            if (seconds < 60) return `${Math.round(seconds)}s`;
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = Math.round(seconds % 60);
+            if (minutes < 60) return `${minutes}m ${remainingSeconds}s`;
+            const hours = Math.floor(minutes / 60);
+            const remainingMinutes = minutes % 60;
+            return `${hours}h ${remainingMinutes}m`;
         }
         
         function formatActivityTime(timestamp) {
@@ -1025,10 +1284,21 @@
             return date.toLocaleDateString();
         }
         
+        function switchTimeRange(range) {
+            currentRange = range;
+            
+            // Update active button
+            document.querySelectorAll('.time-range-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.range === range);
+            });
+            
+            // Refresh data
+            refreshAnalytics();
+        }
+        
         function refreshAnalytics() {
-            const btn = event?.target || document.getElementById('refreshData');
+            const btn = document.getElementById('refreshData');
             const originalHtml = btn.innerHTML;
-            btn.innerHTML = '';
             btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Refreshing...';
             btn.disabled = true;
             
@@ -1038,7 +1308,7 @@
                 setTimeout(() => card.classList.remove('glow'), 2000);
             });
             
-            loadAnalytics().finally(() => {
+            loadAnalytics(currentRange).finally(() => {
                 setTimeout(() => {
                     btn.innerHTML = originalHtml;
                     btn.disabled = false;
@@ -1046,9 +1316,260 @@
             });
         }
         
-        function switchToWeeklyView() {
-            // This would switch to weekly view - for future implementation
-            alert('Weekly view coming soon! Currently showing last 24 hours.');
+        // User Analytics Functions
+        function showUserAnalyticsModal() {
+            document.getElementById('userAnalyticsModal').classList.remove('hidden');
+        }
+        
+        function hideUserAnalyticsModal() {
+            document.getElementById('userAnalyticsModal').classList.add('hidden');
+            selectedUserId = null;
+            document.getElementById('userAnalyticsContent').classList.add('hidden');
+            document.getElementById('userAnalyticsPlaceholder').classList.remove('hidden');
+            document.getElementById('userSearch').value = '';
+        }
+        
+        async function loadUsersList() {
+            try {
+                const response = await fetch('/api/analytics/users/list');
+                if (!response.ok) throw new Error('Failed to load users');
+                const data = await response.json();
+                allUsers = data.users;
+                showUserDropdown(allUsers);
+            } catch (error) {
+                console.error('Failed to load users:', error);
+            }
+        }
+        
+        function showUserDropdown(users) {
+            const dropdown = document.getElementById('userDropdown');
+            dropdown.innerHTML = users.map(user => `
+                <div class="user-option" onclick="selectUser(${user.id}, '${user.username}')">
+                    <div class="font-medium">${user.username}</div>
+                    <div class="text-xs text-gray-400">${user.mobile}</div>
+                </div>
+            `).join('');
+            dropdown.classList.remove('hidden');
+        }
+        
+        function filterUsers() {
+            const searchTerm = document.getElementById('userSearch').value.toLowerCase();
+            const filteredUsers = allUsers.filter(user => 
+                user.username.toLowerCase().includes(searchTerm) || 
+                user.mobile.toLowerCase().includes(searchTerm)
+            );
+            showUserDropdown(filteredUsers);
+        }
+        
+        function selectUser(userId, username) {
+            selectedUserId = userId;
+            document.getElementById('userSearch').value = username;
+            document.getElementById('userDropdown').classList.add('hidden');
+            document.getElementById('userAnalyticsPlaceholder').classList.add('hidden');
+            document.getElementById('userAnalyticsContent').classList.remove('hidden');
+            loadUserAnalytics(userId);
+        }
+        
+        async function loadUserAnalytics(userId = selectedUserId, range = currentUserRange) {
+            if (!userId) return;
+            
+            try {
+                showUserLoadingStates();
+                const response = await fetch(`/api/analytics/user/${userId}?range=${range}`);
+                if (!response.ok) throw new Error('Failed to load user analytics');
+                const data = await response.json();
+                
+                updateUserStats(data);
+                updateUserChart(data, range);
+                updateUserActivityFeed(data);
+                
+            } catch (error) {
+                console.error('Failed to load user analytics:', error);
+                document.getElementById('user-activity-feed').innerHTML = `
+                    <div class="text-center py-4">
+                        <i class="fas fa-exclamation-triangle text-2xl text-yellow-400 mb-2"></i>
+                        <p class="text-gray-400 text-sm">Failed to load user data</p>
+                    </div>
+                `;
+            } finally {
+                hideUserLoadingStates();
+            }
+        }
+        
+        function showUserLoadingStates() {
+            document.getElementById('user-activity-feed').innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                </div>
+            `;
+        }
+        
+        function hideUserLoadingStates() {
+            // Loading states are replaced with content
+        }
+        
+        function updateUserStats(data) {
+            document.getElementById('user-visit-count').textContent = data.visit_count;
+            document.getElementById('user-total-duration').textContent = formatDuration(data.total_duration);
+            document.getElementById('user-favorite-section').textContent = formatSectionName(data.favorite_section);
+            document.getElementById('user-favorite-count').textContent = data.favorite_section_count || 0;
+        }
+        
+        function updateUserChart(data, range) {
+            const userVisitsCtx = document.getElementById('userVisitsChart').getContext('2d');
+            if (userVisitsChart) userVisitsChart.destroy();
+            
+            document.getElementById('user-chart-title').textContent = `User Visits Pattern (${range === '24h' ? 'Last 24 hours' : range === '7d' ? 'Last 7 days' : 'Last 30 days'})`;
+            
+            let visitsData = [];
+            let labels = [];
+            
+            if (data.visits_pattern && data.visits_pattern.length > 0) {
+                if (range === '24h') {
+                    // Create a map for 24 hours
+                    const visitsMap = new Map();
+                    data.visits_pattern.forEach(v => {
+                        const hour = typeof v.time_unit === 'string' ? parseInt(v.time_unit) : v.time_unit;
+                        visitsMap.set(hour, v.count);
+                    });
+                    
+                    // Fill in all 24 hours
+                    for (let hour = 0; hour < 24; hour++) {
+                        visitsData.push(visitsMap.get(hour) || 0);
+                        labels.push(`${hour.toString().padStart(2, '0')}:00`);
+                    }
+                } else {
+                    // For 7d and 30d, use the dates directly
+                    data.visits_pattern.forEach(v => {
+                        visitsData.push(v.count);
+                        const date = new Date(v.time_unit);
+                        labels.push(date.toLocaleDateString());
+                    });
+                }
+            } else {
+                // Fallback to zero data
+                if (range === '24h') {
+                    visitsData = Array(24).fill(0);
+                    labels = Array.from({length: 24}, (_, i) => `${i.toString().padStart(2, '0')}:00`);
+                } else {
+                    const days = range === '7d' ? 7 : 30;
+                    visitsData = Array(days).fill(0);
+                    labels = Array.from({length: days}, (_, i) => {
+                        const date = new Date();
+                        date.setDate(date.getDate() - (days - i - 1));
+                        return date.toLocaleDateString();
+                    });
+                }
+            }
+            
+            userVisitsChart = new Chart(userVisitsCtx, {
+                type: range === '24h' ? 'line' : 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Visits',
+                        data: visitsData,
+                        borderColor: '#8B5CF6',
+                        backgroundColor: range === '24h' ? 'rgba(139, 92, 246, 0.1)' : 'rgba(139, 92, 246, 0.6)',
+                        borderWidth: range === '24h' ? 3 : 1,
+                        fill: range === '24h',
+                        tension: 0.4,
+                        pointBackgroundColor: '#8B5CF6',
+                        pointBorderColor: '#ffffff',
+                        pointBorderWidth: 2,
+                        pointRadius: range === '24h' ? 4 : 3,
+                        pointHoverRadius: range === '24h' ? 6 : 5
+                    }]
+                },
+                options: {
+                    ...chartConfig,
+                    plugins: {
+                        ...chartConfig.plugins,
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: 'rgba(30, 30, 40, 0.9)',
+                            titleColor: '#ffffff',
+                            bodyColor: '#e5e7eb',
+                            borderColor: '#8B5CF6',
+                            borderWidth: 1,
+                            displayColors: false,
+                            callbacks: {
+                                title: function(tooltipItems) {
+                                    return `${range === '24h' ? 'Hour' : 'Date'}: ${tooltipItems[0].label}`;
+                                },
+                                label: function(context) {
+                                    return `Visits: ${context.parsed.y}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { 
+                                color: 'rgba(255, 255, 255, 0.1)',
+                                borderDash: [3, 3]
+                            },
+                            ticks: { 
+                                color: '#9CA3AF',
+                                font: { size: 10 },
+                                stepSize: 1
+                            }
+                        },
+                        x: {
+                            grid: { 
+                                color: 'rgba(255, 255, 255, 0.1)',
+                                borderDash: [3, 3]
+                            },
+                            ticks: { 
+                                color: '#9CA3AF',
+                                font: { size: range === '24h' ? 9 : 8 },
+                                maxTicksLimit: range === '24h' ? 12 : 10
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function updateUserActivityFeed(data) {
+            const feed = document.getElementById('user-activity-feed');
+            const activities = data.activities || [];
+            
+            if (activities.length === 0) {
+                feed.innerHTML = `
+                    <div class="text-center py-4">
+                        <i class="fas fa-inbox text-2xl text-gray-600 mb-2"></i>
+                        <p class="text-gray-400 text-sm">No recent activity</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            feed.innerHTML = activities.map((activity, index) => `
+                <div class="activity-item" style="animation-delay: ${index * 0.1}s">
+                    <div class="flex justify-between items-start mb-1">
+                        <div class="font-semibold text-white">${getActionText(activity.action, activity.target, activity.duration)}</div>
+                        <div class="activity-time">${formatActivityTime(activity.timestamp)}</div>
+                    </div>
+                    ${activity.target && activity.target !== 'main_page' && activity.target !== 'null' ? 
+                        `<div class="text-xs"><span class="section-badge">${formatSectionName(activity.target)}</span></div>` : ''}
+                </div>
+            `).join('');
+        }
+        
+        function switchUserTimeRange(range) {
+            currentUserRange = range;
+            
+            // Update active button
+            document.querySelectorAll('#userAnalyticsContent .time-range-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.range === range);
+            });
+            
+            // Refresh user data
+            if (selectedUserId) {
+                loadUserAnalytics(selectedUserId, range);
+            }
         }
         
         // Initialize analytics
@@ -1059,7 +1580,14 @@
             }, 500);
 
             // Auto-refresh every 1 minute
-            refreshInterval = setInterval(loadAnalytics, 60000);
+            refreshInterval = setInterval(() => loadAnalytics(currentRange), 60000);
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.user-select-container')) {
+                    document.getElementById('userDropdown').classList.add('hidden');
+                }
+            });
         });
         
         // Cleanup on page unload
@@ -1071,12 +1599,9 @@
         
         // Handle window resize
         window.addEventListener('resize', function() {
-            if (visitsChart) {
-                visitsChart.resize();
-            }
-            if (sectionsChart) {
-                sectionsChart.resize();
-            }
+            if (visitsChart) visitsChart.resize();
+            if (sectionsChart) sectionsChart.resize();
+            if (userVisitsChart) userVisitsChart.resize();
         });
     </script>
 </body>

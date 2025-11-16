@@ -5700,8 +5700,19 @@ def track_activity():
 @app.route('/api/analytics/visits')
 @admin_required
 def get_visit_analytics():
-    # Last 24 hours data
-    cutoff_time = (datetime.utcnow() + timedelta(hours=3)) - timedelta(hours=24)
+    # Get time range from query parameter, default to 24h
+    range_param = request.args.get('range', '24h')
+    
+    # Calculate cutoff time based on range
+    now = datetime.utcnow() + timedelta(hours=3)  # Nairobi time
+    if range_param == '24h':
+        cutoff_time = now - timedelta(hours=24)
+    elif range_param == '7d':
+        cutoff_time = now - timedelta(days=7)
+    elif range_param == '30d':
+        cutoff_time = now - timedelta(days=30)
+    else:
+        cutoff_time = now - timedelta(hours=24)
     
     # Total visits
     total_visits = Visit.query.filter(Visit.timestamp >= cutoff_time).count()
@@ -5711,13 +5722,22 @@ def get_visit_analytics():
         Visit.timestamp >= cutoff_time
     ).distinct().count()
     
-    # Visits per hour
-    visits_per_hour = db.session.query(
-        func.extract('hour', Visit.timestamp).label('hour'),
-        func.count(Visit.id).label('count')
-    ).filter(
-        Visit.timestamp >= cutoff_time
-    ).group_by(func.extract('hour', Visit.timestamp)).order_by(func.extract('hour', Visit.timestamp)).all()    
+    # Visits per hour/day based on range
+    if range_param == '24h':
+        visits_per_time = db.session.query(
+            func.extract('hour', Visit.timestamp).label('time_unit'),
+            func.count(Visit.id).label('count')
+        ).filter(
+            Visit.timestamp >= cutoff_time
+        ).group_by(func.extract('hour', Visit.timestamp)).order_by(func.extract('hour', Visit.timestamp)).all()
+    else:
+        # For 7d and 30d, group by day
+        visits_per_time = db.session.query(
+            func.date(Visit.timestamp).label('time_unit'),
+            func.count(Visit.id).label('count')
+        ).filter(
+            Visit.timestamp >= cutoff_time
+        ).group_by(func.date(Visit.timestamp)).order_by(func.date(Visit.timestamp)).all()
     
     # Section popularity
     section_stats = db.session.query(
@@ -5730,39 +5750,76 @@ def get_visit_analytics():
         UserActivity.action,
         UserActivity.target,
         UserActivity.timestamp,
-        User.username
+        UserActivity.duration,
+        User.username,
+        User.id.label('user_id')
     ).join(User).filter(
         UserActivity.timestamp >= cutoff_time
-    ).order_by(UserActivity.timestamp.desc()).all()
+    ).order_by(UserActivity.timestamp.desc()).limit(50).all()
+    
+    # Platform overview stats
+    total_duration = db.session.query(func.sum(UserActivity.duration)).filter(
+        UserActivity.timestamp >= cutoff_time
+    ).scalar() or 0
+    
+    avg_duration = db.session.query(func.avg(UserActivity.duration)).filter(
+        UserActivity.timestamp >= cutoff_time,
+        UserActivity.duration.isnot(None)
+    ).scalar() or 0
     
     return jsonify({
         'total_visits': total_visits,
         'unique_visitors': unique_visitors,
-        'visits_per_hour': [{'hour': v.hour, 'count': v.count} for v in visits_per_hour],
+        'visits_per_time': [{
+            'time_unit': v.time_unit, 
+            'count': v.count
+        } for v in visits_per_time],
         'section_stats': [{'section': s.section, 'count': s.count} for s in section_stats],
         'recent_activity': [{
             'action': ua.action,
             'target': ua.target,
             'timestamp': ua.timestamp.isoformat(),
-            'username': ua.username
-        } for ua in user_activity]
+            'username': ua.username,
+            'user_id': ua.user_id,
+            'duration': ua.duration
+        } for ua in user_activity],
+        'platform_stats': {
+            'total_duration': total_duration,
+            'avg_duration': round(avg_duration, 2) if avg_duration else 0,
+            'range': range_param
+        }
     })
 
 @app.route('/api/analytics/user/<int:user_id>')
 @admin_required
 def get_user_analytics(user_id):
-    cutoff_time = nairobi_time() - timedelta(hours=24)
+    # Get time range from query parameter
+    range_param = request.args.get('range', '24h')
     
+    # Calculate cutoff time based on range
+    now = datetime.utcnow() + timedelta(hours=3)  # Nairobi time
+    if range_param == '24h':
+        cutoff_time = now - timedelta(hours=24)
+    elif range_param == '7d':
+        cutoff_time = now - timedelta(days=7)
+    elif range_param == '30d':
+        cutoff_time = now - timedelta(days=30)
+    else:
+        cutoff_time = now - timedelta(hours=24)
+    
+    # User visits
     user_visits = Visit.query.filter(
         Visit.user_id == user_id,
         Visit.timestamp >= cutoff_time
     ).count()
     
+    # User activities with pagination
     user_activities = UserActivity.query.filter(
         UserActivity.user_id == user_id,
         UserActivity.timestamp >= cutoff_time
-    ).order_by(UserActivity.timestamp.desc()).all()
+    ).order_by(UserActivity.timestamp.desc()).limit(100).all()
     
+    # User's favorite section
     favorite_section = db.session.query(
         Visit.section,
         func.count(Visit.id).label('count')
@@ -5771,15 +5828,69 @@ def get_user_analytics(user_id):
         Visit.timestamp >= cutoff_time
     ).group_by(Visit.section).order_by(func.count(Visit.id).desc()).first()
     
+    # User's visit pattern
+    if range_param == '24h':
+        visits_pattern = db.session.query(
+            func.extract('hour', Visit.timestamp).label('time_unit'),
+            func.count(Visit.id).label('count')
+        ).filter(
+            Visit.user_id == user_id,
+            Visit.timestamp >= cutoff_time
+        ).group_by(func.extract('hour', Visit.timestamp)).order_by(func.extract('hour', Visit.timestamp)).all()
+    else:
+        visits_pattern = db.session.query(
+            func.date(Visit.timestamp).label('time_unit'),
+            func.count(Visit.id).label('count')
+        ).filter(
+            Visit.user_id == user_id,
+            Visit.timestamp >= cutoff_time
+        ).group_by(func.date(Visit.timestamp)).order_by(func.date(Visit.timestamp)).all()
+    
+    # User's total session duration
+    total_duration = db.session.query(func.sum(UserActivity.duration)).filter(
+        UserActivity.user_id == user_id,
+        UserActivity.timestamp >= cutoff_time
+    ).scalar() or 0
+    
+    # Get user info
+    user = User.query.get(user_id)
+    
     return jsonify({
+        'user_info': {
+            'id': user.id,
+            'username': user.username,
+            'mobile': user.mobile,
+            'created_at': user.created_at.isoformat() if user.created_at else None
+        },
         'visit_count': user_visits,
+        'total_duration': total_duration,
         'activities': [{
             'action': ua.action,
             'target': ua.target,
             'timestamp': ua.timestamp.isoformat(),
             'duration': ua.duration
         } for ua in user_activities],
-        'favorite_section': favorite_section[0] if favorite_section else None
+        'favorite_section': favorite_section[0] if favorite_section else None,
+        'favorite_section_count': favorite_section[1] if favorite_section else 0,
+        'visits_pattern': [{
+            'time_unit': v.time_unit,
+            'count': v.count
+        } for v in visits_pattern],
+        'range': range_param
+    })
+
+@app.route('/api/analytics/users/list')
+@admin_required
+def get_users_list():
+    """Get list of all users for the user analytics dropdown"""
+    users = User.query.with_entities(User.id, User.username, User.mobile).order_by(User.username).all()
+    
+    return jsonify({
+        'users': [{
+            'id': user.id,
+            'username': user.username,
+            'mobile': user.mobile
+        } for user in users]
     })
 #==========================================
 # Error Handlers
