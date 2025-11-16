@@ -1904,6 +1904,24 @@
                 }
             }
 
+            async trackVisit(section = 'Marion AI') {
+                try {
+                    await fetch('/api/track-visit', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            user_id: window.currentUserId,
+                            page: window.location.pathname.split('/').filter(Boolean).pop() || 'Marion AI',
+                            section: section,
+                            session_id: this.sessionId,
+                            timestamp: new Date().toISOString()
+                        })
+                    });
+                } catch (error) {
+                    console.log('Visit tracking failed');
+                }
+            }
+
             async registerAIEvent(aiName, eventType) {
                 try {
                     await fetch('/api/track-activity', {
@@ -1930,6 +1948,7 @@
 
         // Track specific Marion AI interactions
         document.addEventListener('DOMContentLoaded', function() {
+            aiMonitor.initialize();
             // Track when user sends a message to Marion AI
             document.getElementById('send-button')?.addEventListener('click', function() {
                 aiMonitor.registerAIEvent('Marion', 'sent_message');

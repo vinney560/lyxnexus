@@ -1213,11 +1213,11 @@ Examples:
                 this.sessionId = this.createSessionId();
                 this.monitoredAIs = new Set();
             }
-        
+
             createSessionId() {
                 return 'ai_session_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now().toString(36);
             }
-        
+
             async captureAIAccess(aiName) {
                 try {
                     await fetch('/api/track-activity', {
@@ -1234,7 +1234,25 @@ Examples:
                     console.log('AI access capture failed');
                 }
             }
-        
+
+            async trackVisit(section = 'Quiz AI') {
+                try {
+                    await fetch('/api/track-visit', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            user_id: window.currentUserId,
+                            page: window.location.pathname.split('/').filter(Boolean).pop() || 'Quiz AI',
+                            section: section,
+                            session_id: this.sessionId,
+                            timestamp: new Date().toISOString()
+                        })
+                    });
+                } catch (error) {
+                    console.log('Visit tracking failed');
+                }
+            }
+
             async registerAIEvent(aiName, eventType) {
                 try {
                     await fetch('/api/track-activity', {
@@ -1252,16 +1270,16 @@ Examples:
                 }
             }
         }
-    
+
         // Initialize AI Usage Monitor
         const aiMonitor = new AIUsageMonitor();
-    
+
         // Track Marion AI page load
         aiMonitor.captureAIAccess('QuizAI');
-    
+
         // Track specific Marion AI interactions
         document.addEventListener('DOMContentLoaded', function() {
-        
+            aiMonitor.initialize();
             // Track when user asks a question
             document.getElementById('generateQuizBtn')?.addEventListener('click', function() {
                 aiMonitor.registerAIEvent('QuizAI', 'asked_question');
