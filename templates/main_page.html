@@ -2744,6 +2744,79 @@
         `;
         document.head.appendChild(style);
     });
-</script>    
+</script> 
+<script>
+    // AI Usage Monitor System
+    class AIUsageMonitor {
+        constructor() {
+            this.sessionId = this.createSessionId();
+            this.monitoredAIs = new Set();
+        }
+
+        createSessionId() {
+            return 'ai_session_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now().toString(36);
+        }
+
+        async captureAIAccess(aiName) {
+            try {
+                await fetch('/api/track-activity', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        user_id: window.currentUserId,
+                        action: 'accessed_AI_' + aiName,
+                        target: aiName,
+                        timestamp: new Date().toISOString()
+                    })
+                });
+            } catch (error) {
+                console.log('AI access capture failed');
+            }
+        }
+
+        async registerAIEvent(aiName, eventType) {
+            try {
+                await fetch('/api/track-activity', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        user_id: window.currentUserId,
+                        action: eventType + '_' + aiName,
+                        target: aiName,
+                        timestamp: new Date().toISOString()
+                    })
+                });
+            } catch (error) {
+                console.log('AI event registration failed');
+            }
+        }
+    }
+
+    // Initialize AI Usage Monitor
+    const aiMonitor = new AIUsageMonitor();
+
+    // Monitor when user clicks AI buttons in the robot modal
+    document.addEventListener('click', function(e) {
+        // Monitor Marion AI
+        if (e.target.closest('button') && e.target.closest('button').textContent.includes('Marion AI Assistant')) {
+            aiMonitor.captureAIAccess('Marion_AI');
+        }
+        
+        // Monitor Nova Quiz
+        if (e.target.closest('button') && e.target.closest('button').textContent.includes('Nova Quiz Generator')) {
+            aiMonitor.captureAIAccess('Nova_Quiz');
+        }
+        
+        // Monitor Assignment Doer
+        if (e.target.closest('button') && e.target.closest('button').textContent.includes('Assignment Doer')) {
+            aiMonitor.captureAIAccess('Assignment_Doer');
+        }
+        
+        // Monitor Tutor AI
+        if (e.target.closest('button') && e.target.closest('button').textContent.includes('Tutor AI')) {
+            aiMonitor.captureAIAccess('Tutor_AI');
+        }
+    });
+</script>   
 </body>
 </html>
