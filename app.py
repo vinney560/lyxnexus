@@ -999,7 +999,8 @@ def login():
             flash('Invalid mobile number', 'error')
             return render_template('login.html', username=username, mobile=mobile,
                                    login_type=login_type, year=_year())
-
+        
+        session.clear()
         # ===============================
         #  ADMIN LOGIN VIA MASTER KEY
         # ===============================
@@ -1017,7 +1018,6 @@ def login():
                     db.session.add(user)
                     db.session.commit()
 
-                session.clear()
                 login_user(user)
                 flash('Administrator access granted successfully!', 'success')
                 return redirect(next_page or url_for('admin_page'))
@@ -1056,7 +1056,6 @@ def login():
                 new_user = User(username=username, mobile=mobile, is_admin=False)
                 db.session.add(new_user)
                 db.session.commit()
-                session.clear()
                 login_user(new_user)
                 flash('Welcome to LyxNexus! Let\'s get you started.', 'success')
                 return redirect(url_for('nav_guide'))
@@ -1066,8 +1065,6 @@ def login():
                     return render_template('login.html', username=username, mobile=mobile,
                                            login_type=login_type, year=_year())
 
-                session.clear()
-                session['authenticated'] = True
                 login_user(user)
                 return redirect(next_page or url_for('main_page', message='Login successful!', message_type='success'))
 
@@ -2789,6 +2786,7 @@ def check():
 @app.route('/logout')
 @login_required
 def logout():
+    session.clear()
     logout_user()
     flash('Logout Successfully!', 'success')
     return redirect(url_for('home'))
@@ -5817,7 +5815,7 @@ def get_user_analytics(user_id):
     user_activities = UserActivity.query.filter(
         UserActivity.user_id == user_id,
         UserActivity.timestamp >= cutoff_time
-    ).order_by(UserActivity.timestamp.desc()).limit(100).all()
+    ).order_by(UserActivity.timestamp.desc()).limit(200).all()
     
     # User's favorite section
     favorite_section = db.session.query(

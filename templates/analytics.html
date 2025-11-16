@@ -60,7 +60,7 @@
             background: linear-gradient(90deg, #3B82F6, #8B5CF6);
             color: white;
             border: none;
-            padding: 10px 24px;
+            padding: 10px 19px;
             border-radius: 50px;
             font-weight: 600;
             transition: all 0.3s ease;
@@ -646,16 +646,16 @@
                     </div>
                 </div>
                 
-                <div class="flex items-center space-x-3 slide-in-right">
+                <div class="grid grid-cols-2 gap-2 slide-in-right items-center">
                     <span class="text-sm text-gray-400 hidden md:block" id="current-range-display">Last 24 hours</span>
                     <button onclick="showUserAnalyticsModal()" class="btn btn-secondary flex items-center space-x-2">
-                        <i class="fas fa-user mr-2"></i> User Analytics
+                        <i class="fas fa-user mr-2"></i> User Visit
                     </button>
                     <button onclick="refreshAnalytics()" id="refreshData" class="btn flex items-center space-x-2">
-                        <i class="fas fa-sync-alt mr-2"></i> Refresh Data
+                        <i class="fas fa-sync-alt mr-2"></i> Refresh
                     </button>
                     <button class="btn flex items-center space-x-2" id="backBtn">
-                        <i class="fas fa-arrow-left mr-2"></i> Back
+                        <i class="fas fa-arrow-left mr-2"></i> Go Back
                     </button>
                 </div>
             </div>
@@ -1367,7 +1367,7 @@
         function refreshAnalytics() {
             const btn = document.getElementById('refreshData');
             const originalHtml = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Refreshing...';
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Loading...';
             btn.disabled = true;
             
             // Add refresh animation to stats
