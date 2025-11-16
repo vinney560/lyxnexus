@@ -1890,7 +1890,7 @@
             
                 async trackAIVisit(aiName) {
                     try {
-                        await fetch('/api/track-ai-visit', {
+                        await fetch('/api/track-visit', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
@@ -1908,7 +1908,7 @@
             
                 async trackAIUsage(aiName, action, duration = null) {
                     try {
-                        await fetch('/api/track-ai-activity', {
+                        await fetch('/api/track-activity', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({

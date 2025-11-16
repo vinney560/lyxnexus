@@ -1221,7 +1221,7 @@ Examples:
             
                 async trackAIVisit(aiName) {
                     try {
-                        await fetch('/api/track-ai-visit', {
+                        await fetch('/api/track-visit', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
@@ -1239,7 +1239,7 @@ Examples:
             
                 async trackAIUsage(aiName, action, duration = null) {
                     try {
-                        await fetch('/api/track-ai-activity', {
+                        await fetch('/api/track-activity', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
@@ -1271,12 +1271,12 @@ Examples:
             // Initialize AI Analytics
             window.aiAnalytics = new AIAnalyticsTracker();
         
-            // Track Nova AI when page loads
-            window.aiAnalytics.trackAIView('NOVA');
+            // Track AI when page loads
+            window.aiAnalytics.trackAIView('QuizAI');
         
             // Track when user asks a question
             document.getElementById('generateQuizBtn')?.addEventListener('click', function() {
-                window.aiAnalytics.trackAIUsage('NOVA', 'asked_question');
+                window.aiAnalytics.trackAIUsage('QuizAI', 'asked_question');
             });
         });
     </script>    
