@@ -354,6 +354,9 @@
         padding: 20px;
         text-align: center;
         border-left: 4px solid #10B981;
+        border-right: 1px solid #10B981;
+        border-top: 1px solid #10B981;
+        border-bottom: 1px solid #10B981;
         transition: all 0.3s ease;
     }
     
@@ -454,6 +457,11 @@
         }
 
         .mobile-nav-btn.active {
+            color: #3B82F6;
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .mobile-nav-btn:hover {
             color: #3B82F6;
             background: rgba(59, 130, 246, 0.1);
         }
@@ -2106,9 +2114,8 @@
                             Topic: ${assignment.topic?.name || 'General'}
                         </span>
                         <button onclick="window.location.href='/assignment/${assignment.id}'" 
-                            class="btn text-sm sm:text-base px-4 py-2 text-blue-400 border border-blue-500 rounded-lg hover:bg-blue-600/20 transition-colors flex items-center gap-1 self-start sm:self-auto">
-                            <i class="fas fa-paper-plane"></i> 
-                            <span>View File</span>
+                                class="btn text-sm sm:text-base px-4 py-2 text-blue-400 border border-blue-500 rounded-lg hover:bg-blue-600/20 transition-colors flex items-center gap-1 self-start sm:self-auto">
+                            <i class="fas fa-paper-plane mr-2" style="color: white;"></i> View File
                         </button>
                     </div>
                 </div>
@@ -2407,6 +2414,9 @@
         button.style.left = (window.innerWidth - button.offsetWidth - 20) + 'px';
         button.style.top = (window.innerHeight - button.offsetHeight - 20) + 'px';
 
+        // Create close button for robot
+        createCloseButton();
+
         // Create modal
         createModal();
 
@@ -2418,6 +2428,93 @@
         document.addEventListener('touchend', dragEnd);
         button.addEventListener('click', handleClick);
 
+        function createCloseButton() {
+            const closeBtn = document.createElement('button');
+            closeBtn.innerHTML = '×';
+            closeBtn.style.cssText = `
+                position: absolute;
+                top: -8px;
+                right: -8px;
+                width: 20px;
+                height: 20px;
+                background: #ef4444;
+                color: white;
+                border: none;
+                border-radius: 50%;
+                font-size: 14px;
+                font-weight: bold;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
+                z-index: 1001;
+                transition: all 0.3s ease;
+                opacity: 0;
+                pointer-events: none;
+            `;
+            
+            closeBtn.addEventListener('mouseover', () => {
+                closeBtn.style.background = '#dc2626';
+                closeBtn.style.transform = 'scale(1.1)';
+            });
+            
+            closeBtn.addEventListener('mouseout', () => {
+                closeBtn.style.background = '#ef4444';
+                closeBtn.style.transform = 'scale(1)';
+            });
+            
+            closeBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                removeRobot();
+            });
+            
+            button.appendChild(closeBtn);
+            
+            // Show close button on hover
+            button.addEventListener('mouseenter', () => {
+                closeBtn.style.opacity = '1';
+                closeBtn.style.pointerEvents = 'all';
+            });
+            
+            button.addEventListener('mouseleave', () => {
+                closeBtn.style.opacity = '0';
+                closeBtn.style.pointerEvents = 'none';
+            });
+            
+            // Also show close button on touch devices
+            button.addEventListener('touchstart', () => {
+                closeBtn.style.opacity = '1';
+                closeBtn.style.pointerEvents = 'all';
+                
+                // Hide after 3 seconds on touch devices
+                setTimeout(() => {
+                    closeBtn.style.opacity = '0';
+                    closeBtn.style.pointerEvents = 'none';
+                }, 3000);
+            });
+        }
+
+        function removeRobot() {
+            // Add fade out animation
+            button.style.transition = 'all 0.5s ease';
+            button.style.opacity = '0';
+            button.style.transform = 'translate3d(0, 0, 0) scale(0.5)';
+            
+            setTimeout(() => {
+                button.style.display = 'none';
+                
+                // Show confirmation toast
+                if (typeof toastSystem !== 'undefined') {
+                    toastSystem.info('AI Assistant hidden. Refresh page to show again.', 'Assistant Hidden', 5000);
+                }
+                
+                // Optional: Save preference to localStorage
+                localStorage.setItem('robotButtonHidden', 'true');
+            }, 500);
+        }
+
         function dragStart(e) {
             if (e.type === 'touchstart') {
                 initialX = e.touches[0].clientX - xOffset;
@@ -2428,6 +2525,11 @@
             }
 
             if (e.target === button || e.target.parentNode === button) {
+                // Don't start dragging if clicking the close button
+                if (e.target.tagName === 'BUTTON' && e.target.textContent === '×') {
+                    return;
+                }
+                
                 isDragging = true;
                 button.style.cursor = 'grabbing';
             }
@@ -2464,6 +2566,11 @@
         }
 
         function handleClick(e) {
+            // Don't trigger if clicking the close button
+            if (e.target.tagName === 'BUTTON' && e.target.textContent === '×') {
+                return;
+            }
+            
             // Only trigger if not dragging (to prevent click after drag)
             if (!isDragging) {
                 // Add animation class
@@ -2475,16 +2582,55 @@
                     button.classList.remove('pulse');
                     button.innerHTML = '<i class="fas fa-robot"></i>';
                     
-                    // Show modal instead of navigating directly
-                    const modal = document.querySelector('.modal-backdrop');
-                    modal.style.display = 'flex';
+                    // Show modal
+                    showModal();
                 }, 1000);
             }
         }
 
+        function showModal() {
+            const modal = document.getElementById('ai-modal-backdrop');
+            console.log('Showing modal:', modal);
+            
+            if (modal) {
+                modal.style.display = 'flex';
+                // Force reflow
+                modal.offsetHeight;
+                modal.style.opacity = '1';
+                
+                const modalContent = modal.querySelector('.modal-content');
+                if (modalContent) {
+                    modalContent.style.transform = 'scale(1)';
+                }
+            } else {
+                console.error('Modal not found!');
+            }
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('ai-modal-backdrop');
+            if (modal) {
+                modal.style.opacity = '0';
+                const modalContent = modal.querySelector('.modal-content');
+                if (modalContent) {
+                    modalContent.style.transform = 'scale(0.9)';
+                }
+                setTimeout(() => {
+                    modal.style.display = 'none';
+                }, 300);
+            }
+        }
+
         function createModal() {
+            // Remove existing modal if any
+            const existingModal = document.getElementById('ai-modal-backdrop');
+            if (existingModal) {
+                existingModal.remove();
+            }
+
             // Create modal backdrop
             const modalBackdrop = document.createElement('div');
+            modalBackdrop.id = 'ai-modal-backdrop';
             modalBackdrop.className = 'modal-backdrop';
             modalBackdrop.style.cssText = `
                 position: fixed;
@@ -2492,227 +2638,209 @@
                 left: 0;
                 width: 100%;
                 height: 100%;
-                background: rgba(0,0,0,0.5);
+                background: rgba(15, 23, 42, 0.95);
+                backdrop-filter: blur(10px);
                 display: none;
                 justify-content: center;
                 align-items: center;
-                z-index: 1000;
+                z-index: 10000;
+                opacity: 0;
+                transition: opacity 0.3s ease;
             `;
 
             // Create modal content
             const modalContent = document.createElement('div');
             modalContent.className = 'modal-content';
             modalContent.style.cssText = `
-                background: linear-gradient(125deg, rgba(30, 41, 59, 0.8) 50%, rgba(30, 41, 59, 0.4) 50%);
-                padding: 30px;
-                border-radius: 12px;
-                box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-                max-width: 400px;
+                background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.98) 100%);
+                padding: 40px 30px 30px 30px;
+                border-radius: 20px;
+                box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5),
+                            inset 0 1px 0 rgba(255, 255, 255, 0.1);
+                max-width: 450px;
                 width: 90%;
                 text-align: center;
-                border: 1px solid lightblue;
+                border: 1px solid rgba(99, 102, 241, 0.3);
+                position: relative;
+                overflow: hidden;
+                transform: scale(0.9);
+                transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+                margin: 20px;
             `;
+
+            // Add decorative elements
+            const decoration = document.createElement('div');
+            decoration.style.cssText = `
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 4px;
+                background: linear-gradient(90deg, #8b5cf6, #3b82f6, #06b6d4);
+                border-radius: 20px 20px 0 0;
+            `;
+            modalContent.appendChild(decoration);
 
             // Create modal header
             const modalHeader = document.createElement('h2');
-            modalHeader.textContent = 'CHOOSE AI TO ACCESS.';
-            modalHeader.style.background = "linear-gradient(135deg, #3B82F6, #8B5CF6)";
-            modalHeader.style.webkitBackgroundClip = "text";
-            modalHeader.style.backgroundClip = "text";
-            modalHeader.style.webkitTextFillColor = "transparent";
-            modalHeader.style.color = "transparent";
-            modalHeader.style.backgroundSize = "200% 200%";
-            modalHeader.style.animation = "gradient-shift 3s ease infinite";
-            modalHeader.classList.add('text-xl', 'md:text-2xl', 'font-bold');
-            modalHeader.style.display = "inline-block";
-            modalHeader.style.borderTop = "2px solid #3B82F6";
-            modalHeader.style.marginBottom = "25px";
-            modalHeader.style.borderBottom = "2px solid #3B82F6";
-            modalHeader.style.textUnderlineOffset = "6px";
+            modalHeader.innerHTML = '<i class="fas fa-robot mr-2"></i> AI Assistant Hub';
+            modalHeader.style.cssText = `
+                background: linear-gradient(135deg, #8b5cf6, #3b82f6, #06b6d4);
+                -webkit-background-clip: text;
+                background-clip: text;
+                -webkit-text-fill-color: transparent;
+                color: transparent;
+                font-size: 1.75rem;
+                font-weight: 700;
+                margin-bottom: 30px;
+                text-shadow: 0 2px 10px rgba(139, 92, 246, 0.3);
+            `;
                     
             // Create buttons container
             const buttonsContainer = document.createElement('div');
             buttonsContainer.style.cssText = `
                 display: flex;
                 flex-direction: column;
-                gap: 15px;
+                gap: 16px;
+                margin-bottom: 25px;
             `;
 
-            // Create Marion AI button
-            const marionButton = document.createElement('button');
-            marionButton.innerHTML = '<i class="fas fa-robot"></i> Marion AI Assistant';
-            marionButton.style.cssText = `
-                padding: 15px 20px;
-                background: linear-gradient(135deg, #667eea, #764ba2);
-                color: white;
-                border: none;
-                border-radius: 10px;
-                font-size: 16px;
-                cursor: pointer;
-                transition: all 0.3s ease;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                gap: 10px;
-            `;
-            marionButton.onmouseover = () => marionButton.style.transform = 'translateY(-2px)';
-            marionButton.onmouseout = () => marionButton.style.transform = 'translateY(0)';
-            marionButton.onclick = () => {
-                marionButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Opening...';
-                setTimeout(() => {
-                    marionButton.style.opacity = '0.5';
-                    window.location.href = '/gemini';
-                }, 200);
-                setTimeout(() => {
-                    marionButton.style.opacity = '0';
-                }, 500);
-                setTimeout(() => {
-                    marionButton.style.opacity = '1';
-                    marionButton.innerHTML = '<i class="fas fa-robot"></i> Marion AI Assistant';
-                }, 2000);
-                setInterval(() => {
-                    window.location.href = '/gemini';
-                }, 1200);
-            };
+            // AI Assistant Buttons
+            const aiButtons = [
+                {
+                    name: 'Marion AI Assistant',
+                    icon: 'fas fa-robot',
+                    gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    href: '/gemini',
+                    description: 'General AI Assistant'
+                },
+                {
+                    name: 'Nova Quiz Generator',
+                    icon: 'fas fa-brain',
+                    gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+                    href: '/quiz',
+                    description: 'Create Practice Quizzes'
+                },
+                {
+                    name: 'Assignment Doer',
+                    icon: 'fas fa-calculator',
+                    gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 60%)',
+                    href: '/math',
+                    description: 'Math & Assignment Help'
+                },
+                {
+                    name: 'Tutor AI',
+                    icon: 'fas fa-chalkboard-teacher',
+                    gradient: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+                    href: '#',
+                    description: 'Coming Soon',
+                    disabled: true
+                }
+            ];
 
-            // Create Nova Quiz button
-            const novaButton = document.createElement('button');
-            novaButton.innerHTML = '<i class="fas fa-question-circle"></i> Nova Quiz Generator';
-            novaButton.style.cssText = `
-                padding: 15px 20px;
-                background: linear-gradient(135deg, #f093fb, #f5576c);
-                color: white;
-                border: none;
-                border-radius: 8px;
-                font-size: 16px;
-                cursor: pointer;
-                transition: all 0.3s ease;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                gap: 10px;
-            `;
-            novaButton.onmouseover = () => novaButton.style.transform = 'translateY(-2px)';
-            novaButton.onmouseout = () => novaButton.style.transform = 'translateY(0)';
-            novaButton.onclick = () => {
-                novaButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Opening...';
-                setTimeout(() => {
-                    novaButton.style.opacity = '0.5';
-                    window.location.href = '/quiz';
-                }, 200);
-                setTimeout(() => {
-                    novaButton.style.opacity = '0';
-                }, 500);
-                setTimeout(() => {
-                    novaButton.style.opacity = '1';
-                    novaButton.innerHTML = '<i class="fas fa-question-circle"></i> Nova Quiz Generator';
-                }, 2000);
-                setInterval(() => {
-                    window.location.href = '/quiz';
-                }, 1200);
-            };
+            aiButtons.forEach(ai => {
+                const btn = document.createElement('button');
+                btn.className = 'ai-button';
+                btn.innerHTML = `
+                    <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <i class="${ai.icon}" style="font-size: 18px; color: white;"></i>
+                            <div style="text-align: left;">
+                                <div style="font-weight: 600; font-size: 14px; color: white;">${ai.name}</div>
+                                <div style="font-size: 11px; opacity: 0.8; margin-top: 2px; color: white;">${ai.description}</div>
+                            </div>
+                        </div>
+                        <i class="fas fa-chevron-right" style="font-size: 12px; opacity: 0.7; color: white;"></i>
+                    </div>
+                `;
+                
+                btn.style.cssText = `
+                    padding: 16px 20px;
+                    background: ${ai.gradient};
+                    color: white;
+                    border: none;
+                    border-radius: 12px;
+                    font-size: 14px;
+                    cursor: ${ai.disabled ? 'not-allowed' : 'pointer'};
+                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                    display: flex;
+                    align-items: center;
+                    box-shadow: 0 4px 15px ${ai.disabled ? 'rgba(0,0,0,0.1)' : 'rgba(0,0,0,0.2)'};
+                    opacity: ${ai.disabled ? '0.6' : '1'};
+                    position: relative;
+                    overflow: hidden;
+                `;
 
-            // Create Assignment Doer button
-            const DoerButton = document.createElement('button');
-            DoerButton.innerHTML = '<i class="fas fa-question-circle"></i> Assignment Doer';
-            DoerButton.style.cssText = `
-                padding: 15px 20px;
-                background: linear-gradient(135deg, #4facfe, #00f2fe);
-                color: white;
-                border: none;
-                border-radius: 8px;
-                font-size: 16px;
-                cursor: pointer;
-                transition: all 0.3s ease;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                gap: 10px;
-            `;
-            
-            DoerButton.onmouseover = () => DoerButton.style.transform = 'translateY(-2px)';
-            DoerButton.onmouseout = () => DoerButton.style.transform = 'translateY(0)';
-            DoerButton.onclick = () => {
-                DoerButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Opening...';
-                setTimeout(() => {
-                    DoerButton.style.opacity = '0.5';
-                    window.location.href = '/math';
-                }, 200);
-                setTimeout(() => {
-                    DoerButton.style.opacity = '0';
-                }, 500);
-                setTimeout(() => {
-                    DoerButton.style.opacity = '1';
-                    DoerButton.innerHTML = '<i class="fas fa-question-circle"></i> Assignment Doer';
-                }, 2000);
-                setInterval(() => {
-                    window.location.href = '/math';
-                }, 1200);
-            };
+                if (!ai.disabled) {
+                    btn.addEventListener('mouseover', () => {
+                        btn.style.transform = 'translateY(-3px)';
+                        btn.style.boxShadow = `0 8px 25px rgba(0,0,0,0.4)`;
+                    });
+                    
+                    btn.addEventListener('mouseout', () => {
+                        btn.style.transform = 'translateY(0)';
+                        btn.style.boxShadow = `0 4px 15px rgba(0,0,0,0.2)`;
+                    });
 
-            // Create Tutor button
-            const TutorButton = document.createElement('button');
-            TutorButton.innerHTML = '<i class="fas fa-question-circle"></i> Tutor AI';
-            TutorButton.style.cssText = `
-                padding: 15px 20px;
-                background: linear-gradient(135deg, #4facfe, #f093fb);
-                color: white;
-                border: none;
-                border-radius: 8px;
-                font-size: 16px;
-                cursor: pointer;
-                transition: all 0.3s ease;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                gap: 10px;
-            `;
-            
-            TutorButton.onmouseover = () => TutorButton.style.transform = 'translateY(-2px)';
-            TutorButton.onmouseout = () => TutorButton.style.transform = 'translateY(0)';
-            TutorButton.onclick = () => {
-                TutorButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Opening...';
-                setTimeout(() => {
-                    TutorButton.style.opacity = '0.5';
-                    //window.location.href = '/tutor';
-                    toastSystem.info("Coming Soon!", "Wait");
-                }, 200);
-                setTimeout(() => {
-                    TutorButton.style.opacity = '0';
-                }, 500);
-                setTimeout(() => {
-                    TutorButton.style.opacity = '1';
-                    TutorButton.innerHTML = '<i class="fas fa-question-circle"></i> Tutor';
-                }, 2000);
-                //setInterval(() => {
-                //    window.location.href = '/tutor';
-                //}, 1200);
-            };
+                    btn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        
+                        btn.innerHTML = '<i class="fas fa-spinner fa-spin" style="color: white;"></i>';
+                        btn.style.opacity = '0.8';
+                        
+                        setTimeout(() => {
+                            window.location.href = ai.href;
+                        }, 800);
+                    });
+                } else {
+                    btn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        if (typeof toastSystem !== 'undefined') {
+                            toastSystem.info("This feature is coming soon!", "Coming Soon");
+                        } else {
+                            alert("This feature is coming soon!");
+                        }
+                    });
+                }
+
+                buttonsContainer.appendChild(btn);
+            });
 
             // Create close button
             const closeButton = document.createElement('button');
-            closeButton.textContent = 'Close';
+            closeButton.innerHTML = '<i class="fas fa-times mr-2"></i> Close';
             closeButton.style.cssText = `
-                margin-top: 20px;
-                padding: 10px 20px;
-                background: #6c757d;
-                color: white;
-                border: none;
-                border-radius: 6px;
+                padding: 12px 24px;
+                background: rgba(255, 255, 255, 0.1);
+                color: #94a3b8;
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: 10px;
+                font-size: 14px;
                 cursor: pointer;
-                transition: background 0.3s ease;
+                transition: all 0.3s ease;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+                width: 100%;
             `;
-            closeButton.onmouseover = () => closeButton.style.background = '#5a6268';
-            closeButton.onmouseout = () => closeButton.style.background = '#6c757d';
-            closeButton.onclick = () => {
-                modalBackdrop.style.display = 'none';
-            };
+            closeButton.addEventListener('mouseover', () => {
+                closeButton.style.background = 'rgba(255, 255, 255, 0.15)';
+                closeButton.style.color = '#e2e8f0';
+            });
+            closeButton.addEventListener('mouseout', () => {
+                closeButton.style.background = 'rgba(255, 255, 255, 0.1)';
+                closeButton.style.color = '#94a3b8';
+            });
+            closeButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                closeModal();
+            });
 
             // Assemble modal
-            buttonsContainer.appendChild(marionButton);
-            buttonsContainer.appendChild(novaButton);
-            buttonsContainer.appendChild(DoerButton);
-            buttonsContainer.appendChild(TutorButton);
             modalContent.appendChild(modalHeader);
             modalContent.appendChild(buttonsContainer);
             modalContent.appendChild(closeButton);
@@ -2720,11 +2848,13 @@
             document.body.appendChild(modalBackdrop);
 
             // Close modal when clicking outside
-            modalBackdrop.onclick = (e) => {
+            modalBackdrop.addEventListener('click', (e) => {
                 if (e.target === modalBackdrop) {
-                    modalBackdrop.style.display = 'none';
+                    closeModal();
                 }
-            };
+            });
+
+            console.log('Modal created with ID:', modalBackdrop.id);
         }
 
         // Make button responsive to window resize
@@ -2749,7 +2879,6 @@
             }
         });
 
-        // Add CSS for pulse animation
         const style = document.createElement('style');
         style.textContent = `
             .pulse {
@@ -2760,6 +2889,55 @@
                 0% { transform: scale(1); }
                 50% { transform: scale(1.03); }
                 100% { transform: scale(1); }
+            }
+
+            #robot-button {
+                width: 50px;
+                height: 50px;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                border-radius: 50%;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                cursor: grab;
+                box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4),
+                            0 3px 10px rgba(0, 0, 0, 0.3),
+                            inset 0 1px 0 rgba(255, 255, 255, 0.2);
+                transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+                z-index: 1000;
+                user-select: none;
+                border: 2px solid rgba(255, 255, 255, 0.1);
+                backdrop-filter: blur(10px);
+                position: relative;
+            }
+
+            #robot-button i {
+                font-size: 20px;
+                color: white;
+                text-shadow: 0 2px 6px rgba(0,0,0,0.3);
+            }
+
+            .ai-button::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: -100%;
+                width: 100%;
+                height: 100%;
+                background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+                transition: left 0.5s;
+            }
+            
+            .ai-button:hover::before {
+                left: 100%;
+            }
+
+            #ai-modal-backdrop {
+                z-index: 10000 !important;
+            }
+
+            .modal-content {
+                z-index: 10001 !important;
             }
         `;
         document.head.appendChild(style);

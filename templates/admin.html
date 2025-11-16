@@ -1053,6 +1053,26 @@
         let currentEditingId = null;
         let currentAssignmentFile = null;
 
+        function truncateFilename(filename, maxLength = 12) {
+            // Handle files without extensions
+            if (!filename.includes('.')) {
+                return filename.length > maxLength 
+                    ? filename.substring(0, maxLength) + '...'
+                    : filename;
+            }
+
+            const fileExt = filename.split('.').pop();
+            const nameWithoutExt = filename.slice(0, filename.lastIndexOf('.'));
+
+            // If filename is already short enough
+            if (nameWithoutExt.length <= maxLength) {
+                return filename;
+            }
+
+            // Truncate and add ellipsis
+            return nameWithoutExt.substring(0, maxLength) + '...' + '.' + fileExt;
+        }
+
         /* ======= TAB MANAGEMENT ======= */
         function openTab(tabId) {
             // Hide all tab contents
@@ -1181,7 +1201,7 @@
             const nameEl = document.getElementById('assignment-file-name');
             const sizeEl = document.getElementById('assignment-file-size');
             const infoEl = document.getElementById('assignment-file-info');
-            if (nameEl) nameEl.textContent = file.name;
+            if (nameEl) nameEl.textContent = truncateFilename(file.name, 12);
             if (sizeEl) sizeEl.textContent = `${Math.round(file.size/1024)} KB`;
             if (infoEl) infoEl.style.display = 'flex';
           }
@@ -1262,7 +1282,7 @@
                   <div class="text-sm text-gray-400">${escapeHtml(assignment.file_type || 'Unknown')}</div>
                 </div>
                 <div class="file-actions">
-                  <button class="btn bg-blue-600 hover:bg-blue-700 text-sm" onclick="downloadAssignmentFile(${assignment.id})"><i class="fas fa-download"></i></button>
+                  <button class="btn bg-blue-600 hover:bg-blue-700 text-sm" onclick="downloadAssignmentFile(${assignment.id})"><i class="fas fa-download text-white"></i></button>
                 </div>
               </div>` : '';
           
