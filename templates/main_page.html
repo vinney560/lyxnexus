@@ -2410,9 +2410,35 @@
         let xOffset = 0;
         let yOffset = 0;
 
-        // Set initial position
-        button.style.left = (window.innerWidth - button.offsetWidth - 20) + 'px';
-        button.style.top = (window.innerHeight - button.offsetHeight - 20) + 'px';
+        // FIXED: Use absolute positioning instead of transform for the base
+        button.style.cssText = `
+            position: fixed;
+            bottom: 60px;
+            right: 16px;
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: grab;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4),
+                        0 3px 10px rgba(0, 0, 0, 0.3),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            z-index: 1000;
+            user-select: none;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            transform: none !important;
+        `;
+
+        button.innerHTML = `
+            <div style="position: relative; display: flex; align-items: center; justify-content: center;">
+                <i class="fas fa-robot" style="font-size: 20px; color: white; text-shadow: 0 2px 6px rgba(0,0,0,0.3);"></i>
+            </div>
+        `;
 
         // Create close button for robot
         createCloseButton();
@@ -2500,7 +2526,7 @@
             // Add fade out animation
             button.style.transition = 'all 0.5s ease';
             button.style.opacity = '0';
-            button.style.transform = 'translate3d(0, 0, 0) scale(0.5)';
+            button.style.transform = 'scale(0.5)';
             
             setTimeout(() => {
                 button.style.display = 'none';
@@ -2517,12 +2543,17 @@
 
         function dragStart(e) {
             if (e.type === 'touchstart') {
-                initialX = e.touches[0].clientX - xOffset;
-                initialY = e.touches[0].clientY - yOffset;
+                initialX = e.touches[0].clientX;
+                initialY = e.touches[0].clientY;
             } else {
-                initialX = e.clientX - xOffset;
-                initialY = e.clientY - yOffset;
+                initialX = e.clientX;
+                initialY = e.clientY;
             }
+
+            // Get current button position
+            const rect = button.getBoundingClientRect();
+            xOffset = rect.left;
+            yOffset = rect.top;
 
             if (e.target === button || e.target.parentNode === button) {
                 // Don't start dragging if clicking the close button
@@ -2532,6 +2563,8 @@
                 
                 isDragging = true;
                 button.style.cursor = 'grabbing';
+                // Remove transitions during drag
+                button.style.transition = 'none';
             }
         }
 
@@ -2539,30 +2572,41 @@
             if (isDragging) {
                 e.preventDefault();
 
+                let clientX, clientY;
+                
                 if (e.type === 'touchmove') {
-                    currentX = e.touches[0].clientX - initialX;
-                    currentY = e.touches[0].clientY - initialY;
+                    clientX = e.touches[0].clientX;
+                    clientY = e.touches[0].clientY;
                 } else {
-                    currentX = e.clientX - initialX;
-                    currentY = e.clientY - initialY;
+                    clientX = e.clientX;
+                    clientY = e.clientY;
                 }
 
-                xOffset = currentX;
-                yOffset = currentY;
+                // Calculate new position relative to viewport
+                currentX = clientX - initialX + xOffset;
+                currentY = clientY - initialY + yOffset;
 
-                setTranslate(currentX, currentY, button);
+                // Keep within viewport bounds
+                const buttonWidth = 50;
+                const buttonHeight = 50;
+                const margin = 10;
+
+                currentX = Math.max(margin, Math.min(currentX, window.innerWidth - buttonWidth - margin));
+                currentY = Math.max(margin, Math.min(currentY, window.innerHeight - buttonHeight - margin));
+
+                // Update position using left/top instead of transform
+                button.style.left = currentX + 'px';
+                button.style.top = currentY + 'px';
+                button.style.bottom = 'auto';
+                button.style.right = 'auto';
             }
         }
 
-        function setTranslate(xPos, yPos, el) {
-            el.style.transform = `translate3d(${xPos}px, ${yPos}px, 0)`;
-        }
-
         function dragEnd() {
-            initialX = currentX;
-            initialY = currentY;
             isDragging = false;
             button.style.cursor = 'grab';
+            // Restore transitions
+            button.style.transition = 'all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
         }
 
         function handleClick(e) {
@@ -2575,12 +2619,16 @@
             if (!isDragging) {
                 // Add animation class
                 button.classList.add('pulse');
-                button.innerHTML = '<i class="fas fa-spinner fa-spin m-auto"></i>';
+                button.innerHTML = '<i class="fas fa-spinner fa-spin" style="font-size: 20px; color: white;"></i>';
 
                 // Remove animation class after animation completes
                 setTimeout(() => {
                     button.classList.remove('pulse');
-                    button.innerHTML = '<i class="fas fa-robot"></i>';
+                    button.innerHTML = `
+                        <div style="position: relative; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-robot" style="font-size: 20px; color: white;"></i>
+                        </div>
+                    `;
                     
                     // Show modal
                     showModal();
@@ -2724,7 +2772,7 @@
                 {
                     name: 'Assignment Doer',
                     icon: 'fas fa-calculator',
-                    gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 60%)',
+                    gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
                     href: '/math',
                     description: 'Math & Assignment Help'
                 },
@@ -2857,28 +2905,46 @@
             console.log('Modal created with ID:', modalBackdrop.id);
         }
 
-        // Make button responsive to window resize
+        // Handle window resize to keep button in view
         window.addEventListener('resize', function() {
-            // Keep the button in view if window is resized
+            if (isDragging) return;
+            
             const rect = button.getBoundingClientRect();
+            const buttonWidth = 50;
+            const buttonHeight = 50;
+            const margin = 20;
 
-            if (rect.right > window.innerWidth) {
-                button.style.left = (window.innerWidth - button.offsetWidth - 20) + 'px';
+            let newLeft = parseFloat(button.style.left);
+            let newTop = parseFloat(button.style.top);
+
+            if (isNaN(newLeft) || isNaN(newTop)) {
+                // Reset to bottom right if positions aren't set
+                button.style.left = (window.innerWidth - buttonWidth - margin) + 'px';
+                button.style.top = (window.innerHeight - buttonHeight - margin) + 'px';
+                button.style.bottom = 'auto';
+                button.style.right = 'auto';
+                return;
             }
 
-            if (rect.bottom > window.innerHeight) {
-                button.style.top = (window.innerHeight - button.offsetHeight - 20) + 'px';
+            // Adjust if out of bounds after resize
+            if (newLeft > window.innerWidth - buttonWidth - margin) {
+                newLeft = window.innerWidth - buttonWidth - margin;
+            }
+            if (newTop > window.innerHeight - buttonHeight - margin) {
+                newTop = window.innerHeight - buttonHeight - margin;
+            }
+            if (newLeft < margin) {
+                newLeft = margin;
+            }
+            if (newTop < margin) {
+                newTop = margin;
             }
 
-            if (rect.left < 0) {
-                button.style.left = '20px';
-            }
-
-            if (rect.top < 0) {
-                button.style.top = '20px';
-            }
+            button.style.left = newLeft + 'px';
+            button.style.top = newTop + 'px';
         });
 
+        // Add CSS for pulse animation
         const style = document.createElement('style');
         style.textContent = `
             .pulse {
@@ -2892,29 +2958,8 @@
             }
 
             #robot-button {
-                width: 50px;
-                height: 50px;
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                border-radius: 50%;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                cursor: grab;
-                box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4),
-                            0 3px 10px rgba(0, 0, 0, 0.3),
-                            inset 0 1px 0 rgba(255, 255, 255, 0.2);
-                transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-                z-index: 1000;
-                user-select: none;
-                border: 2px solid rgba(255, 255, 255, 0.1);
-                backdrop-filter: blur(10px);
-                position: relative;
-            }
-
-            #robot-button i {
-                font-size: 20px;
-                color: white;
-                text-shadow: 0 2px 6px rgba(0,0,0,0.3);
+                position: fixed !important;
+                z-index: 1000 !important;
             }
 
             .ai-button::before {
