@@ -5755,7 +5755,7 @@ def get_visit_analytics():
         User.id.label('user_id')
     ).join(User).filter(
         UserActivity.timestamp >= cutoff_time
-    ).order_by(UserActivity.timestamp.desc()).limit(50).all()
+    ).order_by(UserActivity.timestamp.desc()).all()
     
     # Platform overview stats
     total_duration = db.session.query(func.sum(UserActivity.duration)).filter(
