@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LyxLab Projects</title>
+    
+    <!-- SEO Meta -->
+    <meta name="description" content="LyxLab is a collection of all the projects I have made." />
+    <meta name="keywords" content="education, coding, programming, web development, technology, online courses, learn to code" />
+    <meta name="author" content="Vincent Kipngetich" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://lyxnexus.onrender.com/" />
+    <link rel="icon" href="https://lyxnexus.onrender.com/uploads/favicon-1.png"/>
+    
+    <meta property="og:title" content="LyxLab Intelligence | Unofficial" />
+    <meta property="og:description" content="LyxLab is a collection of all the projects I have made." />
+    <meta property="og:image" content="https://lyxnexus.onrender.com/favicon.ico" />
+    <meta property="og:url" content="https://lyxnexus.onrender.com/" />
+    
+    <meta name="twitter:card" content="summary" />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .glass-morph {
+            background: rgba(30, 30, 40, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+        
+        .gradient-text {
+            background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .project-card {
+            transition: all 0.3s ease;
+        }
+        
+        .project-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0, 31, 135, 0.3);
+        }
+        
+        .loading-spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3B82F6;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .status-active {
+            background-color: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+        
+        .status-development {
+            background-color: rgba(245, 158, 11, 0.2);
+            color: #f59e0b;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+        
+        .status-planned {
+            background-color: rgba(99, 102, 241, 0.2);
+            color: #6366f1;
+            border: 1px solid rgba(99, 102, 241, 0.3);
+        }
+        
+        .btn-disabled {
+            background-color: #4b5563;
+            color: #9ca3af;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+        
+        .btn-disabled:hover {
+            background-color: #4b5563;
+            transform: none;
+        }
+        
+        .credential-field {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            padding: 6px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .credential-field:last-child {
+            border-bottom: none;
+        }
+        
+        .field-name {
+            text-transform: capitalize;
+            color: #9ca3af;
+            font-size: 14px;
+            min-width: 80px;
+        }
+        
+        .field-value {
+            font-family: monospace;
+            font-size: 14px;
+            text-align: right;
+            flex: 1;
+            margin-left: 10px;
+        }
+        
+        .mobile-value {
+            color: #60a5fa;
+        }
+        
+        .email-value {
+            color: #f472b6;
+        }
+        
+        .username-value {
+            color: #34d399;
+        }
+        
+        .password-value {
+            color: #f87171;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <header class="text-center mb-12">
+            <div class="logo-container inline-block p-4 rounded-2xl bg-gradient-to-r from-blue-500 to-purple-600 mb-4">
+                <i class="fas fa-flask text-white text-4xl"></i>
+            </div>
+            <h1 class="text-4xl font-bold gradient-text mb-2">LyxLab</h1>
+            <p class="text-gray-400 text-lg">Explore my projects and demo credentials</p>
+            
+            <!-- Status Legend -->
+            <div class="flex flex-wrap justify-center gap-4 mt-6">
+                <div class="flex items-center gap-2">
+                    <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                    <span class="text-sm text-gray-400">Active</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                    <span class="text-sm text-gray-400">Development</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div class="w-3 h-3 bg-indigo-500 rounded-full"></div>
+                    <span class="text-sm text-gray-400">Planned</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Loading State -->
+        <div id="loadingState" class="text-center py-12">
+            <div class="loading-spinner mx-auto mb-4"></div>
+            <p class="text-gray-400">Loading projects...</p>
+        </div>
+
+        <!-- Error State -->
+        <div id="errorState" class="hidden text-center py-12">
+            <i class="fas fa-exclamation-triangle text-yellow-500 text-5xl mb-4"></i>
+            <h2 class="text-2xl font-bold mb-2">Failed to Load Projects</h2>
+            <p class="text-gray-400 mb-4" id="errorMessage"></p>
+            <button onclick="loadProjects()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors">
+                <i class="fas fa-redo mr-2"></i>Try Again
+            </button>
+        </div>
+
+        <!-- Projects Grid -->
+        <div id="projectsGrid" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Projects will be dynamically inserted here -->
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const loadingState = document.getElementById('loadingState');
+        const errorState = document.getElementById('errorState');
+        const projectsGrid = document.getElementById('projectsGrid');
+        const errorMessage = document.getElementById('errorMessage');
+
+        // Status configuration
+        const statusConfig = {
+            'active': { class: 'status-active', icon: 'fa-check-circle', text: 'Active' },
+            'development': { class: 'status-development', icon: 'fa-tools', text: 'Development' },
+            'planned': { class: 'status-planned', icon: 'fa-clock', text: 'Planned' }
+        };
+
+        // Field type configuration for styling
+        const fieldConfig = {
+            'mobile': { class: 'mobile-value', icon: 'fa-phone' },
+            'email': { class: 'email-value', icon: 'fa-envelope' },
+            'username': { class: 'username-value', icon: 'fa-user' },
+            'password': { class: 'password-value', icon: 'fa-lock' }
+        };
+
+        // Load projects from API
+        async function loadProjects() {
+            try {
+                // Show loading, hide others
+                loadingState.classList.remove('hidden');
+                errorState.classList.add('hidden');
+                projectsGrid.classList.add('hidden');
+
+                // Fetch data from API
+                const response = await fetch('/lyx-lab/data/projects');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const projects = await response.json();
+                
+                // Hide loading
+                loadingState.classList.add('hidden');
+                
+                // Render projects
+                renderProjects(projects);
+                
+            } catch (error) {
+                console.error('Error loading projects:', error);
+                loadingState.classList.add('hidden');
+                errorState.classList.remove('hidden');
+                errorMessage.textContent = error.message || 'Failed to load projects. Please try again.';
+            }
+        }
+
+        // Check if URL is valid
+        function isValidUrl(url) {
+            return url && url.length > 0 && url.startsWith('http');
+        }
+
+        // Check if credentials exist
+        function hasCredentials(credentials) {
+            return credentials && Object.keys(credentials).length > 0;
+        }
+
+        // Get status badge HTML
+        function getStatusBadge(status) {
+            const config = statusConfig[status] || statusConfig.active;
+            return `
+                <span class="status-badge ${config.class}">
+                    <i class="fas ${config.icon} mr-1 text-xs"></i>
+                    ${config.text}
+                </span>
+            `;
+        }
+
+        // Render credential fields
+        function renderCredentialFields(credentials) {
+            if (!credentials) return '';
+            
+            return Object.entries(credentials).map(([field, value]) => {
+                const config = fieldConfig[field] || { class: 'text-gray-300', icon: 'fa-key' };
+                return `
+                    <div class="credential-field">
+                        <span class="field-name">
+                            <i class="fas ${config.icon} mr-1 text-xs"></i>${field}:
+                        </span>
+                        <span class="field-value ${config.class}">${value}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Render projects to the grid
+        function renderProjects(projects) {
+            projectsGrid.innerHTML = '';
+            
+            Object.entries(projects).forEach(([url, project], index) => {
+                const hasUrl = isValidUrl(url);
+                const hasCreds = hasCredentials(project.credentials);
+                const status = project.status || 'active';
+                
+                const projectCard = document.createElement('div');
+                projectCard.className = 'project-card glass-morph rounded-2xl p-6 fade-in';
+                projectCard.style.animationDelay = `${index * 0.1}s`;
+                
+                projectCard.innerHTML = `
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center mr-4">
+                                <i class="fas fa-cube text-white"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-bold">${project.name}</h3>
+                                ${getStatusBadge(status)}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    ${project.description ? `
+                        <div class="mb-4 p-3 bg-gray-800 rounded-lg">
+                            <p class="text-gray-300 text-sm">${project.description}</p>
+                        </div>
+                    ` : ''}
+                    
+                    <div class="mb-4">
+                        <label class="text-gray-400 text-sm block mb-1">Project URL</label>
+                        ${hasUrl ? `
+                            <a href="${url}" target="_blank" class="text-blue-400 hover:text-blue-300 break-words block truncate" title="${url}">
+                                <i class="fas fa-link mr-1 text-xs"></i>${url}
+                            </a>
+                        ` : `
+                            <span class="text-gray-500 italic">
+                                <i class="fas fa-unlink mr-1 text-xs"></i>No URL available
+                            </span>
+                        `}
+                    </div>
+                    
+                    ${hasCreds ? `
+                        <div class="mb-4">
+                            <label class="text-gray-400 text-sm block mb-2">Demo Credentials</label>
+                            <div class="bg-gray-800 rounded-lg p-3">
+                                ${renderCredentialFields(project.credentials)}
+                            </div>
+                        </div>
+                    ` : `
+                        <div class="mb-4">
+                            <label class="text-gray-400 text-sm block mb-2">Credentials</label>
+                            <div class="bg-gray-800 rounded-lg p-3 text-center">
+                                <span class="text-gray-500 italic text-sm">
+                                    <i class="fas fa-lock-open mr-1"></i>No credentials required
+                                </span>
+                            </div>
+                        </div>
+                    `}
+                    
+                    <div class="flex space-x-3">
+                        ${hasUrl ? `
+                            <a href="${url}" target="_blank" 
+                               class="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-center py-2 px-4 rounded-lg transition-colors flex items-center justify-center">
+                                <i class="fas fa-external-link-alt mr-2"></i>Visit Project
+                            </a>
+                        ` : `
+                            <button disabled
+                                    class="flex-1 btn-disabled text-center py-2 px-4 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-external-link-alt mr-2"></i>Visit Project
+                            </button>
+                        `}
+                        
+                        ${hasCreds ? `
+                            <button onclick="copyCredentials(${JSON.stringify(project.credentials)}, '${project.name}')" 
+                                    class="bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded-lg transition-colors flex items-center justify-center"
+                                    title="Copy credentials">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        ` : `
+                            <button disabled
+                                    class="btn-disabled py-2 px-4 rounded-lg flex items-center justify-center"
+                                    title="No credentials to copy">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        `}
+                    </div>
+                `;
+                
+                projectsGrid.appendChild(projectCard);
+            });
+            
+            projectsGrid.classList.remove('hidden');
+        }
+
+        // Copy credentials to clipboard
+        function copyCredentials(credentials, projectName) {
+            const credentialText = Object.entries(credentials)
+                .map(([field, value]) => `${field.charAt(0).toUpperCase() + field.slice(1)}: ${value}`)
+                .join('\n');
+            
+            const text = `Project: ${projectName}\n${credentialText}`;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                showNotification('Credentials copied to clipboard!', 'success');
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+                showNotification('Failed to copy credentials', 'error');
+            });
+        }
+
+        // Show notification
+        function showNotification(message, type) {
+            // Remove existing notification
+            const existingNotification = document.getElementById('copyNotification');
+            if (existingNotification) {
+                existingNotification.remove();
+            }
+
+            const notification = document.createElement('div');
+            notification.id = 'copyNotification';
+            notification.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg transition-all duration-300 ${
+                type === 'success' ? 'bg-green-600' : 'bg-red-600'
+            }`;
+            notification.innerHTML = `
+                <div class="flex items-center">
+                    <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'} mr-2"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+
+            document.body.appendChild(notification);
+
+            // Auto remove after 3 seconds
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                notification.style.transform = 'translateX(100%)';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', loadProjects);
+
+        // Optional: Auto-refresh every 5 minutes
+        setInterval(loadProjects, 5 * 60 * 1000);
+    </script>
+</body>
+</html>

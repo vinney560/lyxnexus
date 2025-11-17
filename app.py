@@ -2761,6 +2761,7 @@ from db_fix import db_tools
 from storage import cloud_migration_bp
 from dashboard_bp import dashboard_bp
 from math_bp import math_bp
+from lyxlab_bp import lyxlab_bp
 from test import test_routes
 from chloe import _chloe_ai
 
@@ -2770,6 +2771,7 @@ app.register_blueprint(_quiz_AI)
 app.register_blueprint(db_tools)
 app.register_blueprint(dashboard_bp)
 app.register_blueprint(math_bp)
+app.register_blueprint(lyxlab_bp)
 app.register_blueprint(cloud_migration_bp)
 app.register_blueprint(test_routes)
 app.register_blueprint(_chloe_ai)

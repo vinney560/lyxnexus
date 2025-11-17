@@ -6,4 +6,4 @@ _chloe_ai = Blueprint('chloe', __name__, url_prefix='/ai')
 def chloe():
     return render_template('chloe.html')
 
-print('Reached to Chloe AI')
+print('Reached to Chloe AI') 
