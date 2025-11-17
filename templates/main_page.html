@@ -1797,6 +1797,28 @@
                 .replace(/==(.*?)==/g, '<span class="highlight">$1</span>')    // ==highlight==
         }
 
+        function getFileIcon(filename) {
+            const ext = filename.split('.').pop().toLowerCase();
+            const iconMap = {
+                'pdf': 'fas fa-file-pdf',
+                'doc': 'fas fa-file-word',
+                'docx': 'fas fa-file-word',
+                'xls': 'fas fa-file-excel',
+                'xlsx': 'fas fa-file-excel',
+                'ppt': 'fas fa-file-powerpoint',
+                'pptx': 'fas fa-file-powerpoint',
+                'txt': 'fas fa-file-alt',
+                'zip': 'fas fa-file-archive',
+                'rar': 'fas fa-file-archive',
+                'mp3': 'fas fa-file-audio',
+                'wav': 'fas fa-file-audio',
+                'mp4': 'fas fa-file-video',
+                'avi': 'fas fa-file-video',
+                'csv': 'fas fa-file-csv'
+            };
+            return iconMap[ext] || 'fas fa-file';
+        }
+
         // Load announcements
         async function loadAnnouncements(isRefresh = false) {
           const container = document.getElementById("announcements-container");
@@ -1879,9 +1901,11 @@
                 } else if (announcement.has_file) {
                   filePreview = `
                     <div class="mb-3">
-                        <a style="color:#60a5fa; text-decoration: underline; font-size:0.875rem;" href="${announcement.file_url}" target="_blank" class="card-hover-lift">
-                          📎 ${announcement.file_name} ↗
-                        </a> 
+                        <a style="color:#60a5fa; text-decoration: none; font-size:0.875rem; display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px; background: #f8fafc; border-radius: 6px; border: 1px solid #e2e8f0;" href="${announcement.file_url}" target="_blank" class="card-hover-lift">
+                            <i class="${getFileIcon(announcement.file_name)}"></i>
+                            ${announcement.file_name}
+                            <i class="fas fa-external-link-alt" style="font-size: 0.7rem;"></i>
+                        </a>
                     </div>
                   `;
                 }

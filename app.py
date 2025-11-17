@@ -2789,7 +2789,7 @@ def logout():
     session.clear()
     logout_user()
     flash('Logout Successfully!', 'success')
-    return redirect(url_for('home'))
+    return redirect(url_for('login'))
 #--------------------------------------------------------------------
 @app.route('/main-page')
 @login_required
