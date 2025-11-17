@@ -200,7 +200,108 @@
         overflow-x: auto;
         overflow-y: hidden;
     }
-    
+
+    /* Popup Modal Styles */
+    .popup-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(8px);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+    }
+
+    .popup-overlay.active {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .popup-content {
+        background: rgba(30, 30, 40, 0.95);
+        border-radius: 20px;
+        padding: 20px;
+        max-width: 90vw;
+        max-height: 90vh;
+        position: relative;
+        transform: scale(0.7);
+        transition: transform 0.3s ease;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+
+    .popup-overlay.active .popup-content {
+        transform: scale(1);
+    }
+
+    .popup-image {
+        max-width: 100%;
+        max-height: 80vh;
+        border-radius: 10px;
+        object-fit: contain;
+    }
+
+    .popup-pdf {
+        width: 80vw;
+        height: 80vh;
+        border: none;
+        border-radius: 10px;
+        background: white;
+    }
+
+    .popup-close {
+        position: absolute;
+        top: 15px;
+        right: 20px;
+        background: rgba(239, 68, 68, 0.8);
+        color: white;
+        border: none;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 20px;
+        transition: all 0.3s ease;
+        z-index: 1001;
+    }
+
+    .popup-close:hover {
+        background: rgba(239, 68, 68, 1);
+        transform: scale(1.1);
+    }
+
+    .popup-title {
+        position: absolute;
+        bottom: 20px;
+        left: 20px;
+        right: 20px;
+        background: rgba(0, 0, 0, 0.7);
+        padding: 10px 15px;
+        border-radius: 8px;
+        font-size: 14px;
+        text-align: center;
+        backdrop-filter: blur(10px);
+    }
+
+    .filename-truncate {
+        display: inline-block;
+        max-width: 200px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        vertical-align: middle;
+    }
+
     @media (max-width: 768px) {
         .file-icon {
             font-size: 48px;
@@ -214,9 +315,41 @@
         .katex-display {
             font-size: 0.9em;
         }
+
+        .popup-content {
+            max-width: 95vw;
+            max-height: 95vh;
+            padding: 15px;
+        }
+
+        .popup-pdf {
+            width: 95vw;
+            height: 85vh;
+        }
+
+        .filename-truncate {
+            max-width: 150px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .filename-truncate {
+            max-width: 120px;
+        }
     }
 </style>
 <body>
+    <!-- Popup Modal -->
+    <div class="popup-overlay" id="popupOverlay">
+        <div class="popup-content">
+            <button class="popup-close" id="popupClose">
+                <i class="fas fa-times"></i>
+            </button>
+            <div id="popupMedia"></div>
+            <div class="popup-title" id="popupTitle"></div>
+        </div>
+    </div>
+
     <header class="glass-morph sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 py-4">
             <div class="flex justify-between items-center">
@@ -320,12 +453,17 @@
                         <div class="w-full">
                             <img src="{{ url_for('download_assignment_file', id=assignment.id) }}" 
                                  alt="{{ assignment.file_name }}"
-                                 class="max-w-full max-h-96 object-contain mb-4 rounded-lg shadow-lg">
-                            <h3 class="text-xl font-bold mb-2">{{ assignment.file_name }}</h3>
+                                 class="max-w-full max-h-96 object-contain mb-4 rounded-lg shadow-lg cursor-pointer"
+                                 onclick="openPopup('{{ url_for('download_assignment_file', id=assignment.id) }}', '{{ assignment.file_name }}', 'image')">
+                            <h3 class="text-xl font-bold mb-2">
+                                <span class="filename-truncate" title="{{ assignment.file_name }}">
+                                    {{ assignment.file_name }}
+                                </span>
+                            </h3>
                             <div class="flex flex-wrap gap-4 justify-center">
-                                <button onclick="openInNewTab('{{ url_for('download_assignment_file', id=assignment.id) }}')" 
+                                <button onclick="openPopup('{{ url_for('download_assignment_file', id=assignment.id) }}', '{{ assignment.file_name }}', 'image')" 
                                         class="btn-outline">
-                                    <i class="fas fa-external-link-alt mr-2"></i>Open Full Size
+                                    <i class="fas fa-expand mr-2"></i>View Full Size
                                 </button>
                                 <a href="{{ url_for('download_assignment_file', id=assignment.id) }}" 
                                    download class="btn">
@@ -337,22 +475,25 @@
                     {% elif assignment.file_type == 'application/pdf' %}
                         <!-- PDF Preview -->
                         <div class="w-full">
-                            <div class="relative w-full h-96 mb-4 rounded-lg overflow-hidden border border-gray-600">
-                                <iframe src="{{ url_for('download_assignment_file', id=assignment.id) }}"
-                                        width="100%" 
-                                        height="100%"
-                                        class="bg-white">
-                                    <p>Your browser does not support PDFs. 
-                                       <a href="{{ url_for('download_assignment_file', id=assignment.id) }}">Download the PDF</a>.
-                                    </p>
-                                </iframe>
+                            <div class="relative w-full h-96 mb-4 rounded-lg overflow-hidden border border-gray-600 bg-gray-800 flex items-center justify-center">
+                                <i class="file-icon fas fa-file-pdf text-6xl"></i>
+                                <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                                    <button onclick="openPopup('{{ url_for('download_assignment_file', id=assignment.id) }}', '{{ assignment.file_name }}', 'pdf')" 
+                                            class="btn">
+                                        <i class="fas fa-eye mr-2"></i>Preview PDF
+                                    </button>
+                                </div>
                             </div>
-                            <h3 class="text-xl font-bold mb-2">{{ assignment.file_name }}</h3>
+                            <h3 class="text-xl font-bold mb-2">
+                                <span class="filename-truncate" title="{{ assignment.file_name }}">
+                                    {{ assignment.file_name }}
+                                </span>
+                            </h3>
                             <div class="flex flex-wrap gap-4 justify-center">
-                                <a href="{{ url_for('download_assignment_file', id=assignment.id) }}" 
-                                   target="_blank" class="btn-outline">
-                                    <i class="fas fa-external-link-alt mr-2"></i>Open in New Tab
-                                </a>
+                                <button onclick="openPopup('{{ url_for('download_assignment_file', id=assignment.id) }}', '{{ assignment.file_name }}', 'pdf')" 
+                                        class="btn-outline">
+                                    <i class="fas fa-eye mr-2"></i>Preview PDF
+                                </button>
                                 <a href="{{ url_for('download_assignment_file', id=assignment.id) }}" 
                                    download class="btn">
                                     <i class="fas fa-download mr-2"></i>Download PDF
@@ -372,7 +513,11 @@
                             {% else %}fa-file-alt
                             {% endif %}">
                         </i>
-                        <h3 class="text-xl font-bold mb-2">{{ assignment.file_name }}</h3>
+                        <h3 class="text-xl font-bold mb-2">
+                            <span class="filename-truncate" title="{{ assignment.file_name }}">
+                                {{ assignment.file_name }}
+                            </span>
+                        </h3>
                         <p class="text-gray-400 mb-6">Preview not available for this file type</p>
                         <a href="{{ url_for('download_assignment_file', id=assignment.id) }}" 
                            download class="btn">
@@ -404,10 +549,54 @@
     </main>
 
     <script>
-        // Function to open files in new tab
-        function openInNewTab(url) {
-            window.open(url, '_blank');
+        // Popup functionality
+        function openPopup(url, filename, type) {
+            const popupOverlay = document.getElementById('popupOverlay');
+            const popupMedia = document.getElementById('popupMedia');
+            const popupTitle = document.getElementById('popupTitle');
+            
+            popupMedia.innerHTML = '';
+            popupTitle.textContent = filename;
+            
+            if (type === 'image') {
+                const img = document.createElement('img');
+                img.src = url;
+                img.alt = filename;
+                img.className = 'popup-image';
+                popupMedia.appendChild(img);
+            } else if (type === 'pdf') {
+                const iframe = document.createElement('iframe');
+                iframe.src = url;
+                iframe.className = 'popup-pdf';
+                iframe.title = filename;
+                popupMedia.appendChild(iframe);
+            }
+            
+            popupOverlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
         }
+
+        function closePopup() {
+            const popupOverlay = document.getElementById('popupOverlay');
+            popupOverlay.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Close popup when clicking overlay or close button
+        document.getElementById('popupOverlay').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closePopup();
+            }
+        });
+
+        document.getElementById('popupClose').addEventListener('click', closePopup);
+
+        // Close popup with Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closePopup();
+            }
+        });
 
         // Math formatting function
         function formatMathElements() {
