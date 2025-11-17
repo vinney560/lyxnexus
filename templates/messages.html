@@ -2076,6 +2076,7 @@
             
             // Show with animation
             setTimeout(() => {
+                clearTimeout(longPressTimer);
                 contextMenu.classList.add('show');
             }, 10);
             
@@ -2084,18 +2085,23 @@
                 if (contextMenu.contains(e.target)) {
                     // Clicked inside: delay closing
                     setTimeout(() => {
+                        clearTimeout(longPressTimer);
                         contextMenu.remove();
                     }, 700);
                 } else {
                     // Clicked outside: close immediately
+                    clearTimeout(longPressTimer);
                     contextMenu.remove();
                 }
             
                 document.removeEventListener('click', closeMenu);
+                clearTimeout(longPressTimer);
             };
 
             // Delay adding the listener so the opening click doesn't trigger close
             setTimeout(() => {
+                isLongPress = false;
+                clearTimeout(longPressTimer);
                 document.addEventListener('click', closeMenu);
             }, 200);
         }
@@ -2223,6 +2229,7 @@
             }, { passive: true });
             
             messageElement.addEventListener('touchend', function(e) {
+                isLongPress = false;
                 clearTimeout(longPressTimer);
                 
                 if (isSwiping && distX > swipeThreshold) {
@@ -2253,6 +2260,7 @@
             // Regular click/tap behavior
             messageElement.addEventListener('click', function(e) {
                 // Only handle clicks that aren't on action buttons
+                isLongPress = false;
                 if (!e.target.closest('.message-actions') && !isLongPress && !isSwiping) {
                     if (isSelectionMode) {
                         // In selection mode - toggle selection
