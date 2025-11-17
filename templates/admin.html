@@ -1087,7 +1087,7 @@
             }
           
             // Truncate and add ellipsis
-            const result = nameWithoutExt.substring(0, maxLength) + '...' + '.' + fileExt;
+            const result = nameWithoutExt.substring(0, maxLength) + '-_LN' + '.' + fileExt;
             console.log('Truncated result:', result); // Debug log
             return result;
         }
@@ -1450,7 +1450,7 @@
               return;
             }
             fileInfoContainer.style.display = 'flex';
-            fileNameEl.textContent = file.name;
+            fileNameEl.textContent = truncateFilename(file.name, 12);
             fileSizeEl.textContent = `${(file.size / 1024).toFixed(2)} KB`;
           });
         }
