@@ -1,7 +1,8 @@
-from flask import Blueprint, jsonify, render_template
+from flask import Blueprint, jsonify, render_template, redirect, url_for, request, flash
 from app import User, UserActivity, db
 from flask_login import login_required, current_user
 from sqlalchemy import func, desc
+from functools import wraps # Wraps a function to a decorator
 import datetime
 
 dashboard_bp = Blueprint('dashboard', __name__, url_prefix='/dashboard')
@@ -10,13 +11,31 @@ dashboard_bp = Blueprint('dashboard', __name__, url_prefix='/dashboard')
 profile --> Id, Username, status, Admin status, created_at, announcements, assignment, activity, 
 """
 
+""" Restrict Users who are banned! """
+def not_banned(f): # @not_banned
+    @wraps(f)
+    def decor(*args, **kwargs):
+        if not current_user.status:
+            if request.path.startswith('/api/') or request.is_json:
+                return jsonify({'error': 'Banned User Not Allowed'}), 401
+            flash('Banned User Not Allowed!', 'warning')
+            referrer = request.referrer
+            if referrer:
+                return redirect(referrer), 302
+            else:
+                return redirect(url_for('main_page')), 302
+        return f(*args, **kwargs)
+    return decor
+
 @dashboard_bp.route('/')
 @login_required
+@not_banned
 def dashboard():
     return render_template('dashboard.html')
 
 @dashboard_bp.route('/api/data')
 @login_required
+@not_banned
 def user_data():
     # Get counts for announcements and assignments --> len() --> not count()
     announcements_count = len(current_user.announcements) if current_user.announcements else 0
@@ -37,6 +56,7 @@ def user_data():
 
 @dashboard_bp.route('/api/activity')
 @login_required
+@not_banned
 def activities():
     try:
         # Retrieve user activity count
@@ -77,6 +97,7 @@ def activities():
 
 @dashboard_bp.route('/api/stats')
 @login_required
+@not_banned
 def user_stats():
     """Additional stats endpoint for charts and analytics"""
     try:
@@ -127,6 +148,7 @@ def user_stats():
 
 @dashboard_bp.route('/api/log_activity', methods=['POST'])
 @login_required
+@not_banned
 def log_activity():
     """Endpoint to log user activity from frontend"""
     try:

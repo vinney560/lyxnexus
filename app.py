@@ -591,6 +591,22 @@ def admin_required(f):
             abort(403)
         return f(*args, **kwargs)
     return decorator
+
+""" Restrict Users who are banned! """
+def not_banned(f): # @not_banned
+    @wraps(f)
+    def decor(*args, **kwargs):
+        if not current_user.status:
+            if request.path.startswith('/api/') or request.is_json:
+                return jsonify({'error': 'Banned User Not Allowed'}), 401
+            flash('Banned User Not Allowed!', 'warning')
+            referrer = request.referrer
+            if referrer:
+                return redirect(referrer), 302
+            else:
+                return redirect(url_for('main_page')), 302
+        return f(*args, **kwargs)
+    return decor
 #------------------------------------------------------------------------------
                                  # BACKGROUND WORKERS
 
@@ -2816,6 +2832,7 @@ def admin_users():
     return render_template('admin_users.html')
 #-----------------------------------------------------------------
 @app.route('/profile')
+@not_banned
 @login_required
 def profile():
     """Render the profile edit page"""
@@ -2824,6 +2841,7 @@ def profile():
 @app.route('/files')
 @limiter.limit("10 per minute")
 @login_required
+@not_banned
 def files():
     """Render the file management page"""
     return render_template('files.html')
@@ -2872,6 +2890,7 @@ def is_authenticated():
 
 @app.route("/subscribe", methods=["POST"])
 @login_required
+@not_banned
 def subscribe():
     data = request.get_json()
 
@@ -3025,10 +3044,10 @@ app.jinja_env.filters['message_time'] = format_message_time
 @app.route('/messages')
 @limiter.limit("10 per minute")
 @login_required
+@not_banned
 def messages():
     """Render the messages page with initial data"""
-    if not current_user.status:
-        abort(403)
+
     try:
         room = request.args.get('room', 'general')
         
@@ -3140,6 +3159,7 @@ def get_unread_count(user_id):
 #==========================================
 @app.route('/api/files')
 @login_required
+@not_banned
 def get_files():
     """Get all files with pagination and filtering"""
     page = request.args.get('page', 1, type=int)
@@ -3197,6 +3217,7 @@ def shorten_filename(filename, length=30):
 
 @app.route('/api/files/upload', methods=['POST'])
 @login_required
+@admin_required
 def upload_file():
     """Upload a new file"""
     if 'file' not in request.files:
@@ -3265,6 +3286,7 @@ users_downloads = {}  # user_id -> count of downloads
 # ---------------- DOWNLOAD ROUTE ----------------
 @app.route('/api/files/<int:id>/download')
 @login_required
+@not_banned
 def download_file(id):
     """Download a file with limiter and share system."""
     user_id = current_user.id
@@ -3368,6 +3390,7 @@ def get_file_categories():
 #==========================================
 @app.route('/api/user/profile', methods=['GET'])
 @login_required
+@not_banned
 def get_user_profile():
     """Get current user's profile data"""
     user_data = {
@@ -3384,6 +3407,7 @@ def get_user_profile():
 
 @app.route('/api/user/profile', methods=['PUT'])
 @login_required
+@not_banned
 def update_user_profile():
     """Update current user's profile"""
     data = request.get_json()
@@ -3455,6 +3479,7 @@ def get_online_users():
 
 @app.route('/api/messages')
 @login_required
+@not_banned
 def get_messages():
     """Get messages for a room with optional filtering"""
     room = request.args.get('room', 'general')
@@ -3518,6 +3543,7 @@ def get_messages():
 
 @app.route('/api/messages/read', methods=['POST'])
 @login_required
+@not_banned
 def mark_messages_read():
     """Mark messages as read for current user"""
     try:
@@ -3554,6 +3580,7 @@ def mark_messages_read():
 
 @app.route('/api/messages/send', methods=['POST'])
 @login_required
+@not_banned
 def send_message():
     """Send a message via HTTP API (fallback)"""
     try:
@@ -3616,6 +3643,7 @@ def send_message():
 
 @app.route('/api/messages/<int:message_id>/reply', methods=['POST'])
 @login_required
+@not_banned
 def reply_to_message(message_id):
     """Reply to a specific message"""
     try:
@@ -3671,6 +3699,7 @@ def reply_to_message(message_id):
 
 @app.route('/api/messages/<int:message_id>', methods=['DELETE'])
 @login_required
+@not_banned
 def delete_message(message_id):
     """Delete a message (soft delete)"""
     try:
@@ -3707,6 +3736,7 @@ def delete_message(message_id):
 
 @app.route('/api/messages/<int:message_id>/replies')
 @login_required
+@not_banned
 def get_message_replies(message_id):
     """Get replies for a specific message"""
     try:
@@ -3765,6 +3795,7 @@ private_rooms = {}
 
 @app.route('/api/private-rooms/create', methods=['POST'])
 @login_required
+@not_banned
 def create_private_room():
     try:
         data = request.get_json()
@@ -3798,6 +3829,7 @@ def create_private_room():
 
 @app.route('/api/private-rooms/join', methods=['POST'])
 @login_required
+@not_banned
 def join_private_room():
     try:
         data = request.get_json()
