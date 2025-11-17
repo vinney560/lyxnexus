@@ -1697,13 +1697,16 @@
                         </div>
                         {% if not message.is_deleted %}
                         <div class="message-actions">
+                            <button class="message-action-btn reply" data-message-id="{{ message.id }}" id="infoBtn">
+                                <i class="fas fa-info-circle"></i>
+                            </button>
                             <button class="message-action-btn reply" data-message-id="{{ message.id }}" title="Reply">
                                 <i class="fas fa-reply"></i>
                             </button>
                             {% if message.user_id == current_user.id or current_user.is_admin %}
                             <button class="message-action-btn delete" data-message-id="{{ message.id }}" title="Delete">
                                 <i class="fas fa-trash"></i>
-                            </button>
+                            </button> 
                             {% endif %}
                         </div>
                         {% endif %}
@@ -2201,11 +2204,10 @@
                 isSwiping = false;
                 isLongPress = false;
                 
-                // Start long press timer for context menu
-                longPressTimer = setTimeout(() => {
-                    isLongPress = true;
+                const infoBtn = document.getElementById('infoBtn');
+                infoBtn.addEventListener('click', () => {
                     showContextMenu(startX, startY, messageId);
-                }, 10000); //ten seconds
+                });
             }, { passive: true });
             
             messageElement.addEventListener('touchmove', function(e) {
