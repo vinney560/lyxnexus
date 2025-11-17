@@ -2199,7 +2199,7 @@
                 longPressTimer = setTimeout(() => {
                     isLongPress = true;
                     showContextMenu(startX, startY, messageId);
-                }, 4500);
+                }, 10000); //ten seconds
             }, { passive: true });
             
             messageElement.addEventListener('touchmove', function(e) {
@@ -2212,6 +2212,7 @@
                 // Only consider it a swipe if horizontal movement is dominant and rightward
                 if (Math.abs(distX) > Math.abs(distY) && Math.abs(distX) > 5 && distX > 0) {
                     isSwiping = true;
+                    isLongPress = false;
                     clearTimeout(longPressTimer);
                     
                     // Show swipe indicator for right swipe
