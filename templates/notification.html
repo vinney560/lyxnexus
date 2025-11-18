@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lyx Nexus - Notifications</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        button {
+            background: linear-gradient(45deg, #FF6B6B, #EE5A24);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px 5px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+        button:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .token-display {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 8px;
+            word-break: break-all;
+            font-family: monospace;
+            font-size: 12px;
+            margin: 10px 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            text-align: center;
+            font-weight: bold;
+        }
+        .success { background: rgba(46, 204, 113, 0.3); }
+        .error { background: rgba(231, 76, 60, 0.3); }
+        .info { background: rgba(52, 152, 219, 0.3); }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔔 Lyx Nexus Notifications</h1>
+        
+        <div class="card">
+            <h2>Step 1: Enable Notifications</h2>
+            <button id="enableNotifications">Enable Push Notifications</button>
+            <div id="notificationStatus" class="status info">Click to enable notifications</div>
+        </div>
+
+        <div class="card hidden" id="tokenSection">
+            <h2>Step 2: Your FCM Token</h2>
+            <div class="token-display" id="tokenDisplay">Waiting for token...</div>
+            <button onclick="copyToken()">Copy Token</button>
+            <div class="status info">
+                Copy this token to test notifications from Firebase Console
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Debug Information</h2>
+            <div id="debugInfo" class="token-display">
+                Service Worker: <span id="swStatus">Checking...</span><br>
+                Notification Permission: <span id="permissionStatus">Checking...</span><br>
+                FCM Support: <span id="fcmStatus">Checking...</span><br>
+                Current URL: <span id="currentUrl">Loading...</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>How to Test Notifications</h2>
+            <ol>
+                <li>Click "Enable Push Notifications"</li>
+                <li>Allow notifications in the browser prompt</li>
+                <li>Copy the FCM token that appears</li>
+                <li>Go to <a href="https://console.firebase.google.com/" style="color: white;" target="_blank">Firebase Console</a></li>
+                <li>Navigate to Engage > Cloud Messaging</li>
+                <li>Click "Send your first message"</li>
+                <li>Paste the token as the target</li>
+                <li>Send a test notification!</li>
+            </ol>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
+        import { getMessaging, getToken, onMessage, isSupported } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-messaging.js";
+
+        // Firebase configuration for lyxnexus.onrender.com
+        const firebaseConfig = {
+            apiKey: "AIzaSyBsp_fIfnXefjjFBgxX7yl6QWQzFM5HXnY",
+            authDomain: "lyxnexus.onrender.com",
+            projectId: "lyx-nexus-bcmzqb",
+            storageBucket: "lyx-nexus-bcmzqb.firebasestorage.app",
+            messagingSenderId: "954068330281",
+            appId: "1:954068330281:web:032ae6946a930abc92f938"
+        };
+
+        // Your VAPID Key
+        const VAPID_KEY = "BNSkl6WKv_oX69rLYfhDC5FqX8lzVi4wpgcy2-MD_0hYyDOj6UKtutKEy_wVB3I52jwGQ09SlhcjvXEGBAs8RHM";
+
+        let app;
+        let messaging;
+        let currentFCMToken = '';
+
+        // Initialize Firebase and check support
+        async function initializeFirebase() {
+            try {
+                // Show current URL for debugging
+                document.getElementById('currentUrl').textContent = window.location.href;
+
+                // Check if FCM is supported
+                const fcmSupported = await isSupported();
+                document.getElementById('fcmStatus').textContent = fcmSupported ? 'Supported ✅' : 'Not Supported ❌';
+
+                if (!fcmSupported) {
+                    showStatus('Firebase Cloud Messaging is not supported in this browser', 'error');
+                    return;
+                }
+
+                // Initialize Firebase
+                app = initializeApp(firebaseConfig);
+                messaging = getMessaging(app);
+
+                // Check service worker support
+                if ('serviceWorker' in navigator) {
+                    try {
+                        // Try multiple paths for service worker
+                        const swPaths = [
+                            '/static/firebase-messaging-sw.js',
+                            './firebase-messaging-sw.js',
+                            'firebase-messaging-sw.js'
+                        ];
+
+                        let registration = null;
+                        for (const path of swPaths) {
+                            try {
+                                registration = await navigator.serviceWorker.register(path);
+                                console.log('Service Worker registered at:', path);
+                                break;
+                            } catch (err) {
+                                console.log('Failed to register at:', path, err);
+                            }
+                        }
+
+                        if (registration) {
+                            document.getElementById('swStatus').textContent = 'Registered ✅';
+                        } else {
+                            document.getElementById('swStatus').textContent = 'Failed to register ❌';
+                            showStatus('Service Worker registration failed. Check console for details.', 'error');
+                        }
+                    } catch (swError) {
+                        document.getElementById('swStatus').textContent = 'Failed ❌';
+                        console.error('Service Worker registration failed:', swError);
+                        showStatus('Service Worker registration failed: ' + swError.message, 'error');
+                    }
+                } else {
+                    document.getElementById('swStatus').textContent = 'Not Supported ❌';
+                }
+
+                // Check current notification permission
+                updatePermissionStatus();
+                
+                // Listen for foreground messages
+                onMessage(messaging, (payload) => {
+                    console.log('Foreground message received:', payload);
+                    showStatus('New notification received!', 'success');
+                });
+
+            } catch (error) {
+                console.error('Firebase initialization error:', error);
+                showStatus('Failed to initialize Firebase: ' + error.message, 'error');
+            }
+        }
+
+        // Update permission status display
+        function updatePermissionStatus() {
+            const status = Notification.permission;
+            document.getElementById('permissionStatus').textContent = status;
+            
+            if (status === 'granted') {
+                document.getElementById('enableNotifications').disabled = true;
+                document.getElementById('enableNotifications').textContent = 'Notifications Enabled ✅';
+                showStatus('Notifications are enabled!', 'success');
+                getFCMToken();
+            } else if (status === 'denied') {
+                showStatus('Notifications are blocked. Please enable them in browser settings.', 'error');
+            }
+        }
+
+        // Request notification permission
+        async function requestNotificationPermission() {
+            try {
+                showStatus('Requesting notification permission...', 'info');
+                
+                const permission = await Notification.requestPermission();
+                updatePermissionStatus();
+                
+                if (permission === 'granted') {
+                    await getFCMToken();
+                }
+            } catch (error) {
+                console.error('Error requesting permission:', error);
+                showStatus('Error requesting permission: ' + error.message, 'error');
+            }
+        }
+
+        // Get FCM token
+        async function getFCMToken() {
+            try {
+                if (!messaging) {
+                    throw new Error('Messaging not initialized');
+                }
+
+                showStatus('Getting FCM token...', 'info');
+                
+                const token = await getToken(messaging, { vapidKey: VAPID_KEY });
+                
+                if (token) {
+                    currentFCMToken = token;
+                    document.getElementById('tokenDisplay').textContent = token;
+                    document.getElementById('tokenSection').classList.remove('hidden');
+                    showStatus('FCM token obtained successfully! Copy it to test notifications in Firebase Console.', 'success');
+                    console.log('FCM Token:', token);
+                } else {
+                    showStatus('No FCM token available', 'error');
+                }
+            } catch (error) {
+                console.error('Error getting FCM token:', error);
+                showStatus('Error getting token: ' + error.message, 'error');
+            }
+        }
+
+        // Show status message
+        function showStatus(message, type) {
+            const statusElement = document.getElementById('notificationStatus');
+            statusElement.textContent = message;
+            statusElement.className = `status ${type}`;
+        }
+
+        // Copy token to clipboard
+        function copyToken() {
+            navigator.clipboard.writeText(currentFCMToken).then(() => {
+                showStatus('Token copied to clipboard!', 'success');
+            }).catch(err => {
+                showStatus('Failed to copy token: ' + err, 'error');
+            });
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeFirebase();
+            document.getElementById('enableNotifications').addEventListener('click', requestNotificationPermission);
+        });
+
+        // Make functions global for HTML onclick handlers
+        window.copyToken = copyToken;
+    </script>
+</body>
+</html>

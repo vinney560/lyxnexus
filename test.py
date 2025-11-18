@@ -8,6 +8,10 @@ print('Reached TEST')
 def test_template():
     return render_template('test.html')
 
+@test_routes.route('/notification')
+def test_notification():
+    return render_template('notification.html')
+
 @test_routes.route('/ai/chloe')
 @login_required
 def ai_lyxin():
