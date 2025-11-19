@@ -996,6 +996,7 @@ def secret_code():
 
 
 """LOGIN USER BASED ON THE PROVIDED REQUIREMENTS"""
+import re
 @app.route('/login', methods=['POST', 'GET'])
 @limiter.limit("10 per minute")
 def login():
@@ -1007,7 +1008,7 @@ def login():
     # ===============================
     if request.method == 'POST':
         username = request.form.get('username', '').strip().lower()[:50]
-        mobile = request.form.get('mobile').replace(' ', '')
+        mobile = re.sub(r'\s+', '', request.form.get('mobile', ''))  # Removes all whitespace
         master_key = request.form.get('master_key')
 
         # Validate mobile number
