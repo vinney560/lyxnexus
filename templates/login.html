@@ -787,17 +787,6 @@
                     '0101234567', '0198765432', '0111223344', '0122334455'
                 ];
 
-                this.validCarriers = [
-                    // 07 prefixes
-                    '70', '71', '72', '73', '74', // Safaricom
-                    '75', '76', '79', // Airtel
-                    '77', // Telkom
-                    '78', // Airtel (new)
-
-                    // 01 prefixes (Safaricom)
-                    '10', '11', '12', '13', '14', '15', '16', '17', '18', '19'
-                ];
-
                 this.validPrefixes = ['07', '01'];
             }
 
@@ -813,12 +802,6 @@
                 const prefix = cleanMobile.substring(0, 2);
                 if (!this.validPrefixes.includes(prefix)) {
                     return { valid: false, reason: 'Kenyan mobile numbers must start with 07 or 01' };
-                }
-
-                // Check carrier prefix (digits 3-4)
-                const carrierPrefix = cleanMobile.substring(2, 4);
-                if (!this.validCarriers.includes(carrierPrefix)) {
-                    return { valid: false, reason: 'Invalid mobile carrier prefix' };
                 }
 
                 // Check for suspicious patterns
@@ -933,7 +916,6 @@
                 const messages = {
                     'Mobile number must be exactly 10 digits': 'Please enter a 10-digit mobile number',
                     'Kenyan mobile numbers must start with 07 or 01': 'Mobile number must start with 07 or 01',
-                    'Invalid mobile carrier prefix': 'This appears to be an invalid mobile number',
                     'Suspicious number pattern detected': 'This mobile number appears to be invalid or fake'
                 };
 
