@@ -755,22 +755,20 @@
             constructor() {
                 this.suspiciousPatterns = [
                     /(\d)\1{7,}/, // 8 or more repeated digits
-
+                            
                     // Sequential digits
                     /0123456789|1234567890|2345678901/,
                     /9876543210|8765432109|7654321098/,
-
+                            
                     // All same digit
                     /^(\d)\1+$/,
-
+                            
                     // Common fake/test numbers
                     /^555\d+$/, /^999\d+$/, /^000\d+$/, /^111\d+$/,
                     /^123456\d*$/, /^654321\d*$/, /^111111\d*$/, /^000000\d*$/,
-
-                    // Kenyan specific suspicious patterns for both 07 and 01
-                    /^(07|01)(0{8}|1{8}|2{8}|3{8}|4{8}|5{8}|6{8}|7{8}|8{8}|9{8})$/, // All same digit after prefix
-                    /^(07|01)(12345678|23456789|34567890)$/, // Sequential patterns
-                    /^(07|01)(87654321|76543210|65432109)$/, // Reverse sequential
+                            
+                    // Kenyan specific - all same digit after prefix
+                    /^(07|01)(\d)\2{7}$/
                 ];
 
                 this.fakeNumbers = [
