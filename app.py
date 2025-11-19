@@ -1007,7 +1007,7 @@ def login():
     # ===============================
     if request.method == 'POST':
         username = request.form.get('username', '').strip().lower()[:50]
-        mobile = request.form.get('mobile')
+        mobile = request.form.get('mobile').replace(' ', '')
         master_key = request.form.get('master_key')
 
         # Validate mobile number
