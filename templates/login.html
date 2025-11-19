@@ -751,6 +751,344 @@
             LOGIN: '/login'
         };
 
+        class MobileValidator {
+            constructor() {
+                this.suspiciousPatterns = [
+                    /(\d)\1{7,}/, // 8 or more repeated digits
+
+                    // Sequential digits
+                    /0123456789|1234567890|2345678901/,
+                    /9876543210|8765432109|7654321098/,
+
+                    // All same digit
+                    /^(\d)\1+$/,
+
+                    // Common fake/test numbers
+                    /^555\d+$/, /^999\d+$/, /^000\d+$/, /^111\d+$/,
+                    /^123456\d*$/, /^654321\d*$/, /^111111\d*$/, /^000000\d*$/,
+
+                    // Kenyan specific suspicious patterns for both 07 and 01
+                    /^(07|01)(0{8}|1{8}|2{8}|3{8}|4{8}|5{8}|6{8}|7{8}|8{8}|9{8})$/, // All same digit after prefix
+                    /^(07|01)(12345678|23456789|34567890)$/, // Sequential patterns
+                    /^(07|01)(87654321|76543210|65432109)$/, // Reverse sequential
+                ];
+
+                this.fakeNumbers = [
+                    // 07 fake numbers
+                    '0788888888', '0777777777', '0766666666', '0755555555',
+                    '0744444444', '0733333333', '0722222222', '0711111111',
+                    '0700000000', '0799999999', '0712345678', '0776543210',
+                    '0701234567', '0798765432', '0711223344', '0722334455',
+
+                    // 01 fake numbers
+                    '0188888888', '0177777777', '0166666666', '0155555555',
+                    '0144444444', '0133333333', '0122222222', '0111111111',
+                    '0100000000', '0199999999', '0112345678', '0176543210',
+                    '0101234567', '0198765432', '0111223344', '0122334455'
+                ];
+
+                this.validCarriers = [
+                    // 07 prefixes
+                    '70', '71', '72', '73', '74', // Safaricom
+                    '75', '76', '79', // Airtel
+                    '77', // Telkom
+                    '78', // Airtel (new)
+
+                    // 01 prefixes (Safaricom)
+                    '10', '11', '12', '13', '14', '15', '16', '17', '18', '19'
+                ];
+
+                this.validPrefixes = ['07', '01'];
+            }
+
+            validate(mobile) {
+                const cleanMobile = mobile.replace(/\D/g, '');
+
+                // Basic validation
+                if (cleanMobile.length !== 10) {
+                    return { valid: false, reason: 'Mobile number must be exactly 10 digits' };
+                }
+
+                // Check if starts with valid prefix
+                const prefix = cleanMobile.substring(0, 2);
+                if (!this.validPrefixes.includes(prefix)) {
+                    return { valid: false, reason: 'Kenyan mobile numbers must start with 07 or 01' };
+                }
+
+                // Check carrier prefix (digits 3-4)
+                const carrierPrefix = cleanMobile.substring(2, 4);
+                if (!this.validCarriers.includes(carrierPrefix)) {
+                    return { valid: false, reason: 'Invalid mobile carrier prefix' };
+                }
+
+                // Check for suspicious patterns
+                if (this.isSuspicious(cleanMobile)) {
+                    return { valid: false, reason: 'Suspicious number pattern detected' };
+                }
+
+                return { valid: true, number: cleanMobile, prefix: prefix };
+            }
+
+            isSuspicious(mobile) {
+                const cleanMobile = mobile.replace(/\D/g, '');
+
+                // Check against known fake numbers
+                if (this.fakeNumbers.includes(cleanMobile)) {
+                    return true;
+                }
+
+                // Check patterns
+                for (let pattern of this.suspiciousPatterns) {
+                    if (pattern.test(cleanMobile)) {
+                        return true;
+                    }
+                }
+
+                // Additional heuristic checks
+                if (this.hasRepeatedGroups(cleanMobile)) {
+                    return true;
+                }
+
+                if (this.isTooPatterned(cleanMobile)) {
+                    return true;
+                }
+
+                return false;
+            }
+
+            hasRepeatedGroups(mobile) {
+                // Check for repeated digit groups (like 0722558844 or 0111223344)
+                const groups = mobile.match(/(\d)\1+/g);
+                if (groups && groups.length >= 2) {
+                    const totalRepeated = groups.reduce((sum, group) => sum + group.length, 0);
+                    return totalRepeated >= 6; // If 6+ digits are in repeated groups
+                }
+                return false;
+            }
+
+            isTooPatterned(mobile) {
+                // Check for obvious patterns
+                const digits = mobile.split('').map(Number);
+
+                // Check for arithmetic sequences
+                let arithmeticUp = true;
+                let arithmeticDown = true;
+
+                for (let i = 2; i < digits.length; i++) {
+                    if (digits[i] - digits[i-1] !== digits[i-1] - digits[i-2]) {
+                        arithmeticUp = false;
+                    }
+                    if (digits[i] - digits[i-1] !== -1) {
+                        arithmeticDown = false;
+                    }
+                }
+
+                if (arithmeticUp || arithmeticDown) {
+                    return true;
+                }
+
+                // Check for palindrome (excluding the prefix for better accuracy)
+                const numberWithoutPrefix = mobile.substring(2);
+                const reversed = numberWithoutPrefix.split('').reverse().join('');
+                if (numberWithoutPrefix === reversed) {
+                    return true;
+                }
+
+                // Check for alternating patterns (like 0101010101 or 0707070707)
+                let alternating1 = true;
+                let alternating2 = true;
+                for (let i = 2; i < digits.length; i += 2) {
+                    if (i + 1 < digits.length && digits[i] !== digits[i + 1]) {
+                        alternating1 = false;
+                    }
+                    if (i + 1 < digits.length && digits[i] === digits[i + 1]) {
+                        alternating2 = false;
+                    }
+                }
+
+                return alternating1 || alternating2;
+            }
+
+            getCarrierInfo(mobile) {
+                const cleanMobile = mobile.replace(/\D/g, '');
+                const prefix = cleanMobile.substring(0, 2);
+                const carrierPrefix = cleanMobile.substring(2, 4);
+
+                const carrierMap = {
+                    '70': 'Safaricom', '71': 'Safaricom', '72': 'Safaricom', 
+                    '73': 'Safaricom', '74': 'Safaricom',
+                    '75': 'Airtel', '76': 'Airtel', '79': 'Airtel',
+                    '77': 'Telkom',
+                    '78': 'Airtel',
+                    '10': 'Safaricom (01)', '11': 'Safaricom (01)', '12': 'Safaricom (01)',
+                    '13': 'Safaricom (01)', '14': 'Safaricom (01)', '15': 'Safaricom (01)',
+                    '16': 'Safaricom (01)', '17': 'Safaricom (01)', '18': 'Safaricom (01)',
+                    '19': 'Safaricom (01)'
+                };
+
+                return carrierMap[carrierPrefix] || 'Unknown Carrier';
+            }
+
+            getValidationMessage(validation) {
+                const messages = {
+                    'Mobile number must be exactly 10 digits': 'Please enter a 10-digit mobile number',
+                    'Kenyan mobile numbers must start with 07 or 01': 'Mobile number must start with 07 or 01',
+                    'Invalid mobile carrier prefix': 'This appears to be an invalid mobile number',
+                    'Suspicious number pattern detected': 'This mobile number appears to be invalid or fake'
+                };
+
+                return messages[validation.reason] || validation.reason;
+            }
+
+            // Helper method to check if number is 01 prefix
+            is01Prefix(mobile) {
+                const cleanMobile = mobile.replace(/\D/g, '');
+                return cleanMobile.startsWith('01');
+            }
+
+            // Helper method to check if number is 07 prefix
+            is07Prefix(mobile) {
+                const cleanMobile = mobile.replace(/\D/g, '');
+                return cleanMobile.startsWith('07');
+            }
+        }
+
+        // Initialize validator
+        const mobileValidator = new MobileValidator();
+
+        // Enhanced mobile input validation
+        function setupMobileValidation() {
+            const mobileInputs = document.querySelectorAll('input[type="tel"]');
+
+            mobileInputs.forEach(input => {
+                // Real-time validation
+                input.addEventListener('blur', function() {
+                    validateMobileInput(this);
+                });
+
+                // Format input
+                input.addEventListener('input', function() {
+                    formatMobileInput(this);
+                });
+
+                // Clear validation on focus
+                input.addEventListener('focus', function() {
+                    clearMobileValidation(this);
+                });
+            });
+        }
+
+        function formatMobileInput(input) {
+            let value = input.value.replace(/\D/g, '');
+
+            // Limit to 10 digits
+            if (value.length > 10) {
+                value = value.substring(0, 10);
+            }
+
+            // Auto-format as user types
+            if (value.length > 2) {
+                value = value.substring(0, 2) + ' ' + value.substring(2);
+            }
+            if (value.length > 5) {
+                value = value.substring(0, 5) + ' ' + value.substring(5);
+            }
+            if (value.length > 8) {
+                value = value.substring(0, 8) + ' ' + value.substring(8);
+            }
+
+            input.value = value;
+        }
+
+        function clearMobileValidation(input) {
+            // Remove validation styles
+            input.classList.remove('border-green-500', 'border-yellow-500', 'border-red-500');
+            input.classList.remove('bg-green-50', 'bg-yellow-50', 'bg-red-50');
+
+            // Remove existing validation message
+            let existingMessage = input.parentNode.querySelector('.mobile-validation-message');
+            if (existingMessage) {
+                existingMessage.remove();
+            }
+        }
+
+        function validateMobileInput(input) {
+            const rawValue = input.value.replace(/\D/g, '');
+            const validation = mobileValidator.validate(rawValue);
+
+            clearMobileValidation(input);
+
+            if (!validation.valid) {
+                // Show error
+                input.classList.add('border-red-500', 'bg-red-50');
+                showMobileError(input, mobileValidator.getValidationMessage(validation));
+                return false;
+            } else if (mobileValidator.isSuspicious(rawValue)) {
+                // Show warning for suspicious but technically valid numbers
+                input.classList.add('border-yellow-500', 'bg-yellow-50');
+                const carrier = mobileValidator.getCarrierInfo(rawValue);
+                showMobileWarning(input, `This number appears unusual. Carrier: ${carrier}`);
+                return true;
+            } else {
+                // Show success with carrier info
+                input.classList.add('border-green-500', 'bg-green-50');
+                const carrier = mobileValidator.getCarrierInfo(rawValue);
+                const prefixType = mobileValidator.is01Prefix(rawValue) ? '01' : '07';
+                showMobileSuccess(input, `Valid ${prefixType} number • ${carrier}`);
+                return true;
+            }
+        }
+
+        function showMobileError(input, message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'mobile-validation-message text-red-400 text-xs mt-1 flex items-center';
+            errorDiv.innerHTML = `<i class="fas fa-exclamation-circle mr-1"></i> ${message}`;
+            input.parentNode.appendChild(errorDiv);
+        }
+
+        function showMobileWarning(input, message) {
+            const warningDiv = document.createElement('div');
+            warningDiv.className = 'mobile-validation-message text-yellow-400 text-xs mt-1 flex items-center';
+            warningDiv.innerHTML = `<i class="fas fa-exclamation-triangle mr-1"></i> ${message}`;
+            input.parentNode.appendChild(warningDiv);
+        }
+
+        function showMobileSuccess(input, message) {
+            const successDiv = document.createElement('div');
+            successDiv.className = 'mobile-validation-message text-green-400 text-xs mt-1 flex items-center';
+            successDiv.innerHTML = `<i class="fas fa-check-circle mr-1"></i> ${message}`;
+            input.parentNode.appendChild(successDiv);
+        }
+
+        // Enhanced form submission validation
+        function validateFormMobile(mobileInput) {
+            const rawValue = mobileInput.value.replace(/\D/g, '');
+            const validation = mobileValidator.validate(rawValue);
+
+            if (!validation.valid) {
+                showToast(mobileValidator.getValidationMessage(validation), 'error', 'Invalid Mobile Number');
+                mobileInput.focus();
+                return false;
+            }
+
+            if (mobileValidator.isSuspicious(rawValue)) {
+                const carrier = mobileValidator.getCarrierInfo(rawValue);
+                const confirm = window.confirm(
+                    `WARNING: This mobile number appears to be invalid or fake.\n\n` +
+                    `Number: ${mobileInput.value}\n` +
+                    `Carrier: ${carrier}\n\n` +
+                    `Are you sure this is your correct number?\n\n` +
+                    `Using fake numbers may result in account suspension.`
+                );
+                if (!confirm) {
+                    mobileInput.focus();
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
         class ToastManager {
             constructor() {
                 this.container = document.getElementById('toast-container');
@@ -915,7 +1253,7 @@
             document.getElementById(modalId).style.display = 'none';
         }
 
-        function validateMobile(mobile) {
+        function validateFormMobile(mobile) {
             return /^\d{10}$/.test(mobile);
         }
 
@@ -1045,7 +1383,7 @@
                 loginButton.innerHTML = '<i class="fas fa-sign-in-alt mr-2"></i> Login as Student';
                 loginButton.disabled = false;
             
-                if (!validateMobile(mobile)) {
+                if (!validateFormMobile(mobile)) {
                     e.preventDefault();
                     showToast('Please enter a valid 10-digit mobile number', 'error', 'Validation Error');
                     return;
@@ -1079,7 +1417,7 @@
                 const mobile = document.getElementById('admin-mobile').value;
                 const username = document.getElementById('admin-username').value;
                 
-                if (!validateMobile(mobile)) {
+                if (!validateFormMobile(mobile)) {
                     e.preventDefault();
                     showToast('Please enter a valid 10-digit mobile number', 'error', 'Validation Error');
                     return;
@@ -1099,7 +1437,7 @@
                 const username = document.getElementById('master-key-username').value;
                 const masterKey = document.getElementById('master-key-input').value;
                 
-                if (!validateMobile(mobile)) {
+                if (!validateFormMobile(mobile)) {
                     e.preventDefault();
                     showToast('Please enter a valid 10-digit mobile number', 'error', 'Validation Error');
                     return;
@@ -1127,7 +1465,7 @@
                 const username = document.getElementById('new-admin-username').value;
                 const masterKey = document.getElementById('register-master-key').value;
                 
-                if (!validateMobile(mobile)) {
+                if (!validateFormMobile(mobile)) {
                     showToast('Please enter a valid 10-digit mobile number', 'error', 'Validation Error');
                     return;
                 }

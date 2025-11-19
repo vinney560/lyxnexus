@@ -971,6 +971,8 @@
         opacity: 0;
         visibility: hidden;
         transition: all 0.3s ease;
+        padding: 20px;
+        box-sizing: border-box;
     }
 
     #ban-overlay.active {
@@ -981,6 +983,7 @@
     .ban-modal {
         width: 90%;
         max-width: 500px;
+        max-height: 80vh;
         padding: 40px 30px 30px 30px;
         border-radius: 20px;
         text-align: center;
@@ -992,6 +995,8 @@
         -webkit-backdrop-filter: blur(20px);
         box-shadow: 0 8px 32px rgba(0, 31, 135, 0.3);
         border: 1px solid rgba(239, 68, 68, 0.3);
+        display: flex;
+        flex-direction: column;
     }
 
     #ban-overlay.active .ban-modal {
@@ -1003,6 +1008,7 @@
         color: var(--danger-color);
         margin-bottom: 20px;
         animation: pulse 2s infinite;
+        flex-shrink: 0;
     }
 
     .ban-title {
@@ -1013,6 +1019,7 @@
         -webkit-background-clip: text;
         background-clip: text;
         -webkit-text-fill-color: transparent;
+        flex-shrink: 0;
     }
 
     .ban-message {
@@ -1020,6 +1027,16 @@
         line-height: 1.6;
         margin-bottom: 25px;
         color: rgba(255, 255, 255, 0.8);
+        overflow-y: auto;
+        flex: 1;
+        padding-right: 5px;
+
+        scrollbar-width: none; 
+        -ms-overflow-style: none;
+    }
+
+    .ban-message::-webkit-scrollbar {
+        display: none; 
     }
 
     .close-btn {
@@ -1052,6 +1069,7 @@
         justify-content: center;
         flex-wrap: wrap;
         margin-top: 20px;
+        flex-shrink: 0;
     }
 
     .btn-secondary {
@@ -1068,6 +1086,29 @@
     body.ban-overlay-active {
         overflow: hidden;
     }
+
+    .ban-reasons {
+        margin: 15px 0;
+        padding-left: 20px;
+        text-align: left;
+    }
+
+    .ban-reasons li {
+        margin-bottom: 8px;
+        position: relative;
+        color: rgba(255, 255, 255, 0.9);
+    }
+
+    .ban-reasons li::before {
+        content: "•";
+        color: #EF4444;
+        font-weight: bold;
+        display: inline-block;
+        width: 1em;
+        margin-left: -1em;
+        font-size: 1.2em;
+    }
+
 </style>
 <body>
     <!-- Toast Container -->
@@ -1158,8 +1199,18 @@
                 <h2 class="ban-title">Account Restricted</h2>
                 
                 <div class="ban-message">
-                    <p>Your account has been temporarily restricted from accessing LyxNexus features.</p>
-                    <p>This restriction may be due to violation of our terms of service or suspicious activity such as Invalid Mobile Number, Phishing, Spamming, Automated Messaging, or Malicious Content. Please ensure your account follows all platform guidelines and that you're using a valid, properly formatted phone number. If you believe this is an error, contact our support team for assistance.</p>
+                    <p style="font-weight: 700; text-decoration: underline; text-decoration-color: #EF4444; text-underline-offset: 4px; text-decoration-thickness: 2px;">
+                        Your account has been temporarily restricted from accessing LyxNexus features.
+                    </p>
+                    <ul class="ban-reasons">
+                        <li>Violation of our terms of service</li>
+                        <li>Suspicious activity</li>
+                        <li>Invalid Mobile Number</li>
+                        <li>Phishing attempts</li>
+                        <li>Spamming</li>
+                        <li>Disrespect!!!</li>
+                        <li>Malicious Content</li>
+                    </ul>                    
                     <p style="margin-top: 15px; font-size: 14px; color: rgba(255, 255, 255, 0.6);">
                         If you believe this is a mistake, please contact our support team for assistance.
                     </p>
@@ -1167,7 +1218,7 @@
                 
                 <div class="ban-actions">
                     <button class="btn" onclick="window.location.href='https://wa.me/254740694312'">
-                        <i class="fas fa-headset mr-2"></i>Contact Support
+                        <i class="fab fa-whatsapp mr-2"></i>Contact Support
                     </button>
                     <button class="btn btn-secondary" id="close-overlay-btn">
                         <i class="fas fa-times mr-2"></i>Close
@@ -1681,10 +1732,6 @@
                 }
             }
 
-            // Method to manually trigger overlay (for testing)
-            triggerForTesting() {
-                this.show();
-            }
         }
 
         // Initialize ban overlay after DOM is loaded
@@ -1692,10 +1739,6 @@
             // Wait a bit to ensure all user data is loaded
             setTimeout(() => {
                 window.banOverlay = new UserBanOverlay();
-
-                // For testing purposes - you can remove this
-                console.log("Ban overlay system initialized");
-                console.log("Current Userstatus:", window.Userstatus);
             }, 1500);
         });
 

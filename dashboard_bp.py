@@ -18,12 +18,11 @@ def not_banned(f): # @not_banned
         if not current_user.status:
             if request.path.startswith('/api/') or request.is_json:
                 return jsonify({'error': 'Banned User Not Allowed'}), 401
-            flash('Banned User Not Allowed!', 'warning')
             referrer = request.referrer
             if referrer:
                 return redirect(referrer), 302
             else:
-                return redirect(url_for('main_page')), 302
+                return redirect(url_for('main_page', message='Banned User Not Allowed!', message_type='warning')), 302
         return f(*args, **kwargs)
     return decor
 

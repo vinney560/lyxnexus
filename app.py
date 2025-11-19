@@ -598,7 +598,7 @@ def not_banned(f): # @not_banned
     def decor(*args, **kwargs):
         if not current_user.status:
             if request.path.startswith('/api/') or request.is_json:
-                return jsonify({'error': 'Banned User Not Allowed'}), 401
+                abort(403)
             flash('Banned User Not Allowed!', 'warning')
             referrer = request.referrer
             if referrer:
