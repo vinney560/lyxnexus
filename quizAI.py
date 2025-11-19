@@ -56,10 +56,14 @@ class QuizGenerator:
     
     def _build_prompt(self, topic, num_questions, difficulty, style):
         """Build the prompt for quiz generation"""
+
+        # Load unit code details from auxiliary file
+        unit_code_details = self._load_unit_code_details()
+
         return f"""
         Generate exactly {num_questions} {style.lower()} questions about: "{topic}"
         Difficulty: {difficulty}
-        
+
         Return ONLY valid JSON in this exact format:
         [
           {{
@@ -69,7 +73,7 @@ class QuizGenerator:
             "explanation": "Clear and Brief explanation"
           }}
         ]
-        
+
         Important:
         You are an intelligent academic topic evaluator within LyxNexus — a learning and collaboration hub designed for structured educational use.
         - For True/False: use options ["True", "False"]
@@ -77,36 +81,37 @@ class QuizGenerator:
         - Ensure ALL questions have all required fields
         - Return ONLY the JSON array, no other text
         - Use mostly internet accessible resources to generate first year level questions and answers
-        
+
         SOURCES AND RESOURCES OF ACADEMICS ONLINE:
         - WHO HIV/AIDS Fact Sheets, CDC HIV Guidelines, Medical Microbiology by Murray et al., The Lancet HIV Journal, OpenStax College Algebra, Khan Academy Algebra, Schaum's Outline of College Algebra, University Math Curriculum, Stanford Encyclopedia of Philosophy, Introduction to Philosophy by John Perry, Philosophy: The Basics by Nigel Warburton, University Philosophy Curriculum, University Communication Textbooks, Communication Theory by F. Jablin, APA Communication Guidelines, Chuka University Lecture Notes, MIT OpenCourseWare – Introduction to Computer Science, NIST Computer Science Resources, OpenStax Introduction to Computer Science, Python.org Documentation, Computer Science: An Overview by J. Glenn Brookshear, IT Fundamentals by Pearson, Online IT Courses (Coursera, edX), Industry Coding Standards, AI-generated, Educational databases
-        
+
+        {unit_code_details}
+
         CONTENT REQUIREMENTS:
-        1. ALIGNMENT: Questions must align with standard university curriculum
-        2. ACCURACY: Use only verified academic information
-        3. DIVERSITY: Cover multiple aspects of the subject
-        
+        1. ALIGNMENT: Questions must align with standard university curriculum for the specific unit code
+        2. ACCURACY: Use only verified academic information relevant to the course
+        3. DIVERSITY: Cover multiple aspects of the subject as outlined in the unit specifications
+        4. LEVEL: Generate first-year university level questions appropriate for beginners
+
         SOURCE INTEGRATION:
-        - Reference established academic sources
-        - Use textbook-accurate terminology
-        - Include real-world applications where appropriate
-        - Maintain academic rigor and precision
-        
+        - Reference established academic sources specific to the discipline
+        - Use textbook-accurate terminology appropriate for the course level
+        - Include real-world applications where appropriate for the subject
+        - Maintain academic rigor and precision according to university standards
+
         QUESTION STRUCTURE:
-        - Each question must test meaningful understanding
+        - Each question must test meaningful understanding of core concepts
         - Avoid trivial or overly simple questions
-        - Ensure logical progression of difficulty
+        - Ensure logical progression of difficulty within the quiz
         - Include practical applications when possible
-        
-        QUALITY ASSURANCE FOR ACCADEMICS:
-        - All content must be academically verifiable
-        - Explanations should cite established knowledge
-        - Questions should promote critical thinking
 
-        Your responsibility:
-        Determine whether the given topic is academic or school-related. An educational topic refers to any subject or theme that could logically belong in a formal learning environment, such as a classroom, college, university, or academic curriculum.
+        QUALITY ASSURANCE FOR ACADEMICS:
+        - All content must be academically verifiable through standard references
+        - Explanations should cite established knowledge in the field
+        - Questions should promote critical thinking and conceptual understanding
 
-        Educational topics typically fall under categories like:
+        TOPIC CLASSIFICATION:
+        Determine whether the given topic is academic or school-related. Educational topics include:
         - Science (Physics, Chemistry, Biology, Environmental Studies)
         - Technology (Computer Science, AI, Robotics, Data Structures)
         - Mathematics (Algebra, Calculus, Statistics)
@@ -115,27 +120,35 @@ class QuizGenerator:
         - Languages and Communication (English, Linguistics, Grammar, communication skills)
         - Professional Studies (Engineering, Business, Education, Medicine)
 
-        A non-educational topic includes:
+        Non-educational topics include:
         - Entertainment, media, and pop culture (movies, celebrities, music)
         - Internet trends or memes
-        - Sports and games (unless being studied academically, e.g., sports science)
+        - Sports and games (unless being studied academically)
         - Personal or informal lifestyle topics
 
-        Carefully analyze the provided topic.  
-        If it can reasonably be studied, taught, or analyzed in an academic context, classify it as educational and use the SOURCES AND RESOURCES OF ACADEMICS ONLINE above to source correct information then generate first year level questions and answers.  
-        If it primarily belongs to casual, entertainment, or social contexts, classify it as non-educational.
-
-        NOTICE & TOPIC BREAKDOWN:
-        * These are the common Topic students will ask, understand the meaning of the unit code and then source correct academic resources for any when asked.
-        - ZOOL 143 is Biology of HIV & AIDS.
-        - COMP 107 is Fundation of computing delaing with Introduction to 
-Computers, Introduction to Computer Software , Operating System, SpreadSheet, Word Processing, Networking, Computer Classification & Harware considerations, .
-        - PHIL 104 is Philosophy & Society.
-        - BIT 100 is Barchelor in Information Technology dealing with INTRODUCTION TO PROGRAMMING, VARIABLES IN PROGRAMMING LANGUAGES, EXPRESSIONS & OPERATORS, PROGRAMMING CONCEPTS, PROBLEM-SOLVING ALGORITHMS 1 & 2.
-        - COMS 101 is Communication Skills.
-        - MATH 112 is College/University Mathematics.
-        ## Use online tool to source information online for this Topics and generate first year level questions and Answers.
+        If the topic matches any unit code (ZOOL 143, COMP 107, PHIL 104, BIT 100, COMS 101, MATH 112) or falls within academic disciplines, use the detailed specifications above to generate appropriate first-year level questions. For other academic topics, use general academic resources to create curriculum-appropriate content.
         """
+
+    def _load_unit_code_details(self):
+        """Load unit code details from auxiliary file"""
+        try:
+            print("Using quizAIprompt.txt file")
+            with open('quizAIprompt.txt', 'r', encoding='utf-8') as file:
+                return file.read()
+        except FileNotFoundError:
+            print("Warning: quizAIprompt.txt not found, using default unit code details")
+            return """
+            DETAILED UNIT CODE SPECIFICATIONS:
+
+            ZOOL 143 - BIOLOGY OF HIV & AIDS
+            COMP 107 - FOUNDATION OF COMPUTING & COMPUTER 
+            PHIL 104 - PHILOSOPHY & SOCIETY
+            BIT 100 - INTRODUCTION TO PROGRAMMING
+            COMS 101 - COMMUNICATION SKILLS
+            MATH 112 - COLLEGE MATHEMATICS
+
+            Use standard academic resources for these courses.
+            """
     
     def _parse_response(self, response_text):
         """Parse and validate the AI response"""

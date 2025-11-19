@@ -830,10 +830,6 @@
                     return true;
                 }
 
-                if (this.isTooPatterned(cleanMobile)) {
-                    return true;
-                }
-
                 return false;
             }
 
@@ -845,49 +841,6 @@
                     return totalRepeated >= 6; // If 6+ digits are in repeated groups
                 }
                 return false;
-            }
-
-            isTooPatterned(mobile) {
-                // Check for obvious patterns
-                const digits = mobile.split('').map(Number);
-
-                // Check for arithmetic sequences
-                let arithmeticUp = true;
-                let arithmeticDown = true;
-
-                for (let i = 2; i < digits.length; i++) {
-                    if (digits[i] - digits[i-1] !== digits[i-1] - digits[i-2]) {
-                        arithmeticUp = false;
-                    }
-                    if (digits[i] - digits[i-1] !== -1) {
-                        arithmeticDown = false;
-                    }
-                }
-
-                if (arithmeticUp || arithmeticDown) {
-                    return true;
-                }
-
-                // Check for palindrome (excluding the prefix for better accuracy)
-                const numberWithoutPrefix = mobile.substring(2);
-                const reversed = numberWithoutPrefix.split('').reverse().join('');
-                if (numberWithoutPrefix === reversed) {
-                    return true;
-                }
-
-                // Check for alternating patterns (like 0101010101 or 0707070707)
-                let alternating1 = true;
-                let alternating2 = true;
-                for (let i = 2; i < digits.length; i += 2) {
-                    if (i + 1 < digits.length && digits[i] !== digits[i + 1]) {
-                        alternating1 = false;
-                    }
-                    if (i + 1 < digits.length && digits[i] === digits[i + 1]) {
-                        alternating2 = false;
-                    }
-                }
-
-                return alternating1 || alternating2;
             }
 
             getCarrierInfo(mobile) {
