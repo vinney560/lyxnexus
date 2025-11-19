@@ -956,7 +956,118 @@
       left: -2px; 
       vertical-align: middle;
     }
+    
+    #ban-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.85);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 10000;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+    }
 
+    #ban-overlay.active {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .ban-modal {
+        width: 90%;
+        max-width: 500px;
+        padding: 40px 30px 30px 30px;
+        border-radius: 20px;
+        text-align: center;
+        position: relative;
+        transform: translateY(20px);
+        transition: transform 0.3s ease;
+        background: rgba(30, 30, 40, 0.95);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        box-shadow: 0 8px 32px rgba(0, 31, 135, 0.3);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    #ban-overlay.active .ban-modal {
+        transform: translateY(0);
+    }
+
+    .ban-icon {
+        font-size: 64px;
+        color: var(--danger-color);
+        margin-bottom: 20px;
+        animation: pulse 2s infinite;
+    }
+
+    .ban-title {
+        font-size: 28px;
+        font-weight: 700;
+        margin-bottom: 15px;
+        background: linear-gradient(90deg, #EF4444, #DC2626);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .ban-message {
+        font-size: 16px;
+        line-height: 1.6;
+        margin-bottom: 25px;
+        color: rgba(255, 255, 255, 0.8);
+    }
+
+    .close-btn {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: none;
+        border: none;
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 24px;
+        cursor: pointer;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+        z-index: 10001;
+    }
+
+    .close-btn:hover {
+        background: rgba(239, 68, 68, 0.2);
+        color: #EF4444;
+    }
+
+    .ban-actions {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 20px;
+    }
+
+    .btn-secondary {
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-secondary:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: translateY(-2px);
+    }
+
+    body.ban-overlay-active {
+        overflow: hidden;
+    }
 </style>
 <body>
     <!-- Toast Container -->
@@ -1030,6 +1141,40 @@
         <div id="robot-button">
             <i class="fas fa-robot"></i>
         </div>
+
+                        <!-- Ban overlay -->
+
+        <!-- Ban Overlay -->
+        <div id="ban-overlay">
+            <div class="ban-modal glass-morph">
+                <button class="close-btn" id="close-ban-overlay">
+                    <i class="fas fa-times"></i>
+                </button>
+                
+                <div class="ban-icon">
+                    <i class="fas fa-ban"></i>
+                </div>
+                
+                <h2 class="ban-title">Account Restricted</h2>
+                
+                <div class="ban-message">
+                    <p>Your account has been temporarily restricted from accessing LyxNexus features.</p>
+                    <p>This restriction may be due to violation of our terms of service or suspicious activity such as Invalid Mobile Number, Phishing, Spamming, Automated Messaging, or Malicious Content. Please ensure your account follows all platform guidelines and that you're using a valid, properly formatted phone number. If you believe this is an error, contact our support team for assistance.</p>
+                    <p style="margin-top: 15px; font-size: 14px; color: rgba(255, 255, 255, 0.6);">
+                        If you believe this is a mistake, please contact our support team for assistance.
+                    </p>
+                </div>
+                
+                <div class="ban-actions">
+                    <button class="btn" onclick="window.location.href='https://wa.me/254740694312'">
+                        <i class="fas fa-headset mr-2"></i>Contact Support
+                    </button>
+                    <button class="btn btn-secondary" id="close-overlay-btn">
+                        <i class="fas fa-times mr-2"></i>Close
+                    </button>
+                </div>
+            </div>
+        </div>                        
                                  <!-- Announcements Section -->
         
                                  <!-- Image Preview Modal -->
@@ -1438,6 +1583,142 @@
         }
         
         const analytics = new AnalyticsTracker();        
+
+        // User Ban Overlay System
+        class UserBanOverlay {
+            constructor() {
+                this.overlay = document.getElementById('ban-overlay');
+                this.closeBtn = document.getElementById('close-ban-overlay');
+                this.closeOverlayBtn = document.getElementById('close-overlay-btn');
+
+                this.init();
+            }
+
+            init() {
+                // Add event listeners
+                if (this.closeBtn) {
+                    this.closeBtn.addEventListener('click', () => this.hide());
+                }
+
+                if (this.closeOverlayBtn) {
+                    this.closeOverlayBtn.addEventListener('click', () => this.hide());
+                }
+
+                // Close overlay when clicking outside
+                this.overlay.addEventListener('click', (e) => {
+                    if (e.target === this.overlay) {
+                        this.hide();
+                    }
+                });
+
+                // Close on Escape key
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape' && this.overlay.classList.contains('active')) {
+                        this.hide();
+                    }
+                });
+
+                // Check user status on load
+                setTimeout(() => {
+                    this.checkUserStatus();
+                }, 1000); // Delay to ensure user data is loaded
+            }
+
+            checkUserStatus() {
+                try {
+                    // Get user status from your global variable
+                    const userStatus = this.getUserStatus();
+
+                    console.log("Checking user status:", userStatus);
+
+                    if (userStatus === false) {
+                        console.log("User is banned, showing overlay");
+                        this.show();
+
+                        // Track this event
+                        if (typeof analytics !== 'undefined') {
+                            analytics.trackActivity('ban_overlay_shown', 'user_banned');
+                        }
+                    }
+                } catch (error) {
+                    console.error("Error checking user status:", error);
+                }
+            }
+
+            getUserStatus() {
+                // Use your existing global Userstatus variable
+                if (typeof window.Userstatus !== 'undefined') {
+                    return window.Userstatus;
+                }
+
+                // Fallback: check from detail-status element
+                const statusElement = document.getElementById('detail-status');
+                if (statusElement) {
+                    const statusText = statusElement.textContent.trim().toLowerCase();
+                    return statusText === 'allowed' || statusText === 'active';
+                }
+
+                return true; // Default to allowed if status can't be determined
+            }
+
+            show() {
+                this.overlay.classList.add('active');
+                document.body.classList.add('ban-overlay-active');
+
+                // Add animation class for entrance
+                setTimeout(() => {
+                    this.overlay.style.transition = 'all 0.3s ease';
+                }, 10);
+            }
+
+            hide() {
+                this.overlay.classList.remove('active');
+                document.body.classList.remove('ban-overlay-active');
+
+                // Track dismissal
+                if (typeof analytics !== 'undefined') {
+                    analytics.trackActivity('ban_overlay_dismissed', 'user_banned');
+                }
+            }
+
+            // Method to manually trigger overlay (for testing)
+            triggerForTesting() {
+                this.show();
+            }
+        }
+
+        // Initialize ban overlay after DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Wait a bit to ensure all user data is loaded
+            setTimeout(() => {
+                window.banOverlay = new UserBanOverlay();
+
+                // For testing purposes - you can remove this
+                console.log("Ban overlay system initialized");
+                console.log("Current Userstatus:", window.Userstatus);
+            }, 1500);
+        });
+
+        // Also check when user data is updated
+        function setupBanOverlayListener() {
+            // Override the updateUserDisplay function to check status after user data loads
+            const originalUpdateUserDisplay = window.updateUserDisplay;
+            window.updateUserDisplay = function() {
+                if (originalUpdateUserDisplay) {
+                    originalUpdateUserDisplay();
+                }
+
+                // Check ban status after user data is updated
+                if (window.banOverlay) {
+                    setTimeout(() => {
+                        window.banOverlay.checkUserStatus();
+                    }, 500);
+                }
+            };
+        }
+
+        // Initialize the listener
+        setupBanOverlayListener();
 
         // Modern Toast System
         class ToastSystem {
