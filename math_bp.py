@@ -7,13 +7,14 @@ from datetime import timedelta
 import json
 import time
 import random
+import os
 
 math_bp = Blueprint('math', __name__, url_prefix='/math')
 
 # API Keys and Model
 API_KEYS = [
-    'AIzaSyA3o8aKHTnVzuW9-qg10KjNy7Lcgn19N2I',
-    'AIzaSyCq8-xrPTC40k8E_i3vXZ_-PR6RiPsuOno'
+    os.getenv("GEMINI_KEY_1"),
+    os.getenv("GEMINI_KEY_2")
 ]
 MODEL = "gemini-2.0-flash"
 

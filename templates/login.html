@@ -788,7 +788,7 @@
         autoAuthenticateBtn.addEventListener('click', () => {
             autoAuthenticateBtn.innerHTML = '<i class="fas fa-spin fa-spinner">';
             autoAuthenticateBtn.disabled = true;
-            window.location.href = '/check-login'
+            window.location.href = '/login-check'
             setTimeout(() => {
                 autoAuthenticateBtn.disabled = false
                 autoAuthenticateBtn.innerHTML = '<i class="fas fa-sign-in-alt mr-2"> Auto Authenticate';
