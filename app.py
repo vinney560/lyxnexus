@@ -1017,7 +1017,6 @@ def login():
             return render_template('login.html', username=username, mobile=mobile,
                                    login_type=login_type, year=_year())
         
-        session.clear()
         # ===============================
         #  ADMIN LOGIN VIA MASTER KEY
         # ===============================
@@ -1059,8 +1058,6 @@ def login():
                 return render_template('login.html', username=username, mobile=mobile,
                                        login_type=login_type, year=_year())
 
-            session.clear()
-            session['authenticated'] = True
             login_user(user)
             flash('Admin login successful!', 'success')
             return redirect(next_page or url_for('admin_page'))
@@ -3324,7 +3321,7 @@ def download_file(id):
             share_link=f'https://lyxnexus.onrender.com/share/{share_uuid}'
         )
 
-# ---------------- SHARE LINK ROUTE ----------------
+# ------------ SHARE LINK ROUTE ----------------
 @app.route('/share/<share_id>')
 def access_share(share_id):
     """Access a shared link to restore one download for the owner."""
@@ -5173,8 +5170,6 @@ def get_timetable():
             Timetable.start_time
         ).all()
 
-        print(f"[DEBUG] Retrieved {len(timetable_slots)} timetable slots from DB")
-
         days_order = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
         timetable_by_day = {day: [] for day in days_order}
 
@@ -5199,7 +5194,6 @@ def get_timetable():
             for day in days_order if timetable_by_day[day]
         ]
 
-        print(f"[DEBUG] Sending grouped timetable response with {len(result)} days")
         return jsonify(result), 200
 
     except Exception as e:

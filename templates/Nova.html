@@ -1288,7 +1288,7 @@
                 };
 
                 recognition.onerror = function(event) {
-                    console.error('Speech recognition error', event.error);
+                    //console.error('Speech recognition error', event.error);
                     addMessage("❌ Sorry, I couldn't hear you clearly. Please try again.", false);
                 };
 
@@ -1297,7 +1297,7 @@
                     audioButton.classList.remove('recording');
                 };
             } else {
-                console.warn('Speech recognition not supported');
+                //console.warn('Speech recognition not supported');
                 audioButton.style.display = 'none';
             }
         }
@@ -1559,7 +1559,7 @@
             try {
                 localStorage.setItem('NovaAI_conversationHistory', JSON.stringify(conversationHistory));
             } catch (error) {
-                console.error('Failed to save conversation history:', error);
+                //console.error('Failed to save conversation history:', error);
             }
         }
 
@@ -1574,7 +1574,7 @@
                     }
                 }
             } catch (error) {
-                console.error('Failed to load conversation history:', error);
+                //console.error('Failed to load conversation history:', error);
             }
         }
 
@@ -1587,7 +1587,7 @@
                     renderConversationItems();
                 }
             } catch (error) {
-                console.error('Failed to load conversation items:', error);
+                //console.error('Failed to load conversation items:', error);
             }
         }
 
@@ -1596,7 +1596,7 @@
             try {
                 localStorage.setItem('NovaAI_conversationItems', JSON.stringify(conversationItems));
             } catch (error) {
-                console.error('Failed to save conversation items:', error);
+                //console.error('Failed to save conversation items:', error);
             }
         }
 
@@ -1891,7 +1891,7 @@
                 saveConversationHistory();
                 
             } catch (error) {
-                console.error('Error:', error);
+                //console.error('Error:', error);
                 hideTypingIndicator();
                 
                 // Try next API key if available
@@ -2062,7 +2062,7 @@
                         })
                     });
                 } catch (error) {
-                    console.log('AI access capture failed');
+                    //console.log('AI access capture failed');
                 }
             }
 
@@ -2079,7 +2079,7 @@
                         })
                     });
                 } catch (error) {
-                    console.log('AI event registration failed');
+                    //console.log('AI event registration failed');
                 }
             }
 

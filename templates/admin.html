@@ -1060,7 +1060,6 @@
         let currentAssignmentFile = null;
 
         function truncateFilename(filename, maxLength = 12) {
-            console.log('Original filename:', filename); // Debug log
 
             // Handle null/undefined
             if (!filename) return '';
@@ -1070,25 +1069,19 @@
                 const result = filename.length > maxLength 
                     ? filename.substring(0, maxLength) + '...'
                     : filename;
-                console.log('No extension result:', result); // Debug log
                 return result;
             }
           
             const fileExt = filename.split('.').pop();
             const nameWithoutExt = filename.slice(0, filename.lastIndexOf('.'));
           
-            console.log('Name without ext:', nameWithoutExt); // Debug log
-            console.log('File extension:', fileExt); // Debug log
-          
             // If filename is already short enough
             if (nameWithoutExt.length <= maxLength) {
-                console.log('Short enough, returning:', filename); // Debug log
                 return filename;
             }
           
             // Truncate and add ellipsis
             const result = nameWithoutExt.substring(0, maxLength) + '-_LN' + '.' + fileExt;
-            console.log('Truncated result:', result); // Debug log
             return result;
         }
 
@@ -1145,7 +1138,6 @@
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
             return await res.json();
           } catch (err) {
-            console.error('[fetchData] error fetching', url, err);
             return []; // safe fallback
           }
         }
@@ -1160,7 +1152,6 @@
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
             return await res.json();
           } catch (err) {
-            console.error('[sendData] error', url, method, err);
             throw err;
           }
         }
@@ -1171,7 +1162,6 @@
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
             return await res.json();
           } catch (err) {
-            console.error('[deleteData] error', url, err);
             throw err;
           }
         }
@@ -1187,7 +1177,6 @@
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
             return await res.json();
           } catch (err) {
-            console.error('[uploadFile] error', endpoint, idSuffix, err);
             throw err;
           }
         }
@@ -1463,7 +1452,6 @@
         }
 
         async function editAnnouncement(id) {
-          console.log('[editAnnouncement]', id);
           const list = await fetchData(ENDPOINTS.ANNOUNCEMENTS);
           const item = list.find(x => x.id == id);
           if (!item) return alert('Announcement not found');
@@ -1507,7 +1495,6 @@
             showToast('Announcement deleted successfully', 'success');
             loadAnnouncements();
           } catch (e) {
-            console.error(e);
             showToast('Failed to delete announcement', 'error');
           }
         }
@@ -1552,7 +1539,6 @@
               closeModal('announcement-modal');
               loadAnnouncements();
             } catch (err) {
-              console.error(err);
               showToast('Error saving announcement', 'error');
             } finally {
               if (submitBtn) {
@@ -1564,7 +1550,6 @@
         }
 
         async function editAssignment(id) {
-          console.log('[editAssignment]', id);
           const list = await fetchData(ENDPOINTS.ASSIGNMENTS);
           const item = list.find(x => x.id == id);
           if (!item) return alert('Assignment not found');
@@ -1636,7 +1621,6 @@
               closeModal('assignment-modal');
               loadAssignments();
             } catch (err) {
-              console.error(err);
               showToast('Error saving assignment', 'error');
             } finally {
               if (submitBtn) {
@@ -1695,7 +1679,6 @@
               loadTopics();
               loadTopicDropdowns();
             } catch (err) {
-              console.error(err);
               showToast('Error saving topic', 'error');
             } finally {
               if (submitBtn) { submitBtn.textContent = originalText; submitBtn.disabled = false; }
@@ -1705,7 +1688,6 @@
           
         /* Timetable */
         async function editTimetableSlot(id) {
-          console.log('[editTimetableSlot]', id);
           const raw = await fetchData(ENDPOINTS.TIMETABLE);
           if (!raw) return alert('No timetable data');
           let flat = [];
@@ -1771,7 +1753,6 @@
               closeModal('timetable-modal');
               loadTimetable();
             } catch (err) {
-              console.error(err);
               showToast('Error saving timetable slot', 'error');
             } finally {
               if (submitBtn) { submitBtn.textContent = originalText; submitBtn.disabled = false; }

@@ -548,6 +548,36 @@
             font-size: 12px;
         }
     }
+
+    /* Enhanced validation styles */
+    .mobile-validation-message {
+        font-size: 12px;
+        margin-top: 4px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .form-input.valid {
+        border-color: #10B981;
+        background: rgba(16, 185, 129, 0.05);
+    }
+
+    .form-input.warning {
+        border-color: #F59E0B;
+        background: rgba(245, 158, 11, 0.05);
+    }
+
+    .form-input.error {
+        border-color: #EF4444;
+        background: rgba(239, 68, 68, 0.05);
+    }
+
+    .submit-blocked {
+        opacity: 0.6;
+        cursor: not-allowed !important;
+        pointer-events: none;
+    }
 </style>
 <body class="bg-[url('/uploads/OIP10.jpg')] bg-fixed bg-center bg-cover brightness-50">
     <header class="nav-header">
@@ -593,6 +623,9 @@
                     </svg>
                 </div>
                 <h1 class="text-3xl font-bold gradient-text">LyxNexus</h1>
+                <button class="btn-outline mt-2" id="autoAuthenticate">
+                    <i class="fas fa-sign-in-alt mr-2"></i> Auto Authenticate
+                </button>
                 <p class="text-gray-400 mt-2">Enter your credentials to continue</p>
             </div>
 
@@ -603,17 +636,17 @@
 
             <!-- Student Login Form -->
             <div id="student-tab" class="tab-content active">
-                <form id="student-login-form" method="POST">
+                <form id="student-login-form" method="POST" onsubmit="return validateStudentForm(event)">
                     <input type="hidden" name="login_type" value="student">
                     <div class="form-group">
                         <label class="form-label" for="username">Username</label>
-                        <input type="text" id="username" name="username" class="form-input" placeholder="Enter your username" maxlength="50" value="{{ username if username }}" required>
+                        <input type="text" id="username" name="username" class="form-input" placeholder="Enter your username" maxlength="30" value="{{ username if username }}" autocomplete="username" required>
                     </div>
                     
                     <div class="form-group">
                         <label class="form-label" for="mobile">Mobile Number</label>
-                        <input type="tel" id="mobile" name="mobile" class="form-input invalid:border-pink-500 invalid:text-pink-600" placeholder="10-digit mobile number" value="{{ mobile if mobile }}" required>
-                        <p class="text-gray-400 text-xs mt-1">Enter your 10-digit mobile number</p>
+                        <input type="tel" id="mobile" name="mobile" class="form-input" placeholder="07XX XXX XXX" value="{{ mobile if mobile }}" required>
+                        <p class="text-gray-400 text-xs mt-1">Enter your 10-digit Kenyan mobile number</p>
                     </div>
                     
                     <button type="submit" class="btn mt-4" id="login-student">
@@ -644,20 +677,20 @@
                 
                 <!-- Normal Admin Login -->
                 <div id="admin-login-tab" class="subtab-content active">
-                    <form id="admin-login-form" method="POST">
+                    <form id="admin-login-form" method="POST" onsubmit="return validateAdminForm(event)">
                         <input type="hidden" name="login_type" value="admin">
                         
                         <div class="form-group">
                             <label class="form-label" for="admin-username">Username</label>
-                            <input type="text" id="admin-username" name="username" class="form-input" placeholder="Enter admin username" maxlength="50" required>
+                            <input type="text" id="admin-username" name="username" class="form-input" placeholder="Enter admin username" maxlength="30" autocomplete="username" required>
                         </div>
                         
                         <div class="form-group">
                             <label class="form-label" for="admin-mobile">Mobile Number</label>
-                            <input type="tel" id="admin-mobile" name="mobile" class="form-input invalid:border-pink-500 invalid:text-pink-600" placeholder="10-digit mobile number" required>
+                            <input type="tel" id="admin-mobile" name="mobile" class="form-input" placeholder="07XX XXX XXX" required>
                         </div>
                         
-                        <button type="submit" class="btn btn-admin mt-4">
+                        <button type="submit" class="btn btn-admin mt-4" id="admin-login-btn">
                             <i class="fas fa-key mr-2"></i> Login as Admin
                         </button>
                     </form>
@@ -665,17 +698,17 @@
                 
                 <!-- Master Key Admin Access -->
                 <div id="master-key-tab" class="subtab-content">
-                    <form id="master-key-form" method="POST">
+                    <form id="master-key-form" method="POST" onsubmit="return validateMasterKeyForm(event)">
                         <input type="hidden" name="login_type" value="admin">
                         
                         <div class="form-group">
                             <label class="form-label" for="master-key-username">Username</label>
-                            <input type="text" id="master-key-username" name="username" class="form-input" placeholder="Enter username for admin account" maxlength="50" required>
+                            <input type="text" id="master-key-username" name="username" class="form-input" placeholder="Enter username for admin account" maxlength="30" autocomplete="username" required>
                         </div>
                         
                         <div class="form-group">
                             <label class="form-label" for="master-key-mobile">Mobile Number</label>
-                            <input type="tel" id="master-key-mobile" name="mobile" class="form-input invalid:border-pink-500 invalid:text-pink-600" placeholder="10-digit mobile number" required>
+                            <input type="tel" id="master-key-mobile" name="mobile" class="form-input" placeholder="07XX XXX XXX" required>
                         </div>
                         
                         <div class="form-group">
@@ -684,7 +717,7 @@
                             <p class="text-gray-400 text-xs mt-1">This will create or promote to admin account</p>
                         </div>
                         
-                        <button type="submit" class="btn btn-admin mt-4">
+                        <button type="submit" class="btn btn-admin mt-4" id="master-key-btn">
                             <i class="fas fa-user-shield mr-2"></i> Access with Master Key
                         </button>
                     </form>
@@ -715,15 +748,15 @@
                 </div>
             </div>
             
-            <form id="register-admin-form">
+            <form id="register-admin-form" onsubmit="return validateRegisterAdminForm(event)">
                 <div class="form-group">
                     <label class="form-label" for="new-admin-mobile">Mobile Number</label>
-                    <input type="tel" id="new-admin-mobile" name="mobile" class="form-input" placeholder="10-digit mobile number" pattern="[0-9]{10}" required>
+                    <input type="tel" id="new-admin-mobile" name="mobile" class="form-input" placeholder="07XX XXX XXX" required>
                 </div>
                 
                 <div class="form-group">
                     <label class="form-label" for="new-admin-username">Username</label>
-                    <input type="text" id="new-admin-username" name="username" class="form-input" placeholder="Admin username" maxlength="50" required>
+                    <input type="text" id="new-admin-username" name="username" class="form-input" placeholder="Admin username" maxlength="30" autocomplete="username" required>
                 </div>
                 
                 <div class="form-group">
@@ -734,7 +767,7 @@
                 
                 <div class="flex justify-end space-x-3 mt-6">
                     <button type="button" class="btn-outline" id="cancel-register-admin">Cancel</button>
-                    <button type="submit" class="btn btn-admin">
+                    <button type="submit" class="btn btn-admin" id="register-admin-submit-btn">
                         <i class="fas fa-user-shield mr-2"></i> Register Admin
                     </button>
                 </div>
@@ -751,277 +784,265 @@
             LOGIN: '/login'
         };
 
+        const autoAuthenticateBtn = document.getElementById('autoAuthenticate');
+        autoAuthenticateBtn.addEventListener('click', () => {
+            autoAuthenticateBtn.innerHTML = '<i class="fas fa-spin fa-spinner">';
+            autoAuthenticateBtn.disabled = true;
+            window.location.href = '/check-login'
+            setTimeout(() => {
+                autoAuthenticateBtn.disabled = false
+                autoAuthenticateBtn.innerHTML = '<i class="fas fa-sign-in-alt mr-2"> Auto Authenticate';
+                showToast('Auto Authenication Failed', 'error', 'Failed To Authenticate');
+            }, 1500);
+        });
+
         class MobileValidator {
             constructor() {
-                this.suspiciousPatterns = [
+                this.validPrefixes = ['07', '01'];
+                this.suspiciousPatterns = this.initializeSuspiciousPatterns();
+                this.fakeNumbers = this.initializeFakeNumbers();
+                this.carrierMap = this.initializeCarrierMap();
+                this.blockedNumbers = this.initializeBlockedNumbers();
+            }
+
+            initializeSuspiciousPatterns() {
+                return [
+                    // Repeated digits
                     /(\d)\1{7,}/, // 8 or more repeated digits
-                            
-                    // Sequential digits
-                    /0123456789|1234567890|2345678901/,
-                    /9876543210|8765432109|7654321098/,
-                            
+                    /(\d)\1{6,}/, // 7 or more repeated digits
+                    
+                    // Sequential digits (forward and reverse)
+                    /0123456789|1234567890|2345678901|3456789012|4567890123/,
+                    /9876543210|8765432109|7654321098|6543210987|5432109876/,
+                    
                     // All same digit
                     /^(\d)\1+$/,
-                            
-                    // Common fake/test numbers
-                    /^555\d+$/, /^999\d+$/, /^000\d+$/, /^111\d+$/,
-                    /^123456\d*$/, /^654321\d*$/, /^111111\d*$/, /^000000\d*$/,
-                            
-                    // Kenyan specific - all same digit after prefix
-                    /^(07|01)(\d)\2{7}$/
+                    
+                    // Common fake/test patterns
+                    /^555\d+$/, /^999\d+$/, /^000\d+$/, /^111\d+$/, /^222\d+$/, /^333\d+$/, /^444\d+$/, /^666\d+$/, /^777\d+$/, /^888\d+$/,
+                    /^123456\d*$/, /^654321\d*$/, /^111111\d*$/, /^000000\d*$/, /^222222\d*$/, /^333333\d*$/, /^444444\d*$/, /^555555\d*$/, /^666666\d*$/, /^777777\d*$/, /^888888\d*$/, /^999999\d*$/,
+                    
+                    // Kenyan specific patterns
+                    /^(07|01)(\d)\2{7}$/, // All same digit after prefix
+                    /^(07|01)123456\d{2}$/, /^(07|01)654321\d{2}$/,
+                    
+                    // Repeated pairs
+                    /^(07|01)(\d\d)\2\2\2$/,
+                    
+                    // Incremental patterns
+                    /^(07|01)(\d)\3{0,1}(\d)\4{0,1}(\d)\5{0,1}(\d)\6{0,1}$/
+                ];
+            }
+
+            initializeFakeNumbers() {
+                const prefixes = ['07', '01'];
+                const fakePatterns = [
+                    '88888888', '77777777', '66666666', '55555555', '44444444', '33333333', '22222222', '11111111',
+                    '00000000', '99999999', '12345678', '76543210', '01234567', '98765432', '11223344', '22334455',
+                    '11112222', '22223333', '33334444', '44445555', '55556666', '66667777', '77778888', '88889999',
+                    '12121212', '23232323', '34343434', '45454545', '56565656', '67676767', '78787878', '89898989',
+                    '10101010', '20202020', '30303030', '40404040', '50505050', '60606060', '70707070', '80808080', '90909090'
                 ];
 
-                this.fakeNumbers = [
-                    // 07 fake numbers
-                    '0788888888', '0777777777', '0766666666', '0755555555',
-                    '0744444444', '0733333333', '0722222222', '0711111111',
-                    '0700000000', '0799999999', '0712345678', '0776543210',
-                    '0701234567', '0798765432', '0711223344', '0722334455',
+                return prefixes.flatMap(prefix => 
+                    fakePatterns.map(pattern => prefix + pattern)
+                );
+            }
 
-                    // 01 fake numbers
-                    '0188888888', '0177777777', '0166666666', '0155555555',
-                    '0144444444', '0133333333', '0122222222', '0111111111',
-                    '0100000000', '0199999999', '0112345678', '0176543210',
-                    '0101234567', '0198765432', '0111223344', '0122334455'
+            initializeBlockedNumbers() {
+                return [
+                    '0700000000', '0711111111', '0722222222', '0733333333', '0744444444',
+                    '0755555555', '0766666666', '0777777777', '0788888888', '0799999999',
+                    '0100000000', '0111111111', '0122222222', '0133333333', '0144444444',
+                    '0155555555', '0166666666', '0177777777', '0188888888', '0199999999',
+                    '0712345678', '0776543210', '0701234567', '0798765432'
                 ];
+            }
 
-                this.validPrefixes = ['07', '01'];
+            initializeCarrierMap() {
+                return {
+                    '70': 'Safaricom', '71': 'Safaricom', '72': 'Safaricom', 
+                    '73': 'Safaricom', '74': 'Safaricom', '79': 'Safaricom',
+                    '75': 'Airtel', '76': 'Airtel', 
+                    '77': 'Telkom', '78': 'Airtel',
+                    '10': 'Safaricom (01)', '11': 'Safaricom (01)', '12': 'Safaricom (01)',
+                    '13': 'Safaricom (01)', '14': 'Safaricom (01)', '15': 'Safaricom (01)',
+                    '16': 'Safaricom (01)', '17': 'Safaricom (01)', '18': 'Safaricom (01)',
+                    '19': 'Safaricom (01)'
+                };
             }
 
             validate(mobile) {
-                const cleanMobile = mobile.replace(/\D/g, '');
-
+                const cleanMobile = this.cleanNumber(mobile);
+                
                 // Basic validation
-                if (cleanMobile.length !== 10) {
-                    return { valid: false, reason: 'Mobile number must be exactly 10 digits' };
-                }
+                const basicValidation = this.validateBasic(cleanMobile);
+                if (!basicValidation.valid) return basicValidation;
 
-                // Check if starts with valid prefix
-                const prefix = cleanMobile.substring(0, 2);
-                if (!this.validPrefixes.includes(prefix)) {
-                    return { valid: false, reason: 'Kenyan mobile numbers must start with 07 or 01' };
+                // Check prefix
+                const prefixValidation = this.validatePrefix(cleanMobile);
+                if (!prefixValidation.valid) return prefixValidation;
+
+                // Check if number is blocked
+                if (this.isBlocked(cleanMobile)) {
+                    return { 
+                        valid: false, 
+                        reason: 'This mobile number is not allowed' 
+                    };
                 }
 
                 // Check for suspicious patterns
                 if (this.isSuspicious(cleanMobile)) {
-                    return { valid: false, reason: 'Suspicious number pattern detected' };
+                    return { 
+                        valid: false, 
+                        reason: 'Suspicious number pattern detected' 
+                    };
                 }
 
-                return { valid: true, number: cleanMobile, prefix: prefix };
+                return { 
+                    valid: true, 
+                    number: cleanMobile, 
+                    prefix: cleanMobile.substring(0, 2),
+                    formatted: this.getFormattedNumber(cleanMobile),
+                    carrier: this.getCarrierInfo(cleanMobile)
+                };
+            }
+
+            cleanNumber(mobile) {
+                return mobile.replace(/\D/g, '');
+            }
+
+            validateBasic(mobile) {
+                if (mobile.length !== 10) {
+                    return { 
+                        valid: false, 
+                        reason: 'Mobile number must be exactly 10 digits' 
+                    };
+                }
+
+                if (!/^\d+$/.test(mobile)) {
+                    return { 
+                        valid: false, 
+                        reason: 'Mobile number must contain only digits' 
+                    };
+                }
+
+                return { valid: true };
+            }
+
+            validatePrefix(mobile) {
+                const prefix = mobile.substring(0, 2);
+                if (!this.validPrefixes.includes(prefix)) {
+                    return { 
+                        valid: false, 
+                        reason: 'Kenyan mobile numbers must start with 07 or 01' 
+                    };
+                }
+                return { valid: true };
+            }
+
+            isBlocked(mobile) {
+                return this.blockedNumbers.includes(mobile);
             }
 
             isSuspicious(mobile) {
-                const cleanMobile = mobile.replace(/\D/g, '');
-
+                const cleanMobile = this.cleanNumber(mobile);
+                
                 // Check against known fake numbers
                 if (this.fakeNumbers.includes(cleanMobile)) {
                     return true;
                 }
 
                 // Check patterns
-                for (let pattern of this.suspiciousPatterns) {
-                    if (pattern.test(cleanMobile)) {
-                        return true;
-                    }
-                }
-
-                // Additional heuristic checks
-                if (this.hasRepeatedGroups(cleanMobile)) {
+                if (this.suspiciousPatterns.some(pattern => pattern.test(cleanMobile))) {
                     return true;
                 }
 
-                return false;
+                // Additional heuristic checks
+                return this.hasRepeatedGroups(cleanMobile) || 
+                       this.isSequential(cleanMobile);
             }
 
             hasRepeatedGroups(mobile) {
-                // Check for repeated digit groups (like 0722558844 or 0111223344)
-                const groups = mobile.match(/(\d)\1+/g);
+                const cleanMobile = this.cleanNumber(mobile);
+                const groups = cleanMobile.match(/(\d)\1+/g);
                 if (groups && groups.length >= 2) {
                     const totalRepeated = groups.reduce((sum, group) => sum + group.length, 0);
-                    return totalRepeated >= 6; // If 6+ digits are in repeated groups
+                    return totalRepeated >= 6;
                 }
                 return false;
             }
 
+            isSequential(mobile) {
+                const cleanMobile = this.cleanNumber(mobile);
+                const digits = cleanMobile.split('').map(Number);
+                
+                // Check for sequential increasing
+                let increasing = true;
+                for (let i = 2; i < digits.length - 1; i++) {
+                    if (digits[i] + 1 !== digits[i + 1]) {
+                        increasing = false;
+                        break;
+                    }
+                }
+                
+                // Check for sequential decreasing
+                let decreasing = true;
+                for (let i = 2; i < digits.length - 1; i++) {
+                    if (digits[i] - 1 !== digits[i + 1]) {
+                        decreasing = false;
+                        break;
+                    }
+                }
+                
+                return increasing || decreasing;
+            }
+
             getCarrierInfo(mobile) {
-                const cleanMobile = mobile.replace(/\D/g, '');
-                const prefix = cleanMobile.substring(0, 2);
-                const carrierPrefix = cleanMobile.substring(2, 4);
-
-                const carrierMap = {
-                    '70': 'Safaricom', '71': 'Safaricom', '72': 'Safaricom', 
-                    '73': 'Safaricom', '74': 'Safaricom',
-                    '75': 'Airtel', '76': 'Airtel', '79': 'Airtel',
-                    '77': 'Telkom',
-                    '78': 'Airtel',
-                    '10': 'Safaricom (01)', '11': 'Safaricom (01)', '12': 'Safaricom (01)',
-                    '13': 'Safaricom (01)', '14': 'Safaricom (01)', '15': 'Safaricom (01)',
-                    '16': 'Safaricom (01)', '17': 'Safaricom (01)', '18': 'Safaricom (01)',
-                    '19': 'Safaricom (01)'
-                };
-
-                return carrierMap[carrierPrefix] || 'Unknown Carrier';
+                const cleanMobile = this.cleanNumber(mobile);
+                const carrierPrefix = cleanMobile.substring(1, 3);
+                return this.carrierMap[carrierPrefix] || 'Unknown Carrier';
             }
 
             getValidationMessage(validation) {
                 const messages = {
                     'Mobile number must be exactly 10 digits': 'Please enter a 10-digit mobile number',
+                    'Mobile number must contain only digits': 'Please enter only digits',
                     'Kenyan mobile numbers must start with 07 or 01': 'Mobile number must start with 07 or 01',
-                    'Suspicious number pattern detected': 'This mobile number appears to be invalid or fake'
+                    'This mobile number is not allowed': 'This mobile number is not accepted',
+                    'Suspicious number pattern detected': 'This appears to be an invalid or fake number'
                 };
 
                 return messages[validation.reason] || validation.reason;
             }
 
-            // Helper method to check if number is 01 prefix
-            is01Prefix(mobile) {
-                const cleanMobile = mobile.replace(/\D/g, '');
-                return cleanMobile.startsWith('01');
+            getFormattedNumber(mobile) {
+                const cleanMobile = this.cleanNumber(mobile);
+                if (cleanMobile.length !== 10) return mobile;
+                
+                return `${cleanMobile.substring(0, 2)} ${cleanMobile.substring(2, 5)} ${cleanMobile.substring(5, 8)} ${cleanMobile.substring(8)}`;
             }
 
-            // Helper method to check if number is 07 prefix
-            is07Prefix(mobile) {
-                const cleanMobile = mobile.replace(/\D/g, '');
-                return cleanMobile.startsWith('07');
+            // Strict validation - no suspicious numbers allowed
+            validateStrict(mobile) {
+                const validation = this.validate(mobile);
+                if (!validation.valid) return validation;
+                
+                if (this.isSuspicious(validation.number)) {
+                    return { 
+                        valid: false, 
+                        reason: 'Suspicious number pattern detected' 
+                    };
+                }
+                
+                return validation;
             }
         }
 
         // Initialize validator
         const mobileValidator = new MobileValidator();
 
-        // Enhanced mobile input validation
-        function setupMobileValidation() {
-            const mobileInputs = document.querySelectorAll('input[type="tel"]');
-
-            mobileInputs.forEach(input => {
-                // Real-time validation
-                input.addEventListener('blur', function() {
-                    validateMobileInput(this);
-                });
-
-                // Format input
-                input.addEventListener('input', function() {
-                    formatMobileInput(this);
-                });
-
-                // Clear validation on focus
-                input.addEventListener('focus', function() {
-                    clearMobileValidation(this);
-                });
-            });
-        }
-
-        function formatMobileInput(input) {
-            let value = input.value.replace(/\D/g, '');
-
-            // Limit to 10 digits
-            if (value.length > 10) {
-                value = value.substring(0, 10);
-            }
-
-            // Auto-format as user types
-            if (value.length > 2) {
-                value = value.substring(0, 2) + ' ' + value.substring(2);
-            }
-            if (value.length > 5) {
-                value = value.substring(0, 5) + ' ' + value.substring(5);
-            }
-            if (value.length > 8) {
-                value = value.substring(0, 8) + ' ' + value.substring(8);
-            }
-
-            input.value = value;
-        }
-
-        function clearMobileValidation(input) {
-            // Remove validation styles
-            input.classList.remove('border-green-500', 'border-yellow-500', 'border-red-500');
-            input.classList.remove('bg-green-50', 'bg-yellow-50', 'bg-red-50');
-
-            // Remove existing validation message
-            let existingMessage = input.parentNode.querySelector('.mobile-validation-message');
-            if (existingMessage) {
-                existingMessage.remove();
-            }
-        }
-
-        function validateMobileInput(input) {
-            const rawValue = input.value.replace(/\D/g, '');
-            const validation = mobileValidator.validate(rawValue);
-
-            clearMobileValidation(input);
-
-            if (!validation.valid) {
-                // Show error
-                input.classList.add('border-red-500', 'bg-red-50');
-                showMobileError(input, mobileValidator.getValidationMessage(validation));
-                return false;
-            } else if (mobileValidator.isSuspicious(rawValue)) {
-                // Show warning for suspicious but technically valid numbers
-                input.classList.add('border-yellow-500', 'bg-yellow-50');
-                const carrier = mobileValidator.getCarrierInfo(rawValue);
-                showMobileWarning(input, `This number appears unusual. Carrier: ${carrier}`);
-                return true;
-            } else {
-                // Show success with carrier info
-                input.classList.add('border-green-500', 'bg-green-50');
-                const carrier = mobileValidator.getCarrierInfo(rawValue);
-                const prefixType = mobileValidator.is01Prefix(rawValue) ? '01' : '07';
-                showMobileSuccess(input, `Valid ${prefixType} number • ${carrier}`);
-                return true;
-            }
-        }
-
-        function showMobileError(input, message) {
-            const errorDiv = document.createElement('div');
-            errorDiv.className = 'mobile-validation-message text-red-400 text-xs mt-1 flex items-center';
-            errorDiv.innerHTML = `<i class="fas fa-exclamation-circle mr-1"></i> ${message}`;
-            input.parentNode.appendChild(errorDiv);
-        }
-
-        function showMobileWarning(input, message) {
-            const warningDiv = document.createElement('div');
-            warningDiv.className = 'mobile-validation-message text-yellow-400 text-xs mt-1 flex items-center';
-            warningDiv.innerHTML = `<i class="fas fa-exclamation-triangle mr-1"></i> ${message}`;
-            input.parentNode.appendChild(warningDiv);
-        }
-
-        function showMobileSuccess(input, message) {
-            const successDiv = document.createElement('div');
-            successDiv.className = 'mobile-validation-message text-green-400 text-xs mt-1 flex items-center';
-            successDiv.innerHTML = `<i class="fas fa-check-circle mr-1"></i> ${message}`;
-            input.parentNode.appendChild(successDiv);
-        }
-
-        // Enhanced form submission validation
-        function validateFormMobile(mobileInput) {
-            const rawValue = mobileInput.value.replace(/\D/g, '');
-            const validation = mobileValidator.validate(rawValue);
-
-            if (!validation.valid) {
-                showToast(mobileValidator.getValidationMessage(validation), 'error', 'Invalid Mobile Number');
-                mobileInput.focus();
-                return false;
-            }
-
-            if (mobileValidator.isSuspicious(rawValue)) {
-                const carrier = mobileValidator.getCarrierInfo(rawValue);
-                const confirm = window.confirm(
-                    `WARNING: This mobile number appears to be invalid or fake.\n\n` +
-                    `Number: ${mobileInput.value}\n` +
-                    `Carrier: ${carrier}\n\n` +
-                    `Are you sure this is your correct number?\n\n` +
-                    `Using fake numbers may result in account suspension.`
-                );
-                if (!confirm) {
-                    mobileInput.focus();
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
+        // Toast Manager
         class ToastManager {
             constructor() {
                 this.container = document.getElementById('toast-container');
@@ -1074,7 +1095,6 @@
                     }
                 }, 100);
                 
-                // Auto close
                 setTimeout(() => {
                     this.close(toast);
                 }, duration);
@@ -1095,10 +1115,6 @@
                     this.toasts.delete(toast);
                 }, 400);
             }
-            
-            closeAll() {
-                this.toasts.forEach(toast => this.close(toast));
-            }
         }
         
         const toastManager = new ToastManager();
@@ -1114,75 +1130,264 @@
             return toastManager.show(title || titles[type], message, type);
         }
 
-        function goToHome() {
-            window.location.href = '/';
+        // Mobile input formatting and validation
+        function setupMobileValidation() {
+            const mobileInputs = document.querySelectorAll('input[type="tel"]');
+
+            mobileInputs.forEach(input => {
+                input.addEventListener('input', function() {
+                    formatMobileInput(this);
+                    validateMobileInputRealTime(this);
+                });
+
+                input.addEventListener('blur', function() {
+                    validateMobileInputRealTime(this);
+                });
+
+                input.addEventListener('focus', function() {
+                    clearMobileValidation(this);
+                });
+            });
         }
 
-        // Tab management
-        function openTab(tabName) {
+        function formatMobileInput(input) {
+            let value = input.value.replace(/\D/g, '');
             
-            document.querySelectorAll('.tab-content').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            
-            document.querySelectorAll('.tab-button').forEach(button => {
-                button.classList.remove('active');
-            });
-            
-            const tabElement = document.getElementById(tabName);
-            if (tabElement) {
-                tabElement.classList.add('active');
-                //console.log('Tab element found and activated');
-            } else {
-                //console.error('Tab element not found:', tabName);
+            if (value.length > 10) {
+                value = value.substring(0, 10);
             }
             
-            document.querySelectorAll('.tab-button').forEach(button => {
-                if (button.getAttribute('data-tab') === tabName) {
-                    button.classList.add('active');
+            let formattedValue = '';
+            for (let i = 0; i < value.length; i++) {
+                if (i === 2 || i === 5 || i === 8) {
+                    formattedValue += ' ';
                 }
-            });
+                formattedValue += value[i];
+            }
             
-            if (tabName === 'student-tab') {
-                showToast('Switched to student login', 'info');
-            } else if (tabName === 'admin-tab') {
-                showToast('Switched to admin access', 'info');
+            input.value = formattedValue.trim();
+        }
+
+        function clearMobileValidation(input) {
+            input.classList.remove('valid', 'warning', 'error');
+            
+            let existingMessage = input.parentNode.querySelector('.mobile-validation-message');
+            if (existingMessage) {
+                existingMessage.remove();
             }
         }
 
-        function openSubTab(subTabName) {
-            //console.log('Opening subtab:', subTabName);
+        function validateMobileInputRealTime(input) {
+            const rawValue = input.value.replace(/\D/g, '');
+            const validation = mobileValidator.validateStrict(rawValue);
             
-            document.querySelectorAll('.subtab-content').forEach(tab => {
-                tab.classList.remove('active');
-            });
+            clearMobileValidation(input);
             
-            document.querySelectorAll('.subtab-button').forEach(button => {
-                button.classList.remove('active');
-            });
-            
-            const subtabElement = document.getElementById(subTabName);
-            if (subtabElement) {
-                subtabElement.classList.add('active');
-                //console.log('Subtab element found and activated');
+            if (!validation.valid) {
+                input.classList.add('error');
+                showMobileError(input, mobileValidator.getValidationMessage(validation));
+                return false;
             } else {
-                //console.error('Subtab element not found:', subTabName);
+                input.classList.add('valid');
+                const carrier = mobileValidator.getCarrierInfo(rawValue);
+                showMobileSuccess(input, `✓ Valid • ${carrier}`);
+                return true;
+            }
+        }
+
+        function showMobileError(input, message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'mobile-validation-message text-red-400 text-xs mt-1 flex items-center';
+            errorDiv.innerHTML = `<i class="fas fa-exclamation-circle mr-1"></i> ${message}`;
+            input.parentNode.appendChild(errorDiv);
+        }
+
+        function showMobileSuccess(input, message) {
+            const successDiv = document.createElement('div');
+            successDiv.className = 'mobile-validation-message text-green-400 text-xs mt-1 flex items-center';
+            successDiv.innerHTML = `<i class="fas fa-check-circle mr-1"></i> ${message}`;
+            input.parentNode.appendChild(successDiv);
+        }
+
+        // FORM VALIDATION FUNCTIONS - ACTUAL SUBMISSION
+        function validateStudentForm(event) {
+            const mobile = document.getElementById('mobile').value;
+            const username = document.getElementById('username').value;
+            const loginButton = document.getElementById('login-student');
+            
+            if (!username.trim()) {
+                event.preventDefault();
+                showToast('Please enter a username', 'error', 'Validation Error');
+                return false;
             }
             
-            document.querySelectorAll('.subtab-button').forEach(button => {
-                if (button.getAttribute('data-subtab') === subTabName) {
-                    button.classList.add('active');
-                }
-            });
+            const rawMobile = mobile.replace(/\D/g, '');
+            const validation = mobileValidator.validateStrict(rawMobile);
+            
+            if (!validation.valid) {
+                event.preventDefault();
+                showToast(mobileValidator.getValidationMessage(validation), 'error', 'Invalid Mobile Number');
+                document.getElementById('mobile').focus();
+                return false;
+            }
+            
+            // Update the mobile field with clean number before submission
+            document.getElementById('mobile').value = rawMobile;
+            
+            // Final confirmation
+            const confirmMobile = confirm(`Is this your mobile number? ${validation.formatted}. By continuing, you agree to our terms and conditions.`);
+            if (!confirmMobile) {
+                event.preventDefault();
+                return false;
+            }
+            
+            loginButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in...';
+            loginButton.disabled = true;
+            
+            showToast('Logging in...', 'info', 'Please Wait');
+            
+            // Allow the form to submit normally to the backend
+            return true;
         }
 
-        function openRegisterAdminModal() {
-            document.getElementById('register-admin-modal').style.display = 'flex';
-            showToast('Opening admin registration', 'info');
+        function validateAdminForm(event) {
+            const mobile = document.getElementById('admin-mobile').value;
+            const username = document.getElementById('admin-username').value;
+            const loginButton = document.getElementById('admin-login-btn');
+            
+            if (!username.trim()) {
+                event.preventDefault();
+                showToast('Please enter a username', 'error', 'Validation Error');
+                return false;
+            }
+            
+            const rawMobile = mobile.replace(/\D/g, '');
+            const validation = mobileValidator.validateStrict(rawMobile);
+            
+            if (!validation.valid) {
+                event.preventDefault();
+                showToast(mobileValidator.getValidationMessage(validation), 'error', 'Invalid Mobile Number');
+                document.getElementById('admin-mobile').focus();
+                return false;
+            }
+            
+            // Update the mobile field with clean number before submission
+            document.getElementById('admin-mobile').value = rawMobile;
+            
+            loginButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Authenticating...';
+            loginButton.disabled = true;
+            
+            showToast('Authenticating admin access...', 'info', 'Please Wait');
+            
+            // Allow the form to submit normally to the backend
+            return true;
         }
 
-        function closeModal(modalId) {
-            document.getElementById(modalId).style.display = 'none';
+        function validateMasterKeyForm(event) {
+            const mobile = document.getElementById('master-key-mobile').value;
+            const username = document.getElementById('master-key-username').value;
+            const masterKey = document.getElementById('master-key-input').value;
+            const loginButton = document.getElementById('master-key-btn');
+            
+            if (!username.trim()) {
+                event.preventDefault();
+                showToast('Please enter a username', 'error', 'Validation Error');
+                return false;
+            }
+            
+            if (!masterKey) {
+                event.preventDefault();
+                showToast('Please enter the master authorization key', 'error', 'Validation Error');
+                return false;
+            }
+            
+            const rawMobile = mobile.replace(/\D/g, '');
+            const validation = mobileValidator.validateStrict(rawMobile);
+            
+            if (!validation.valid) {
+                event.preventDefault();
+                showToast(mobileValidator.getValidationMessage(validation), 'error', 'Invalid Mobile Number');
+                document.getElementById('master-key-mobile').focus();
+                return false;
+            }
+            
+            // Update the mobile field with clean number before submission
+            document.getElementById('master-key-mobile').value = rawMobile;
+            
+            loginButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+            loginButton.disabled = true;
+            
+            showToast('Processing master key access...', 'info', 'Please Wait');
+            
+            // Allow the form to submit normally to the backend
+            return true;
+        }
+
+        function validateRegisterAdminForm(event) {
+            event.preventDefault();
+            
+            const mobile = document.getElementById('new-admin-mobile').value;
+            const username = document.getElementById('new-admin-username').value;
+            const masterKey = document.getElementById('register-master-key').value;
+            const submitButton = document.getElementById('register-admin-submit-btn');
+            
+            if (!username.trim()) {
+                showToast('Please enter a username', 'error', 'Validation Error');
+                return false;
+            }
+            
+            if (!masterKey) {
+                showToast('Please enter the master authorization key', 'error', 'Validation Error');
+                return false;
+            }
+            
+            const rawMobile = mobile.replace(/\D/g, '');
+            const validation = mobileValidator.validateStrict(rawMobile);
+            
+            if (!validation.valid) {
+                showToast(mobileValidator.getValidationMessage(validation), 'error', 'Invalid Mobile Number');
+                document.getElementById('new-admin-mobile').focus();
+                return false;
+            }
+            
+            const formData = {
+                mobile: rawMobile,
+                username: username,
+                master_key: masterKey
+            };
+            
+            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Registering...';
+            submitButton.disabled = true;
+            
+            registerAdmin(formData)
+                .then(result => {
+                    showToast('Admin account created successfully! You can now login.', 'success');
+                    closeModal('register-admin-modal');
+                    
+                    openTab('admin-tab');
+                    document.getElementById('admin-mobile').value = rawMobile;
+                    document.getElementById('admin-username').value = username;
+                })
+                .catch(error => {
+                    promoteToAdmin(formData)
+                        .then(result => {
+                            showToast('User promoted to admin successfully! You can now login.', 'success');
+                            closeModal('register-admin-modal');
+                            
+                            openTab('admin-tab');
+                            document.getElementById('admin-mobile').value = rawMobile;
+                            document.getElementById('admin-username').value = username;
+                        })
+                        .catch(promoteError => {
+                            showToast(promoteError.message || 'Admin registration failed', 'error', 'Registration Failed');
+                        });
+                })
+                .finally(() => {
+                    submitButton.innerHTML = '<i class="fas fa-user-shield mr-2"></i> Register Admin';
+                    submitButton.disabled = false;
+                });
+            
+            return false;
         }
 
         async function registerAdmin(formData) {
@@ -1203,12 +1408,10 @@
                 
                 return data;
             } catch (error) {
-                //console.error('Error registering admin:', error);
                 throw error;
             }
         }
 
-        // Promote existing user to admin --> Requested by Class Rep
         async function promoteToAdmin(formData) {
             try {
                 const response = await fetch(ENDPOINTS.PROMOTE_TO_ADMIN, {
@@ -1227,32 +1430,66 @@
                 
                 return data;
             } catch (error) {
-                //console.error('Error promoting to admin:', error);
                 throw error;
             }
         }
 
-        async function checkAdmin(mobile) {
-            try {
-                const response = await fetch(ENDPOINTS.CHECK_ADMIN, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ mobile })
-                });
-                
-                const data = await response.json();
-                return data;
-            } catch (error) {
-                //console.error('Error checking admin status:', error);
-                return { is_admin: false };
-            }
+        function goToHome() {
+            window.location.href = '/';
         }
 
-        document.addEventListener('DOMContentLoaded', function() {
-            //console.log('DOM loaded, initializing page...');
+        function openTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
             
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.classList.remove('active');
+            });
+            
+            const tabElement = document.getElementById(tabName);
+            if (tabElement) {
+                tabElement.classList.add('active');
+            }
+            
+            document.querySelectorAll('.tab-button').forEach(button => {
+                if (button.getAttribute('data-tab') === tabName) {
+                    button.classList.add('active');
+                }
+            });
+        }
+
+        function openSubTab(subTabName) {
+            document.querySelectorAll('.subtab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            document.querySelectorAll('.subtab-button').forEach(button => {
+                button.classList.remove('active');
+            });
+            
+            const subtabElement = document.getElementById(subTabName);
+            if (subtabElement) {
+                subtabElement.classList.add('active');
+            }
+            
+            document.querySelectorAll('.subtab-button').forEach(button => {
+                if (button.getAttribute('data-subtab') === subTabName) {
+                    button.classList.add('active');
+                }
+            });
+        }
+
+        function openRegisterAdminModal() {
+            document.getElementById('register-admin-modal').style.display = 'flex';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        // Initialize everything when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
                     {% for category, message in messages %}
@@ -1261,14 +1498,7 @@
                 {% endif %}
             {% endwith %}
             
-            const mobileInputs = document.querySelectorAll('input[type="tel"]');
-            mobileInputs.forEach(input => {
-                input.addEventListener('input', function() {
-                    this.value = this.value.replace(/\D/g, '').slice(0, 10);
-                });
-            });
-            
-            // Tab button event listeners
+            // Tab management
             document.querySelectorAll('.tab-button').forEach(button => {
                 button.addEventListener('click', function() {
                     const tabName = this.getAttribute('data-tab');
@@ -1276,7 +1506,6 @@
                 });
             });
             
-            // Subtab button event listeners
             document.querySelectorAll('.subtab-button').forEach(button => {
                 button.addEventListener('click', function() {
                     const subTabName = this.getAttribute('data-subtab');
@@ -1302,152 +1531,12 @@
                 }
             });
             
-            // Student Form submit handlers
-            document.getElementById('student-login-form').addEventListener('submit', function(e) {
-                const mobile = document.getElementById('mobile').value;
-                const username = document.getElementById('username').value;
-                const loginButton = document.getElementById('login-student');
-            
-                loginButton.innerHTML = '<i class="fas fa-sign-in-alt mr-2"></i> Login as Student';
-                loginButton.disabled = false;
-            
-                if (!validateFormMobile(mobile)) {
-                    e.preventDefault();
-                    return;
-                }
-            
-                if (!username.trim()) {
-                    e.preventDefault();
-                    showToast('Please enter a username', 'error', 'Validation Error');
-                    return;
-                }
-            
-                // Confirm mobile number --> Requested by Manuu
-                const confirmMobile = confirm(`Is this your mobile number? ${mobile}. By continuing, you agree to our terms and conditions.`);
-                if (!confirmMobile) {
-                    e.preventDefault();
-                    return;
-                }
-            
-                loginButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span> Logging in...</span>';
-                loginButton.disabled = true;
-            
-                setTimeout(() => {
-                    loginButton.innerHTML = '<i class="fas fa-sign-in-alt mr-2"></i> Login as Student';
-                    loginButton.disabled = false;
-                }, 3000);
-            
-                showToast('Logging in...', 'info', 'Please Wait');
-            });
-
-            document.getElementById('admin-login-form').addEventListener('submit', function(e) {
-                const mobile = document.getElementById('admin-mobile').value;
-                const username = document.getElementById('admin-username').value;
-                
-                if (!validateFormMobile(mobile)) {
-                    e.preventDefault();
-                    return;
-                }
-                
-                if (!username.trim()) {
-                    e.preventDefault();
-                    showToast('Please enter a username', 'error', 'Validation Error');
-                    return;
-                }
-                
-                showToast('Authenticating admin access...', 'info', 'Please Wait');
-            });
-
-            document.getElementById('master-key-form').addEventListener('submit', function(e) {
-                const mobile = document.getElementById('master-key-mobile').value;
-                const username = document.getElementById('master-key-username').value;
-                const masterKey = document.getElementById('master-key-input').value;
-                
-                if (!validateFormMobile(mobile)) {
-                    e.preventDefault();
-                    return;
-                }
-                
-                if (!username.trim()) {
-                    e.preventDefault();
-                    showToast('Please enter a username', 'error', 'Validation Error');
-                    return;
-                }
-                
-                if (!masterKey) {
-                    e.preventDefault();
-                    showToast('Please enter the master authorization key', 'error', 'Validation Error');
-                    return;
-                }
-                
-                showToast('Processing master key access...', 'info', 'Please Wait');
-            });
-
-            document.getElementById('register-admin-form').addEventListener('submit', async function(e) {
-                e.preventDefault();
-                
-                const mobile = document.getElementById('new-admin-mobile').value;
-                const username = document.getElementById('new-admin-username').value;
-                const masterKey = document.getElementById('register-master-key').value;
-                
-                if (!validateFormMobile(mobile)) {
-                    return;
-                }
-                
-                if (!username.trim()) {
-                    showToast('Please enter a username', 'error', 'Validation Error');
-                    return;
-                }
-                
-                if (!masterKey) {
-                    showToast('Please enter the master authorization key', 'error', 'Validation Error');
-                    return;
-                }
-                
-                const formData = {
-                    mobile: mobile,
-                    username: username,
-                    master_key: masterKey
-                };
-                
-                // Show loading toast
-                const toast = showToast('Processing admin registration...', 'info', 'Please Wait');
-                
-                try {
-                    const result = await registerAdmin(formData);
-                    toastManager.close(toast);
-                    showToast('Admin account created successfully! You can now login.', 'success');
-                    closeModal('register-admin-modal');
-                    
-                    openTab('admin-tab');
-                    document.getElementById('admin-mobile').value = mobile;
-                    document.getElementById('admin-username').value = username;
-                } catch (error) {
-                    try {
-                        const result = await promoteToAdmin(formData);
-                        toastManager.close(toast);
-                        showToast('User promoted to admin successfully! You can now login.', 'success');
-                        closeModal('register-admin-modal');
-                        
-                        openTab('admin-tab');
-                        document.getElementById('admin-mobile').value = mobile;
-                        document.getElementById('admin-username').value = username;
-                    } catch (promoteError) {
-                        toastManager.close(toast);
-                        showToast(promoteError.message || 'Admin registration failed', 'error', 'Registration Failed');
-                    }
-                }
-            });
+            // Setup mobile validation
+            setupMobileValidation();
             
             setTimeout(() => {
-                showToast('Please enter credentials and click login to continue.', 'info', 'Welcome');
+                showToast('Please enter valid credentials to continue', 'info', 'Welcome to LyxNexus');
             }, 1000);
-            
-            //console.log('Page initialization complete');
-        });
-        
-        document.addEventListener('DOMContentLoaded', function() {
-            setupMobileValidation(); // Enables real-time validation on all mobile inputs
         });
     </script>    
 </body>

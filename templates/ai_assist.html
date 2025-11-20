@@ -1222,9 +1222,9 @@
         // Initialize KaTeX when DOM is loaded
         function initKaTeX() {
             if (typeof renderMathInElement !== 'undefined') {
-                console.log('KaTeX auto-render is available');
+                
             } else {
-                console.warn('KaTeX auto-render not available, retrying...');
+                
                 // Try to load KaTeX auto-render if not available
                 setTimeout(() => {
                     if (typeof renderMathInElement !== 'undefined') {
@@ -1251,7 +1251,6 @@
                     showError('Failed to load chat data');
                 }
             } catch (error) {
-                console.error('Error initializing app:', error);
                 showError('Failed to connect to server');
             }
         }

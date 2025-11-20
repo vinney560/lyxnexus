@@ -672,30 +672,18 @@
                         <i class="fas fa-tachometer-alt w-5"></i>
                         <span>Dashboard</span>
                     </div>
-                    <div class="sidebar-item">
-                        <i class="fas fa-chart-bar w-5"></i>
-                        <span>Analytics</span>
-                    </div>
                     <div class="sidebar-item" onclick="window.location.href='/main-page'">
                         <i class="fas fa-home w-5"></i>
                         <span>Main Page</span>
                     </div>
-                    <div class="sidebar-item" onclick="window.location.href='/main-page'">
-                        <i class="fas fa-bullhorn w-5"></i>
-                        <span>Announcements</span>
-                    </div>
-                    <div class="sidebar-item" onclick="window.location.href='/main-page'">
-                        <i class="fas fa-tasks w-5"></i>
-                        <span>Assignments</span>
-                    </div>
                 </div>
                 
                 <div class="mt-10 px-6">
-                    <h3 class="text-xs uppercase text-gray-500 font-semibold mb-3">Tools</h3>
+                    <h3 class="text-xs uppercase text-gray-500 font-semibold mb-3">Tools Used</h3>
                     <div class="space-y-2">
                         <div class="sidebar-item">
                             <i class="fas fa-chart-line w-5"></i>
-                            <span>Reports</span>
+                            <span>Reports & Analytics</span>
                         </div>
                         <div class="sidebar-item">
                             <i class="fas fa-database w-5"></i>
@@ -709,7 +697,7 @@
                         <div class="user-avatar w-10 h-10 text-sm" id="sidebar-user-avatar">LN</div>
                         <div class="flex-1 min-w-0">
                             <p class="text-sm font-medium truncate" id="sidebar-username">Loading...</p>
-                            <p class="text-xs text-gray-400 truncate" id="sidebar-role">Student</p>
+                            <p class="text-xs text-gray-400"> Admin: <span class="text-xs text-red-400 truncate" id="profile-admin">--</span></p>
                         </div>
                         <button class="text-gray-400 hover:text-white transition-colors" onclick="window.location.href='/logout'">
                             <i class="fas fa-sign-out-alt"></i>
@@ -831,6 +819,32 @@
                             </div>
                             <div class="p-3 bg-green-500/20 rounded-xl">
                                 <i class="fas fa-bolt text-green-400 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card border-l-pink-500 card-hover-lift fade-in" style="animation-delay: 0.4s">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <div class="stat-number count-up" id="available-files">0</div>
+                                <div class="stat-label">Available Files</div>
+                                <div class="stat-trend trend-up" id="if-enough-files">↑ Loading...</div>
+                            </div>
+                            <div class="p-3 bg-cyan-500/20 rounded-xl">
+                                <i class="fas fa-cloud-upload-alt text-yellow-400 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card border-l-pink-200 card-hover-lift fade-in" style="animation-delay: 0.4s">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <div class="stat-number count-up" id="all-students">0</div>
+                                <div class="stat-label">Total Students</div>
+                                <div class="stat-trend trend-up" id="students-trend">↑ Loading...</div>
+                            </div>
+                            <div class="p-3 bg-blue-500/20 rounded-xl">
+                                <i class="fas fa-users text-white text-xl"></i>
                             </div>
                         </div>
                     </div>
@@ -962,8 +976,6 @@
                 }
                 const userData = await userResponse.json();
                 
-                console.log('User Data:', userData);
-                
                 // Update user profile information
                 updateUserProfile(userData._data);
                 
@@ -973,8 +985,6 @@
                     throw new Error(`HTTP error! status: ${activityResponse.status}`);
                 }
                 const activityData = await activityResponse.json();
-                
-                console.log('Activity Data:', activityData);
                 
                 // Update activity information
                 updateActivity(activityData);
@@ -1040,6 +1050,14 @@
             
             // Update trends
             document.getElementById('status-trend').textContent = user.status ? '↑ All systems go' : '↑ Account inactive';
+
+            //Update Available files
+            document.getElementById('available-files').textContent = user.available_files;
+            document.getElementById('if-enough-files').textContent = user.available_files >= 80 ? '↑ Enough' : '⬇ Less';
+
+            // Update Students 
+            document.getElementById('all-students').textContent = user.all_students;
+            document.getElementById('students-trend').textContent = user.all_students >= 200 ? '↑ Many' : '⬇ Few';
         }
         
         function updateActivity(activityData) {

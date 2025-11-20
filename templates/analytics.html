@@ -632,7 +632,14 @@
             <div class="flex flex-col md:flex-row justify-between items-center">
                 <div class="flex items-center space-x-3 mb-4 md:mb-0 slide-in-left">
                     <div class="logo-container bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl p-2 glow">
-                        <i class="fas fa-chart-line text-white text-xl"></i>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                            <polyline points="7.5 4.21 12 6.81 16.5 4.21"></polyline>
+                            <polyline points="7.5 19.79 7.5 14.6 3 12"></polyline>
+                            <polyline points="21 12 16.5 14.6 16.5 19.79"></polyline>
+                            <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                            <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                        </svg>
                     </div>
                     <div>
                         <h1 class="text-2xl font-bold gradient-text">Analytics Dashboard</h1>
@@ -759,7 +766,7 @@
             <!-- Recent Activity Feed -->
             <div class="chart-container lg:col-span-2 card-hover-lift fade-in" style="animation-delay: 0.7s">
                 <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xl font-bold text-shimmer">Recent User Activity</h3>
+                    <h3 class="text-xl font-bold text-shimmer">Recent Activity</h3>
                     <span class="text-sm text-gray-400" id="activity-count">0 activities</span>
                 </div>
                 <div class="activity-feed" id="activity-feed">
@@ -927,8 +934,6 @@
                 }
                 const data = await response.json();
                 
-                console.log('Analytics Data:', data); // Debug log
-                
                 // Update current range display
                 updateRangeDisplay(range);
                 
@@ -942,7 +947,6 @@
                 document.getElementById('last-updated').textContent = new Date().toLocaleTimeString();
                 
             } catch (error) {
-                console.error('Failed to load analytics:', error);
                 showErrorStates();
             } finally {
                 hideLoadingStates();
@@ -1040,7 +1044,6 @@
             let labels = [];
             
             if (data.visits_per_time && data.visits_per_time.length > 0) {
-                console.log('Raw visits per time:', data.visits_per_time);
                 
                 if (range === '24h') {
                     // Create a map for 24 hours
@@ -1078,8 +1081,6 @@
                     });
                 }
             }
-            
-            console.log('Processed visits data:', visitsData, labels);
             
             visitsChart = new Chart(visitsCtx, {
                 type: range === '24h' ? 'line' : 'bar',
@@ -1165,8 +1166,6 @@
             if (sectionsChart) sectionsChart.destroy();
             
             const sectionsData = data.section_stats || [];
-            
-            console.log('Section stats:', sectionsData);
             
             // Format section names and ensure we have data
             const formattedSections = sectionsData.map(s => {

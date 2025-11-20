@@ -1439,15 +1439,13 @@
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             window.Userstatus = {{ current_user.status|tojson }};
-            console.log("Userstatus initialized:", window.Userstatus);
         });
     </script>
     <script>
         function formatMath(text) {
             try {
-                // Use a span to wrap the LaTeX
                 const container = document.createElement("span");
-                container.innerHTML = text; // raw LaTeX goes here
+                container.innerHTML = text;
             
                 renderMathInElement(container, {
                     delimiters: [
@@ -1461,7 +1459,6 @@
             
                 return container.innerHTML;
             } catch (err) {
-                console.error("KaTeX render error:", err);
                 return text; // fallback
             }
         }
@@ -1469,7 +1466,7 @@
 
     <script>
         window.currentUserId = {{ current_user.id }};
-        console.log('User ID:', window.currentUserId);
+        
         const API_BASE = '/api';
         const ENDPOINTS = {
             USER: `${API_BASE}/user`,
@@ -1609,20 +1606,24 @@
                     if (e.target.closest('a[href*="/files"]') || e.target.closest('#files')) {
                         this.trackActivity('file_download', e.target.href || 'unknown_file');
                     }
+
+                    if (e.target.closest('a[href*="/messages"]') || e.target.closest('#messages')) {
+                        this.trackActivity('Viewed_Message', e.target.href || 'Messages');
+                    }
                     
                     // Monitor Marion AI
-                    if (e.target.closest('button') && e.target.closest('button').textContent.includes('Marion AI Assistant')) {
-                        aiMonitor.captureAIAccess('Marion_AI');
+                    if (e.target.closest('a[href*="/gemini"]') || e.target.closest('#gemini')) {
+                        this.trackActivity('Marion_AI', e.target.href || 'Marion AI');
                     }
 
                     // Monitor Nova Quiz
-                    if (e.target.closest('button') && e.target.closest('button').textContent.includes('Nova Quiz Generator')) {
-                        aiMonitor.captureAIAccess('Nova_Quiz');
+                    if (e.target.closest('a[href*="/quiz"]') || e.target.closest('#marion')) {
+                        this.trackActivity('Quiz_AI', e.target.href || 'Nova AI');
                     }
 
                     // Monitor Assignment Doer
-                    if (e.target.closest('button') && e.target.closest('button').textContent.includes('Assignment Doer')) {
-                        aiMonitor.captureAIAccess('Assignment_Doer');
+                    if (e.target.closest('a[href*="/math"]') || e.target.closest('#math')) {
+                        this.trackActivity('Doer_AI', e.target.href || 'DOER AI');
                     }
 
                     // Monitor Tutor AI
@@ -1680,10 +1681,7 @@
                     // Get user status from your global variable
                     const userStatus = this.getUserStatus();
 
-                    console.log("Checking user status:", userStatus);
-
                     if (userStatus === false) {
-                        console.log("User is banned, showing overlay");
                         this.show();
 
                         // Track this event
@@ -1692,7 +1690,6 @@
                         }
                     }
                 } catch (error) {
-                    console.error("Error checking user status:", error);
                 }
             }
 
@@ -1951,7 +1948,6 @@
             const hasContentSections = document.querySelector('.content-section') !== null;
 
             if (!hasContentSections) {
-                console.log('Not on main page, skipping navigation setup');
                 return;
             }
 
@@ -1989,7 +1985,6 @@
 
             // Check if we're on the main page (has content sections)
             if (!sectionElement) {
-                console.log('Not on main page, skipping section activation');
                 return;
             }
 
@@ -2349,7 +2344,6 @@
             }
           }
       
-          // Toggle pin
           window.togglePin = function (id) {
             if (pinnedIds.includes(id)) {
               pinnedIds = pinnedIds.filter((x) => x !== id);
@@ -2648,11 +2642,11 @@
                     loadAssignments(true);
                 }, 5 * 60 * 1000);
                 
-                // SUPER HEAVY refresh ---> 1 hrs
+                // SUPER HEAVY refresh ---> 10 min
                 setInterval(() => {
                     loadTopics(true);
                     loadTimetable(true);
-                }, 60 * 60 * 1000);
+                }, 10 * 60 * 1000);
             } else {
                 // Run only global functions on other pages
                 checkForFlaskMessages();
@@ -2665,11 +2659,9 @@
             navigator.serviceWorker
               .register('/service-worker.js')
               .then(reg => {
-                console.log('✅ SW registered:', reg.scope);
                 toastSystem.success('App is ready for offline use', 'Offline Care');
               })
               .catch(err => {
-                console.error('❌ SW registration failed:', err);
                 toastSystem.error('Offline features unavailable', 'Offline Care');
               });
           });
@@ -2692,7 +2684,7 @@
         
           if (!installBtn) return;
         
-          // Detect if inside your custom LyxNexus WebView
+          // Detect if inside LyxNexus APP
           function isInLyxApp() {
             const ua = navigator.userAgent || navigator.vendor || window.opera;
             return /App\{\d+\}/i.test(ua);
@@ -2766,7 +2758,6 @@
             let xOffset = 0;
             let yOffset = 0;
         
-            // FIXED: Use absolute positioning instead of transform for the base
             button.style.cssText = `
                 position: fixed;
                 bottom: 60px;
@@ -2870,7 +2861,7 @@
                     closeBtn.style.opacity = '1';
                     closeBtn.style.pointerEvents = 'all';
                     
-                    // Hide after 3 seconds on touch devices
+                    // Hide after 3 secs on touch devices
                     setTimeout(() => {
                         closeBtn.style.opacity = '0';
                         closeBtn.style.pointerEvents = 'none';
@@ -2879,7 +2870,6 @@
             }
         
             function removeRobot() {
-                // Add fade out animation
                 button.style.transition = 'all 0.5s ease';
                 button.style.opacity = '0';
                 button.style.transform = 'scale(0.5)';
@@ -2892,7 +2882,6 @@
                         toastSystem.info('AI Assistant hidden. Refresh page to show again.', 'Assistant Hidden', 5000);
                     }
                     
-                    // Optional: Save preference to localStorage
                     localStorage.setItem('robotButtonHidden', 'true');
                 }, 500);
             }
@@ -2912,7 +2901,6 @@
                 yOffset = rect.top;
             
                 if (e.target === button || e.target.parentNode === button) {
-                    // Don't start dragging if clicking the close button
                     if (e.target.tagName === 'BUTTON' && e.target.textContent === '×') {
                         return;
                     }
@@ -2950,7 +2938,7 @@
                     currentX = Math.max(margin, Math.min(currentX, window.innerWidth - buttonWidth - margin));
                     currentY = Math.max(margin, Math.min(currentY, window.innerHeight - buttonHeight - margin));
                 
-                    // Update position using left/top instead of transform
+                    // Update position using left/top
                     button.style.left = currentX + 'px';
                     button.style.top = currentY + 'px';
                     button.style.bottom = 'auto';
@@ -2973,11 +2961,10 @@
                 
                 // Only trigger if not dragging (to prevent click after drag)
                 if (!isDragging) {
-                    // Add animation class
+                    
                     button.classList.add('pulse');
                     button.innerHTML = '<i class="fas fa-spinner fa-spin" style="font-size: 20px; color: white;"></i>';
                 
-                    // Remove animation class after animation completes
                     setTimeout(() => {
                         button.classList.remove('pulse');
                         button.innerHTML = `
@@ -2994,7 +2981,6 @@
         
             function showModal() {
                 const modal = document.getElementById('ai-modal-backdrop');
-                console.log('Showing modal:', modal);
                 
                 if (modal) {
                     modal.style.display = 'flex';
@@ -3026,7 +3012,6 @@
             }
         
             function createModal() {
-                // Remove existing modal if any
                 const existingModal = document.getElementById('ai-modal-backdrop');
                 if (existingModal) {
                     existingModal.remove();
@@ -3257,8 +3242,6 @@
                         closeModal();
                     }
                 });
-            
-                console.log('Modal created with ID:', modalBackdrop.id);
             }
         
             // Handle window resize to keep button in view

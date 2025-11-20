@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, render_template, redirect, url_for, request, flash
-from app import User, UserActivity, db
+from app import User, UserActivity, db, File
 from flask_login import login_required, current_user
 from sqlalchemy import func, desc
 from functools import wraps # Wraps a function to a decorator
@@ -36,6 +36,9 @@ def dashboard():
 @login_required
 @not_banned
 def user_data():
+    # Auxiliary features for moer data tod dahboard
+    available_files = File.query.count() # Never use .all().count()
+    all_users = User.query.count()
     # Get counts for announcements and assignments --> len() --> not count()
     announcements_count = len(current_user.announcements) if current_user.announcements else 0
     assignments_count = len(current_user.assignments) if current_user.assignments else 0
@@ -49,7 +52,9 @@ def user_data():
             'is_admin': current_user.is_admin, # True or False
             'created_at': current_user.created_at.strftime('%Y-%m-%d %H:%M:%S') if current_user.created_at else 'Unknown',
             'announcements': announcements_count,
-            'assignment': assignments_count
+            'assignment': assignments_count,
+            'available_files': available_files,
+            'all_users': all_users
         }
     )
 

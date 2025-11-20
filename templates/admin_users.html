@@ -111,6 +111,10 @@
         background: linear-gradient(90deg, #4fea7d, #6fa1e8);
     }
     
+    .btn-dashboard {
+        background: linear-gradient(135deg, #6f31b5, #1a1ad7);
+    }
+
     .btn-info {
         background: linear-gradient(90deg, #0EA5E9, #0369A1);
     }
@@ -690,6 +694,9 @@
                     <span class="text-xl sm:text-2xl font-bold gradient-text">User Management</span>
                 </div>
                 <div class="nav-buttons-container">
+                    <button class="btn btn-dashboard" onclick="window.location.href='/dashboard'">
+                        <i class="fas fa-tachometer-alt mr-2"></i> Dashboard
+                    </button>
                     <button class="btn btn-ai" onclick="window.location.href='/ai-chat'">
                         <i class="fas fa-robot mr-2"></i> AI Help
                     </button>
@@ -1339,7 +1346,6 @@
                 }
                 return await response.json();
             } catch (error) {
-                console.error('Error fetching online users:', error);
                 return [];
             }
         }
@@ -1484,7 +1490,6 @@
             document.getElementById('prev-page').disabled = currentPage === 1;
             document.getElementById('next-page').disabled = currentPage === totalPages || totalPages === 0;
 
-            console.log(`Pagination: Page ${currentPage} of ${totalPages}, Total: ${totalUsers}`);
         }
 
 
@@ -1561,10 +1566,8 @@
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 const data = await response.json();
-                console.log('API Response:', data); // Debug log
                 return data;
             } catch (error) {
-                console.error('Error fetching users:', error);
                 showToast('Failed to load users: ' + error.message, 'error');
                 return { users: [], pagination: null, stats: null, chart_data: null };
             }
@@ -1647,9 +1650,7 @@
                     </td>
                     <td>
                         ${(() => {
-                            console.log('Raw status:', user.status, 'Type:', typeof user.status);
                             const status = (user.status === true || user.status === 'true' || user.status === 1);
-                            console.log('Normalized status:', status);
                         
                             return `
                                 <span class="status-badge ${status ? 'status-allowed' : 'status-banned'}">
@@ -1698,9 +1699,8 @@
                                 </button>`
                             }
                             ${(() => {
-                                console.log('Raw status:', user.status, 'Type:', typeof user.status);
+                                
                                 const status = (user.status === true || user.status === 'true' || user.status === 1);
-                                console.log('Normalized status:', status);
 
                                 return status ? 
                                     `<button class="btn btn-danger btn-sm toggle-status-btn" data-user-id="${user.id}">

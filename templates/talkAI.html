@@ -980,7 +980,7 @@
                 };
 
                 recognition.onerror = function(event) {
-                    console.error('Speech recognition error', event.error);
+                    //console.error('Speech recognition error', event.error);
                     addMessage("❌ Couldn't process audio. Please try again.", false);
                 };
 
@@ -989,7 +989,7 @@
                     audioButton.classList.remove('recording');
                 };
             } else {
-                console.warn('Speech recognition not supported');
+                //console.warn('Speech recognition not supported');
                 audioButton.style.display = 'none';
             }
         }
@@ -1352,7 +1352,7 @@
                 saveCurrentConversation();
                 
             } catch (error) {
-                console.error('Error:', error);
+                //console.error('Error:', error);
                 hideTypingIndicator();
                 
                 // Try next API key if available
@@ -1487,7 +1487,7 @@
             try {
                 localStorage.setItem('ChloeAI_conversationItems', JSON.stringify(conversationItems));
             } catch (error) {
-                console.error('Failed to save conversation items:', error);
+                //console.error('Failed to save conversation items:', error);
             }
         }
 
@@ -1500,7 +1500,7 @@
                     renderConversationItems();
                 }
             } catch (error) {
-                console.error('Failed to load conversation items:', error);
+                //console.error('Failed to load conversation items:', error);
             }
         }
 
