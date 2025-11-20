@@ -54,7 +54,7 @@ def user_data():
             'announcements': announcements_count,
             'assignment': assignments_count,
             'available_files': available_files,
-            'all_users': all_users
+            'all_students': all_users
         }
     )
 

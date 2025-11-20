@@ -1603,34 +1603,40 @@
             
                 // Track file visit
                 document.addEventListener('click', (e) => {
-                    if (e.target.closest('a[href*="/files"]') || e.target.closest('#files')) {
-                        this.trackActivity('file_download', e.target.href || 'unknown_file');
+                    const target = e.target;
+
+                    // Files tracking
+                    if (target.closest('a[href*="/files"]') || target.closest('#files')) {
+                        const link = target.closest('a');
+                        this.trackActivity('file_download', link?.href || 'unknown_file');
+                    }
+                
+                    // Messages tracking
+                    if (target.closest('a[href*="/messages"]') || target.closest('#messages')) {
+                        this.trackActivity('viewed_message', 'messages_section');
                     }
 
-                    if (e.target.closest('a[href*="/messages"]') || e.target.closest('#messages')) {
-                        this.trackActivity('Viewed_Message', e.target.href || 'Messages');
+                    // Marion AI tracking
+                    if (target.closest('a[href*="/gemini"]') || target.closest('#gemini')) {
+                        this.trackActivity('ai_accessed', 'marion_ai');
                     }
-                    
-                    // Monitor Marion AI
-                    if (e.target.closest('a[href*="/gemini"]') || e.target.closest('#gemini')) {
-                        this.trackActivity('Marion_AI', e.target.href || 'Marion AI');
+                
+                    // Nova Quiz tracking
+                    if (target.closest('a[href*="/quiz"]') || target.closest('#marion')) {
+                        this.trackActivity('ai_accessed', 'nova_quiz');
                     }
-
-                    // Monitor Nova Quiz
-                    if (e.target.closest('a[href*="/quiz"]') || e.target.closest('#marion')) {
-                        this.trackActivity('Quiz_AI', e.target.href || 'Nova AI');
+                
+                    // Assignment Doer tracking
+                    if (target.closest('a[href*="/math"]') || target.closest('#math')) {
+                        this.trackActivity('ai_accessed', 'assignment_doer');
                     }
-
-                    // Monitor Assignment Doer
-                    if (e.target.closest('a[href*="/math"]') || e.target.closest('#math')) {
-                        this.trackActivity('Doer_AI', e.target.href || 'DOER AI');
+                
+                    // Tutor AI tracking
+                    const tutorButton = target.closest('button');
+                    if (tutorButton && tutorButton.textContent.toLowerCase().includes('tutor ai')) {
+                        aiMonitor.captureAIAccess('tutor_ai');
                     }
-
-                    // Monitor Tutor AI
-                    if (e.target.closest('button') && e.target.closest('button').textContent.includes('Tutor AI')) {
-                        aiMonitor.captureAIAccess('Tutor_AI');
-                    }
-                });                
+                });
             }
         }
         

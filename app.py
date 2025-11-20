@@ -111,7 +111,7 @@ UPLOAD_FOLDER = os.path.join(app.root_path, 'uploads')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER # Where to save files --> We moved to DB saving
 
 # --- Push Notification Configuration ---
-VAPID_PUBLIC_KEY = "BEk4C5_aQbjOMkvGYk4OFZMyMAInUdVP6oAFs9kAd7Gx3iog2UF4ZLwdQ8GmB0-i61FANGD6D0TCHsFYVOA45OQ";
+VAPID_PUBLIC_KEY = "BEk4C5_aQbjOMkvGYk4OFZMyMAInUdVP6oAFs9kAd7Gx3iog2UF4ZLwdQ8GmB0-i61FANGD6D0TCHsFYVOA45OQ"
 VAPID_PRIVATE_KEY = "42FlV4n_SjaTAcJnUcCi8bDrVEwX_8YCFJiCzAOhngw"
 VAPID_CLAIMS = {"sub": "mailto:vincentkipngetich479@gmail.com"}
 
@@ -5162,7 +5162,6 @@ def delete_topic(id):
 @app.route('/api/timetable/grouped', methods=['GET'])
 def get_timetable():
     """Get timetable grouped by day"""
-    print("\n[DEBUG] Fetching grouped timetable...")
 
     try:
         timetable_slots = Timetable.query.order_by(
@@ -5174,7 +5173,6 @@ def get_timetable():
         timetable_by_day = {day: [] for day in days_order}
 
         for slot in timetable_slots:
-            print(f"[DEBUG] Processing slot ID {slot.id} ({slot.subject}) on {slot.day_of_week}")
             timetable_by_day[slot.day_of_week].append({
                 'id': slot.id,
                 'start_time': slot.start_time.strftime('%H:%M'),
