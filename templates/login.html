@@ -640,12 +640,12 @@
                     <input type="hidden" name="login_type" value="student">
                     <div class="form-group">
                         <label class="form-label" for="username">Username</label>
-                        <input type="text" id="username" name="username" class="form-input" placeholder="Enter your username" maxlength="30" value="{{ username if username }}" autocomplete="username" required>
+                        <input type="text" id="username" name="username" class="form-input" placeholder="E.g. LyxNexus" minlength="3" value="{{ username if username }}" required>
                     </div>
                     
                     <div class="form-group">
                         <label class="form-label" for="mobile">Mobile Number</label>
-                        <input type="tel" id="mobile" name="mobile" class="form-input" placeholder="07XX XXX XXX" value="{{ mobile if mobile }}" required>
+                        <input type="tel" id="mobile" name="mobile" class="form-input" placeholder="07XX XXX XXX or 07XX XXX XXX" value="{{ mobile if mobile }}" required>
                         <p class="text-gray-400 text-xs mt-1">Enter your 10-digit Kenyan mobile number</p>
                     </div>
                     
@@ -682,7 +682,7 @@
                         
                         <div class="form-group">
                             <label class="form-label" for="admin-username">Username</label>
-                            <input type="text" id="admin-username" name="username" class="form-input" placeholder="Enter admin username" maxlength="30" autocomplete="username" required>
+                            <input type="text" id="admin-username" name="username" class="form-input" placeholder="Enter admin username" maxlength="30" required>
                         </div>
                         
                         <div class="form-group">
@@ -703,7 +703,7 @@
                         
                         <div class="form-group">
                             <label class="form-label" for="master-key-username">Username</label>
-                            <input type="text" id="master-key-username" name="username" class="form-input" placeholder="Enter username for admin account" maxlength="30" autocomplete="username" required>
+                            <input type="text" id="master-key-username" name="username" class="form-input" placeholder="Enter username for admin account" maxlength="30" required>
                         </div>
                         
                         <div class="form-group">
@@ -756,7 +756,7 @@
                 
                 <div class="form-group">
                     <label class="form-label" for="new-admin-username">Username</label>
-                    <input type="text" id="new-admin-username" name="username" class="form-input" placeholder="Admin username" maxlength="30" autocomplete="username" required>
+                    <input type="text" id="new-admin-username" name="username" class="form-input" placeholder="Admin username" maxlength="30" required>
                 </div>
                 
                 <div class="form-group">
