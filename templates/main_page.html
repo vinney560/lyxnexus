@@ -1108,7 +1108,139 @@
         margin-left: -1em;
         font-size: 1.2em;
     }
+    
+    .search-container {
+        margin-bottom: 30px;
+        padding: 20px;
+        background: rgba(30, 30, 40, 0.7);
+        border-radius: 15px;
+        border: 1px solid rgba(59, 130, 246, 0.3);
+    }
 
+    .search-box {
+        width: 100%;
+        max-width: 500px;
+        padding: 12px 50px 12px 20px;
+        background: rgba(15, 23, 42, 0.8);
+        border: 2px solid rgba(59, 130, 246, 0.4);
+        border-radius: 50px;
+        color: white;
+        font-size: 16px;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
+    }
+
+    .search-box:focus {
+        outline: none;
+        border-color: #3B82F6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        background: rgba(15, 23, 42, 0.9);
+    }
+
+    .search-box::placeholder {
+        color: rgba(156, 163, 175, 0.7);
+    }
+
+    .search-shortcut-hint {
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(59, 130, 246, 0.2);
+        color: #3B82F6;
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 600;
+        border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+
+    .search-filters {
+        display: flex;
+        gap: 10px;
+        margin-top: 15px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .filter-btn {
+        padding: 8px 16px;
+        background: rgba(30, 41, 59, 0.6);
+        border: 1px solid rgba(156, 163, 175, 0.3);
+        border-radius: 20px;
+        color: #9CA3AF;
+        font-size: 12px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .filter-btn:hover {
+        background: rgba(59, 130, 246, 0.1);
+        border-color: #3B82F6;
+        color: #3B82F6;
+    }
+
+    .filter-btn.active {
+        background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+        border-color: transparent;
+        color: white;
+    }
+
+    .search-results-info {
+        margin-top: 15px;
+        text-align: center;
+        color: #9CA3AF;
+        font-size: 14px;
+    }
+
+    .search-highlight {
+        background: linear-gradient(120deg, rgba(59, 130, 246, 0.3), rgba(139, 92, 246, 0.3));
+        padding: 2px 4px;
+        border-radius: 4px;
+        color: inherit;
+    }
+    
+    .search-active .content-section.active .original-content {
+        display: none;
+    }
+
+    .search-active .content-section.active .search-results {
+        display: block;
+    }
+
+    .no-results {
+        text-align: center;
+        padding: 40px 20px;
+        color: #9CA3AF;
+    }
+
+    .no-results i {
+        margin-bottom: 15px;
+        opacity: 0.5;
+    }
+
+    /* Responsive search */
+    @media (max-width: 768px) {
+        .search-container {
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .search-box {
+            padding: 10px 45px 10px 16px;
+            font-size: 14px;
+        }
+
+        .search-filters {
+            gap: 8px;
+        }
+
+        .filter-btn {
+            padding: 6px 12px;
+            font-size: 11px;
+        }
+    }
 </style>
 <body>
     <!-- Toast Container -->
@@ -1439,6 +1571,7 @@
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             window.Userstatus = {{ current_user.status|tojson }};
+            
         });
     </script>
     <script>
@@ -1642,6 +1775,682 @@
         
         const analytics = new AnalyticsTracker();        
 
+        class OptimizedSearchSystem {
+            constructor() {
+                this.currentQuery = '';
+                this.currentSection = '';
+                this.searchIndex = new Map();
+                this.isIndexing = false;
+                this.debounceTimer = null;
+            
+                setTimeout(() => {
+                    this.init();
+                }, 2000);
+            }
+        
+            init() {
+                this.createSearchUI();
+                this.setupEventListeners();
+                this.setupKeyboardShortcuts();
+            
+                // Wait for data to load before indexing
+                setTimeout(() => {
+                    this.preIndexData();
+                }, 2000);
+            }
+        
+            createSearchUI() {
+                // Check if search UI already exists
+                if (document.getElementById('search-container')) {
+                    return;
+                }
+            
+                const searchHTML = `
+                    <div class="search-container" id="search-container">
+                        <div style="position: relative; display: flex; justify-content: center;">
+                            <input 
+                                type="text" 
+                                id="global-search" 
+                                class="search-box" 
+                                placeholder="Search announcements, assignments, topics..."
+                                autocomplete="off"
+                            >
+                        </div>
+                        <div class="search-filters" id="search-filters"></div>
+                        <div class="search-results-info" id="search-results-info"></div>
+                    </div>
+                `;
+                
+                const mainElement = document.querySelector('main');
+                if (mainElement) {
+                    mainElement.insertAdjacentHTML('afterbegin', searchHTML);
+                    this.searchInput = document.getElementById('global-search');
+                    this.searchContainer = document.getElementById('search-container');
+                    this.resultsInfo = document.getElementById('search-results-info');
+                    this.filtersContainer = document.getElementById('search-filters');
+
+                    // Auto-focus on search input
+                    setTimeout(() => {
+                        this.searchInput.focus();
+                    }, 500);
+                }
+            }
+        
+            setupEventListeners() {
+                if (!this.searchInput) return;
+            
+                // Debounced search input
+                this.searchInput.addEventListener('input', (e) => {
+                    clearTimeout(this.debounceTimer);
+                    this.debounceTimer = setTimeout(() => {
+                        this.performSearch(e.target.value);
+                    }, 150);
+                });
+            
+                // Clear search on escape
+                this.searchInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') {
+                        this.clearSearch();
+                    }
+                });
+            
+                // Section change detection
+                const originalSetActiveSection = window.setActiveSection;
+                window.setActiveSection = (sectionId) => {
+                    if (originalSetActiveSection) {
+                        originalSetActiveSection(sectionId);
+                    }
+                    this.onSectionChange(sectionId);
+                };
+            }
+        
+            setupKeyboardShortcuts() {
+                document.addEventListener('keydown', (e) => {
+                    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                        e.preventDefault();
+                        this.toggleSearch();
+                    }
+                });
+            }
+        
+            showSearch() {
+                if (!this.searchContainer) return;
+            
+                this.searchContainer.style.display = 'block';
+                this.searchInput.focus();
+                this.updateSectionFilters();
+            }    
+        
+            onSectionChange(sectionId) {
+                this.currentSection = sectionId;
+                this.updateSectionFilters();
+            
+                // Re-apply search if there's an active query
+                if (this.currentQuery) {
+                    this.performSearch(this.currentQuery);
+                }
+            }
+        
+            updateSectionFilters() {
+                if (!this.filtersContainer) return;
+            
+                const filters = this.getSectionFilters(this.currentSection);
+                this.filtersContainer.innerHTML = filters.map(filter => `
+                    <button class="filter-btn ${filter.active ? 'active' : ''}" 
+                            data-filter="${filter.key}"
+                            onclick="window.searchSystem.setFilter('${filter.key}')">
+                        ${filter.label}
+                    </button>
+                `).join('');
+            }
+        
+            getSectionFilters(section) {
+                const filterConfig = {
+                    'announcements': [
+                        { key: 'title', label: 'Title', active: true },
+                        { key: 'content', label: 'Content', active: true },
+                        { key: 'author', label: 'Author', active: false }
+                    ],
+                    'assignments': [
+                        { key: 'title', label: 'Title', active: true },
+                        { key: 'description', label: 'Description', active: true },
+                        { key: 'topic', label: 'Topic', active: false },
+                        { key: 'status', label: 'Status', active: false }
+                    ],
+                    'topics': [
+                        { key: 'name', label: 'Name', active: true },
+                        { key: 'description', label: 'Description', active: true }
+                    ],
+                    'timetable': [
+                        { key: 'subject', label: 'Subject', active: true },
+                        { key: 'teacher', label: 'Teacher', active: false },
+                        { key: 'room', label: 'Room', active: false }
+                    ]
+                };
+            
+                return filterConfig[section] || [];
+            }
+        
+            async preIndexData() {
+                if (this.isIndexing) return;
+            
+                this.isIndexing = true;
+            
+                // Wait for data to be loaded
+                await new Promise(resolve => setTimeout(resolve, 1000));
+            
+                // Pre-index announcements and assignments (most searched)
+                try {
+                    await this.indexSectionData('announcements', window.announcements);
+                    await this.indexSectionData('assignments', window.assignments);
+                } catch (error) {
+                    console.log('Search indexing failed:', error);
+                }
+            
+                this.isIndexing = false;
+            }
+        
+            indexSectionData(section, data) {
+                return new Promise((resolve) => {
+                    setTimeout(() => {
+                        if (!data || !Array.isArray(data)) {
+                            resolve();
+                            return;
+                        }
+                    
+                        const indexKey = `${section}_index`;
+                        this.searchIndex.set(indexKey, this.createSearchIndex(data));
+                        resolve();
+                    }, 0);
+                });
+            }
+        
+            createSearchIndex(data) {
+                const index = {
+                    byTitle: new Map(),
+                    byContent: new Map(),
+                    byAuthor: new Map(),
+                    allItems: data
+                };
+            
+                data.forEach((item, idx) => {
+                    // Index by title
+                    if (item.title) {
+                        this.addToIndex(index.byTitle, item.title.toLowerCase(), idx);
+                    }
+                
+                    // Index by content/description
+                    const content = item.content || item.description || '';
+                    this.addToIndex(index.byContent, content.toLowerCase(), idx);
+                
+                    // Index by author
+                    if (item.author?.username) {
+                        this.addToIndex(index.byAuthor, item.author.username.toLowerCase(), idx);
+                    }
+                });
+            
+                return index;
+            }
+        
+            addToIndex(indexMap, text, itemId) {
+                if (!text) return;
+            
+                const words = text.split(/\s+/);
+                words.forEach(word => {
+                    if (word.length < 2) return; // Ignore very short words
+                
+                    if (!indexMap.has(word)) {
+                        indexMap.set(word, new Set());
+                    }
+                    indexMap.get(word).add(itemId);
+                });
+            }
+        
+            performSearch(query) {
+                this.currentQuery = query.trim();
+            
+                if (!this.currentQuery) {
+                    this.clearSearch();
+                    return;
+                }
+            
+                if (!this.currentSection) {
+                    this.currentSection = document.querySelector('.content-section.active')?.id || 'announcements';
+                }
+            
+                const results = this.searchInSection(this.currentSection, this.currentQuery);
+                this.displayResults(results);
+            }
+        
+            searchInSection(section, query) {
+                const searchTerms = query.toLowerCase().split(/\s+/).filter(term => term.length > 1);
+            
+                switch(section) {
+                    case 'announcements':
+                        return this.searchAnnouncements(searchTerms);
+                    case 'assignments':
+                        return this.searchAssignments(searchTerms);
+                    case 'topics':
+                        return this.searchTopics(searchTerms);
+                    case 'timetable':
+                        return this.searchTimetable(searchTerms);
+                    default:
+                        return [];
+                }
+            }
+        
+            searchAnnouncements(searchTerms) {
+                if (!window.announcements || !Array.isArray(window.announcements)) return [];
+            
+                return window.announcements.filter(announcement => {
+                    const title = (announcement.title || '').toLowerCase();
+                    const content = (announcement.content || '').toLowerCase();
+                    const author = (announcement.author?.username || '').toLowerCase();
+
+                    // Check if ALL search terms are found in ANY field
+                    return searchTerms.every(term => 
+                        title.includes(term) || 
+                        content.includes(term) || 
+                        author.includes(term)
+                    );
+                });
+            }
+        
+            searchAssignments(searchTerms) {
+                if (!window.assignments || !Array.isArray(window.assignments)) return [];
+            
+                return window.assignments.filter(assignment => {
+                    const title = (assignment.title || '').toLowerCase();
+                    const description = (assignment.description || '').toLowerCase();
+                    const topic = (assignment.topic?.name || '').toLowerCase();
+
+                    return searchTerms.every(term =>
+                        title.includes(term) ||
+                        description.includes(term) ||
+                        topic.includes(term)
+                    );
+                });
+            }
+        
+            searchTopics(searchTerms) {
+                if (!window.topics || !Array.isArray(window.topics)) return [];
+            
+                return window.topics.filter(topic => {
+                    const name = (topic.name || '').toLowerCase();
+                    const description = (topic.description || '').toLowerCase();
+
+                    return searchTerms.every(term =>
+                        name.includes(term) ||
+                        description.includes(term)
+                    );
+                });
+            }
+        
+            searchTimetable(searchTerms) {
+                if (!window.timetable || !Array.isArray(window.timetable)) return [];
+            
+                const results = [];
+                window.timetable.forEach(daySchedule => {
+                    const matchingSlots = daySchedule.slots.filter(slot => {
+                        const subject = (slot.subject || '').toLowerCase();
+                        const teacher = (slot.teacher || '').toLowerCase();
+                        const room = (slot.room || '').toLowerCase();
+
+                        return searchTerms.every(term =>
+                            subject.includes(term) ||
+                            teacher.includes(term) ||
+                            room.includes(term)
+                        );
+                    });
+                
+                    if (matchingSlots.length > 0) {
+                        results.push({
+                            ...daySchedule,
+                            slots: matchingSlots
+                        });
+                    }
+                });
+            
+                return results;
+            }
+        
+            displayResults(results) {
+                const section = this.currentSection;
+                const container = document.getElementById(`${section}-container`);
+                const sectionElement = document.getElementById(section);
+            
+                if (!container || !sectionElement) return;
+            
+                // Add search-active class to body to trigger CSS
+                document.body.classList.add('search-active');
+            
+                // Create search results container if it doesn't exist
+                let resultsContainer = sectionElement.querySelector('.search-results');
+                if (!resultsContainer) {
+                    resultsContainer = document.createElement('div');
+                    resultsContainer.className = 'search-results';
+                    sectionElement.appendChild(resultsContainer);
+                }
+            
+                // Hide original content, show search results
+                const originalContent = sectionElement.querySelector('.original-content');
+                if (!originalContent) {
+                    // Wrap existing content in original-content div
+                    const existingContent = container.innerHTML;
+                    container.innerHTML = '';
+                    const originalDiv = document.createElement('div');
+                    originalDiv.className = 'original-content';
+                    originalDiv.innerHTML = existingContent;
+                    container.appendChild(originalDiv);
+                    container.appendChild(resultsContainer);
+                }
+            
+                if (results.length === 0) {
+                    resultsContainer.innerHTML = `
+                        <div class="no-results">
+                            <i class="fas fa-search fa-2x mb-3 opacity-50"></i>
+                            <p>No results found for "${this.currentQuery}"</p>
+                            <p class="text-sm mt-2">Try different keywords or check your spelling</p>
+                        </div>
+                    `;
+                    if (this.resultsInfo) {
+                        this.resultsInfo.textContent = `No results found for "${this.currentQuery}"`;
+                    }
+                    return;
+                }
+            
+                // Render search results
+                switch(section) {
+                    case 'announcements':
+                        this.renderSearchAnnouncements(results, resultsContainer);
+                        break;
+                    case 'assignments':
+                        this.renderSearchAssignments(results, resultsContainer);
+                        break;
+                    case 'topics':
+                        this.renderSearchTopics(results, resultsContainer);
+                        break;
+                    case 'timetable':
+                        this.renderSearchTimetable(results, resultsContainer);
+                        break;
+                }
+            
+                if (this.resultsInfo) {
+                    this.resultsInfo.textContent = `Found ${results.length} results for "${this.currentQuery}"`;
+                }
+            }
+
+            renderSearchAnnouncements(announcements, container) {
+                container.innerHTML = announcements.map(announcement => {
+                    const urlMatch = announcement.content.match(/https?:\/\/[^\s]+/);
+                    const url = urlMatch ? urlMatch[0] : null;
+                    const previewId = `og-preview-${announcement.id || Math.random().toString(36).slice(2)}`;
+
+                    // File preview (image or link)
+                    let filePreview = "";
+                    if (announcement.has_file && announcement.file_type?.startsWith("image/")) {
+                        filePreview = `
+                            <div class="mb-3 w-24 h-24 rounded-lg overflow-hidden bg-gray-700 flex items-center justify-center cursor-pointer card-hover-lift"
+                                 onclick="openImagePreview('${announcement.file_url}')">
+                                <img src="${announcement.file_url}" alt="${announcement.file_name}" class="object-cover w-full h-full">
+                            </div>
+                        `;
+                    } else if (announcement.has_file) {
+                        filePreview = `
+                            <div class="mb-3">
+                                <a style="color:#60a5fa; text-decoration: none; font-size:0.875rem; display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px; background: #f8fafc; border-radius: 6px; border: 1px solid #e2e8f0;" href="${announcement.file_url}" target="_blank" class="card-hover-lift">
+                                    <i class="${getFileIcon(announcement.file_name)}"></i>
+                                    ${announcement.file_name}
+                                    <i class="fas fa-external-link-alt" style="font-size: 0.7rem;"></i>
+                                </a>
+                            </div>
+                        `;
+                    }
+                
+                    return `
+                        <div class="announcement-card border border-blue-800 shadow-md bg-gray-900/60 rounded-2xl transition duration-200 ease-in-out overflow-hidden mb-6 p-2 relative card-hover-lift fade-in">
+                            <!-- OG Preview -->
+                            <div id="${previewId}" class="w-full border-b border-gray-800"></div>
+                        
+                            <!-- File/Image Preview -->
+                            ${filePreview}
+                        
+                            <!-- Announcement Body -->
+                            <div class="p-4 sm:p-5">
+                                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-3 gap-2">
+                                    <h3 class="text-xl uppercase break-all underline underline-offset-8 decoration-red-500 decoration-double sm:text-2xl font-extrabold text-white leading-snug break-words">
+                                        ${this.highlightText(announcement.title, this.currentQuery)}
+                                    </h3>
+
+                                    <i class="fa fa-clock mr-2">
+                                        <span class="text-xs sm:text-sm whitespace-nowrap font-bold 
+                                                     underline underline-offset-2 decoration-blue-400 
+                                                     text-transparent bg-clip-text 
+                                                     bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400">
+                                            ${formatDate(announcement.created_at)}
+                                        </span>
+                                    </i>
+                                </div>
+                            
+                                <p class="mb-3 break-all hyphens-auto text-slate-300 leading-relaxed list-inside formatted-text">
+                                    ${this.highlightText(formatText(announcement.content), this.currentQuery)}
+                                </p>
+                            
+                                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+                                    <span class="text-gray-400 text-xs sm:text-sm">
+                                        By: ${announcement.author?.username || "Unknown"}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            
+                // Render OG previews for search results
+                announcements.forEach((announcement) => {
+                    const urlMatch = announcement.content.match(/https?:\/\/[^\s]+/);
+                    if (!urlMatch) return;
+
+                    const url = urlMatch[0];
+                    const previewId = `og-preview-${announcement.id || Math.random().toString(36).slice(2)}`;
+                    const previewEl = document.getElementById(previewId);
+
+                    if (previewEl) {
+                        fetch(`/api/preview?url=${encodeURIComponent(url)}`)
+                            .then((res) => res.json())
+                            .then((data) => {
+                                if (!data.title && !data.image) return;
+
+                                previewEl.innerHTML = `
+                                    <a href="${url}" target="_blank" class="flex items-center gap-3 p-3 sm:p-4 bg-gray-800/70 hover:bg-gray-800/90 transition duration-200 ease-in-out card-hover-lift">
+                                        ${
+                                            data.image
+                                                ? `<div class="flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden bg-gray-700 flex items-center justify-center">
+                                                     <img src="${data.image}" alt="" class="object-cover w-full h-full cursor-pointer" onclick="openImagePreview('${data.image}')">
+                                                   </div>`
+                                                : `<div class="flex-shrink-0 w-16 h-16 rounded-lg bg-gray-700 flex items-center justify-center text-gray-500 text-xs italic">
+                                                     No image
+                                                   </div>`
+                                        }
+                                        <div class="flex-1">
+                                            <h3 class="text-white font-semibold text-sm sm:text-base mb-1 line-clamp-1">
+                                                ${data.title || "Untitled"}
+                                            </h3>
+                                            <p class="text-gray-400 text-xs sm:text-sm line-clamp-2">
+                                                ${data.description || ""}
+                                            </p>
+                                        </div>
+                                    </a>
+                                `;
+                            })
+                            .catch(() => console.warn("No OG preview found for", url));
+                    }
+                });
+            }
+
+            renderSearchAssignments(assignments, container) {
+                container.innerHTML = assignments.map(assignment => {
+                    const dueDate = new Date(assignment.due_date);
+                    const now = new Date();
+                    const daysUntilDue = Math.ceil((dueDate - now) / (1000 * 60 * 60 * 24));
+
+                    let statusClass = 'bg-blue-500';
+                    let statusText = 'Due Soon';
+                
+                    if (daysUntilDue < 0) {
+                        statusClass = 'bg-red-500';
+                        statusText = 'Overdue';
+                    } else if (daysUntilDue < 1) {
+                        statusClass = 'bg-yellow-400';
+                        statusText = 'Due Today';
+                    } else if (daysUntilDue === 1) {
+                        statusClass = 'bg-orange-400';
+                        statusText = 'Due Tomorrow';    
+                    } else if (daysUntilDue <= 3) {
+                        statusClass = 'bg-green-400';
+                        statusText = 'Due Soon';
+                    }
+
+                    return `
+                        <div class="assignment-card border-l-4 border-blue-500 border-r-1 border-blue-500 border-t-1 border-blue-500 border-b-1 border-blue-500 bg-gray-800/50 p-3 sm:p-4 rounded-xl shadow-md hover:shadow-lg transition duration-200 ease-in-out card-hover-lift fade-in">
+                            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-3 gap-2">
+                                <h3 class="text-xl sm:text-2xl font-extrabold text-white underline underline-offset-4 decoration-blue-500 leading-snug break-words">
+                                    ${this.highlightText(assignment.title, this.currentQuery)}
+                                </h3>
+                                <span class="${statusClass} text-white px-3 py-1 rounded-full text-xs sm:text-sm whitespace-nowrap">
+                                    ${statusText}: ${formatDate(assignment.due_date)}
+                                </span>
+                            </div>
+                        
+                            <div class="mb-4 text-gray-300 text-sm leading-relaxed whitespace-pre-line list-inside">
+                                ${this.highlightText(formatMath(assignment.description), this.currentQuery)}
+                            </div>
+
+                            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+                                <span class="text-gray-400 text-xs sm:text-sm">
+                                    Topic: ${assignment.topic?.name || 'General'}
+                                </span>
+                                <button onclick="window.location.href='/assignment/${assignment.id}'" 
+                                        class="btn text-sm sm:text-base px-4 py-2 text-blue-400 border border-blue-500 rounded-lg hover:bg-blue-600/20 transition-colors flex items-center gap-1 self-start sm:self-auto">
+                                    <i class="fas fa-paper-plane mr-2" style="color: white;"></i>
+                                    <span style="color: white;"> View File</span>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            renderSearchTopics(topics, container) {
+                container.innerHTML = topics.map(topic => {
+                    return `
+                        <div class="topic-card card-hover-lift fade-in">
+                            <div class="feature-icon">
+                                <i class="fas fa-book"></i>
+                            </div>
+                            <h3 class="text-xl font-bold mb-2">${this.highlightText(topic.name, this.currentQuery)}</h3>
+                            <p class="text-gray-300 mb-2 whitespace-pre-wrap break-words break-all">
+                                ${this.highlightText(topic.description, this.currentQuery)}
+                            </p>
+                            <button class="btn text-sm px-4 py-2 w-full" onclick="window.location.href='/material/${topic.id}'">
+                                <i class="fas fa-folder-open mr-1"></i> View Materials
+                            </button>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            renderSearchTimetable(timetable, container) {
+                container.innerHTML = timetable.map(daySchedule => `
+                    <div class="timetable-day card-hover-lift fade-in">
+                        <h3 class="text-xl font-bold mb-4 border-b border-gray-700 pb-2">${daySchedule.day}</h3>
+                        ${daySchedule.slots.map(slot => `
+                            <div class="timetable-slot">
+                                <div class="flex-1">
+                                    <div class="font-semibold">${this.highlightText(slot.subject, this.currentQuery)}</div>
+                                    <div class="text-sm text-gray-400">${slot.teacher || 'TBA'}</div>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-blue-400">${slot.time}</div>
+                                    <div class="text-sm text-gray-400">${slot.room || 'TBA'}</div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `).join('');
+            }            
+        
+            highlightText(text, term) {
+                if (!text) return '';
+
+                if(text.includes('<') && text.includes('>')) {
+                    return;
+                }
+            
+                const regex = new RegExp(`(${this.escapeRegex(term)})`, 'gi');
+                return text.replace(regex, '<mark class="search-highlight">$1</mark>');
+            }
+        
+            escapeRegex(string) {
+                return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            }
+        
+            clearSearch() {
+                this.currentQuery = '';
+                if (this.searchInput) {
+                    this.searchInput.value = '';
+                }
+                if (this.resultsInfo) {
+                    this.resultsInfo.textContent = '';
+                }
+            
+                // Remove search-active class and show original content
+                document.body.classList.remove('search-active');
+            
+                // Reload original content properly
+                const section = this.currentSection;
+                const sectionElement = document.getElementById(section);
+                if (sectionElement) {
+                    const resultsContainer = sectionElement.querySelector('.search-results');
+                    if (resultsContainer) {
+                        resultsContainer.innerHTML = '';
+                    }
+                }
+            
+                // Force refresh of the current section
+                switch(section) {
+                    case 'announcements':
+                        loadAnnouncements(true);
+                        break;
+                    case 'assignments':
+                        loadAssignments(true);
+                        break;
+                    case 'topics':
+                        loadTopics(true);
+                        break;
+                    case 'timetable':
+                        loadTimetable(true);
+                        break;
+                }
+            }
+        
+            setFilter(filterKey) {
+                // Toggle filter active state
+                const filterBtn = this.filtersContainer.querySelector(`[data-filter="${filterKey}"]`);
+                if (filterBtn) {
+                    filterBtn.classList.toggle('active');
+                }
+            
+                // Re-run search with updated filters
+                if (this.currentQuery) {
+                    this.performSearch(this.currentQuery);
+                }
+            }
+        }
+
+        // Initialize search system globally
+        window.searchSystem = new OptimizedSearchSystem();        
+       
         // User Ban Overlay System
         class UserBanOverlay {
             constructor() {
@@ -1743,6 +2552,10 @@
             setTimeout(() => {
                 window.banOverlay = new UserBanOverlay();
             }, 1500);
+
+            setTimeout(() => {
+                searchSystem.preIndexData();
+            }, 2000);
         });
 
         // Also check when user data is updated
@@ -2184,7 +2997,7 @@
               "0 announced";
             return;
           }
-      
+          
           document.getElementById("announcements-count").textContent = `${newAnnouncements.length} announced`;
       
           let pinnedIds = JSON.parse(localStorage.getItem("pinnedAnnouncements") || "[]");
@@ -2192,6 +3005,7 @@
           // Check for new announcements
           const newItems = isRefresh ? findNewItems(announcements, newAnnouncements, 'id') : [];
           announcements = newAnnouncements;
+          window.announcements = announcements;
       
           // Render announcements (pinned first)
           function renderAnnouncements() {
@@ -2410,6 +3224,7 @@
             // Check for new assignments
             const newItems = isRefresh ? findNewItems(assignments, newAssignments, 'id') : [];
             assignments = newAssignments;
+            window.assignments = assignments;
             
             if (assignments.length === 0) {
                 container.innerHTML = '<p class="text-center text-gray-400 py-8">No assignments available.</p>';
@@ -2499,6 +3314,7 @@
             // Check for new topics
             const newItems = isRefresh ? findNewItems(topics, newTopics, 'id') : [];
             topics = newTopics;
+            window.topics = topics;
             
             if (topics.length === 0) {
                 container.innerHTML = '<p class="text-center text-gray-400 py-8">No topics available.</p>';
@@ -2545,6 +3361,7 @@
             
             const timetableData = await fetchData(`${ENDPOINTS.TIMETABLE}/grouped`) || [];
             timetable = timetableData;
+            window.timetable = timetable; 
             
             if (timetable.length === 0) {
                 container.innerHTML = '<p class="text-center text-gray-400 py-8">No timetable available.</p>';
@@ -2616,10 +3433,12 @@
                 window.history.replaceState({}, document.title, newUrl);
             }
         }
-
+        
         document.addEventListener('DOMContentLoaded', function() {
             // Only run main page scripts if we're on the main page
             analytics.initialize();
+            // Initialize search system globally
+            window.searchSystem.init();
             const isMainPage = document.querySelector('.content-container') !== null;
             
             if (isMainPage) {
@@ -2659,7 +3478,7 @@
                 loadUserData(); 
             }
         });        
-
+        
         if ('serviceWorker' in navigator) {
           window.addEventListener('load', () => {
             navigator.serviceWorker

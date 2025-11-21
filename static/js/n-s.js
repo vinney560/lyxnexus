@@ -12,7 +12,6 @@ class LyxNexusNotificationService {
         this.audio.preload = 'auto';
         this.audio.volume = 0.7;
 
-        console.log(`${this.serviceName}: Created, waiting for dependencies...`);
         this.startInitialization();
         this.setupConnectivityListeners();
     }
@@ -21,19 +20,16 @@ class LyxNexusNotificationService {
         try {
             await this.delay(1000);
             if (typeof io === 'undefined') {
-                console.warn(`${this.serviceName}: Socket.IO not loaded, will retry...`);
                 this.retryInitialization();
                 return;
             }
             await this.initializeService();
         } catch (error) {
-            console.error(`${this.serviceName}: Startup failed:`, error);
             this.retryInitialization();
         }
     }
 
     async initializeService() {
-        console.log(`${this.serviceName}: Starting initialization...`);
         this.setupSocketConnection();
         await this.requestPermission();
         await this.subscribeForPush();
@@ -43,12 +39,10 @@ class LyxNexusNotificationService {
         // Process any pending notifications that were stored while offline
         await this.processPendingNotifications();
         
-        console.log(`${this.serviceName}: Ready and listening for notifications`);
     }
 
     setupConnectivityListeners() {
         window.addEventListener('online', () => {
-            console.log(`${this.serviceName}: Online - processing pending notifications`);
             this.isOnline = true;
             this.processPendingNotifications();
             this.reconnectSocket();
@@ -82,7 +76,6 @@ class LyxNexusNotificationService {
             });
 
             this.socket.on('connect', () => {
-                console.log(`${this.serviceName}: ✅ Connected to server`);
                 // Sync any missed notifications when reconnecting
                 this.syncMissedNotifications();
             });
@@ -154,8 +147,6 @@ class LyxNexusNotificationService {
 
         const pending = await this.getStoredNotifications();
         if (pending.length === 0) return;
-
-        console.log(`${this.serviceName}: Processing ${pending.length} pending notifications`);
 
         // Sort by timestamp (oldest first)
         pending.sort((a, b) => a.timestamp - b.timestamp);
@@ -401,7 +392,6 @@ class LyxNexusNotificationService {
 
     async subscribeForPush() {
         if (!("serviceWorker" in navigator)) {
-            console.warn(`${this.serviceName}: Service Worker not supported.`);
             return;
         }
 
@@ -416,8 +406,6 @@ class LyxNexusNotificationService {
                 applicationServerKey: convertedKey
             });
 
-            console.log(`${this.serviceName}: Push subscription successful.`);
-
             const subscriptionData = subscription.toJSON();
 
             const userId = window.currentUserId || await new Promise(resolve => {
@@ -428,15 +416,12 @@ class LyxNexusNotificationService {
 
             subscriptionData.user_id = userId;
 
-            console.log("📩 Sending subscription to backend:", subscriptionData);
-
             await fetch("/subscribe", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(subscriptionData)
             });
 
-            console.log(`${this.serviceName}: ✅ Push notifications subscribed.`);
         } catch (err) {
             console.error(`${this.serviceName}: Failed to subscribe for push`, err);
         }
