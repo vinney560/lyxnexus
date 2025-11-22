@@ -33,9 +33,9 @@
             background: linear-gradient(90deg, #3B82F6, #8B5CF6);
             color: white;
             border: none;
-            padding: 10px 24px;
+            padding: 8px 14px;
             border-radius: 50px;
-            font-weight: 600;
+            font-weight: 400;
             transition: all 0.3s ease;
             cursor: pointer;
         }
@@ -70,7 +70,6 @@
             display: inline-block;
         }
 
-        /* User Search Styles */
         .user-search-container {
             position: relative;
         }
@@ -159,7 +158,6 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* Toast Styles */
         .toast-container {
             position: fixed;
             top: 20px;
@@ -262,8 +260,8 @@
                 </div>
                 <div class="flex items-center space-x-4">
                     <span class="text-gray-300">Welcome, {{ current_user.username }}</span>
-                    <a href="/" class="btn btn-outline text-sm">
-                        <i class="fas fa-arrow-left mr-1"></i>Back
+                    <a href="/admin/users" class="btn btn-outline text-sm">
+                        <i class="fas fa-arrow-left mr-1"></i>
                     </a>
                 </div>
             </div>
@@ -355,7 +353,7 @@
                     <div class="flex justify-between items-center mb-6">
                         <h2 class="text-xl font-bold">Manage Notifications</h2>
                         <button onclick="loadStats()" class="btn btn-outline text-sm">
-                            <i class="fas fa-refresh mr-2"></i>Refresh
+                            Refresh
                         </button>
                     </div>
                     

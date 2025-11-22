@@ -1270,7 +1270,7 @@ def create_notification():
             # The frontend sends time in Nairobi time, but we need to convert to UTC for storage
             nairobi_time = datetime.fromisoformat(data['expires_at'].replace('Z', '+00:00'))
             # Convert Nairobi time to UTC for storage
-            notification.expires_at = nairobi_time
+            notification.expires_at = nairobi_time + timedelta(hours=3)
         else:
             # Default to 7 days from now in UTC
             notification.expires_at = datetime.utcnow() + timedelta(days=7)
