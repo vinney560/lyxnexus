@@ -1395,10 +1395,23 @@ def mark_all_notifications_read():
 @login_required
 @admin_required
 def admin_notifications():
-    """Admin notification management page"""
     
     notifications = Notification.query.order_by(Notification.created_at.desc()).all()
-    return render_template('admin_notifications.html', notifications=notifications)
+    
+    # Convert SQLAlchemy objects to serializable data
+    notifications_data = []
+    for notification in notifications:
+        notifications_data.append({
+            'id': notification.id,
+            'title': notification.title,
+            'message': notification.message,
+            'target_audience': notification.target_audience,
+            'is_active': notification.is_active,
+            'created_at': notification.created_at.isoformat() if notification.created_at else None,
+            'expires_at': notification.expires_at.isoformat() if notification.expires_at else None
+        })
+    
+    return render_template('admin_notifications.html', notifications=notifications_data)
 
 @app.route('/admin/notifications/<int:notification_id>/update', methods=['POST'])
 @login_required
