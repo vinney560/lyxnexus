@@ -2043,7 +2043,7 @@
             async checkUserStatusAndLoadNotifications() {
                 try {
                     // Check if user is banned - don't show notifications if banned
-                    const isBanned = this.isUserBanned();
+                    const isBanned = false;
 
                     if (!isBanned) {
                         await this.loadNotifications();
@@ -2068,18 +2068,6 @@
             }
         
             isUserBanned() {
-                // Use the same logic as ban overlay
-                if (typeof window.Userstatus !== 'undefined') {
-                    return !window.Userstatus;
-                }
-            
-                // Fallback: check from detail-status element
-                const statusElement = document.getElementById('detail-status');
-                if (statusElement) {
-                    const statusText = statusElement.textContent.trim().toLowerCase();
-                    return statusText === 'banned' || statusText === 'restricted';
-                }
-            
                 return false;
             }
         
