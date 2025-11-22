@@ -1305,7 +1305,7 @@ def create_notification():
 @app.route('/api/notify')
 @login_required
 def get_notifications():
-    """Get notifications for current user with specific targeting"""
+    """Get notifications for current user"""
     try:
         # Get active notifications that user hasn't read or hasn't received yet
         active_notifications = Notification.query.filter(
@@ -1350,11 +1350,12 @@ def get_notifications():
                     )
                     db.session.add(user_notif)
                 
+                # Convert SQLAlchemy object to dictionary for JSON serialization
                 user_notifications.append({
                     'id': notification.id,
                     'title': notification.title,
                     'message': notification.message,
-                    'created_at': notification.created_at.isoformat(),
+                    'created_at': notification.created_at.isoformat() if notification.created_at else None,
                     'unread': not user_notif.is_read
                 })
                 
@@ -1362,6 +1363,7 @@ def get_notifications():
                     unread_count += 1
         
         db.session.commit()
+        
         return jsonify({
             'notifications': user_notifications,
             'unread_count': unread_count
@@ -1369,7 +1371,8 @@ def get_notifications():
         
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-
+    
+    
 @app.route('/api/notify/read-all', methods=['POST'])
 @login_required
 def mark_all_notifications_read():
