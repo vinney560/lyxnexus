@@ -936,7 +936,7 @@
             
             try {
                 // Fetch fresh data from the server
-                const response = await fetch('/admin/notifications/data');
+                const response = await fetch('/admin/notifications');
                 const result = await response.json();
                 
                 if (result.success) {
