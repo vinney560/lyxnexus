@@ -1302,79 +1302,54 @@ def create_notification():
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
 
+# TEMPORARY: Return all active notifications regardless of targeting
 @app.route('/api/notify')
 @login_required
 def get_notifications():
-    """Get notifications for current user"""
     try:
-        # Get active notifications that user hasn't read or hasn't received yet
+        print(f"[DEBUG] TEMPORARY: Returning all active notifications for testing")
+        
         active_notifications = Notification.query.filter(
             Notification.is_active == True,
             (Notification.expires_at > nairobi_time()) | (Notification.expires_at == None)
         ).all()
         
         user_notifications = []
-        unread_count = 0
         
         for notification in active_notifications:
-            should_receive = False
+            # TEMPORARY: Skip all targeting logic
+            user_notif = UserNotification.query.filter_by(
+                user_id=current_user.id,
+                notification_id=notification.id
+            ).first()
             
-            # Check if user should receive this notification
-            if notification.target_audience == 'all':
-                should_receive = True
-            elif notification.target_audience == 'students' and not current_user.is_admin:
-                should_receive = True
-            elif notification.target_audience == 'admins' and current_user.is_admin:
-                should_receive = True
-            elif notification.target_audience == 'specific':
-                # Check if user is in specific users list
-                specific_user = NotificationSpecificUser.query.filter_by(
-                    notification_id=notification.id,
-                    user_id=current_user.id
-                ).first()
-                should_receive = specific_user is not None
-            
-            if should_receive:
-                # Check if user has already received this notification
-                user_notif = UserNotification.query.filter_by(
+            if not user_notif:
+                user_notif = UserNotification(
                     user_id=current_user.id,
-                    notification_id=notification.id
-                ).first()
-                
-                if not user_notif:
-                    # Create new user notification entry
-                    user_notif = UserNotification(
-                        user_id=current_user.id,
-                        notification_id=notification.id,
-                        is_read=False
-                    )
-                    db.session.add(user_notif)
-                
-                # Convert SQLAlchemy object to dictionary for JSON serialization
-                user_notifications.append({
-                    'id': notification.id,
-                    'title': notification.title,
-                    'message': notification.message,
-                    'created_at': notification.created_at.isoformat() if notification.created_at else None,
-                    'unread': not user_notif.is_read
-                })
-                
-                if not user_notif.is_read:
-                    unread_count += 1
+                    notification_id=notification.id,
+                    is_read=False
+                )
+                db.session.add(user_notif)
+            
+            user_notifications.append({
+                'id': notification.id,
+                'title': notification.title,
+                'message': notification.message,
+                'created_at': notification.created_at.isoformat(),
+                'unread': not user_notif.is_read
+            })
         
         db.session.commit()
-        print("[DEBUG] xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
-        print(f"Data: {user_notifications}")
-        print("[DEBUG] xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
+        
+        print(f"[DEBUG] TEMPORARY: Returning {len(user_notifications)} notifications")
         return jsonify({
             'notifications': user_notifications,
-            'unread_count': unread_count
+            'unread_count': len([n for n in user_notifications if n['unread']])
         })
         
     except Exception as e:
         return jsonify({'error': str(e)}), 500
     
-
 @app.route('/api/notify/read-all', methods=['POST'])
 @login_required
 def mark_all_notifications_read():
