@@ -1266,12 +1266,17 @@ def create_notification():
             is_active=data.get('is_active', True)
         )
         
-        # Set expiration if provided
         if data.get('expires_at'):
-            notification.expires_at = datetime.fromisoformat(data['expires_at'].replace('Z', '+00:00'))
+            # The frontend sends time in Nairobi time, but we need to convert to UTC for storage
+            nairobi_time = datetime.fromisoformat(data['expires_at'].replace('Z', '+00:00'))
+            # Convert Nairobi time to UTC for storage
+            notification.expires_at = nairobi_time - timedelta(hours=3)
+        else:
+            # Default to 7 days from now in UTC
+            notification.expires_at = datetime.utcnow() + timedelta(days=7)
         
         db.session.add(notification)
-        db.session.flush()  # Get the ID before commit
+        db.session.flush()
         
         # Add specific users if target is 'specific'
         if data.get('target_audience') == 'specific' and data.get('specific_users'):
@@ -1284,6 +1289,8 @@ def create_notification():
         
         db.session.commit()
         
+        # Debug output
+        nairobi_now = datetime.utcnow() + timedelta(hours=3)
         return jsonify({
             'success': True,
             'message': 'Notification created successfully',
@@ -1301,7 +1308,7 @@ def create_notification():
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
-
+    
 @app.route('/api/notify')
 @login_required
 def get_notifications():
@@ -1312,26 +1319,13 @@ def get_notifications():
         # Use consistent time comparison
         current_time = datetime.utcnow() + timedelta(hours=3)
         
-        print(f"[DEBUG] =========== NOTIFICATION CHECK ===========")
-        print(f"[DEBUG] Current time: {current_time}")
-        print(f"[DEBUG] User: {current_user.username} (Admin: {current_user.is_admin})")
-        
         # DEBUG: Check all notifications first
         all_notifications = Notification.query.all()
-        print(f"[DEBUG] Total notifications in DB: {len(all_notifications)}")
         
         for notification in all_notifications:
-            print(f"\n[DEBUG] Notification: '{notification.title}'")
-            print(f"  - ID: {notification.id}")
-            print(f"  - Active: {notification.is_active}")
-            print(f"  - Target: {notification.target_audience}") 
-            print(f"  - Expires: {notification.expires_at}")
-            
             if notification.expires_at:
                 is_future = notification.expires_at > current_time
                 time_diff = notification.expires_at - current_time
-                print(f"  - Is future: {is_future}")
-                print(f"  - Time difference: {time_diff}")
             else:
                 print(f"  - No expiration (always active)")
             
@@ -1341,43 +1335,32 @@ def get_notifications():
             passes_expiry = notification.expires_at is None or notification.expires_at > current_time
             passes_both = passes_active and passes_expiry
             
-            print(f"  - Passes active: {passes_active}")
-            print(f"  - Passes expiry: {passes_expiry}")
-            print(f"  - Passes both: {passes_both}")
-        
         # Now run the actual query
         active_notifications = Notification.query.filter(
             Notification.is_active == True,
             (Notification.expires_at > current_time) | (Notification.expires_at == None)
         ).all()
         
-        print(f"\n[DEBUG] Query returned: {len(active_notifications)} active notifications")
-        
         user_notifications = []
         unread_count = 0
         
         for notification in active_notifications:
-            print(f"[DEBUG] Processing active: '{notification.title}'")
             
             should_receive = False
             
             # Check if user should receive this notification
             if notification.target_audience == 'all':
                 should_receive = True
-                print(f"  ✓ Qualifies: ALL users")
             elif notification.target_audience == 'students' and not current_user.is_admin:
                 should_receive = True
-                print(f"  ✓ Qualifies: STUDENTS")
             elif notification.target_audience == 'admins' and current_user.is_admin:
                 should_receive = True
-                print(f"  ✓ Qualifies: ADMINS")
             elif notification.target_audience == 'specific':
                 specific_user = NotificationSpecificUser.query.filter_by(
                     notification_id=notification.id,
                     user_id=current_user.id
                 ).first()
                 should_receive = specific_user is not None
-                print(f"  ✓ Qualifies for SPECIFIC: {should_receive}")
             else:
                 print(f"  ✗ Does NOT qualify")
             
@@ -1394,7 +1377,6 @@ def get_notifications():
                         is_read=False
                     )
                     db.session.add(user_notif)
-                    print(f"  + Created UserNotification entry")
                 else:
                     print(f"  • Existing entry, read: {user_notif.is_read}")
                 
@@ -1410,11 +1392,6 @@ def get_notifications():
                     unread_count += 1
         
         db.session.commit()
-        
-        print(f"\n[DEBUG] Final result: {len(user_notifications)} notifications for user")
-        print(f"[DEBUG] Unread count: {unread_count}")
-        print("[DEBUG] ==========================================")
-        
         return jsonify({
             'notifications': user_notifications,
             'unread_count': unread_count
