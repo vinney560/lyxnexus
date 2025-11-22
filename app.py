@@ -1309,46 +1309,77 @@ def get_notifications():
     try:
         from datetime import datetime, timedelta
         
-        # Use local datetime logic
+        # Use consistent time comparison
         current_time = datetime.utcnow() + timedelta(hours=3)
         
+        print(f"[DEBUG] =========== NOTIFICATION CHECK ===========")
         print(f"[DEBUG] Current time: {current_time}")
+        print(f"[DEBUG] User: {current_user.username} (Admin: {current_user.is_admin})")
         
-        # Get active notifications
+        # DEBUG: Check all notifications first
+        all_notifications = Notification.query.all()
+        print(f"[DEBUG] Total notifications in DB: {len(all_notifications)}")
+        
+        for notification in all_notifications:
+            print(f"\n[DEBUG] Notification: '{notification.title}'")
+            print(f"  - ID: {notification.id}")
+            print(f"  - Active: {notification.is_active}")
+            print(f"  - Target: {notification.target_audience}") 
+            print(f"  - Expires: {notification.expires_at}")
+            
+            if notification.expires_at:
+                is_future = notification.expires_at > current_time
+                time_diff = notification.expires_at - current_time
+                print(f"  - Is future: {is_future}")
+                print(f"  - Time difference: {time_diff}")
+            else:
+                print(f"  - No expiration (always active)")
+            
+            # Check if passes active filter
+            passes_active = notification.is_active == True
+            # Check if passes expiration filter  
+            passes_expiry = notification.expires_at is None or notification.expires_at > current_time
+            passes_both = passes_active and passes_expiry
+            
+            print(f"  - Passes active: {passes_active}")
+            print(f"  - Passes expiry: {passes_expiry}")
+            print(f"  - Passes both: {passes_both}")
+        
+        # Now run the actual query
         active_notifications = Notification.query.filter(
             Notification.is_active == True,
             (Notification.expires_at > current_time) | (Notification.expires_at == None)
         ).all()
         
-        print(f"[DEBUG] Found {len(active_notifications)} active notifications")
+        print(f"\n[DEBUG] Query returned: {len(active_notifications)} active notifications")
         
         user_notifications = []
         unread_count = 0
         
         for notification in active_notifications:
-            print(f"[DEBUG] Processing: '{notification.title}'")
-            print(f"[DEBUG]   Expires: {notification.expires_at}")
-            print(f"[DEBUG]   Not expired: {not notification.expires_at or notification.expires_at > current_time}")
+            print(f"[DEBUG] Processing active: '{notification.title}'")
             
             should_receive = False
             
             # Check if user should receive this notification
             if notification.target_audience == 'all':
                 should_receive = True
-                print(f"[DEBUG]   ✓ Qualifies: ALL users")
+                print(f"  ✓ Qualifies: ALL users")
             elif notification.target_audience == 'students' and not current_user.is_admin:
                 should_receive = True
-                print(f"[DEBUG]   ✓ Qualifies: STUDENTS")
+                print(f"  ✓ Qualifies: STUDENTS")
             elif notification.target_audience == 'admins' and current_user.is_admin:
                 should_receive = True
-                print(f"[DEBUG]   ✓ Qualifies: ADMINS")
+                print(f"  ✓ Qualifies: ADMINS")
             elif notification.target_audience == 'specific':
                 specific_user = NotificationSpecificUser.query.filter_by(
                     notification_id=notification.id,
                     user_id=current_user.id
                 ).first()
                 should_receive = specific_user is not None
-                print(f"[DEBUG]   ✓ Qualifies for SPECIFIC: {should_receive}")
+                print(f"  ✓ Qualifies for SPECIFIC: {should_receive}")
+            else:
+                print(f"  ✗ Does NOT qualify")
             
             if should_receive:
                 user_notif = UserNotification.query.filter_by(
@@ -1363,7 +1394,9 @@ def get_notifications():
                         is_read=False
                     )
                     db.session.add(user_notif)
-                    print(f"[DEBUG]   + Created UserNotification entry")
+                    print(f"  + Created UserNotification entry")
+                else:
+                    print(f"  • Existing entry, read: {user_notif.is_read}")
                 
                 user_notifications.append({
                     'id': notification.id,
@@ -1378,8 +1411,9 @@ def get_notifications():
         
         db.session.commit()
         
-        print(f"[DEBUG] Final: {len(user_notifications)} notifications for user")
-        print("[DEBUG] =======================================================")
+        print(f"\n[DEBUG] Final result: {len(user_notifications)} notifications for user")
+        print(f"[DEBUG] Unread count: {unread_count}")
+        print("[DEBUG] ==========================================")
         
         return jsonify({
             'notifications': user_notifications,
@@ -1388,6 +1422,8 @@ def get_notifications():
         
     except Exception as e:
         print(f"[ERROR] in /api/notify: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return jsonify({'error': str(e)}), 500
     
 @app.route('/api/notify/read-all', methods=['POST'])
