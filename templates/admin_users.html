@@ -108,11 +108,16 @@
     }
 
     .btn-ai {
-        background: linear-gradient(90deg, #4fea7d, #6fa1e8);
+        background: linear-gradient(90deg, #a3aa3f, #5a761a);
     }
     
     .btn-dashboard {
         background: linear-gradient(135deg, #6f31b5, #1a1ad7);
+    }
+
+    .btn-notify {
+        background: linear-gradient(90deg, #10B981, #059669);
+        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
     }
 
     .btn-info {
@@ -719,6 +724,9 @@
                 <div class="nav-buttons-container">
                     <button class="btn btn-dashboard" onclick="window.location.href='/dashboard'">
                         <i class="fas fa-tachometer-alt mr-2"></i> Dashboard
+                    </button>
+                    <button class="btn btn-notify" onclick="window.location.href='/admin/notifications'">
+                        <i class="fas fa-bell mr-2"></i> Notification
                     </button>
                     <button class="btn btn-ai" onclick="window.location.href='/ai-chat'">
                         <i class="fas fa-robot mr-2"></i> AI Help

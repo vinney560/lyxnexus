@@ -337,23 +337,10 @@
         const mobileError = document.getElementById('mobile-error');
         const successMessage = document.getElementById('success-message');
         const submitBtn = document.getElementById('submit-btn');
-        const backBtn = document.getElementById('backBtn');
         const cancelEdit = document.getElementById('cancelEdit');
 
         // Back button handler
         const isAdmin = {{ 'true' if current_user.is_admin else 'false' }};
-
-        backBtn.addEventListener('click', function() {
-            backBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i><span>existing...</span>';
-            const redirectUrl = isAdmin ? '/admin' : '/main-page';
-            window.location.href = redirectUrl;
-            backBtn.disabled = true; // prevent double clicks
-
-            setTimeout(() => {
-                backBtn.innerHTML = '<i class="fas fa-arrow-left mr-2"></i><span>Back to Dashboard</span>';
-                backBtn.disabled = false;
-            }, 2000); // simulate loading delay
-        });
 
         // Cancel button handler
         cancelEdit.addEventListener('click', function() {
