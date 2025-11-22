@@ -1224,93 +1224,6 @@ def format_mobile_display(mobile):
 # =========================================
 # NOTIFICATION API ROUTES &&  RENDERING
 # =========================================
-
-"""
-When you want to send notification to a specific user. Must know the name || mobile
-"""
-@app.route('/api/users/search')
-@login_required
-@admin_required
-def search_users():
-    """Search users for specific targeting"""
-    
-    query = request.args.get('q', '')
-    if not query or len(query) < 2:
-        return jsonify({'users': []})
-    
-    users = User.query.filter(
-        (User.username.ilike(f'%{query}%')) | 
-        (User.mobile.ilike(f'%{query}%'))
-    ).limit(10).all()
-    
-    return jsonify({
-        'users': [{
-            'id': user.id,
-            'username': user.username,
-            'mobile': user.mobile,
-            'is_admin': user.is_admin,
-            'status': user.status
-        } for user in users]
-    })
-
-@app.route('/admin/notifications/create', methods=['POST'])
-@login_required
-@admin_required
-def create_notification():
-    """Create a new notification with specific user targeting"""
-    
-    try:
-        data = request.get_json()
-        
-        notification = Notification(
-            title=data['title'],
-            message=data['message'],
-            target_audience=data.get('target_audience', 'all'),
-            is_active=data.get('is_active', True)
-        )
-        
-        if data.get('expires_at'):
-            # The frontend sends time in Nairobi time, but we need to convert to UTC for storage
-            nairobi_time = datetime.fromisoformat(data['expires_at'].replace('Z', '+00:00'))
-            # Convert to Nairobi time for Storage
-            notification.expires_at = nairobi_time + timedelta(hours=3)
-        else:
-            # Default to 7 days from now in UTC
-            notification.expires_at = datetime.utcnow() + timedelta(days=7)
-        
-        db.session.add(notification)
-        db.session.flush()
-        
-        # Add specific users if target is 'specific'
-        if data.get('target_audience') == 'specific' and data.get('specific_users'):
-            for user_id in data['specific_users']:
-                specific_user = NotificationSpecificUser(
-                    notification_id=notification.id,
-                    user_id=user_id
-                )
-                db.session.add(specific_user)
-        
-        db.session.commit()
-        
-        # Debug output
-        nairobi_now = datetime.utcnow() + timedelta(hours=3)
-        return jsonify({
-            'success': True,
-            'message': 'Notification created successfully',
-            'notification': {
-                'id': notification.id,
-                'title': notification.title,
-                'message': notification.message,
-                'target_audience': notification.target_audience,
-                'is_active': notification.is_active,
-                'created_at': notification.created_at.isoformat(),
-                'expires_at': notification.expires_at.isoformat() if notification.expires_at else None
-            }
-        })
-        
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({'error': str(e)}), 500
     
 @app.route('/api/notify')
 @login_required
@@ -1425,6 +1338,94 @@ def mark_all_notifications_read():
         return jsonify({'success': True, 'message': 'All notifications marked as read'})
         
     except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+#------------------------------------------------
+"""
+When you want to send notification to a specific user. Must know the name || mobile
+"""
+@app.route('/api/users/search')
+@login_required
+@admin_required
+def search_users():
+    """Search users for specific targeting"""
+    
+    query = request.args.get('q', '')
+    if not query or len(query) < 2:
+        return jsonify({'users': []})
+    
+    users = User.query.filter(
+        (User.username.ilike(f'%{query}%')) | 
+        (User.mobile.ilike(f'%{query}%'))
+    ).limit(10).all()
+    
+    return jsonify({
+        'users': [{
+            'id': user.id,
+            'username': user.username,
+            'mobile': user.mobile,
+            'is_admin': user.is_admin,
+            'status': user.status
+        } for user in users]
+    })
+
+@app.route('/admin/notifications/create', methods=['POST'])
+@login_required
+@admin_required
+def create_notification():
+    """Create a new notification with specific user targeting"""
+    
+    try:
+        data = request.get_json()
+        
+        notification = Notification(
+            title=data['title'],
+            message=data['message'],
+            target_audience=data.get('target_audience', 'all'),
+            is_active=data.get('is_active', True)
+        )
+        
+        if data.get('expires_at'):
+            # The frontend sends time in Nairobi time, but we need to convert to UTC for storage
+            nairobi_time = datetime.fromisoformat(data['expires_at'].replace('Z', '+00:00'))
+            # Convert to Nairobi time for Storage
+            notification.expires_at = nairobi_time + timedelta(hours=3)
+        else:
+            # Default to 7 days from now in UTC
+            notification.expires_at = datetime.utcnow() + timedelta(days=7)
+        
+        db.session.add(notification)
+        db.session.flush()
+        
+        # Add specific users if target is 'specific'
+        if data.get('target_audience') == 'specific' and data.get('specific_users'):
+            for user_id in data['specific_users']:
+                specific_user = NotificationSpecificUser(
+                    notification_id=notification.id,
+                    user_id=user_id
+                )
+                db.session.add(specific_user)
+        
+        db.session.commit()
+        
+        # Debug output
+        nairobi_now = datetime.utcnow() + timedelta(hours=3)
+        return jsonify({
+            'success': True,
+            'message': 'Notification created successfully',
+            'notification': {
+                'id': notification.id,
+                'title': notification.title,
+                'message': notification.message,
+                'target_audience': notification.target_audience,
+                'is_active': notification.is_active,
+                'created_at': notification.created_at.isoformat(),
+                'expires_at': notification.expires_at.isoformat() if notification.expires_at else None
+            }
+        })
+        
+    except Exception as e:
+        db.session.rollback()
         return jsonify({'error': str(e)}), 500
 
 @app.route('/admin/notifications')
