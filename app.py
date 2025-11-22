@@ -1302,52 +1302,92 @@ def create_notification():
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
 
-# TEMPORARY: Return all active notifications regardless of targeting
 @app.route('/api/notify')
 @login_required
 def get_notifications():
+    """Get notifications for current user"""
     try:
-        print(f"[DEBUG] TEMPORARY: Returning all active notifications for testing")
+        from datetime import datetime, timedelta
         
+        # Use local datetime logic instead of nairobi_time()
+        current_time = datetime.utcnow() + timedelta(hours=3)
+        
+        print(f"[DEBUG] Current time: {current_time}")
+        
+        # Get active notifications
         active_notifications = Notification.query.filter(
             Notification.is_active == True,
-            (Notification.expires_at > nairobi_time()) | (Notification.expires_at == None)
+            (Notification.expires_at > current_time) | (Notification.expires_at == None)
         ).all()
         
+        print(f"[DEBUG] Found {len(active_notifications)} active notifications")
+        
         user_notifications = []
+        unread_count = 0
         
         for notification in active_notifications:
-            # TEMPORARY: Skip all targeting logic
-            user_notif = UserNotification.query.filter_by(
-                user_id=current_user.id,
-                notification_id=notification.id
-            ).first()
+            print(f"[DEBUG] Processing: '{notification.title}'")
+            print(f"[DEBUG]   Expires: {notification.expires_at}")
+            print(f"[DEBUG]   Not expired: {not notification.expires_at or notification.expires_at > current_time}")
             
-            if not user_notif:
-                user_notif = UserNotification(
-                    user_id=current_user.id,
+            should_receive = False
+            
+            # Check if user should receive this notification
+            if notification.target_audience == 'all':
+                should_receive = True
+                print(f"[DEBUG]   ✓ Qualifies: ALL users")
+            elif notification.target_audience == 'students' and not current_user.is_admin:
+                should_receive = True
+                print(f"[DEBUG]   ✓ Qualifies: STUDENTS")
+            elif notification.target_audience == 'admins' and current_user.is_admin:
+                should_receive = True
+                print(f"[DEBUG]   ✓ Qualifies: ADMINS")
+            elif notification.target_audience == 'specific':
+                specific_user = NotificationSpecificUser.query.filter_by(
                     notification_id=notification.id,
-                    is_read=False
-                )
-                db.session.add(user_notif)
+                    user_id=current_user.id
+                ).first()
+                should_receive = specific_user is not None
+                print(f"[DEBUG]   ✓ Qualifies for SPECIFIC: {should_receive}")
             
-            user_notifications.append({
-                'id': notification.id,
-                'title': notification.title,
-                'message': notification.message,
-                'created_at': notification.created_at.isoformat(),
-                'unread': not user_notif.is_read
-            })
+            if should_receive:
+                user_notif = UserNotification.query.filter_by(
+                    user_id=current_user.id,
+                    notification_id=notification.id
+                ).first()
+                
+                if not user_notif:
+                    user_notif = UserNotification(
+                        user_id=current_user.id,
+                        notification_id=notification.id,
+                        is_read=False
+                    )
+                    db.session.add(user_notif)
+                    print(f"[DEBUG]   + Created UserNotification entry")
+                
+                user_notifications.append({
+                    'id': notification.id,
+                    'title': notification.title,
+                    'message': notification.message,
+                    'created_at': notification.created_at.isoformat() if notification.created_at else None,
+                    'unread': not user_notif.is_read
+                })
+                
+                if not user_notif.is_read:
+                    unread_count += 1
         
         db.session.commit()
         
-        print(f"[DEBUG] TEMPORARY: Returning {len(user_notifications)} notifications")
+        print(f"[DEBUG] Final: {len(user_notifications)} notifications for user")
+        print("[DEBUG] =======================================================")
+        
         return jsonify({
             'notifications': user_notifications,
-            'unread_count': len([n for n in user_notifications if n['unread']])
+            'unread_count': unread_count
         })
         
     except Exception as e:
+        print(f"[ERROR] in /api/notify: {str(e)}")
         return jsonify({'error': str(e)}), 500
     
 @app.route('/api/notify/read-all', methods=['POST'])
