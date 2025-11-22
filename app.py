@@ -1509,43 +1509,187 @@ def delete_notification(notification_id):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+import ctypes
+import json
+from flask import jsonify
+
+# Load C library
+try:
+    clib = ctypes.CDLL('./libstatsprocessor.so')
+    
+    # Define C structures
+    class NotificationData(ctypes.Structure):
+        _fields_ = [
+            ('id', ctypes.c_int),
+            ('title', ctypes.c_char_p),
+            ('is_active', ctypes.c_int),
+            ('total_receivers', ctypes.c_int),
+            ('read_count', ctypes.c_int)
+        ]
+
+    class InputData(ctypes.Structure):
+        _fields_ = [
+            ('notifications', ctypes.POINTER(NotificationData)),
+            ('count', ctypes.c_int),
+            ('total_users', ctypes.c_int)
+        ]
+
+    class BasicStats(ctypes.Structure):
+        _fields_ = [
+            ('total_notifications', ctypes.c_int),
+            ('active_notifications', ctypes.c_int),
+            ('total_users', ctypes.c_int)
+        ]
+
+    class ProcessedStat(ctypes.Structure):
+        _fields_ = [
+            ('id', ctypes.c_int),
+            ('title', ctypes.c_char_p),
+            ('total_receivers', ctypes.c_int),
+            ('read_count', ctypes.c_int),
+            ('read_percentage', ctypes.c_double)
+        ]
+
+    class OutputData(ctypes.Structure):
+        _fields_ = [
+            ('basic', BasicStats),
+            ('stats', ctypes.POINTER(ProcessedStat)),
+            ('stats_count', ctypes.c_int)
+        ]
+
+    # Define C function prototypes
+    clib.process_stats.argtypes = [ctypes.POINTER(InputData)]
+    clib.process_stats.restype = ctypes.POINTER(OutputData)
+    
+    clib.free_input_data.argtypes = [ctypes.POINTER(InputData)]
+    clib.free_input_data.restype = None
+    
+    clib.free_output_data.argtypes = [ctypes.POINTER(OutputData)]
+    clib.free_output_data.restype = None
+
+except Exception as e:
+    print(f"C library load failed: {e}")
+    clib = None
+
+def get_notification_stats_c():
+    """Get stats using C processing"""
+    if not clib:
+        return None
+
+    try:
+        # Python fetches raw data from database
+        total_users = User.query.count()
+        notifications = Notification.query.order_by(Notification.created_at.desc()).limit(10).all()
+        
+        # Prepare input data for C
+        notification_count = len(notifications)
+        notifications_array = (NotificationData * notification_count)()
+        
+        for i, notification in enumerate(notifications):
+            total_receivers = UserNotification.query.filter_by(
+                notification_id=notification.id
+            ).count()
+            read_count = UserNotification.query.filter_by(
+                notification_id=notification.id, is_read=True
+            ).count()
+            
+            notifications_array[i].id = notification.id
+            notifications_array[i].title = ctypes.c_char_p(notification.title.encode('utf-8'))
+            notifications_array[i].is_active = 1 if notification.is_active else 0
+            notifications_array[i].total_receivers = total_receivers
+            notifications_array[i].read_count = read_count
+        
+        # Create input structure
+        input_data = InputData()
+        input_data.notifications = notifications_array
+        input_data.count = notification_count
+        input_data.total_users = total_users
+        
+        # C processes the data
+        output_ptr = clib.process_stats(ctypes.byref(input_data))
+        if not output_ptr:
+            return None
+            
+        output = output_ptr.contents
+        
+        # Convert C output to Python dict
+        result = {
+            'total_notifications': output.basic.total_notifications,
+            'active_notifications': output.basic.active_notifications,
+            'total_users': output.basic.total_users,
+            'latest_stats': []
+        }
+        
+        for i in range(output.stats_count):
+            stat = output.stats[i]
+            result['latest_stats'].append({
+                'id': stat.id,
+                'title': stat.title.decode('utf-8') if stat.title else '',
+                'total_receivers': stat.total_receivers,
+                'read_count': stat.read_count,
+                'read_percentage': round(stat.read_percentage, 2)
+            })
+        
+        # Free C memory
+        clib.free_output_data(output_ptr)
+        clib.free_input_data(ctypes.byref(input_data))
+        
+        return result
+        
+    except Exception as e:
+        print(f"C processing error: {e}")
+        return None
+
 @app.route('/admin/notifications/stats')
 @login_required
 @admin_required
 def notification_stats():
-    """Get notification statistics"""
-    
+    """Get notification statistics using C processing"""
     try:
-        total_notifications = Notification.query.count()
-        active_notifications = Notification.query.filter_by(is_active=True).count()
-        total_users = User.query.count()
+        # Try C processing first
+        stats_data = get_notification_stats_c()
         
-        # Get read statistics for latest notifications
-        latest_notifications = Notification.query.order_by(Notification.created_at.desc()).limit(5).all()
-        
-        stats = []
-        for notification in latest_notifications:
-            total_receivers = UserNotification.query.filter_by(notification_id=notification.id).count()
-            read_count = UserNotification.query.filter_by(notification_id=notification.id, is_read=True).count()
+        # Fallback to Python if C fails
+        if not stats_data:
+            total_notifications = Notification.query.count()
+            active_notifications = Notification.query.filter_by(is_active=True).count()
+            total_users = User.query.count()
             
-            stats.append({
-                'id': notification.id,
-                'title': notification.title,
-                'total_receivers': total_receivers,
-                'read_count': read_count,
-                'read_percentage': (read_count / total_receivers * 100) if total_receivers > 0 else 0
-            })
+            latest_notifications = Notification.query.order_by(
+                Notification.created_at.desc()
+            ).limit(5).all()
+            
+            stats = []
+            for notification in latest_notifications:
+                total_receivers = UserNotification.query.filter_by(
+                    notification_id=notification.id
+                ).count()
+                read_count = UserNotification.query.filter_by(
+                    notification_id=notification.id, is_read=True
+                ).count()
+                
+                stats.append({
+                    'id': notification.id,
+                    'title': notification.title,
+                    'total_receivers': total_receivers,
+                    'read_count': read_count,
+                    'read_percentage': round(
+                        (read_count / total_receivers * 100) if total_receivers > 0 else 0, 2
+                    )
+                })
+            
+            stats_data = {
+                'total_notifications': total_notifications,
+                'active_notifications': active_notifications,
+                'total_users': total_users,
+                'latest_stats': stats
+            }
         
-        return jsonify({
-            'total_notifications': total_notifications,
-            'active_notifications': active_notifications,
-            'total_users': total_users,
-            'latest_stats': stats
-        })
+        return jsonify(stats_data)
         
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-
+    
 @app.route('/admin/notifications/<int:notification_id>')
 @login_required
 @admin_required
