@@ -2042,7 +2042,6 @@
         
             async checkUserStatusAndLoadNotifications() {
                 try {
-                    console.log("DEBUG: Checking notifications");
 
                     await this.loadNotifications();
                     this.updateNotificationBadge();
@@ -2052,14 +2051,9 @@
                         this.notifications.length > 0 && 
                         document.visibilityState === 'visible'
                     );
-
-                    console.log("DEBUG: Should auto-show:", shouldAutoShow);
-                    console.log("DEBUG: Has dismissed:", this.hasUserDismissed());
-                    console.log("DEBUG: Notifications count:", this.notifications.length);
                 
                     if (shouldAutoShow) {
                         setTimeout(() => {
-                            console.log("DEBUG: Auto-showing notification overlay");
                             this.show();
                         }, 5000);
                     }
