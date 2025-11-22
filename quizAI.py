@@ -128,6 +128,11 @@ class QuizGenerator:
         - Personal or informal lifestyle topics
 
         If the topic matches any unit code (ZOOL 143, COMP 107, PHIL 104, BIT 100, COMS 101, MATH 112) or falls within academic disciplines, use the detailed specifications above to generate appropriate first-year level questions and stick only to the Unit Code details do not roam across all the Units. For other academic topics, use general academic resources to create curriculum-appropriate content.
+         **CRITICAL INSTRUCTION:** 
+            - If a specific unit code is mentioned in the topic, generate questions ONLY from that unit's content
+            - Do NOT include questions from other unit codes unless explicitly requested  
+            - Stay strictly within the specified academic discipline
+            - Focus exclusively on the relevant unit's learning outcomes and topics
         """
 
     def _load_unit_code_details(self):
