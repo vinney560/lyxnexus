@@ -92,6 +92,7 @@ class QuizGenerator:
         2. ACCURACY: Use only verified academic information relevant to the course
         3. DIVERSITY: Cover multiple aspects of the subject as outlined in the unit specifications
         4. LEVEL: Generate first-year university level questions appropriate for beginners
+        5. If Unit Code explicitly mentioned, Only ask questions related to the Unit and Topic
 
         SOURCE INTEGRATION:
         - Reference established academic sources specific to the discipline
@@ -126,7 +127,7 @@ class QuizGenerator:
         - Sports and games (unless being studied academically)
         - Personal or informal lifestyle topics
 
-        If the topic matches any unit code (ZOOL 143, COMP 107, PHIL 104, BIT 100, COMS 101, MATH 112) or falls within academic disciplines, use the detailed specifications above to generate appropriate first-year level questions. For other academic topics, use general academic resources to create curriculum-appropriate content.
+        If the topic matches any unit code (ZOOL 143, COMP 107, PHIL 104, BIT 100, COMS 101, MATH 112) or falls within academic disciplines, use the detailed specifications above to generate appropriate first-year level questions and stick only to the Unit Code details do not roam across all the Units. For other academic topics, use general academic resources to create curriculum-appropriate content.
         """
 
     def _load_unit_code_details(self):
