@@ -2042,34 +2042,32 @@
         
             async checkUserStatusAndLoadNotifications() {
                 try {
-                    // Check if user is banned - don't show notifications if banned
-                    const isBanned = false;
+                    console.log("DEBUG: Checking notifications");
 
-                    if (!isBanned) {
-                        await this.loadNotifications();
-                        this.updateNotificationBadge();
+                    await this.loadNotifications();
+                    this.updateNotificationBadge();
+                
+                    const shouldAutoShow = (
+                        !this.hasUserDismissed() && 
+                        this.notifications.length > 0 && 
+                        document.visibilityState === 'visible'
+                    );
 
-                        // Auto-show overlay conditions
-                        const shouldAutoShow = (
-                            !this.hasUserDismissed() && 
-                            this.notifications.length > 0 && 
-                            document.visibilityState === 'visible'
-                        );
-
-                        if (shouldAutoShow) {
-                            setTimeout(() => {
-                                this.show();
-                            }, 5000); // Show after 5 seconds
-                        }
+                    console.log("DEBUG: Should auto-show:", shouldAutoShow);
+                    console.log("DEBUG: Has dismissed:", this.hasUserDismissed());
+                    console.log("DEBUG: Notifications count:", this.notifications.length);
+                
+                    if (shouldAutoShow) {
+                        setTimeout(() => {
+                            console.log("DEBUG: Auto-showing notification overlay");
+                            this.show();
+                        }, 5000);
                     }
+
                 } catch (error) {
                     console.error('Error checking notifications:', error);
                 }
-            }
-        
-            isUserBanned() {
-                return false;
-            }
+            }            
         
             hasUserDismissed() {
                 return localStorage.getItem('notificationsDismissed') === 'true';
@@ -2232,10 +2230,6 @@
             }
         
             show() {
-                // Don't show if user is banned
-                if (this.isUserBanned()) {
-                    return;
-                }
             
                 this.overlay.classList.add('active');
                 document.body.classList.add('notification-overlay-active');

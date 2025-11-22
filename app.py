@@ -1363,7 +1363,9 @@ def get_notifications():
                     unread_count += 1
         
         db.session.commit()
-        
+        print("[DEBUG] xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
+        print(f"Data: {user_notifications}")
+        print("[DEBUG] xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
         return jsonify({
             'notifications': user_notifications,
             'unread_count': unread_count
@@ -1372,7 +1374,7 @@ def get_notifications():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
     
-    
+
 @app.route('/api/notify/read-all', methods=['POST'])
 @login_required
 def mark_all_notifications_read():
