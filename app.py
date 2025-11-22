@@ -1222,9 +1222,12 @@ def format_mobile_display(mobile):
 #===================================================================
 
 # =========================================
-# NOTIFICATION API ROUTES
+# NOTIFICATION API ROUTES &&  RENDERING
 # =========================================
 
+"""
+When you want to send notification to a specific user. Must know the name || mobile
+"""
 @app.route('/api/users/search')
 @login_required
 @admin_required
@@ -1578,7 +1581,7 @@ def get_notification_details(notification_id):
         return jsonify({'error': str(e)}), 500
 #===================================================================
 # =========================================
-# AI CHAT ROUTES - COMPLETE IMPLEMENTATION
+# AI CHAT ROUTES 
 # =========================================
 
 import requests
