@@ -1117,9 +1117,25 @@
         border: 1px solid rgba(59, 130, 246, 0.3);
     }
 
+    .search-container {
+        margin-bottom: 30px;
+        padding: 20px;
+        background: rgba(30, 30, 40, 0.7);
+        border-radius: 15px;
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        position: relative;
+    }
+
+    .search-input-wrapper {
+        position: relative;
+        display: flex;
+        justify-content: center;
+        max-width: 500px;
+        margin: 0 auto;
+    }
+
     .search-box {
         width: 100%;
-        max-width: 500px;
         padding: 12px 50px 12px 20px;
         background: rgba(15, 23, 42, 0.8);
         border: 2px solid rgba(59, 130, 246, 0.4);
@@ -1128,8 +1144,8 @@
         font-size: 16px;
         transition: all 0.3s ease;
         backdrop-filter: blur(10px);
+        font-family: 'Poppins', sans-serif;
     }
-
     .search-box:focus {
         outline: none;
         border-color: #3B82F6;
@@ -1143,16 +1159,20 @@
 
     .search-shortcut-hint {
         position: absolute;
-        right: 15px;
+        right: 8px;
         top: 50%;
         transform: translateY(-50%);
         background: rgba(59, 130, 246, 0.2);
         color: #3B82F6;
-        padding: 4px 8px;
-        border-radius: 6px;
-        font-size: 12px;
-        font-weight: 600;
+        padding: 5px 8px;
+        border-radius: 16px;
+        font-size: 14px;
+        font-weight: 700;
         border: 1px solid rgba(59, 130, 246, 0.3);
+        font-family: 'Poppins', sans-serif;
+        white-space: nowrap;
+        pointer-events: none;
+        z-index: 2;
     }
 
     .search-filters {
@@ -1220,7 +1240,6 @@
         opacity: 0.5;
     }
 
-    /* Responsive search */
     @media (max-width: 768px) {
         .search-container {
             padding: 15px;
@@ -1232,13 +1251,23 @@
             font-size: 14px;
         }
 
-        .search-filters {
-            gap: 8px;
+        .search-shortcut-hint {
+            right: 10px;
+            font-size: 15px;
+            padding: 5px 8px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .search-box {
+            padding: 8px 40px 8px 14px;
+            font-size: 13px;
         }
 
-        .filter-btn {
-            padding: 6px 12px;
-            font-size: 11px;
+        .search-shortcut-hint {
+            right: 8px;
+            font-size: 14px;
+            padding: 4px 7px;
         }
     }
 </style>
@@ -1804,7 +1833,7 @@
                 if (document.getElementById('search-container')) {
                     return;
                 }
-            
+                         
                 const searchHTML = `
                     <div class="search-container" id="search-container">
                         <div style="position: relative; display: flex; justify-content: center;">
@@ -1815,6 +1844,7 @@
                                 placeholder="Search announcements, assignments, topics..."
                                 autocomplete="off"
                             >
+                            <div class="search-shortcut-hint"><i class="fas fa-search"></i></div>
                         </div>
                         <div class="search-filters" id="search-filters"></div>
                         <div class="search-results-info" id="search-results-info"></div>
@@ -2114,6 +2144,7 @@
                 return results;
             }
         
+            // Display the searched stuff
             displayResults(results) {
                 const section = this.currentSection;
                 const container = document.getElementById(`${section}-container`);
@@ -2121,8 +2152,18 @@
             
                 if (!container || !sectionElement) return;
             
-                // Add search-active class to body to trigger CSS
+                // Add search-active class to body
                 document.body.classList.add('search-active');
+            
+                // Hide ALL content sections first --> prevent unnecesarry container
+                document.querySelectorAll('.content-section').forEach(sectionEl => {
+                    sectionEl.classList.remove('active');
+                    sectionEl.style.display = 'none';
+                });
+            
+                // Show ONLY the current search section
+                sectionElement.style.display = 'block';
+                sectionElement.classList.add('active');
             
                 // Create search results container if it doesn't exist
                 let resultsContainer = sectionElement.querySelector('.search-results');
@@ -2159,7 +2200,7 @@
                     return;
                 }
             
-                // Render search results
+                // Render search results based on section
                 switch(section) {
                     case 'announcements':
                         this.renderSearchAnnouncements(results, resultsContainer);
@@ -2176,7 +2217,64 @@
                 }
             
                 if (this.resultsInfo) {
-                    this.resultsInfo.textContent = `Found ${results.length} results for "${this.currentQuery}"`;
+                    this.resultsInfo.textContent = `Found ${results.length} results for "${this.currentQuery}" in ${this.getSectionName(section)}`;
+                }
+            }
+
+            // Helper function to get section display name
+            getSectionName(section) {
+                const names = {
+                    'announcements': 'Announcements',
+                    'assignments': 'Assignments', 
+                    'topics': 'Units',
+                    'timetable': 'Timetable'
+                };
+                return names[section] || section;
+            }
+
+            clearSearch() {
+                this.currentQuery = '';
+                if (this.searchInput) {
+                    this.searchInput.value = '';
+                }
+                if (this.resultsInfo) {
+                    this.resultsInfo.textContent = '';
+                }
+            
+                // Remove search-active class
+                document.body.classList.remove('search-active');
+            
+                // Show ALL sections again and restore navigation
+                document.querySelectorAll('.content-section').forEach(sectionEl => {
+                    sectionEl.style.display = 'block';
+                });
+            
+                // Set active section back to what it was before search
+                setActiveSection(this.currentSection);
+            
+                // Clear search results
+                const sectionElement = document.getElementById(this.currentSection);
+                if (sectionElement) {
+                    const resultsContainer = sectionElement.querySelector('.search-results');
+                    if (resultsContainer) {
+                        resultsContainer.innerHTML = '';
+                    }
+                }
+            
+                // Force refresh of the current section to show original content
+                switch(this.currentSection) {
+                    case 'announcements':
+                        loadAnnouncements(true);
+                        break;
+                    case 'assignments':
+                        loadAssignments(true);
+                        break;
+                    case 'topics':
+                        loadTopics(true);
+                        break;
+                    case 'timetable':
+                        loadTimetable(true);
+                        break;
                 }
             }
 
@@ -2384,7 +2482,7 @@
                 if (!text) return '';
 
                 if(text.includes('<') && text.includes('>')) {
-                    return;
+                    return text;
                 }
             
                 const regex = new RegExp(`(${this.escapeRegex(term)})`, 'gi');

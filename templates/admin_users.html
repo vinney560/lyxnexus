@@ -453,6 +453,7 @@
     }
 
     .toast {
+        position: relative;
         padding: 15px 20px;
         border-radius: 10px;
         color: white;
@@ -465,6 +466,28 @@
 
     .toast.show {
         transform: translateX(0);
+    }
+
+    .toast-close {
+        background: rgba(31, 41, 55, 0.9);
+        border: none;
+        cursor: pointer;
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        font-size: 12px;
+        opacity: 0.8;
+        transition: all 0.2s ease;
+        z-index: 10;
+    }
+    
+    .toast-close:hover {
+        opacity: 1;
+        background: rgba(55, 65, 81, 0.9);
+        transform: scale(1.1);
     }
 
     .toast-success {
@@ -1296,14 +1319,19 @@
         function showToast(message, type = 'info', duration = 5000) {
             const toastContainer = document.getElementById('toast-container');
             const toastId = 'toast-' + Date.now();
-
+        
             const toast = document.createElement('div');
             toast.id = toastId;
             toast.className = `toast toast-${type}`;
             toast.innerHTML = `
-                <div class="flex items-center">
-                    <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'} mr-2"></i>
-                    <span>${message}</span>
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'} mr-2"></i>
+                        <span>${message}</span>
+                    </div>
+                    <button class="toast-close absolute -top-0 -right-0 bg-gray-800 hover:bg-gray-700 rounded-full w-6 h-6 flex items-center justify-center text-white border border-gray-600 transition-all" onclick="removeToast('${toastId}')">
+                        <i class="fas fa-times text-xs"></i>
+                    </button>                    
                 </div>
             `;
             
@@ -1313,19 +1341,34 @@
             setTimeout(() => {
                 toast.classList.add('show');
             }, 10);
-
-            // Auto remove after duration
-            setTimeout(() => {
-                toast.classList.remove('show');
-                setTimeout(() => {
-                    if (toast.parentNode) {
-                        toast.parentNode.removeChild(toast);
-                    }
-                }, 300);
+        
+            // Auto remove after duration (if not already closed)
+            const autoRemove = setTimeout(() => {
+                removeToast(toastId);
             }, duration);
-
+        
+            // Store timeout ID for potential cleanup
+            toast.dataset.timeoutId = autoRemove;
+        
             return toastId;
         }
+
+        function removeToast(toastId) {
+            const toast = document.getElementById(toastId);
+            if (!toast) return;
+
+            // Clear the auto-remove timeout if it exists
+            if (toast.dataset.timeoutId) {
+                clearTimeout(parseInt(toast.dataset.timeoutId));
+            }
+
+            toast.classList.remove('show');
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.parentNode.removeChild(toast);
+                }
+            }, 300);
+        }        
 
         function setButtonLoading(button, isLoading) {
             if (isLoading) {
@@ -1394,6 +1437,16 @@
                 showToast('Online users updated', 'success');
             } catch (error) {
                 showToast('Failed to update online users', 'error');
+            }
+        }
+
+        // rapidly Refresh online users
+        async function rapidRefreshOnlineUsers() {
+            try {
+                const users = await fetchOnlineUsers();
+                displayOnlineUsers(users);
+            } catch (error) {
+                console.log("Failed to Refresh User");
             }
         }
 
@@ -1889,6 +1942,20 @@
             window.location.href = '/logout';
         }
 
+        function stopAllPolling() {
+            if (pollInterval) clearInterval(pollInterval);
+            if (rapidPolling) clearInterval(rapidPolling);
+        }
+
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                stopAllPolling();
+            } else {
+                // refresh immediately upon page unhidding/visible
+                refreshOnlineUsers();
+            }
+        });
+
         document.addEventListener('DOMContentLoaded', function() {
             // Initialize charts
             initializeCharts();
@@ -1931,9 +1998,15 @@
                 refreshOnlineUsers();
             }, 120000);
             
+            // Auto Rapid Poll
+            rapidPolling = setInterval(() => {
+                rapidRefreshOnlineUsers();
+            }, 10000); //10s
+
             window.addEventListener('beforeunload', function() {
                 if (pollInterval) {
                     clearInterval(pollInterval);
+                    clearInterval(rapidPolling);
                 }
             });
         });

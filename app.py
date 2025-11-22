@@ -997,50 +997,50 @@ def secret_code():
 
 """LOGIN USER BASED ON THE PROVIDED REQUIREMENTS"""
 import re
+from sqlalchemy import or_
+
 @app.route('/login', methods=['POST', 'GET'])
 @limiter.limit("10 per minute")
 def login():
     next_page = request.args.get("next") or request.form.get("next")
-    login_type = request.form.get('login_type', 'student')  # 'student' or 'admin'
-        
+    
     # ===============================
     #  LOGIN FORM HANDLING
     # ===============================
     if request.method == 'POST':
-        username = request.form.get('username', '').strip().lower()[:50]
-        mobile = re.sub(r'\s+', '', request.form.get('mobile', ''))  # Removes all whitespace
-        master_key = request.form.get('master_key')
+        login_type = request.form.get('login_type', 'student')
+        login_subtype = request.form.get('login_subtype', 'login')
+        username = request.form.get('username', '').strip().lower()[:25]
+        mobile = re.sub(r'\D', '', request.form.get('mobile', ''))  # Keep only digits
+        master_key = request.form.get('master_key', '').strip()
 
-        # Validate mobile number
-        if not mobile or len(mobile) != 10 or not (mobile.startswith('07') or mobile.startswith('01')):
-            flash('Invalid mobile number', 'error')
-            return render_template('login.html', username=username, mobile=mobile,
-                                   login_type=login_type, year=_year())
+        # validation
+        validation_errors = []
         
+        # Validate username
+        if not username or len(username) < 3:
+            validation_errors.append('Username must be at least 3 characters long')
+        elif not re.match(r'^[a-zA-Z0-9_.-]+$', username):
+            validation_errors.append('Username can only contain letters, numbers, dots, hyphens, and underscores')
+        
+        # Validate mobile number
+        if not mobile or len(mobile) != 10 or not mobile.startswith(('07', '01')):
+            validation_errors.append('Invalid Kenyan mobile number. Must be 10 digits starting with 07 or 01')
+        
+        if validation_errors:
+            for error in validation_errors:
+                flash(error, 'error')
+            return render_template('login.html', 
+                                 username=username, 
+                                 mobile=format_mobile_display(mobile),
+                                 login_type=login_type,  # Pass back the same login_type
+                                 year=_year())
+
         # ===============================
         #  ADMIN LOGIN VIA MASTER KEY
         # ===============================
         if master_key:
-            admin_code_record = AdminCode.query.first()
-            if admin_code_record and check_password_hash(admin_code_record.code, master_key):
-                user = User.query.filter_by(mobile=mobile).first()
-                if user:
-                    user.is_admin = True
-                    if username and user.username.lower() != username.lower():
-                        user.username = username
-                    db.session.commit()
-                else:
-                    user = User(username=username, mobile=mobile, is_admin=True)
-                    db.session.add(user)
-                    db.session.commit()
-
-                login_user(user)
-                flash('Administrator access granted successfully!', 'success')
-                return redirect(next_page or url_for('admin_page'))
-            else:
-                flash('Invalid master authorization key', 'error')
-                return render_template('login.html', username=username, mobile=mobile,
-                                       login_type=login_type, year=_year())
+            return handle_master_key_login(username, mobile, master_key, next_page)
 
         user = User.query.filter_by(mobile=mobile).first()
 
@@ -1048,44 +1048,143 @@ def login():
         #  ADMIN LOGIN (WITHOUT MASTER KEY)
         # =================================
         if login_type == 'admin':
-            if not user or not user.is_admin:
-                flash('Invalid admin credentials', 'error')
-                return render_template('login.html', username=username, mobile=mobile,
-                                       login_type=login_type, year=_year())
-
-            if user.username.lower() != username.lower():
-                flash('Username does not match admin account', 'error')
-                return render_template('login.html', username=username, mobile=mobile,
-                                       login_type=login_type, year=_year())
-
-            login_user(user)
-            flash('Admin login successful!', 'success')
-            return redirect(next_page or url_for('admin_page'))
+            return handle_admin_login(user, username, mobile, next_page)
 
         # ================
         #  STUDENT LOGIN
         # ================
         if login_type == 'student':
-            if not user:
-                new_user = User(username=username, mobile=mobile, is_admin=False)
-                db.session.add(new_user)
-                db.session.commit()
-                login_user(new_user)
-                flash('Welcome to LyxNexus! Let\'s get you started.', 'success')
-                return redirect(url_for('nav_guide'))
+            return handle_student_login(user, username, mobile, login_subtype, next_page)
+
+    # GET request - render login template
+    login_type = request.args.get('login_type', 'student')
+    return render_template('login.html', 
+                         login_type=login_type, 
+                         year=_year())
+
+def handle_master_key_login(username, mobile, master_key, next_page):
+    """Handle admin login with master key"""
+    admin_code_record = AdminCode.query.first()
+    
+    if not admin_code_record or not check_password_hash(admin_code_record.code, master_key):
+        flash('Invalid master authorization key', 'error')
+        return render_template('login.html', 
+                             username=username, 
+                             mobile=format_mobile_display(mobile),
+                             login_type='admin',  # Stay on admin tab
+                             year=_year())
+
+    # Find or create admin user
+    user = User.query.filter_by(mobile=mobile).first()
+    
+    if user:
+        # Existing user - upgrade to admin
+        user.is_admin = True
+        if username and user.username.lower() != username.lower():
+            # Check if new username is available
+            existing_user = User.query.filter(
+                User.username.ilike(username),
+                User.id != user.id
+            ).first()
+            if not existing_user:
+                user.username = username
             else:
-                if user.username.lower() != username.lower():
-                    flash('Username does not match existing account', 'error')
-                    return render_template('login.html', username=username, mobile=mobile,
-                                           login_type=login_type, year=_year())
+                flash('Username already taken', 'warning')
+    else:
+        # New admin user
+        if User.query.filter(User.username.ilike(username)).first():
+            flash('Username already taken', 'error')
+            return render_template('login.html',
+                                 username=username,
+                                 mobile=format_mobile_display(mobile),
+                                 login_type='admin',
+                                 year=_year())
+        user = User(username=username, mobile=mobile, is_admin=True)
 
-                login_user(user)
-                return redirect(next_page or url_for('main_page', message='Login successful!', message_type='success'))
+    db.session.add(user)
+    db.session.commit()
+    login_user(user)
+    
+    flash('Administrator access granted successfully!', 'success')
+    return redirect(next_page or url_for('admin_page'))
 
-    # Render login form for new session
-    login_type = request.args.get('type', 'student')
-    return render_template('login.html', login_type=login_type, year=_year())
+def handle_admin_login(user, username, mobile, next_page):
+    """Handle regular admin login"""
+    if not user or not user.is_admin:
+        flash('Invalid admin credentials or insufficient privileges', 'error')
+        return render_template('login.html',
+                             username=username,
+                             mobile=format_mobile_display(mobile),
+                             login_type='admin',  # Stay on admin tab
+                             year=_year())
 
+    if user.username.lower() != username.lower():
+        flash('Username does not match admin account', 'error')
+        return render_template('login.html',
+                             username=username,
+                             mobile=format_mobile_display(mobile),
+                             login_type='admin',  # Stay on admin tab
+                             year=_year())
+
+    login_user(user)
+    flash('Admin login successful!', 'success')
+    return redirect(next_page or url_for('admin_page'))
+
+def handle_student_login(user, username, mobile, login_subtype, next_page):
+    """Handle student login/registration"""
+    if login_subtype == 'register':
+        if user:
+            flash('An account with this mobile number already exists. Please login instead.', 'error')
+            return render_template('login.html',
+                                 username=username,
+                                 mobile=format_mobile_display(mobile),
+                                 login_type='student',  # Stay on student tab
+                                 year=_year())
+        
+        # Check if username is taken
+        if User.query.filter(User.username.ilike(username)).first():
+            flash('Username already taken. Please choose a different one.', 'error')
+            return render_template('login.html',
+                                 username=username,
+                                 mobile=format_mobile_display(mobile),
+                                 login_type='student',  # Stay on student tab
+                                 year=_year())
+        
+        # Create new student
+        new_user = User(username=username, mobile=mobile, is_admin=False)
+        db.session.add(new_user)
+        db.session.commit()
+        login_user(new_user)
+        
+        flash('Welcome to LyxNexus! Let\'s get you started.', 'success')
+        return redirect(url_for('nav_guide'))
+    
+    else:  # login subtype
+        if not user:
+            flash('No account found with this mobile number. Please register instead.', 'error')
+            return render_template('login.html',
+                                 username=username,
+                                 mobile=format_mobile_display(mobile),
+                                 login_type='student',  # Stay on student tab
+                                 year=_year())
+
+        if user.username.lower() != username.lower():
+            flash('Username does not match existing account', 'error')
+            return render_template('login.html',
+                                 username=username,
+                                 mobile=format_mobile_display(mobile),
+                                 login_type='student',  # Stay on student tab
+                                 year=_year())
+
+        login_user(user)
+        flash('Login successful!', 'success')
+        return redirect(next_page or url_for('main_page'))
+
+def format_mobile_display(mobile):
+    """Format mobile number for display"""
+    if len(mobile) == 10:
+        return f"{mobile[:2]} {mobile[2:5]} {mobile[5:8]} {mobile[8:]}"
+    return mobile
 #===================================================================
 
 # =========================================

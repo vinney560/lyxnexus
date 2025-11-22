@@ -578,8 +578,41 @@
         cursor: not-allowed !important;
         pointer-events: none;
     }
+
+    /* Student subtype styles */
+    .student-subtype-tabs {
+        display: flex;
+        border-radius: 10px;
+        background: rgba(30, 30, 40, 0.6);
+        padding: 4px;
+        margin-bottom: 20px;
+    }
+
+    .student-subtype-tab {
+        flex: 1;
+        text-align: center;
+        padding: 10px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 500;
+        font-size: 14px;
+    }
+
+    .student-subtype-tab.active {
+        background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+        color: white;
+    }
+
+    .student-subtype-tab:not(.active):hover {
+        background: rgba(59, 130, 246, 0.2);
+    }
+
+    .custom-bg {
+        background-image: url('/uploads/OIP10.jpg');
+    }
 </style>
-<body class="bg-[url('/uploads/OIP10.jpg')] bg-fixed bg-center bg-cover brightness-50">
+<body class="custom-bg bg-fixed bg-center bg-cover">
     <header class="nav-header">
         <div class="nav-content">
             <div class="nav-logo" onclick="goToHome()">
@@ -591,7 +624,7 @@
                     <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
                     <line x1="12" y1="22.08" x2="12" y2="12"></line>
                 </svg>
-                <span class="nav-logo-text">LyxNexus</span>
+                <span class="nav-logo-text">Home</span>
             </div>
             <div class="nav-links">
                 <a href="#" class="nav-link" onclick="window.location.href='/terms'">
@@ -636,8 +669,20 @@
 
             <!-- Student Login Form -->
             <div id="student-tab" class="tab-content active">
+                <!-- Student Subtype Tabs -->
+                <div class="student-subtype-tabs">
+                    <div class="student-subtype-tab active" data-subtype="login">
+                        Login
+                    </div>
+                    <div class="student-subtype-tab" data-subtype="register">
+                        Register
+                    </div>
+                </div>
+
                 <form id="student-login-form" method="POST" onsubmit="return validateStudentForm(event)">
                     <input type="hidden" name="login_type" value="student">
+                    <input type="hidden" name="login_subtype" id="student-login-subtype" value="login">
+                    
                     <div class="form-group">
                         <label class="form-label" for="username">Username</label>
                         <input type="text" id="username" name="username" class="form-input" placeholder="E.g. LyxNexus" minlength="3" value="{{ username if username }}" required>
@@ -687,7 +732,7 @@
                         
                         <div class="form-group">
                             <label class="form-label" for="admin-mobile">Mobile Number</label>
-                            <input type="tel" id="admin-mobile" name="mobile" class="form-input" placeholder="07XX XXX XXX" required>
+                            <input type="tel" id="admin-mobile" name="mobile" class="form-input" placeholder="07XX XXX XXX or 01XX XXX XXX" required>
                         </div>
                         
                         <button type="submit" class="btn btn-admin mt-4" id="admin-login-btn">
@@ -708,7 +753,7 @@
                         
                         <div class="form-group">
                             <label class="form-label" for="master-key-mobile">Mobile Number</label>
-                            <input type="tel" id="master-key-mobile" name="mobile" class="form-input" placeholder="07XX XXX XXX" required>
+                            <input type="tel" id="master-key-mobile" name="mobile" class="form-input" placeholder="07XX XXX XXX or 01XX XXX XXX" required>
                         </div>
                         
                         <div class="form-group">
@@ -751,7 +796,7 @@
             <form id="register-admin-form" onsubmit="return validateRegisterAdminForm(event)">
                 <div class="form-group">
                     <label class="form-label" for="new-admin-mobile">Mobile Number</label>
-                    <input type="tel" id="new-admin-mobile" name="mobile" class="form-input" placeholder="07XX XXX XXX" required>
+                    <input type="tel" id="new-admin-mobile" name="mobile" class="form-input" placeholder="07XX XXX XXX or 01XX XXX XXX" required>
                 </div>
                 
                 <div class="form-group">
@@ -829,7 +874,7 @@
                     // Repeated pairs
                     /^(07|01)(\d\d)\2\2\2$/,
                     
-                    // Incremental patterns
+                    // Incremental(desc&&acs) patterns
                     /^(07|01)(\d)\3{0,1}(\d)\4{0,1}(\d)\5{0,1}(\d)\6{0,1}$/
                 ];
             }
@@ -862,10 +907,10 @@
             initializeCarrierMap() {
                 return {
                     '70': 'Safaricom', '71': 'Safaricom', '72': 'Safaricom', 
-                    '73': 'Safaricom', '74': 'Safaricom', '79': 'Safaricom',
+                    '73': 'Airtel', '74': 'Safaricom', '79': 'Safaricom',
                     '75': 'Airtel', '76': 'Airtel', 
                     '77': 'Telkom', '78': 'Airtel',
-                    '10': 'Safaricom (01)', '11': 'Safaricom (01)', '12': 'Safaricom (01)',
+                    '10': 'Airtel (01)', '11': 'Safaricom (01)', '12': 'Safaricom (01)',
                     '13': 'Safaricom (01)', '14': 'Safaricom (01)', '15': 'Safaricom (01)',
                     '16': 'Safaricom (01)', '17': 'Safaricom (01)', '18': 'Safaricom (01)',
                     '19': 'Safaricom (01)'
@@ -1209,11 +1254,57 @@
             input.parentNode.appendChild(successDiv);
         }
 
-        // FORM VALIDATION FUNCTIONS - ACTUAL SUBMISSION
+        // Student subtype management
+        function setupStudentSubtypeTabs() {
+            const subtypeTabs = document.querySelectorAll('.student-subtype-tab');
+            
+            subtypeTabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const subtype = this.getAttribute('data-subtype');
+                    
+                    // Update active tab
+                    subtypeTabs.forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Update hidden input value
+                    document.getElementById('student-login-subtype').value = subtype;
+                    
+                    // Update button text
+                    const loginButton = document.getElementById('login-student');
+                    if (subtype === 'login') {
+                        loginButton.innerHTML = '<i class="fas fa-sign-in-alt mr-2"></i> Login as Student';
+                    } else {
+                        loginButton.innerHTML = '<i class="fas fa-user-plus mr-2"></i> Register as Student';
+                    }
+                    
+                    // Update form behavior or show additional fields if needed
+                    updateStudentFormForSubtype(subtype);
+                });
+            });
+        }
+
+        function updateStudentFormForSubtype(subtype) {
+            const usernameField = document.getElementById('username');
+            const mobileField = document.getElementById('mobile');
+            
+            if (subtype === 'register') {
+                // Update placeholders
+                usernameField.placeholder = 'Choose a username (min. 3 characters)';
+                mobileField.placeholder = '07XX XXX XXX or 01XX XXX XXX';
+                
+            } else {
+                // Reset to login defaults
+                usernameField.placeholder = 'E.g. LyxNexus';
+                mobileField.placeholder = '07XX XXX XXX or 01XX XXX XXX';
+            }
+        }
+
+        // FORM VALIDATION FUNCTIONS
         function validateStudentForm(event) {
             const mobile = document.getElementById('mobile').value;
             const username = document.getElementById('username').value;
             const loginButton = document.getElementById('login-student');
+            const subtype = document.getElementById('student-login-subtype').value;
             
             if (!username.trim()) {
                 event.preventDefault();
@@ -1234,17 +1325,33 @@
             // Update the mobile field with clean number before submission
             document.getElementById('mobile').value = rawMobile;
             
-            // Final confirmation
-            const confirmMobile = confirm(`Is this your mobile number? ${validation.formatted}. By continuing, you agree to our terms and conditions.`);
-            if (!confirmMobile) {
+            // Different confirmation messages based on subtype
+            let confirmMessage;
+            if (subtype === 'login') {
+                confirmMessage = `Is this your mobile number? ${validation.formatted}. By continuing, you agree to our terms and conditions.`;
+            } else {
+                confirmMessage = `Register with mobile number: ${validation.formatted}. By continuing, you agree to our terms and conditions.`;
+            }
+            
+            const confirmAction = confirm(confirmMessage);
+            if (!confirmAction) {
                 event.preventDefault();
                 return false;
             }
             
-            loginButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in...';
+            // Update button text based on subtype
+            if (subtype === 'login') {
+                loginButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in...';
+            } else {
+                loginButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Registering...';
+            }
             loginButton.disabled = true;
             
-            showToast('Logging in...', 'info', 'Please Wait');
+            if (subtype === 'login') {
+                showToast('Logging in...', 'info', 'Please Wait');
+            } else {
+                showToast('Creating account...', 'info', 'Please Wait');
+            }
             
             // Allow the form to submit normally to the backend
             return true;
@@ -1512,6 +1619,9 @@
                     openSubTab(subTabName);
                 });
             });
+            
+            // Student subtype tabs
+            setupStudentSubtypeTabs();
             
             document.getElementById('switch-to-admin-btn').addEventListener('click', function() {
                 openTab('admin-tab');
