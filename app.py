@@ -1222,7 +1222,7 @@ def format_mobile_display(mobile):
 #===================================================================
 
 # =========================================
-# COMPLETE NOTIFICATION API ROUTES
+# NOTIFICATION API ROUTES
 # =========================================
 
 @app.route('/api/users/search')
@@ -1309,7 +1309,7 @@ def get_notifications():
     try:
         from datetime import datetime, timedelta
         
-        # Use local datetime logic instead of nairobi_time()
+        # Use local datetime logic
         current_time = datetime.utcnow() + timedelta(hours=3)
         
         print(f"[DEBUG] Current time: {current_time}")
@@ -1402,7 +1402,7 @@ def mark_all_notifications_read():
         
         for user_notif in user_notifications:
             user_notif.is_read = True
-            user_notif.read_at = nairobi_time()
+            user_notif.read_at = datetime.utcnow() + timedelta(hours=3)
         
         db.session.commit()
         
