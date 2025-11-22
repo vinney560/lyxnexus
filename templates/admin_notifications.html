@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Notification Management | LyxNexus</title>
+    <title>Notification Management - LyxNexus</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -495,7 +495,7 @@
 
         @keyframes realTimePulse {
             0% { background-color: rgba(59, 130, 246, 0.3); }
-            100% { background-color: transparent; }
+            100% { background-color: transparent;
         }
     </style>
 </head>
@@ -516,13 +516,14 @@
                                 <line x1="12" y1="22.08" x2="12" y2="12"></line>
                             </svg>
                         </div>
-                        <h1 class="text-2xl font-bold gradient-text">LyxNexus</h1>
+                        <h1 class="text-2xl font-bold gradient-text">LyxNexus Admin</h1>
                     </a>
                 </div>
                 <div class="flex items-center space-x-4">
                     <span class="text-gray-300 text-conspicuous">Welcome, {{ current_user.username }}</span>
                     <a href="/admin/users" class="btn btn-outline text-sm relative">
                         <i class="fas fa-arrow-left mr-1"></i>
+                        Back to Users
                     </a>
                 </div>
             </div>
@@ -624,7 +625,7 @@
                         <div class="flex items-center space-x-3">
                             <span class="text-sm text-gray-400 font-medium" id="last-updated">Just now</span>
                             <button onclick="refreshAllData()" class="btn btn-outline text-sm">
-                                Refresh
+                                <i class="fas fa-sync-alt mr-1"></i>Refresh
                             </button>
                         </div>
                     </div>
@@ -705,7 +706,17 @@
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
-            loadAllData();
+            // Use the original server-side rendered data first
+            try {
+                const initialNotifications = {{ notifications|tojson|safe }};
+                currentNotifications = initialNotifications;
+                displayNotifications(currentNotifications);
+            } catch (error) {
+                console.error('Error loading initial notifications:', error);
+                loadNotifications();
+            }
+            
+            loadStats();
             setupEventListeners();
             startAutoRefresh();
         });
@@ -784,7 +795,10 @@
         async function refreshAllData(silent = false) {
             if (!silent) {
                 // Add visual feedback for refresh
-                document.querySelector('button[onclick="refreshAllData()"]').classList.add('btn-updating');
+                const refreshBtn = document.querySelector('button[onclick="refreshAllData()"]');
+                if (refreshBtn) {
+                    refreshBtn.classList.add('btn-updating');
+                }
             }
             
             await Promise.all([
@@ -795,7 +809,10 @@
             
             if (!silent) {
                 setTimeout(() => {
-                    document.querySelector('button[onclick="refreshAllData()"]').classList.remove('btn-updating');
+                    const refreshBtn = document.querySelector('button[onclick="refreshAllData()"]');
+                    if (refreshBtn) {
+                        refreshBtn.classList.remove('btn-updating');
+                    }
                 }, 1000);
             }
         }
@@ -910,8 +927,10 @@
                     selectedUsers.clear();
                     updateSelectedUsersDisplay();
                     
-                    // Real-time data refresh
-                    await refreshAllData(true);
+                    // Real-time data refresh - reload the entire page to get fresh server-side data
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
                 } else {
                     toast.show(result.error || 'Failed to create notification', 'error');
                 }
@@ -935,34 +954,26 @@
             }
             
             try {
-                // Fetch fresh data from the server
-                const response = await fetch('/admin/notifications');
-                const result = await response.json();
                 
-                if (result.success) {
-                    currentNotifications = result.notifications;
+                const response = await fetch('/admin/notifications?partial=1');
+                if (response.ok) {
+                    const html = await response.text();
+                    // Extract notifications from the response or use current data
                     displayNotifications(currentNotifications);
                 } else {
-                    throw new Error(result.error || 'Failed to load notifications');
+                    throw new Error('Failed to load notifications');
                 }
             } catch (error) {
                 console.error('Error loading notifications:', error);
-                document.getElementById('notifications-list').innerHTML = `
-                    <div class="text-center py-8 text-red-400 fade-in">
-                        <i class="fas fa-exclamation-triangle fa-2x mb-3"></i>
-                        <p class="font-semibold">Failed to load notifications</p>
-                        <button onclick="loadNotifications()" class="btn btn-outline mt-3">
-                            <i class="fas fa-redo mr-1"></i>Retry
-                        </button>
-                    </div>
-                `;
+                // Fallback to displaying current notifications
+                displayNotifications(currentNotifications);
             }
         }
 
         function displayNotifications(notifications) {
             const container = document.getElementById('notifications-list');
             
-            if (notifications.length === 0) {
+            if (!notifications || notifications.length === 0) {
                 container.innerHTML = `
                     <div class="text-center py-8 text-gray-400 fade-in">
                         <i class="fas fa-bell-slash fa-2x mb-3"></i>
@@ -1121,19 +1132,28 @@
                 if (result.success) {
                     toast.show(`🔔 Notification ${newStatus ? 'activated' : 'deactivated'}!`, 'success');
                     
-                    // Real-time update - refresh all data to get fresh state
-                    await refreshAllData(true);
+                    // Update local state immediately for instant UI feedback
+                    const updatedNotification = currentNotifications.find(n => n.id === id);
+                    if (updatedNotification) {
+                        updatedNotification.is_active = newStatus;
+                    }
+                    
+                    // Refresh the display with updated data
+                    displayNotifications(currentNotifications);
+                    
+                    // Also refresh stats
+                    loadStats(true);
                 } else {
                     toast.show(result.error || 'Failed to update notification', 'error');
                 }
             } catch (error) {
                 toast.show('Error updating notification', 'error');
             } finally {
-                // Restore button state temporarily until refresh completes
+                // Restore button state
                 setTimeout(() => {
                     btn.innerHTML = originalHTML;
                     btn.classList.remove('content-loading', 'btn-updating');
-                }, 1000);
+                }, 500);
             }
         }
 
@@ -1160,19 +1180,25 @@
                 if (result.success) {
                     toast.show('🗑️ Notification deleted successfully!', 'success');
                     
-                    // Real-time update - refresh all data
-                    await refreshAllData(true);
+                    // Remove from local state immediately
+                    currentNotifications = currentNotifications.filter(n => n.id !== id);
+                    
+                    // Refresh the display
+                    displayNotifications(currentNotifications);
+                    
+                    // Also refresh stats
+                    loadStats(true);
                 } else {
                     toast.show(result.error || 'Failed to delete notification', 'error');
                 }
             } catch (error) {
                 toast.show('Error deleting notification', 'error');
             } finally {
-                // Restore button state temporarily until refresh completes
+                // Restore button state
                 setTimeout(() => {
                     btn.innerHTML = originalHTML;
                     btn.classList.remove('content-loading', 'btn-updating');
-                }, 1000);
+                }, 500);
             }
         }
     </script>
