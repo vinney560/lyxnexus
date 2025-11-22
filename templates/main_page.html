@@ -1270,6 +1270,157 @@
             padding: 4px 7px;
         }
     }
+    
+    #notification-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.85);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 10000;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+        padding: 20px;
+        box-sizing: border-box;
+    }
+
+    #notification-overlay.active {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .notification-modal {
+        width: 90%;
+        max-width: 500px;
+        height: 100%;
+        max-height: 98vh;
+        padding: 40px 30px 30px 30px;
+        border-radius: 20px;
+        text-align: center;
+        position: relative;
+        transform: translateY(20px);
+        transition: transform 0.3s ease;
+        background: rgba(30, 30, 40, 0.95);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        box-shadow: 0 8px 32px rgba(0, 31, 135, 0.3);
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        display: flex;
+        flex-direction: column;
+    }
+
+    #notification-overlay.active .notification-modal {
+        transform: translateY(0);
+    }
+
+    .notification-icon {
+        font-size: 54px;
+        color: var(--accent-color);
+        margin-bottom: 5px;
+        animation: pulse 2s infinite;
+        flex-shrink: 0;
+    }
+
+    .notification-title {
+        font-size: 24px;
+        font-weight: 700;
+        margin-bottom: 5px;
+        background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        flex-shrink: 0;
+    }
+
+    .notification-message {
+        font-size: 16px;
+        line-height: 1.6;
+        margin-bottom: 25px;
+        color: rgba(255, 255, 255, 0.8);
+        overflow-y: auto;
+        flex: 1;
+        padding-right: 5px;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+        
+    }
+
+    .notification-message::-webkit-scrollbar {
+        display: none;
+    }
+
+    .notification-actions {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 5px;
+        flex-shrink: 0;
+    }
+
+    .notification-list {
+        margin: 15px 0;
+        text-align: left;
+    }
+
+    .notification-item {
+        margin-bottom: 12px;
+        padding: 12px;
+        background: rgba(59, 130, 246, 0.1);
+        border-radius: 8px;
+        border-left: 3px solid #3B82F6;
+        position: relative;
+    }
+
+    .notification-item-title {
+        font-weight: 600;
+        margin-bottom: 5px;
+        color: white;
+    }
+
+    .notification-item-message {
+        font-size: 14px;
+        color: rgba(255, 255, 255, 0.8);
+        line-height: 1.4;
+    }
+
+    .notification-item-time {
+        font-size: 12px;
+        color: rgba(255, 255, 255, 0.6);
+        margin-top: 5px;
+        text-align: right;
+    }
+
+    .no-notifications {
+        text-align: center;
+        padding: 20px;
+        color: rgba(255, 255, 255, 0.6);
+    }
+
+    .notification-badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: linear-gradient(90deg, #EF4444, #DC2626);
+        color: white;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: bold;
+    }
+
+    body.notification-overlay-active {
+        overflow: hidden;
+    }    
 </style>
 <body>
     <!-- Toast Container -->
@@ -1386,7 +1537,39 @@
                     </button>
                 </div>
             </div>
-        </div>                        
+        </div>    
+        
+                            <!-- Notify User -->
+
+        <!-- Notification Overlay -->
+        <div id="notification-overlay">
+            <div class="notification-modal glass-morph">
+                <button class="close-btn" id="close-notification-overlay">
+                    <i class="fas fa-times"></i>
+                </button>
+
+                <div class="notification-icon">
+                    <i class="fas fa-bell"></i>
+                </div>
+
+                <h2 class="notification-title">Notifications</h2>
+
+                <div class="notification-message" id="notification-content">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                    </div>
+                </div>
+
+                <div class="notification-actions">
+                    <button class="btn" id="mark-all-read-btn">
+                        <i class="fas fa-check-double mr-2"></i>Mark All as Read
+                    </button>
+                    <button class="btn btn-secondary" id="close-notification-btn">
+                        <i class="fas fa-times mr-2"></i>Close
+                    </button>
+                </div>
+            </div>
+        </div>                            
                                  <!-- Announcements Section -->
         
                                  <!-- Image Preview Modal -->
@@ -1803,6 +1986,414 @@
         }
         
         const analytics = new AnalyticsTracker();        
+
+        // Notification Overlay System
+        class NotificationOverlay {
+            constructor() {
+                this.overlay = document.getElementById('notification-overlay');
+                this.closeBtn = document.getElementById('close-notification-overlay');
+                this.closeNotificationBtn = document.getElementById('close-notification-btn');
+                this.markAllReadBtn = document.getElementById('mark-all-read-btn');
+                this.notificationContent = document.getElementById('notification-content');
+                this.notifications = [];
+                this.unreadCount = 0;
+            
+                this.init();
+            }
+        
+            init() {
+                // Add event listeners
+                if (this.closeBtn) {
+                    this.closeBtn.addEventListener('click', () => this.hide());
+                }
+            
+                if (this.closeNotificationBtn) {
+                    this.closeNotificationBtn.addEventListener('click', () => this.hide());
+                }
+            
+                if (this.markAllReadBtn) {
+                    this.markAllReadBtn.addEventListener('click', () => this.markAllAsRead());
+                }
+            
+                // Close overlay when clicking outside
+                this.overlay.addEventListener('click', (e) => {
+                    if (e.target === this.overlay) {
+                        this.hide();
+                    }
+                });
+            
+                // Close on Escape key
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape' && this.overlay.classList.contains('active')) {
+                        this.hide();
+                    }
+                });
+            
+                // Check for notifications on load (if user is not banned)
+                setTimeout(() => {
+                    this.checkUserStatusAndLoadNotifications();
+                }, 2000);
+            
+                // Set up periodic notification checks (every 2 minutes)
+                setInterval(() => {
+                    this.checkUserStatusAndLoadNotifications();
+                }, 2 * 60 * 1000);
+            }
+        
+            async checkUserStatusAndLoadNotifications() {
+                try {
+                    // Check if user is banned - don't show notifications if banned
+                    const isBanned = this.isUserBanned();
+
+                    if (!isBanned) {
+                        await this.loadNotifications();
+                        this.updateNotificationBadge();
+
+                        // Auto-show overlay conditions
+                        const shouldAutoShow = (
+                            !this.hasUserDismissed() && 
+                            this.notifications.length > 0 && 
+                            document.visibilityState === 'visible'
+                        );
+
+                        if (shouldAutoShow) {
+                            setTimeout(() => {
+                                this.show();
+                            }, 5000); // Show after 5 seconds
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error checking notifications:', error);
+                }
+            }
+        
+            isUserBanned() {
+                // Use the same logic as ban overlay
+                if (typeof window.Userstatus !== 'undefined') {
+                    return !window.Userstatus;
+                }
+            
+                // Fallback: check from detail-status element
+                const statusElement = document.getElementById('detail-status');
+                if (statusElement) {
+                    const statusText = statusElement.textContent.trim().toLowerCase();
+                    return statusText === 'banned' || statusText === 'restricted';
+                }
+            
+                return false;
+            }
+        
+            hasUserDismissed() {
+                return localStorage.getItem('notificationsDismissed') === 'true';
+            }
+        
+            async loadNotifications() {
+                try {
+                    const response = await fetch('/api/notify');
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const data = await response.json();
+                    this.notifications = data.notifications || [];
+                    this.unreadCount = data.unread_count || 0;
+
+                    this.renderNotifications();
+
+                } catch (error) {
+                    console.error('Error loading notifications:', error);
+                    this.renderError('Failed to load notifications');
+                }
+            }
+        
+            renderNotifications() {
+                if (this.notifications.length === 0) {
+                    this.notificationContent.innerHTML = `
+                        <div class="no-notifications">
+                            <i class="fas fa-bell-slash fa-2x mb-3"></i>
+                            <p>No notifications at the moment</p>
+                            <p class="text-sm mt-2">We'll notify you when there's something new</p>
+                        </div>
+                    `;
+                    return;
+                }
+            
+                const notificationsHTML = this.notifications.map(notification => `
+                    <div class="notification-item ${notification.unread ? 'unread' : ''}">
+                        ${notification.unread ? '<div class="notification-badge">!</div>' : ''}
+                        <div class="notification-item-title">
+                            ${this.escapeHtml(notification.title)}
+                        </div>
+                        <div class="notification-item-message">
+                            ${this.formatNotificationMessage(notification.message)}
+                        </div>
+                        <div class="notification-item-time">
+                            ${this.formatTimeAgo(notification.created_at)}
+                        </div>
+                    </div>
+                `).join('');
+                
+                this.notificationContent.innerHTML = `
+                    <div class="notification-list">
+                        ${notificationsHTML}
+                    </div>
+                    ${this.unreadCount > 0 ? `
+                        <div class="text-center mt-4">
+                            <span class="text-blue-400 text-sm">
+                                ${this.unreadCount} unread notification${this.unreadCount !== 1 ? 's' : ''}
+                            </span>
+                        </div>
+                    ` : ''}
+                `;
+            }
+        
+            renderError(message) {
+                this.notificationContent.innerHTML = `
+                    <div class="no-notifications">
+                        <i class="fas fa-exclamation-triangle fa-2x mb-3"></i>
+                        <p>${message}</p>
+                        <button class="btn btn-outline mt-3" onclick="window.notificationOverlay.loadNotifications()">
+                            <i class="fas fa-redo mr-2"></i>Try Again
+                        </button>
+                    </div>
+                `;
+            }
+        
+            formatNotificationMessage(message) {
+                // Apply basic formatting to notification messages
+                return this.escapeHtml(message)
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                    .replace(/\n/g, '<br>');
+            }
+        
+            escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+        
+            formatTimeAgo(dateString) {
+                const date = new Date(dateString);
+                const now = new Date();
+                const diffMs = now - date;
+                const diffMins = Math.floor(diffMs / 60000);
+                const diffHours = Math.floor(diffMs / 3600000);
+                const diffDays = Math.floor(diffMs / 86400000);
+            
+                if (diffMins < 1) return 'Just now';
+                if (diffMins < 60) return `${diffMins}m ago`;
+                if (diffHours < 24) return `${diffHours}h ago`;
+                if (diffDays < 7) return `${diffDays}d ago`;
+
+                return date.toLocaleDateString();
+            }
+        
+            async markAllAsRead() {
+                try {
+                    const response = await fetch('/api/notify/read-all', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
+                    });
+                
+                    if (response.ok) {
+                        // Update local state
+                        this.notifications.forEach(notification => {
+                            notification.unread = false;
+                        });
+                        this.unreadCount = 0;
+
+                        // Re-render
+                        this.renderNotifications();
+                        this.updateNotificationBadge();
+
+                        // Show success message
+                        if (typeof toastSystem !== 'undefined') {
+                            toastSystem.success('All notifications marked as read', 'Notifications');
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error marking notifications as read:', error);
+                    if (typeof toastSystem !== 'undefined') {
+                        toastSystem.error('Failed to mark notifications as read', 'Error');
+                    }
+                }
+            }
+        
+            updateNotificationBadge() {
+                // Update any notification badges in the UI
+                const badgeElements = document.querySelectorAll('.notification-badge-global');
+                badgeElements.forEach(badge => {
+                    if (this.unreadCount > 0) {
+                        badge.textContent = this.unreadCount > 99 ? '99+' : this.unreadCount;
+                        badge.style.display = 'flex';
+                    } else {
+                        badge.style.display = 'none';
+                    }
+                });
+            
+                // Update document title if there are unread notifications
+                if (this.unreadCount > 0) {
+                    document.title = `(${this.unreadCount}) LyxNexus`;
+                } else {
+                    document.title = 'LyxNexus';
+                }
+            }
+        
+            show() {
+                // Don't show if user is banned
+                if (this.isUserBanned()) {
+                    return;
+                }
+            
+                this.overlay.classList.add('active');
+                document.body.classList.add('notification-overlay-active');
+            
+                // Track this event
+                if (typeof analytics !== 'undefined') {
+                    analytics.trackActivity('notification_overlay_opened', 'notifications');
+                }
+            }
+        
+            hide() {
+                this.overlay.classList.remove('active');
+                document.body.classList.remove('notification-overlay-active');
+            
+                // Mark as dismissed for this session
+                localStorage.setItem('notificationsDismissed', 'true');
+            
+                // Track dismissal
+                if (typeof analytics !== 'undefined') {
+                    analytics.trackActivity('notification_overlay_closed', 'notifications');
+                }
+            }
+        
+            // Method to manually trigger notification check
+            async checkNow() {
+                await this.checkUserStatusAndLoadNotifications();
+            }
+        }
+
+        // Add notification badge to header (optional)
+        function addNotificationBadgeToHeader() {
+            const header = document.querySelector('header');
+            if (!header) return;
+        
+            const existingBadge = document.querySelector('.notification-badge-global');
+            if (existingBadge) return;
+        
+            const badge = document.createElement('div');
+            badge.className = 'notification-badge-global';
+            badge.style.cssText = `
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                background: linear-gradient(90deg, #EF4444, #DC2626);
+                color: white;
+                border-radius: 50%;
+                width: 20px;
+                height: 20px;
+                display: none;
+                align-items: center;
+                justify-content: center;
+                font-size: 12px;
+                font-weight: bold;
+                z-index: 1001;
+            `;
+        
+            header.style.position = 'relative';
+            header.appendChild(badge);
+        }
+
+        // Initialize notification system
+        document.addEventListener('DOMContentLoaded', function() {
+            // Wait a bit to ensure all user data is loaded
+            setTimeout(() => {
+                window.notificationOverlay = new NotificationOverlay();
+                addNotificationBadgeToHeader();
+            }, 2000);
+        });
+
+        // Add notification button to navigation (optional)
+        function addNotificationButton() {
+            const navButtons = document.querySelector('.nav-buttons');
+            const mobileNav = document.querySelector('.mobile-nav');
+        
+            if (navButtons) {
+                const notificationBtn = document.createElement('button');
+                notificationBtn.className = 'nav-btn';
+                notificationBtn.innerHTML = `
+                    <i class="fas fa-bell mr-2"></i>Notifications
+                    <span class="notification-badge-global" style="
+                        display: none;
+                        position: absolute;
+                        top: -5px;
+                        right: -5px;
+                        background: linear-gradient(90deg, #EF4444, #DC2626);
+                        color: white;
+                        border-radius: 50%;
+                        width: 18px;
+                        height: 18px;
+                        font-size: 10px;
+                        font-weight: bold;
+                    "></span>
+                `;
+                notificationBtn.style.position = 'relative';
+                notificationBtn.addEventListener('click', () => {
+                    window.notificationOverlay.show();
+                });
+
+                // Insert as first child instead of appending
+                const firstChild = navButtons.firstElementChild;
+                if (firstChild) {
+                    navButtons.insertBefore(notificationBtn, firstChild);
+                } else {
+                    navButtons.appendChild(notificationBtn);
+                }
+            }
+        
+            if (mobileNav) {
+                const mobileNotificationBtn = document.createElement('button');
+                mobileNotificationBtn.className = 'mobile-nav-btn';
+                mobileNotificationBtn.innerHTML = `
+                    <i class="fas fa-bell"></i>
+                    <span>Alerts</span>
+                    <span class="notification-badge-global" style="
+                        display: none;
+                        position: absolute;
+                        top: 2px;
+                        right: 2px;
+                        background: linear-gradient(90deg, #EF4444, #DC2626);
+                        color: white;
+                        border-radius: 50%;
+                        width: 16px;
+                        height: 16px;
+                        font-size: 9px;
+                        font-weight: bold;
+                        align-items: center;
+                        justify-content: center;
+                    "></span>
+                `;
+                mobileNotificationBtn.style.position = 'relative';
+                mobileNotificationBtn.addEventListener('click', () => {
+                    window.notificationOverlay.show();
+                });
+
+                // Insert as first child in mobile nav too
+                const firstMobileChild = mobileNav.firstElementChild;
+                if (firstMobileChild) {
+                    mobileNav.insertBefore(mobileNotificationBtn, firstMobileChild);
+                } else {
+                    mobileNav.appendChild(mobileNotificationBtn);
+                }
+            }
+        }
+
+        // Initialize notification button
+        setTimeout(addNotificationButton, 3000);
 
         class OptimizedSearchSystem {
             constructor() {

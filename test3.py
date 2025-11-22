@@ -38,6 +38,69 @@ def home():
     """Home page route"""
     return render_template('index.html', year=datetime.datetime.now().year)
 
+@app.route('/api/notify')
+def mock_notifications():
+    """Mock notifications that work with your main_page.html template"""
+    from datetime import datetime, timedelta
+    import random
+    
+    # Generate 3-6 random notifications
+    notification_count = random.randint(3, 6)
+    mock_notifications = []
+    
+    notification_templates = [
+        {
+            'title': 'System Maintenance Scheduled',
+            'message': 'The platform will undergo maintenance on Saturday from 2-4 AM. Please save your work.',
+            'hours_ago': 2
+        },
+        {
+            'title': 'New Assignment Posted', 
+            'message': 'A new assignment "Web Development Project" has been posted. Due next Friday.',
+            'hours_ago': 24
+        },
+        {
+            'title': 'Welcome to LyxNexus!',
+            'message': 'Welcome to our learning platform! Explore features and let us know if you need help.',
+            'hours_ago': 72
+        },
+        {
+            'title': 'Holiday Schedule',
+            'message': 'Classes suspended next week for mid-term break. Enjoy your holiday!',
+            'hours_ago': 120
+        },
+        {
+            'title': 'Urgent: Server Update', 
+            'message': 'Critical security update tonight at 11 PM. System unavailable for 30 minutes.',
+            'hours_ago': 6
+        },
+        {
+            'title': 'Assignment Deadline Reminder',
+            'message': 'Mathematics Quiz 3 due tomorrow. Submit before deadline to avoid penalties.',
+            'hours_ago': 12
+        }
+    ]
+    
+    # Select random templates
+    selected_templates = random.sample(notification_templates, notification_count)
+    
+    for i, template in enumerate(selected_templates):
+        mock_notifications.append({
+            'id': i + 1,
+            'title': template['title'],
+            'message': template['message'],
+            'created_at': (datetime.now() - timedelta(hours=template['hours_ago'])).isoformat(),
+            'unread': random.choice([True, False])  # Random read status
+        })
+    
+    # Count unread notifications
+    unread_count = sum(1 for n in mock_notifications if n['unread'])
+    
+    return jsonify({
+        'notifications': mock_notifications,
+        'unread_count': unread_count
+    })
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     """Login page route - handles both GET and POST requests"""
@@ -522,9 +585,6 @@ from datetime import datetime, timedelta
 from faker import Faker
 import os
 
-app = Flask(__name__)
-app.secret_key = 'your-secret-key-here'  # Change this in production
-
 class MockDataGenerator:
     def __init__(self):
         self.fake = Faker()
@@ -762,10 +822,6 @@ def get_link_preview():
         'url': url
     })
 
-# Additional routes for navigation
-@app.route('/dashboard')
-def dashboard():
-    return render_template('main_page.html', current_user=current_user)
 
 @app.route('/files')
 def files():
@@ -775,9 +831,6 @@ def files():
 def messages():
     return render_template('main_page.html', current_user=current_user)
 
-@app.route('/terms')
-def terms():
-    return render_template('main_page.html', current_user=current_user)
 
 @app.route('/lyx-lab')
 def lyx_lab():
@@ -806,10 +859,6 @@ def quiz():
 @app.route('/math')
 def math_ai():
     return render_template('main_page.html', current_user=current_user)
-
-@app.route('/logout')
-def logout():
-    return redirect('/')
 
 # Search API endpoint
 @app.route('/api/search')

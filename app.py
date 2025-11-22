@@ -479,7 +479,41 @@ class Share(db.Model):
     def is_expired(self):
         from datetime import timedelta, datetime
         return datetime.utcnow() > self.created_at + timedelta(hours=2)
-#==============================================
+# =========================================
+# ENHANCED NOTIFICATION MODELS
+# =========================================
+class Notification(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200), nullable=False)
+    message = db.Column(db.Text, nullable=False)
+    target_audience = db.Column(db.String(50), default='all')  # 'all', 'students', 'admins', 'specific'
+    is_active = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=nairobi_time)
+    expires_at = db.Column(db.DateTime, nullable=True)
+    
+    # Relationships
+    user_notifications = db.relationship('UserNotification', backref='notification', lazy=True, cascade='all, delete-orphan')
+    specific_users = db.relationship('NotificationSpecificUser', backref='notification', lazy=True, cascade='all, delete-orphan')
+
+class NotificationSpecificUser(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    notification_id = db.Column(db.Integer, db.ForeignKey('notification.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    
+    # Relationship
+    user = db.relationship('User', backref='specific_notifications')
+
+class UserNotification(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    notification_id = db.Column(db.Integer, db.ForeignKey('notification.id'), nullable=False)
+    is_read = db.Column(db.Boolean, default=False)
+    read_at = db.Column(db.DateTime, nullable=True)
+    created_at = db.Column(db.DateTime, default=nairobi_time)
+    
+    # Relationship
+    user = db.relationship('User', backref='notifications')
+#===============================================
 
 # Master key for Admin Access  
 def initialize_admin_code():
@@ -1025,7 +1059,7 @@ def login():
         
         # Validate mobile number
         if not mobile or len(mobile) != 10 or not mobile.startswith(('07', '01')):
-            validation_errors.append('Invalid Kenyan mobile number. Must be 10 digits starting with 07 or 01')
+            validation_errors.append('Invalid Mobile number. Must be 10 digits starting with 07 or 01')
         
         if validation_errors:
             for error in validation_errors:
@@ -1187,6 +1221,316 @@ def format_mobile_display(mobile):
     return mobile
 #===================================================================
 
+# =========================================
+# COMPLETE NOTIFICATION API ROUTES
+# =========================================
+
+@app.route('/api/users/search')
+@login_required
+@admin_required
+def search_users():
+    """Search users for specific targeting"""
+    
+    query = request.args.get('q', '')
+    if not query or len(query) < 2:
+        return jsonify({'users': []})
+    
+    users = User.query.filter(
+        (User.username.ilike(f'%{query}%')) | 
+        (User.mobile.ilike(f'%{query}%'))
+    ).limit(10).all()
+    
+    return jsonify({
+        'users': [{
+            'id': user.id,
+            'username': user.username,
+            'mobile': user.mobile,
+            'is_admin': user.is_admin,
+            'status': user.status
+        } for user in users]
+    })
+
+@app.route('/admin/notifications/create', methods=['POST'])
+@login_required
+@admin_required
+def create_notification():
+    """Create a new notification with specific user targeting"""
+    
+    try:
+        data = request.get_json()
+        
+        notification = Notification(
+            title=data['title'],
+            message=data['message'],
+            target_audience=data.get('target_audience', 'all'),
+            is_active=data.get('is_active', True)
+        )
+        
+        # Set expiration if provided
+        if data.get('expires_at'):
+            notification.expires_at = datetime.fromisoformat(data['expires_at'].replace('Z', '+00:00'))
+        
+        db.session.add(notification)
+        db.session.flush()  # Get the ID before commit
+        
+        # Add specific users if target is 'specific'
+        if data.get('target_audience') == 'specific' and data.get('specific_users'):
+            for user_id in data['specific_users']:
+                specific_user = NotificationSpecificUser(
+                    notification_id=notification.id,
+                    user_id=user_id
+                )
+                db.session.add(specific_user)
+        
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': 'Notification created successfully',
+            'notification': {
+                'id': notification.id,
+                'title': notification.title,
+                'message': notification.message,
+                'target_audience': notification.target_audience,
+                'is_active': notification.is_active,
+                'created_at': notification.created_at.isoformat(),
+                'expires_at': notification.expires_at.isoformat() if notification.expires_at else None
+            }
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/notify')
+@login_required
+def get_notifications():
+    """Get notifications for current user with specific targeting"""
+    try:
+        # Get active notifications that user hasn't read or hasn't received yet
+        active_notifications = Notification.query.filter(
+            Notification.is_active == True,
+            (Notification.expires_at > nairobi_time()) | (Notification.expires_at == None)
+        ).all()
+        
+        user_notifications = []
+        unread_count = 0
+        
+        for notification in active_notifications:
+            should_receive = False
+            
+            # Check if user should receive this notification
+            if notification.target_audience == 'all':
+                should_receive = True
+            elif notification.target_audience == 'students' and not current_user.is_admin:
+                should_receive = True
+            elif notification.target_audience == 'admins' and current_user.is_admin:
+                should_receive = True
+            elif notification.target_audience == 'specific':
+                # Check if user is in specific users list
+                specific_user = NotificationSpecificUser.query.filter_by(
+                    notification_id=notification.id,
+                    user_id=current_user.id
+                ).first()
+                should_receive = specific_user is not None
+            
+            if should_receive:
+                # Check if user has already received this notification
+                user_notif = UserNotification.query.filter_by(
+                    user_id=current_user.id,
+                    notification_id=notification.id
+                ).first()
+                
+                if not user_notif:
+                    # Create new user notification entry
+                    user_notif = UserNotification(
+                        user_id=current_user.id,
+                        notification_id=notification.id,
+                        is_read=False
+                    )
+                    db.session.add(user_notif)
+                
+                user_notifications.append({
+                    'id': notification.id,
+                    'title': notification.title,
+                    'message': notification.message,
+                    'created_at': notification.created_at.isoformat(),
+                    'unread': not user_notif.is_read
+                })
+                
+                if not user_notif.is_read:
+                    unread_count += 1
+        
+        db.session.commit()
+        return jsonify({
+            'notifications': user_notifications,
+            'unread_count': unread_count
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/notify/read-all', methods=['POST'])
+@login_required
+def mark_all_notifications_read():
+    """Mark all notifications as read for current user"""
+    try:
+        user_notifications = UserNotification.query.filter_by(
+            user_id=current_user.id,
+            is_read=False
+        ).all()
+        
+        for user_notif in user_notifications:
+            user_notif.is_read = True
+            user_notif.read_at = nairobi_time()
+        
+        db.session.commit()
+        
+        return jsonify({'success': True, 'message': 'All notifications marked as read'})
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/admin/notifications')
+@login_required
+@admin_required
+def admin_notifications():
+    """Admin notification management page"""
+    
+    notifications = Notification.query.order_by(Notification.created_at.desc()).all()
+    return render_template('admin_notifications.html', notifications=notifications)
+
+@app.route('/admin/notifications/<int:notification_id>/update', methods=['POST'])
+@login_required
+@admin_required
+def update_notification(notification_id):
+    """Update a notification"""
+    
+    try:
+        notification = Notification.query.get_or_404(notification_id)
+        data = request.get_json()
+        
+        notification.title = data.get('title', notification.title)
+        notification.message = data.get('message', notification.message)
+        notification.target_audience = data.get('target_audience', notification.target_audience)
+        notification.is_active = data.get('is_active', notification.is_active)
+        
+        if 'expires_at' in data:
+            notification.expires_at = datetime.fromisoformat(data['expires_at'].replace('Z', '+00:00')) if data['expires_at'] else None
+        
+        # Update specific users if target is 'specific'
+        if data.get('target_audience') == 'specific' and data.get('specific_users'):
+            # Remove existing specific users
+            NotificationSpecificUser.query.filter_by(notification_id=notification.id).delete()
+            
+            # Add new specific users
+            for user_id in data['specific_users']:
+                specific_user = NotificationSpecificUser(
+                    notification_id=notification.id,
+                    user_id=user_id
+                )
+                db.session.add(specific_user)
+        
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': 'Notification updated successfully'
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/admin/notifications/<int:notification_id>/delete', methods=['POST'])
+@login_required
+@admin_required
+def delete_notification(notification_id):
+    """Delete a notification"""
+    
+    try:
+        notification = Notification.query.get_or_404(notification_id)
+        db.session.delete(notification)
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': 'Notification deleted successfully'
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/admin/notifications/stats')
+@login_required
+@admin_required
+def notification_stats():
+    """Get notification statistics"""
+    
+    try:
+        total_notifications = Notification.query.count()
+        active_notifications = Notification.query.filter_by(is_active=True).count()
+        total_users = User.query.count()
+        
+        # Get read statistics for latest notifications
+        latest_notifications = Notification.query.order_by(Notification.created_at.desc()).limit(5).all()
+        
+        stats = []
+        for notification in latest_notifications:
+            total_receivers = UserNotification.query.filter_by(notification_id=notification.id).count()
+            read_count = UserNotification.query.filter_by(notification_id=notification.id, is_read=True).count()
+            
+            stats.append({
+                'id': notification.id,
+                'title': notification.title,
+                'total_receivers': total_receivers,
+                'read_count': read_count,
+                'read_percentage': (read_count / total_receivers * 100) if total_receivers > 0 else 0
+            })
+        
+        return jsonify({
+            'total_notifications': total_notifications,
+            'active_notifications': active_notifications,
+            'total_users': total_users,
+            'latest_stats': stats
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/admin/notifications/<int:notification_id>')
+@login_required
+@admin_required
+def get_notification_details(notification_id):
+    """Get detailed notification information including specific users"""
+    
+    try:
+        notification = Notification.query.get_or_404(notification_id)
+        
+        # Get specific users if any
+        specific_users = []
+        if notification.target_audience == 'specific':
+            specific_users = [{
+                'id': su.user.id,
+                'username': su.user.username,
+                'mobile': su.user.mobile
+            } for su in notification.specific_users]
+        
+        return jsonify({
+            'notification': {
+                'id': notification.id,
+                'title': notification.title,
+                'message': notification.message,
+                'target_audience': notification.target_audience,
+                'is_active': notification.is_active,
+                'created_at': notification.created_at.isoformat(),
+                'expires_at': notification.expires_at.isoformat() if notification.expires_at else None,
+                'specific_users': specific_users
+            }
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+#===================================================================
 # =========================================
 # AI CHAT ROUTES - COMPLETE IMPLEMENTATION
 # =========================================

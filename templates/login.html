@@ -691,7 +691,7 @@
                     <div class="form-group">
                         <label class="form-label" for="mobile">Mobile Number</label>
                         <input type="tel" id="mobile" name="mobile" class="form-input" placeholder="07XX XXX XXX or 07XX XXX XXX" value="{{ mobile if mobile }}" required>
-                        <p class="text-gray-400 text-xs mt-1">Enter your 10-digit Kenyan mobile number</p>
+                        <p class="text-gray-400 text-xs mt-1">Enter your 10-digit mobile number</p>
                     </div>
                     
                     <button type="submit" class="btn mt-4" id="login-student">
@@ -867,7 +867,7 @@
                     /^555\d+$/, /^999\d+$/, /^000\d+$/, /^111\d+$/, /^222\d+$/, /^333\d+$/, /^444\d+$/, /^666\d+$/, /^777\d+$/, /^888\d+$/,
                     /^123456\d*$/, /^654321\d*$/, /^111111\d*$/, /^000000\d*$/, /^222222\d*$/, /^333333\d*$/, /^444444\d*$/, /^555555\d*$/, /^666666\d*$/, /^777777\d*$/, /^888888\d*$/, /^999999\d*$/,
                     
-                    // Kenyan specific patterns
+                    // Specific patterns
                     /^(07|01)(\d)\2{7}$/, // All same digit after prefix
                     /^(07|01)123456\d{2}$/, /^(07|01)654321\d{2}$/,
                     
@@ -980,7 +980,7 @@
                 if (!this.validPrefixes.includes(prefix)) {
                     return { 
                         valid: false, 
-                        reason: 'Kenyan mobile numbers must start with 07 or 01' 
+                        reason: 'Mobile numbers must start with 07 or 01' 
                     };
                 }
                 return { valid: true };
@@ -1003,7 +1003,7 @@
                     return true;
                 }
 
-                // Additional heuristic checks
+                // Pattern & sequence checks
                 return this.hasRepeatedGroups(cleanMobile) || 
                        this.isSequential(cleanMobile);
             }
@@ -1053,7 +1053,7 @@
                 const messages = {
                     'Mobile number must be exactly 10 digits': 'Please enter a 10-digit mobile number',
                     'Mobile number must contain only digits': 'Please enter only digits',
-                    'Kenyan mobile numbers must start with 07 or 01': 'Mobile number must start with 07 or 01',
+                    'Mobile numbers must start with 07 or 01': 'Mobile number must start with 07 or 01',
                     'This mobile number is not allowed': 'This mobile number is not accepted',
                     'Suspicious number pattern detected': 'This appears to be an invalid or fake number'
                 };
