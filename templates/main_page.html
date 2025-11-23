@@ -3771,7 +3771,7 @@
                     return aPinned === bPinned ? 0 : aPinned ? -1 : 1;
                 });
             
-                // CHANGED: Added grid wrapper and updated card structure
+                // grid wrapper and updated card structure
                 container.innerHTML = `
                     <div class="announcements-grid">
                         ${sorted.map((announcement) => {
@@ -3930,7 +3930,7 @@
                 renderAnnouncements();
             };
         
-            // Image modal - PRESERVED FROM ORIGINAL
+            // Image modal
             window.openImagePreview = function(src) {
                 let modal = document.getElementById("image-preview-modal");
                 let img = document.getElementById("image-preview-img");
@@ -3970,7 +3970,6 @@
             const container = document.getElementById('assignments-container');
 
             if (isInitialLoad && !isRefresh) {
-                // CHANGED: Added grid wrapper
                 container.innerHTML = `
                     <div class="assignments-grid">
                         <div class="loading"><div class="spinner"></div></div>
@@ -3995,7 +3994,6 @@
 
             document.getElementById('assignments-count').textContent = `${assignments.length} assignments`;
 
-            // CHANGED: Added grid wrapper and updated card structure
             container.innerHTML = `
                 <div class="assignments-grid">
                     ${assignments.map(assignment => {
@@ -4032,7 +4030,7 @@
                                         <h3 class="text-xl sm:text-2xl font-extrabold text-white underline underline-offset-4 decoration-blue-500 leading-snug break-words flex-1">
                                             ${assignment.title}
                                         </h3>
-                                        <span class="${statusClass} text-white px-3 py-1 rounded-full text-xs sm:text-sm whitespace-nowrap flex-shrink-0">
+                                        <span class="${statusClass} text-white px-2 py-1 rounded-full text-xs font-medium whitespace-nowrap flex-shrink-0 self-center">
                                             ${statusText}
                                         </span>
                                     </div>
