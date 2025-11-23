@@ -266,6 +266,77 @@
         box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
     }
     
+    .announcements-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 24px;
+    }
+
+    .assignments-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 24px;
+    }
+
+    
+    @media (min-width: 768px) {
+        .announcements-grid {
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 28px;
+        }
+
+        .assignments-grid {
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 28px;
+        }
+    }
+
+    
+    @media (min-width: 1200px) {
+        .announcements-grid {
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 32px;
+        }
+
+        .assignments-grid {
+            grid-template-columns: repeat(auto-fit, minmax(550px, 1fr));
+            gap: 32px;
+        }
+    }
+
+    
+    .announcement-card,
+    .assignment-card {
+        height: fit-content;
+        min-height: 200px;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .announcement-content,
+    .assignment-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .announcement-body,
+    .assignment-body {
+        flex: 1;
+    }
+
+    .announcement-card .p-4,
+    .assignment-card .p-4 {
+        padding: 20px;
+    }
+
+    @media (min-width: 768px) {
+        .announcement-card .p-4,
+        .assignment-card .p-4 {
+            padding: 24px;
+        }
+    }    
+    
     .topic-card {
         position: relative;
         background: rgba(30, 30, 40, 0.7);
@@ -3646,239 +3717,240 @@
 
         // Load announcements
         async function loadAnnouncements(isRefresh = false) {
-          const container = document.getElementById("announcements-container");
-
-          if (isInitialLoad && !isRefresh) {
-            // Show skeleton only on initial load
-            container.innerHTML = `
-              <div class="announcement-skeleton">
-                  <div class="skeleton-title"></div>
-                  <div class="skeleton-text"></div>
-                  <div class="skeleton-text"></div>
-                  <div class="skeleton-text short"></div>
-              </div>
-              <div class="announcement-skeleton">
-                  <div class="skeleton-title"></div>
-                  <div class="skeleton-text"></div>
-                  <div class="skeleton-text short"></div>
-              </div>
-            `;
-          } else if (isRefresh) {
-            // Save scroll position before refresh
-            saveScrollPosition();
-          }
-
-          const newAnnouncements = (await fetchData(ENDPOINTS.ANNOUNCEMENTS)) || [];
+            const container = document.getElementById("announcements-container");
         
-          if (newAnnouncements.length === 0) {
-            container.innerHTML =
-              '<p class="text-center text-gray-400 py-8">No announcements available.</p>';
-            document.getElementById("announcements-count").textContent =
-              "0 announced";
-            return;
-          }
-          
-          document.getElementById("announcements-count").textContent = `${newAnnouncements.length} announced`;
-      
-          let pinnedIds = JSON.parse(localStorage.getItem("pinnedAnnouncements") || "[]");
-      
-          // Check for new announcements
-          const newItems = isRefresh ? findNewItems(announcements, newAnnouncements, 'id') : [];
-          announcements = newAnnouncements;
-          window.announcements = announcements;
-      
-          // Render announcements (pinned first)
-          function renderAnnouncements() {
-            const sorted = [...announcements].sort((a, b) => {
-              const aPinned = pinnedIds.includes(a.id);
-              const bPinned = pinnedIds.includes(b.id);
-              return aPinned === bPinned ? 0 : aPinned ? -1 : 1;
-            });
-        
-            container.innerHTML = sorted
-              .map((announcement) => {
-                const urlMatch = announcement.content.match(/https?:\/\/[^\s]+/);
-                const url = urlMatch ? urlMatch[0] : null;
-                const previewId = `og-preview-${announcement.id || Math.random().toString(36).slice(2)}`;
-                const isPinned = pinnedIds.includes(announcement.id);
-                // Check if the announcement is less than 1 hour
-                const createdAt = new Date(announcement.created_at);
-                const now = new Date();
-                const diffHours = (now - createdAt) / (1000 * 60 * 60);
-                const isRecent = diffHours < 3;
-                
-                // Check if this is a new item
-                const isNew = newItems.some(item => item.id === announcement.id);
-                const newClass = isNew ? 'new-item-highlight' : '';
-
-                const neonBorderClass = isRecent
-                  ? "border-l-4 border-l-yellow-400 border-t border-t-blue-700 border-r border-r-blue-700 border-b border-b-blue-700 shadow-sm"
-                  : "border border-blue-800 shadow-md";
-
-                // File preview (image or link)
-                let filePreview = "";
-                if (announcement.has_file && announcement.file_type?.startsWith("image/")) {
-                  filePreview = `
-                    <div class="mb-3 w-24 h-24 rounded-lg overflow-hidden bg-gray-700 flex items-center justify-center cursor-pointer card-hover-lift"
-                         onclick="openImagePreview('${announcement.file_url}')">
-                      <img src="${announcement.file_url}" alt="${announcement.file_name}" class="object-cover w-full h-full">
-                    </div>
-                  `;
-                } else if (announcement.has_file) {
-                  filePreview = `
-                    <div class="mb-3">
-                        <a style="color:#60a5fa; text-decoration: none; font-size:0.875rem; display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px; background: #f8fafc; border-radius: 6px; border: 1px solid #e2e8f0;" href="${announcement.file_url}" target="_blank" class="card-hover-lift">
-                            <i class="${getFileIcon(announcement.file_name)}"></i>
-                            ${announcement.file_name}
-                            <i class="fas fa-external-link-alt" style="font-size: 0.7rem;"></i>
-                        </a>
-                    </div>
-                  `;
-                }
-            
-                return `
-                  <div class="announcement-card ${neonBorderClass} ${newClass} bg-gray-900/60 rounded-2xl transition duration-200 ease-in-out overflow-hidden mb-6 p-2 relative card-hover-lift fade-in">
-                
-                    <!-- Pin button -->
-                    <button 
-                        onclick="togglePin(${announcement.id})"
-                        class="absolute top-3 right-3 p-1 rounded-full transition duration-200 ${
-                          isPinned
-                            ? "bg-yellow-400/20 text-yellow-400 hover:bg-yellow-400/30"
-                            : "text-gray-500 hover:text-yellow-400 hover:bg-gray-800/40"
-                        }"
-                        title="${isPinned ? "Unpin" : "Pin"}"
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" 
-                            viewBox="0 0 24 24" 
-                            fill="${isPinned ? 'currentColor' : 'none'}" 
-                            stroke="currentColor" 
-                            stroke-width="1.9" 
-                            class="w-8 h-8 drop-shadow-sm">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 2c.8 0 1.5.7 1.5 1.5V9l3 3v1.5h-3l-.25 6.5a.75.75 0 01-1.5 0L11 13.5H8V12l3-3V3.5C11 2.7 11.7 2 12 2z" />
-                        </svg>
-                    </button>
-                    
-                    <!-- item indicator -->
-                    ${isNew ? `<div class="absolute top-3 left-3 w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>` : ''}
-                
-                    <!-- OG Preview -->
-                    <div id="${previewId}" class="w-full border-b border-gray-800"></div>
-                
-                    <!-- File/Image Preview -->
-                    ${filePreview}
-                
-                    <!-- Announcement Body -->
-                    <div class="p-4 sm:p-5">
-                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-3 gap-2">
-                            <h3 class="text-xl uppercase break-all underline underline-offset-8 decoration-red-500 decoration-double sm:text-2xl font-extrabold text-white leading-snug break-words">
-                                ${announcement.title}
-                            </h3>
-                            
-                            <i class="fa fa-clock mr-2">
-                              <span class="text-xs sm:text-sm whitespace-nowrap font-bold 
-                                           underline underline-offset-2 decoration-blue-400 
-                                           text-transparent bg-clip-text 
-                                           bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400">
-                                ${formatDate(announcement.created_at)}
-                              </span>
-                            </i>
-
+            if (isInitialLoad && !isRefresh) {
+                // Show skeleton only on initial load - CHANGED: Added grid wrapper
+                container.innerHTML = `
+                    <div class="announcements-grid">
+                        <div class="announcement-skeleton">
+                            <div class="skeleton-title"></div>
+                            <div class="skeleton-text"></div>
+                            <div class="skeleton-text"></div>
+                            <div class="skeleton-text short"></div>
                         </div>
-                    
-                        <p class="mb-3 break-all hyphens-auto text-slate-300 leading-relaxed list-inside formatted-text">${formatText(announcement.content)}</p>
-                    
-                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
-                            <span class="text-gray-400 text-xs sm:text-sm">
-                                By: ${announcement.author?.username || "Unknown"}
-                            </span>
+                        <div class="announcement-skeleton">
+                            <div class="skeleton-title"></div>
+                            <div class="skeleton-text"></div>
+                            <div class="skeleton-text short"></div>
                         </div>
                     </div>
-                  </div>
                 `;
-              })
-              .join("");  
-          
-            // Render OG previews
-            sorted.forEach((announcement) => {
-              const urlMatch = announcement.content.match(/https?:\/\/[^\s]+/);
-              if (!urlMatch) return;
+            } else if (isRefresh) {
+                saveScrollPosition();
+            }
+        
+            const newAnnouncements = (await fetchData(ENDPOINTS.ANNOUNCEMENTS)) || [];
             
-              const url = urlMatch[0];
-              const previewId = `og-preview-${announcement.id || Math.random().toString(36).slice(2)}`;
-              const previewEl = document.getElementById(previewId);
+            if (newAnnouncements.length === 0) {
+                container.innerHTML = '<p class="text-center text-gray-400 py-8">No announcements available.</p>';
+                document.getElementById("announcements-count").textContent = "0 announced";
+                return;
+            }
             
-              fetch(`/api/preview?url=${encodeURIComponent(url)}`)
-                .then((res) => res.json())
-                .then((data) => {
-                  if (!data.title && !data.image) return;
+            document.getElementById("announcements-count").textContent = `${newAnnouncements.length} announced`;
+        
+            let pinnedIds = JSON.parse(localStorage.getItem("pinnedAnnouncements") || "[]");
+        
+            // Check for new announcements
+            const newItems = isRefresh ? findNewItems(announcements, newAnnouncements, 'id') : [];
+            announcements = newAnnouncements;
+            window.announcements = announcements;
+        
+            // Render announcements (pinned first)
+            function renderAnnouncements() {
+                const sorted = [...announcements].sort((a, b) => {
+                    const aPinned = pinnedIds.includes(a.id);
+                    const bPinned = pinnedIds.includes(b.id);
+                    return aPinned === bPinned ? 0 : aPinned ? -1 : 1;
+                });
+            
+                // CHANGED: Added grid wrapper and updated card structure
+                container.innerHTML = `
+                    <div class="announcements-grid">
+                        ${sorted.map((announcement) => {
+                            const urlMatch = announcement.content.match(/https?:\/\/[^\s]+/);
+                            const url = urlMatch ? urlMatch[0] : null;
+                            const previewId = `og-preview-${announcement.id || Math.random().toString(36).slice(2)}`;
+                            const isPinned = pinnedIds.includes(announcement.id);
+                            const createdAt = new Date(announcement.created_at);
+                            const now = new Date();
+                            const diffHours = (now - createdAt) / (1000 * 60 * 60);
+                            const isRecent = diffHours < 3;
+                            
+                            const isNew = newItems.some(item => item.id === announcement.id);
+                            const newClass = isNew ? 'new-item-highlight' : '';
+                        
+                            const neonBorderClass = isRecent
+                                ? "border-l-4 border-l-yellow-400 border-t border-t-blue-700 border-r border-r-blue-700 border-b border-b-blue-700 shadow-sm"
+                                : "border border-blue-800 shadow-md";
+                        
+                            // File preview (image or link)
+                            let filePreview = "";
+                            if (announcement.has_file && announcement.file_type?.startsWith("image/")) {
+                                filePreview = `
+                                    <div class="mb-3 w-24 h-24 rounded-lg overflow-hidden bg-gray-700 flex items-center justify-center cursor-pointer card-hover-lift"
+                                         onclick="openImagePreview('${announcement.file_url}')">
+                                        <img src="${announcement.file_url}" alt="${announcement.file_name}" class="object-cover w-full h-full">
+                                    </div>
+                                `;
+                            } else if (announcement.has_file) {
+                                filePreview = `
+                                    <div class="mb-3">
+                                        <a style="color:#60a5fa; text-decoration: none; font-size:0.875rem; display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px; background: #f8fafc; border-radius: 6px; border: 1px solid #e2e8f0;" href="${announcement.file_url}" target="_blank" class="card-hover-lift">
+                                            <i class="${getFileIcon(announcement.file_name)}"></i>
+                                            ${announcement.file_name}
+                                            <i class="fas fa-external-link-alt" style="font-size: 0.7rem;"></i>
+                                        </a>
+                                    </div>
+                                `;
+                            }
+                        
+                            return `
+                                <div class="announcement-card ${neonBorderClass} ${newClass} bg-gray-900/60 rounded-2xl transition duration-200 ease-in-out overflow-hidden card-hover-lift fade-in announcement-content">
+                                    <!-- Pin button -->
+                                    <button 
+                                        onclick="togglePin(${announcement.id})"
+                                        class="absolute top-3 right-3 p-1 rounded-full transition duration-200 z-10 ${
+                                            isPinned
+                                            ? "bg-yellow-400/20 text-yellow-400 hover:bg-yellow-400/30"
+                                            : "text-gray-500 hover:text-yellow-400 hover:bg-gray-800/40"
+                                        }"
+                                        title="${isPinned ? "Unpin" : "Pin"}"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" 
+                                            viewBox="0 0 24 24" 
+                                            fill="${isPinned ? 'currentColor' : 'none'}" 
+                                            stroke="currentColor" 
+                                            stroke-width="1.9" 
+                                            class="w-6 h-6 drop-shadow-sm">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 2c.8 0 1.5.7 1.5 1.5V9l3 3v1.5h-3l-.25 6.5a.75.75 0 01-1.5 0L11 13.5H8V12l3-3V3.5C11 2.7 11.7 2 12 2z" />
+                                        </svg>
+                                    </button>
+                                    
+                                    <!-- New item indicator -->
+                                    ${isNew ? `<div class="absolute top-3 left-3 w-3 h-3 bg-green-500 rounded-full animate-pulse z-10"></div>` : ''}
+                                
+                                    <!-- OG Preview -->
+                                    <div id="${previewId}" class="w-full border-b border-gray-800"></div>
+                                
+                                    <!-- File/Image Preview -->
+                                    ${filePreview}
+                                
+                                    <!-- Announcement Body -->
+                                    <div class="announcement-body p-4 sm:p-5">
+                                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-3 gap-2">
+                                            <h3 class="text-xl uppercase break-all underline underline-offset-8 decoration-red-500 decoration-double sm:text-2xl font-extrabold text-white leading-snug break-words">
+                                                ${announcement.title}
+                                            </h3>
+                                            
+                                            <div class="flex items-center gap-2">
+                                                <i class="fa fa-clock text-gray-400"></i>
+                                                <span class="text-xs sm:text-sm whitespace-nowrap font-bold 
+                                                           underline underline-offset-2 decoration-blue-400 
+                                                           text-transparent bg-clip-text 
+                                                           bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400">
+                                                    ${formatDate(announcement.created_at)}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    
+                                        <p class="mb-4 break-all hyphens-auto text-slate-300 leading-relaxed list-inside formatted-text">
+                                            ${formatText(announcement.content)}
+                                        </p>
+                                    
+                                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mt-auto pt-4 border-t border-gray-700">
+                                            <span class="text-gray-400 text-xs sm:text-sm">
+                                                By: ${announcement.author?.username || "Unknown"}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                `;
                 
-                  previewEl.innerHTML = `
-                    <a href="${url}" target="_blank" class="flex items-center gap-3 p-3 sm:p-4 bg-gray-800/70 hover:bg-gray-800/90 transition duration-200 ease-in-out card-hover-lift">
-                        ${
-                          data.image
-                            ? `<div class="flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden bg-gray-700 flex items-center justify-center">
-                                 <img src="${data.image}" alt="" class="object-cover w-full h-full cursor-pointer" onclick="openImagePreview('${data.image}')">
-                               </div>`
-                            : `<div class="flex-shrink-0 w-16 h-16 rounded-lg bg-gray-700 flex items-center justify-center text-gray-500 text-xs italic">
-                                 No image
-                               </div>`
-                        }
-                        <div class="flex-1">
-                            <h3 class="text-white font-semibold text-sm sm:text-base mb-1 line-clamp-1">
-                                ${data.title || "Untitled"}
-                            </h3>
-                            <p class="text-gray-400 text-xs sm:text-sm line-clamp-2">
-                                ${data.description || ""}
-                            </p>
-                        </div>
-                    </a>
-                  `;
-                })
-                .catch(() => console.warn("No OG preview found for", url));
+                // Render OG previews
+                sorted.forEach((announcement) => {
+                    const urlMatch = announcement.content.match(/https?:\/\/[^\s]+/);
+                    if (!urlMatch) return;
+                
+                    const url = urlMatch[0];
+                    const previewId = `og-preview-${announcement.id || Math.random().toString(36).slice(2)}`;
+                    const previewEl = document.getElementById(previewId);
+                
+                    fetch(`/api/preview?url=${encodeURIComponent(url)}`)
+                        .then((res) => res.json())
+                        .then((data) => {
+                            if (!data.title && !data.image) return;
+                        
+                            previewEl.innerHTML = `
+                                <a href="${url}" target="_blank" class="flex items-center gap-3 p-3 sm:p-4 bg-gray-800/70 hover:bg-gray-800/90 transition duration-200 ease-in-out card-hover-lift">
+                                    ${
+                                        data.image
+                                            ? `<div class="flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden bg-gray-700 flex items-center justify-center">
+                                                 <img src="${data.image}" alt="" class="object-cover w-full h-full cursor-pointer" onclick="openImagePreview('${data.image}')">
+                                               </div>`
+                                            : `<div class="flex-shrink-0 w-16 h-16 rounded-lg bg-gray-700 flex items-center justify-center text-gray-500 text-xs italic">
+                                                 No image
+                                               </div>`
+                                    }
+                                    <div class="flex-1">
+                                        <h3 class="text-white font-semibold text-sm sm:text-base mb-1 line-clamp-1">
+                                            ${data.title || "Untitled"}
+                                        </h3>
+                                        <p class="text-gray-400 text-xs sm:text-sm line-clamp-2">
+                                            ${data.description || ""}
+                                        </p>
+                                    </div>
+                                </a>
+                            `;
+                        })
+                        .catch(() => console.warn("No OG preview found for", url));
+                });
+                
+                // Restore scroll position after refresh
+                if (isRefresh) {
+                    restoreScrollPosition('announcements');
+                }
+            }
+        
+            window.togglePin = function (id) {
+                if (pinnedIds.includes(id)) {
+                    pinnedIds = pinnedIds.filter((x) => x !== id);
+                } else {
+                    pinnedIds.push(id);
+                }
+                localStorage.setItem("pinnedAnnouncements", JSON.stringify(pinnedIds));
+                renderAnnouncements();
+            };
+        
+            // Image modal - PRESERVED FROM ORIGINAL
+            window.openImagePreview = function(src) {
+                let modal = document.getElementById("image-preview-modal");
+                let img = document.getElementById("image-preview-img");
+                if (!modal || !img) return;
+                img.src = src;
+                modal.classList.remove("hidden");
+                modal.classList.add("flex");
+            };
+        
+            window.closeImagePreview = function() {
+                let modal = document.getElementById("image-preview-modal");
+                let img = document.getElementById("image-preview-img");
+                if (!modal || !img) return;
+                modal.classList.add("hidden");
+                modal.classList.remove("flex");
+                img.src = "";
+            };
+        
+            // Close modal when clicking outside the image
+            document.getElementById("image-preview-modal")?.addEventListener("click", e => {
+                if (e.target.id === "image-preview-modal") closeImagePreview();
             });
-            
-            // Restore scroll position after refresh
-            if (isRefresh) {
-              restoreScrollPosition('announcements');
-            }
-          }
-      
-          window.togglePin = function (id) {
-            if (pinnedIds.includes(id)) {
-              pinnedIds = pinnedIds.filter((x) => x !== id);
-            } else {
-              pinnedIds.push(id);
-            }
-            localStorage.setItem("pinnedAnnouncements", JSON.stringify(pinnedIds));
+        
             renderAnnouncements();
-          };
-      
-          // Image modal
-          window.openImagePreview = function(src) {
-            let modal = document.getElementById("image-preview-modal");
-            let img = document.getElementById("image-preview-img");
-            if (!modal || !img) return;
-            img.src = src;
-            modal.classList.remove("hidden");
-            modal.classList.add("flex");
-          };
-      
-          window.closeImagePreview = function() {
-            let modal = document.getElementById("image-preview-modal");
-            let img = document.getElementById("image-preview-img");
-            if (!modal || !img) return;
-            modal.classList.add("hidden");
-            modal.classList.remove("flex");
-            img.src = "";
-          };
-      
-          // Close modal when clicking outside the image
-          document.getElementById("image-preview-modal")?.addEventListener("click", e => {
-            if (e.target.id === "image-preview-modal") closeImagePreview();
-          });
-      
-          renderAnnouncements();
         }
         
         // Helper function to find new items
@@ -3892,88 +3964,104 @@
         // Load assignments
         async function loadAssignments(isRefresh = false) {
             const container = document.getElementById('assignments-container');
-            
+
             if (isInitialLoad && !isRefresh) {
-                container.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+                // CHANGED: Added grid wrapper
+                container.innerHTML = `
+                    <div class="assignments-grid">
+                        <div class="loading"><div class="spinner"></div></div>
+                    </div>
+                `;
             } else if (isRefresh) {
                 saveScrollPosition();
             }
-            
+
             const newAssignments = await fetchData(ENDPOINTS.ASSIGNMENTS) || [];
-            
+
             // Check for new assignments
             const newItems = isRefresh ? findNewItems(assignments, newAssignments, 'id') : [];
             assignments = newAssignments;
             window.assignments = assignments;
-            
+
             if (assignments.length === 0) {
                 container.innerHTML = '<p class="text-center text-gray-400 py-8">No assignments available.</p>';
                 document.getElementById('assignments-count').textContent = '0 assignments';
                 return;
             }
-            
+
             document.getElementById('assignments-count').textContent = `${assignments.length} assignments`;
-            
-            container.innerHTML = assignments.map(assignment => {
-                const dueDate = new Date(assignment.due_date);
-                const now = new Date();
-                const daysUntilDue = Math.ceil((dueDate - now) / (1000 * 60 * 60 * 24));
-                
-                // Check if this is a new item
-                const isNew = newItems.some(item => item.id === assignment.id);
-                const newClass = isNew ? 'new-item-highlight' : '';
 
-                let statusClass = 'bg-blue-500';
-                let statusText = 'Due Soon';
+            // CHANGED: Added grid wrapper and updated card structure
+            container.innerHTML = `
+                <div class="assignments-grid">
+                    ${assignments.map(assignment => {
+                        const dueDate = new Date(assignment.due_date);
+                        const now = new Date();
+                        const daysUntilDue = Math.ceil((dueDate - now) / (1000 * 60 * 60 * 24));
 
-                if (daysUntilDue < 0) {
-                    statusClass = 'bg-red-500';
-                    statusText = 'Overdue';
-                } else if (daysUntilDue < 1) {
-                    statusClass = 'bg-yellow-400';
-                    statusText = 'Due Today';
-                } else if (daysUntilDue === 1) {
-                    statusClass = 'bg-orange-400';
-                    statusText = 'Due Tomorrow';    
-                } else if (daysUntilDue <= 3) {
-                    statusClass = 'bg-green-400';
-                    statusText = 'Due Soon';
-                }
-                
-                return `
-                <div class="assignment-card border-l-4 border-blue-500 border-r-1 border-blue-500 border-t-1 border-blue-500 border-b-1 border-blue-500 bg-gray-800/50 p-3 sm:p-4 rounded-xl shadow-md hover:shadow-lg transition duration-200 ease-in-out card-hover-lift fade-in ${newClass}">
-                    ${isNew ? `<div class="absolute top-3 left-3 w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>` : ''}
-                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-3 gap-2">
-                        <h3 class="text-xl sm:text-2xl font-extrabold text-white underline underline-offset-4 decoration-blue-500 leading-snug break-words">
-                            ${assignment.title}
-                        </h3>
-                        <span class="${statusClass} text-white px-3 py-1 rounded-full text-xs sm:text-sm whitespace-nowrap">
-                            ${statusText}: ${formatDate(assignment.due_date)}
-                        </span>
-                    </div>
-                
-                    <div 
-                      class="mb-4 text-gray-300 text-sm leading-relaxed whitespace-pre-line list-inside"
-                    >
-                      ${formatMath(assignment.description)}
-                    </div>
+                        const isNew = newItems.some(item => item.id === assignment.id);
+                        const newClass = isNew ? 'new-item-highlight' : '';
                     
-                
-                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
-                        <span class="text-gray-400 text-xs sm:text-sm">
-                            Topic: ${assignment.topic?.name || 'General'}
-                        </span>
-                        <button onclick="window.location.href='/assignment/${assignment.id}'" 
-                                class="btn text-sm sm:text-base px-4 py-2 text-blue-400 border border-blue-500 rounded-lg hover:bg-blue-600/20 transition-colors flex items-center gap-1 self-start sm:self-auto">
-                            <i class="fas fa-paper-plane mr-2" style="color: white;"></i>
-                            <span style="color: white;"> View File</span>
-                        </button>
-                    </div>
+                        let statusClass = 'bg-blue-500';
+                        let statusText = 'Due Soon';
+                    
+                        if (daysUntilDue < 0) {
+                            statusClass = 'bg-red-500';
+                            statusText = 'Overdue';
+                        } else if (daysUntilDue < 1) {
+                            statusClass = 'bg-yellow-400';
+                            statusText = 'Due Today';
+                        } else if (daysUntilDue === 1) {
+                            statusClass = 'bg-orange-400';
+                            statusText = 'Due Tomorrow';    
+                        } else if (daysUntilDue <= 3) {
+                            statusClass = 'bg-green-400';
+                            statusText = 'Due Soon';
+                        }
+
+                        return `
+                            <div class="assignment-card border-l-4 border-blue-500 border border-blue-500 bg-gray-800/50 rounded-xl shadow-md hover:shadow-lg transition duration-200 ease-in-out card-hover-lift fade-in ${newClass} assignment-content">
+                                ${isNew ? `<div class="absolute top-3 left-3 w-3 h-3 bg-green-500 rounded-full animate-pulse z-10"></div>` : ''}
+
+                                <div class="assignment-body p-4 sm:p-5">
+                                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-4 gap-2">
+                                        <h3 class="text-xl sm:text-2xl font-extrabold text-white underline underline-offset-4 decoration-blue-500 leading-snug break-words flex-1">
+                                            ${assignment.title}
+                                        </h3>
+                                        <span class="${statusClass} text-white px-3 py-1 rounded-full text-xs sm:text-sm whitespace-nowrap flex-shrink-0">
+                                            ${statusText}
+                                        </span>
+                                    </div>
+                                
+                                    <div class="mb-4 text-gray-300 text-sm leading-relaxed whitespace-pre-line list-inside formatted-text">
+                                        ${formatMath(assignment.description)}
+                                    </div>
+
+                                    <div class="mt-auto pt-4 border-t border-gray-700">
+                                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+                                            <div class="flex flex-col sm:flex-row sm:items-center gap-2 text-sm">
+                                                <span class="text-gray-400">
+                                                    Topic: ${assignment.topic?.name || 'General'}
+                                                </span>
+                                                <span class="hidden sm:inline text-gray-500">•</span>
+                                                <span class="text-blue-400 font-medium">
+                                                    Due: ${formatDate(assignment.due_date)}
+                                                </span>
+                                            </div>
+                                            <button onclick="window.location.href='/assignment/${assignment.id}'" 
+                                                    class="btn text-sm sm:text-base px-4 py-2 text-blue-400 border border-blue-500 rounded-lg hover:bg-blue-600/20 transition-colors flex items-center gap-1 self-start sm:self-auto flex-shrink-0">
+                                                <i class="fas fa-paper-plane mr-2" style="color: white;"></i>
+                                                <span style="color: white;">View File</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
                 </div>
-                `;
-            }).join('');
+            `;
             
-            // Restore scroll position after refresh
             if (isRefresh) {
                 restoreScrollPosition('assignments');
             }
