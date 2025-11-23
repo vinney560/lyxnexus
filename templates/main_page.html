@@ -275,19 +275,19 @@
     .assignments-grid {
         display: grid;
         grid-template-columns: 1fr;
-        gap: 24px;
+        gap: 18px;
     }
 
     
     @media (min-width: 768px) {
         .announcements-grid {
             grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
-            gap: 28px;
+            gap: 18px;
         }
 
         .assignments-grid {
             grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
-            gap: 28px;
+            gap: 18px;
         }
     }
 
@@ -304,7 +304,6 @@
         }
     }
 
-    
     .announcement-card,
     .assignment-card {
         height: fit-content;
@@ -3681,12 +3680,6 @@
             if (!text) return '';
 
             text = text.trim();
-
-            // Replace multiple spaces with single space
-            text = text.replace(/\s+/g, ' ');
-
-            // Replace multiple newlines with single newline
-            text = text.replace(/\n\s*\n/g, '\n');
 
             // Escape HTML
             const escaped = text
