@@ -999,8 +999,14 @@
     .formatted-text {
       white-space: pre-wrap;
       word-wrap: break-word;
+      text-indent: 0;
     }
-    
+
+    .announcement-body p.formatted-text {
+      margin-top: 0;
+      padding-top: 0;
+    }
+
     .formatted-text strong, .formatted-text .bold {
         font-weight: 700;
         color: var(--text-primary);
@@ -3673,8 +3679,15 @@
 
         function formatText(text) {
             if (!text) return '';
+
             text = text.trim();
-        
+
+            // Replace multiple spaces with single space
+            text = text.replace(/\s+/g, ' ');
+
+            // Replace multiple newlines with single newline
+            text = text.replace(/\n\s*\n/g, '\n');
+
             // Escape HTML
             const escaped = text
                 .replace(/&/g, '&amp;')
@@ -3682,15 +3695,15 @@
                 .replace(/>/g, '&gt;')
                 .replace(/"/g, '&quot;')
                 .replace(/'/g, '&#039;');
-        
-            // Apply linkify FIRST, then continue formatting
-            const linkified = linkify(escaped);
-        
-            return linkified
-                .replace(/\*(.*?)\*/g, '<strong>$1</strong>')               // *bold*
-                .replace(/_(.*?)_/g, '<em>$1</em>')                 // _italic_
-                .replace(/~(.*?)~/g, '<span class="strikethrough">$1</span>')  // ~strike~
-                .replace(/==(.*?)==/g, '<span class="highlight">$1</span>')    // ==highlight==
+
+            // Apply formatting
+            const formatted = escaped
+                .replace(/\*(.*?)\*/g, '<strong>$1</strong>')
+                .replace(/_(.*?)_/g, '<em>$1</em>')
+                .replace(/~(.*?)~/g, '<span class="strikethrough">$1</span>')
+                .replace(/==(.*?)==/g, '<span class="highlight">$1</span>');
+
+            return linkify(formatted);
         }
 
         function getFileIcon(filename) {
@@ -3720,7 +3733,7 @@
             const container = document.getElementById("announcements-container");
         
             if (isInitialLoad && !isRefresh) {
-                // Show skeleton only on initial load - CHANGED: Added grid wrapper
+                // Show skeleton only on initial load
                 container.innerHTML = `
                     <div class="announcements-grid">
                         <div class="announcement-skeleton">
@@ -3741,13 +3754,13 @@
             }
         
             const newAnnouncements = (await fetchData(ENDPOINTS.ANNOUNCEMENTS)) || [];
-            
+
             if (newAnnouncements.length === 0) {
                 container.innerHTML = '<p class="text-center text-gray-400 py-8">No announcements available.</p>';
                 document.getElementById("announcements-count").textContent = "0 announced";
                 return;
             }
-            
+
             document.getElementById("announcements-count").textContent = `${newAnnouncements.length} announced`;
         
             let pinnedIds = JSON.parse(localStorage.getItem("pinnedAnnouncements") || "[]");
@@ -3777,7 +3790,7 @@
                             const now = new Date();
                             const diffHours = (now - createdAt) / (1000 * 60 * 60);
                             const isRecent = diffHours < 3;
-                            
+
                             const isNew = newItems.some(item => item.id === announcement.id);
                             const newClass = isNew ? 'new-item-highlight' : '';
                         
@@ -3827,7 +3840,7 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 2c.8 0 1.5.7 1.5 1.5V9l3 3v1.5h-3l-.25 6.5a.75.75 0 01-1.5 0L11 13.5H8V12l3-3V3.5C11 2.7 11.7 2 12 2z" />
                                         </svg>
                                     </button>
-                                    
+
                                     <!-- New item indicator -->
                                     ${isNew ? `<div class="absolute top-3 left-3 w-3 h-3 bg-green-500 rounded-full animate-pulse z-10"></div>` : ''}
                                 
@@ -3843,7 +3856,7 @@
                                             <h3 class="text-xl uppercase break-all underline underline-offset-8 decoration-red-500 decoration-double sm:text-2xl font-extrabold text-white leading-snug break-words">
                                                 ${announcement.title}
                                             </h3>
-                                            
+
                                             <div class="flex items-center gap-2">
                                                 <i class="fa fa-clock text-gray-400"></i>
                                                 <span class="text-xs sm:text-sm whitespace-nowrap font-bold 
@@ -3855,9 +3868,7 @@
                                             </div>
                                         </div>
                                     
-                                        <p class="mb-4 break-all hyphens-auto text-slate-300 leading-relaxed list-inside formatted-text">
-                                            ${formatText(announcement.content)}
-                                        </p>
+                                        <p class="mb-4 break-all hyphens-auto text-slate-300 leading-relaxed list-inside formatted-text">${formatText(announcement.content)}</p>
                                     
                                         <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mt-auto pt-4 border-t border-gray-700">
                                             <span class="text-gray-400 text-xs sm:text-sm">
@@ -3909,7 +3920,7 @@
                         })
                         .catch(() => console.warn("No OG preview found for", url));
                 });
-                
+
                 // Restore scroll position after refresh
                 if (isRefresh) {
                     restoreScrollPosition('announcements');
