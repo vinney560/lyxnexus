@@ -581,6 +581,9 @@
 
     @media (min-width: 769px) {
         header .max-w-7xl.mx-auto.px-2 {
+            position: fixed;
+            top: 0;
+            left: 0;
             padding-top: 0.25rem;
             padding-bottom: 0.25rem;
         }
@@ -1517,7 +1520,7 @@
     <!-- Toast Container -->
     <div class="toast-container" id="toastContainer"></div>
 
-    <header class="glass-morph floating-element header-fixed" style="position: fixed;">
+    <header class="glass-morph floating-element header-fixed">
         <div class="max-w-7xl mx-auto px-2 py-2">
             <div class="flex flex-col md:flex-row justify-between items-center">
                 <div class="flex items-center space-x-3 mb-4 md:mb-0">
@@ -3651,9 +3654,6 @@
                     </div>
                     <h3 class="font-bold">${currentUser.username}</h3>
                     <p class="text-gray-400 text-sm">${currentUser.is_admin ? 'Administrator' : 'Student'}</p>
-                    <div class="mt-2 text-xs text-gray-500">
-                        Joined ${formatDate(currentUser.created_at)}
-                    </div>
                 </div>
             `;
             
