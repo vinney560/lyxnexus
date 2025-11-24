@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Modern Dashboard | LyxNexus</title>
+    <title>Dashboard | LyxNexus</title>
     <!-- SEO Meta -->
     <meta name="description" content="LyxNexus is a simple yet powerful class hub designed to keep everything in one place — from announcements and assignments to topics and class discussions." />
     <meta name="keywords" content="education, coding, programming, web development, technology, online courses, learn to code" />
@@ -498,7 +498,7 @@
             font-size: 0.75rem;
         }
         
-        /* Mobile optimizations */
+        /* Mobile */
         @media (max-width: 1024px) {
             .sidebar {
                 position: fixed;
@@ -724,7 +724,6 @@
         
         <!-- Main Content -->
         <div class="flex-1 overflow-x-hidden hide-scrollbar">
-            <!-- Header - Responsive -->
             <header class="glass-morph sticky top-0 z-20 header-compact">
                 <div class="flex items-center justify-between w-full">
                     <div class="flex items-center space-x-2 md:space-x-4 flex-1 min-w-0">
@@ -784,7 +783,6 @@
 
             <!-- Main Content Area -->
             <div class="p-4 md:p-6">
-                <!-- Stats Grid - Removed Announcements and Assignments -->
                 <div class="analytics-grid">
                     <div class="stat-card border-l-purple-500 card-hover-lift fade-in" style="animation-delay: 0.1s">
                         <div class="flex justify-between items-start">
@@ -1094,8 +1092,8 @@
             document.getElementById('activity-count').textContent = `${activities.length} activities`;
             document.getElementById('visits-trend').textContent = activityData.visits > 50 ? '↑ High activity' : activityData.visits > 20 ? '↑ Normal usage' : '↑ Getting started';
             
-            // Generate sample data for demo cards
-            document.getElementById('session-duration').textContent = '1.5h';
+            // Generate sample data
+            document.getElementById('session-duration').textContent = '1.75h';
             document.getElementById('session-trend').textContent = '↑ 12% increase';
             document.getElementById('active-time').textContent = '24';
             document.getElementById('time-trend').textContent = '↑ 8% more active';
@@ -1141,7 +1139,6 @@
             const activityCtx = document.getElementById('activityChart').getContext('2d');
             if (activityChart) activityChart.destroy();
             
-            // Use real data if available, otherwise generate sample data
             let labels, data;
             if (statsData && statsData.success && statsData.weekly_activity) {
                 labels = statsData.weekly_activity.map(item => item.date);
@@ -1220,7 +1217,6 @@
             const usageCtx = document.getElementById('usageChart').getContext('2d');
             if (usageChart) usageChart.destroy();
             
-            // Use real data if available, otherwise generate sample data
             let labels, data;
             if (statsData && statsData.success && statsData.action_stats) {
                 labels = Object.keys(statsData.action_stats);
