@@ -2973,9 +2973,7 @@
                             <!-- Announcement Body -->
                             <div class="p-4 sm:p-5">
                                 <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-3 gap-2">
-                                    <h3 class="text-xl uppercase break-all underline underline-offset-8 decoration-red-500 decoration-double sm:text-2xl font-extrabold text-white leading-snug break-words">
-                                        ${this.highlightText(announcement.title, this.currentQuery)}
-                                    </h3>
+                                    <h3 class="text-xl uppercase break-all underline underline-offset-8 decoration-red-500 decoration-double sm:text-2xl font-extrabold text-white leading-snug break-words">${this.highlightText(announcement.title, this.currentQuery)}</h3>
 
                                     <i class="fa fa-clock mr-2">
                                         <span class="text-xs sm:text-sm whitespace-nowrap font-bold 
@@ -2987,9 +2985,7 @@
                                     </i>
                                 </div>
                             
-                                <p class="mb-3 break-all hyphens-auto text-slate-300 leading-relaxed list-inside formatted-text">
-                                    ${this.highlightText(formatText(announcement.content), this.currentQuery)}
-                                </p>
+                                <p class="mb-3 break-all hyphens-auto text-slate-300 leading-relaxed list-inside formatted-text">${this.highlightText(formatText(announcement.content), this.currentQuery)}</p>
                             
                                 <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
                                     <span class="text-gray-400 text-xs sm:text-sm">
@@ -3067,19 +3063,15 @@
                     }
 
                     return `
-                        <div class="assignment-card border-l-4 border-blue-500 border-r-1 border-blue-500 border-t-1 border-blue-500 border-b-1 border-blue-500 bg-gray-800/50 p-3 sm:p-4 rounded-xl shadow-md hover:shadow-lg transition duration-200 ease-in-out card-hover-lift fade-in">
+                        <div class="assignment-card border-l-4 border-blue-500 border-r-1 border-blue-500 border-t-1 border-blue-500 border-b-1 border-blue-500 bg-gray-800/50 p-2 sm:p-3 rounded-xl shadow-md hover:shadow-lg transition duration-200 ease-in-out card-hover-lift fade-in">
                             <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-3 gap-2">
-                                <h3 class="text-xl sm:text-2xl font-extrabold text-white underline underline-offset-4 decoration-blue-500 leading-snug break-words">
-                                    ${this.highlightText(assignment.title, this.currentQuery)}
-                                </h3>
+                                <h3 class="text-xl sm:text-2xl font-extrabold text-white underline underline-offset-4 decoration-blue-500 leading-snug break-words">${this.highlightText(assignment.title, this.currentQuery)}</h3>
                                 <span class="${statusClass} text-white px-3 py-1 rounded-full text-xs sm:text-sm whitespace-nowrap">
                                     ${statusText}: ${formatDate(assignment.due_date)}
                                 </span>
                             </div>
                         
-                            <div class="mb-4 text-gray-300 text-sm leading-relaxed whitespace-pre-line list-inside">
-                                ${this.highlightText(formatMath(assignment.description), this.currentQuery)}
-                            </div>
+                            <div class="mb-4 text-gray-300 text-sm leading-relaxed whitespace-pre-line list-inside">${this.highlightText(formatMath(assignment.description), this.currentQuery)}</div>
 
                             <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
                                 <span class="text-gray-400 text-xs sm:text-sm">
@@ -3104,9 +3096,7 @@
                                 <i class="fas fa-book"></i>
                             </div>
                             <h3 class="text-xl font-bold mb-2">${this.highlightText(topic.name, this.currentQuery)}</h3>
-                            <p class="text-gray-300 mb-2 whitespace-pre-wrap break-words break-all">
-                                ${this.highlightText(topic.description, this.currentQuery)}
-                            </p>
+                            <p class="text-gray-300 mb-2 whitespace-pre-wrap break-words break-all">${this.highlightText(topic.description, this.currentQuery)}</p>
                             <button class="btn text-sm px-4 py-2 w-full" onclick="window.location.href='/material/${topic.id}'">
                                 <i class="fas fa-folder-open mr-1"></i> View Materials
                             </button>
