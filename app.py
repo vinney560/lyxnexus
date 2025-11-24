@@ -1161,7 +1161,6 @@ def handle_admin_login(user, username, mobile, next_page):
                              year=_year())
 
     login_user(user)
-    flash('Admin login successful!', 'success')
     return redirect(next_page or url_for('admin_page'))
 
 def handle_student_login(user, username, mobile, login_subtype, next_page):
@@ -1211,7 +1210,6 @@ def handle_student_login(user, username, mobile, login_subtype, next_page):
                                  year=_year())
 
         login_user(user)
-        flash('Login successful!', 'success')
         return redirect(next_page or url_for('main_page'))
 
 def format_mobile_display(mobile):
