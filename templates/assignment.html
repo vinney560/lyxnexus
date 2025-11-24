@@ -627,23 +627,30 @@
             const now = new Date();
             const timeRemainingElement = document.getElementById('timeRemaining');
             const statusBadge = document.getElementById('statusBadge');
-
+        
             const diffMs = dueDate - now;
             const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
             const diffHrs = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
             const diffMins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-
+        
             // Check if it's actually the same calendar day
             const isSameDay = now.getDate() === dueDate.getDate() && 
                              now.getMonth() === dueDate.getMonth() && 
                              now.getFullYear() === dueDate.getFullYear();
-
+            
+            // Check if it's due tomorrow (next calendar day)
+            const tomorrow = new Date(now);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            const isTomorrow = dueDate.getDate() === tomorrow.getDate() && 
+                              dueDate.getMonth() === tomorrow.getMonth() && 
+                              dueDate.getFullYear() === tomorrow.getFullYear();
+        
             if (diffMs < 0) {
                 // Overdue
                 const overdueDays = Math.abs(diffDays);
                 const overdueHrs = Math.abs(diffHrs);
                 const overdueMins = Math.abs(diffMins);
-
+            
                 timeRemainingElement.textContent = `${overdueDays}d ${overdueHrs}h ${overdueMins}m ago`;
                 statusBadge.textContent = 'Overdue';
                 statusBadge.className = 'status-badge status-overdue';
@@ -658,8 +665,13 @@
                     statusBadge.textContent = 'Due Today';
                     statusBadge.className = 'status-badge status-due-soon';
                 }
+            } else if (isTomorrow) {
+                // Due tomorrow
+                timeRemainingElement.textContent = `${diffDays}d ${diffHrs}h ${diffMins}m`;
+                statusBadge.textContent = 'Due Tomorrow';
+                statusBadge.className = 'status-badge status-due-soon';
             } else if (diffDays < 3) {
-                // Due soon (within 3 days)
+                // Due soon (within 3 days, but not today or tomorrow)
                 timeRemainingElement.textContent = `${diffDays}d ${diffHrs}h ${diffMins}m`;
                 statusBadge.textContent = 'Due Soon';
                 statusBadge.className = 'status-badge status-due-soon';
