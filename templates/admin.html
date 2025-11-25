@@ -401,7 +401,6 @@
             font-size: 1.25rem;
         }
         
-        /* Improved mobile button layout */
         .mobile-btn-container {
             display: flex;
             flex-wrap: wrap;
@@ -687,7 +686,6 @@
         }
     }
 
-    /* Status indicators */
     .status-indicator {
         display: inline-block;
         width: 8px;
@@ -710,6 +708,114 @@
         background-color: var(--error-color);
         box-shadow: 0 0 6px var(--error-color);
     }
+
+    .nav-expanded {
+        max-height: 500px !important;
+        opacity: 1 !important;
+        transform: translateX(0) !important;
+    }
+
+    .nav-collapsed {
+        max-height: 0 !important;
+        opacity: 0 !important;
+        transform: translateX(-20px) !important;
+    }
+
+    .toggle-rotate {
+        transform: rotate(90deg);
+    }
+
+    .mobile-btn-container {
+        display: grid;
+        gap: 8px;
+        justify-content: center;
+        width: 100%;
+        transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    @media (min-width: 768px) {
+        .mobile-btn-container {
+            display: flex !important;
+            width: auto;
+            flex-wrap: nowrap;
+            max-height: none !important;
+            opacity: 1 !important;
+            transform: none !important;
+        }
+
+        .nav-expanded, .nav-collapsed {
+            max-height: none !important;
+            opacity: 1 !important;
+            transform: none !important;
+        }
+
+        .mobile-btn-container .btn {
+            width: auto;
+            white-space: nowrap;
+        }
+    }
+
+    @media (max-width: 767px) {
+        .mobile-btn-container {
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            align-items: stretch;
+        }
+
+        .mobile-btn-container .btn {
+            width: 100%;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            padding: 10px 8px;
+        }
+
+        .mobile-btn-container .btn-danger,
+        .mobile-btn-container .btn-warning {
+            grid-column: 1 / -1; 
+        }
+
+        .mobile-btn-container .btn i {
+            font-size: 14px;
+            margin-right: 6px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .mobile-btn-container {
+            grid-template-columns: 1fr;
+            gap: 8px;
+        }
+
+        .mobile-btn-container .btn {
+            min-height: 48px;
+            font-size: 15px;
+            padding: 12px 10px;
+        }
+
+        .mobile-btn-container .btn-danger,
+        .mobile-btn-container .btn-warning {
+            grid-column: 1;
+        }
+    }
+
+    .mobile-btn-container {
+        transition: grid-template-rows 0.5s ease-in-out, opacity 0.3s ease-in-out;
+    }
+
+    .mobile-btn-container .btn {
+        text-align: center;
+        white-space: normal;
+        word-wrap: break-word;
+        line-height: 1.2;
+    }
+
+    .mobile-btn-container .btn span {
+        display: inline-block;
+        vertical-align: middle;
+    }
 </style>
 <body>
     <!-- Toast Container -->
@@ -731,13 +837,40 @@
                     </div>
                     <span class="text-xl sm:text-2xl font-bold gradient-text">LyxNexus Admin</span>
                 </div>
-                <div class="mobile-btn-container">
-                    <button class="btn btn-warning hover:bg-gray-700 text-sm sm:text-base" onclick="window.location.href='/admin/secret-code'"><i class="fas fa-shield-alt mr-2"></i>Code</button>
-                    <button class="btn bg-gray-600 hover:bg-gray-700 text-sm sm:text-base" onclick="window.location.href='/admin/clone-db'"><i class="fas fa-database mr-2"></i>Database</button>
-                    <button class="btn bg-gray-600 hover:bg-gray-700 text-sm sm:text-base" onclick="window.location.href='/profile'"><i class="fas fa-user mr-2"></i>Profile</button>
-                    <button class="btn bg-gray-600 hover:bg-gray-700 text-sm sm:text-base" onclick="window.location.href='/messages'"><i class="fas fa-comments mr-2"></i>Messages</button>
-                    <button class="btn bg-gray-600 hover:bg-gray-700 text-sm sm:text-base" onclick="window.location.href='/admin/users'"><i class="fas fa-users mr-2"></i>Users</button>
-                    <button class="btn btn-danger text-sm sm:text-base" onclick="logout()"><i class="fas fa-sign-out-alt mr-2"></i>Logout</button>
+
+                <div id="nav-buttons-container" class="mobile-btn-container hidden sm:flex">
+                    <button class="btn btn-warning hover:bg-gray-700 text-sm sm:text-base" onclick="window.location.href='/admin/secret-code'">
+                        <i class="fas fa-shield-alt mr-2"></i>
+                        <span>Code</span>
+                    </button>
+                    <button class="btn bg-gray-600 hover:bg-gray-700 text-sm sm:text-base" onclick="window.location.href='/admin/clone-db'">
+                        <i class="fas fa-database mr-2"></i>
+                        <span>Database</span>
+                    </button>
+                    <button class="btn bg-gray-600 hover:bg-gray-700 text-sm sm:text-base" onclick="window.location.href='/profile'">
+                        <i class="fas fa-user mr-2"></i>
+                        <span>Profile</span>
+                    </button>
+                    <button class="btn bg-gray-600 hover:bg-gray-700 text-sm sm:text-base" onclick="window.location.href='/messages'">
+                        <i class="fas fa-comments mr-2"></i>
+                        <span>Messages</span>
+                    </button>
+                    <button class="btn bg-gray-600 hover:bg-gray-700 text-sm sm:text-base" onclick="window.location.href='/admin/users'">
+                        <i class="fas fa-users mr-2"></i>
+                        <span>Users</span>
+                    </button>
+                    <button class="btn btn-danger text-sm sm:text-base" onclick="logout()">
+                        <i class="fas fa-sign-out-alt mr-2"></i>
+                        <span>Logout</span>
+                    </button>
+                </div>
+
+                <!-- Toggle Button - Only visible on mobile -->
+                <div class="flex sm:hidden items-center">
+                    <button id="nav-toggle" class="btn bg-purple-600 hover:bg-purple-700 text-sm transition-all duration-300 ease-in-out transform hover:scale-105" onclick="toggleNavButtons()">
+                        <i class="fas fa-bars mr-2"></i>
+                        <span id="toggle-text">Menu</span>
+                    </button>
                 </div>
             </div>
         </div>
@@ -896,7 +1029,7 @@
                             <div id="assignment-file-name" class="font-medium text-white" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; color: #f5f9fd;"></div>
                             <div id="assignment-file-size" style="font-size: 12px; color: #6b7280; margin-top: 2px;"></div>
 
-                            <!-- Enhanced close button -->
+                            <!-- Close button -->
                             <button type="button" 
                                     style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: #ef4444; color: white; border: none; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-size: 12px; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 2px 6px rgba(239, 68, 68, 0.3); padding: 5px 6px;"
                                     onmouseover="this.style.background='#dc2626'; this.style.transform='translateY(-50%) scale(1.1)'" 
@@ -1044,6 +1177,90 @@
             
             return toastManager.show(title || titles[type], message, type);
         }
+
+        // Navigation Toggle
+        let isNavExpanded = false;
+
+        function toggleNavButtons() {
+            const navContainer = document.getElementById('nav-buttons-container');
+            const toggleButton = document.getElementById('nav-toggle');
+            const toggleIcon = toggleButton.querySelector('i');
+            const toggleText = document.getElementById('toggle-text');
+
+            if (!isNavExpanded) {
+                navContainer.classList.remove('nav-collapsed');
+                navContainer.classList.add('nav-expanded');
+                toggleIcon.classList.remove('fa-bars');
+                toggleIcon.classList.add('fa-times');
+                toggleText.textContent = 'Close';
+                toggleButton.classList.add('toggle-rotate');
+                isNavExpanded = true;
+            } else {
+                navContainer.classList.remove('nav-expanded');
+                navContainer.classList.add('nav-collapsed');
+                toggleIcon.classList.remove('fa-times');
+                toggleIcon.classList.add('fa-bars');
+                toggleText.textContent = 'Menu';
+                toggleButton.classList.remove('toggle-rotate');
+                isNavExpanded = false;
+            }
+        }
+
+        document.addEventListener('click', function(event) {
+            const navContainer = document.getElementById('nav-buttons-container');
+            const toggleButton = document.getElementById('nav-toggle');
+
+            if (isNavExpanded && 
+                !navContainer.contains(event.target) && 
+                !toggleButton.contains(event.target) &&
+                window.innerWidth < 768) {
+                toggleNavButtons();
+            }
+        });
+
+        function handleResponsiveNavigation() {
+            const navContainer = document.getElementById('nav-buttons-container');
+            const toggleButton = document.getElementById('nav-toggle');
+            const toggleWrapper = toggleButton.parentElement;
+
+            if (window.innerWidth >= 768) {
+                navContainer.classList.remove('nav-collapsed', 'nav-expanded');
+                navContainer.style.maxHeight = 'none';
+                navContainer.style.opacity = '1';
+                navContainer.style.transform = 'none';
+                navContainer.style.display = 'flex';
+
+                toggleWrapper.style.display = 'none';
+
+                isNavExpanded = true;
+            } else {
+                toggleWrapper.style.display = 'flex';
+
+                if (!isNavExpanded) {
+                    navContainer.classList.remove('nav-expanded');
+                    navContainer.classList.add('nav-collapsed');
+                } else {
+                    navContainer.classList.remove('nav-collapsed');
+                    navContainer.classList.add('nav-expanded');
+                }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const navContainer = document.getElementById('nav-buttons-container');
+            const toggleButton = document.getElementById('nav-toggle');
+            const toggleWrapper = toggleButton.parentElement;
+
+            handleResponsiveNavigation();
+
+            if (window.innerWidth >= 768) {
+                navContainer.style.display = 'flex';
+                navContainer.style.flexWrap = 'nowrap';
+                navContainer.style.gap = '8px';
+            }
+        });
+
+        window.addEventListener('resize', handleResponsiveNavigation);
 
         /* ======= CONFIG ======= */
         const API_BASE = '/api';

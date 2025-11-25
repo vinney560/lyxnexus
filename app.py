@@ -81,11 +81,12 @@ app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY", "4321REWQ")
-# For only Our Server to access our Utils and API's
 CORS(app, resources={
     r'/*': {
         'origins': [
             r'https://*.onrender.com',
+            r'https://lyxnexus-2.onrender.com',
+            r'https://lyxnexus.onrender.com',
             r'http://viewtv.viewtv.gt.tc',
             f'http://localhost:47947'
         ]
