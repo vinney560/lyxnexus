@@ -4132,6 +4132,11 @@ def send_message():
                 }
         
         socketio.emit('new_message', message_data, room=room)
+        notf_data = {
+            'title': f"New message in {room} room",
+            'message': f"{current_user.username}: {content[:20]}",
+        }
+        send_webpush(notf_data)
         
         return jsonify({
             'success': True,
@@ -4188,6 +4193,11 @@ def reply_to_message(message_id):
         }
         
         socketio.emit('new_message', reply_data, room=parent_message.room)
+        notfn_data = {
+            'title': f"New reply in {parent_message.room} room",
+            'message': f"{current_user.username}: {content[:20]}",
+        }
+        send_webpush(notfn_data)
         
         return jsonify({
             'success': True,

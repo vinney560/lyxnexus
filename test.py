@@ -8,6 +8,10 @@ print('Reached TEST')
 def test_template():
     return render_template('test.html')
 
+@test_routes.route('/web-scraper')
+def web_scraper():
+    return render_template('testUrl.html')
+
 @test_routes.route('/notification')
 def test_notification():
     return render_template('notification.html')
