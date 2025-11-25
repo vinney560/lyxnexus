@@ -2999,7 +2999,7 @@
                     let filePreview = "";
                     if (announcement.has_file && announcement.file_type?.startsWith("image/")) {
                         filePreview = `
-                            <div class="mb-2 w-24 h-22 rounded-lg overflow-hidden bg-gray-700 flex items-center justify-center cursor-pointer card-hover-lift"
+                            <div class="mb-2 w-24 h-24 rounded-lg overflow-hidden bg-gray-700 flex items-center justify-center cursor-pointer card-hover-lift"
                                  onclick="openImagePreview('${announcement.file_url}')">
                                 <img src="${announcement.file_url}" alt="${announcement.file_name}" class="object-cover w-full h-full">
                             </div>
@@ -3026,7 +3026,7 @@
                     return `
                         <div class="announcement-card border border-blue-800 shadow-md bg-gray-900/60 rounded-2xl transition duration-200 ease-in-out overflow-hidden mb-6 p-2 relative card-hover-lift fade-in">
                             <!-- OG Preview -->
-                            <div id="${previewId}" class="w-full border-b border-gray-800"></div>
+                            <div id="${previewId}" class="w-full border-b border-gray-800 rounded-xl mb-2"></div>
                         
                             <!-- File/Image Preview -->
                             ${filePreview}
