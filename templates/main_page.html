@@ -3897,7 +3897,7 @@
                             let filePreview = "";
                             if (announcement.has_file && announcement.file_type?.startsWith("image/")) {
                                 filePreview = `
-                                    <div class="mb-2 w-30 h-48 rounded-lg overflow-hidden bg-gray-700 flex items-center justify-center cursor-pointer card-hover-lift"
+                                    <div class="mb-2 w-full h-52 rounded-lg overflow-hidden bg-gray-700 flex items-center justify-center cursor-pointer card-hover-lift"
                                          onclick="openImagePreview('${announcement.file_url}')">
                                         <img src="${announcement.file_url}" alt="${announcement.file_name}" class="object-cover w-full h-full">
                                     </div>

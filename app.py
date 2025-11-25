@@ -3311,9 +3311,6 @@ def logout():
 @app.route('/main-page')
 @login_required
 def main_page():
-    if not current_user.is_authenticated:
-        flash("Login to access this page")
-        return redirect(url_for("login"))
     return render_template('main_page.html', year=_year())
 #-----------------------------------------------------------------
 @app.route('/navigation-guide')
