@@ -3100,9 +3100,8 @@
                 
                     // Calculate precise time difference
                     const timeDiff = dueDate - now;
-                    const hoursUntilDue = Math.floor(timeDiff / (1000 * 60 * 60));
-                    const minutesUntilDue = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
-
+                    
+                    // Calculate calendar days difference
                     const dueCalendarDate = new Date(dueDate.getFullYear(), dueDate.getMonth(), dueDate.getDate());
                     const nowCalendarDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
                     const calendarDaysDiff = Math.floor((dueCalendarDate - nowCalendarDate) / (1000 * 60 * 60 * 24));
@@ -3115,15 +3114,19 @@
                         // Overdue
                         statusClass = 'bg-red-500';
                         statusText = 'Overdue';
-                        const overdueHours = Math.abs(hoursUntilDue);
-                        const overdueDays = Math.abs(calendarDaysDiff);
-                        if (overdueDays === 0) {
-                            timeDisplay = overdueHours === 0 ? `${Math.abs(minutesUntilDue)} min ago` : `${overdueHours}h ago`;
+                        const overdueHours = Math.abs(Math.floor(timeDiff / (1000 * 60 * 60)));
+                        const overdueMinutes = Math.abs(Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60)));
+                        
+                        if (calendarDaysDiff === 0) {
+                            timeDisplay = overdueHours === 0 ? `${overdueMinutes} min ago` : `${overdueHours}h ago`;
                         } else {
-                            timeDisplay = overdueDays === 1 ? '1 day ago' : `${overdueDays} days ago`;
+                            timeDisplay = Math.abs(calendarDaysDiff) === 1 ? '1 day ago' : `${Math.abs(calendarDaysDiff)} days ago`;
                         }
                     } else if (calendarDaysDiff === 0) {
                         // Due today
+                        const hoursUntilDue = Math.floor(timeDiff / (1000 * 60 * 60));
+                        const minutesUntilDue = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+                        
                         if (hoursUntilDue < 1) {
                             statusClass = 'bg-red-500';
                             statusText = 'Due Now';
@@ -3142,33 +3145,38 @@
                             timeDisplay = `${hoursUntilDue}h`;
                         }
                     } else if (calendarDaysDiff === 1) {
+                        // Due tomorrow - calculate hours until midnight + hours in tomorrow
+                        const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0);
+                        const hoursUntilMidnight = Math.floor((midnight - now) / (1000 * 60 * 60));
+                        const hoursInTomorrow = dueDate.getHours() + (dueDate.getMinutes() / 60);
+                        const totalHours = Math.round(hoursUntilMidnight + hoursInTomorrow);
+                        
                         statusClass = 'bg-purple-500';
                         statusText = 'Due Tomorrow';
-                        timeDisplay = `${hoursUntilDue}h`; // Hours until due
+                        timeDisplay = `${totalHours}h`;
                     } else if (calendarDaysDiff <= 3) {
-                        // Due in 2-3 days
                         statusClass = 'bg-green-500';
                         statusText = 'Due Soon';
                         timeDisplay = `${calendarDaysDiff} days`;
                     } else if (calendarDaysDiff <= 7) {
-                        // Due in 4-7 days
                         statusClass = 'bg-blue-400';
                         statusText = 'Upcoming';
                         timeDisplay = `${calendarDaysDiff} days`;
                     } else {
-                        // Due in more than a week
                         statusClass = 'bg-gray-500';
                         statusText = 'Later';
                         timeDisplay = `${calendarDaysDiff} days`;
                     }
-
+                
                     return `
                         <div class="assignment-card border-l-4 border-blue-500 border-r-1 border-blue-500 border-t-1 border-blue-500 border-b-1 border-blue-500 bg-gray-800/50 p-2 sm:p-2 rounded-xl shadow-md hover:shadow-lg transition duration-200 ease-in-out card-hover-lift fade-in">
                             <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-3 gap-2">
                                 <h3 class="text-xl sm:text-2xl font-extrabold text-white underline underline-offset-4 decoration-blue-500 leading-snug break-words">${this.highlightText(assignment.title, this.currentQuery)}</h3>
                                 <div class="flex flex-col items-end gap-2 sm:gap-1">
                                     <span class="${statusClass} text-white px-3 py-1 rounded-full text-xs sm:text-sm whitespace-nowrap">${statusText}</span>
-                                    <span class="${statusClass} text-white px-2 py-1 rounded-full text-xs sm:text-sm whitespace-nowrap">${timeDisplay}</span>
+                                    <span class="bg-yellow-500 text-white px-2 py-1 rounded-full text-xs sm:text-sm whitespace-nowrap">
+                                        ${timeDisplay}
+                                    </span>
                                 </div>
                             </div>
                         
