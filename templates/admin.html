@@ -667,7 +667,6 @@
         background: rgba(255, 255, 255, 0.1);
     }
 
-    /* Enhanced grid layouts */
     .topics-grid {
         display: grid;
         grid-template-columns: 1fr;
@@ -708,114 +707,72 @@
         background-color: var(--error-color);
         box-shadow: 0 0 6px var(--error-color);
     }
-
-    .nav-expanded {
-        max-height: 500px !important;
-        opacity: 1 !important;
-        transform: translateX(0) !important;
+    
+    .mobile-menu {
+        max-height: 0;
+        opacity: 0;
+        overflow: hidden;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        transform: translateY(-10px);
     }
 
-    .nav-collapsed {
-        max-height: 0 !important;
-        opacity: 0 !important;
-        transform: translateX(-20px) !important;
+    .mobile-menu.open {
+        max-height: 750px;
+        opacity: 1;
+        transform: translateY(0);
+        margin-top: 1rem;
     }
 
-    .toggle-rotate {
-        transform: rotate(90deg);
-    }
-
-    .mobile-btn-container {
+    .mobile-grid {
         display: grid;
-        gap: 8px;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+        padding: 0.5rem;
+    }
+
+    .mobile-grid-btn {
+        display: flex;
+        align-items: center;
         justify-content: center;
+        padding: 1rem 0.75rem;
+        min-height: 60px;
+        font-size: 0.875rem;
+        transition: all 0.3s ease;
+        opacity: 0;
+        transform: translateY(20px);
+        animation: slideInUp 0.5s ease forwards;
         width: 100%;
-        transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        text-align: center;
     }
 
-    @media (min-width: 768px) {
-        .mobile-btn-container {
-            display: flex !important;
-            width: auto;
-            flex-wrap: nowrap;
-            max-height: none !important;
-            opacity: 1 !important;
-            transform: none !important;
-        }
+    .mobile-menu.open .mobile-grid-btn:nth-child(1) { animation-delay: 0.1s; }
+    .mobile-menu.open .mobile-grid-btn:nth-child(2) { animation-delay: 0.15s; }
+    .mobile-menu.open .mobile-grid-btn:nth-child(3) { animation-delay: 0.2s; }
+    .mobile-menu.open .mobile-grid-btn:nth-child(4) { animation-delay: 0.25s; }
+    .mobile-menu.open .mobile-grid-btn:nth-child(5) { animation-delay: 0.3s; }
+    .mobile-menu.open .mobile-grid-btn:nth-child(6) { animation-delay: 0.35s; }
 
-        .nav-expanded, .nav-collapsed {
-            max-height: none !important;
-            opacity: 1 !important;
-            transform: none !important;
-        }
-
-        .mobile-btn-container .btn {
-            width: auto;
-            white-space: nowrap;
+    @keyframes slideInUp {
+        to {
+            opacity: 1;
+            transform: translateY(0);
         }
     }
 
-    @media (max-width: 767px) {
-        .mobile-btn-container {
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            align-items: stretch;
-        }
-
-        .mobile-btn-container .btn {
-            width: 100%;
-            min-height: 44px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-            padding: 10px 8px;
-        }
-
-        .mobile-btn-container .btn-danger,
-        .mobile-btn-container .btn-warning {
-            grid-column: 1 / -1; 
-        }
-
-        .mobile-btn-container .btn i {
-            font-size: 14px;
-            margin-right: 6px;
-        }
+    .mobile-grid-btn.btn-danger {
+        grid-column: 1 / -1;
     }
 
     @media (max-width: 480px) {
-        .mobile-btn-container {
-            grid-template-columns: 1fr;
-            gap: 8px;
+        .mobile-grid {
+            grid-template-columns: 2fr;
+            gap: 0.5rem;
         }
 
-        .mobile-btn-container .btn {
-            min-height: 48px;
-            font-size: 15px;
-            padding: 12px 10px;
-        }
-
-        .mobile-btn-container .btn-danger,
-        .mobile-btn-container .btn-warning {
+        .mobile-grid-btn.btn-danger {
             grid-column: 1;
         }
-    }
-
-    .mobile-btn-container {
-        transition: grid-template-rows 0.5s ease-in-out, opacity 0.3s ease-in-out;
-    }
-
-    .mobile-btn-container .btn {
-        text-align: center;
-        white-space: normal;
-        word-wrap: break-word;
-        line-height: 1.2;
-    }
-
-    .mobile-btn-container .btn span {
-        display: inline-block;
-        vertical-align: middle;
-    }
+    }    
 </style>
 <body>
     <!-- Toast Container -->
@@ -823,7 +780,7 @@
 
     <nav class="glass-morph sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 py-4">
-            <div class="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
+            <div class="flex justify-between items-center">
                 <div class="flex items-center space-x-2">
                     <div class="logo-container">
                         <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -837,39 +794,46 @@
                     </div>
                     <span class="text-xl sm:text-2xl font-bold gradient-text">LyxNexus Admin</span>
                 </div>
-
-                <div id="nav-buttons-container" class="mobile-btn-container hidden sm:flex">
-                    <button class="btn btn-warning hover:bg-gray-700 text-sm sm:text-base" onclick="window.location.href='/admin/secret-code'">
+              
+                <div class="hidden sm:flex space-x-2">
+                    <button class="btn btn-warning" onclick="window.location.href='/admin/secret-code'"><i class="fas fa-shield-alt mr-2"></i>Code</button>
+                    <button class="btn bg-gray-600 hover:bg-gray-700" onclick="window.location.href='/admin/clone-db'"><i class="fas fa-database mr-2"></i>Database</button>
+                    <button class="btn bg-gray-600 hover:bg-gray-700" onclick="window.location.href='/profile'"><i class="fas fa-user mr-2"></i>Profile</button>
+                    <button class="btn bg-gray-600 hover:bg-gray-700" onclick="window.location.href='/messages'"><i class="fas fa-comments mr-2"></i>Messages</button>
+                    <button class="btn bg-gray-600 hover:bg-gray-700" onclick="window.location.href='/admin/users'"><i class="fas fa-users mr-2"></i>Users</button>
+                    <button class="btn btn-danger" onclick="logout()"><i class="fas fa-sign-out-alt mr-2"></i>Logout</button>
+                </div>
+                              
+                <button id="mobile-menu-btn" class="sm:hidden btn bg-purple-600 hover:bg-purple-700">
+                    <i class="fas fa-bars mr-2"></i> Menu
+                </button>
+            </div>
+          
+            <div id="mobile-menu" class="mobile-menu">
+                <div class="mobile-grid">
+                    <button class="btn btn-warning mobile-grid-btn" onclick="window.location.href='/admin/secret-code'">
                         <i class="fas fa-shield-alt mr-2"></i>
                         <span>Code</span>
                     </button>
-                    <button class="btn bg-gray-600 hover:bg-gray-700 text-sm sm:text-base" onclick="window.location.href='/admin/clone-db'">
+                    <button class="btn bg-gray-600 hover:bg-gray-700 mobile-grid-btn" onclick="window.location.href='/admin/clone-db'">
                         <i class="fas fa-database mr-2"></i>
                         <span>Database</span>
                     </button>
-                    <button class="btn bg-gray-600 hover:bg-gray-700 text-sm sm:text-base" onclick="window.location.href='/profile'">
+                    <button class="btn bg-gray-600 hover:bg-gray-700 mobile-grid-btn" onclick="window.location.href='/profile'">
                         <i class="fas fa-user mr-2"></i>
                         <span>Profile</span>
                     </button>
-                    <button class="btn bg-gray-600 hover:bg-gray-700 text-sm sm:text-base" onclick="window.location.href='/messages'">
+                    <button class="btn bg-gray-600 hover:bg-gray-700 mobile-grid-btn" onclick="window.location.href='/messages'">
                         <i class="fas fa-comments mr-2"></i>
                         <span>Messages</span>
                     </button>
-                    <button class="btn bg-gray-600 hover:bg-gray-700 text-sm sm:text-base" onclick="window.location.href='/admin/users'">
+                    <button class="btn bg-gray-600 hover:bg-gray-700 mobile-grid-btn" onclick="window.location.href='/admin/users'">
                         <i class="fas fa-users mr-2"></i>
                         <span>Users</span>
                     </button>
-                    <button class="btn btn-danger text-sm sm:text-base" onclick="logout()">
+                    <button class="btn btn-danger mobile-grid-btn" onclick="logout()">
                         <i class="fas fa-sign-out-alt mr-2"></i>
                         <span>Logout</span>
-                    </button>
-                </div>
-
-                <!-- Toggle Button - Only visible on mobile -->
-                <div class="flex sm:hidden items-center">
-                    <button id="nav-toggle" class="btn bg-purple-600 hover:bg-purple-700 text-sm transition-all duration-300 ease-in-out transform hover:scale-105" onclick="toggleNavButtons()">
-                        <i class="fas fa-bars mr-2"></i>
-                        <span id="toggle-text">Menu</span>
                     </button>
                 </div>
             </div>
@@ -1178,89 +1142,39 @@
             return toastManager.show(title || titles[type], message, type);
         }
 
-        // Navigation Toggle
-        let isNavExpanded = false;
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        let isMenuOpen = false;
 
-        function toggleNavButtons() {
-            const navContainer = document.getElementById('nav-buttons-container');
-            const toggleButton = document.getElementById('nav-toggle');
-            const toggleIcon = toggleButton.querySelector('i');
-            const toggleText = document.getElementById('toggle-text');
-
-            if (!isNavExpanded) {
-                navContainer.classList.remove('nav-collapsed');
-                navContainer.classList.add('nav-expanded');
-                toggleIcon.classList.remove('fa-bars');
-                toggleIcon.classList.add('fa-times');
-                toggleText.textContent = 'Close';
-                toggleButton.classList.add('toggle-rotate');
-                isNavExpanded = true;
+        function toggleMobileMenu() {
+            if (isMenuOpen) {
+                mobileMenu.classList.remove('open');
+                mobileMenuBtn.innerHTML = '<i class="fas fa-bars mr-2"></i> Menu';
             } else {
-                navContainer.classList.remove('nav-expanded');
-                navContainer.classList.add('nav-collapsed');
-                toggleIcon.classList.remove('fa-times');
-                toggleIcon.classList.add('fa-bars');
-                toggleText.textContent = 'Menu';
-                toggleButton.classList.remove('toggle-rotate');
-                isNavExpanded = false;
+                mobileMenu.classList.add('open');
+                mobileMenuBtn.innerHTML = '<i class="fas fa-times mr-2"></i> Close';
             }
+            isMenuOpen = !isMenuOpen;
         }
 
-        document.addEventListener('click', function(event) {
-            const navContainer = document.getElementById('nav-buttons-container');
-            const toggleButton = document.getElementById('nav-toggle');
+        mobileMenuBtn.addEventListener('click', toggleMobileMenu);
 
-            if (isNavExpanded && 
-                !navContainer.contains(event.target) && 
-                !toggleButton.contains(event.target) &&
-                window.innerWidth < 768) {
-                toggleNavButtons();
+        document.addEventListener('click', (event) => {
+            if (isMenuOpen && !mobileMenu.contains(event.target) && !mobileMenuBtn.contains(event.target)) {
+                toggleMobileMenu();
             }
         });
 
-        function handleResponsiveNavigation() {
-            const navContainer = document.getElementById('nav-buttons-container');
-            const toggleButton = document.getElementById('nav-toggle');
-            const toggleWrapper = toggleButton.parentElement;
-
-            if (window.innerWidth >= 768) {
-                navContainer.classList.remove('nav-collapsed', 'nav-expanded');
-                navContainer.style.maxHeight = 'none';
-                navContainer.style.opacity = '1';
-                navContainer.style.transform = 'none';
-                navContainer.style.display = 'flex';
-
-                toggleWrapper.style.display = 'none';
-
-                isNavExpanded = true;
-            } else {
-                toggleWrapper.style.display = 'flex';
-
-                if (!isNavExpanded) {
-                    navContainer.classList.remove('nav-expanded');
-                    navContainer.classList.add('nav-collapsed');
-                } else {
-                    navContainer.classList.remove('nav-collapsed');
-                    navContainer.classList.add('nav-expanded');
-                }
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                window.location.href = '/logout';
             }
         }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            const navContainer = document.getElementById('nav-buttons-container');
-            const toggleButton = document.getElementById('nav-toggle');
-            const toggleWrapper = toggleButton.parentElement;
-
-            handleResponsiveNavigation();
-
-            if (window.innerWidth >= 768) {
-                navContainer.style.display = 'flex';
-                navContainer.style.flexWrap = 'nowrap';
-                navContainer.style.gap = '8px';
+        window.addEventListener('resize', () => {
+            if (window.innerWidth >= 640 && isMenuOpen) {
+                toggleMobileMenu();
             }
         });
-
-        window.addEventListener('resize', handleResponsiveNavigation);
 
         /* ======= CONFIG ======= */
         const API_BASE = '/api';
