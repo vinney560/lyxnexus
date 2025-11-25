@@ -4670,6 +4670,11 @@ def handle_send_message(data):
                 }
         
         emit('new_message', message_data, room=room)
+        notfon_data = {
+            'title': f"New message in {room} room",
+            'message': f"{current_user.username}: {content[:20]}",
+        }
+        send_webpush(notfon_data)
         
         return {'success': True, 'message': message_data}
         
