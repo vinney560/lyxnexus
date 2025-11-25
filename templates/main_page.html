@@ -1512,32 +1512,6 @@
     body.notification-overlay-active {
         overflow: hidden;
     }    
-
-    .card-hover-lift {
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    .card-hover-lift:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-    }
-
-    .hover-shadow-2xl {
-        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-    }
-
-    /* Smooth image loading */
-    img {
-        transition: opacity 0.3s ease;
-    }
-
-    img[loading="lazy"] {
-        opacity: 0;
-    }
-
-    img[loading="lazy"].loaded {
-        opacity: 1;
-    }
 </style>
 <body>
     <!-- Toast Container -->
@@ -3025,7 +2999,7 @@
                     let filePreview = "";
                     if (announcement.has_file && announcement.file_type?.startsWith("image/")) {
                         filePreview = `
-                            <div class="mb-3 w-24 h-24 rounded-lg overflow-hidden bg-gray-700 flex items-center justify-center cursor-pointer card-hover-lift"
+                            <div class="mb-3 w-30 h-28 rounded-lg overflow-hidden bg-gray-700 flex items-center justify-center cursor-pointer card-hover-lift"
                                  onclick="openImagePreview('${announcement.file_url}')">
                                 <img src="${announcement.file_url}" alt="${announcement.file_name}" class="object-cover w-full h-full">
                             </div>
@@ -3868,13 +3842,13 @@
             }
         
             const newAnnouncements = (await fetchData(ENDPOINTS.ANNOUNCEMENTS)) || [];
-        
+
             if (newAnnouncements.length === 0) {
                 container.innerHTML = '<p class="text-center text-gray-400 py-8">No announcements available.</p>';
                 document.getElementById("announcements-count").textContent = "0 announced";
                 return;
             }
-        
+
             document.getElementById("announcements-count").textContent = `${newAnnouncements.length} announced`;
         
             let pinnedIds = JSON.parse(localStorage.getItem("pinnedAnnouncements") || "[]");
@@ -3904,7 +3878,7 @@
                             const now = new Date();
                             const diffHours = (now - createdAt) / (1000 * 60 * 60);
                             const isRecent = diffHours < 3;
-                        
+
                             const isNew = newItems.some(item => item.id === announcement.id);
                             const newClass = isNew ? 'new-item-highlight' : '';
                         
@@ -3912,47 +3886,22 @@
                                 ? "border-l-4 border-l-yellow-400 border-t border-t-blue-700 border-r border-r-blue-700 border-b border-b-blue-700 shadow-sm"
                                 : "border border-blue-800 shadow-md";
                         
-                            // IMPROVED File preview (image or link)
+                            // File preview (image or link)
                             let filePreview = "";
                             if (announcement.has_file && announcement.file_type?.startsWith("image/")) {
                                 filePreview = `
-                                    <div class="mb-6 w-full flex justify-center">
-                                        <div class="w-full max-w-4xl rounded-xl overflow-hidden bg-gray-800/50 border border-gray-700 cursor-pointer card-hover-lift transition-all duration-300 hover:shadow-2xl hover:border-blue-400/50"
-                                             onclick="openImagePreview('${announcement.file_url}')">
-                                            <div class="relative w-full" style="padding-bottom: 56.25%;">
-                                                <img src="${announcement.file_url}" 
-                                                     alt="${announcement.file_name}" 
-                                                     class="absolute inset-0 w-full h-full object-cover"
-                                                     loading="lazy"
-                                                     onerror="this.style.display='none'; this.parentElement.innerHTML='<div class=\"absolute inset-0 flex items-center justify-center text-gray-400\"><i class=\"fas fa-image text-4xl opacity-50\"></i></div>'">
-                                            </div>
-                                            <div class="p-3 bg-gray-900/80 border-t border-gray-700 flex items-center justify-between">
-                                                <div class="flex items-center space-x-2">
-                                                    <i class="fas fa-expand-arrows-alt text-blue-400 text-sm"></i>
-                                                    <span class="text-xs text-gray-300 truncate">${announcement.file_name}</span>
-                                                </div>
-                                                <div class="text-xs text-gray-500 flex items-center space-x-1">
-                                                    <i class="fas fa-eye"></i>
-                                                    <span>Click to view full size</span>
-                                                </div>
-                                            </div>
-                                        </div>
+                                    <div class="mb-3 w-24 h-24 rounded-lg overflow-hidden bg-gray-700 flex items-center justify-center cursor-pointer card-hover-lift"
+                                         onclick="openImagePreview('${announcement.file_url}')">
+                                        <img src="${announcement.file_url}" alt="${announcement.file_name}" class="object-cover w-full h-full">
                                     </div>
                                 `;
                             } else if (announcement.has_file) {
                                 filePreview = `
-                                    <div class="mb-4">
-                                        <a href="${announcement.file_url}" target="_blank" 
-                                           class="inline-flex items-center gap-3 px-4 py-3 bg-gray-800/70 hover:bg-gray-700/80 border border-gray-600 hover:border-blue-400/50 rounded-xl transition-all duration-300 card-hover-lift group">
-                                            <i class="${getFileIcon(announcement.file_name)} text-blue-400 text-lg group-hover:scale-110 transition-transform duration-300"></i>
-                                            <div class="flex-1 min-w-0">
-                                                <div class="text-white font-medium text-sm truncate">${announcement.file_name}</div>
-                                                <div class="text-gray-400 text-xs flex items-center gap-1">
-                                                    <i class="fas fa-external-link-alt text-xs"></i>
-                                                    <span>Click to download</span>
-                                                </div>
-                                            </div>
-                                            <i class="fas fa-download text-gray-400 group-hover:text-blue-400 transition-colors duration-300"></i>
+                                    <div class="mb-3">
+                                        <a style="color:#60a5fa; text-decoration: none; font-size:0.875rem; display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px; background: #f8fafc; border-radius: 6px; border: 1px solid #e2e8f0;" href="${announcement.file_url}" target="_blank" class="card-hover-lift">
+                                            <i class="${getFileIcon(announcement.file_name)}"></i>
+                                            ${announcement.file_name}
+                                            <i class="fas fa-external-link-alt" style="font-size: 0.7rem;"></i>
                                         </a>
                                     </div>
                                 `;
@@ -3979,14 +3928,14 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 2c.8 0 1.5.7 1.5 1.5V9l3 3v1.5h-3l-.25 6.5a.75.75 0 01-1.5 0L11 13.5H8V12l3-3V3.5C11 2.7 11.7 2 12 2z" />
                                         </svg>
                                     </button>
-                                
+
                                     <!-- New item indicator -->
                                     ${isNew ? `<div class="absolute top-3 left-3 w-3 h-3 bg-green-500 rounded-full animate-pulse z-10"></div>` : ''}
                                 
                                     <!-- OG Preview -->
                                     <div id="${previewId}" class="w-full border-b border-gray-800"></div>
                                 
-                                    <!-- IMPROVED File/Image Preview -->
+                                    <!-- File/Image Preview -->
                                     ${filePreview}
                                 
                                     <!-- Announcement Body -->
@@ -3995,7 +3944,7 @@
                                             <h3 class="text-xl uppercase break-all underline underline-offset-8 decoration-red-500 decoration-double sm:text-2xl font-extrabold text-white leading-snug break-words">
                                                 ${announcement.title}
                                             </h3>
-                                        
+
                                             <div class="flex items-center gap-2">
                                                 <i class="fa fa-clock text-gray-400"></i>
                                                 <span class="text-xs sm:text-sm whitespace-nowrap font-bold 
@@ -4039,11 +3988,10 @@
                                 <a href="${url}" target="_blank" class="flex items-center gap-3 p-3 sm:p-4 bg-gray-800/70 hover:bg-gray-800/90 transition duration-200 ease-in-out card-hover-lift">
                                     ${
                                         data.image
-                                            ? `<div class="flex-shrink-0 w-24 h-24 rounded-lg overflow-hidden bg-gray-700 flex items-center justify-center cursor-pointer card-hover-lift"
-                                                 onclick="openImagePreview('${data.image}')">
-                                                 <img src="${data.image}" alt="" class="object-cover w-full h-full">
+                                            ? `<div class="flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden bg-gray-700 flex items-center justify-center">
+                                                 <img src="${data.image}" alt="" class="object-cover w-full h-full cursor-pointer" onclick="openImagePreview('${data.image}')">
                                                </div>`
-                                            : `<div class="flex-shrink-0 w-24 h-24 rounded-lg bg-gray-700 flex items-center justify-center text-gray-500 text-xs italic">
+                                            : `<div class="flex-shrink-0 w-16 h-16 rounded-lg bg-gray-700 flex items-center justify-center text-gray-500 text-xs italic">
                                                  No image
                                                </div>`
                                     }
@@ -4060,7 +4008,7 @@
                         })
                         .catch(() => console.warn("No OG preview found for", url));
                 });
-            
+
                 // Restore scroll position after refresh
                 if (isRefresh) {
                     restoreScrollPosition('announcements');
@@ -4102,7 +4050,7 @@
             });
         
             renderAnnouncements();
-        }        
+        }
         
         // Helper function to find new items
         function findNewItems(oldItems, newItems, idField) {
