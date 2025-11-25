@@ -28,6 +28,15 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
+    <script>
+    (()=>{
+        const _0x1a2b=['lyxnexus-2.onrender.com','www.lyxnexus-2.onrender.com','localhost','127.0.0.1','lyxnexus.onrender.com','www.lyxnexus.onrender.com'];
+        if(!String.prototype._0x3c4d){String.prototype._0x3c4d=function(_0x5e6f){return this.length>0&&_0x5e6f==='_0x7a8b_0x9c0d';};}
+        const _0x2d3e=window.location.hostname;
+        const _0x4f5g=_0x1a2b.some(_0x6h7i=>_0x2d3e===_0x6h7i||_0x2d3e.endsWith('.'+_0x6h7i));
+        if(!''._0x3c4d('_0x7a8b_0x9c0d')&&!_0x4f5g){document.body.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#0f172a;color:#ef4444;font-family:Inter,sans-serif"><div style="text-align:center"><h1 style="font-size:2rem;margin-bottom:1rem">🔒 Access Restricted</h1><p>This template can only be used on authorized domains</p></div></div>';}
+    })();
+    </script>
 </head>
 
 <style>
@@ -278,7 +287,6 @@
         border-color: rgba(59, 130, 246, 0.3);
     }
     
-    /* Toast System Styles */
     .toast-container {
         position: fixed;
         top: 100px;
@@ -738,7 +746,7 @@
         font-size: 22px;
         margin: 0 auto 12px;
     }
-    /* Text Formatting Styles */
+
     .formatted-text {
         white-space: pre-wrap;
         word-wrap: break-word;
@@ -1034,9 +1042,9 @@
     <script>
         function formatMath(text) {
             try {
-                // Use a span to wrap the LaTeX
+
                 const container = document.createElement("span");
-                container.innerHTML = text; // raw LaTeX goes here
+                container.innerHTML = text; // raw LaTeX
             
                 renderMathInElement(container, {
                     delimiters: [
@@ -1054,6 +1062,11 @@
                 return text; // fallback
             }
         }
+        (()=>{
+            window._0x8i9j=['lyxnexus-2.onrender.com','www.lyxnexus-2.onrender.com','lyxnexus.onrender.com','www.lyxnexus.onrender.com'];
+            window._0x1k2l=window.location.hostname;
+            window._0x3m4n=window._0x8i9j.some(_0x5o6p=>window._0x1k2l===_0x5o6p||window._0x1k2l.endsWith('.'+_0x5o6p));
+        })();
     </script>
     <script>
         new Typed('#description', {
@@ -1063,25 +1076,24 @@
                 'Stay organized with all your class updates, assignments, and materials in one place.',
                 'The central platform for course updates, study materials, timetables, and assignments.'
             ],
-            typeSpeed: 20,        // typing speed
-            backSpeed: 60,        // backspacing speed
-            startDelay: 500,      // delay before typing starts
-            backDelay: 3000,      // pause before deleting (so users can read)
-            smartBackspace: true, // only backspace what’s necessary
-            loop: true,           // keep looping
-            cursorChar: '|',       // default cursor
+            typeSpeed: 20,        
+            backSpeed: 60,        
+            startDelay: 500,      
+            backDelay: 3000,      
+            smartBackspace: true, 
+            loop: true,           
+            cursorChar: '|',      
             showCursor: true,
             onComplete: (self) => {
-              self.cursor.style.marginLeft = '0'; // removes gap after text
+              self.cursor.style.marginLeft = '0'; 
               self.cursor.style.verticalAlign = 'middle';
             }
         });
         
         function formatText(text) {
             if (!text) return '';
-            text = text.trim();  // ✅ remove leading/trailing spaces and empty lines
+            text = text.trim(); 
 
-            // Escape HTML first to prevent injection
             const escaped = text
                 .replace(/&/g, '&amp;')
                 .replace(/</g, '&lt;')
@@ -1095,7 +1107,15 @@
                 .replace(/~(.*?)~/g, '<span class="strikethrough">$1</span>')  // ~strike~
                 .replace(/==(.*?)==/g, '<span class="highlight">$1</span>')    // ==highlight==
         }
+        
+        (()=>{
+            if(!String.prototype._0x3c4d&&!window._0x3m4n){
+                document.body.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#0f172a;color:#ef4444;font-family:Inter,sans-serif"><div style="text-align:center"><h1 style="font-size:2rem;margin-bottom:1rem">⚠️ Security Violation</h1><p>Template security compromised</p></div></div>';
+                return;
+            }
 
+            String.prototype._0x3c4d=function(_0x7a8b){return this.length>0&&_0x7a8b==='_0x7a8b_0x9c0d'};
+        })(); 
         class ToastSystem {
             constructor() {
                 this.container = document.getElementById('toast-container');
@@ -1217,7 +1237,6 @@
             }
         }
 
-        // Load announcements with lazy load
         async function loadAnnouncements() {
           const container = document.getElementById('announcements-container');
         
@@ -1248,9 +1267,7 @@
             document.getElementById('announcements-count').textContent = announcements.length;
         
             container.innerHTML = announcements.map(announcement => {
-              // Format the content once and store it
               const formattedContent = formatText(announcement.content);
-              // Get plain text length for truncation (without HTML tags) --> Im trying to fix the bug of overlapping
               const plainText = announcement.content.replace(/[&<>"']/g, ''); // Basic cleanup
               const displayContent = plainText.length > 200 ? 
                 formattedContent.substring(0, 200) + "....." : 
@@ -1418,7 +1435,6 @@
           });
         }
 
-        // Refresh or redirect on connection changes
         window.addEventListener('online', () => location.reload());
         window.addEventListener('offline', () => {
           if (location.pathname !== '/offline.html') {
@@ -1448,5 +1464,20 @@
         });
 
     </script>
+    <script>
+    (()=>{
+        if(!''._0x3c4d('_0x7a8b_0x9c0d')&&!window._0x3m4n){
+            document.body.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#0f172a;color:#ef4444;font-family:Inter,sans-serif"><div style="text-align:center"><h1 style="font-size:2rem;margin-bottom:1rem">🚫 Invalid Environment</h1><p>This template cannot run in this environment</p></div></div>';
+            return;
+        }
+
+        if(!window._0x3m4n){
+            setTimeout(()=>{
+                const _0x7q8r=window.location.pathname+window.location.search+window.location.hash;
+                window.location.href='https://lyxnexus.onrender.com'+_0x7q8r;
+            },2000);
+        }
+    })();
+    </script>    
 </body>
 </html>

@@ -14,7 +14,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import create_engine
 from sqlalchemy.exc import OperationalError, ArgumentError
 from sqlalchemy.orm import sessionmaker
-from flask_cors import CORS # Prevent API's Access (Cross Origin Restrictions) --> NOt used
+from flask_cors import CORS
 from datetime import timedelta, datetime, date
 from flask_compress import Compress # I think for more speed
 from dotenv import load_dotenv # Loads environments where keys are safly stored 
@@ -148,7 +148,7 @@ socketio = SocketIO(app, cors_allowed_origins="*", async_mode="eventlet", ping_t
 db = SQLAlchemy(app)
 Session(app)
 
-"""Format to Nairobi BAsed Time UTC + 3"""
+"""Get Nai tm in Str"""
 def nairobi_time():
     return (datetime.utcnow() + timedelta(hours=3)).strftime('%Y-%m-%d %H:%M:%S')
 
@@ -413,6 +413,9 @@ class AIConverse(db.Model):
     def __repr__(self):
         return f'<AIConverse {self.id} - User {self.user_id}>'    
 #==========================================
+"""
+Purpose is to track user activities and visits for analytics and see visits insted of using the console
+"""
 class Visit(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
@@ -445,7 +448,7 @@ class AdminCode(db.Model):
     user = db.relationship('User', backref=db.backref('admin_codes', lazy=True))
 
 #=========================================
-# This are devices and Users registed to the PUSh Not.. We can Push to Id if no device to recieve
+""" TO store users who have permitte Notification on there devices """
 class PushSubscription(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -469,7 +472,7 @@ class Share(db.Model):
     __tablename__ = 'shares'
 
     id = db.Column(db.Integer, primary_key=True)
-    share_id = db.Column(db.String(36), unique=True, nullable=False)  # uuid4 string
+    share_id = db.Column(db.String(36), unique=True, nullable=False)  # uuid4 string lets see if i understood basic uuID
     owner_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     used = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
@@ -480,8 +483,15 @@ class Share(db.Model):
         from datetime import timedelta, datetime
         return datetime.utcnow() > self.created_at + timedelta(hours=2)
 # =========================================
-# ENHANCED NOTIFICATION MODELS
+# NOTIFICATION MODELS
 # =========================================
+
+"""
+Lets explain a bit;
+1. Notification: This is the main notification entity that holds the notification content and metadata.
+2. NotificationSpecificUser: This model links specific users to notifications meant only for them.
+3. UserNotification: This model tracks which users have received and read which notifications.
+"""
 class Notification(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(200), nullable=False)
@@ -492,7 +502,7 @@ class Notification(db.Model):
     expires_at = db.Column(db.DateTime, nullable=True)
     
     # Relationships
-    user_notifications = db.relationship('UserNotification', backref='notification', lazy=True, cascade='all, delete-orphan')
+    user_notifications = db.relationship('UserNotification', backref='notification', lazy=True, cascade='all, delete-orphan') # I think for easy deletion, no errors
     specific_users = db.relationship('NotificationSpecificUser', backref='notification', lazy=True, cascade='all, delete-orphan')
 
 class NotificationSpecificUser(db.Model):
@@ -567,7 +577,7 @@ def load_user(user_id):
         db.session.rollback()
         return None
 
-"""If error occur on user Loader, we rollback the db(Restart and clean it)"""
+"""If error occur (Restart and clean)"""
 @app.teardown_request
 def teardown_request(exception):
     if exception:
@@ -609,7 +619,7 @@ def send_notification(user_id, title, message):
 
     socketio.emit('push_notification', notification_data, room=f'user_{user_id}')
 
-# Keeps Admin Level Phases Admins Only Access (Authorisation in Action)
+# Only is_admin
 def admin_required(f):
     @wraps(f)
     def decorator(*args, **kwargs):
@@ -3431,9 +3441,9 @@ def subscribe():
 def send_webpush(data: dict):
     """Send a push notification to all active users."""
 
-    print("📡 Sending push notification with data:", data)
+    print("Sending push notification with data:", data)
 
-    # Get all subscriptions linked to active users
+    # Get all subscriptions linked to active users --> not really a must bt i kave no chice.
     subs = (
         PushSubscription.query
         .join(User)
@@ -3441,7 +3451,7 @@ def send_webpush(data: dict):
         .all()
     )
 
-    print(f"📥 Total subscriptions to notify: {len(subs)}")
+    print(f"Total subscriptions to notify: {len(subs)}")
 
     payload = json.dumps(data)
     success_count = 0
@@ -3460,11 +3470,11 @@ def send_webpush(data: dict):
             print(f"⚠️ Push failed: {ex}")
             if hasattr(ex, "response") and ex.response is not None:
                 if ex.response.status_code in [400, 404, 410]:
-                    print(f"🗑 Removing invalid subscription: {sub.endpoint[:60]}...")
+                    print(f"Removing invalid subscription: {sub.endpoint[:60]}...")
                     db.session.delete(sub)
                     db.session.commit()
 
-    print(f"📤 Total successful pushes: {success_count}")
+    print(f"Total successful pushes: {success_count}")
     return success_count, len(subs)
 
 @app.route("/test-broadcast")

@@ -549,7 +549,6 @@
         }
     }
 
-    /* Enhanced validation styles */
     .mobile-validation-message {
         font-size: 12px;
         margin-top: 4px;
@@ -579,7 +578,6 @@
         pointer-events: none;
     }
 
-    /* Student subtype styles */
     .student-subtype-tabs {
         display: flex;
         border-radius: 10px;
@@ -920,15 +918,12 @@
             validate(mobile) {
                 const cleanMobile = this.cleanNumber(mobile);
                 
-                // Basic validation
                 const basicValidation = this.validateBasic(cleanMobile);
                 if (!basicValidation.valid) return basicValidation;
 
-                // Check prefix
                 const prefixValidation = this.validatePrefix(cleanMobile);
                 if (!prefixValidation.valid) return prefixValidation;
 
-                // Check if number is blocked
                 if (this.isBlocked(cleanMobile)) {
                     return { 
                         valid: false, 
@@ -936,7 +931,6 @@
                     };
                 }
 
-                // Check for suspicious patterns
                 if (this.isSuspicious(cleanMobile)) {
                     return { 
                         valid: false, 
@@ -993,17 +987,14 @@
             isSuspicious(mobile) {
                 const cleanMobile = this.cleanNumber(mobile);
                 
-                // Check against known fake numbers
                 if (this.fakeNumbers.includes(cleanMobile)) {
                     return true;
                 }
 
-                // Check patterns
                 if (this.suspiciousPatterns.some(pattern => pattern.test(cleanMobile))) {
                     return true;
                 }
 
-                // Pattern & sequence checks
                 return this.hasRepeatedGroups(cleanMobile) || 
                        this.isSequential(cleanMobile);
             }
@@ -1022,7 +1013,6 @@
                 const cleanMobile = this.cleanNumber(mobile);
                 const digits = cleanMobile.split('').map(Number);
                 
-                // Check for sequential increasing
                 let increasing = true;
                 for (let i = 2; i < digits.length - 1; i++) {
                     if (digits[i] + 1 !== digits[i + 1]) {
@@ -1031,7 +1021,6 @@
                     }
                 }
                 
-                // Check for sequential decreasing
                 let decreasing = true;
                 for (let i = 2; i < digits.length - 1; i++) {
                     if (digits[i] - 1 !== digits[i + 1]) {
@@ -1084,10 +1073,8 @@
             }
         }
 
-        // Initialize validator
         const mobileValidator = new MobileValidator();
 
-        // Toast Manager
         class ToastManager {
             constructor() {
                 this.container = document.getElementById('toast-container');
@@ -1269,7 +1256,6 @@
                     // Update hidden input value
                     document.getElementById('student-login-subtype').value = subtype;
                     
-                    // Update button text
                     const loginButton = document.getElementById('login-student');
                     if (subtype === 'login') {
                         loginButton.innerHTML = '<i class="fas fa-sign-in-alt mr-2"></i> Login as Student';
@@ -1277,7 +1263,6 @@
                         loginButton.innerHTML = '<i class="fas fa-user-plus mr-2"></i> Register as Student';
                     }
                     
-                    // Update form behavior or show additional fields if needed
                     updateStudentFormForSubtype(subtype);
                 });
             });
@@ -1288,12 +1273,10 @@
             const mobileField = document.getElementById('mobile');
             
             if (subtype === 'register') {
-                // Update placeholders
                 usernameField.placeholder = 'Choose a username (min. 3 characters)';
                 mobileField.placeholder = '07XX XXX XXX or 01XX XXX XXX';
                 
             } else {
-                // Reset to login defaults
                 usernameField.placeholder = 'E.g. LyxNexus';
                 mobileField.placeholder = '07XX XXX XXX or 01XX XXX XXX';
             }
@@ -1322,10 +1305,8 @@
                 return false;
             }
             
-            // Update the mobile field with clean number before submission
             document.getElementById('mobile').value = rawMobile;
             
-            // Different confirmation messages based on subtype
             let confirmMessage;
             if (subtype === 'login') {
                 confirmMessage = `Is this your mobile number? ${validation.formatted}. By continuing, you agree to our terms and conditions.`;
@@ -1353,7 +1334,6 @@
                 showToast('Creating account...', 'info', 'Please Wait');
             }
             
-            // Allow the form to submit normally to the backend
             return true;
         }
 
@@ -1386,7 +1366,6 @@
             
             showToast('Authenticating admin access...', 'info', 'Please Wait');
             
-            // Allow the form to submit normally to the backend
             return true;
         }
 
@@ -1418,7 +1397,6 @@
                 return false;
             }
             
-            // Update the mobile field with clean number before submission
             document.getElementById('master-key-mobile').value = rawMobile;
             
             loginButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
@@ -1426,7 +1404,6 @@
             
             showToast('Processing master key access...', 'info', 'Please Wait');
             
-            // Allow the form to submit normally to the backend
             return true;
         }
 
