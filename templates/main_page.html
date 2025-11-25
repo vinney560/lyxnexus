@@ -3897,7 +3897,7 @@
                             let filePreview = "";
                             if (announcement.has_file && announcement.file_type?.startsWith("image/")) {
                                 filePreview = `
-                                    <div class="mb-3 w-30 h-28 rounded-lg overflow-hidden bg-gray-700 flex items-center justify-center cursor-pointer card-hover-lift"
+                                    <div class="mb-2 w-30 h-48 rounded-lg overflow-hidden bg-gray-700 flex items-center justify-center cursor-pointer card-hover-lift"
                                          onclick="openImagePreview('${announcement.file_url}')">
                                         <img src="${announcement.file_url}" alt="${announcement.file_name}" class="object-cover w-full h-full">
                                     </div>
@@ -3947,7 +3947,7 @@
                                     ${isNew ? `<div class="absolute top-3 left-3 w-3 h-3 bg-green-500 rounded-full animate-pulse z-10"></div>` : ''}
                                 
                                     <!-- OG Preview -->
-                                    <div id="${previewId}" class="w-full border-b border-gray-800"></div>
+                                    <div id="${previewId}" class="w-full border-b border-gray-800 rounded-xl mb-2"></div>
                                 
                                     <!-- File/Image Preview -->
                                     ${filePreview}
