@@ -1512,6 +1512,32 @@
     body.notification-overlay-active {
         overflow: hidden;
     }    
+
+    .card-hover-lift {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .card-hover-lift:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .hover-shadow-2xl {
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    }
+
+    /* Smooth image loading */
+    img {
+        transition: opacity 0.3s ease;
+    }
+
+    img[loading="lazy"] {
+        opacity: 0;
+    }
+
+    img[loading="lazy"].loaded {
+        opacity: 1;
+    }
 </style>
 <body>
     <!-- Toast Container -->
