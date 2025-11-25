@@ -1545,34 +1545,34 @@
                 </div>
                 
                 <div class="nav-buttons flex flex-wrap justify-center gap-2">
-                    <button class="nav-btn active" data-section="announcements">
+                    <button class="nav-btn active" data-section="announcements" id="nav-announcements">
                         <i class="fas fa-bullhorn mr-2"></i>Announcements
                     </button>
-                    <button class="nav-btn" data-section="assignments">
+                    <button class="nav-btn" data-section="assignments" id="nav-assignments">
                         <i class="fas fa-tasks mr-2"></i>Assignments
                     </button>
-                    <button class="nav-btn" data-section="topics">
+                    <button class="nav-btn" data-section="topics" id="nav-topics">
                         <i class="fas fa-book mr-2"></i>Units
                     </button>
-                    <button class="nav-btn" data-section="timetable">
+                    <button class="nav-btn" data-section="timetable" id="nav-timetable">
                         <i class="fas fa-calendar-alt mr-2"></i>Timetable
                     </button>
-                    <button class="nav-btn" data-section="profile">
+                    <button class="nav-btn" data-section="profile" id="nav-profile">
                         <i class="fas fa-user mr-2"></i>Profile
                     </button>
-                    <button class="nav-btn" onclick="location.href='/files'" id="files">
+                    <button class="nav-btn" onclick="location.href='/files'" id="nav-files">
                         <i class="fas fa-folder mr-2"></i>Files
                     </button>
-                    <button class="nav-btn" onclick="location.href='/dashboard'">
+                    <button class="nav-btn" onclick="location.href='/dashboard'" id="nav-dashboard">
                         <i class="fas fa-tachometer-alt mr-2"></i>Dashboard
                     </button>
-                    <button class="nav-btn" onclick="location.href='/messages'">
+                    <button class="nav-btn" onclick="location.href='/messages'" id="nav-messages">
                         <i class="fas fa-comments mr-2"></i>Messages
                     </button>
-                    <button class="nav-btn" onclick="location.href='/terms'">
+                    <button class="nav-btn" onclick="location.href='/terms'" id="nav-terms">
                         <i class="fas fa-file-contract mr-2"></i>Terms
                     </button>
-                    <button class="nav-btn" onclick="location.href='/lyx-lab/'">
+                    <button class="nav-btn" onclick="location.href='/lyx-lab/'" id="nav-lyxlab">
                         <i class="fas fa-flask mr-2"></i> LyxLab
                     </button>
                 </div>
@@ -1829,43 +1829,43 @@
     <!-- Mobile Navigation -->
     <div class="mobile-menu">
         <div class="mobile-nav">
-            <button class="mobile-nav-btn active" data-section="announcements">
+            <button class="mobile-nav-btn active" data-section="announcements" id="mobile-announcements">
                 <i class="fas fa-bullhorn"></i>
                 <span>Announce</span>
             </button>
-            <button class="mobile-nav-btn" data-section="assignments">
+            <button class="mobile-nav-btn" data-section="assignments" id="mobile-assignments">
                 <i class="fas fa-tasks"></i>
                 <span>Assign</span>
             </button>
-            <button class="mobile-nav-btn" data-section="topics">
+            <button class="mobile-nav-btn" data-section="topics" id="mobile-topics">
                 <i class="fas fa-book"></i>
                 <span>Units</span>
             </button>
-            <button class="mobile-nav-btn" data-section="timetable">
+            <button class="mobile-nav-btn" data-section="timetable" id="mobile-timetable">
                 <i class="fas fa-calendar-alt"></i>
                 <span>Timetable</span>
             </button>
-            <button class="mobile-nav-btn" data-section="profile">
+            <button class="mobile-nav-btn" data-section="profile" id="mobile-profile">
                 <i class="fas fa-user"></i>
                 <span>Profile</span>
             </button>
-            <button class="mobile-nav-btn" onclick="location.href='/dashboard'">
+            <button class="mobile-nav-btn" onclick="location.href='/dashboard'" id="mobile-dashboard">
                 <i class="fas fa-tachometer-alt"></i>
                 <span>Dashboard</span>
             </button>
-            <button class="mobile-nav-btn" onclick="location.href='/files'" id="files">
+            <button class="mobile-nav-btn" onclick="location.href='/files'" id="mobile-files">
                 <i class="fas fa-folder"></i>
                 <span>Files</span>
             </button>
-            <button class="mobile-nav-btn" onclick="location.href='/messages'">
+            <button class="mobile-nav-btn" onclick="location.href='/messages'" id="mobile-messages">
                 <i class="fas fa-comments"></i>
                 <span>Messages</span>
             </button>
-            <button class="mobile-nav-btn" onclick="location.href='/terms'">
+            <button class="mobile-nav-btn" onclick="location.href='/terms'" id="mobile-terms">
                 <i class="fas fa-file-contract"></i>
                 <span>Terms</span>
             </button>
-            <button class="mobile-nav-btn" onclick="location.href='/lyx-lab'">
+            <button class="mobile-nav-btn" onclick="location.href='/lyx-lab'" id="mobile-lyxlab">
                 <i class="fas fa-flask"></i>
                 <span>LyxLab</span>
             </button>
@@ -1958,6 +1958,7 @@
                 this.pageLoadTime = Date.now();
                 this.currentSection = 'announcements';
                 this.trackedSections = new Set();
+                this.initialized = false;
             }
         
             generateSessionId() {
@@ -1983,6 +1984,7 @@
             }
         
             async trackActivity(action, target, duration = null) {
+                console.log(`Tracking: ${action} - ${target}`);
                 try {
                     await fetch('/api/track-activity', {
                         method: 'POST',
@@ -2000,6 +2002,89 @@
                 }
             }
         
+            setupNavigationTracking() {
+                console.log('Setting up navigation tracking with IDs...');
+
+                // Define all the navigation elements and their tracking targets
+                const navigationMap = {
+                    // Main section buttons
+                    'nav-announcements': 'announcements_section',
+                    'nav-assignments': 'assignments_section', 
+                    'nav-topics': 'topics_section',
+                    'nav-timetable': 'timetable_section',
+                    'nav-profile': 'profile_section',
+
+                    // Feature buttons
+                    'nav-files': 'files_section',
+                    'nav-dashboard': 'dashboard_section',
+                    'nav-messages': 'messages_section',
+                    'nav-terms': 'terms_section',
+                    'nav-lyxlab': 'lyxlab_section',
+
+                    // Mobile navigation
+                    'mobile-announcements': 'announcements_section',
+                    'mobile-assignments': 'assignments_section',
+                    'mobile-topics': 'topics_section', 
+                    'mobile-timetable': 'timetable_section',
+                    'mobile-profile': 'profile_section',
+                    'mobile-files': 'files_section',
+                    'mobile-dashboard': 'dashboard_section',
+                    'mobile-messages': 'messages_section',
+                    'mobile-terms': 'terms_section',
+                    'mobile-lyxlab': 'lyxlab_section'
+                };
+            
+                // Add click listeners to all navigation elements
+                Object.keys(navigationMap).forEach(id => {
+                    const element = document.getElementById(id);
+                    if (element) {
+                        element.addEventListener('click', () => {
+                            this.trackActivity('navigation', navigationMap[id]);
+                        });
+                    } else {
+                        console.warn(`Element with ID ${id} not found`);
+                    }
+                });
+            
+                // Track AI tools
+                this.setupAITracking();
+            }
+        
+            setupAITracking() {
+                // Track AI tool links by ID
+                const aiToolsMap = {
+                    'nav-gemini': 'marion_ai',
+                    'nav-quiz': 'nova_quiz', 
+                    'nav-math': 'assignment_doer'
+                };
+            
+                Object.keys(aiToolsMap).forEach(id => {
+                    const element = document.getElementById(id);
+                    if (element) {
+                        element.addEventListener('click', () => {
+                            this.trackActivity('ai_accessed', aiToolsMap[id]);
+                        });
+                    }
+                });
+            
+                // Also track AI tools in robot modal
+                document.addEventListener('click', (e) => {
+                    const button = e.target.closest('.ai-button');
+                    if (button) {
+                        const buttonText = button.textContent.toLowerCase();
+                        if (buttonText.includes('marion')) {
+                            this.trackActivity('ai_accessed', 'marion_ai');
+                        } else if (buttonText.includes('nova quiz')) {
+                            this.trackActivity('ai_accessed', 'nova_quiz');
+                        } else if (buttonText.includes('assignment doer')) {
+                            this.trackActivity('ai_accessed', 'assignment_doer');
+                        } else if (buttonText.includes('tutor')) {
+                            this.trackActivity('ai_accessed', 'tutor_ai');
+                        }
+                    }
+                });
+            }
+        
             trackSectionView(section) {
                 if (!this.trackedSections.has(section)) {
                     this.trackActivity('section_view', section);
@@ -2014,94 +2099,37 @@
             }
         
             initialize() {
+                if (this.initialized) return;
+
+                console.log('Initializing analytics...');
+
                 // Track initial visit
                 this.trackVisit(this.currentSection);
                 this.trackActivity('page_view', 'main_page');
             
+                // Setup navigation tracking
+                setTimeout(() => {
+                    this.setupNavigationTracking();
+                }, 1000);
+            
                 // Track section changes
-                const originalSetupNavigation = window.setupNavigation;
-                window.setupNavigation = () => {
-                    originalSetupNavigation();
-                    
-                    const navButtons = document.querySelectorAll('.nav-btn, .mobile-nav-btn');
-                    navButtons.forEach(button => {
-                        button.addEventListener('click', () => {
-                            const section = button.getAttribute('data-section');
-                            this.trackSectionView(section);
-                        });
-                    });
-                };
+                const originalSetActiveSection = window.setActiveSection;
+                if (originalSetActiveSection) {
+                    window.setActiveSection = (sectionId) => {
+                        originalSetActiveSection(sectionId);
+                        this.trackSectionView(sectionId);
+                    };
+                }
             
                 // Track page exit
                 window.addEventListener('beforeunload', () => {
                     this.trackPageExit();
                 });
             
-                // Track navigation clicks
-                document.addEventListener('click', (e) => {
-                    const target = e.target;
-                    const closestLink = target.closest('a');
-                    const closestButton = target.closest('button');
-                
-                    // Files tracking
-                    if (closestLink && closestLink.href.includes('/files')) {
-                        this.trackActivity('navigation', 'files_section');
-                    }
-                
-                    // Messages tracking
-                    if (closestLink && closestLink.href.includes('/messages')) {
-                        this.trackActivity('navigation', 'messages_section');
-                    }
-                
-                    // Dashboard tracking
-                    if (closestLink && closestLink.href.includes('/dashboard')) {
-                        this.trackActivity('navigation', 'dashboard_section');
-                    }
-                
-                    // Terms tracking
-                    if (closestLink && closestLink.href.includes('/terms')) {
-                        this.trackActivity('navigation', 'terms_section');
-                    }
-                
-                    // LyxLab tracking
-                    if (closestLink && closestLink.href.includes('/lyx-lab')) {
-                        this.trackActivity('navigation', 'lyxlab_section');
-                    }
-                
-                    // AI Tools tracking - check both links and buttons
-                    if (closestLink && closestLink.href.includes('/gemini')) {
-                        this.trackActivity('ai_accessed', 'marion_ai');
-                    }
-                    if (closestLink && closestLink.href.includes('/quiz')) {
-                        this.trackActivity('ai_accessed', 'nova_quiz');
-                    }
-                    if (closestLink && closestLink.href.includes('/math')) {
-                        this.trackActivity('ai_accessed', 'assignment_doer');
-                    }
-                
-                    // Also track navigation buttons by their text content
-                    if (closestButton) {
-                        const buttonText = closestButton.textContent.toLowerCase();
-
-                        if (buttonText.includes('messages')) {
-                            this.trackActivity('navigation', 'messages_section');
-                        }
-                        if (buttonText.includes('dashboard')) {
-                            this.trackActivity('navigation', 'dashboard_section');
-                        }
-                        if (buttonText.includes('terms')) {
-                            this.trackActivity('navigation', 'terms_section');
-                        }
-                        if (buttonText.includes('lyxlab')) {
-                            this.trackActivity('navigation', 'lyxlab_section');
-                        }
-                        if (buttonText.includes('tutor ai')) {
-                            this.trackActivity('ai_accessed', 'tutor_ai');
-                        }
-                    }
-                });
+                this.initialized = true;
+                console.log('Analytics initialized successfully');
             }
-        }
+        }        
         
         const analytics = new AnalyticsTracker();        
 
@@ -4709,21 +4737,24 @@
                         icon: 'fas fa-robot',
                         gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                         href: '/gemini',
-                        description: 'General AI Assistant'
+                        description: 'General AI Assistant',
+                        id: "nav-gemini"
                     },
                     {
                         name: 'Nova Quiz Generator',
                         icon: 'fas fa-brain',
                         gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
                         href: '/quiz',
-                        description: 'Create Practice Quizzes'
+                        description: 'Create Practice Quizzes',
+                        id: "nav-quiz"
                     },
                     {
                         name: 'Assignment Doer',
                         icon: 'fas fa-calculator',
                         gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
                         href: '/math',
-                        description: 'Math & Assignment Help'
+                        description: 'Math & Assignment Help',
+                        id: "nav-math"
                     },
                     {
                         name: 'Tutor AI',
@@ -4731,7 +4762,8 @@
                         gradient: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
                         href: '#',
                         description: 'Coming Soon',
-                        disabled: true
+                        disabled: true,
+                        id: "nav-tutor"
                     }
                 ];
                 
