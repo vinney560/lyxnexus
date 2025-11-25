@@ -2037,40 +2037,67 @@
                     this.trackPageExit();
                 });
             
-                // Track file visit
+                // Track navigation clicks
                 document.addEventListener('click', (e) => {
                     const target = e.target;
-
+                    const closestLink = target.closest('a');
+                    const closestButton = target.closest('button');
+                
                     // Files tracking
-                    if (target.closest('a[href*="/files"]') || target.closest('#files')) {
-                        const link = target.closest('a');
-                        this.trackActivity('file_download', link?.href || 'unknown_file');
+                    if (closestLink && closestLink.href.includes('/files')) {
+                        this.trackActivity('navigation', 'files_section');
                     }
                 
                     // Messages tracking
-                    if (target.closest('a[href*="/messages"]') || target.closest('#messages')) {
-                        this.trackActivity('viewed_message', 'messages_section');
+                    if (closestLink && closestLink.href.includes('/messages')) {
+                        this.trackActivity('navigation', 'messages_section');
                     }
-
-                    // Marion AI tracking
-                    if (target.closest('a[href*="/gemini"]') || target.closest('#gemini')) {
+                
+                    // Dashboard tracking
+                    if (closestLink && closestLink.href.includes('/dashboard')) {
+                        this.trackActivity('navigation', 'dashboard_section');
+                    }
+                
+                    // Terms tracking
+                    if (closestLink && closestLink.href.includes('/terms')) {
+                        this.trackActivity('navigation', 'terms_section');
+                    }
+                
+                    // LyxLab tracking
+                    if (closestLink && closestLink.href.includes('/lyx-lab')) {
+                        this.trackActivity('navigation', 'lyxlab_section');
+                    }
+                
+                    // AI Tools tracking - check both links and buttons
+                    if (closestLink && closestLink.href.includes('/gemini')) {
                         this.trackActivity('ai_accessed', 'marion_ai');
                     }
-                
-                    // Nova Quiz tracking
-                    if (target.closest('a[href*="/quiz"]') || target.closest('#marion')) {
+                    if (closestLink && closestLink.href.includes('/quiz')) {
                         this.trackActivity('ai_accessed', 'nova_quiz');
                     }
-                
-                    // Assignment Doer tracking
-                    if (target.closest('a[href*="/math"]') || target.closest('#math')) {
+                    if (closestLink && closestLink.href.includes('/math')) {
                         this.trackActivity('ai_accessed', 'assignment_doer');
                     }
                 
-                    // Tutor AI tracking
-                    const tutorButton = target.closest('button');
-                    if (tutorButton && tutorButton.textContent.toLowerCase().includes('tutor ai')) {
-                        aiMonitor.captureAIAccess('tutor_ai');
+                    // Also track navigation buttons by their text content
+                    if (closestButton) {
+                        const buttonText = closestButton.textContent.toLowerCase();
+
+                        if (buttonText.includes('messages')) {
+                            this.trackActivity('navigation', 'messages_section');
+                        }
+                        if (buttonText.includes('dashboard')) {
+                            this.trackActivity('navigation', 'dashboard_section');
+                        }
+                        if (buttonText.includes('terms')) {
+                            this.trackActivity('navigation', 'terms_section');
+                        }
+                        if (buttonText.includes('lyxlab')) {
+                            this.trackActivity('navigation', 'lyxlab_section');
+                        }
+                        if (buttonText.includes('tutor ai')) {
+                            this.trackActivity('ai_accessed', 'tutor_ai');
+                        }
                     }
                 });
             }
