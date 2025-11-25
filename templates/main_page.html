@@ -2005,7 +2005,6 @@
             setupNavigationTracking() {
                 console.log('Setting up navigation tracking with IDs...');
 
-                // Define all the navigation elements and their tracking targets
                 const navigationMap = {
                     // Main section buttons
                     'nav-announcements': 'announcements_section',
@@ -3098,32 +3097,76 @@
                 container.innerHTML = assignments.map(assignment => {
                     const dueDate = new Date(assignment.due_date);
                     const now = new Date();
-                    const daysUntilDue = Math.ceil((dueDate - now) / (1000 * 60 * 60 * 24));
 
+                    // Calculate precise time difference
+                    const timeDiff = dueDate - now;
+                    const daysUntilDue = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+                    const hoursUntilDue = Math.floor(timeDiff / (1000 * 60 * 60));
+                    const minutesUntilDue = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+                
                     let statusClass = 'bg-blue-500';
                     let statusText = 'Due Soon';
+                    let timeDisplay = '';
                 
-                    if (daysUntilDue < 0) {
+                    if (timeDiff < 0) {
+                        // Overdue
                         statusClass = 'bg-red-500';
                         statusText = 'Overdue';
-                    } else if (daysUntilDue < 1) {
-                        statusClass = 'bg-yellow-400';
-                        statusText = 'Due Today';
+                        const overdueDays = Math.abs(daysUntilDue);
+                        timeDisplay = overdueDays === 1 ? '1 day ago' : `${overdueDays} days ago`;
+                    } else if (daysUntilDue === 0) {
+                        // Due today
+                        if (hoursUntilDue < 1) {
+                            // Due in less than 1 hour
+                            statusClass = 'bg-red-500';
+                            statusText = 'Due Now';
+                            timeDisplay = minutesUntilDue <= 0 ? 'Any moment' : `${minutesUntilDue} min`;
+                        } else if (hoursUntilDue < 3) {
+                            // Due in less than 3 hours
+                            statusClass = 'bg-orange-500';
+                            statusText = 'Almost Due';
+                            timeDisplay = `${hoursUntilDue}h ${minutesUntilDue}m`;
+                        } else if (hoursUntilDue < 12) {
+                            // Due in less than 12 hours
+                            statusClass = 'bg-yellow-500';
+                            statusText = 'Due Today';
+                            timeDisplay = `${hoursUntilDue}h ${minutesUntilDue}m`;
+                        } else {
+                            // Due today but more than 12 hours
+                            statusClass = 'bg-blue-400';
+                            statusText = 'Due Today';
+                            timeDisplay = `${hoursUntilDue}h`;
+                        }
                     } else if (daysUntilDue === 1) {
-                        statusClass = 'bg-orange-400';
-                        statusText = 'Due Tomorrow';    
+                        // Due tomorrow
+                        statusClass = 'bg-purple-500';
+                        statusText = 'Due Tomorrow';
+                        timeDisplay = `${hoursUntilDue + 24}h`; // Show total hours until due
                     } else if (daysUntilDue <= 3) {
-                        statusClass = 'bg-green-400';
+                        // Due in 2-3 days
+                        statusClass = 'bg-green-500';
                         statusText = 'Due Soon';
+                        timeDisplay = `${daysUntilDue} days`;
+                    } else if (daysUntilDue <= 7) {
+                        // Due in 4-7 days
+                        statusClass = 'bg-blue-400';
+                        statusText = 'Upcoming';
+                        timeDisplay = `${daysUntilDue} days`;
+                    } else {
+                        // Due in more than a week
+                        statusClass = 'bg-gray-500';
+                        statusText = 'Later';
+                        timeDisplay = `${daysUntilDue} days`;
                     }
 
                     return `
                         <div class="assignment-card border-l-4 border-blue-500 border-r-1 border-blue-500 border-t-1 border-blue-500 border-b-1 border-blue-500 bg-gray-800/50 p-2 sm:p-2 rounded-xl shadow-md hover:shadow-lg transition duration-200 ease-in-out card-hover-lift fade-in">
                             <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-3 gap-2">
                                 <h3 class="text-xl sm:text-2xl font-extrabold text-white underline underline-offset-4 decoration-blue-500 leading-snug break-words">${this.highlightText(assignment.title, this.currentQuery)}</h3>
-                                <span class="${statusClass} text-white px-3 py-1 rounded-full text-xs sm:text-sm whitespace-nowrap">
-                                    ${statusText}: ${formatDate(assignment.due_date)}
-                                </span>
+                                <div class="flex flex-col items-end gap-1">
+                                    <span class="${statusClass} text-white px-3 py-1 rounded-full text-xs sm:text-sm whitespace-nowrap">${statusText}</span>
+                                    ${timeDisplay ? `<span class="text-xs text-gray-300 bg-gray-700 px-2 py-1 rounded">${timeDisplay}</span>` : ''}
+                                </div>
                             </div>
                         
                             <div class="mb-4 text-gray-300 text-sm leading-relaxed whitespace-pre-line list-inside">${this.highlightText(formatMath(assignment.description), this.currentQuery)}</div>
