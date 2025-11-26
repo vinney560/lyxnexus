@@ -4151,26 +4151,69 @@
                     ${assignments.map(assignment => {
                         const dueDate = new Date(assignment.due_date);
                         const now = new Date();
-                        const daysUntilDue = Math.ceil((dueDate - now) / (1000 * 60 * 60 * 24));
-
-                        const isNew = newItems.some(item => item.id === assignment.id);
-                        const newClass = isNew ? 'new-item-highlight' : '';
-                    
+                        const timeDiff = dueDate - now;
+                        
+                        const dueCalendarDate = new Date(dueDate.getFullYear(), dueDate.getMonth(), dueDate.getDate());
+                        const nowCalendarDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                        const calendarDaysDiff = Math.floor((dueCalendarDate - nowCalendarDate) / (1000 * 60 * 60 * 24));
+                        
                         let statusClass = 'bg-blue-500';
                         let statusText = 'Due Soon';
-                    
-                        if (daysUntilDue < 0) {
+                        let timeDisplay = '';
+                        
+                        if (timeDiff < 0) {
                             statusClass = 'bg-red-500';
                             statusText = 'Overdue';
-                        } else if (daysUntilDue < 1) {
-                            statusClass = 'bg-yellow-400';
-                            statusText = 'Due Today';
-                        } else if (daysUntilDue === 1) {
-                            statusClass = 'bg-orange-400';
-                            statusText = 'Due Tomorrow';    
-                        } else if (daysUntilDue <= 3) {
-                            statusClass = 'bg-green-400';
+                            const overdueHours = Math.abs(Math.floor(timeDiff / (1000 * 60 * 60)));
+                            const overdueMinutes = Math.abs(Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60)));
+
+                            if (calendarDaysDiff === 0) {
+                                timeDisplay = overdueHours === 0 ? `${overdueMinutes} min ago` : `${overdueHours}h ago`;
+                            } else {
+                                timeDisplay = Math.abs(calendarDaysDiff) === 1 ? '1 day ago' : `${Math.abs(calendarDaysDiff)} days ago`;
+                            }
+                        } else if (calendarDaysDiff === 0) {
+                            const hoursUntilDue = Math.floor(timeDiff / (1000 * 60 * 60));
+                            const minutesUntilDue = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+
+                            if (hoursUntilDue < 1) {
+                                statusClass = 'bg-red-500';
+                                statusText = 'Due Now';
+                                timeDisplay = minutesUntilDue <= 0 ? 'Any moment' : `${minutesUntilDue} min`;
+                            } else if (hoursUntilDue < 3) {
+                                statusClass = 'bg-orange-500';
+                                statusText = 'Almost Due';
+                                timeDisplay = `${hoursUntilDue}h ${minutesUntilDue}m`;
+                            } else if (hoursUntilDue < 12) {
+                                statusClass = 'bg-yellow-500';
+                                statusText = 'Due Today';
+                                timeDisplay = `${hoursUntilDue}h ${minutesUntilDue}m`;
+                            } else {
+                                statusClass = 'bg-blue-400';
+                                statusText = 'Due Today';
+                                timeDisplay = `${hoursUntilDue}h`;
+                            }
+                        } else if (calendarDaysDiff === 1) {
+                            const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0);
+                            const hoursUntilMidnight = Math.floor((midnight - now) / (1000 * 60 * 60));
+                            const hoursInTomorrow = dueDate.getHours() + (dueDate.getMinutes() / 60);
+                            const totalHours = Math.round(hoursUntilMidnight + hoursInTomorrow);
+
+                            statusClass = 'bg-purple-500';
+                            statusText = 'Due Tomorrow';
+                            timeDisplay = `${totalHours}h`;
+                        } else if (calendarDaysDiff <= 3) {
+                            statusClass = 'bg-green-500';
                             statusText = 'Due Soon';
+                            timeDisplay = `${calendarDaysDiff} days`;
+                        } else if (calendarDaysDiff <= 7) {
+                            statusClass = 'bg-blue-400';
+                            statusText = 'Upcoming';
+                            timeDisplay = `${calendarDaysDiff} days`;
+                        } else {
+                            statusClass = 'bg-gray-500';
+                            statusText = 'Later';
+                            timeDisplay = `${calendarDaysDiff} days`;
                         }
 
                         return `
@@ -4184,6 +4227,9 @@
                                         </h3>
                                         <span class="${statusClass} text-white px-2 py-1 rounded-full text-xs font-medium whitespace-nowrap flex-shrink-0 self-center">
                                             ${statusText}
+                                        </span>
+                                        <span class="bg-yellow-500 text-white px-2 py-1 rounded-full text-xs sm:text-sm whitespace-nowrap">
+                                            ${timeDisplay || '....'}
                                         </span>
                                     </div>
                                 
