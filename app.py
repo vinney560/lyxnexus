@@ -3812,7 +3812,8 @@ def download_file(id):
         new_share = Share(
             share_id=share_uuid,
             owner_id=user_id,
-            used=False
+            used=False,
+            created_at=datetime.utcnow() + timedelta(hours=3)
         )
         db.session.add(new_share)
         db.session.commit()
