@@ -1512,6 +1512,29 @@
     body.notification-overlay-active {
         overflow: hidden;
     }    
+
+    .mobile-nav::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 0%;
+        height: 2px;
+        background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+        transition: width 3s ease-in-out;
+        z-index: 101;
+    }
+    
+    .mobile-nav.scroll-animating::after {
+        width: 100%;
+        animation: progressBar 3s ease-in-out;
+    }
+    
+    @keyframes progressBar {
+        0% { width: 0%; }
+        50% { width: 100%; }
+        100% { width: 0%; }
+    }
 </style>
 <body>
     <!-- Toast Container -->
@@ -1875,6 +1898,133 @@
         document.addEventListener("DOMContentLoaded", function() {
             window.Userstatus = {{ current_user.status|tojson }};
             
+        });
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileNav = document.querySelector('.mobile-nav');
+            if (!mobileNav) return;
+        
+            class MobileNavScroller {
+                constructor(navElement) {
+                    this.nav = navElement;
+                    this.isAnimating = false;
+                    this.animationId = null;
+                    this.setupStyles();
+                }
+            
+                setupStyles() {
+                    this.nav.style.scrollBehavior = 'smooth';                    
+                    const style = document.createElement('style');
+                    style.textContent = `
+                        .mobile-nav.scroll-animating {
+                            pointer-events: none;
+                        }
+                        .mobile-nav.scroll-complete {
+                            animation: navPulse 0.5s ease-in-out;
+                        }
+                        @keyframes navPulse {
+                            0% { transform: scale(1); }
+                            50% { transform: scale(1.02); }
+                            100% { transform: scale(1); }
+                        }
+                    `;
+                    document.head.appendChild(style);
+                }
+            
+                getMaxScroll() {
+                    return this.nav.scrollWidth - this.nav.clientWidth;
+                }
+            
+                async scrollToPosition(target, duration = 700) {
+                    return new Promise((resolve) => {
+                        const start = this.nav.scrollLeft;
+                        const distance = target - start;
+                        const startTime = performance.now();
+                    
+                        function animate(currentTime) {
+                            const elapsed = currentTime - startTime;
+                            const progress = Math.min(elapsed / duration, 1);
+
+                            const ease = 1 - Math.pow(1 - progress, 3);
+
+                            this.nav.scrollLeft = start + (distance * ease);
+                        
+                            if (progress < 1) {
+                                this.animationId = requestAnimationFrame(animate.bind(this));
+                            } else {
+                                this.animationId = null;
+                                resolve();
+                            }
+                        }
+                    
+                        this.animationId = requestAnimationFrame(animate.bind(this));
+                    });
+                }
+            
+                async performFullScrollAnimation() {
+                    if (this.isAnimating) return;
+
+                    this.isAnimating = true;
+                    this.nav.classList.add('scroll-animating');
+                
+                    const maxScroll = this.getMaxScroll();
+
+                    if (maxScroll <= 0) {
+                        this.isAnimating = false;
+                        this.nav.classList.remove('scroll-animating');
+                        return;
+                    }
+                
+                    try {
+                        await this.scrollToPosition(maxScroll, 1200);
+
+                        await new Promise(resolve => setTimeout(resolve, 300));
+
+                        await this.scrollToPosition(0, 1200);
+
+                        this.nav.classList.remove('scroll-animating');
+                        this.nav.classList.add('scroll-complete');
+                        setTimeout(() => {
+                            this.nav.classList.remove('scroll-complete');
+                        }, 700);
+                    
+                    } catch (error) {
+                        console.log('Scroll animation interrupted');
+                    } finally {
+                        this.isAnimating = false;
+                    }
+                }
+            
+                stopAnimation() {
+                    if (this.animationId) {
+                        cancelAnimationFrame(this.animationId);
+                        this.animationId = null;
+                    }
+                    this.isAnimating = false;
+                    this.nav.classList.remove('scroll-animating', 'scroll-complete');
+                }
+            }
+        
+            setTimeout(() => {
+                const scroller = new MobileNavScroller(mobileNav);
+                scroller.performFullScrollAnimation();
+        
+                window.addEventListener('orientationchange', () => {
+                    setTimeout(() => {
+                        scroller.performFullScrollAnimation();
+                    }, 700);
+                });
+            
+                let interactionTimer;
+                mobileNav.addEventListener('touchstart', () => {
+                    scroller.stopAnimation();
+                });
+            
+                mobileNav.addEventListener('wheel', () => {
+                    scroller.stopAnimation();
+                });
+            
+            }, 700);
         });
     </script>
     <script>
