@@ -679,7 +679,7 @@
 
         function displayShares(shares) {
             const container = document.getElementById('shares-list');
-            
+
             if (!shares || shares.length === 0) {
                 container.innerHTML = `
                     <div class="text-center py-8 text-gray-400 fade-in">
@@ -690,11 +690,18 @@
                 `;
                 return;
             }
-            
+
             container.innerHTML = shares.map((share, index) => {
                 const isExpired = isShareExpired(share);
                 const shareUrl = `${window.location.origin}/share/${share.share_id}`;
-                
+
+                // Convert to UTC+3
+                const createdDate = new Date(share.created_at);
+                const createdUTC3 = new Date(createdDate.getTime() + (3 * 60 * 60 * 1000));
+
+                const expiryDate = new Date(createdDate.getTime() + (2 * 60 * 60 * 1000));
+                const expiryUTC3 = new Date(expiryDate.getTime() + (3 * 60 * 60 * 1000));
+
                 return `
                     <div class="share-item fade-in real-time-update ${isExpired ? 'expired' : ''}" style="animation-delay: ${index * 0.1}s">
                         <div class="flex justify-between items-start mb-4">
@@ -712,7 +719,7 @@
                                         </span>
                                     </div>
                                 </div>
-                                
+
                                 <div class="mb-3">
                                     <div class="label-text">Share URL</div>
                                     <div class="flex items-center space-x-2">
@@ -722,7 +729,7 @@
                                         </button>
                                     </div>
                                 </div>
-                                
+
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                     <div>
                                         <span class="text-gray-400 font-semibold">Owner:</span>
@@ -730,11 +737,11 @@
                                     </div>
                                     <div>
                                         <span class="text-gray-400 font-semibold">Created:</span>
-                                        <span class="text-white ml-2 font-medium">${new Date(share.created_at).toLocaleString()}</span>
+                                        <span class="text-white ml-2 font-medium">${formatUTCDate(createdUTC3)}</span>
                                     </div>
                                     <div>
                                         <span class="text-gray-400 font-semibold">Expires:</span>
-                                        <span class="text-white ml-2 font-medium">${new Date(new Date(share.created_at).getTime() + 2 * 60 * 60 * 1000).toLocaleString()}</span>
+                                        <span class="text-white ml-2 font-medium">${formatUTCDate(expiryUTC3)}</span>
                                     </div>
                                     <div>
                                         <span class="text-gray-400 font-semibold">Share ID:</span>
@@ -743,7 +750,7 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div class="flex justify-between items-center pt-4 border-t border-gray-700">
                             <div class="text-sm text-gray-400 font-medium">
                                 <i class="fas fa-info-circle mr-1"></i>
@@ -769,10 +776,24 @@
             }).join('');
         }
 
+        function formatUTCDate(date) {
+            return date.toLocaleString('en-US', {
+                timeZone: 'UTC',
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false
+            });
+        }
+
         function isShareExpired(share) {
             const created = new Date(share.created_at);
-            const expiry = new Date(created.getTime() + 2 * 60 * 60 * 1000); // 2 hours
-            return new Date() > expiry;
+            const expiry = new Date(created.getTime() + (2 * 60 * 60 * 1000));
+            const nowUTC3 = new Date(Date.now() + (3 * 60 * 60 * 1000)); 
+            return nowUTC3 > expiry;
         }
 
         function updateStats() {
