@@ -3779,7 +3779,7 @@ from uuid import uuid4
 from datetime import datetime, timedelta
 
 # ---------------- SETTINGS ----------------
-MAX_DOWNLOADS = 5
+MAX_DOWNLOADS = 10
 LINK_EXPIRY_HOURS = 2
 
 # Track downloads per user in memory
@@ -3851,16 +3851,78 @@ def access_share(share_id):
     if not share.used:
         share.used = True
         owner_id = share.owner_id
-        users_downloads[owner_id] = max(0, users_downloads.get(owner_id, 0) - 1)
+        users_downloads[owner_id] = max(0, users_downloads.get(owner_id, 0) - 25)
         db.session.commit()
 
     return render_template(
         'share_status.html',
-        message="Hey! Welcome LyxNexus, a modern learning platform that simplifies class notes, assignments, and discussions.",
+        message="Hey! Welcome LyxNexus, a modern learning platform that simplifies class notes, assignments, and discussions soully made for IN17's.",
         link="/",
         link_text="Go Home"
     )
+    
+#-------------------------------------------------
+@app.route('/admin/shares')
+@login_required
+@admin_required
+def view_shares():
+    return render_template('admin_shares.html')
 
+@app.route('/admin/shares/data')
+@login_required
+@admin_required
+def get_shares_data():
+    """Get shares data for the admin panel"""
+    shares = Share.query.order_by(Share.created_at.desc()).all()
+    return jsonify({
+        'shares': [{
+            'id': share.id,
+            'share_id': share.share_id,
+            'owner_id': share.owner_id,
+            'owner': {'username': share.owner.username},
+            'used': share.used,
+            'created_at': share.created_at.isoformat()
+        } for share in shares]
+    })
+
+@app.route('/api/delete/share/<int:id>', methods=['DELETE'])
+@login_required
+@admin_required
+def delete_share(id):
+    """Delete a share link"""
+    share = Share.query.get_or_404(id)
+
+    try:
+        db.session.delete(share)
+        db.session.commit()
+        
+        return jsonify({'message': 'Share link deleted successfully'})
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': 'Failed to delete share link'}), 500
+    
+@app.route('/api/modify/share/<int:id>', methods=['PUT'])
+@login_required
+@admin_required
+def modify_share(id):
+    """Modify a share link (mark as used/unused)"""
+    share = Share.query.get_or_404(id)
+    data = request.get_json()
+    
+    if 'used' not in data:
+        return jsonify({'error': 'Used status is required'}), 400
+    
+    try:
+        share.used = bool(data['used'])
+        db.session.commit()
+        
+        return jsonify({'message': 'Share link updated successfully'})
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': 'Failed to update share link'}), 500
+#-------------------------------------------------
 @app.route('/api/files/<int:id>', methods=['DELETE'])
 @login_required
 @admin_required
