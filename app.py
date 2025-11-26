@@ -3866,7 +3866,9 @@ def access_share(share_id):
 @login_required
 @admin_required
 def view_shares():
-    return render_template('admin_shares.html')
+    """View all share links"""
+    shares = Share.query.order_by(Share.created_at.desc()).all()
+    return render_template('admin_shares.html', shares=shares)
 
 @app.route('/admin/shares/data')
 @login_required

@@ -611,16 +611,7 @@
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
-            try {
-                const initialShares = {{ shares|tojson|safe }};
-                currentShares = initialShares;
-                displayShares(currentShares);
-                updateStats();
-            } catch (error) {
-                console.error('Error loading initial shares:', error);
-                loadShares();
-            }
-            
+            loadShares();
             startAutoRefresh();
         });
 
