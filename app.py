@@ -3734,7 +3734,7 @@ def upload_file():
     description = request.form.get('description', '')[:12000]
     category = request.form.get('category', 'general')
     
-    # Validate file size (10MB limit) - Memory 1GB only
+    # Validate file size (10MB limit)
     file_data = file.read()
     if len(file_data) > 10 * 1024 * 1024:
         return jsonify({'error': 'File size exceeds 10MB limit'}), 400
@@ -3901,7 +3901,7 @@ def delete_share(id):
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': 'Failed to delete share link'}), 500
-    
+
 @app.route('/api/modify/share/<int:id>', methods=['PUT'])
 @login_required
 @admin_required

@@ -544,7 +544,7 @@
             transform: translateX(-50%);
             width: 20px;
             height: 3px;
-            background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+            background: linear-gradient(90deg, #3b82f6, #8B5CF6);
             border-radius: 2px;
         }
 
@@ -1695,7 +1695,7 @@
         <section id="announcements" class="content-section active scroll-fade-in">
             <div class="flex justify-between items-center mb-6 section-header">
                 <h2 id="announceH" class="text-2xl md:text-3xl font-bold gradient-text inline-block align-middle" style="vertical-align:middle;"></h2>
-                <span class="text-gray-400 text-sm" id="announcements-count">Loading...</span>
+                <div class="text-gray-400 text-sm text-white border border-green-700 flex items-center justify-center rounded-full bg-gradient-to-r from-blue-500 to-purple-500 p-2 w-10 h-10 sm: p-2 w-9 h-9" id="announcements-count">---</div>
             </div>
             <div id="announcements-container">
 
@@ -1722,7 +1722,7 @@
         <section id="assignments" class="content-section scroll-fade-in">
             <div class="flex justify-between items-center mb-6 section-header">
                 <h2 class="text-2xl md:text-3xl font-bold gradient-text">Your Assignments</h2>
-                <span class="text-gray-400 text-sm" id="assignments-count">Loading...</span>
+                <div class="text-white text-sm text-white border border-green-700 flex items-center justify-center rounded-full bg-gradient-to-r from-blue-500 to-purple-500 p-2 w-10 h-10 sm:w-9 h-9" id="assignments-count">---</div>
             </div>
             <div id="assignments-container">
                 <div class="loading">
@@ -1735,7 +1735,7 @@
         <section id="topics" class="content-section scroll-fade-in">
             <div class="flex justify-between items-center mb-6 section-header">
                 <h2 class="text-2xl md:text-3xl font-bold gradient-text">Course Units</h2>
-                <span class="text-gray-400 text-sm" id="topics-count">Loading...</span>
+                <div class="text-white text-sm text-white border border-green-700 flex items-center justify-center rounded-full bg-gradient-to-r from-blue-500 to-purple-500 p-2 w-10 h-10 sm:w-9 h-9" id="topics-count">---</div>
             </div>
             <div id="topics-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div class="loading">
@@ -1748,7 +1748,7 @@
         <section id="timetable" class="content-section scroll-fade-in">
             <div class="flex justify-between items-center mb-6 section-header">
                 <h2 class="text-2xl md:text-3xl font-bold gradient-text">Class Schedule</h2>
-                <span class="text-gray-400 text-sm">Current Week</span>
+                <div class="flex items-center justify-center text-white font-semibold text-sm border border-cyan-500 bg-gradient-to-r from-green-600 to-green-700 rounded-full w-32 h-8 px-2">Current Week</div>
             </div>
             <div id="timetable-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div class="loading">
@@ -2062,7 +2062,6 @@
             TOPICS: `${API_BASE}/topics`
         };
         
-        // Section persistence
         let currentActiveSection = localStorage.getItem('activeSection') || 'announcements';
         
         const typed = new Typed('#announceH', {
@@ -2101,7 +2100,6 @@
         let isInitialLoad = true;
         let scrollPositions = {};
 
-        // Analytics Tracking System
         class AnalyticsTracker {
             constructor() {
                 this.sessionId = this.generateSessionId();
@@ -2163,9 +2161,7 @@
                     'nav-timetable': 'timetable_section',
                     'nav-profile': 'profile_section',
 
-                    // Feature buttons
                     'nav-files': 'files_section',
-                    'nav-dashboard': 'dashboard_section',
                     'nav-messages': 'messages_section',
                     'nav-terms': 'terms_section',
                     'nav-lyxlab': 'lyxlab_section',
@@ -2177,13 +2173,11 @@
                     'mobile-timetable': 'timetable_section',
                     'mobile-profile': 'profile_section',
                     'mobile-files': 'files_section',
-                    'mobile-dashboard': 'dashboard_section',
                     'mobile-messages': 'messages_section',
                     'mobile-terms': 'terms_section',
                     'mobile-lyxlab': 'lyxlab_section'
                 };
             
-                // Add click listeners to all navigation elements
                 Object.keys(navigationMap).forEach(id => {
                     const element = document.getElementById(id);
                     if (element) {
@@ -2195,12 +2189,11 @@
                     }
                 });
             
-                // Track AI tools
                 this.setupAITracking();
             }
         
             setupAITracking() {
-                // Track AI tool links by ID
+
                 const aiToolsMap = {
                     'nav-gemini': 'marion_ai',
                     'nav-quiz': 'nova_quiz', 
@@ -2216,7 +2209,6 @@
                     }
                 });
             
-                // Also track AI tools in robot modal
                 document.addEventListener('click', (e) => {
                     const button = e.target.closest('.ai-button');
                     if (button) {
@@ -2252,16 +2244,13 @@
 
                 console.log('Initializing analytics...');
 
-                // Track initial visit
                 this.trackVisit(this.currentSection);
                 this.trackActivity('page_view', 'main_page');
             
-                // Setup navigation tracking
                 setTimeout(() => {
                     this.setupNavigationTracking();
                 }, 1000);
             
-                // Track section changes
                 const originalSetActiveSection = window.setActiveSection;
                 if (originalSetActiveSection) {
                     window.setActiveSection = (sectionId) => {
@@ -2270,7 +2259,6 @@
                     };
                 }
             
-                // Track page exit
                 window.addEventListener('beforeunload', () => {
                     this.trackPageExit();
                 });
@@ -2282,7 +2270,6 @@
         
         const analytics = new AnalyticsTracker();        
 
-        // Notification Overlay System
         class NotificationOverlay {
             constructor() {
                 this.overlay = document.getElementById('notification-overlay');
@@ -2297,7 +2284,6 @@
             }
         
             init() {
-                // Add event listeners
                 if (this.closeBtn) {
                     this.closeBtn.addEventListener('click', () => this.hide());
                 }
@@ -2310,26 +2296,22 @@
                     this.markAllReadBtn.addEventListener('click', () => this.markAllAsRead());
                 }
             
-                // Close overlay when clicking outside
                 this.overlay.addEventListener('click', (e) => {
                     if (e.target === this.overlay) {
                         this.hide();
                     }
                 });
             
-                // Close on Escape key
                 document.addEventListener('keydown', (e) => {
                     if (e.key === 'Escape' && this.overlay.classList.contains('active')) {
                         this.hide();
                     }
                 });
             
-                // Check for notifications on load (if user is not banned)
                 setTimeout(() => {
                     this.checkUserStatusAndLoadNotifications();
                 }, 2000);
             
-                // Set up periodic notification checks (every 2 minutes)
                 setInterval(() => {
                     this.checkUserStatusAndLoadNotifications();
                 }, 2 * 60 * 1000);
@@ -2436,7 +2418,6 @@
             }
         
             formatNotificationMessage(message) {
-                // Apply basic formatting to notification messages
                 return this.escapeHtml(message)
                     .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
                     .replace(/\*(.*?)\*/g, '<em>$1</em>')
@@ -2475,17 +2456,14 @@
                     });
                 
                     if (response.ok) {
-                        // Update local state
                         this.notifications.forEach(notification => {
                             notification.unread = false;
                         });
                         this.unreadCount = 0;
 
-                        // Re-render
                         this.renderNotifications();
                         this.updateNotificationBadge();
 
-                        // Show success message
                         if (typeof toastSystem !== 'undefined') {
                             toastSystem.success('All notifications marked as read', 'Notifications');
                         }
@@ -2499,7 +2477,6 @@
             }
         
             updateNotificationBadge() {
-                // Update any notification badges in the UI
                 const badgeElements = document.querySelectorAll('.notification-badge-global');
                 badgeElements.forEach(badge => {
                     if (this.unreadCount > 0) {
@@ -2510,7 +2487,6 @@
                     }
                 });
             
-                // Update document title if there are unread notifications
                 if (this.unreadCount > 0) {
                     document.title = `(${this.unreadCount}) LyxNexus`;
                 } else {
@@ -2523,7 +2499,6 @@
                 this.overlay.classList.add('active');
                 document.body.classList.add('notification-overlay-active');
             
-                // Track this event
                 if (typeof analytics !== 'undefined') {
                     analytics.trackActivity('notification_overlay_opened', 'notifications');
                 }
@@ -2532,23 +2507,18 @@
             hide() {
                 this.overlay.classList.remove('active');
                 document.body.classList.remove('notification-overlay-active');
-            
-                // Mark as dismissed for this session
                 localStorage.setItem('notificationsDismissed', 'true');
             
-                // Track dismissal
                 if (typeof analytics !== 'undefined') {
                     analytics.trackActivity('notification_overlay_closed', 'notifications');
                 }
             }
         
-            // Method to manually trigger notification check
             async checkNow() {
                 await this.checkUserStatusAndLoadNotifications();
             }
         }
 
-        // Add notification badge to header (optional)
         function addNotificationBadgeToHeader() {
             const header = document.querySelector('header');
             if (!header) return;
@@ -2578,16 +2548,13 @@
             header.appendChild(badge);
         }
 
-        // Initialize notification system
         document.addEventListener('DOMContentLoaded', function() {
-            // Wait a bit to ensure all user data is loaded
             setTimeout(() => {
                 window.notificationOverlay = new NotificationOverlay();
                 addNotificationBadgeToHeader();
             }, 2000);
         });
 
-        // Add notification button to navigation (optional)
         function addNotificationButton() {
             const navButtons = document.querySelector('.nav-buttons');
             const mobileNav = document.querySelector('.mobile-nav');
@@ -2616,7 +2583,6 @@
                     window.notificationOverlay.show();
                 });
 
-                // Insert as first child instead of appending
                 const firstChild = navButtons.firstElementChild;
                 if (firstChild) {
                     navButtons.insertBefore(notificationBtn, firstChild);
@@ -2652,7 +2618,6 @@
                     window.notificationOverlay.show();
                 });
 
-                // Insert as first child in mobile nav too
                 const firstMobileChild = mobileNav.firstElementChild;
                 if (firstMobileChild) {
                     mobileNav.insertBefore(mobileNotificationBtn, firstMobileChild);
@@ -2661,8 +2626,6 @@
                 }
             }
         }
-
-        // Initialize notification button
         setTimeout(addNotificationButton, 3000);
 
         class OptimizedSearchSystem {
@@ -2683,14 +2646,12 @@
                 this.setupEventListeners();
                 this.setupKeyboardShortcuts();
             
-                // Wait for data to load before indexing
                 setTimeout(() => {
                     this.preIndexData();
                 }, 2000);
             }
         
             createSearchUI() {
-                // Check if search UI already exists
                 if (document.getElementById('search-container')) {
                     return;
                 }
@@ -2720,7 +2681,6 @@
                     this.resultsInfo = document.getElementById('search-results-info');
                     this.filtersContainer = document.getElementById('search-filters');
 
-                    // Auto-focus on search input
                     setTimeout(() => {
                         this.searchInput.focus();
                     }, 500);
@@ -2730,7 +2690,6 @@
             setupEventListeners() {
                 if (!this.searchInput) return;
             
-                // Debounced search input
                 this.searchInput.addEventListener('input', (e) => {
                     clearTimeout(this.debounceTimer);
                     this.debounceTimer = setTimeout(() => {
@@ -2738,14 +2697,12 @@
                     }, 150);
                 });
             
-                // Clear search on escape
                 this.searchInput.addEventListener('keydown', (e) => {
                     if (e.key === 'Escape') {
                         this.clearSearch();
                     }
                 });
             
-                // Section change detection
                 const originalSetActiveSection = window.setActiveSection;
                 window.setActiveSection = (sectionId) => {
                     if (originalSetActiveSection) {
@@ -2775,8 +2732,6 @@
             onSectionChange(sectionId) {
                 this.currentSection = sectionId;
                 this.updateSectionFilters();
-            
-                // Re-apply search if there's an active query
                 if (this.currentQuery) {
                     this.performSearch(this.currentQuery);
                 }
@@ -2827,10 +2782,8 @@
             
                 this.isIndexing = true;
             
-                // Wait for data to be loaded
                 await new Promise(resolve => setTimeout(resolve, 1000));
             
-                // Pre-index announcements and assignments (most searched)
                 try {
                     await this.indexSectionData('announcements', window.announcements);
                     await this.indexSectionData('assignments', window.assignments);
@@ -2865,16 +2818,13 @@
                 };
             
                 data.forEach((item, idx) => {
-                    // Index by title
                     if (item.title) {
                         this.addToIndex(index.byTitle, item.title.toLowerCase(), idx);
                     }
                 
-                    // Index by content/description
                     const content = item.content || item.description || '';
                     this.addToIndex(index.byContent, content.toLowerCase(), idx);
                 
-                    // Index by author
                     if (item.author?.username) {
                         this.addToIndex(index.byAuthor, item.author.username.toLowerCase(), idx);
                     }
@@ -2938,7 +2888,6 @@
                     const content = (announcement.content || '').toLowerCase();
                     const author = (announcement.author?.username || '').toLowerCase();
 
-                    // Check if ALL search terms are found in ANY field
                     return searchTerms.every(term => 
                         title.includes(term) || 
                         content.includes(term) || 
@@ -3005,7 +2954,6 @@
                 return results;
             }
         
-            // Display the searched stuff
             displayResults(results) {
                 const section = this.currentSection;
                 const container = document.getElementById(`${section}-container`);
@@ -3013,20 +2961,16 @@
             
                 if (!container || !sectionElement) return;
             
-                // Add search-active class to body
                 document.body.classList.add('search-active');
             
-                // Hide ALL content sections first --> prevent unnecesarry container
                 document.querySelectorAll('.content-section').forEach(sectionEl => {
                     sectionEl.classList.remove('active');
                     sectionEl.style.display = 'none';
                 });
             
-                // Show ONLY the current search section
                 sectionElement.style.display = 'block';
                 sectionElement.classList.add('active');
-            
-                // Create search results container if it doesn't exist
+        
                 let resultsContainer = sectionElement.querySelector('.search-results');
                 if (!resultsContainer) {
                     resultsContainer = document.createElement('div');
@@ -3034,10 +2978,8 @@
                     sectionElement.appendChild(resultsContainer);
                 }
             
-                // Hide original content, show search results
                 const originalContent = sectionElement.querySelector('.original-content');
                 if (!originalContent) {
-                    // Wrap existing content in original-content div
                     const existingContent = container.innerHTML;
                     container.innerHTML = '';
                     const originalDiv = document.createElement('div');
@@ -3061,7 +3003,6 @@
                     return;
                 }
             
-                // Render search results based on section
                 switch(section) {
                     case 'announcements':
                         this.renderSearchAnnouncements(results, resultsContainer);
@@ -3082,7 +3023,6 @@
                 }
             }
 
-            // Helper function to get section display name
             getSectionName(section) {
                 const names = {
                     'announcements': 'Announcements',
@@ -3102,18 +3042,14 @@
                     this.resultsInfo.textContent = '';
                 }
             
-                // Remove search-active class
                 document.body.classList.remove('search-active');
             
-                // Show ALL sections again and restore navigation
                 document.querySelectorAll('.content-section').forEach(sectionEl => {
                     sectionEl.style.display = 'block';
                 });
             
-                // Set active section back to what it was before search
                 setActiveSection(this.currentSection);
             
-                // Clear search results
                 const sectionElement = document.getElementById(this.currentSection);
                 if (sectionElement) {
                     const resultsContainer = sectionElement.querySelector('.search-results');
@@ -3122,7 +3058,6 @@
                     }
                 }
             
-                // Force refresh of the current section to show original content
                 switch(this.currentSection) {
                     case 'announcements':
                         loadAnnouncements(true);
@@ -3149,7 +3084,7 @@
                     let filePreview = "";
                     if (announcement.has_file && announcement.file_type?.startsWith("image/")) {
                         filePreview = `
-                            <div class="mb-2 w-24 h-24 rounded-lg overflow-hidden bg-gray-700 flex items-center justify-center cursor-pointer card-hover-lift"
+                            <div class="mb-2 w-full h-48 rounded-lg overflow-hidden bg-gray-700 flex items-center justify-center cursor-pointer card-hover-lift"
                                  onclick="openImagePreview('${announcement.file_url}')">
                                 <img src="${announcement.file_url}" alt="${announcement.file_name}" class="object-cover w-full h-full">
                             </div>
@@ -3207,8 +3142,6 @@
                         </div>
                     `;
                 }).join('');
-            
-                // Render OG previews for search results
                 announcements.forEach((announcement) => {
                     const urlMatch = announcement.content.match(/https?:\/\/[^\s]+/);
                     if (!urlMatch) return;
@@ -3224,7 +3157,7 @@
                                 if (!data.title && !data.image) return;
 
                                 previewEl.innerHTML = `
-                                    <a href="${url}" target="_blank" class="flex items-center gap-3 p-3 sm:p-4 bg-gray-800/70 hover:bg-gray-800/90 transition duration-200 ease-in-out card-hover-lift">
+                                    <a href="${url}" target="_blank" class="flex items-center gap-3 p-3 sm:p-4 bg-gray-800/70 hover:bg-gray-800/90 transition duration-200 ease-in-out card-hover-lift rounded-xl mb-2">
                                         ${
                                             data.image
                                                 ? `<div class="flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden bg-gray-700 flex items-center justify-center">
@@ -3254,11 +3187,8 @@
                 container.innerHTML = assignments.map(assignment => {
                     const dueDate = new Date(assignment.due_date);
                     const now = new Date();
-                
-                    // Calculate precise time difference
                     const timeDiff = dueDate - now;
                     
-                    // Calculate calendar days difference
                     const dueCalendarDate = new Date(dueDate.getFullYear(), dueDate.getMonth(), dueDate.getDate());
                     const nowCalendarDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
                     const calendarDaysDiff = Math.floor((dueCalendarDate - nowCalendarDate) / (1000 * 60 * 60 * 24));
@@ -3268,7 +3198,6 @@
                     let timeDisplay = '';
                 
                     if (timeDiff < 0) {
-                        // Overdue
                         statusClass = 'bg-red-500';
                         statusText = 'Overdue';
                         const overdueHours = Math.abs(Math.floor(timeDiff / (1000 * 60 * 60)));
@@ -3280,7 +3209,6 @@
                             timeDisplay = Math.abs(calendarDaysDiff) === 1 ? '1 day ago' : `${Math.abs(calendarDaysDiff)} days ago`;
                         }
                     } else if (calendarDaysDiff === 0) {
-                        // Due today
                         const hoursUntilDue = Math.floor(timeDiff / (1000 * 60 * 60));
                         const minutesUntilDue = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
                         
@@ -3302,7 +3230,6 @@
                             timeDisplay = `${hoursUntilDue}h`;
                         }
                     } else if (calendarDaysDiff === 1) {
-                        // Due tomorrow - calculate hours until midnight + hours in tomorrow
                         const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0);
                         const hoursUntilMidnight = Math.floor((midnight - now) / (1000 * 60 * 60));
                         const hoursInTomorrow = dueDate.getHours() + (dueDate.getMinutes() / 60);
@@ -3415,10 +3342,8 @@
                     this.resultsInfo.textContent = '';
                 }
             
-                // Remove search-active class and show original content
                 document.body.classList.remove('search-active');
             
-                // Reload original content properly
                 const section = this.currentSection;
                 const sectionElement = document.getElementById(section);
                 if (sectionElement) {
@@ -3427,8 +3352,7 @@
                         resultsContainer.innerHTML = '';
                     }
                 }
-            
-                // Force refresh of the current section
+
                 switch(section) {
                     case 'announcements':
                         loadAnnouncements(true);
@@ -3446,23 +3370,19 @@
             }
         
             setFilter(filterKey) {
-                // Toggle filter active state
                 const filterBtn = this.filtersContainer.querySelector(`[data-filter="${filterKey}"]`);
                 if (filterBtn) {
                     filterBtn.classList.toggle('active');
                 }
             
-                // Re-run search with updated filters
                 if (this.currentQuery) {
                     this.performSearch(this.currentQuery);
                 }
             }
         }
 
-        // Initialize search system globally
         window.searchSystem = new OptimizedSearchSystem();        
        
-        // User Ban Overlay System
         class UserBanOverlay {
             constructor() {
                 this.overlay = document.getElementById('ban-overlay');
@@ -3473,7 +3393,6 @@
             }
 
             init() {
-                // Add event listeners
                 if (this.closeBtn) {
                     this.closeBtn.addEventListener('click', () => this.hide());
                 }
@@ -3481,36 +3400,30 @@
                 if (this.closeOverlayBtn) {
                     this.closeOverlayBtn.addEventListener('click', () => this.hide());
                 }
-
-                // Close overlay when clicking outside
                 this.overlay.addEventListener('click', (e) => {
                     if (e.target === this.overlay) {
                         this.hide();
                     }
                 });
 
-                // Close on Escape key
                 document.addEventListener('keydown', (e) => {
                     if (e.key === 'Escape' && this.overlay.classList.contains('active')) {
                         this.hide();
                     }
                 });
 
-                // Check user status on load
                 setTimeout(() => {
                     this.checkUserStatus();
-                }, 1000); // Delay to ensure user data is loaded
+                }, 1000);
             }
 
             checkUserStatus() {
                 try {
-                    // Get user status from your global variable
                     const userStatus = this.getUserStatus();
 
                     if (userStatus === false) {
                         this.show();
 
-                        // Track this event
                         if (typeof analytics !== 'undefined') {
                             analytics.trackActivity('ban_overlay_shown', 'user_banned');
                         }
@@ -3520,26 +3433,23 @@
             }
 
             getUserStatus() {
-                // Use your existing global Userstatus variable
                 if (typeof window.Userstatus !== 'undefined') {
                     return window.Userstatus;
                 }
 
-                // Fallback: check from detail-status element
                 const statusElement = document.getElementById('detail-status');
                 if (statusElement) {
                     const statusText = statusElement.textContent.trim().toLowerCase();
                     return statusText === 'allowed' || statusText === 'active';
                 }
 
-                return true; // Default to allowed if status can't be determined
+                return true;
             }
 
             show() {
                 this.overlay.classList.add('active');
                 document.body.classList.add('ban-overlay-active');
 
-                // Add animation class for entrance
                 setTimeout(() => {
                     this.overlay.style.transition = 'all 0.3s ease';
                 }, 10);
@@ -3549,7 +3459,6 @@
                 this.overlay.classList.remove('active');
                 document.body.classList.remove('ban-overlay-active');
 
-                // Track dismissal
                 if (typeof analytics !== 'undefined') {
                     analytics.trackActivity('ban_overlay_dismissed', 'user_banned');
                 }
@@ -3557,9 +3466,7 @@
 
         }
 
-        // Initialize ban overlay after DOM is loaded
         document.addEventListener('DOMContentLoaded', function() {
-            // Wait a bit to ensure all user data is loaded
             setTimeout(() => {
                 window.banOverlay = new UserBanOverlay();
             }, 1500);
@@ -3569,16 +3476,13 @@
             }, 2000);
         });
 
-        // Also check when user data is updated
         function setupBanOverlayListener() {
-            // Override the updateUserDisplay function to check status after user data loads
             const originalUpdateUserDisplay = window.updateUserDisplay;
             window.updateUserDisplay = function() {
                 if (originalUpdateUserDisplay) {
                     originalUpdateUserDisplay();
                 }
 
-                // Check ban status after user data is updated
                 if (window.banOverlay) {
                     setTimeout(() => {
                         window.banOverlay.checkUserStatus();
@@ -3587,10 +3491,8 @@
             };
         }
 
-        // Initialize the listener
         setupBanOverlayListener();
 
-        // Modern Toast System
         class ToastSystem {
             constructor() {
                 this.container = document.getElementById('toastContainer');
@@ -3624,7 +3526,6 @@
                 // Trigger animation
                 setTimeout(() => toast.classList.add('show'), 10);
 
-                // Auto-remove if duration is set
                 if (duration > 0) {
                     setTimeout(() => this.close(id), duration);
                 }
@@ -3657,7 +3558,6 @@
                 return icons[type] || icons.info;
             }
 
-            // Convenience methods
             success(message, title = 'Success', duration = 5000) {
                 return this.show(title, message, 'success', duration);
             }
@@ -3675,7 +3575,6 @@
             }
         }
 
-        // Initialize toast system
         const toastSystem = new ToastSystem();
 
         async function fetchDataWithToast(endpoint, options = {}) {
@@ -3713,7 +3612,6 @@
 
                 const data = await response.json();
                 
-                // Show success toast for non-GET requests
                 if (options.method && options.method !== 'GET' && showToast) {
                     toastSystem.success('Operation completed successfully', 'Success');
                 }
@@ -3752,7 +3650,6 @@
             return `${formattedDate} at ${formattedTime}`;
         }
 
-        // Format time for display
         function formatTime(dateString) {
             const options = { hour: '2-digit', minute: '2-digit' };
             return new Date(dateString).toLocaleTimeString(undefined, options);
@@ -3774,21 +3671,18 @@
         function setupNavigation() {
             const navButtons = document.querySelectorAll('.nav-btn, .mobile-nav-btn');
 
-            // Check if we're on the main page before setting up navigation
             const hasContentSections = document.querySelector('.content-section') !== null;
 
             if (!hasContentSections) {
                 return;
             }
 
-            // Set active section from localStorage
             setActiveSection(currentActiveSection);
 
             navButtons.forEach(button => {
                 button.addEventListener('click', function() {
                     const targetSection = this.getAttribute('data-section');
 
-                    // Save active section to localStorage
                     localStorage.setItem('activeSection', targetSection);
                     currentActiveSection = targetSection;
 
@@ -3813,7 +3707,6 @@
             const navButtons = document.querySelectorAll('.nav-btn, .mobile-nav-btn');
             const sectionElement = document.getElementById(sectionId);
 
-            // Check if we're on the main page (has content sections)
             if (!sectionElement) {
                 return;
             }
@@ -4002,11 +3895,11 @@
 
             if (newAnnouncements.length === 0) {
                 container.innerHTML = '<p class="text-center text-gray-400 py-8">No announcements available.</p>';
-                document.getElementById("announcements-count").textContent = "0 announced";
+                document.getElementById("announcements-count").textContent = "0";
                 return;
             }
 
-            document.getElementById("announcements-count").textContent = `${newAnnouncements.length} announced`;
+            document.getElementById("announcements-count").textContent = `${newAnnouncements.length}`;
         
             let pinnedIds = JSON.parse(localStorage.getItem("pinnedAnnouncements") || "[]");
         
@@ -4247,11 +4140,11 @@
 
             if (assignments.length === 0) {
                 container.innerHTML = '<p class="text-center text-gray-400 py-8">No assignments available.</p>';
-                document.getElementById('assignments-count').textContent = '0 assignments';
+                document.getElementById('assignments-count').textContent = '0';
                 return;
             }
 
-            document.getElementById('assignments-count').textContent = `${assignments.length} assignments`;
+            document.getElementById('assignments-count').textContent = `${assignments.length}`;
 
             container.innerHTML = `
                 <div class="assignments-grid">
@@ -4347,11 +4240,11 @@
             
             if (topics.length === 0) {
                 container.innerHTML = '<p class="text-center text-gray-400 py-8">No topics available.</p>';
-                document.getElementById('topics-count').textContent = '0 topics';
+                document.getElementById('topics-count').textContent = '0';
                 return;
             }
             
-            document.getElementById('topics-count').textContent = `${topics.length} topics`;
+            document.getElementById('topics-count').textContent = `${topics.length}`;
             
             container.innerHTML = topics.map(topic => {
                 const isNew = newItems.some(item => item.id === topic.id);
@@ -4464,9 +4357,7 @@
         }
         
         document.addEventListener('DOMContentLoaded', function() {
-            // Only run main page scripts if we're on the main page
             analytics.initialize();
-            // Initialize search system globally
             window.searchSystem.init();
             const isMainPage = document.querySelector('.content-container') !== null;
             
@@ -4479,8 +4370,7 @@
                 loadAssignments();
                 loadTopics();
                 loadTimetable();
-                
-                // Mark initial load as complete
+                updateProfileStats();
                 setTimeout(() => {
                     isInitialLoad = false;
                 }, 1000);
