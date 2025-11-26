@@ -476,13 +476,13 @@ class Share(db.Model):
     share_id = db.Column(db.String(36), unique=True, nullable=False)  # uuid4 string lets see if i understood basic uuID
     owner_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     used = db.Column(db.Boolean, default=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    created_at = db.Column(db.DateTime, default=(datetime.utcnow() + timedelta(hours=3)), nullable=False)
 
     owner = db.relationship('User', backref='shares')
 
     def is_expired(self):
         from datetime import timedelta, datetime
-        return datetime.utcnow() > self.created_at + timedelta(hours=2)
+        return (datetime.utcnow() + timedelta(hours=3)) > self.created_at + timedelta(hours=2)
 # =========================================
 # NOTIFICATION MODELS
 # =========================================
@@ -3866,9 +3866,7 @@ def access_share(share_id):
 @login_required
 @admin_required
 def view_shares():
-    """View all share links"""
-    shares = Share.query.order_by(Share.created_at.desc()).all()
-    return render_template('admin_shares.html', shares=shares)
+    return render_template('admin_shares.html')
 
 @app.route('/admin/shares/data')
 @login_required
