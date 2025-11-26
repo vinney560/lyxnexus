@@ -3933,8 +3933,8 @@
                             const newClass = isNew ? 'new-item-highlight' : '';
                         
                             const neonBorderClass = isRecent
-                                ? "border-l-4 border-l-yellow-400 border-t border-t-blue-700 border-r border-r-blue-700 border-b border-b-blue-700 shadow-sm"
-                                : "border border-blue-800 shadow-md";
+                                ? "border-l-4 border-l-yellow-400 border-t border-t-blue-400 border-r border-r-blue-400 border-b border-b-blue-400 shadow-sm"
+                                : "border border-blue-600 shadow-md";
                         
                             // File preview (image or link)
                             let filePreview = "";
@@ -4152,15 +4152,15 @@
                         const dueDate = new Date(assignment.due_date);
                         const now = new Date();
                         const timeDiff = dueDate - now;
-                        
+
                         const dueCalendarDate = new Date(dueDate.getFullYear(), dueDate.getMonth(), dueDate.getDate());
                         const nowCalendarDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
                         const calendarDaysDiff = Math.floor((dueCalendarDate - nowCalendarDate) / (1000 * 60 * 60 * 24));
-                        
+                    
                         let statusClass = 'bg-blue-500';
                         let statusText = 'Due Soon';
                         let timeDisplay = '';
-                        
+                    
                         if (timeDiff < 0) {
                             statusClass = 'bg-red-500';
                             statusText = 'Overdue';
@@ -4215,28 +4215,31 @@
                             statusText = 'Later';
                             timeDisplay = `${calendarDaysDiff} days`;
                         }
-
+                    
+                        const isNew = newItems.some(item => item.id === assignment.id);
+                        const newClass = isNew ? 'new-item-highlight' : '';
+                    
                         return `
                             <div class="assignment-card border-l-4 border-blue-500 border border-blue-500 bg-gray-800/50 rounded-xl shadow-md hover:shadow-lg transition duration-200 ease-in-out card-hover-lift fade-in ${newClass} assignment-content">
                                 ${isNew ? `<div class="absolute top-3 left-3 w-3 h-3 bg-green-500 rounded-full animate-pulse z-10"></div>` : ''}
-
-                                <div class="assignment-body p-4 sm:p-5">
-                                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-4 gap-2">
+                            
+                                <div class="assignment-body p-3 sm:p-2">
+                                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-2 gap-2">
                                         <h3 class="text-xl sm:text-2xl font-extrabold text-white underline underline-offset-4 decoration-blue-500 leading-snug break-words flex-1">
                                             ${assignment.title}
                                         </h3>
-                                        <span class="${statusClass} text-white px-2 py-1 rounded-full text-xs font-medium whitespace-nowrap flex-shrink-0 self-center">
-                                            ${statusText}
-                                        </span>
-                                        <span class="bg-yellow-500 text-white px-2 py-1 rounded-full text-xs sm:text-sm whitespace-nowrap">
-                                            ${timeDisplay || '....'}
-                                        </span>
+                                        <div class="flex flex-row items-center justify-between gap-2 sm:gap-1">
+                                            <span class="${statusClass} text-white px-3 py-1 rounded-full text-xs sm:text-sm whitespace-nowrap">${statusText}</span>
+                                            <span class="bg-yellow-500 text-white px-2 py-1 rounded-full text-xs sm:text-sm whitespace-nowrap">
+                                                ${timeDisplay || '....'}
+                                            </span>
+                                        </div>
                                     </div>
                                 
                                     <div class="mb-4 text-gray-300 text-sm leading-relaxed whitespace-pre-line list-inside formatted-text">
                                         ${formatMath(assignment.description)}
                                     </div>
-
+                                
                                     <div class="mt-auto pt-4 border-t border-gray-700">
                                         <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
                                             <div class="flex flex-col sm:flex-row sm:items-center gap-2 text-sm">
@@ -4261,7 +4264,7 @@
                     }).join('')}
                 </div>
             `;
-            
+                        
             if (isRefresh) {
                 restoreScrollPosition('assignments');
             }
