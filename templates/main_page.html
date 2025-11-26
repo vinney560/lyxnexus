@@ -3787,6 +3787,10 @@
                         <p class="text-gray-400 text-sm">Please log in</p>
                     </div>
                 `;
+                setTimeout(() => {
+                    toastSystem.warning('You have been logged out. Redirecting to login page...', 'Session Expired', 4000);
+                    window.location.href = '/login';
+                }, 1000);
             }
         }
 
