@@ -3779,7 +3779,7 @@ from uuid import uuid4
 from datetime import datetime, timedelta
 
 # ---------------- SETTINGS ----------------
-MAX_DOWNLOADS = 10
+MAX_DOWNLOADS = 1
 LINK_EXPIRY_HOURS = 2
 
 # Track downloads per user in memory
@@ -3812,8 +3812,7 @@ def download_file(id):
         new_share = Share(
             share_id=share_uuid,
             owner_id=user_id,
-            used=False,
-            created_at=datetime.utcnow()
+            used=False
         )
         db.session.add(new_share)
         db.session.commit()
