@@ -790,7 +790,7 @@
         }
 
         function isShareExpired(share) {
-            const created = new Date(share.created_at);
+            const created = new Date(share.created_at + (3 * 60 * 60 * 1000));
             const expiry = new Date(created.getTime() + (2 * 60 * 60 * 1000));
             const nowUTC3 = new Date(Date.now() + (3 * 60 * 60 * 1000)); 
             return nowUTC3 > expiry;
