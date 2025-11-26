@@ -3779,7 +3779,7 @@ from uuid import uuid4
 from datetime import datetime, timedelta
 
 # ---------------- SETTINGS ----------------
-MAX_DOWNLOADS = 1
+MAX_DOWNLOADS = 10
 LINK_EXPIRY_HOURS = 2
 
 # Track downloads per user in memory
@@ -3846,7 +3846,7 @@ def access_share(share_id):
             link_text="Go Home"
         ), 410
 
-    # Mark as used and restore one download to owner
+    # Mark as used and restore 25 downloads to owner
     if not share.used:
         share.used = True
         owner_id = share.owner_id
@@ -3914,8 +3914,9 @@ def modify_share(id):
     
     try:
         share.used = bool(data['used'])
+        owner_id = share.owner_id
+        users_downloads[owner_id] = max(0, users_downloads.get(owner_id, 0) - 25)
         db.session.commit()
-        
         return jsonify({'message': 'Share link updated successfully'})
         
     except Exception as e:
