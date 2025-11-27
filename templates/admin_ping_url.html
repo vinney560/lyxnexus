@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LyxPinger | LyxNexus</title>
+    
+    <!-- SEO Meta -->
+    <meta name="description" content="Professional URL monitoring dashboard with real-time status tracking and live analytics" />
+    <meta name="keywords" content="monitoring, uptime, status, ping, real-time, dashboard, analytics" />
+    <meta name="author" content="Monitoring System" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://your-monitor-domain.com/" />
+    
+    <meta property="og:title" content="LyxPinger | LyxNexus" />
+    <meta property="og:description" content="Professional URL monitoring dashboard with real-time status tracking and live analytics" />
+    <meta property="og:image" content="https://your-monitor-domain.com/og-image.png" />
+    <meta property="og:url" content="https://your-monitor-domain.com/" />
+    
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --text-color: #f1f5f9;
+            --accent-color: #3b82f6;
+            --secondary-color: #8b5cf6;
+            --card-bg: rgba(30, 41, 59, 0.8);
+            --border-color: rgba(100, 116, 139, 0.3);
+            --success-color: #10b981;
+            --error-color: #ef4444;
+            --warning-color: #f59e0b;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            overflow-x: hidden;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(16, 185, 129, 0.05) 0%, transparent 50%);
+            animation: backgroundShift 20s ease-in-out infinite;
+        }
+
+        @keyframes backgroundShift {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.1) rotate(180deg); }
+        }
+
+        .gradient-text {
+            background: linear-gradient(90deg, #3B82F6, #8B5CF6, #10B981);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent;
+            background-size: 200% auto;
+            animation: gradientShift 3s ease-in-out infinite;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% center; }
+            50% { background-position: 100% center; }
+        }
+
+        .glass-morph {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .glass-morph::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.1), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .glass-morph:hover::before {
+            left: 100%;
+        }
+
+        .glass-morph:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 
+                0 20px 40px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.15);
+            border-color: rgba(59, 130, 246, 0.4);
+        }
+
+        .header {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1.5rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent-color), transparent);
+        }
+
+        .stats-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stats-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent-color), var(--secondary-color));
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .stats-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .stats-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .status-card {
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            opacity: 0;
+            animation: slideInUp 0.6s ease forwards;
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .status-card.online {
+            border-left: 4px solid var(--success-color);
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), transparent);
+        }
+
+        .status-card.offline {
+            border-left: 4px solid var(--error-color);
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), transparent);
+        }
+
+        .status-card.unknown {
+            border-left: 4px solid var(--warning-color);
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), transparent);
+        }
+
+        .status-pulse {
+            animation: statusPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes statusPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .log-container {
+            max-height: 400px;
+            overflow-y: auto;
+            background: rgba(15, 23, 42, 0.9);
+            color: var(--text-color);
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            font-size: 0.85em;
+            scrollbar-width: thin;
+            scrollbar-color: var(--accent-color) transparent;
+        }
+
+        .log-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .log-container::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .log-container::-webkit-scrollbar-thumb {
+            background: var(--accent-color);
+            border-radius: 3px;
+        }
+
+        .log-success {
+            color: var(--success-color);
+            animation: logEntry 0.5s ease;
+        }
+
+        .log-error {
+            color: var(--error-color);
+            animation: logEntry 0.5s ease;
+        }
+
+        @keyframes logEntry {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .btn-glass {
+            background: rgba(59, 130, 246, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            color: var(--text-color);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-glass::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn-glass:hover::before {
+            left: 100%;
+        }
+
+        .btn-glass:hover {
+            background: rgba(59, 130, 246, 0.2);
+            border-color: rgba(59, 130, 246, 0.5);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid transparent;
+            border-top: 3px solid var(--accent-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1055;
+        }
+
+        .toast-glass {
+            background: rgba(30, 41, 59, 0.9);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+            animation: toastSlideIn 0.5s ease;
+        }
+
+        @keyframes toastSlideIn {
+            from {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .manual-ping-input {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            transition: all 0.3s ease;
+        }
+
+        .manual-ping-input:focus {
+            background: rgba(15, 23, 42, 0.9);
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            color: var(--text-color);
+        }
+
+        .badge-pulse {
+            animation: badgePulse 2s infinite;
+        }
+
+        @keyframes badgePulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .floating {
+            animation: floating 3s ease-in-out infinite;
+        }
+
+        @keyframes floating {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .stats-card {
+                padding: 1rem;
+            }
+            
+            .log-container {
+                font-size: 0.8em;
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-color);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--accent-color);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--secondary-color);
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-animation"></div>
+
+    <div class="toast-container" id="toastContainer"></div>
+
+    <div class="header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="gradient-text font-bold mb-2"><i class="fas fa-satellite-dish me-3 floating"></i>LyxPinger</h1>
+                    <p class="text-muted mb-0">Real-time monitoring dashboard with live analytics</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <button id="pingNow" class="btn btn-glass btn-sm me-2">
+                        <i class="fas fa-sync-alt me-2"></i>Ping Now
+                    </button>
+                    <button id="clearLogs" class="btn btn-glass btn-sm">
+                        <i class="fas fa-trash me-2"></i>Clear Logs
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container py-4">
+        <div class="row mb-4" id="statsSection">
+            <div class="col-md-3 mb-3">
+                <div class="stats-card glass-morph text-center">
+                    <h3 id="totalUrls" class="gradient-text">0</h3>
+                    <p class="text-muted mb-0">Total URLs</p>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="stats-card glass-morph text-center status-pulse">
+                    <h3 id="onlineCount" class="text-success">0</h3>
+                    <p class="text-muted mb-0">Online</p>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="stats-card glass-morph text-center status-pulse">
+                    <h3 id="offlineCount" class="text-danger">0</h3>
+                    <p class="text-muted mb-0">Offline</p>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="stats-card glass-morph text-center">
+                    <h3 id="totalLogs" class="gradient-text">0</h3>
+                    <p class="text-muted mb-0">Total Logs</p>
+                    <div class="last-update text-muted mt-2" id="lastUpdate" style="font-size: 0.8em;">Updating...</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="glass-morph rounded-3 mb-4">
+                    <div class="card-header bg-transparent border-bottom border-secondary d-flex justify-content-between align-items-center py-3">
+                        <h5 class="card-title mb-0 gradient-text"><i class="fas fa-list-alt me-2"></i>URL Status</h5>
+                        <div>
+                            <button id="refreshStatus" class="btn btn-glass btn-sm">
+                                <i class="fas fa-redo me-1"></i>Refresh
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div id="urlStatusContainer" class="p-3">
+                            <div class="text-center py-4">
+                                <div class="loading-spinner mx-auto mb-3"></div>
+                                <p class="text-muted">Loading URL status...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-morph rounded-3">
+                    <div class="card-header bg-transparent border-bottom border-secondary py-3">
+                        <h6 class="card-title mb-0 gradient-text"><i class="fas fa-bullseye me-2"></i>Manual Ping</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="input-group">
+                            <input type="text" id="manualUrl" class="form-control manual-ping-input rounded-start" placeholder="https://example.com">
+                            <button id="pingManual" class="btn btn-glass rounded-end">Ping</button>
+                        </div>
+                        <div id="manualResult" class="mt-3"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="glass-morph rounded-3 h-100">
+                    <div class="card-header bg-transparent border-bottom border-secondary d-flex justify-content-between align-items-center py-3">
+                        <h5 class="card-title mb-0 gradient-text"><i class="fas fa-terminal me-2"></i>Live Logs</h5>
+                        <div>
+                            <span class="badge bg-primary badge-pulse me-2" id="logsCount">0 logs</span>
+                            <button id="refreshLogs" class="btn btn-glass btn-sm">
+                                <i class="fas fa-sync"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="log-container" id="logsContainer">
+                            <div class="text-muted text-center py-5">
+                                <i class="fas fa-terminal fa-2x mb-3 d-block"></i>
+                                Loading live logs...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-5">
+            <div class="col-12 text-center">
+                <div class="glass-morph rounded-pill py-2 px-4 d-inline-block">
+                    <small class="text-muted">
+                        <i class="fas fa-sync-alt fa-spin me-2"></i>Live Ping Logs | 
+                        <i class="fas fa-heart text-danger mx-2"></i>Powered by LyxLab Intelligence
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        class PingMonitor {
+            constructor() {
+                this.pollingInterval = 10000;
+                this.init();
+            }
+
+            init() {
+                this.loadAllData();
+                this.setupEventListeners();
+                this.startPolling();
+            }
+
+            async loadAllData() {
+                await Promise.all([
+                    this.loadStatus(),
+                    this.loadLogs()
+                ]);
+            }
+
+            async loadStatus() {
+                try {
+                    const response = await fetch('/api/status');
+                    const data = await response.json();
+                    this.updateStatusDisplay(data);
+                } catch (error) {
+                    console.error('Error loading status:', error);
+                }
+            }
+
+            async loadLogs() {
+                try {
+                    const response = await fetch('/api/logs?limit=30');
+                    const data = await response.json();
+                    this.updateLogsDisplay(data);
+                } catch (error) {
+                    console.error('Error loading logs:', error);
+                }
+            }
+
+            updateStatusDisplay(data) {
+                document.getElementById('totalUrls').textContent = data.stats.total_urls;
+                document.getElementById('onlineCount').textContent = data.stats.online_count;
+                document.getElementById('offlineCount').textContent = data.stats.offline_count;
+                document.getElementById('lastUpdate').textContent = `Last: ${data.stats.last_update}`;
+
+                const container = document.getElementById('urlStatusContainer');
+                container.innerHTML = '';
+
+                data.urls.forEach((url, index) => {
+                    const status = data.url_status[url] || { status: 'unknown' };
+                    const card = this.createStatusCard(url, status, index);
+                    container.appendChild(card);
+                });
+            }
+
+            createStatusCard(url, status, index) {
+                const card = document.createElement('div');
+                card.className = `status-card ${status.status}`;
+                card.style.animationDelay = `${index * 0.1}s`;
+
+                const isOnline = status.status === 'online';
+                const statusIcon = isOnline ? 'fa-check-circle' : 'fa-times-circle';
+                const statusClass = isOnline ? 'success' : 'danger';
+                const statusText = isOnline ? 'Online' : 'Offline';
+
+                card.innerHTML = `
+                    <div class="p-3">
+                        <div class="row align-items-center">
+                            <div class="col-8">
+                                <h6 class="card-title mb-1 text-truncate">${url}</h6>
+                                <small class="text-muted">
+                                    Status: <span class="text-${statusClass}">${statusText}</span>
+                                    | Code: ${status.status_code || 'N/A'}
+                                    ${status.response_time && status.response_time !== 'N/A' ? `| Response: ${status.response_time}s` : ''}
+                                </small>
+                                <br>
+                                <small class="text-muted">Last checked: ${status.last_checked || 'Never'}</small>
+                            </div>
+                            <div class="col-4 text-end">
+                                <span class="badge bg-${statusClass} badge-pulse">
+                                    <i class="fas ${statusIcon}"></i> ${statusText}
+                                </span>
+                                <button class="btn btn-glass btn-sm mt-1" onclick="monitor.pingSingleUrl('${url}')">
+                                    <i class="fas fa-sync"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                return card;
+            }
+
+            updateLogsDisplay(data) {
+                const container = document.getElementById('logsContainer');
+                const countBadge = document.getElementById('logsCount');
+                
+                countBadge.textContent = `${data.total_logs} logs`;
+                document.getElementById('totalLogs').textContent = data.total_logs;
+
+                if (data.logs.length === 0) {
+                    container.innerHTML = '<div class="text-muted text-center py-5">No logs available</div>';
+                    return;
+                }
+
+                container.innerHTML = data.logs.map((log, index) => `
+                    <div class="log-entry ${log.type === 'success' ? 'log-success' : 'log-error'}" style="animation-delay: ${index * 0.05}s">
+                        ${log.message}
+                    </div>
+                `).join('');
+
+                container.scrollTop = container.scrollHeight;
+            }
+
+            async pingSingleUrl(url) {
+                try {
+                    const response = await fetch('/api/ping-specific', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ url: `https://${url}` })
+                    });
+                    
+                    const result = await response.json();
+                    this.showToast(result.message, result.success ? 'success' : 'error');
+                    this.loadAllData();
+                } catch (error) {
+                    this.showToast('Error pinging URL', 'error');
+                }
+            }
+
+            async pingNow() {
+                try {
+                    const response = await fetch('/api/ping-now', { method: 'POST' });
+                    const data = await response.json();
+                    this.showToast(data.message, 'success');
+                    this.loadAllData();
+                } catch (error) {
+                    this.showToast('Error performing manual ping', 'error');
+                }
+            }
+
+            async clearLogs() {
+                if (!confirm('Are you sure you want to clear all logs?')) return;
+
+                try {
+                    const response = await fetch('/api/clear-logs', { method: 'POST' });
+                    const data = await response.json();
+                    this.showToast(data.message, 'success');
+                    this.loadAllData();
+                } catch (error) {
+                    this.showToast('Error clearing logs', 'error');
+                }
+            }
+
+            async pingManual() {
+                const urlInput = document.getElementById('manualUrl');
+                const url = urlInput.value.trim();
+                const resultDiv = document.getElementById('manualResult');
+
+                if (!url) {
+                    resultDiv.innerHTML = '<div class="alert alert-warning glass-morph">Please enter a URL</div>';
+                    return;
+                }
+
+                try {
+                    resultDiv.innerHTML = '<div class="text-info text-center"><div class="loading-spinner mx-auto mb-2"></div>Pinging...</div>';
+                    const response = await fetch('/api/ping-specific', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ url: url })
+                    });
+                    
+                    const data = await response.json();
+                    const alertClass = data.success ? 'alert-success' : 'alert-danger';
+                    resultDiv.innerHTML = `<div class="alert ${alertClass} glass-morph">${data.message}</div>`;
+                    
+                    if (response.ok) {
+                        urlInput.value = '';
+                        this.loadAllData();
+                    }
+                } catch (error) {
+                    resultDiv.innerHTML = '<div class="alert alert-danger glass-morph">Error pinging URL</div>';
+                }
+            }
+
+            showToast(message, type = 'info') {
+                const toastContainer = document.getElementById('toastContainer');
+                const toastId = 'toast-' + Date.now();
+                
+                const toast = document.createElement('div');
+                toast.className = `toast-glass mb-3 p-3 border-${type}`;
+                toast.id = toastId;
+                toast.innerHTML = `
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-${type === 'success' ? 'check' : type === 'error' ? 'exclamation-triangle' : 'info'}-circle text-${type} me-3"></i>
+                        <div class="flex-grow-1">${message}</div>
+                        <button type="button" class="btn-close btn-close-white ms-3" onclick="document.getElementById('${toastId}').remove()"></button>
+                    </div>
+                `;
+                
+                toastContainer.appendChild(toast);
+                
+                setTimeout(() => {
+                    if (document.getElementById(toastId)) {
+                        document.getElementById(toastId).remove();
+                    }
+                }, 5000);
+            }
+
+            setupEventListeners() {
+                document.getElementById('pingNow').addEventListener('click', () => this.pingNow());
+                document.getElementById('clearLogs').addEventListener('click', () => this.clearLogs());
+                document.getElementById('refreshStatus').addEventListener('click', () => this.loadStatus());
+                document.getElementById('refreshLogs').addEventListener('click', () => this.loadLogs());
+                document.getElementById('pingManual').addEventListener('click', () => this.pingManual());
+                
+                document.getElementById('manualUrl').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') this.pingManual();
+                });
+            }
+
+            startPolling() {
+                setInterval(() => {
+                    this.loadAllData();
+                }, this.pollingInterval);
+            }
+        }
+
+        let monitor;
+        document.addEventListener('DOMContentLoaded', () => {
+            monitor = new PingMonitor();
+        });
+    </script>
+</body>
+</html>

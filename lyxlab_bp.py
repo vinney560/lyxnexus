@@ -45,23 +45,29 @@ projects = {
         },
         'status': 'active'
     },
-    'tonnymusic': {  # Changed from empty string to unique key
+    'tonnymusic': {  
         'name': 'TonnyMusic',
         'credentials': None,
         'status': 'planned',
         'description': 'Music streaming platform - Owned now by a friend'
     },
-    'examroom': {  # Changed from empty string to unique key
+    'examroom': {  
         'name': 'Exam Room',
         'credentials': None,
         'status': 'planned',
         'description': 'Sophisticated and Comprehensive Test platform!'
     },
-    'lyxwifi': {  # Changed from empty string to unique key
+    'lyxwifi': {  
         'name': 'LyxWifi',
         'credentials': None,
         'status': 'development',
         'description': 'Local WiFi management system - Currently in development & Private'
+    },
+    'lyxpinger': {  
+        'name': 'LyxPinger',
+        'credentials': None,
+        'status': 'development',
+        'description': 'Currently being integrated with LyxLab - URL Uptime Pinger'
     },
 }
 

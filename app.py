@@ -3262,6 +3262,7 @@ from storage import cloud_migration_bp
 from dashboard_bp import dashboard_bp
 from math_bp import math_bp
 from lyxlab_bp import lyxlab_bp
+from url_ping_bp import url_ping_bp
 from test import test_routes
 from chloe import _chloe_ai
 
@@ -3273,6 +3274,7 @@ app.register_blueprint(dashboard_bp)
 app.register_blueprint(math_bp)
 app.register_blueprint(lyxlab_bp)
 app.register_blueprint(cloud_migration_bp)
+app.register_blueprint(url_ping_bp)
 app.register_blueprint(test_routes)
 app.register_blueprint(_chloe_ai)
 #========================================================================
@@ -4915,50 +4917,6 @@ def handle_mark_read(data):
     except Exception as e:
         db.session.rollback()
         print(f"Error marking messages as read: {e}")
-
-# ================================================
-        # PERIODIC TASKS FOR KEEP ALIVE THE WEBS
-# ==================================================
-import requests
-
-TARGET_URLS = [
-    "https://lyxspace.onrender.com/files",
-    "https://lyxnexus.xo.je",
-    "https://lyxnexus.onrender.com/",
-    "https://viewtv.viewtv.gt.tc/",
-    "https://lyxnexus-2.onrender.com"
-]
-
-def ping_urls():
-    for url in TARGET_URLS:
-        try:
-            response = requests.get(url, timeout=5)
-            print(f"Pinged {url} | Status: {response.status_code}")
-        except requests.RequestException as e:
-            print(f"Failed to ping {url}: {e}")
-
-scheduler = BackgroundScheduler()
-scheduler.add_job(func=ping_urls, trigger="interval", minutes=3)
-scheduler.start()
-
-atexit.register(lambda: scheduler.shutdown())
-
-TARGET_URL = 'https://lyxspace.onrender.com/files'
-@app.route("/ping-lyx")
-def manual_ping():
-    try:
-        response = requests.get(TARGET_URL, timeout=5)
-        return {
-            "url": TARGET_URL,
-            "status_code": response.status_code,
-            "success": response.ok
-        }
-    except requests.RequestException as e:
-        return {
-            "url": TARGET_URL,
-            "error": str(e),
-            "success": False
-        }
 
 #===========================================
 @app.route('/api/users')
