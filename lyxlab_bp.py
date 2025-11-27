@@ -63,7 +63,7 @@ projects = {
         'status': 'development',
         'description': 'Local WiFi management system - Currently in development & Private'
     },
-    'lyxpinger': {  
+    'https://lyxnexus.onrender.com/lyxpinger/': {  
         'name': 'LyxPinger',
         'credentials': None,
         'status': 'development',

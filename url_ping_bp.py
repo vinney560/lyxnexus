@@ -6,7 +6,7 @@ import datetime
 import json
 import time
 
-url_ping_bp = Blueprint('url_ping', __name__)
+url_ping_bp = Blueprint('url_ping', __name__, url_prefix='/lyxpinger')
 
 # Store logs and status
 ping_logs = []
@@ -200,7 +200,7 @@ def api_ping_specific():
 
 # Initialize scheduler
 scheduler = BackgroundScheduler()
-scheduler.add_job(func=ping_urls, trigger="interval", minutes=1)
+scheduler.add_job(func=ping_urls, trigger="interval", minutes=3)
 scheduler.start()
 atexit.register(lambda: scheduler.shutdown())
 
