@@ -3713,9 +3713,18 @@ def get_files():
         'has_prev': files_pagination.has_prev
     })
 
-def shorten_filename(filename, length=30):
+def shorten_filename(filename, length=70):
     name, ext = os.path.splitext(filename)
     return f"{name[:length]}...{ext}" if len(name) > length else filename
+
+
+@app.route('/api/files/count')
+@login_required
+@not_banned
+def get_file_count():
+    """Get total count of files"""
+    total_files = File.query.count()
+    return jsonify({'count': total_files})
 
 @app.route('/api/files/upload', methods=['POST'])
 @login_required

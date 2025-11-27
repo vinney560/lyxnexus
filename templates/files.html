@@ -578,6 +578,72 @@
         background: rgba(59, 130, 246, 0.1);
         border-color: rgba(59, 130, 246, 0.5);
     }
+
+    .file-counter {
+        background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+        color: white;
+        padding: 12px 20px;
+        border-radius: 50px;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        font-weight: 500;
+        box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+        border: 2px solid rgba(255, 255, 255, 0.1);
+        min-width: 200px;
+        display: inline-block;
+    }
+    
+    .counter-content {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .loading-icon, .success-icon, .error-icon {
+        font-size: 14px;
+    }
+    
+    .counter-text, .result-text, .error-text {
+        font-size: 14px;
+        font-weight: 500;
+    }
+    
+    .file-count {
+        font-size: 16px;
+        font-weight: 700;
+        margin-right: 5px;
+    }
+    
+    .hidden {
+        display: none !important;
+    }
+    
+    .success-icon {
+        color: #10b981;
+        margin-left: 8px;
+    }
+    
+    .error-icon {
+        color: #fbbf24;
+        margin-right: 8px;
+    }
+    
+    @keyframes countUp {
+        from { transform: scale(1); }
+        to { transform: scale(1.1); }
+    }
+    
+    .count-animate {
+        animation: countUp 0.3s ease-in-out;
+    }
+    
+    .fa-spin {
+        animation: fa-spin 1s infinite linear;
+    }
+    
+    @keyframes fa-spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }    
 </style>
 <body>
     <!-- Navigation -->
@@ -622,6 +688,21 @@
             <h1 class="text-2xl sm:text-3xl font-bold gradient-text mb-2">File Management</h1>
             <p class="text-gray-400">Scroll, download, and manage files</p>
         </div>
+        <div class="file-counter" id="count-files">
+            <div class="counter-content">
+                <i class="fas fa-spinner fa-spin loading-icon"></i>
+                <span class="counter-text">Counting files...</span>
+                <div class="result-container hidden">
+                    <span class="file-count">0</span>
+                    <span class="result-text">Files Available</span>
+                    <i class="fas fa-check success-icon"></i>
+                </div>
+                <div class="error-container hidden">
+                    <i class="fas fa-exclamation-triangle error-icon"></i>
+                    <span class="error-text">--</span>
+                </div>
+            </div>
+        </div>
 
         <!-- Search and Filter -->
         <div class="glass-morph rounded-xl p-4 sm:p-6 mb-6 enhanced-border">
@@ -651,7 +732,6 @@
 
         <!-- Pagination -->
         <div id="pagination-container" class="pagination hidden">
-            <!-- Pagination will be inserted here by JavaScript -->
         </div>
     </main>
 
@@ -722,17 +802,79 @@
 
         backBtn.addEventListener('click', function() {
             backBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>';
-            backBtn.style.backgroundColor = '#6B7280'; // Change to gray to indicate loading
+            backBtn.style.backgroundColor = '#6B7280'; 
             const redirectUrl = isAdmin ? '/admin' : '/main-page';
             window.location.href = redirectUrl;
-            backBtn.disabled = true; // prevent double clicks
+            backBtn.disabled = true;
 
             setTimeout(() => {
                 backBtn.innerHTML = '<i class="fas fa-arrow-left mr-2"></i><span> Back</span>';
-                backBtn.style.backgroundColor = ''; // Reset to original color
+                backBtn.style.backgroundColor = '';
                 backBtn.disabled = false;
-            }, 2000); // simulate loading
+            }, 2000);
         });
+
+        const countFiles = document.getElementById('count-files');
+
+        async function fetchFileCount() {
+            try {
+                const response = await fetch(`${FILES_ENDPOINT}/count`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+
+                // Animate the count update
+                updateFileCount(data.count);
+            } catch (error) {
+                console.error('Error fetching file count:', error);
+                showError();
+            }
+        }
+
+        function updateFileCount(count) {
+            const loadingEl = countFiles.querySelector('.counter-text');
+            const loadingIcon = countFiles.querySelector('.loading-icon');
+            const resultContainer = countFiles.querySelector('.result-container');
+            const fileCountEl = countFiles.querySelector('.file-count');
+            
+            loadingEl.classList.add('hidden');
+            loadingIcon.classList.add('hidden');
+
+            resultContainer.classList.remove('hidden');
+
+            let currentCount = 0;
+            const duration = 1500; 
+            const steps = 60;
+            const increment = count / steps;
+            const stepTime = duration / steps;
+
+            const timer = setInterval(() => {
+                currentCount += increment;
+                if (currentCount >= count) {
+                    currentCount = count;
+                    clearInterval(timer);
+                    fileCountEl.classList.add('count-animate');
+                    setTimeout(() => {
+                        fileCountEl.classList.remove('count-animate');
+                    }, 300);
+                }
+                fileCountEl.textContent = Math.floor(currentCount);
+            }, stepTime);
+        }
+
+        function showError() {
+            const loadingEl = countFiles.querySelector('.counter-text');
+            const loadingIcon = countFiles.querySelector('.loading-icon');
+            const errorContainer = countFiles.querySelector('.error-container');
+
+            loadingEl.classList.add('hidden');
+            loadingIcon.classList.add('hidden');
+            errorContainer.classList.remove('hidden');
+        }
+
+        fetchFileCount(); 
+               
           // Toast notification system
         class ToastManager {
             constructor() {
