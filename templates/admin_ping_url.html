@@ -548,7 +548,7 @@
 
             async loadStatus() {
                 try {
-                    const response = await fetch('/api/status');
+                    const response = await fetch('/lyxpinger/api/status');
                     const data = await response.json();
                     this.updateStatusDisplay(data);
                 } catch (error) {
@@ -558,7 +558,7 @@
 
             async loadLogs() {
                 try {
-                    const response = await fetch('/api/logs?limit=30');
+                    const response = await fetch('/lyxpinger/api/logs?limit=30');
                     const data = await response.json();
                     this.updateLogsDisplay(data);
                 } catch (error) {
@@ -643,7 +643,7 @@
 
             async pingSingleUrl(url) {
                 try {
-                    const response = await fetch('/api/ping-specific', {
+                    const response = await fetch('/lyxpinger/api/ping-specific', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ url: `https://${url}` })
@@ -659,7 +659,7 @@
 
             async pingNow() {
                 try {
-                    const response = await fetch('/api/ping-now', { method: 'POST' });
+                    const response = await fetch('/lyxpinger/api/ping-now', { method: 'POST' });
                     const data = await response.json();
                     this.showToast(data.message, 'success');
                     this.loadAllData();
@@ -672,7 +672,7 @@
                 if (!confirm('Are you sure you want to clear all logs?')) return;
 
                 try {
-                    const response = await fetch('/api/clear-logs', { method: 'POST' });
+                    const response = await fetch('/lyxpinger/api/clear-logs', { method: 'POST' });
                     const data = await response.json();
                     this.showToast(data.message, 'success');
                     this.loadAllData();
@@ -693,7 +693,7 @@
 
                 try {
                     resultDiv.innerHTML = '<div class="text-info text-center"><div class="loading-spinner mx-auto mb-2"></div>Pinging...</div>';
-                    const response = await fetch('/api/ping-specific', {
+                    const response = await fetch('/lyxpinger/api/ping-specific', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ url: url })

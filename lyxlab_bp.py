@@ -66,8 +66,8 @@ projects = {
     'https://lyxnexus.onrender.com/lyxpinger/': {  
         'name': 'LyxPinger',
         'credentials': None,
-        'status': 'development',
-        'description': 'Currently being integrated with LyxLab - URL Uptime Pinger'
+        'status': 'active',
+        'description': 'Currently being integrated with LyxLab - LyxPinger'
     },
 }
 
