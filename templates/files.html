@@ -588,9 +588,9 @@
         font-weight: 500;
         box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
         border: 2px solid rgba(255, 255, 255, 0.1);
-        min-width: 200px;
+        min-width: 170px;
         display: inline-block;
-        margin-bottom: 10px;
+        margin-top: 12px;
     }
     
     .counter-content {
@@ -684,23 +684,23 @@
     <!-- Toast Container -->
     <div class="toast-container" id="toast-container"></div>
 
-    <main class="max-w-7xl mx-auto px-4 py-8 flex flex-col-2 flex-wrap">
-        <div class="mb-8">
+    <main class="max-w-7xl mx-auto px-4 py-8">
+        <div class="mb-8 flex-row items-center justify-between">
             <h1 class="text-2xl sm:text-3xl font-bold gradient-text mb-2">File Management</h1>
             <p class="text-gray-400">Scroll, download, and access files</p>
-        </div>
-        <div class="file-counter" id="count-files">
-            <div class="counter-content">
-                <i class="fas fa-spinner fa-spin loading-icon"></i>
-                <span class="counter-text">Counting files...</span>
-                <div class="result-container hidden">
-                    <span class="file-count">0</span>
-                    <span class="result-text">Files Available</span>
-                    <i class="fas fa-check success-icon"></i>
-                </div>
-                <div class="error-container hidden">
-                    <i class="fas fa-exclamation-triangle error-icon"></i>
-                    <span class="error-text">--</span>
+            <div class="file-counter" id="count-files">
+                <div class="counter-content">
+                    <i class="fas fa-spinner fa-spin loading-icon"></i>
+                    <span class="counter-text">Counting files...</span>
+                    <div class="result-container hidden">
+                        <span class="file-count">0</span>
+                        <span class="result-text">Files Available</span>
+                        <i class="fas fa-check success-icon"></i>
+                    </div>
+                    <div class="error-container hidden">
+                        <i class="fas fa-exclamation-triangle error-icon"></i>
+                        <span class="error-text">--</span>
+                    </div>
                 </div>
             </div>
         </div>
