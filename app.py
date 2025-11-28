@@ -3320,7 +3320,9 @@ def main_page():
 def nav_guide():
     return render_template('navigation.html')
 #--------------------------------------------------------------------
-
+@app.route('/developer')
+def developer():
+    return render_template('developer.html', year=_year())
 #--------------------------------------------------------------------
 @app.route('/admin')
 @login_required

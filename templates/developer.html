@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="description" content="LyxNexus is a simple yet powerful class hub designed to keep everything in one place — from announcements and assignments to topics and class discussions." />
+  <meta name="keywords" content="education, coding, programming, web development, technology, online courses, learn to code" />
+  <meta name="author" content="Vincent Kipngetich" />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://lyxnexus.onrender.com/" />
+  <link rel="icon" href="https://lyxnexus.onrender.com/uploads/favicon-1.png"/>
+  
+  <meta property="og:title" content="LyxNexus | Developer" />
+  <meta property="og:description" content="LyxNexus is a simple yet powerful class hub designed to keep everything in one place — from announcements and assignments to topics and class discussions." />
+  <meta property="og:image" content="https://lyxnexus.onrender.com/favicon.ico" />
+  <meta property="og:url" content="https://lyxnexus.onrender.com/" />
+  
+  <meta name="twitter:card" content="summary" />
+  <title>Developer | LyxNexus</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-color: #0f172a;
+      --text-color: #f1f5f9;
+      --accent-color: #3b82f6;
+      --secondary-color: #8b5cf6;
+      --card-bg: rgba(30, 41, 59, 0.8);
+      --border-color: rgba(100, 116, 139, 0.3);
+    }
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+    
+    .gradient-text {
+      background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      color: transparent;
+    }
+    
+    .glass-morph {
+      background: rgba(30, 41, 59, 0.7);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(59, 130, 246, 0.2);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .glass-morph:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+    }
+    
+    .glow-text { 
+      text-shadow: 0 0 10px rgba(0,255,255,0.5); 
+    }
+    
+    .fade-in { 
+      animation: fadeIn 0.4s ease-in-out; 
+    }
+    
+    @keyframes fadeIn {
+      from { 
+        opacity: 0; 
+        transform: translateY(-10px); 
+      }
+      to { 
+        opacity: 1; 
+        transform: translateY(0); 
+      }
+    }
+    
+    .profile-img {
+      border: 3px solid;
+      border-image: linear-gradient(45deg, #3B82F6, #8B5CF6) 1;
+      box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+    }
+    
+    .social-icon {
+      transition: transform 0.3s ease;
+    }
+    
+    .social-icon:hover {
+      transform: scale(1.1);
+    }
+  </style>
+</head>
+<body class="min-h-screen p-6">
+
+  <div class="max-w-4xl mx-auto space-y-10 fade-in">
+
+    <!-- Header -->
+    <div class="text-center">
+      <h1 class="text-4xl font-bold gradient-text mb-2">Meet the Developer</h1>
+      <p class="text-gray-300 text-sm">The creative force behind LyxNexus</p>
+    </div>
+
+    <!-- Profile Card -->
+    <div class="glass-morph rounded-xl p-6 flex flex-col md:flex-row items-center gap-6">
+      <img src="{{ url_for('uploaded_file', filename='developer_logo.png') }}"
+           alt="Developer Image"
+           class="w-40 h-40 rounded-full object-cover profile-img"/>
+
+      <div class="text-left space-y-2 text-sm">
+        <p><span class="font-semibold text-white">Name:</span> Vincent Kipngetich</p>
+        <p><span class="font-semibold text-white">Year:</span> 2025</p>
+        <p><span class="font-semibold text-white">Role:</span> Fullstack Developer</p>
+        <p><span class="font-semibold text-white">Tech Stack:</span> Python, Flask, TailwindCSS, SQLite, JavaScript</p>
+        <p><span class="font-semibold text-white">Focus:</span> Secure, fast, responsive systems with smooth UX</p>
+        <p><span class="font-semibold text-white">Project:</span> Founder & Lead Developer of <span class="text-cyan-400">LyxNexus</span></p>
+      </div>
+    </div>
+
+    <!-- About LyxNexus -->
+    <div class="glass-morph rounded-xl p-6 space-y-4">
+      <h2 class="text-xl font-semibold gradient-text">About LyxNexus</h2>
+      <p class="text-sm text-gray-300 leading-relaxed">
+        LyxNexus is a simple yet powerful class hub designed to keep everything in one place — from announcements and assignments to topics and class discussions. 
+        It provides educators and students with a centralized platform for managing educational content and fostering collaborative learning environments.
+      </p>
+    </div>
+
+    <!-- Vision -->
+    <div class="glass-morph rounded-xl p-6 space-y-4">
+      <h2 class="text-xl font-semibold gradient-text">Vision & Philosophy</h2>
+      <p class="text-sm text-gray-300 leading-relaxed">
+        LyxNexus is not just a platform — it's a vision to provide a seamless, lightweight, and intuitive educational experience.
+        I created this platform to give educators and students a unified space where learning materials, discussions, and assignments can be easily accessed and managed.
+        The focus is on simplicity, accessibility, and creating an environment that enhances the educational journey.
+      </p>
+    </div>
+
+    <!-- Technologies Used -->
+    <div class="glass-morph rounded-xl p-6 space-y-4">
+      <h2 class="text-xl font-semibold gradient-text">Technologies Used</h2>
+      <ul class="list-disc pl-6 text-sm text-gray-300 space-y-1">
+        <li><strong>Backend:</strong> Flask (Python), Jinja2, JWT, WTForms, SQLite</li>
+        <li><strong>Frontend:</strong> TailwindCSS, responsive UI, SVG icons, glass morphism effects</li>
+        <li><strong>Authentication:</strong> Flask-Login, password hashing, role-based access</li>
+        <li><strong>Security:</strong> CSRF protection, rate limiting, session control</li>
+        <li><strong>Deployment:</strong> Hosted on Render, SEO with sitemap.xml and robots.txt</li>
+      </ul>
+    </div>
+
+    <!-- Future Plans -->
+    <div class="glass-morph rounded-xl p-6 space-y-3">
+      <h2 class="text-xl font-semibold gradient-text">What's Next</h2>
+      <ul class="list-disc pl-6 text-sm text-gray-300 space-y-1">
+        <li>Native mobile apps (Android first)</li>
+        <li>Enhanced discussion forums with real-time updates</li>
+        <li>Assignment submission and grading system</li>
+        <li>Calendar integration for class schedules</li>
+        <li>Collaborative document editing features</li>
+        <li>Advanced analytics for educators</li>
+      </ul>
+    </div>
+
+    <!-- Contact -->
+    <div class="glass-morph rounded-xl p-6 space-y-4">
+      <h2 class="text-xl font-semibold gradient-text">Contact Developer</h2>
+      <ul class="text-sm text-gray-300 space-y-2">
+        <li class="flex items-center gap-2">
+          <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f4e7.svg" class="w-5 h-5 social-icon" alt="email">
+          Email: <a href="mailto:vincentkipngetich479@gmail.com" class="text-cyan-400 underline">vincentkipngetich479@gmail.com</a>
+        </li>
+        <li class="flex items-center gap-2">
+          <img src="https://cdn-icons-png.flaticon.com/512/2111/2111728.png" class="w-5 h-5 social-icon" alt="whatsapp">
+          WhatsApp: <a href="https://wa.me/254740694312" class="text-cyan-400 underline">+254 740 694 312</a>
+        </li>
+        <li class="flex items-center gap-2">
+          <img src="https://cdn-icons-png.flaticon.com/512/2111/2111646.png" class="w-5 h-5 social-icon" alt="telegram">
+          Telegram: <a href="https://t.me/+254740694312" class="text-cyan-400 underline">Message on Telegram</a>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Footer -->
+    <div class="text-center text-gray-500 text-xs mt-10">
+      Built by Vincent Kipngetich &copy; {{ year }}. LyxNexus, built for education.
+    </div>
+
+  </div>
+
+</body>
+</html>
