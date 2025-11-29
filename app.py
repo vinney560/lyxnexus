@@ -3719,8 +3719,7 @@ def get_files():
 
 def shorten_filename(filename, length=70):
     name, ext = os.path.splitext(filename)
-    return f"{name[:length]}...{ext}" if len(name) > length else filename
-
+    return f"{name[:length]}@LN{ext}" if len(name) > length else filename
 
 @app.route('/api/files/count')
 @login_required
@@ -5283,6 +5282,9 @@ def get_announcements():
         return jsonify({'error': 'Failed to fetch announcements'}), 500
 
 from werkzeug.utils import secure_filename
+def shorten_filename_create(filename, length=12):
+    name, ext = os.path.splitext(filename)
+    return f"{name[:length]}@LN{ext}" if len(name) > length else filename
 
 @app.route('/api/announcements/create', methods=['POST'])
 @login_required
@@ -5295,7 +5297,7 @@ def create_announcement():
     content = request.form.get('content')
 
     file = request.files.get('file')
-    file_name = secure_filename(file.filename) if file else None
+    file_name = shorten_filename_create(secure_filename(file.filename)) if file else None
     file_type = file.mimetype if file else None
     file_data = file.read() if file else None
 

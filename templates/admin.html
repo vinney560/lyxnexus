@@ -1201,7 +1201,7 @@
             // Handle files without extensions
             if (!filename.includes('.')) {
                 const result = filename.length > maxLength 
-                    ? filename.substring(0, maxLength) + '...'
+                    ? filename.substring(0, maxLength) + '@LN'
                     : filename;
                 return result;
             }
@@ -1215,7 +1215,7 @@
             }
           
             // Truncate and add ellipsis
-            const result = nameWithoutExt.substring(0, maxLength) + '-_LN' + '.' + fileExt;
+            const result = nameWithoutExt.substring(0, maxLength) + '@LN' + '.' + fileExt;
             return result;
         }
 
