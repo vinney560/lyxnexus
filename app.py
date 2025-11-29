@@ -3311,6 +3311,7 @@ def logout():
     logout_user()
     return redirect(url_for('help_logout'))
 
+@app.route('/help-logout')
 def help_logout():
     logout_user()
     flash('Logout Successfully!', 'success')
