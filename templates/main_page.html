@@ -3797,7 +3797,7 @@
                 setTimeout(() => {
                     toastSystem.warning('You have been logged out. Redirecting to login page...', 'Session Expired', 4000);
                     window.location.href = '/login';
-                }, 1000);
+                }, 4700);
             }
         }
 
@@ -3973,10 +3973,10 @@
                                                         const nameWithoutExt = lastDotIndex !== -1 ? filename.slice(0, lastDotIndex) : filename;
 
                                                         const words = nameWithoutExt.split(/[\s_-]+/).filter(word => word.length > 0);
-                                                        const truncatedWords = words.slice(0, 10);
+                                                        const truncatedWords = words.slice(0, 12);
 
-                                                        if (words.length > 10) {
-                                                            return truncatedWords.join(' ') + '@LN' + (extension ? extension : '');
+                                                        if (words.length > 12) {
+                                                            return truncatedWords.join(' ') + '...' + (extension ? extension : '');
                                                         }
 
                                                         return truncatedWords.join(' ') + (extension ? extension : '');

@@ -3306,10 +3306,9 @@ def check():
 @app.route('/logout')
 @login_required
 def logout():
-    session.clear()
     logout_user()
     flash('Logout Successfully!', 'success')
-    return redirect(url_for('login'))
+    return redirect(url_for('check'))
 #--------------------------------------------------------------------
 @app.route('/main-page')
 @login_required
