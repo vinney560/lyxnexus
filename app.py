@@ -116,18 +116,20 @@ VAPID_PUBLIC_KEY = "BEk4C5_aQbjOMkvGYk4OFZMyMAInUdVP6oAFs9kAd7Gx3iog2UF4ZLwdQ8Gm
 VAPID_PRIVATE_KEY = "42FlV4n_SjaTAcJnUcCi8bDrVEwX_8YCFJiCzAOhngw"
 VAPID_CLAIMS = {"sub": "mailto:vincentkipngetich479@gmail.com"}
 
+from datetime import timedelta
+
 # =======================================
 #   SESSION INITIALIZATION
 # =======================================
 app.config['SESSION_TYPE'] = 'filesystem'          
-app.config['SESSION_PERMANENT'] = True           
+app.config['SESSION_PERMANENT'] = False  
 app.config['SESSION_USE_SIGNER'] = True            
 app.config['SESSION_FILE_DIR'] = './flask_session/'
 app.config['SESSION_COOKIE_HTTPONLY'] = True       
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'      
 app.config['SESSION_COOKIE_SECURE'] = True
-app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=31)
-app.permanent_session_lifetime = timedelta(days=31)
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=1) 
+app.permanent_session_lifetime = timedelta(hours=1)
 # =======================================
 #   RATE LIMITER INITIALIZATION
 # ===============================
@@ -3310,10 +3312,13 @@ def logout():
     session.pop('_flashes', None)
     session.pop('_user_id', None)
     session.pop('user_id', None)
+    session.pop('is_authenticated', None)
+    session.clear()
+    session.modified = True
     logout_user()
     print(f"After logout - User authenticated: {current_user.is_authenticated}")
     flash('Logout Successfully!', 'success')
-    return redirect(url_for('check'))
+    return redirect(url_for('login'))
 #--------------------------------------------------------------------
 @app.route('/main-page')
 @login_required
