@@ -3308,15 +3308,13 @@ def check():
 @app.route('/logout')
 @login_required
 def logout():
-    print(f"Before logout - User authenticated: {current_user.is_authenticated}")
     session.pop('_flashes', None)
     session.pop('_user_id', None)
     session.pop('user_id', None)
-    session.pop('is_authenticated', None)
+    session.pop('is_authenticated', False)
     session.clear()
     session.modified = True
     logout_user()
-    print(f"After logout - User authenticated: {current_user.is_authenticated}")
     flash('Logout Successfully!', 'success')
     return redirect(url_for('login'))
 #--------------------------------------------------------------------
