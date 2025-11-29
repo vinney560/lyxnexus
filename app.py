@@ -3308,15 +3308,14 @@ def check():
 @app.route('/logout')
 @login_required
 def logout():
-    session.pop('_flashes', None)
-    session.pop('_user_id', None)
-    session.pop('user_id', None)
-    session.pop('is_authenticated', False)
-    session.clear()
-    session.modified = True
+    logout_user()
+    return redirect(url_for('help_logout'))
+
+def help_logout():
     logout_user()
     flash('Logout Successfully!', 'success')
-    return redirect(url_for('login'))
+    return redirect(url_for('home'))
+
 #--------------------------------------------------------------------
 @app.route('/main-page')
 @login_required
