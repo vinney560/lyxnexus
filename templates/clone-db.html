@@ -603,7 +603,7 @@
                             <i class="fas fa-copy mr-2"></i> Clone Database Now
                         </button>
                         <button id="switch-db-btn" class="btn btn-success px-8 py-3" onclick="fixSequences()">
-                            <i class="fas fa-copy mr-2"></i> Fix Database
+                            <i class="fas fa-gears mr-2"></i> Fix Database
                         </button>
                         <a href="{{ url_for('admin_page') }}" class="btn-outline px-8 py-3">
                             <i class="fas fa-arrow-left mr-2"></i> Back to Dashboard
@@ -689,13 +689,11 @@
         </div>
     </div>
 
-    <!-- Footer -->
     <footer class="text-center py-6 text-gray-500 text-sm">
         <p>&copy; {{ year }} LyxNexus. All rights reserved.</p>
     </footer>
 
     <script>
-        // Toast notification system
         class ToastManager {
             constructor() {
                 this.container = document.getElementById('toast-container');
@@ -826,14 +824,12 @@
                     resultMessage.textContent = data.message;
                     resultSection.classList.remove('hidden');
                 } else {
-                    // Error
                     throw new Error(data.error || 'Failed to clone database');
                 }
             } catch (error) {
                 console.error('Error cloning database:', error);
                 showToast(error.message, 'error', 'Database Cloning Error');
                 
-                // Show error in result section
                 resultMessage.textContent = error.message;
                 resultSection.querySelector('.bg-green-500').classList.replace('bg-green-500', 'bg-red-500');
                 resultSection.querySelector('.text-green-500').classList.replace('text-green-500', 'text-red-500');
@@ -842,19 +838,15 @@
                 resultSection.querySelector('i').classList.replace('fa-check-circle', 'fa-exclamation-triangle');
                 resultSection.classList.remove('hidden');
             } finally {
-                // Reset button state
                 cloneBtn.disabled = false;
                 cloneBtn.innerHTML = '<i class="fas fa-copy mr-2"></i> Clone Database Now';
                 progressSection.classList.add('hidden');
             }
         }
 
-        // Initialize the page
         document.addEventListener('DOMContentLoaded', function() {
-            // Add event listener to clone button
             document.getElementById('clone-db-btn').addEventListener('click', cloneDatabase);
             
-            // Show welcome toast
             setTimeout(() => {
                 showToast('Database cloning page loaded successfully', 'info', 'Ready');
             }, 1000);
@@ -866,7 +858,6 @@
             const originalText = btn.innerHTML;
         
             try {
-                // Indicate loading
                 btn.disabled = true;
                 btn.innerHTML = `<i class="fas fa-spinner fa-spin mr-2"></i> Fixing...`;
                 btn.classList.remove("btn-success", "btn-danger");
@@ -880,13 +871,11 @@
                 const data = await response.json();
             
                 if (response.ok) {
-                    // Success state
                     showToast(data.fixed, 'success', 'Database Fixed');
                     btn.innerHTML = `<i class="fas fa-check mr-2"></i> Fixed! (${data.fixed.length})`;
                     btn.classList.remove("btn-warning");
                     btn.classList.add("btn-success");
                 
-                    // Revert back after 2 seconds
                     setTimeout(() => {
                         btn.innerHTML = originalText;
                         btn.disabled = false;
@@ -894,7 +883,6 @@
                         btn.classList.add("btn-success");
                     }, 2000);
                 } else {
-                    // Error state
                     btn.innerHTML = `<i class="fas fa-exclamation-triangle mr-2"></i> Error!`;
                     btn.classList.remove("btn-warning");
                     btn.classList.add("btn-danger");
@@ -902,7 +890,6 @@
                 }
             } catch (error) {
                 showToast(error.message, 'error', 'Database Fix Failed');
-                // Network or unexpected error
                 btn.innerHTML = `<i class="fas fa-exclamation-triangle mr-2"></i> Failed!`;
                 btn.classList.remove("btn-warning");
                 btn.classList.add("btn-danger");

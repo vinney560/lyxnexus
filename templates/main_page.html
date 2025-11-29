@@ -3105,7 +3105,7 @@
                                    class="inline-flex items-center gap-3 px-4 py-3 bg-gray-800/70 hover:bg-gray-700/80 border border-gray-600 hover:border-blue-400/50 rounded-xl transition-all duration-300 card-hover-lift group">
                                     <i class="${getFileIcon(announcement.file_name)} text-blue-400 text-lg group-hover:scale-110 transition-transform duration-300"></i>
                                     <div class="flex-1 min-w-0">
-                                        <div class="text-white font-medium text-sm truncate">${announcement.file_name}</div>
+                                        <div class="text-white font-medium text-sm truncate word-break overflow-break">${announcement.file_name}</div>
                                         <div class="text-gray-400 text-xs flex items-center gap-1">
                                             <i class="fas fa-external-link-alt text-xs"></i>
                                             <span>Click to download</span>
@@ -3953,7 +3953,7 @@
                             let filePreview = "";
                             if (announcement.has_file && announcement.file_type?.startsWith("image/")) {
                                 filePreview = `
-                                    <div class="mb-2 w-full h-52 rounded-lg overflow-hidden bg-gray-700 flex items-center justify-center cursor-pointer card-hover-lift"
+                                    <div class="mb-2 w-full h-52 rounded-lg overflow-hidden bg-gray-700 flex items-center justify-center cursor-pointer card-hover-lift border-gray-600 border"
                                          onclick="openImagePreview('${announcement.file_url}')">
                                         <img src="${announcement.file_url}" alt="${announcement.file_name}" class="object-cover w-full h-full">
                                     </div>
@@ -3965,7 +3965,23 @@
                                            class="inline-flex items-center gap-3 px-4 py-3 bg-gray-800/70 hover:bg-gray-700/80 border border-gray-600 hover:border-blue-400/50 rounded-xl transition-all duration-300 card-hover-lift group">
                                             <i class="${getFileIcon(announcement.file_name)} text-blue-400 text-lg group-hover:scale-110 transition-transform duration-300"></i>
                                             <div class="flex-1 min-w-0">
-                                                <div class="text-white font-medium text-sm truncate">${announcement.file_name}</div>
+                                                <div class="text-white font-medium text-sm truncate word-break overflow-break">
+                                                    ${(() => {
+                                                        const filename = announcement.file_name;
+                                                        const lastDotIndex = filename.lastIndexOf('.');
+                                                        const extension = lastDotIndex !== -1 ? filename.slice(lastDotIndex) : '';
+                                                        const nameWithoutExt = lastDotIndex !== -1 ? filename.slice(0, lastDotIndex) : filename;
+
+                                                        const words = nameWithoutExt.split(/[\s_-]+/).filter(word => word.length > 0);
+                                                        const truncatedWords = words.slice(0, 5);
+
+                                                        if (words.length > 10) {
+                                                            return truncatedWords.join(' ') + '-LN' + (extension ? extension : '');
+                                                        }
+
+                                                        return truncatedWords.join(' ') + (extension ? extension : '');
+                                                    })()}
+                                                </div>
                                                 <div class="text-gray-400 text-xs flex items-center gap-1">
                                                     <i class="fas fa-external-link-alt text-xs"></i>
                                                     <span>Click to download</span>

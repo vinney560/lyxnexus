@@ -676,7 +676,7 @@
                 statusBadge.textContent = 'Due Tomorrow';
                 statusBadge.className = 'status-badge status-due-soon';
             } else if (diffDays < 3) {
-                // Due soon (within 3 days, but not today or tomorrow)
+                // Due soon (within 3 days)
                 timeLabel.textContent = 'Time Remaining: ';
                 timeRemainingElement.textContent = `${diffDays}d ${diffHrs}h ${diffMins}m`;
                 statusBadge.textContent = 'Due Soon';
@@ -689,13 +689,9 @@
                 statusBadge.className = 'status-badge status-upcoming';
             }
         }
-
-        // Initialize everything when DOM is loaded
         document.addEventListener('DOMContentLoaded', function() {
-            // Format math in description
             formatMathElements();
             
-            // Handle time calculations
             {% if assignment and assignment.due_date %}
                 const dueDate = new Date("{{ assignment.due_date.strftime('%Y-%m-%dT%H:%M:%S') }}");
                 updateTimeRemaining(dueDate);

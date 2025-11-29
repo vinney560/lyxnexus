@@ -652,8 +652,8 @@ class MockDataGenerator:
             file_name = None
             
             if has_file:
-                file_type = random.choice(['image/jpeg', 'image/png', 'application/pdf'])
-                file_name = f"announcement_{i}.{file_type.split('/')[-1]}"
+                file_type = random.choice(['image/png', 'image/png', 'application/pdf'])
+                file_name = f"navmmbm-{i}.{file_type.split('/')[-1]}"
                 file_url = f"/uploads/{file_name}"
             
             content = self.fake.paragraph(nb_sentences=random.randint(2, 4))

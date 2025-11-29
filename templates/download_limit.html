@@ -408,12 +408,10 @@
         function copyLink() {
             const input = document.getElementById('shareLink');
             input.select();
-            input.setSelectionRange(0, 99999); // For mobile devices
-            
+            input.setSelectionRange(0, 99999); 
             navigator.clipboard.writeText(input.value).then(() => {
                 showSuccessMessage();
                 
-                // Add visual feedback to the card
                 const card = document.querySelector('.glass-card');
                 card.style.transform = 'scale(1.02)';
                 setTimeout(() => {
@@ -421,7 +419,6 @@
                 }, 200);
             }).catch(err => {
                 console.error('Failed to copy: ', err);
-                // Fallback for older browsers
                 document.execCommand('copy');
                 showSuccessMessage();
             });
@@ -436,7 +433,6 @@
             }, 3000);
         }
         
-        // Add some interactive effects
         document.addEventListener('DOMContentLoaded', function() {
             const card = document.querySelector('.glass-card');
             

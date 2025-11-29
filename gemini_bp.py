@@ -1080,7 +1080,7 @@ def status():
         'stats': stats
     })
 
-print("✅ Enhanced Gemini Blueprint loaded successfully!")
+print("✅ Gemini Blueprint loaded successfully!")
 print("🔑 API Keys configured:", len(API_KEYS))
 print("🤖 Model:", MODEL)
-print("🚀 Enhanced Gemini Blueprint is ready to use!")
+print("🚀 Gemini Blueprint is ready to use!")

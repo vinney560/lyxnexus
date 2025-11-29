@@ -89,4 +89,4 @@ def files_preview():
             f.signed_url = None
     return render_template('file_preview.html', files=files)
 
-print('Cloud Storage Blueprint Initialized ✅')
+print('✅ Cloud Storage Blueprint Initialized ')
