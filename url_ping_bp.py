@@ -15,7 +15,7 @@ MAX_LOGS = 200  # Keep last 200 logs
 
 target_urls = [
     'lyxnexus.onrender.com',
-    'lyxnexus-2.onrender.com',
+    'lyxnexus-3.onrender.com',
     'lyxspace.onrender.com',
     't-give-3.onrender.com/home',
     'lyxnexus.xo.je',

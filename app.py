@@ -3395,7 +3395,6 @@ def sw():
 #-------------------------------------------------------------------
 @app.route('/is_authenticated')
 def is_authenticated():
-    # Checks both Flask-Login and session for reliability
     return jsonify({
         'authenticated': current_user.is_authenticated or session.get('authenticated', False)
     })
@@ -3414,7 +3413,6 @@ def subscribe():
     if not endpoint or not p256dh or not auth:
         return jsonify({"error": "Invalid subscription data"}), 400
 
-    # Detect push service type based on endpoint URL
     if "fcm.googleapis.com" in endpoint:
         service_type = "FCM (Google Chrome / Android)"
     elif "wns2" in endpoint or "notify.windows.com" in endpoint:
@@ -3424,7 +3422,6 @@ def subscribe():
     else:
         service_type = "Unknown Push Service"
 
-    # Upsert subscription for the logged-in user
     existing = PushSubscription.query.filter_by(user_id=current_user.id).first()
     if existing:
         existing.endpoint = endpoint
@@ -3455,7 +3452,6 @@ def send_webpush(data: dict):
 
     print("Sending push notification with data:", data)
 
-    # Get all subscriptions linked to active users --> not really a must bt i kave no chice.
     subs = (
         PushSubscription.query
         .join(User)
