@@ -5285,7 +5285,7 @@ def get_announcements():
         return jsonify({'error': 'Failed to fetch announcements'}), 500
 
 from werkzeug.utils import secure_filename
-def shorten_filename_create(filename, length=12):
+def shorten_filename_create(filename, length=17):
     name, ext = os.path.splitext(filename)
     return f"{name[:length]}@LN{ext}" if len(name) > length else filename
 

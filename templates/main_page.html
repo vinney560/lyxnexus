@@ -3973,9 +3973,9 @@
                                                         const nameWithoutExt = lastDotIndex !== -1 ? filename.slice(0, lastDotIndex) : filename;
 
                                                         const words = nameWithoutExt.split(/[\s_-]+/).filter(word => word.length > 0);
-                                                        const truncatedWords = words.slice(0, 12);
+                                                        const truncatedWords = words.slice(0, 17);
 
-                                                        if (words.length > 12) {
+                                                        if (words.length > 17) {
                                                             return truncatedWords.join(' ') + '...' + (extension ? extension : '');
                                                         }
 
