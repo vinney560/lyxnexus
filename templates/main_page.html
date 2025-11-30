@@ -3973,10 +3973,10 @@
                                                         const nameWithoutExt = lastDotIndex !== -1 ? filename.slice(0, lastDotIndex) : filename;
 
                                                         const words = nameWithoutExt.split(/[\s_-]+/).filter(word => word.length > 0);
-                                                        const truncatedWords = words.slice(0, 17);
+                                                        const truncatedWords = words.slice(0, 20);
 
-                                                        if (words.length > 17) {
-                                                            return truncatedWords.join(' ') + '...' + (extension ? extension : '');
+                                                        if (words.length > 20) {
+                                                            return truncatedWords.join(' ') + '@LN' + (extension ? extension : '');
                                                         }
 
                                                         return truncatedWords.join(' ') + (extension ? extension : '');
