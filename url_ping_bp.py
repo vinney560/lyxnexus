@@ -19,7 +19,7 @@ target_urls = [
     'lyxspace.onrender.com',
     't-give-3.onrender.com/home',
     'lyxnexus.xo.je',
-    'https://lyxnexus.lyxnexus.xo.je/',
+    'lyxnexus.lyxnexus.xo.je',
     'viewtv.viewtv.gt.tc'
 ]
 
