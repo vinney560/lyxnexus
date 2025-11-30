@@ -2052,8 +2052,6 @@
                 mobileNav.addEventListener('wheel', () => scroller.stopAnimation(), { passive: true });
             try {
                 const container = document.createElement("span");
-                container.innerHTML = text;
-            
                 renderMathInElement(container, {
                     delimiters: [
                         { left: "$$", right: "$$", display: true },
@@ -2066,7 +2064,7 @@
             
                 return container.innerHTML;
             } catch (err) {
-                console.error("Math rendering error:", err);
+                console.error("MathScroll rendering error:", err);
             }
         });
     });
