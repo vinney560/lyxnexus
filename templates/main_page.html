@@ -2069,7 +2069,28 @@
         });
     });
     </script>
-
+    <script>
+        function formatMath(text) {
+            try {
+                const container = document.createElement("span");
+                container.innerHTML = text;
+            
+                renderMathInElement(container, {
+                    delimiters: [
+                        { left: "$$", right: "$$", display: true },
+                        { left: "\\[", right: "\\]", display: true },
+                        { left: "$", right: "$", display: false },
+                        { left: "\\(", right: "\\)", display: false }
+                    ],
+                    throwOnError: false
+                });
+            
+                return container.innerHTML;
+            } catch (err) {
+                return text; // fallback
+            }
+        }
+    </script>
     <script>
         window.currentUserId = {{ current_user.id }};
         
