@@ -998,6 +998,65 @@ with app.app_context():
         print('X' * 70)
         print(f"Error initializing Upcoming Class scheduler ==>> {e}")
 
+
+#===========================================================
+from flask import Flask, render_template, request, make_response
+
+@app.route('/robots.txt')
+def robots():
+    return """User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /private/
+
+Sitemap: https://lyxnexus.lyxnexus.xo.je/sitemap.xml
+"""
+
+from datetime import datetime, timezone, timedelta
+@app.route('/sitemap.xml')
+def sitemap():
+    # Get base URL dynamically
+    base_url = request.url_root.rstrip('/')
+    current_date = datetime.now(timezone(timedelta(hours=3))).strftime('%Y-%m-%d')
+    
+    sitemap_xml = f'''<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>{base_url}/</loc>
+    <lastmod>{current_date}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>{base_url}/developer</loc>
+    <lastmod>{current_date}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>{base_url}/dashboard</loc>
+    <lastmod>{current_date}</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>{base_url}/messages</loc>
+    <lastmod>{current_date}</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>{base_url}/files</loc>
+    <lastmod>{current_date}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+</urlset>'''
+    
+    response = make_response(sitemap_xml)
+    response.headers['Content-Type'] = 'application/xml'
+    return response
+
 #==========================================
 #                  NORMAL ROUTES
 #==========================================
