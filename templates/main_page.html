@@ -1337,13 +1337,17 @@
             margin-bottom: 20px;
         }
 
+        .small-header {
+            margin-top: 10px;
+        }
+
         .search-box {
             padding: 10px 45px 10px 16px;
             font-size: 14px;
         }
 
         .search-shortcut-hint {
-            right: 10px;
+            right: 8px;
             font-size: 15px;
             padding: 5px 8px;
         }
@@ -1356,7 +1360,7 @@
         }
 
         .search-shortcut-hint {
-            right: 8px;
+            right: 6px;
             font-size: 14px;
             padding: 4px 7px;
         }
@@ -1535,6 +1539,17 @@
         50% { width: 100%; }
         100% { width: 0%; }
     }
+
+    .small-header {
+        border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+    .small-header:hover {
+        border-color: #3B82F6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        transform: translateY(-2px) scale(0.8);
+        transition: transform 0.3s ease-out, box-shadow 0.3s ease-out, border-color 0.3s ease-out;
+    }
+    
 </style>
 <body>
     <!-- Toast Container -->
@@ -1556,7 +1571,10 @@
                     </div>
                     <div>
                         <h1 class="text-2xl font-bold gradient-text">LyxNexus</h1>
-                        <p class="text-sm text-gray-400">Learning Management System</p>
+                        <h3 class="text-md font-bold gradient-text">
+                            <i class="fas fa-chalkboard-teacher mr-1"></i>Class Portal
+                        </h3>
+                        <p class="text-sm text-gray-400">Flexibility and Innovation is Key to Success</p>
                     </div>
                 </div>
                 
@@ -1780,7 +1798,7 @@
                         <p id="profile-role" class="text-gray-400 mb-4">Student</p>
                         <div class="flex justify-center space-x-4">
                             <button id="logout" class="btn bg-green-600 hover:bg-green-700 text-sm">
-                                <i class="fa-solid fa-right-from-bracket mr-2"></i> Logout
+                                <i class="fa-solid fa-right-from-bracket mr-1"></i> Logout
                             </button>
                             <button id="installAppBtn" class="btn bg-blue-600 hover:bg-blue-700 text-sm">
                               <i class="fas fa-download mr-2"></i> Install LyxNexus
@@ -1913,101 +1931,107 @@
             const mobileNav = document.querySelector('.mobile-nav');
             if (!mobileNav) return;
         
-            class MobileNavScroller {
+            class EnhancedMobileNavScroller {
                 constructor(navElement) {
                     this.nav = navElement;
                     this.isAnimating = false;
-                    this.animationId = null;
+                    this.rafId = null;
+                    this.startTime = null;
+                    this.startX = 0;
+                    this.targetX = 0;
+                    this.duration = 1200; // ms
+                    this.userInterrupted = false;
                     this.setupStyles();
+                    this.bindUserCancelEvents();
                 }
             
                 setupStyles() {
-                    this.nav.style.scrollBehavior = 'smooth';                    
+                    this.nav.style.scrollBehavior = 'auto';
                     const style = document.createElement('style');
                     style.textContent = `
-                        .mobile-nav.scroll-animating {
-                            pointer-events: none;
-                        }
-                        .mobile-nav.scroll-complete {
-                            animation: navPulse 0.5s ease-in-out;
-                        }
-                        @keyframes navPulse {
-                            0% { transform: scale(1); }
-                            50% { transform: scale(1.02); }
-                            100% { transform: scale(1); }
-                        }
+                        .mobile-nav.scroll-animating { pointer-events: none; }
+                        .mobile-nav.scroll-complete { animation: navPulse 0.5s ease-in-out; }
+                        @keyframes navPulse { 0%{transform:scale(1)}50%{transform:scale(1.02)}100%{transform:scale(1)} }
                     `;
                     document.head.appendChild(style);
                 }
             
-                getMaxScroll() {
-                    return this.nav.scrollWidth - this.nav.clientWidth;
+                bindUserCancelEvents() {
+                    const cancel = () => { this.userInterrupted = true; this.stopAnimation(); };
+                    this.nav.addEventListener('touchstart', cancel, { passive: true });
+                    this.nav.addEventListener('pointerdown', cancel, { passive: true });
+                    this.nav.addEventListener('wheel', cancel, { passive: true });
+                    this.nav.addEventListener('mousedown', cancel, { passive: true });
                 }
             
-                async scrollToPosition(target, duration = 700) {
+                easeOutCubic(t) {
+                    return 1 - Math.pow(1 - t, 3);
+                }
+            
+                animateTo(target, duration = this.duration) {
+                    if (this.rafId) cancelAnimationFrame(this.rafId);
+                    this.isAnimating = true;
+                    this.userInterrupted = false;
+                    this.startTime = performance.now();
+                    this.startX = this.nav.scrollLeft;
+                    this.targetX = Math.max(0, Math.min(target, this.getMaxScroll()));
+                    this.duration = duration;
+            
                     return new Promise((resolve) => {
-                        const start = this.nav.scrollLeft;
-                        const distance = target - start;
-                        const startTime = performance.now();
-                    
-                        function animate(currentTime) {
-                            const elapsed = currentTime - startTime;
-                            const progress = Math.min(elapsed / duration, 1);
-
-                            const ease = 1 - Math.pow(1 - progress, 3);
-
-                            this.nav.scrollLeft = start + (distance * ease);
-                        
-                            if (progress < 1) {
-                                this.animationId = requestAnimationFrame(animate.bind(this));
-                            } else {
-                                this.animationId = null;
-                                resolve();
+                        const step = (now) => {
+                            if (this.userInterrupted) {
+                                this.isAnimating = false;
+                                this.rafId = null;
+                                resolve(false);
+                                return;
                             }
-                        }
-                    
-                        this.animationId = requestAnimationFrame(animate.bind(this));
+                            const elapsed = now - this.startTime;
+                            const progress = Math.min(elapsed / this.duration, 1);
+                            const eased = this.easeOutCubic(progress);
+                            const current = this.startX + (this.targetX - this.startX) * eased;
+                            this.nav.scrollLeft = current;
+                            if (progress < 1) {
+                                this.rafId = requestAnimationFrame(step);
+                            } else {
+                                this.isAnimating = false;
+                                this.rafId = null;
+                                resolve(true);
+                            }
+                        };
+                        this.rafId = requestAnimationFrame(step);
                     });
                 }
             
+                getMaxScroll() {
+                    return Math.max(0, this.nav.scrollWidth - this.nav.clientWidth);
+                }
+    
                 async performFullScrollAnimation() {
                     if (this.isAnimating) return;
-
-                    this.isAnimating = true;
-                    this.nav.classList.add('scroll-animating');
-                
                     const maxScroll = this.getMaxScroll();
-
-                    if (maxScroll <= 0) {
-                        this.isAnimating = false;
-                        this.nav.classList.remove('scroll-animating');
-                        return;
-                    }
-                
-                    try {
-                        await this.scrollToPosition(maxScroll, 1200);
-
-                        await new Promise(resolve => setTimeout(resolve, 300));
-
-                        await this.scrollToPosition(0, 1200);
-
-                        this.nav.classList.remove('scroll-animating');
-                        this.nav.classList.add('scroll-complete');
-                        setTimeout(() => {
-                            this.nav.classList.remove('scroll-complete');
-                        }, 700);
-                    
-                    } catch (error) {
-                        console.log('Scroll animation interrupted');
-                    } finally {
-                        this.isAnimating = false;
-                    }
+                    if (maxScroll <= 0) return;
+            
+                    this.nav.classList.add('scroll-animating');
+                    await new Promise(r => setTimeout(r, 150));
+            
+                    const wentToEnd = await this.animateTo(maxScroll, 900);
+                    if (!wentToEnd) { this.nav.classList.remove('scroll-animating'); return; }
+            
+                    await new Promise(r => setTimeout(r, 420));
+                    if (this.userInterrupted) { this.nav.classList.remove('scroll-animating'); return; }
+            
+                    const returned = await this.animateTo(0, 900);
+                    if (!returned) { this.nav.classList.remove('scroll-animating'); return; }
+            
+                    this.nav.classList.remove('scroll-animating');
+                    this.nav.classList.add('scroll-complete');
+                    setTimeout(() => this.nav.classList.remove('scroll-complete'), 1000);
                 }
             
                 stopAnimation() {
-                    if (this.animationId) {
-                        cancelAnimationFrame(this.animationId);
-                        this.animationId = null;
+                    if (this.rafId) {
+                        cancelAnimationFrame(this.rafId);
+                        this.rafId = null;
                     }
                     this.isAnimating = false;
                     this.nav.classList.remove('scroll-animating', 'scroll-complete');
@@ -2015,29 +2039,17 @@
             }
         
             setTimeout(() => {
-                const scroller = new MobileNavScroller(mobileNav);
+                const scroller = new EnhancedMobileNavScroller(mobileNav);
                 scroller.performFullScrollAnimation();
         
                 window.addEventListener('orientationchange', () => {
                     setTimeout(() => {
                         scroller.performFullScrollAnimation();
-                    }, 700);
+                    }, 1000);
                 });
-            
-                let interactionTimer;
-                mobileNav.addEventListener('touchstart', () => {
-                    scroller.stopAnimation();
-                });
-            
-                mobileNav.addEventListener('wheel', () => {
-                    scroller.stopAnimation();
-                });
-            
-            }, 700);
-        });
-    </script>
-    <script>
-        function formatMath(text) {
+        
+                mobileNav.addEventListener('touchstart', () => scroller.stopAnimation(), { passive: true });
+                mobileNav.addEventListener('wheel', () => scroller.stopAnimation(), { passive: true });
             try {
                 const container = document.createElement("span");
                 container.innerHTML = text;
@@ -2054,9 +2066,10 @@
             
                 return container.innerHTML;
             } catch (err) {
-                return text; // fallback
+                return text;
             }
-        }
+        });
+        });
     </script>
 
     <script>
@@ -2092,7 +2105,7 @@
         
         const logoutBtn = document.getElementById('logout');
         logoutBtn.addEventListener('click', (e) => {
-            logoutBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> ...';
+            logoutBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> ...';
             window.location.href = '/logout';
             logoutBtn.disabled = true;
             setTimeout(() => {
@@ -2666,13 +2679,19 @@
                 }
                          
                 const searchHTML = `
+                    <div class="flex items-center justify-center flex-col small-header bg-gray-800 w-full h-24 p-4 rounded-xl mb-3 md:hidden">
+                        <h2 class="gradient-text underline decoration-2 decoration-indigo-500 text-2xl font-bold mx-auto my-auto">
+                            LyxNexus
+                        </h2>
+                        <p class="text-sm text-gray-400"><i class="fas fa-chalkboard-teacher mr-1"></i>Flexibility and Innovation is Key to Success.</p>
+                    </div>
                     <div class="search-container" id="search-container">
                         <div style="position: relative; display: flex; justify-content: center;">
                             <input 
                                 type="text" 
                                 id="global-search" 
                                 class="search-box" 
-                                placeholder="Search announcements, assignments, topics..."
+                                placeholder="Search announce, assign, units..."
                                 autocomplete="off"
                             >
                             <div class="search-shortcut-hint"><i class="fas fa-search"></i></div>
