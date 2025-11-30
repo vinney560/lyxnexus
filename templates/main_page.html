@@ -1543,13 +1543,13 @@
     .small-header {
         border: 1px solid rgba(59, 130, 246, 0.3);
     }
+
     .small-header:hover {
         border-color: #3B82F6;
         box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
         transform: translateY(-2px) scale(0.8);
         transition: transform 0.3s ease-out, box-shadow 0.3s ease-out, border-color 0.3s ease-out;
-    }
-    
+    }    
 </style>
 <body>
     <!-- Toast Container -->
@@ -2066,7 +2066,7 @@
             
                 return container.innerHTML;
             } catch (err) {
-                return text;
+                console.error("Math rendering error:", err);
             }
         });
         });
@@ -3814,7 +3814,7 @@
                     </div>
                 `;
                 setTimeout(() => {
-                    toastSystem.warning('You have been logged out. Redirecting to login page...', 'Session Expired', 4000);
+                    toastSystem.warning('You have been logged out. Redirecting to login page...', 'Session Expired', 2200);
                     window.location.href = '/login';
                 }, 4700);
             }
