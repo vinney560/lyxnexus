@@ -1547,7 +1547,7 @@
     .small-header:hover {
         border-color: #3B82F6;
         box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
-        transform: translateY(-2px) scale(0.8);
+        transform: translateY(-2px) scale(0.93);
         transition: transform 0.3s ease-out, box-shadow 0.3s ease-out, border-color 0.3s ease-out;
     }    
 </style>
@@ -1939,7 +1939,7 @@
                     this.startTime = null;
                     this.startX = 0;
                     this.targetX = 0;
-                    this.duration = 1200; // ms
+                    this.duration = 800; // ms
                     this.userInterrupted = false;
                     this.setupStyles();
                     this.bindUserCancelEvents();
@@ -1965,7 +1965,7 @@
                 }
             
                 easeOutCubic(t) {
-                    return 1 - Math.pow(1 - t, 3);
+                    return t * (2 - t);
                 }
             
                 animateTo(target, duration = this.duration) {
@@ -2010,22 +2010,14 @@
                     if (this.isAnimating) return;
                     const maxScroll = this.getMaxScroll();
                     if (maxScroll <= 0) return;
-            
                     this.nav.classList.add('scroll-animating');
-                    await new Promise(r => setTimeout(r, 150));
-            
-                    const wentToEnd = await this.animateTo(maxScroll, 900);
-                    if (!wentToEnd) { this.nav.classList.remove('scroll-animating'); return; }
-            
-                    await new Promise(r => setTimeout(r, 420));
-                    if (this.userInterrupted) { this.nav.classList.remove('scroll-animating'); return; }
-            
-                    const returned = await this.animateTo(0, 900);
-                    if (!returned) { this.nav.classList.remove('scroll-animating'); return; }
-            
-                    this.nav.classList.remove('scroll-animating');
+                    await this.animateTo(maxScroll, 800);
+                    if (this.userInterrupted) return;
+
+                    await this.animateTo(0, 800);
                     this.nav.classList.add('scroll-complete');
                     setTimeout(() => this.nav.classList.remove('scroll-complete'), 1000);
+                    setTimeout(() => this.nav.classList.remove('scroll-animating'), 1200);
                 }
             
                 stopAnimation() {
@@ -3305,7 +3297,7 @@
                                 <h3 class="text-xl sm:text-2xl font-extrabold text-white underline underline-offset-4 decoration-blue-500 leading-snug break-words">${this.highlightText(assignment.title, this.currentQuery)}</h3>
                                 <div class="flex flex-col items-end gap-2 sm:gap-1">
                                     <span class="${statusClass} text-white px-3 py-1 rounded-full text-xs sm:text-sm whitespace-nowrap">${statusText}</span>
-                                    <span class="bg-yellow-500 text-white px-2 py-1 rounded-full text-xs sm:text-sm whitespace-nowrap">
+                                    <span class="bg-yellow-700 text-white px-2 py-1 rounded-full text-xs sm:text-sm whitespace-nowrap">
                                         ${timeDisplay || '....'}
                                     </span>
                                 </div>
@@ -3984,7 +3976,7 @@
                             const newClass = isNew ? 'new-item-highlight' : '';
                         
                             const neonBorderClass = isRecent
-                                ? "border-l-4 border-l-yellow-400 border-t border-t-blue-400 border-r border-r-blue-400 border-b border-b-blue-400 shadow-sm"
+                                ? "border-l-2 border-l-yellow-600 border-t border-t-amber-600 border-r border-r-orange-600 border-b border-b-orange-600 shadow-sm"
                                 : "border border-blue-600 shadow-md";
                         
                             // File preview (image or link)
@@ -4297,7 +4289,7 @@
                                         </h3>
                                         <div class="flex flex-row items-center justify-between gap-2 sm:gap-1">
                                             <span class="${statusClass} text-white px-3 py-1 rounded-full text-xs sm:text-sm whitespace-nowrap">${statusText}</span>
-                                            <span class="bg-yellow-500 text-white px-2 py-1 rounded-full text-xs sm:text-sm whitespace-nowrap">
+                                            <span class="bg-yellow-700 text-white px-2 py-1 rounded-full text-xs sm:text-sm whitespace-nowrap">
                                                 ${timeDisplay || '....'}
                                             </span>
                                         </div>
