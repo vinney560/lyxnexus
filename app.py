@@ -134,10 +134,11 @@ app.permanent_session_lifetime = timedelta(hours=1)
 #   RATE LIMITER INITIALIZATION
 # ===============================
 limiter = Limiter(
-    key_func=get_remote_address,
+    key_func=lambda: current_user.id if current_user.is_authenticated else get_remote_address(),
     app=app,                    
     default_limits=["2200 per day", "200 per hour"]
 )
+
 # ===============================
 login_manager = LoginManager()
 login_manager.init_app(app)
