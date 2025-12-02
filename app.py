@@ -3976,7 +3976,7 @@ def single_message(user_id, message="Default message"):
 
 def bulk_message(message="Default message", user_ids=None):
     """
-    Send SMS to multiple users
+    Send SMS to multiple students
     
     Usage:
         bulk_message("Hello users!")  # Send to all users
