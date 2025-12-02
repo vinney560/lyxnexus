@@ -4075,7 +4075,7 @@ def whatsapp_bulk(message="Message", user_ids=None, app=None):
             
             # Estimate time (for user info)
             if total_users > 0:
-                estimated_time = total_users * 0.3  # 300ms per message
+                estimated_time = total_users * 1.5  # 1.5 seconds per message
                 estimated_minutes = estimated_time / 60
                 print(f"📱 Sending {total_users} WhatsApp messages")
                 print(f"⏱️ Estimated time: {estimated_minutes:.1f} minutes")
@@ -4205,6 +4205,7 @@ def send_whatsapp_command():
             click.echo(f"✅ WhatsApp sending started: {result}")
     
     send_whatsapp()
+
 
 print("🚀 WhatsApp Anti-BAN service loaded successfully!")
 print("✅ Features:")
@@ -6029,7 +6030,7 @@ def create_announcement():
 
     # Mirror to browser push (system notification)
     send_webpush(data)
-    bulk_message(f"New announcement: {announcement.title}")
+    whatsapp_bulk(f"New announcement: {announcement.title}")
 
     return jsonify({'message': 'Announcement created successfully', 'id': announcement.id}), 201
 
@@ -6078,7 +6079,7 @@ def update_announcement(id):
         'timestamp': datetime.utcnow().isoformat()
     }
     send_webpush(data)
-    bulk_message(f"Announcement eddited: {announcement.title}")
+    whatsapp_bulk(f"Announcement eddited: {announcement.title}")
 
     return jsonify({'message': 'Announcement updated successfully'})
 
@@ -6115,7 +6116,7 @@ def delete_announcement(id):
     db.session.delete(announcement)
     db.session.commit()
     send_webpush(data)
-    bulk_message(f"Announcement delete: {announcement.title}")
+    whatsapp_bulk(f"Announcement delete: {announcement.title}")
 
     return jsonify({'message': 'Announcement deleted successfully'})
 
@@ -6199,7 +6200,7 @@ def create_assignment():
         'timestamp': datetime.utcnow().isoformat()
     }
     send_webpush(data)
-    bulk_message(f"New assignment: {assignment.title}")
+    whatsapp_bulk(f"New assignment: {assignment.title}")
 
     return jsonify({'message': 'Assignment created successfully', 'id': assignment.id}), 201
 
