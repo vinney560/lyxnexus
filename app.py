@@ -3459,7 +3459,10 @@ def is_authenticated():
         'authenticated': current_user.is_authenticated or session.get('authenticated', False)
     })
 #-------------------------------------------------------------------
-
+@app.route('/pushify.js')
+def serve_pushify():
+    return send_file('pushify.js', mimetype='application/javascript')
+#-------------------------------------------------------------------
 @app.route("/subscribe", methods=["POST"])
 @login_required
 @not_banned
