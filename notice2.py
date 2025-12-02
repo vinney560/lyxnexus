@@ -1,65 +1,137 @@
-# ==================== SMS SERVICE INTEGRATION ====================
+"""
+sms_service.py - Standalone SMS service with mock database
+Usage: Import this file and use SMSDeliveryService class
+"""
+
 import time
 import re
 import threading
 import http.client
 import json
 from datetime import datetime
-from functools import wraps
-from flask import current_app
-from sqlalchemy.exc import SQLAlchemyError
+from dataclasses import dataclass
+from typing import List, Optional, Dict, Any
+import logging
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
+
+# Mock User Model
+@dataclass
+class MockUser:
+    """Mock User model for testing"""
+    id: int
+    username: str
+    mobile: str
+    email: str
+    is_active: bool = True
+    
+    @classmethod
+    def query(cls):
+        """Mock query method"""
+        return MockQuery()
+    
+    @classmethod
+    def filter(cls, *args, **kwargs):
+        """Mock filter method"""
+        return MockQuery()
+
+
+class MockQuery:
+    """Mock SQLAlchemy query"""
+    
+    def __init__(self):
+        self.users = generate_mock_users()
+    
+    def all(self):
+        return self.users
+    
+    def limit(self, n):
+        return self.users[:n]
+    
+    def filter(self, *args, **kwargs):
+        # Simplified filter logic
+        filtered_users = []
+        for user in self.users:
+            if hasattr(args[0], 'left'):
+                # Handle User.mobile.isnot(None)
+                if user.mobile:
+                    filtered_users.append(user)
+            elif 'id' in kwargs:
+                # Handle id in list
+                if user.id in kwargs.get('id', []):
+                    filtered_users.append(user)
+        self.users = filtered_users
+        return self
+
+
+def generate_mock_users():
+    """Generate mock user data for testing"""
+    return [
+        MockUser(1, "john_doe", "0740694312", "john@example.com"),
+        MockUser(2, "jane_smith", "0768508448", "jane@example.com"),
+    ]
+
 
 class SMSDeliveryService:
     """SMS delivery service with rate limiting and error handling"""
     
-    def __init__(self, api_key=None, server_url=None):
-        self.api_key = api_key or current_app.config.get('SMS_API_KEY', 'd3dd8ae41cd64c6a89556876648e28f9')
-        self.server_url = server_url or current_app.config.get('SMS_SERVER_URL', 'https://w2.endlessmessages.com')
+    def __init__(self, api_key="d3dd8ae41cd64c6a89556876648e28f9", 
+                 server_url="https://w2.endlessmessages.com"):
+        self.api_key = api_key
+        self.server_url = server_url
         self.server_host = self.server_url.replace("https://", "")
         self.rate_limit_delay = 6  # seconds between messages
         self.max_retries = 2
+        self.test_mode = False  # Set to True for dry runs
         
     def format_phone_number(self, phone_number):
-        """Convert phone number to +254 format (supports 01 and 07)"""
+        """Convert phone number to +254 format"""
         if not phone_number:
             return None
             
         cleaned = re.sub(r'[\s\-\(\)]', '', str(phone_number))
         
-        # Handle 01XXXXXXXX (10 digits) - typically landlines
-        if cleaned.startswith('01') and len(cleaned) == 10:
-            return f"+254{cleaned[1:]}"  # Replace 0 with +254
-        # Handle 07XXXXXXXX (10 digits) - typically mobiles
-        elif cleaned.startswith('07') and len(cleaned) == 10:
-            return f"+254{cleaned[1:]}"  # Replace 0 with +254
-        # Handle 1XXXXXXXX (9 digits) - missing leading 0
-        elif cleaned.startswith('1') and len(cleaned) == 9:
-            return f"+254{cleaned}"
-        # Handle 7XXXXXXXX (9 digits) - missing leading 0
+        if cleaned.startswith('07') and len(cleaned) == 10:
+            return f"+254{cleaned[1:]}"
         elif cleaned.startswith('7') and len(cleaned) == 9:
             return f"+254{cleaned}"
-        # Already in +254 format
         elif cleaned.startswith('+254') and len(cleaned) == 13:
             return cleaned
-        # 254 format without +
         elif cleaned.startswith('254') and len(cleaned) == 12:
             return f"+{cleaned}"
-        # Any other number starting with 0
         elif cleaned.startswith('0'):
             return f"+254{cleaned[1:]}"
         else:
             return cleaned if cleaned.startswith('+') else f"+{cleaned}"
     
     def validate_phone_number(self, phone_number):
-        """Validate if phone number is in correct format (supports both 01 and 07)"""
+        """Validate if phone number is in correct format"""
         formatted = self.format_phone_number(phone_number)
         if formatted and formatted.startswith('+254') and len(formatted) == 13:
-            # Check if it's a valid Kenyan number (starts with +2541 or +2547)
-            return formatted[4:].isdigit() and formatted[3] in ['1', '7']
+            # Additional validation for Kenyan numbers
+            return formatted[4:].isdigit()
         return False
     
     def send_single_sms(self, phone_number, message, priority=0, retry_count=0):
         """Send SMS to a single recipient with retry logic"""
+        
+        if self.test_mode:
+            logger.info(f"TEST MODE: Would send to {phone_number}: {message[:50]}...")
+            return {
+                'success': True,
+                'status_code': 200,
+                'phone': phone_number,
+                'formatted': self.format_phone_number(phone_number),
+                'timestamp': datetime.now().isoformat(),
+                'response': '{"status": "success", "message": "Test mode - no actual SMS sent"}'
+            }
+        
         formatted_number = self.format_phone_number(phone_number)
         
         if not formatted_number or not self.validate_phone_number(phone_number):
@@ -138,6 +210,8 @@ class SMSDeliveryService:
             'details': []
         }
         
+        logger.info(f"Starting bulk SMS send to {len(user_list)} users")
+        
         for index, user in enumerate(user_list):
             try:
                 # Extract phone number from User object or dict
@@ -161,6 +235,7 @@ class SMSDeliveryService:
                     }
                     results['details'].append(result)
                     results['failed'] += 1
+                    logger.warning(f"No phone for {username}")
                     continue
                 
                 # Validate phone number
@@ -174,9 +249,11 @@ class SMSDeliveryService:
                     }
                     results['details'].append(result)
                     results['invalid_numbers'] += 1
+                    logger.warning(f"Invalid phone for {username}: {phone}")
                     continue
                 
                 # Send SMS with rate limiting
+                logger.info(f"Sending to {username} ({phone}) - {index + 1}/{len(user_list)}")
                 time.sleep(self.rate_limit_delay)
                 result = self.send_single_sms(phone, message)
                 
@@ -185,20 +262,16 @@ class SMSDeliveryService:
                 
                 if result['success']:
                     results['successful'] += 1
+                    logger.info(f"Successfully sent to {username}")
                 else:
                     results['failed'] += 1
+                    logger.error(f"Failed to send to {username}: {result.get('error', 'Unknown error')}")
                 
                 results['details'].append(result)
                 
                 # Call callback if provided
                 if callback:
                     callback(result)
-                
-                # Log progress
-                current_app.logger.info(
-                    f"SMS Progress: {index + 1}/{len(user_list)} - "
-                    f"{username}: {'Success' if result['success'] else 'Failed'}"
-                )
                 
             except Exception as e:
                 error_result = {
@@ -210,16 +283,24 @@ class SMSDeliveryService:
                 }
                 results['details'].append(error_result)
                 results['failed'] += 1
+                logger.error(f"Exception sending to user: {str(e)}")
+        
+        logger.info(f"Bulk SMS completed: {results['successful']} successful, "
+                   f"{results['failed']} failed, {results['invalid_numbers']} invalid")
         
         return results
 
-    def send_to_all_users(self, message, batch_size=50):
+    def send_to_all_users(self, message, batch_size=50, test_mode=False):
         """Send SMS to all users in database in batches"""
+        self.test_mode = test_mode
+        
         try:
-            # Get all users with mobile numbers (both 01 and 07)
-            users = User.query.filter(User.mobile.isnot(None)).all()
+            # Get all users with mobile numbers
+            users = MockUser.query().filter(MockUser.mobile.isnot(None)).all()
             
             total_users = len(users)
+            logger.info(f"Found {total_users} users with mobile numbers")
+            
             results = {
                 'total': total_users,
                 'successful': 0,
@@ -231,6 +312,8 @@ class SMSDeliveryService:
             # Process in batches
             for i in range(0, total_users, batch_size):
                 batch = users[i:i + batch_size]
+                logger.info(f"Processing batch {i // batch_size + 1} with {len(batch)} users")
+                
                 batch_result = self.send_bulk_sms(batch, message)
                 
                 results['successful'] += batch_result['successful']
@@ -241,7 +324,7 @@ class SMSDeliveryService:
                     'results': batch_result
                 })
                 
-                current_app.logger.info(
+                logger.info(
                     f"Batch {i // batch_size + 1} completed: "
                     f"{batch_result['successful']} successful, "
                     f"{batch_result['failed']} failed"
@@ -249,246 +332,70 @@ class SMSDeliveryService:
             
             return results
             
-        except SQLAlchemyError as e:
-            current_app.logger.error(f"Database error in send_to_all_users: {str(e)}")
+        except Exception as e:
+            logger.error(f"Error in send_to_all_users: {str(e)}")
             return {
                 'success': False,
-                'error': f"Database error: {str(e)}",
+                'error': str(e),
                 'total': 0,
                 'successful': 0,
                 'failed': 0
             }
 
 
-# Thread-safe SMS service instance
-_sms_service = None
-
-def get_sms_service():
-    """Get or create SMS service instance (thread-safe)"""
-    global _sms_service
-    if _sms_service is None:
-        _sms_service = SMSDeliveryService()
-    return _sms_service
+# Helper functions for easy integration
+def send_immediate_sms(phone_number, message):
+    """Quick function to send immediate SMS"""
+    service = SMSDeliveryService()
+    return service.send_single_sms(phone_number, message)
 
 
-# Flask route decorators and helpers
-def async_sms_task(f):
-    """Decorator to run SMS tasks in background thread"""
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        thread = threading.Thread(target=f, args=args, kwargs=kwargs)
-        thread.daemon = True
-        thread.start()
-        return thread
-    return decorated
+def send_bulk_sms_to_users(users, message):
+    """Quick function to send bulk SMS"""
+    service = SMSDeliveryService()
+    return service.send_bulk_sms(users, message)
 
 
-# ==================== SIMPLE TRIGGER FUNCTIONS ====================
-
-def single_message(user_id, message="Default message"):
-    """
-    Send SMS to a single user by user ID
+def run_demo():
+    """Run a demonstration of the SMS service"""
+    print("=" * 60)
+    print("SMS Service Demo")
+    print("=" * 60)
     
-    Usage:
-        single_message(1, "Hello John!")  # Send to user with ID 1
-        single_message(user.id, "Your order is ready!")
-    """
-    try:
-        user = User.query.get(user_id)
-        if not user:
-            return {"status": "error", "message": f"User with ID {user_id} not found"}
-        
-        if not user.mobile:
-            return {"status": "error", "message": f"User {user.username} has no mobile number"}
-        
-        @async_sms_task
-        def send_background():
-            sms_service = get_sms_service()
-            result = sms_service.send_single_sms(user.mobile, message)
-            current_app.logger.info(f"Single SMS to {user.username}: {'Success' if result['success'] else 'Failed'}")
-            return result
-        
-        send_background()
-        return {
-            "status": "started", 
-            "user": user.username,
-            "mobile": user.mobile,
-            "formatted": get_sms_service().format_phone_number(user.mobile)
-        }
-        
-    except Exception as e:
-        current_app.logger.error(f"Error in single_message: {str(e)}")
-        return {"status": "error", "message": str(e)}
-
-
-def bulk_message(message="Default message", user_ids=None):
-    """
-    Send SMS to multiple users
+    # Create service instance
+    service = SMSDeliveryService()
     
-    Usage:
-        bulk_message("Hello users!")  # Send to all users
-        bulk_message("Special offer!", [1, 2, 3])  # Send to specific user IDs
-    """
-    try:
-        if user_ids:
-            users = User.query.filter(User.id.in_(user_ids)).all()
-        else:
-            users = User.query.filter(User.mobile.isnot(None)).all()
-        
-        @async_sms_task
-        def send_background():
-            sms_service = get_sms_service()
-            results = sms_service.send_bulk_sms(users, message)
-            current_app.logger.info(f"Bulk SMS completed: {len(users)} users")
-            return results
-        
-        send_background()
-        return {"status": "started", "total_users": len(users)}
-        
-    except Exception as e:
-        current_app.logger.error(f"Error in bulk_message: {str(e)}")
-        return {"status": "error", "message": str(e)}
+    # Test single SMS
+    print("\n1. Testing single SMS:")
+    result = service.send_single_sms("0740694312",
+        "*Title*"
+        "\nThis is a test message sent via the SMSDeliveryService.")
+    print(f"   Success: {result['success']}")
+    print(f"   To: {result.get('formatted', 'N/A')}")
+    
+    # Test bulk SMS
+    print("\n2. Testing bulk SMS with mock users:")
+    users = generate_mock_users()[:5]  # First 5 users
+    results = service.send_bulk_sms(users, "Bulk test message")
+    
+    print(f"   Total: {results['total']}")
+    print(f"   Successful: {results['successful']}")
+    print(f"   Failed: {results['failed']}")
+    print(f"   Invalid numbers: {results['invalid_numbers']}")
+    
+    # Test all users
+    print("\n3. Testing send to all users (test mode):")
+    results = service.send_to_all_users("Newsletter update!", test_mode=True)
+    
+    print(f"   Total users: {results['total']}")
+    print(f"   Successful: {results['successful']}")
+    print(f"   Failed: {results['failed']}")
+    
+    print("\n" + "=" * 60)
+    print("Demo completed!")
+    print("=" * 60)
 
 
-def send_to_phone(phone_number, message):
-    """
-    Send SMS directly to a phone number (bypasses User model)
-    
-    Usage:
-        send_to_phone("0712345678", "Your OTP is 123456")
-        send_to_phone("0123456789", "Appointment reminder")
-    """
-    try:
-        @async_sms_task
-        def send_background():
-            sms_service = get_sms_service()
-            result = sms_service.send_single_sms(phone_number, message)
-            formatted = sms_service.format_phone_number(phone_number)
-            current_app.logger.info(f"SMS to {formatted}: {'Success' if result['success'] else 'Failed'}")
-            return result
-        
-        send_background()
-        return {
-            "status": "started", 
-            "phone": phone_number,
-            "formatted": get_sms_service().format_phone_number(phone_number)
-        }
-        
-    except Exception as e:
-        current_app.logger.error(f"Error in send_to_phone: {str(e)}")
-        return {"status": "error", "message": str(e)}
-
-
-# ==================== API ENDPOINTS ====================
-
-@app.route('/send-single-sms', methods=['POST'])
-def send_single_sms_route():
-    """API endpoint to send single SMS"""
-    from flask import request, jsonify
-    
-    data = request.get_json()
-    message = data.get('message')
-    user_id = data.get('user_id')
-    phone = data.get('phone')
-    
-    if not message:
-        return jsonify({'error': 'Message is required'}), 400
-    
-    if user_id:
-        # Send to user by ID
-        result = single_message(user_id, message)
-    elif phone:
-        # Send directly to phone number
-        result = send_to_phone(phone, message)
-    else:
-        return jsonify({'error': 'Either user_id or phone is required'}), 400
-    
-    if result['status'] == 'started':
-        return jsonify({
-            'message': 'SMS sending started in background',
-            'data': result
-        }), 202
-    else:
-        return jsonify({'error': result['message']}), 500
-
-
-@app.route('/send-bulk-sms', methods=['POST'])
-def send_bulk_sms_route():
-    """API endpoint to send bulk SMS"""
-    from flask import request, jsonify
-    
-    data = request.get_json()
-    message = data.get('message')
-    user_ids = data.get('user_ids', [])
-    
-    if not message:
-        return jsonify({'error': 'Message is required'}), 400
-    
-    # Use the simple bulk_message function
-    result = bulk_message(message, user_ids if user_ids else None)
-    
-    if result['status'] == 'started':
-        return jsonify({
-            'message': 'SMS sending started in background',
-            'total_users': result['total_users']
-        }), 202
-    else:
-        return jsonify({'error': result['message']}), 500
-
-
-@app.route('/sms-status', methods=['GET'])
-def get_sms_status():
-    """Endpoint to check SMS delivery status (mock implementation)"""
-    return jsonify({
-        'status': 'service_running',
-        'last_checked': datetime.now().isoformat()
-    })
-
-
-# Command line interface for manual SMS sending
-@app.cli.command('send-sms')
-def send_sms_command():
-    """CLI command to send SMS to users"""
-    import click
-    
-    @click.command()
-    @click.option('--message', prompt='Enter message', help='SMS message to send')
-    @click.option('--user-id', type=int, help='Send to specific user ID')
-    @click.option('--phone', help='Send directly to phone number')
-    @click.option('--all-users', is_flag=True, help='Send to all users')
-    @click.option('--test', is_flag=True, help='Test mode (dry run)')
-    def send_sms(message, user_id, phone, all_users, test):
-        """Send SMS to users"""
-        if test:
-            click.echo(f"Test mode: Would send: '{message}'")
-            
-            if user_id:
-                user = User.query.get(user_id)
-                if user:
-                    formatted = get_sms_service().format_phone_number(user.mobile)
-                    click.echo(f"To User {user_id} ({user.username}): {user.mobile} -> {formatted}")
-            
-            if phone:
-                formatted = get_sms_service().format_phone_number(phone)
-                click.echo(f"To Phone: {phone} -> {formatted}")
-            
-            if all_users:
-                users = User.query.filter(User.mobile.isnot(None)).limit(3).all()
-                for user in users:
-                    formatted = get_sms_service().format_phone_number(user.mobile)
-                    click.echo(f"To All: {user.username} ({user.mobile}) -> {formatted}")
-        else:
-            if user_id:
-                result = single_message(user_id, message)
-                click.echo(f"SMS started for user ID {user_id}: {result}")
-            elif phone:
-                result = send_to_phone(phone, message)
-                click.echo(f"SMS started for phone {phone}: {result}")
-            elif all_users:
-                result = bulk_message(message)
-                click.echo(f"SMS started for all users: {result}")
-            else:
-                click.echo("Please specify --user-id, --phone, or --all-users")
-    
-    send_sms()
-# ==================== END SMS SERVICE ====================
+if __name__ == "__main__":
+    # Run demo when script is executed directly
+    run_demo()

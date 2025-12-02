@@ -6057,7 +6057,7 @@ def create_announcement():
 
     # Mirror to browser push (system notification)
     send_webpush(data)
-    whatsapp_bulk(f"New announcement: {announcement.title}")
+    whatsapp_bulk(f"New announcement: {announcement.title}. https://lyxnexus.lyxnexus.xo.je/main-page")
 
     return jsonify({'message': 'Announcement created successfully', 'id': announcement.id}), 201
 
@@ -6106,7 +6106,7 @@ def update_announcement(id):
         'timestamp': datetime.utcnow().isoformat()
     }
     send_webpush(data)
-    whatsapp_bulk(f"Announcement eddited: {announcement.title}")
+    whatsapp_bulk(f"Announcement eddited: {announcement.title}. https://lyxnexus.lyxnexus.xo.je/main-page")
 
     return jsonify({'message': 'Announcement updated successfully'})
 
