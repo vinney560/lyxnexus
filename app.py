@@ -1118,17 +1118,17 @@ def login():
         login_type = request.form.get('login_type', 'student')
         login_subtype = request.form.get('login_subtype', 'login')
         username = request.form.get('username', '').strip().lower()[:25]
-        mobile = re.sub(r'\D', '', request.form.get('mobile', ''))  # Keep only digits
+        mobile = re.sub(r'\D', '', request.form.get('mobile', '')) 
         master_key = request.form.get('master_key', '').strip()
 
         # validation
         validation_errors = []
         
         # Validate username
-        if not username or len(username) < 3:
-            validation_errors.append('Username must be at least 3 characters long')
-        elif not re.match(r'^[a-zA-Z0-9_.-]+$', username):
-            validation_errors.append('Username can only contain letters, numbers, dots, hyphens, and underscores')
+        if not username or len(username) < 3 or len(username) > 30:
+            validation_errors.append('Username must be at least 3 characters and at most 30 characters long')
+        elif not re.match(r'^[a-zA-Z0-9_. -]+$', username):
+            validation_errors.append('Username can only contain letters, numbers, dots, hyphens, underscores, and spaces')
         
         # Validate mobile number
         if not mobile or len(mobile) != 10 or not mobile.startswith(('07', '01')):
@@ -4069,7 +4069,7 @@ def whatsapp_bulk(message="Message", user_ids=None, app=None):
                 with app.app_context():
                     service = get_whatsapp_service(app)
                     for i in users:
-                        personalised_message = f"Hi {i.username.split()[0]}!\n\n{message}"
+                        personalised_message = f"LyxNexus Notification!\n\n{message}"
                         print(f"Preparing message for {i.username}")
                     results = service.send_bulk_whatsapp(users, personalised_message)
                     
@@ -6038,8 +6038,8 @@ def create_announcement():
 
     # Mirror to browser push (system notification)
     send_webpush(data)
-    whatsapp_bulk(f"New announcement: *{announcement.title}*.\n\n"
-                  f"🔗 *LyxNexus Bot*.\n\n")
+    #whatsapp_bulk(f"New announcement: *{announcement.title}*.\n\n"
+    #              f"🔗 *LyxNexus Bot*.\n\n")
 
     return jsonify({'message': 'Announcement created successfully', 'id': announcement.id}), 201
 
@@ -6088,8 +6088,8 @@ def update_announcement(id):
         'timestamp': datetime.utcnow().isoformat()
     }
     send_webpush(data)
-    whatsapp_bulk(f"Announcement edited: *{announcement.title}*\n\n"
-                  f"🔗 *LyxNexus Bot*.\n\n")
+    #whatsapp_bulk(f"Announcement edited: *{announcement.title}*\n\n"
+    #              f"🔗 *LyxNexus Bot*.\n\n")
 
     return jsonify({'message': 'Announcement updated successfully'})
 
@@ -6126,8 +6126,8 @@ def delete_announcement(id):
     db.session.delete(announcement)
     db.session.commit()
     send_webpush(data)
-    whatsapp_bulk(f"Announcement delete: *~{announcement.title}~*\n\n"
-                  f"🔗 *LyxNexus Bot*.\n\n")
+    #whatsapp_bulk(f"Announcement delete: *~{announcement.title}~*\n\n"
+    #              f"🔗 *LyxNexus Bot*.\n\n")
 
     return jsonify({'message': 'Announcement deleted successfully'})
 
@@ -6211,8 +6211,8 @@ def create_assignment():
         'timestamp': datetime.utcnow().isoformat()
     }
     send_webpush(data)
-    whatsapp_bulk(f"New assignment: *{assignment.title}*\n\n"
-                  f"🔗 *LyxNexus Bot*\n\n")
+    #whatsapp_bulk(f"New assignment: *{assignment.title}*\n\n"
+    #              f"🔗 *LyxNexus Bot*\n\n")
 
     return jsonify({'message': 'Assignment created successfully', 'id': assignment.id}), 201
 
