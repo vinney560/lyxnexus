@@ -3685,12 +3685,33 @@ from sqlalchemy.exc import SQLAlchemyError
 class SMSDeliveryService:
     """SMS delivery service with rate limiting and error handling"""
     
-    def __init__(self, api_key=None, server_url=None):
-        self.api_key = api_key or current_app.config.get('SMS_API_KEY', 'd3dd8ae41cd64c6a89556876648e28f9')
-        self.server_url = server_url or current_app.config.get('SMS_SERVER_URL', 'https://w2.endlessmessages.com')
-        self.server_host = self.server_url.replace("https://", "")
+    def __init__(self, app=None):
+        self.app = app
         self.rate_limit_delay = 6 
         self.max_retries = 2
+        
+    def init_app(self, app):
+        """Initialize with Flask app"""
+        self.app = app
+        
+    @property
+    def api_key(self):
+        """Get API key from app config"""
+        if self.app:
+            return self.app.config.get('SMS_API_KEY', 'd3dd8ae41cd64c6a89556876648e28f9')
+        return 'd3dd8ae41cd64c6a89556876648e28f9'
+    
+    @property
+    def server_url(self):
+        """Get server URL from app config"""
+        if self.app:
+            return self.app.config.get('SMS_SERVER_URL', 'https://w2.endlessmessages.com')
+        return 'https://w2.endlessmessages.com'
+    
+    @property
+    def server_host(self):
+        """Get server host"""
+        return self.server_url.replace("https://", "")
         
     def format_phone_number(self, phone_number):
         """Convert phone number to +254 format (supports 01 and 07)"""
@@ -3852,10 +3873,14 @@ class SMSDeliveryService:
                 if callback:
                     callback(result)
                 
-                current_app.logger.info(
-                    f"SMS Progress: {index + 1}/{len(user_list)} - "
-                    f"{username}: {'Success' if result['success'] else 'Failed'}"
-                )
+                # Safe logging
+                if self.app:
+                    self.app.logger.info(
+                        f"SMS Progress: {index + 1}/{len(user_list)} - "
+                        f"{username}: {'Success' if result['success'] else 'Failed'}"
+                    )
+                else:
+                    print(f"SMS Progress: {index + 1}/{len(user_list)} - {username}: {'Success' if result['success'] else 'Failed'}")
                 
             except Exception as e:
                 error_result = {
@@ -3870,59 +3895,23 @@ class SMSDeliveryService:
         
         return results
 
-    def send_to_all_users(self, message, batch_size=5):
-        """Send SMS to all users in database in batches"""
-        try:
-            users = User.query.filter(User.mobile.isnot(None)).all()
-            
-            total_users = len(users)
-            results = {
-                'total': total_users,
-                'successful': 0,
-                'failed': 0,
-                'invalid_numbers': 0,
-                'batches': []
-            }
-            
-            for i in range(0, total_users, batch_size):
-                batch = users[i:i + batch_size]
-                batch_result = self.send_bulk_sms(batch, message)
-                
-                results['successful'] += batch_result['successful']
-                results['failed'] += batch_result['failed']
-                results['invalid_numbers'] += batch_result['invalid_numbers']
-                results['batches'].append({
-                    'batch_number': i // batch_size + 1,
-                    'results': batch_result
-                })
-                
-                current_app.logger.info(
-                    f"Batch {i // batch_size + 1} completed: "
-                    f"{batch_result['successful']} successful, "
-                    f"{batch_result['failed']} failed"
-                )
-            
-            return results
-            
-        except SQLAlchemyError as e:
-            current_app.logger.error(f"Database error in send_to_all_users: {str(e)}")
-            return {
-                'success': False,
-                'error': f"Database error: {str(e)}",
-                'total': 0,
-                'successful': 0,
-                'failed': 0
-            }
 
-
+# Thread-safe SMS service instance
 _sms_service = None
 
-def get_sms_service():
+def get_sms_service(app=None):
     """Get or create SMS service instance (thread-safe)"""
     global _sms_service
     if _sms_service is None:
-        _sms_service = SMSDeliveryService()
+        _sms_service = SMSDeliveryService(app)
+    elif app and not _sms_service.app:
+        _sms_service.init_app(app)
     return _sms_service
+
+
+def init_sms_service(app):
+    """Initialize SMS service with Flask app"""
+    get_sms_service(app)
 
 
 def async_sms_task(f):
@@ -3938,7 +3927,7 @@ def async_sms_task(f):
 
 # ==================== SIMPLE TRIGGER FUNCTIONS ====================
 
-def single_message(user_id, message="Default message"):
+def single_message(user_id, message="Default message", app=None):
     """
     Send SMS to a single user by user ID
     
@@ -3947,34 +3936,53 @@ def single_message(user_id, message="Default message"):
         single_message(user.id, "Your order is ready!")
     """
     try:
-        user = User.query.get(user_id)
-        if not user:
-            return {"status": "error", "message": f"User with ID {user_id} not found"}
+        from flask import current_app
         
-        if not user.mobile:
-            return {"status": "error", "message": f"User {user.username} has no mobile number"}
+        # Get app context
+        if not app:
+            app = current_app._get_current_object() if hasattr(current_app, '_get_current_object') else None
         
-        @async_sms_task
-        def send_background():
-            sms_service = get_sms_service()
-            result = sms_service.send_single_sms(user.mobile, message)
-            current_app.logger.info(f"Single SMS to {user.username}: {'Success' if result['success'] else 'Failed'}")
-            return result
+        # If still no app, create minimal context
+        if not app:
+            return {"status": "error", "message": "Application context required"}
         
-        send_background()
-        return {
-            "status": "started", 
-            "user": user.username,
-            "mobile": user.mobile,
-            "formatted": get_sms_service().format_phone_number(user.mobile)
-        }
+        with app.app_context():
+            user = User.query.get(user_id)
+            if not user:
+                return {"status": "error", "message": f"User with ID {user_id} not found"}
+            
+            if not user.mobile:
+                return {"status": "error", "message": f"User {user.username} has no mobile number"}
+            
+            @async_sms_task
+            def send_background():
+                with app.app_context():
+                    sms_service = get_sms_service(app)
+                    result = sms_service.send_single_sms(user.mobile, message)
+                    if app:
+                        app.logger.info(f"Single SMS to {user.username}: {'Success' if result['success'] else 'Failed'}")
+                    else:
+                        print(f"Single SMS to {user.username}: {'Success' if result['success'] else 'Failed'}")
+                    return result
+            
+            send_background()
+            return {
+                "status": "started", 
+                "user": user.username,
+                "mobile": user.mobile,
+                "formatted": get_sms_service(app).format_phone_number(user.mobile)
+            }
         
     except Exception as e:
-        current_app.logger.error(f"Error in single_message: {str(e)}")
+        error_msg = f"Error in single_message: {str(e)}"
+        if app:
+            app.logger.error(error_msg)
+        else:
+            print(error_msg)
         return {"status": "error", "message": str(e)}
 
 
-def bulk_message(message="Default message", user_ids=None):
+def bulk_message(message="Default message", user_ids=None, app=None):
     """
     Send SMS to multiple students
     
@@ -3983,28 +3991,46 @@ def bulk_message(message="Default message", user_ids=None):
         bulk_message("Special offer!", [1, 2, 3])  # Send to specific user IDs
     """
     try:
-        if user_ids:
-            users = User.query.filter(User.id.in_(user_ids)).all()
-        else:
-            users = User.query.filter(User.mobile.isnot(None)).all()
+        from flask import current_app
         
-        @async_sms_task
-        def send_background():
-            sms_service = get_sms_service()
-            results = sms_service.send_bulk_sms(users, message)
-            current_app.logger.info(f"Bulk SMS completed: {len(users)} users")
-            print(f"Bulk SMS completed: {len(users)} users")
-            return results
+        # Get app context
+        if not app:
+            app = current_app._get_current_object() if hasattr(current_app, '_get_current_object') else None
         
-        send_background()
-        return {"status": "started", "total_users": len(users)}
+        # If still no app, create minimal context
+        if not app:
+            return {"status": "error", "message": "Application context required"}
+        
+        with app.app_context():
+            if user_ids:
+                users = User.query.filter(User.id.in_(user_ids)).all()
+            else:
+                users = User.query.filter(User.mobile.isnot(None)).all()
+            
+            @async_sms_task
+            def send_background():
+                with app.app_context():
+                    sms_service = get_sms_service(app)
+                    results = sms_service.send_bulk_sms(users, message)
+                    if app:
+                        app.logger.info(f"Bulk SMS completed: {len(users)} users")
+                    else:
+                        print(f"Bulk SMS completed: {len(users)} users")
+                    return results
+            
+            send_background()
+            return {"status": "started", "total_users": len(users)}
         
     except Exception as e:
-        current_app.logger.error(f"Error in bulk_message: {str(e)}")
+        error_msg = f"Error in bulk_message: {str(e)}"
+        if app:
+            app.logger.error(error_msg)
+        else:
+            print(error_msg)
         return {"status": "error", "message": str(e)}
 
 
-def send_to_phone(phone_number, message):
+def send_to_phone(phone_number, message, app=None):
     """
     Send SMS directly to a phone number (bypasses User model)
     
@@ -4013,25 +4039,42 @@ def send_to_phone(phone_number, message):
         send_to_phone("0123456789", "Appointment reminder")
     """
     try:
+        from flask import current_app
+        
+        # Get app context
+        if not app:
+            app = current_app._get_current_object() if hasattr(current_app, '_get_current_object') else None
+        
+        # If still no app, create minimal context
+        if not app:
+            return {"status": "error", "message": "Application context required"}
+        
         @async_sms_task
         def send_background():
-            sms_service = get_sms_service()
-            result = sms_service.send_single_sms(phone_number, message)
-            formatted = sms_service.format_phone_number(phone_number)
-            current_app.logger.info(f"SMS to {formatted}: {'Success' if result['success'] else 'Failed'}")
-            return result
+            with app.app_context():
+                sms_service = get_sms_service(app)
+                result = sms_service.send_single_sms(phone_number, message)
+                formatted = sms_service.format_phone_number(phone_number)
+                if app:
+                    app.logger.info(f"SMS to {formatted}: {'Success' if result['success'] else 'Failed'}")
+                else:
+                    print(f"SMS to {formatted}: {'Success' if result['success'] else 'Failed'}")
+                return result
         
         send_background()
         return {
             "status": "started", 
             "phone": phone_number,
-            "formatted": get_sms_service().format_phone_number(phone_number)
+            "formatted": get_sms_service(app).format_phone_number(phone_number)
         }
         
     except Exception as e:
-        current_app.logger.error(f"Error in send_to_phone: {str(e)}")
+        error_msg = f"Error in send_to_phone: {str(e)}"
+        if app:
+            app.logger.error(error_msg)
+        else:
+            print(error_msg)
         return {"status": "error", "message": str(e)}
-
 
 # ==================== API ENDPOINTS ====================
 
@@ -4049,9 +4092,9 @@ def send_single_sms_route():
         return jsonify({'error': 'Message is required'}), 400
     
     if user_id:
-        result = single_message(user_id, message)
+        result = single_message(user_id, message, app=current_app._get_current_object())
     elif phone:
-        result = send_to_phone(phone, message)
+        result = send_to_phone(phone, message, app=current_app._get_current_object())
     else:
         return jsonify({'error': 'Either user_id or phone is required'}), 400
     
@@ -4076,7 +4119,7 @@ def send_bulk_sms_route():
     if not message:
         return jsonify({'error': 'Message is required'}), 400
     
-    result = bulk_message(message, user_ids if user_ids else None)
+    result = bulk_message(message, user_ids if user_ids else None, app=current_app._get_current_object())
     
     if result['status'] == 'started':
         return jsonify({
@@ -4085,15 +4128,6 @@ def send_bulk_sms_route():
         }), 202
     else:
         return jsonify({'error': result['message']}), 500
-
-
-@app.route('/sms-status', methods=['GET'])
-def get_sms_status():
-    """Endpoint to check SMS delivery status (mock implementation)"""
-    return jsonify({
-        'status': 'service_running',
-        'last_checked': datetime.now().isoformat()
-    })
 
 
 @app.cli.command('send-sms')
@@ -4109,33 +4143,39 @@ def send_sms_command():
     @click.option('--test', is_flag=True, help='Test mode (dry run)')
     def send_sms(message, user_id, phone, all_users, test):
         """Send SMS to users"""
+        from flask import current_app
+        
+        app = current_app._get_current_object()
+        
         if test:
             click.echo(f"Test mode: Would send: '{message}'")
             
             if user_id:
-                user = User.query.get(user_id)
-                if user:
-                    formatted = get_sms_service().format_phone_number(user.mobile)
-                    click.echo(f"To User {user_id} ({user.username}): {user.mobile} -> {formatted}")
+                with app.app_context():
+                    user = User.query.get(user_id)
+                    if user:
+                        formatted = get_sms_service(app).format_phone_number(user.mobile)
+                        click.echo(f"To User {user_id} ({user.username}): {user.mobile} -> {formatted}")
             
             if phone:
-                formatted = get_sms_service().format_phone_number(phone)
+                formatted = get_sms_service(app).format_phone_number(phone)
                 click.echo(f"To Phone: {phone} -> {formatted}")
             
             if all_users:
-                users = User.query.filter(User.mobile.isnot(None)).limit(3).all()
-                for user in users:
-                    formatted = get_sms_service().format_phone_number(user.mobile)
-                    click.echo(f"To All: {user.username} ({user.mobile}) -> {formatted}")
+                with app.app_context():
+                    users = User.query.filter(User.mobile.isnot(None)).limit(3).all()
+                    for user in users:
+                        formatted = get_sms_service(app).format_phone_number(user.mobile)
+                        click.echo(f"To All: {user.username} ({user.mobile}) -> {formatted}")
         else:
             if user_id:
-                result = single_message(user_id, message)
+                result = single_message(user_id, message, app=app)
                 click.echo(f"SMS started for user ID {user_id}: {result}")
             elif phone:
-                result = send_to_phone(phone, message)
+                result = send_to_phone(phone, message, app=app)
                 click.echo(f"SMS started for phone {phone}: {result}")
             elif all_users:
-                result = bulk_message(message)
+                result = bulk_message(message, app=app)
                 click.echo(f"SMS started for all users: {result}")
             else:
                 click.echo("Please specify --user-id, --phone, or --all-users")
