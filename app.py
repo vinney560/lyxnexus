@@ -3582,7 +3582,97 @@ def list_subscriptions():
     return jsonify(data), 200
 
 #------------------------------------------------------------------------
+from notificationapi_python_server_sdk import notificationapi
+import asyncio
+import os
 
+# Initialize NotificationAPI
+notificationapi.init(
+    "tn46tvp8r580do0ei9jujqhe75", 
+    "taf382qxy2x7yt2270q1gnf7kurz1pjkxgwmf8lntt3qjww2cvsvz536gv"
+)
+
+@app.route('/admin/phone')
+@admin_required
+@login_required
+def serve_call_html():
+    return render_template('call.html')
+
+@app.route('/send-notification', methods=['POST'])
+@admin_required
+@login_required
+def send_notification():
+    try:
+        data = request.get_json()
+        
+        mobile_number = data.get('mobile')
+        message_content = data.get('message')
+        
+        print(f"[{datetime.now()}] Sending notification to: {mobile_number}")
+        print(f"Message: {message_content[:100]}...")
+            
+        notification_payload = {
+            "type": "NOTIFICATION",
+            "to": {
+                "id": "pushify_user",
+                "number": mobile_number
+            },
+            "sms": {
+                "message": f"SMS: {message_content}"
+            },
+            "call": {
+                "message": f"Voice Call: {message_content}"
+            }
+        }
+        
+        async def send_async():
+            return await notificationapi.send(notification_payload)
+        
+        response = asyncio.run(send_async())
+        
+        response_data = {
+            "success": True,
+            "message": "Notification sent successfully",
+            "data": {
+                "to": mobile_number,
+                "timestamp": datetime.now().isoformat(),
+                "message_preview": message_content[:50] + "..." if len(message_content) > 50 else message_content
+            },
+            "response": {
+                "status_code": getattr(response, 'status_code', 'N/A'),
+                "status": getattr(response, 'reason', 'N/A') if hasattr(response, 'reason') else 'Sent'
+            }
+        }
+        
+        if hasattr(response, 'text'):
+            response_data["response"]["text"] = response.text
+        
+        return jsonify(response_data), 200
+        
+    except Exception as e:
+        error_data = {
+            "success": False,
+            "error": str(e),
+            "timestamp": datetime.now().isoformat(),
+            "suggestion": "Check if the phone number is valid and you have sufficient credits."
+        }
+        print(f"[ERROR] {datetime.now()}: {str(e)}")
+        return jsonify(error_data), 500
+
+@app.route('/health', methods=['GET'])
+def health_check():
+    return jsonify({
+        "status": "healthy",
+        "service": "Pushify Notification API",
+        "timestamp": datetime.now().isoformat(),
+        "endpoints": {
+            "/": "HTML Interface",
+            "/send-notification": "Send notifications (POST)",
+            "/health": "Health check"
+        }
+    }), 200
+
+# =========================================
 #                 SPECIFIED ROUTES
 
 def format_message_time(created_at):

@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LyxPhone</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --text-color: #f1f5f9;
+            --accent-color: #3b82f6;
+            --secondary-color: #8b5cf6;
+            --card-bg: rgba(30, 41, 59, 0.8);
+            --border-color: rgba(100, 116, 139, 0.3);
+            --success-color: #10b981;
+            --error-color: #ef4444;
+            --warning-color: #f59e0b;
+            --gray-500: #64748b;
+            --gray-600: #475569;
+            --gray-700: #334155;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.15) 0%, transparent 50%);
+            z-index: -1;
+            animation: pulse 20s ease-in-out infinite alternate;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 0.5; }
+            100% { opacity: 0.8; }
+        }
+        
+        .container {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 
+                0 20px 40px rgba(0, 0, 0, 0.3),
+                0 0 100px rgba(59, 130, 246, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            padding: 40px;
+            width: 100%;
+            max-width: 500px;
+            border: 1px solid var(--border-color);
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .container:hover {
+            transform: translateY(-5px);
+            box-shadow: 
+                0 25px 50px rgba(0, 0, 0, 0.4),
+                0 0 120px rgba(59, 130, 246, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.15);
+        }
+        
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, 
+                transparent, 
+                var(--accent-color), 
+                var(--secondary-color), 
+                transparent);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 32px;
+            position: relative;
+        }
+        
+        .logo {
+            color: var(--text-color);
+            font-size: 42px;
+            font-weight: 800;
+            margin-bottom: 8px;
+            letter-spacing: -1px;
+            background: linear-gradient(135deg, var(--accent-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 2px 10px rgba(59, 130, 246, 0.3);
+            text-decoration: underline;
+            text-underline-offset: 5px;
+            text-decoration-color: rgba(59, 130, 246, 0.5);
+        }
+        
+        .subtitle {
+            color: var(--gray-500);
+            font-size: 15px;
+            font-weight: 400;
+            margin-top: 4px;
+        }
+        
+        .form-group {
+            margin-bottom: 24px;
+            position: relative;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-color);
+            font-weight: 500;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0.9;
+        }
+        
+        .input-wrapper {
+            position: relative;
+        }
+        
+        input, textarea {
+            width: 100%;
+            padding: 16px 20px;
+            background: rgba(15, 23, 42, 0.6);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            font-size: 15px;
+            font-family: inherit;
+            color: var(--text-color);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+        
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 
+                0 0 0 3px rgba(59, 130, 246, 0.1),
+                0 0 20px rgba(59, 130, 246, 0.2);
+            background: rgba(15, 23, 42, 0.8);
+        }
+        
+        textarea {
+            min-height: 140px;
+            resize: vertical;
+            line-height: 1.5;
+        }
+        
+        .input-icon {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--accent-color);
+            font-size: 18px;
+            opacity: 0.7;
+        }
+        
+        .character-count {
+            position: absolute;
+            right: 16px;
+            bottom: 16px;
+            font-size: 12px;
+            color: var(--gray-500);
+            opacity: 0.7;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 32px;
+        }
+        
+        button {
+            flex: 1;
+            padding: 18px 24px;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            letter-spacing: 0.5px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(255, 255, 255, 0.1), 
+                transparent);
+            transition: left 0.5s ease;
+        }
+        
+        button:hover::before {
+            left: 100%;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-color), var(--secondary-color));
+            color: white;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+        }
+        
+        .btn-primary:disabled {
+            background: var(--gray-600);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+            opacity: 0.6;
+        }
+        
+        .btn-secondary {
+            background: rgba(30, 41, 59, 0.6);
+            color: var(--text-color);
+            border: 2px solid var(--border-color);
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(30, 41, 59, 0.8);
+            border-color: var(--accent-color);
+        }
+        
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        
+        .toast {
+            background: var(--card-bg);
+            color: white;
+            padding: 18px 22px;
+            border-radius: 14px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            box-shadow: 
+                0 10px 30px rgba(0, 0, 0, 0.3),
+                0 0 40px rgba(59, 130, 246, 0.1);
+            transform: translateX(400px);
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            max-width: 350px;
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .toast::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 4px;
+        }
+        
+        .toast.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        
+        .toast.success {
+            border-left: 4px solid var(--success-color);
+        }
+        
+        .toast.success::before {
+            background: var(--success-color);
+        }
+        
+        .toast.error {
+            border-left: 4px solid var(--error-color);
+        }
+        
+        .toast.error::before {
+            background: var(--error-color);
+        }
+        
+        .toast.info {
+            border-left: 4px solid var(--accent-color);
+        }
+        
+        .toast.info::before {
+            background: var(--accent-color);
+        }
+        
+        .toast-icon {
+            font-size: 22px;
+            flex-shrink: 0;
+        }
+        
+        .toast-content {
+            flex: 1;
+        }
+        
+        .toast-title {
+            font-weight: 600;
+            font-size: 15px;
+            margin-bottom: 4px;
+            color: var(--text-color);
+        }
+        
+        .toast-message {
+            font-size: 13px;
+            opacity: 0.8;
+            color: white;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .status-indicator {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: var(--gray-500);
+            opacity: 0.7;
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success-color);
+            animation: pulse-dot 2s ease-in-out infinite;
+        }
+        
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+        
+        @media (max-width: 640px) {
+            .container {
+                padding: 30px 24px;
+                border-radius: 16px;
+            }
+            
+            .logo {
+                font-size: 36px;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+            
+            .toast-container {
+                left: 20px;
+                right: 20px;
+            }
+            
+            .toast {
+                max-width: none;
+            }
+            
+            .status-indicator {
+                bottom: 10px;
+                left: 50%;
+                transform: translateX(-50%);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">LyxPhone</div>
+            <div class="subtitle">Student Call Notification System</div>
+        </div>
+        
+        <form id="notificationForm">
+            <div class="form-group">
+                <label for="mobile">Phone Number</label>
+                <div class="input-wrapper">
+                    <input type="tel" id="mobile" name="mobile" 
+                           placeholder="+254xxxxxxxxx" 
+                           value="+254xxxxxxxxx" required>
+                    <span class="input-icon">
+                        <i class="fas fa-phone"></i>
+                    </span>
+                </div>
+                <small style="color: var(--gray-500); margin-top: 4px; display: block;">
+                    Format: +[country code][number]
+                </small>
+            </div>
+            
+            <div class="form-group">
+                <label for="message">Message Content</label>
+                <textarea id="message" name="message" 
+                         placeholder="Enter your notification message here..." required>
+This is a test notification from LyxPhone. You can edit this message before sending.
+                </textarea>
+                <div class="character-count" id="charCount">0/160</div>
+            </div>
+            
+            <div class="button-group">
+                <button type="submit" class="btn-primary" id="submitBtn">
+                    <span id="btnText">Send Notification</span>
+                    <span id="btnLoader" class="loading" style="display: none;"></span>
+                </button>
+                <button type="button" class="btn-secondary" id="clearBtn">
+                    <span>Clear Form</span>
+                </button>
+            </div>
+        </form>
+    </div>
+    
+    <div class="toast-container" id="toastContainer"></div>
+    
+    <div class="status-indicator" id="statusIndicator">
+        <div class="status-dot"></div>
+        <span>Connected to LyxPhone API</span>
+    </div>
+    
+    <script>
+        class Toast {
+            constructor() {
+                this.container = document.getElementById('toastContainer');
+            }
+            
+            show(title, message, type = 'info', duration = 5000) {
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                
+                const icons = {
+                    success: '<i class="fas fa-check-circle mr-1"></i>',
+                    error: '<i class="fas fa-times-circle mr-1"></i>',
+                    info: '<i class="fas fa-info-circle mr-1"></i>',
+                    warning: '<i class="fas fa-exclamation-triangle mr-1"></i>'
+                };
+                
+                toast.innerHTML = `
+                    <span class="toast-icon">${icons[type] || icons.info}</span>
+                    <div class="toast-content">
+                        <div class="toast-title">${title}</div>
+                        <div class="toast-message">${message}</div>
+                    </div>
+                `;
+                
+                this.container.appendChild(toast);
+                
+                setTimeout(() => toast.classList.add('show'), 10);
+                
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                    setTimeout(() => {
+                        if (toast.parentNode === this.container) {
+                            this.container.removeChild(toast);
+                        }
+                    }, 400);
+                }, duration);
+                
+                return toast;
+            }
+        }
+        
+        const toast = new Toast();
+        
+        const messageTextarea = document.getElementById('message');
+        const charCount = document.getElementById('charCount');
+        
+        messageTextarea.addEventListener('input', function() {
+            const length = this.value.length;
+            charCount.textContent = `${length}/160`;
+            
+            if (length > 140) {
+                charCount.style.color = 'var(--warning-color)';
+            } else if (length > 120) {
+                charCount.style.color = 'var(--gray-500)';
+            } else {
+                charCount.style.color = 'var(--accent-color)';
+            }
+        });
+        
+        messageTextarea.dispatchEvent(new Event('input'));
+        
+        document.getElementById('notificationForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const mobile = document.getElementById('mobile').value.trim();
+            const message = document.getElementById('message').value.trim();
+            const submitBtn = document.getElementById('submitBtn');
+            const btnText = document.getElementById('btnText');
+            const btnLoader = document.getElementById('btnLoader');
+            const statusIndicator = document.getElementById('statusIndicator');
+            
+            if (!mobile.startsWith('+')) {
+                toast.show('Invalid Format', 'Phone number must start with +', 'error');
+                return;
+            }
+            
+            if (!/^\+\d{10,15}$/.test(mobile)) {
+                toast.show('Invalid Number', 'Please enter a valid phone number with country code', 'error');
+                return;
+            }
+            
+            if (message.length > 160) {
+                toast.show('Message Too Long', 'SMS messages should be 160 characters or less', 'warning');
+                return;
+            }
+            
+            submitBtn.disabled = true;
+            btnText.textContent = 'Sending...';
+            btnLoader.style.display = 'inline-block';
+            statusIndicator.innerHTML = '<div class="status-dot" style="background: var(--warning-color)"></div><span>Sending notification...</span>';
+            
+            try {
+                const response = await fetch('/send-notification', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        mobile: mobile,
+                        message: message,
+                        timestamp: new Date().toISOString()
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    toast.show('Success!', 'Notification sent successfully', 'success');
+                    
+                    statusIndicator.innerHTML = '<div class="status-dot" style="background: var(--success-color)"></div><span>Last sent: Just now</span>';
+                    
+                    addToHistory(mobile, message);
+                    
+                } else {
+                    toast.show('Error', data.error || 'Failed to send notification', 'error');
+                    statusIndicator.innerHTML = '<div class="status-dot" style="background: var(--error-color)"></div><span>Failed to send</span>';
+                }
+                
+            } catch (error) {
+                toast.show('Connection Error', 'Could not connect to server', 'error');
+                statusIndicator.innerHTML = '<div class="status-dot" style="background: var(--error-color)"></div><span>Connection lost</span>';
+                console.error('Error:', error);
+            } finally {
+                setTimeout(() => {
+                    submitBtn.disabled = false;
+                    btnText.textContent = 'Send Notification';
+                    btnLoader.style.display = 'none';
+                }, 1000);
+            }
+        });
+        
+        document.getElementById('clearBtn').addEventListener('click', () => {
+            document.getElementById('mobile').value = '';
+            document.getElementById('message').value = '';
+            messageTextarea.dispatchEvent(new Event('input'));
+            toast.show('Form Cleared', 'All fields have been reset', 'info', 3000);
+        });
+        
+        document.getElementById('mobile').addEventListener('input', (e) => {
+            const value = e.target.value;
+            if (value && !value.startsWith('+')) {
+                e.target.style.borderColor = 'var(--error-color)';
+                e.target.style.boxShadow = '0 0 0 3px rgba(239, 68, 68, 0.1)';
+            } else {
+                e.target.style.borderColor = 'var(--border-color)';
+                e.target.style.boxShadow = 'none';
+            }
+        });
+        
+        function addToHistory(phone, message) {
+            const history = JSON.parse(localStorage.getItem('lyxphone_history') || '[]');
+            history.unshift({
+                phone: phone,
+                message: message.substring(0, 50) + (message.length > 50 ? '...' : ''),
+                time: new Date().toLocaleTimeString()
+            });
+            
+            if (history.length > 10) history.pop();
+            
+            localStorage.setItem('lyxphone_history', JSON.stringify(history));
+        }
+        
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                toast.show('Ready to Send', 'Fill in the details and click Send', 'info', 4000);
+            }, 800);
+            
+            fetch('/health')
+                .then(() => {
+                    statusIndicator.innerHTML = '<div class="status-dot"></div><span>Connected to LyxPhone API</span>';
+                })
+                .catch(() => {
+                    statusIndicator.innerHTML = '<div class="status-dot" style="background: var(--error-color)"></div><span>API not connected</span>';
+                    toast.show('API Offline', 'Cannot connect to server. Make sure Flask is running.', 'warning', 6000);
+                });
+        });
+        
+        document.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                document.getElementById('submitBtn').click();
+            }
+        });
+    </script>
+</body>
+</html>

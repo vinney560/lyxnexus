@@ -127,6 +127,10 @@
     .btn-info {
         background: linear-gradient(90deg, #0EA5E9, #0369A1);
     }
+
+    .btn-phone {
+        background: linear-gradient(90deg, #c7304e, #442e76);
+    }
     
     .logo-container {
         background: linear-gradient(135deg, #3B82F6, #8B5CF6);
@@ -723,9 +727,12 @@
                             <line x1="12" y1="22.08" x2="12" y2="12"></line>
                         </svg>                        
                     </div>
-                    <span class="text-xl sm:text-2xl font-bold gradient-text">User Management</span>
+                    <span class="text-xl sm:text-2xl font-bold gradient-text mr-1">Students Management</span>
                 </div>
                 <div class="nav-buttons-container">
+                    <button class="btn btn-phone" onclick="window.location.href='/admin/phone'">
+                        <i class="fas fa-mobile-alt mr-2"></i> Phones
+                    </button>
                     <button class="btn btn-dashboard" onclick="window.location.href='/dashboard'">
                         <i class="fas fa-tachometer-alt mr-2"></i> Dashboard
                     </button>
