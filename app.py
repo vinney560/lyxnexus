@@ -3691,18 +3691,16 @@ class WhatsAppSafeService:
         self.service_type = service_type
         self.max_retries = 2
         
-        # WhatsApp-optimized settings (CRITICAL for no ban!)
         if service_type == 'whatsapp':
-            self.base_delay = 3.1  # 3.1 seconds base delay
-            self.random_variance = 0.2  # ±200ms random
-            self.max_per_hour = 80  # Conservative hourly limit
-            self.max_per_day = 500  # Daily limit
+            self.base_delay = 3.1  
+            self.random_variance = 0.2  
+            self.max_per_hour = 80 
+            self.max_per_day = 500 
             self.message_counter_hour = 0
             self.message_counter_day = 0
             self.last_hour_reset = datetime.now()
             self.last_day_reset = datetime.now()
         else:
-            # SMS settings (your original)
             self.base_delay = 6
             self.random_variance = 0
         
@@ -3734,7 +3732,7 @@ class WhatsAppSafeService:
         if self.service_type == 'whatsapp':
             variance = random.uniform(-self.random_variance, self.random_variance)
             delay = self.base_delay + variance
-            return max(0.15, delay)  # Minimum 150ms
+            return max(0.15, delay) 
         return self.base_delay
     
     def check_rate_limits(self):
@@ -4073,18 +4071,46 @@ def whatsapp_bulk(message="Message", user_ids=None, app=None):
             
             total_users = len(users)
             
-            # Estimate time (for user info)
-            if total_users > 0:
-                estimated_time = total_users * 3.1  # 3.1 seconds per message
-                estimated_minutes = estimated_time / 60
-                print(f"📱 Sending {total_users} WhatsApp messages")
-                print(f"⏱️ Estimated time: {estimated_minutes:.1f} minutes")
-                print(f"🔒 Anti-ban protection: ACTIVE")
+            # 🚨 DIAGNOSTIC: Check if we have users
+            print(f"🔄 DEBUG: Found {total_users} users with mobile numbers")
+            if total_users == 0:
+                print("❌ ERROR: No users found with mobile numbers!")
+                return {"status": "error", "message": "No users with mobile numbers"}
+            
+            # 🚨 DIAGNOSTIC: Show first 3 users
+            for i, user in enumerate(users[:3]):
+                print(f"   User {i+1}: {user.username} - {user.mobile}")
+            
+            # Estimate time (for user info) - MOVE THIS BEFORE SENDING
+            estimated_time = total_users * 0.3  # 300ms per message
+            estimated_minutes = estimated_time / 60
+            print(f"📱 Sending {total_users} WhatsApp messages")
+            print(f"⏱️ Estimated time: {estimated_minutes:.1f} minutes")
+            print(f"🔒 Anti-ban protection: ACTIVE")
             
             @async_task
             def send_background():
                 with app.app_context():
                     service = get_whatsapp_service(app)
+                    
+                    # 🚨 DIAGNOSTIC: Test API connection with ONE user first
+                    if users:
+                        test_user = users[0]
+                        test_message = "WhatsApp test message"
+                        print(f"🧪 Testing API with user: {test_user.username}")
+                        
+                        test_result = service.send_single_message(
+                            test_user.mobile, 
+                            test_message
+                        )
+                        
+                        print(f"🧪 Test result: {'SUCCESS' if test_result['success'] else 'FAILED'}")
+                        if not test_result['success']:
+                            print(f"🧪 Error: {test_result.get('error', 'Unknown')}")
+                            print(f"🧪 Response: {test_result.get('response', 'No response')}")
+                            return {"test_failed": True, "result": test_result}
+                    
+                    # If test passed, send all
                     results = service.send_bulk_messages(users, message)
                     
                     # Summary
@@ -4100,10 +4126,13 @@ def whatsapp_bulk(message="Message", user_ids=None, app=None):
                 "status": "started", 
                 "total_users": total_users,
                 "anti_ban": True,
-                "estimated_minutes": estimated_minutes if total_users > 0 else 0
+                "estimated_minutes": estimated_minutes
             }
         
     except Exception as e:
+        print(f"❌ EXCEPTION in whatsapp_bulk: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return {"status": "error", "message": str(e)}
 
 def sms_bulk(message="Message", user_ids=None, app=None):
