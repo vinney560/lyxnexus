@@ -3690,13 +3690,11 @@ class WhatsAppService:
     def __init__(self, app=None):
         self.app = app
         
-        # WhatsApp-optimized settings
-        self.base_delay = 0.3  # 300ms base delay
-        self.random_variance = 0.2  # ±200ms random
+        self.base_delay = 5.5 
+        self.random_variance = 0.2
         self.max_retries = 2
         
-        # Rate limiting (EndlessMessages limits)
-        self.max_per_hour = 100  # Conservative
+        self.max_per_hour = 250  # Conservative
         self.max_per_day = 1000  # Daily limit
         self.message_counter_hour = 0
         self.message_counter_day = 0
@@ -3711,7 +3709,6 @@ class WhatsAppService:
     def api_key(self):
         """Get WhatsApp API key from config"""
         if self.app:
-            # Use WHATSAPP_API_KEY if configured, fallback to SMS key
             return self.app.config.get('WHATSAPP_API_KEY') or \
                    self.app.config.get('SMS_API_KEY', 'd3dd8ae41cd64c6a89556876648e28f9')
         return 'd3dd8ae41cd64c6a89556876648e28f9'
@@ -3733,23 +3730,20 @@ class WhatsAppService:
         """Get randomized delay to avoid pattern detection"""
         variance = random.uniform(-self.random_variance, self.random_variance)
         delay = self.base_delay + variance
-        return max(0.15, delay)  # Minimum 150ms
+        return max(2.75, delay)
     
     def check_rate_limits(self):
         """Enforce hourly and daily limits"""
         now = datetime.now()
         
-        # Reset hourly counter if needed
         if (now - self.last_hour_reset).seconds > 3600:
             self.message_counter_hour = 0
             self.last_hour_reset = now
         
-        # Reset daily counter if needed
         if (now - self.last_day_reset).days >= 1:
             self.message_counter_day = 0
             self.last_day_reset = now
         
-        # Check hourly limit
         if self.message_counter_hour >= self.max_per_hour:
             wait_time = 3600 - (now - self.last_hour_reset).seconds
             print(f"⚠️ Hourly limit reached. Waiting {wait_time} seconds...")
@@ -3757,11 +3751,10 @@ class WhatsAppService:
             self.message_counter_hour = 0
             self.last_hour_reset = datetime.now()
         
-        # Check daily limit
         if self.message_counter_day >= self.max_per_day:
             wait_time = 86400 - (now - self.last_day_reset).seconds
             print(f"⚠️ Daily limit reached. Waiting {wait_time/3600:.1f} hours...")
-            time.sleep(min(wait_time, 3600))  # Wait max 1 hour
+            time.sleep(min(wait_time, 3600))
             self.message_counter_day = 0
             self.last_day_reset = datetime.now()
     
@@ -3769,12 +3762,10 @@ class WhatsAppService:
         """Personalize WhatsApp messages"""
         personalized = base_message
         
-        # Add name if available (50% chance)
         if hasattr(user, 'name') and random.random() > 0.5:
             name_part = user.name.split()[0] if ' ' in user.name else user.name
             personalized = f"Hi {name_part}! {personalized}"
         
-        # Add emoji (30% chance)
         if random.random() > 0.7:
             emojis = ["🙂", "👋", "✨", "💫", "🌟", "🎯", "🔥", "💡", "🚀"]
             personalized = f"{random.choice(emojis)} {personalized}"
@@ -3786,7 +3777,6 @@ class WhatsAppService:
         if not phone_number:
             return None
 
-        # Remove all non-digits
         digits = re.sub(r'\D', '', str(phone_number))
 
         if not digits:
@@ -3843,15 +3833,14 @@ class WhatsAppService:
                 'formatted': formatted_number
             }
         
-        # EndlessMessages WhatsApp payload
         payload = {
             "number": formatted_number,
             "apikey": self.api_key,
             "text": message,
-            "fileData": "",  # Leave empty for text messages
-            "fileName": "",  # Leave empty for text messages
-            "priority": 1,   # WhatsApp priority
-            "scheduledDate": ""  # Immediate send
+            "fileData": "", 
+            "fileName": "", 
+            "priority": 1,  
+            "scheduledDate": ""
         }
         
         print(f"🔧 API Key (first 10 chars): {self.api_key[:10]}...")
@@ -3859,16 +3848,13 @@ class WhatsAppService:
         print(f"🔧 Payload keys: {list(payload.keys())}")
         
         try:
-            # Create HTTPS connection
             conn = http.client.HTTPSConnection(self.server_host, timeout=30)
             
-            # Prepare headers
             headers = {
                 'Content-Type': 'application/json',
                 'User-Agent': 'Mozilla/5.0'
             }
             
-            # Send request
             json_payload = json.dumps(payload)
             print(f"📨 Sending to {self.server_host}/send_message")
             
@@ -3883,18 +3869,15 @@ class WhatsAppService:
             print(f"📬 Response status: {res.status}")
             print(f"📬 Response: {response_text[:200]}")
             
-            # Parse response
             success = False
             try:
                 response_json = json.loads(response_text)
-                # Check for success indicators
                 if isinstance(response_json, dict):
                     success = response_json.get('status', '').lower() in ['success', 'sent', 'queued', 'ok']
                 elif isinstance(response_json, list):
                     success = any(item.get('status', '').lower() in ['success', 'sent'] 
                                 for item in response_json if isinstance(item, dict))
             except:
-                # If not JSON, check text
                 success = any(keyword in response_text.lower() 
                             for keyword in ['success', 'sent', 'message queued', 'ok'])
             
@@ -3908,7 +3891,6 @@ class WhatsAppService:
                 'payload': payload
             }
             
-            # Retry logic
             if not success and retry_count < self.max_retries:
                 print(f"🔄 Retry {retry_count + 1}/{self.max_retries}")
                 time.sleep(random.uniform(2, 5))
@@ -3947,7 +3929,6 @@ class WhatsAppService:
         
         for index, user in enumerate(user_list):
             try:
-                # Extract user info
                 if hasattr(user, 'mobile'):
                     phone = user.mobile
                     username = user.username if hasattr(user, 'username') else 'N/A'
@@ -3963,19 +3944,16 @@ class WhatsAppService:
                     results['failed'] += 1
                     continue
                 
-                # Validate phone
                 if not self.validate_phone_number(phone):
                     print(f"⚠️ Skipping {username}: Invalid phone format {phone}")
                     results['invalid_numbers'] += 1
                     continue
                 
-                # Check rate limits
                 self.check_rate_limits()
                 
                 # Personalize message
                 message = self.personalize_message(base_message, user)
                 
-                # Add safe delay
                 delay = self.get_safe_delay()
                 print(f"⏳ Delay {delay:.2f}s before user {index + 1}")
                 time.sleep(delay)
@@ -4090,7 +4068,10 @@ def whatsapp_bulk(message="Message", user_ids=None, app=None):
             def send_background():
                 with app.app_context():
                     service = get_whatsapp_service(app)
-                    results = service.send_bulk_whatsapp(users, message)
+                    for i in users:
+                        personalised_message = f"Hi {i.username.split()[0]}!\n\n{message}"
+                        print(f"Preparing message for {i.username}")
+                    results = service.send_bulk_whatsapp(users, personalised_message)
                     
                     # Summary
                     success_rate = (results['successful'] / total_users * 100) if total_users > 0 else 0
@@ -6057,7 +6038,8 @@ def create_announcement():
 
     # Mirror to browser push (system notification)
     send_webpush(data)
-    whatsapp_bulk(f"New announcement: {announcement.title}. https://lyxnexus.lyxnexus.xo.je/main-page")
+    whatsapp_bulk(f"New announcement: *{announcement.title}*.\n\n"
+                  f"🔗 *LyxNexus Bot*.\n\n")
 
     return jsonify({'message': 'Announcement created successfully', 'id': announcement.id}), 201
 
@@ -6106,7 +6088,8 @@ def update_announcement(id):
         'timestamp': datetime.utcnow().isoformat()
     }
     send_webpush(data)
-    whatsapp_bulk(f"Announcement eddited: {announcement.title}. https://lyxnexus.lyxnexus.xo.je/main-page")
+    whatsapp_bulk(f"Announcement edited: *{announcement.title}*\n\n"
+                  f"🔗 *LyxNexus Bot*.\n\n")
 
     return jsonify({'message': 'Announcement updated successfully'})
 
@@ -6143,7 +6126,8 @@ def delete_announcement(id):
     db.session.delete(announcement)
     db.session.commit()
     send_webpush(data)
-    whatsapp_bulk(f"Announcement delete: {announcement.title}")
+    whatsapp_bulk(f"Announcement delete: *~{announcement.title}~*\n\n"
+                  f"🔗 *LyxNexus Bot*.\n\n")
 
     return jsonify({'message': 'Announcement deleted successfully'})
 
@@ -6227,7 +6211,8 @@ def create_assignment():
         'timestamp': datetime.utcnow().isoformat()
     }
     send_webpush(data)
-    whatsapp_bulk(f"New assignment: {assignment.title}")
+    whatsapp_bulk(f"New assignment: *{assignment.title}*\n\n"
+                  f"🔗 *LyxNexus Bot*\n\n")
 
     return jsonify({'message': 'Assignment created successfully', 'id': assignment.id}), 201
 

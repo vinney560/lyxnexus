@@ -1,159 +1,99 @@
 """
-sms_service.py - Standalone SMS service with mock database
-Usage: Import this file and use SMSDeliveryService class
+whatsapp_service.py - Simple WhatsApp sender for 2 numbers
+Usage: python whatsapp_service.py
 """
 
 import time
 import re
-import threading
 import http.client
 import json
+import random
 from datetime import datetime
-from dataclasses import dataclass
-from typing import List, Optional, Dict, Any
 import logging
 
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    format='%(asctime)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
 
-
-# Mock User Model
-@dataclass
-class MockUser:
-    """Mock User model for testing"""
-    id: int
-    username: str
-    mobile: str
-    email: str
-    is_active: bool = True
+class WhatsAppSender:
+    """Simple WhatsApp sender for 2 mobile numbers"""
     
-    @classmethod
-    def query(cls):
-        """Mock query method"""
-        return MockQuery()
-    
-    @classmethod
-    def filter(cls, *args, **kwargs):
-        """Mock filter method"""
-        return MockQuery()
-
-
-class MockQuery:
-    """Mock SQLAlchemy query"""
-    
-    def __init__(self):
-        self.users = generate_mock_users()
-    
-    def all(self):
-        return self.users
-    
-    def limit(self, n):
-        return self.users[:n]
-    
-    def filter(self, *args, **kwargs):
-        # Simplified filter logic
-        filtered_users = []
-        for user in self.users:
-            if hasattr(args[0], 'left'):
-                # Handle User.mobile.isnot(None)
-                if user.mobile:
-                    filtered_users.append(user)
-            elif 'id' in kwargs:
-                # Handle id in list
-                if user.id in kwargs.get('id', []):
-                    filtered_users.append(user)
-        self.users = filtered_users
-        return self
-
-
-def generate_mock_users():
-    """Generate mock user data for testing"""
-    return [
-        MockUser(1, "john_doe", "0740694312", "john@example.com"),
-        MockUser(2, "jane_smith", "0768508448", "jane@example.com"),
-    ]
-
-
-class SMSDeliveryService:
-    """SMS delivery service with rate limiting and error handling"""
-    
-    def __init__(self, api_key="d3dd8ae41cd64c6a89556876648e28f9", 
-                 server_url="https://w2.endlessmessages.com"):
+    def __init__(self, api_key="d3dd8ae41cd64c6a89556876648e28f9"):
         self.api_key = api_key
-        self.server_url = server_url
-        self.server_host = self.server_url.replace("https://", "")
-        self.rate_limit_delay = 6  # seconds between messages
-        self.max_retries = 2
-        self.test_mode = False  # Set to True for dry runs
+        self.server_host = "w2.endlessmessages.com"
+        self.base_delay = 0.3  # 300ms for WhatsApp
+        self.random_variance = 0.2  # ±200ms random
         
-    def format_phone_number(self, phone_number):
-        """Convert phone number to +254 format"""
-        if not phone_number:
+    def format_phone(self, phone):
+        """Format phone to +254"""
+        if not phone:
             return None
             
-        cleaned = re.sub(r'[\s\-\(\)]', '', str(phone_number))
+        # Remove all non-digits
+        digits = re.sub(r'\D', '', str(phone))
         
-        if cleaned.startswith('07') and len(cleaned) == 10:
-            return f"+254{cleaned[1:]}"
-        elif cleaned.startswith('7') and len(cleaned) == 9:
-            return f"+254{cleaned}"
-        elif cleaned.startswith('+254') and len(cleaned) == 13:
-            return cleaned
-        elif cleaned.startswith('254') and len(cleaned) == 12:
-            return f"+{cleaned}"
-        elif cleaned.startswith('0'):
-            return f"+254{cleaned[1:]}"
-        else:
-            return cleaned if cleaned.startswith('+') else f"+{cleaned}"
+        if not digits:
+            return None
+            
+        # If starts with 0, remove it
+        if digits.startswith('0'):
+            digits = digits[1:]
+        
+        # If 9 digits, add +254
+        if len(digits) == 9:
+            return f"+254{digits}"
+        
+        # If 12 digits (254XXXXXXXXX), add +
+        if len(digits) == 12 and digits.startswith('254'):
+            return f"+{digits}"
+        
+        # Default: take last 9 digits and add +254
+        if len(digits) >= 9:
+            return f"+254{digits[-9:]}"
+        
+        return None
     
-    def validate_phone_number(self, phone_number):
-        """Validate if phone number is in correct format"""
-        formatted = self.format_phone_number(phone_number)
-        if formatted and formatted.startswith('+254') and len(formatted) == 13:
-            # Additional validation for Kenyan numbers
-            return formatted[4:].isdigit()
-        return False
+    def format_whatsapp_message(self, title, description, link=None):
+        """Format message for WhatsApp with proper styling"""
+        
+        message = f"""*📢 {title}*
+
+{description}
+
+"""
+        
+        if link:
+            message += f"🔗 *Link:* {link}\n\n"
+        
+        message += "_Sent via University Announcements System_"
+        
+        return message
     
-    def send_single_sms(self, phone_number, message, priority=0, retry_count=0):
-        """Send SMS to a single recipient with retry logic"""
+    def send_single(self, phone, message):
+        """Send WhatsApp to one number"""
+        formatted_phone = self.format_phone(phone)
         
-        if self.test_mode:
-            logger.info(f"TEST MODE: Would send to {phone_number}: {message[:50]}...")
-            return {
-                'success': True,
-                'status_code': 200,
-                'phone': phone_number,
-                'formatted': self.format_phone_number(phone_number),
-                'timestamp': datetime.now().isoformat(),
-                'response': '{"status": "success", "message": "Test mode - no actual SMS sent"}'
-            }
+        if not formatted_phone:
+            return {"success": False, "error": "Invalid phone number"}
         
-        formatted_number = self.format_phone_number(phone_number)
-        
-        if not formatted_number or not self.validate_phone_number(phone_number):
-            return {
-                'success': False,
-                'error': 'Invalid phone number format',
-                'phone': phone_number,
-                'formatted': formatted_number
-            }
+        print(f"📤 Sending to: {phone} -> {formatted_phone}")
+        print(f"📝 Message: {message[:100]}...")
         
         payload = {
-            "number": formatted_number,
+            "number": formatted_phone,
             "apikey": self.api_key,
-            "text": message[:160],  # Truncate to 160 chars
+            "text": message,
             "fileData": "",
             "fileName": "",
-            "priority": priority,
+            "priority": 1,  # WhatsApp priority
             "scheduledDate": ""
         }
         
         try:
-            conn = http.client.HTTPSConnection(self.server_host)
+            conn = http.client.HTTPSConnection(self.server_host, timeout=30)
             conn.request("POST", "/send_message", json.dumps(payload), 
                         {'Content-Type': 'application/json'})
             
@@ -162,240 +102,220 @@ class SMSDeliveryService:
             response_text = data.decode("utf-8")
             conn.close()
             
-            success = res.status in [200, 201]
+            # Parse response
+            success = False
+            try:
+                response_json = json.loads(response_text)
+                success = response_json.get('status', '').lower() in ['success', 'sent', 'queued']
+            except:
+                success = any(keyword in response_text.lower() 
+                            for keyword in ['success', 'sent', 'message queued'])
             
             result = {
                 'success': success,
                 'status_code': res.status,
-                'phone': phone_number,
-                'formatted': formatted_number,
-                'timestamp': datetime.now().isoformat(),
-                'response': response_text
+                'phone': phone,
+                'formatted': formatted_phone,
+                'response': response_text[:200]
             }
             
-            # Retry logic for failed attempts
-            if not success and retry_count < self.max_retries:
-                time.sleep(2)  # Wait before retry
-                return self.send_single_sms(phone_number, message, priority, retry_count + 1)
-                
             return result
             
         except Exception as e:
-            if retry_count < self.max_retries:
-                time.sleep(2)
-                return self.send_single_sms(phone_number, message, priority, retry_count + 1)
-            
             return {
                 'success': False,
                 'error': str(e),
-                'phone': phone_number,
-                'formatted': formatted_number,
-                'timestamp': datetime.now().isoformat()
+                'phone': phone,
+                'formatted': formatted_phone
             }
     
-    def send_bulk_sms(self, user_list, message, callback=None):
-        """
-        Send SMS to multiple users with rate limiting
+    def send_to_two_numbers(self, phone1, phone2, message):
+        """Send WhatsApp to both numbers with delay"""
+        results = []
         
-        Args:
-            user_list: List of User objects or dictionaries with 'mobile' key
-            message: SMS message to send
-            callback: Optional callback function to handle results
-        """
-        results = {
-            'total': len(user_list),
-            'successful': 0,
-            'failed': 0,
-            'invalid_numbers': 0,
-            'details': []
-        }
+        phones = [phone1, phone2]
         
-        logger.info(f"Starting bulk SMS send to {len(user_list)} users")
-        
-        for index, user in enumerate(user_list):
-            try:
-                # Extract phone number from User object or dict
-                if hasattr(user, 'mobile'):
-                    phone = user.mobile
-                    username = user.username if hasattr(user, 'username') else 'N/A'
-                elif isinstance(user, dict):
-                    phone = user.get('mobile')
-                    username = user.get('username', 'N/A')
-                else:
-                    continue
-                
-                # Skip if no phone number
-                if not phone:
-                    result = {
-                        'success': False,
-                        'error': 'No phone number',
-                        'username': username,
-                        'phone': phone,
-                        'timestamp': datetime.now().isoformat()
-                    }
-                    results['details'].append(result)
-                    results['failed'] += 1
-                    logger.warning(f"No phone for {username}")
-                    continue
-                
-                # Validate phone number
-                if not self.validate_phone_number(phone):
-                    result = {
-                        'success': False,
-                        'error': 'Invalid phone format',
-                        'username': username,
-                        'phone': phone,
-                        'timestamp': datetime.now().isoformat()
-                    }
-                    results['details'].append(result)
-                    results['invalid_numbers'] += 1
-                    logger.warning(f"Invalid phone for {username}: {phone}")
-                    continue
-                
-                # Send SMS with rate limiting
-                logger.info(f"Sending to {username} ({phone}) - {index + 1}/{len(user_list)}")
-                time.sleep(self.rate_limit_delay)
-                result = self.send_single_sms(phone, message)
-                
-                # Add username to result
-                result['username'] = username
-                
-                if result['success']:
-                    results['successful'] += 1
-                    logger.info(f"Successfully sent to {username}")
-                else:
-                    results['failed'] += 1
-                    logger.error(f"Failed to send to {username}: {result.get('error', 'Unknown error')}")
-                
-                results['details'].append(result)
-                
-                # Call callback if provided
-                if callback:
-                    callback(result)
-                
-            except Exception as e:
-                error_result = {
-                    'success': False,
-                    'error': str(e),
-                    'username': username if 'username' in locals() else 'Unknown',
-                    'phone': phone if 'phone' in locals() else 'Unknown',
-                    'timestamp': datetime.now().isoformat()
-                }
-                results['details'].append(error_result)
-                results['failed'] += 1
-                logger.error(f"Exception sending to user: {str(e)}")
-        
-        logger.info(f"Bulk SMS completed: {results['successful']} successful, "
-                   f"{results['failed']} failed, {results['invalid_numbers']} invalid")
+        for i, phone in enumerate(phones):
+            print(f"\n[{i+1}/2] Processing {phone}")
+            
+            # Send message
+            result = self.send_single(phone, message)
+            results.append(result)
+            
+            if result['success']:
+                print(f"✅ Sent to {phone}")
+            else:
+                print(f"❌ Failed: {result.get('error', 'Unknown')}")
+            
+            # Add delay between messages (for WhatsApp anti-ban)
+            if i < len(phones) - 1:
+                delay = self.base_delay + random.uniform(-self.random_variance, self.random_variance)
+                delay = max(0.15, delay)  # Minimum 150ms
+                print(f"⏳ Waiting {delay:.2f}s...")
+                time.sleep(delay)
         
         return results
-
-    def send_to_all_users(self, message, batch_size=50, test_mode=False):
-        """Send SMS to all users in database in batches"""
-        self.test_mode = test_mode
+    
+    def send_announcement(self, phone1, phone2, title, description, link=None):
+        """Send formatted announcement to both numbers"""
+        # Format message for WhatsApp
+        message = self.format_whatsapp_message(title, description, link)
         
+        print("=" * 60)
+        print("📱 WHATSAPP ANNOUNCEMENT")
+        print("=" * 60)
+        print(f"Title: {title}")
+        print(f"Description: {description[:100]}...")
+        if link:
+            print(f"Link: {link}")
+        print(f"Recipients: {phone1}, {phone2}")
+        print("=" * 60)
+        
+        # Send to both numbers
+        return self.send_to_two_numbers(phone1, phone2, message)
+
+# ==================== SAMPLE ANNOUNCEMENTS ====================
+SAMPLE_ANNOUNCEMENTS = [
+    {
+        "title": "EXAMINATION TIMETABLE RELEASED",
+        "description": "The end of semester examination timetable has been released. Please check the student portal for your schedule. All exams will be held in the main examination halls.",
+        "link": "https://portal.university.ac.ke/exams"
+    },
+    {
+        "title": "FEE PAYMENT REMINDER",
+        "description": "This is a reminder that the fee payment deadline is 30th November 2025. Late payments will attract a penalty. Please clear your fees to avoid inconvenience.",
+        "link": "https://portal.university.ac.ke/fees"
+    },
+    {
+        "title": "GRADUATION CEREMONY",
+        "description": "The 24th Graduation Ceremony will be held on 12th December 2025. All graduating students must attend the rehearsal on 10th December.",
+        "link": None
+    }
+]
+
+# ==================== MAIN EXECUTION ====================
+def main():
+    """Main function to send WhatsApp announcements"""
+    
+    print("🚀 WhatsApp Announcement Sender")
+    print("=" * 60)
+    
+    # The two mobile numbers
+    PHONE1 = "0740694312"
+    PHONE2 = "0768508448"
+    
+    print(f"📱 Number 1: {PHONE1}")
+    print(f"📱 Number 2: {PHONE2}")
+    print("=" * 60)
+    
+    # Create WhatsApp sender
+    sender = WhatsAppSender()
+    
+    # Test phone formatting
+    print("\n🔧 Phone Formatting Test:")
+    for phone in [PHONE1, PHONE2]:
+        formatted = sender.format_phone(phone)
+        print(f"  {phone} -> {formatted}")
+    
+    # Ask user which announcement to send
+    print("\n📋 Available Announcements:")
+    for i, announcement in enumerate(SAMPLE_ANNOUNCEMENTS, 1):
+        print(f"{i}. {announcement['title']}")
+    
+    print(f"{len(SAMPLE_ANNOUNCEMENTS) + 1}. Custom announcement")
+    
+    choice = input("\nSelect announcement (1-4): ").strip()
+    
+    if choice == "4":
+        # Custom announcement
+        title = input("Enter title: ").strip()
+        description = input("Enter description: ").strip()
+        link = input("Enter link (press Enter to skip): ").strip() or None
+        
+        if not title or not description:
+            print("❌ Title and description are required!")
+            return
+    else:
         try:
-            # Get all users with mobile numbers
-            users = MockUser.query().filter(MockUser.mobile.isnot(None)).all()
-            
-            total_users = len(users)
-            logger.info(f"Found {total_users} users with mobile numbers")
-            
-            results = {
-                'total': total_users,
-                'successful': 0,
-                'failed': 0,
-                'invalid_numbers': 0,
-                'batches': []
-            }
-            
-            # Process in batches
-            for i in range(0, total_users, batch_size):
-                batch = users[i:i + batch_size]
-                logger.info(f"Processing batch {i // batch_size + 1} with {len(batch)} users")
-                
-                batch_result = self.send_bulk_sms(batch, message)
-                
-                results['successful'] += batch_result['successful']
-                results['failed'] += batch_result['failed']
-                results['invalid_numbers'] += batch_result['invalid_numbers']
-                results['batches'].append({
-                    'batch_number': i // batch_size + 1,
-                    'results': batch_result
-                })
-                
-                logger.info(
-                    f"Batch {i // batch_size + 1} completed: "
-                    f"{batch_result['successful']} successful, "
-                    f"{batch_result['failed']} failed"
-                )
-            
-            return results
-            
-        except Exception as e:
-            logger.error(f"Error in send_to_all_users: {str(e)}")
-            return {
-                'success': False,
-                'error': str(e),
-                'total': 0,
-                'successful': 0,
-                'failed': 0
-            }
-
-
-# Helper functions for easy integration
-def send_immediate_sms(phone_number, message):
-    """Quick function to send immediate SMS"""
-    service = SMSDeliveryService()
-    return service.send_single_sms(phone_number, message)
-
-
-def send_bulk_sms_to_users(users, message):
-    """Quick function to send bulk SMS"""
-    service = SMSDeliveryService()
-    return service.send_bulk_sms(users, message)
-
-
-def run_demo():
-    """Run a demonstration of the SMS service"""
-    print("=" * 60)
-    print("SMS Service Demo")
-    print("=" * 60)
+            idx = int(choice) - 1
+            if 0 <= idx < len(SAMPLE_ANNOUNCEMENTS):
+                announcement = SAMPLE_ANNOUNCEMENTS[idx]
+                title = announcement["title"]
+                description = announcement["description"]
+                link = announcement["link"]
+            else:
+                print("❌ Invalid choice!")
+                return
+        except:
+            print("❌ Invalid input!")
+            return
     
-    # Create service instance
-    service = SMSDeliveryService()
-    
-    # Test single SMS
-    print("\n1. Testing single SMS:")
-    result = service.send_single_sms("0740694312",
-        "*Title*"
-        "\nThis is a test message sent via the SMSDeliveryService.")
-    print(f"   Success: {result['success']}")
-    print(f"   To: {result.get('formatted', 'N/A')}")
-    
-    # Test bulk SMS
-    print("\n2. Testing bulk SMS with mock users:")
-    users = generate_mock_users()[:5]  # First 5 users
-    results = service.send_bulk_sms(users, "Bulk test message")
-    
-    print(f"   Total: {results['total']}")
-    print(f"   Successful: {results['successful']}")
-    print(f"   Failed: {results['failed']}")
-    print(f"   Invalid numbers: {results['invalid_numbers']}")
-    
-    # Test all users
-    print("\n3. Testing send to all users (test mode):")
-    results = service.send_to_all_users("Newsletter update!", test_mode=True)
-    
-    print(f"   Total users: {results['total']}")
-    print(f"   Successful: {results['successful']}")
-    print(f"   Failed: {results['failed']}")
-    
+    # Confirm before sending
     print("\n" + "=" * 60)
-    print("Demo completed!")
+    print("📤 READY TO SEND")
     print("=" * 60)
+    print(f"Title: {title}")
+    print(f"Description: {description[:100]}...")
+    if link:
+        print(f"Link: {link}")
+    print(f"To: {PHONE1}, {PHONE2}")
+    
+    confirm = input("\nSend this announcement? (yes/no): ").strip().lower()
+    
+    if confirm != 'yes':
+        print("❌ Cancelled!")
+        return
+    
+    # Send the announcement
+    print("\n" + "=" * 60)
+    print("📨 SENDING ANNOUNCEMENT...")
+    print("=" * 60)
+    
+    results = sender.send_announcement(PHONE1, PHONE2, title, description, link)
+    
+    # Show results
+    print("\n" + "=" * 60)
+    print("📊 RESULTS")
+    print("=" * 60)
+    
+    success_count = sum(1 for r in results if r['success'])
+    
+    for i, result in enumerate(results, 1):
+        status = "✅ SUCCESS" if result['success'] else "❌ FAILED"
+        print(f"\nRecipient {i}: {result['phone']}")
+        print(f"  Status: {status}")
+        if not result['success']:
+            print(f"  Error: {result.get('error', 'Unknown')}")
+    
+    print(f"\n📈 Summary: {success_count}/2 successful")
+    
+    # Save log
+    log_entry = {
+        "timestamp": datetime.now().isoformat(),
+        "title": title,
+        "description": description[:100],
+        "link": link,
+        "recipients": [PHONE1, PHONE2],
+        "results": results,
+        "success_rate": f"{success_count}/2"
+    }
+    
+    # Save to log file
+    try:
+        with open("whatsapp_log.json", "a") as f:
+            f.write(json.dumps(log_entry) + "\n")
+        print(f"\n📝 Log saved to whatsapp_log.json")
+    except:
+        print(f"\n⚠️ Could not save log file")
 
+# Quick send function (for importing)
+def quick_send(title, description, link=None):
+    """Quick function to send announcement to both numbers"""
+    PHONE1 = "0740694312"
+    PHONE2 = "0768508448"
+    
+    sender = WhatsAppSender()
+    return sender.send_announcement(PHONE1, PHONE2, title, description, link)
 
 if __name__ == "__main__":
-    # Run demo when script is executed directly
-    run_demo()
+    main()
