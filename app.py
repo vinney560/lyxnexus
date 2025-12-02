@@ -3678,31 +3678,30 @@ import threading
 import http.client
 import json
 import random
+import urllib.parse
 from datetime import datetime, timedelta
 from functools import wraps
 from flask import current_app
 from sqlalchemy.exc import SQLAlchemyError
 
-class WhatsAppSafeService:
-    """WhatsApp delivery service with anti-ban protection"""
+class WhatsAppService:
+    """WhatsApp delivery service for EndlessMessages.com"""
     
-    def __init__(self, app=None, service_type='whatsapp'):
+    def __init__(self, app=None):
         self.app = app
-        self.service_type = service_type
+        
+        # WhatsApp-optimized settings
+        self.base_delay = 0.3  # 300ms base delay
+        self.random_variance = 0.2  # ±200ms random
         self.max_retries = 2
         
-        if service_type == 'whatsapp':
-            self.base_delay = 3.1  
-            self.random_variance = 0.2  
-            self.max_per_hour = 80 
-            self.max_per_day = 500 
-            self.message_counter_hour = 0
-            self.message_counter_day = 0
-            self.last_hour_reset = datetime.now()
-            self.last_day_reset = datetime.now()
-        else:
-            self.base_delay = 6
-            self.random_variance = 0
+        # Rate limiting (EndlessMessages limits)
+        self.max_per_hour = 100  # Conservative
+        self.max_per_day = 1000  # Daily limit
+        self.message_counter_hour = 0
+        self.message_counter_day = 0
+        self.last_hour_reset = datetime.now()
+        self.last_day_reset = datetime.now()
         
     def init_app(self, app):
         """Initialize with Flask app"""
@@ -3710,30 +3709,31 @@ class WhatsAppSafeService:
         
     @property
     def api_key(self):
-        """Get API key from app config"""
+        """Get WhatsApp API key from config"""
         if self.app:
-            return self.app.config.get('SMS_API_KEY', 'd3dd8ae41cd64c6a89556876648e28f9')
+            # Use WHATSAPP_API_KEY if configured, fallback to SMS key
+            return self.app.config.get('WHATSAPP_API_KEY') or \
+                   self.app.config.get('SMS_API_KEY', 'd3dd8ae41cd64c6a89556876648e28f9')
         return 'd3dd8ae41cd64c6a89556876648e28f9'
     
     @property
     def server_url(self):
-        """Get server URL from app config"""
+        """EndlessMessages server URL"""
         if self.app:
-            return self.app.config.get('SMS_SERVER_URL', 'https://w2.endlessmessages.com')
+            return self.app.config.get('WHATSAPP_SERVER_URL') or \
+                   self.app.config.get('SMS_SERVER_URL', 'https://w2.endlessmessages.com')
         return 'https://w2.endlessmessages.com'
     
     @property
     def server_host(self):
-        """Get server host"""
+        """Get server host without https://"""
         return self.server_url.replace("https://", "")
     
     def get_safe_delay(self):
         """Get randomized delay to avoid pattern detection"""
-        if self.service_type == 'whatsapp':
-            variance = random.uniform(-self.random_variance, self.random_variance)
-            delay = self.base_delay + variance
-            return max(0.15, delay) 
-        return self.base_delay
+        variance = random.uniform(-self.random_variance, self.random_variance)
+        delay = self.base_delay + variance
+        return max(0.15, delay)  # Minimum 150ms
     
     def check_rate_limits(self):
         """Enforce hourly and daily limits"""
@@ -3766,95 +3766,137 @@ class WhatsAppSafeService:
             self.last_day_reset = datetime.now()
     
     def personalize_message(self, base_message, user):
-        """Personalize messages to avoid identical content"""
+        """Personalize WhatsApp messages"""
         personalized = base_message
-        
-        # Add personal touch (30% chance)
-        if random.random() > 0.7:
-            greetings = ["Hello", "Hi", "Hey", "Greetings"]
-            personalized = f"{random.choice(greetings)}! {personalized}"
         
         # Add name if available (50% chance)
         if hasattr(user, 'name') and random.random() > 0.5:
             name_part = user.name.split()[0] if ' ' in user.name else user.name
-            personalized = personalized.replace("Hello", f"Hello {name_part}")
+            personalized = f"Hi {name_part}! {personalized}"
         
-        # Add random emoji (20% chance)
-        if random.random() > 0.8:
+        # Add emoji (30% chance)
+        if random.random() > 0.7:
             emojis = ["🙂", "👋", "✨", "💫", "🌟", "🎯", "🔥", "💡", "🚀"]
             personalized = f"{random.choice(emojis)} {personalized}"
-        
-        # Add random suffix (10% chance)
-        if random.random() > 0.9:
-            suffixes = ["", " Thank you!", " Have a great day!", " Cheers!"]
-            personalized += random.choice(suffixes)
         
         return personalized
     
     def format_phone_number(self, phone_number):
-        """Convert phone number to +254 format"""
+        """Super simple formatter - just make sure it has +254"""
         if not phone_number:
             return None
-            
-        cleaned = re.sub(r'[\s\-\(\)]', '', str(phone_number))
-        
-        if cleaned.startswith('01') and len(cleaned) == 10:
-            return f"+254{cleaned[1:]}"
-        elif cleaned.startswith('07') and len(cleaned) == 10:
-            return f"+254{cleaned[1:]}"
-        elif cleaned.startswith('1') and len(cleaned) == 9:
-            return f"+254{cleaned}"
-        elif cleaned.startswith('7') and len(cleaned) == 9:
-            return f"+254{cleaned}"
-        elif cleaned.startswith('+254') and len(cleaned) == 13:
-            return cleaned
-        elif cleaned.startswith('254') and len(cleaned) == 12:
-            return f"+{cleaned}"
-        elif cleaned.startswith('0'):
-            return f"+254{cleaned[1:]}"
-        else:
-            return cleaned if cleaned.startswith('+') else f"+{cleaned}"
-    
+
+        # Remove all non-digits
+        digits = re.sub(r'\D', '', str(phone_number))
+
+        if not digits:
+            return None
+
+        if digits.startswith('0'):
+            digits = digits[1:]
+
+        if len(digits) == 9:
+            return f"+254{digits}"
+
+        if len(digits) == 12 and digits.startswith('254'):
+            return f"+{digits}"
+
+        if digits.startswith('254'):
+            return f"+{digits}"
+
+        if len(digits) >= 9:
+            return f"+254{digits[-9:]}"
+
+        return None
+
     def validate_phone_number(self, phone_number):
-        """Validate phone number format"""
+        """Always return True for WhatsApp - let API handle validation"""
         formatted = self.format_phone_number(phone_number)
-        if formatted and formatted.startswith('+254') and len(formatted) == 13:
-            return formatted[4:].isdigit() and formatted[3] in ['1', '7']
+
+        if not formatted:
+            print(f"❌ Could not format: {phone_number}")
+            return False
+
+        if formatted.startswith('+') and len(formatted) >= 10:
+            print(f"✅ Accepting: {phone_number} -> {formatted}")
+            return True
+
+        print(f"❌ Invalid: {phone_number} -> {formatted}")
         return False
     
-    def send_single_message(self, phone_number, message, priority=0, retry_count=0):
-        """Send single WhatsApp/SMS message"""
+    def send_single_whatsapp(self, phone_number, message, retry_count=0):
+        """
+        Send single WhatsApp via EndlessMessages
+        Format based on their documentation
+        """
         formatted_number = self.format_phone_number(phone_number)
         
+        print(f"📤 Sending WhatsApp to: {phone_number} -> {formatted_number}")
+        print(f"📝 Message: {message[:50]}...")
+        
         if not formatted_number or not self.validate_phone_number(phone_number):
+            print(f"❌ Invalid WhatsApp number: {phone_number}")
             return {
                 'success': False,
-                'error': 'Invalid phone number format',
+                'error': 'Invalid WhatsApp number format',
                 'phone': phone_number,
                 'formatted': formatted_number
             }
         
+        # EndlessMessages WhatsApp payload
         payload = {
             "number": formatted_number,
             "apikey": self.api_key,
-            "text": message[:160],
-            "fileData": "",
-            "fileName": "",
-            "priority": priority,
-            "scheduledDate": ""
+            "text": message,
+            "fileData": "",  # Leave empty for text messages
+            "fileName": "",  # Leave empty for text messages
+            "priority": 1,   # WhatsApp priority
+            "scheduledDate": ""  # Immediate send
         }
         
+        print(f"🔧 API Key (first 10 chars): {self.api_key[:10]}...")
+        print(f"🔧 Server: {self.server_host}")
+        print(f"🔧 Payload keys: {list(payload.keys())}")
+        
         try:
-            conn = http.client.HTTPSConnection(self.server_host)
-            conn.request("POST", "/send_message", json.dumps(payload),
-                        {'Content-Type': 'application/json'})
+            # Create HTTPS connection
+            conn = http.client.HTTPSConnection(self.server_host, timeout=30)
             
+            # Prepare headers
+            headers = {
+                'Content-Type': 'application/json',
+                'User-Agent': 'Mozilla/5.0'
+            }
+            
+            # Send request
+            json_payload = json.dumps(payload)
+            print(f"📨 Sending to {self.server_host}/send_message")
+            
+            conn.request("POST", "/send_message", json_payload, headers)
+            
+            # Get response
             res = conn.getresponse()
             data = res.read()
             response_text = data.decode("utf-8")
             conn.close()
             
-            success = res.status in [200, 201]
+            print(f"📬 Response status: {res.status}")
+            print(f"📬 Response: {response_text[:200]}")
+            
+            # Parse response
+            success = False
+            try:
+                response_json = json.loads(response_text)
+                # Check for success indicators
+                if isinstance(response_json, dict):
+                    success = response_json.get('status', '').lower() in ['success', 'sent', 'queued', 'ok']
+                elif isinstance(response_json, list):
+                    success = any(item.get('status', '').lower() in ['success', 'sent'] 
+                                for item in response_json if isinstance(item, dict))
+            except:
+                # If not JSON, check text
+                success = any(keyword in response_text.lower() 
+                            for keyword in ['success', 'sent', 'message queued', 'ok'])
             
             result = {
                 'success': success,
@@ -3862,19 +3904,24 @@ class WhatsAppSafeService:
                 'phone': phone_number,
                 'formatted': formatted_number,
                 'timestamp': datetime.now().isoformat(),
-                'response': response_text
+                'response': response_text[:500],
+                'payload': payload
             }
             
+            # Retry logic
             if not success and retry_count < self.max_retries:
-                time.sleep(random.uniform(1, 3))  # Random retry delay
-                return self.send_single_message(phone_number, message, priority, retry_count + 1)
-                
+                print(f"🔄 Retry {retry_count + 1}/{self.max_retries}")
+                time.sleep(random.uniform(2, 5))
+                return self.send_single_whatsapp(phone_number, message, retry_count + 1)
+            
             return result
             
         except Exception as e:
+            print(f"❌ Connection error: {str(e)}")
+            
             if retry_count < self.max_retries:
-                time.sleep(random.uniform(1, 3))
-                return self.send_single_message(phone_number, message, priority, retry_count + 1)
+                time.sleep(random.uniform(2, 5))
+                return self.send_single_whatsapp(phone_number, message, retry_count + 1)
             
             return {
                 'success': False,
@@ -3884,9 +3931,9 @@ class WhatsAppSafeService:
                 'timestamp': datetime.now().isoformat()
             }
     
-    def send_bulk_messages(self, user_list, base_message, callback=None):
+    def send_bulk_whatsapp(self, user_list, base_message, callback=None):
         """
-        Send bulk messages with ANTI-BAN protection
+        Send bulk WhatsApp with anti-ban protection
         """
         results = {
             'total': len(user_list),
@@ -3895,6 +3942,8 @@ class WhatsAppSafeService:
             'invalid_numbers': 0,
             'details': []
         }
+        
+        print(f"🚀 Starting WhatsApp bulk send for {len(user_list)} users")
         
         for index, user in enumerate(user_list):
             try:
@@ -3910,60 +3959,47 @@ class WhatsAppSafeService:
                 
                 # Skip if no phone
                 if not phone:
+                    print(f"⚠️ Skipping {username}: No phone number")
                     results['failed'] += 1
                     continue
                 
                 # Validate phone
                 if not self.validate_phone_number(phone):
+                    print(f"⚠️ Skipping {username}: Invalid phone format {phone}")
                     results['invalid_numbers'] += 1
                     continue
                 
-                # Check rate limits (WhatsApp only)
-                if self.service_type == 'whatsapp':
-                    self.check_rate_limits()
+                # Check rate limits
+                self.check_rate_limits()
                 
-                # Personalize message (WhatsApp only)
-                if self.service_type == 'whatsapp':
-                    message = self.personalize_message(base_message, user)
-                else:
-                    message = base_message
+                # Personalize message
+                message = self.personalize_message(base_message, user)
                 
-                # Safe delay (randomized for WhatsApp)
+                # Add safe delay
                 delay = self.get_safe_delay()
+                print(f"⏳ Delay {delay:.2f}s before user {index + 1}")
                 time.sleep(delay)
                 
-                # Send message
-                result = self.send_single_message(phone, message)
+                # Send WhatsApp
+                print(f"📨 [{index + 1}/{len(user_list)}] Sending to {username}...")
+                result = self.send_single_whatsapp(phone, message)
                 result['username'] = username
                 
                 if result['success']:
                     results['successful'] += 1
-                    # Update counters
-                    if self.service_type == 'whatsapp':
-                        self.message_counter_hour += 1
-                        self.message_counter_day += 1
+                    self.message_counter_hour += 1
+                    self.message_counter_day += 1
+                    print(f"✅ Success: {username}")
                 else:
                     results['failed'] += 1
+                    print(f"❌ Failed: {username} - {result.get('error', 'Unknown error')}")
                 
                 results['details'].append(result)
                 
-                # Log progress
-                if self.app:
-                    self.app.logger.info(
-                        f"{self.service_type.upper()} Progress: {index + 1}/{len(user_list)} - "
-                        f"{username}: {'✅' if result['success'] else '❌'}"
-                    )
-                else:
-                    print(f"{self.service_type.upper()} Progress: {index + 1}/{len(user_list)} - "
-                          f"{username}: {'✅' if result['success'] else '❌'}")
-                
-                # Human-like random break every 15-25 messages (WhatsApp only)
-                if (self.service_type == 'whatsapp' and 
-                    results['successful'] % random.randint(15, 25) == 0 and
-                    results['successful'] > 0):
-                    
-                    break_time = random.uniform(5, 15)  # 5-15 second break
-                    print(f"⏸️ Taking {break_time:.1f}s human-like break...")
+                # Human-like break every 15-25 messages
+                if results['successful'] % random.randint(15, 25) == 0 and results['successful'] > 0:
+                    break_time = random.uniform(5, 15)
+                    print(f"⏸️ Human break: {break_time:.1f}s")
                     time.sleep(break_time)
                 
                 # Callback if provided
@@ -3971,6 +4007,7 @@ class WhatsAppSafeService:
                     callback(result)
                     
             except Exception as e:
+                print(f"💥 Exception for user {index}: {str(e)}")
                 error_result = {
                     'success': False,
                     'error': str(e),
@@ -3981,33 +4018,24 @@ class WhatsAppSafeService:
                 results['details'].append(error_result)
                 results['failed'] += 1
         
+        print(f"🏁 WhatsApp bulk completed: {results['successful']}/{len(user_list)} successful")
         return results
 
 
-# Thread-safe service instances
+# Service instance
 _whatsapp_service = None
-_sms_service = None
 
 def get_whatsapp_service(app=None):
     """Get WhatsApp service instance"""
     global _whatsapp_service
     if _whatsapp_service is None:
-        _whatsapp_service = WhatsAppSafeService(app, service_type='whatsapp')
+        _whatsapp_service = WhatsAppService(app)
     elif app and not _whatsapp_service.app:
         _whatsapp_service.init_app(app)
     return _whatsapp_service
 
-def get_sms_service(app=None):
-    """Get SMS service instance"""
-    global _sms_service
-    if _sms_service is None:
-        _sms_service = WhatsAppSafeService(app, service_type='sms')
-    elif app and not _sms_service.app:
-        _sms_service.init_app(app)
-    return _sms_service
-
 def async_task(f):
-    """Decorator for background tasks"""
+    """Background task decorator"""
     @wraps(f)
     def decorated(*args, **kwargs):
         thread = threading.Thread(target=f, args=args, kwargs=kwargs)
@@ -4016,44 +4044,10 @@ def async_task(f):
         return thread
     return decorated
 
-# ==================== SIMPLE TRIGGER FUNCTIONS ====================
-
-def whatsapp_message(user_id, message="Hello!", app=None):
-    """Send WhatsApp to single user"""
-    try:
-        from flask import current_app
-        
-        if not app:
-            app = current_app._get_current_object() if hasattr(current_app, '_get_current_object') else None
-        
-        if not app:
-            return {"status": "error", "message": "App context required"}
-        
-        with app.app_context():
-            user = User.query.get(user_id)
-            if not user:
-                return {"status": "error", "message": "User not found"}
-            
-            if not user.mobile:
-                return {"status": "error", "message": "No mobile number"}
-            
-            @async_task
-            def send_background():
-                with app.app_context():
-                    service = get_whatsapp_service(app)
-                    result = service.send_single_message(user.mobile, message)
-                    if app:
-                        app.logger.info(f"WhatsApp to {user.username}: {'✅' if result['success'] else '❌'}")
-                    return result
-            
-            send_background()
-            return {"status": "started", "user": user.username}
-        
-    except Exception as e:
-        return {"status": "error", "message": str(e)}
+# ==================== SIMPLE TRIGGERS ====================
 
 def whatsapp_bulk(message="Message", user_ids=None, app=None):
-    """Send WhatsApp to multiple users - NO BAN GUARANTEE"""
+    """Main WhatsApp bulk function"""
     try:
         from flask import current_app
         
@@ -4064,6 +4058,7 @@ def whatsapp_bulk(message="Message", user_ids=None, app=None):
             return {"status": "error", "message": "App context required"}
         
         with app.app_context():
+            # Get users
             if user_ids:
                 users = User.query.filter(User.id.in_(user_ids)).all()
             else:
@@ -4071,72 +4066,62 @@ def whatsapp_bulk(message="Message", user_ids=None, app=None):
             
             total_users = len(users)
             
-            # 🚨 DIAGNOSTIC: Check if we have users
-            print(f"🔄 DEBUG: Found {total_users} users with mobile numbers")
             if total_users == 0:
-                print("❌ ERROR: No users found with mobile numbers!")
                 return {"status": "error", "message": "No users with mobile numbers"}
             
-            # 🚨 DIAGNOSTIC: Show first 3 users
-            for i, user in enumerate(users[:3]):
-                print(f"   User {i+1}: {user.username} - {user.mobile}")
+            # Show diagnostic info
+            print("=" * 50)
+            print(f"🚀 WHATSAPP BULK SEND INITIATED")
+            print(f"📊 Total users: {total_users}")
+            print(f"📝 Message: {message[:50]}...")
+            print(f"🔑 API: EndlessMessages.com")
+            print("=" * 50)
             
-            # Estimate time (for user info) - MOVE THIS BEFORE SENDING
-            estimated_time = total_users * 0.3  # 300ms per message
-            estimated_minutes = estimated_time / 60
-            print(f"📱 Sending {total_users} WhatsApp messages")
+            # Test first user
+            if users:
+                test_user = users[0]
+                print(f"🧪 Test user: {test_user.username} - {test_user.mobile}")
+                print(f"🧪 Formatted: {get_whatsapp_service(app).format_phone_number(test_user.mobile)}")
+            
+            estimated_minutes = (total_users * 0.3) / 60
             print(f"⏱️ Estimated time: {estimated_minutes:.1f} minutes")
-            print(f"🔒 Anti-ban protection: ACTIVE")
             
             @async_task
             def send_background():
                 with app.app_context():
                     service = get_whatsapp_service(app)
-                    
-                    # 🚨 DIAGNOSTIC: Test API connection with ONE user first
-                    if users:
-                        test_user = users[0]
-                        test_message = "WhatsApp test message"
-                        print(f"🧪 Testing API with user: {test_user.username}")
-                        
-                        test_result = service.send_single_message(
-                            test_user.mobile, 
-                            test_message
-                        )
-                        
-                        print(f"🧪 Test result: {'SUCCESS' if test_result['success'] else 'FAILED'}")
-                        if not test_result['success']:
-                            print(f"🧪 Error: {test_result.get('error', 'Unknown')}")
-                            print(f"🧪 Response: {test_result.get('response', 'No response')}")
-                            return {"test_failed": True, "result": test_result}
-                    
-                    # If test passed, send all
-                    results = service.send_bulk_messages(users, message)
+                    results = service.send_bulk_whatsapp(users, message)
                     
                     # Summary
                     success_rate = (results['successful'] / total_users * 100) if total_users > 0 else 0
-                    print(f"✅ WhatsApp bulk completed: {results['successful']}/{total_users} ({success_rate:.1f}%)")
+                    print("=" * 50)
+                    print(f"✅ WHATSAPP BULK COMPLETED")
+                    print(f"📊 Success: {results['successful']}/{total_users} ({success_rate:.1f}%)")
+                    print(f"📊 Failed: {results['failed']}")
+                    print(f"📊 Invalid numbers: {results['invalid_numbers']}")
+                    print("=" * 50)
                     
                     if app:
                         app.logger.info(f"WhatsApp bulk: {results['successful']}/{total_users} successful")
+                    
                     return results
             
             send_background()
+            
             return {
-                "status": "started", 
+                "status": "started",
                 "total_users": total_users,
-                "anti_ban": True,
-                "estimated_minutes": estimated_minutes
+                "estimated_minutes": estimated_minutes,
+                "service": "EndlessMessages WhatsApp",
+                "message_preview": message[:50]
             }
         
     except Exception as e:
-        print(f"❌ EXCEPTION in whatsapp_bulk: {str(e)}")
-        import traceback
-        traceback.print_exc()
+        print(f"❌ ERROR in whatsapp_bulk: {str(e)}")
         return {"status": "error", "message": str(e)}
 
-def sms_bulk(message="Message", user_ids=None, app=None):
-    """Send SMS to multiple users"""
+def test_whatsapp_api(user_id=None, app=None):
+    """Test WhatsApp API with single user"""
     try:
         from flask import current_app
         
@@ -4147,32 +4132,65 @@ def sms_bulk(message="Message", user_ids=None, app=None):
             return {"status": "error", "message": "App context required"}
         
         with app.app_context():
-            if user_ids:
-                users = User.query.filter(User.id.in_(user_ids)).all()
+            # Get user
+            if user_id:
+                user = User.query.get(user_id)
             else:
-                users = User.query.filter(User.mobile.isnot(None)).all()
+                user = User.query.filter(User.mobile.isnot(None)).first()
             
-            @async_task
-            def send_background():
-                with app.app_context():
-                    service = get_sms_service(app)
-                    results = service.send_bulk_messages(users, message)
-                    
-                    if app:
-                        app.logger.info(f"SMS bulk: {results['successful']}/{len(users)} successful")
-                    return results
+            if not user:
+                return {"status": "error", "message": "No user found"}
             
-            send_background()
-            return {"status": "started", "total_users": len(users)}
+            print("=" * 50)
+            print(f"🧪 WHATSAPP API TEST")
+            print(f"👤 User: {user.username}")
+            print(f"📱 Phone: {user.mobile}")
+            
+            service = get_whatsapp_service(app)
+            formatted = service.format_phone_number(user.mobile)
+            print(f"🔧 Formatted: {formatted}")
+            print(f"🔑 API Key: {service.api_key[:10]}...")
+            print(f"🌐 Server: {service.server_host}")
+            print("=" * 50)
+            
+            # Send test message
+            test_message = "WhatsApp test message from Python API"
+            print(f"📤 Sending: {test_message}")
+            
+            result = service.send_single_whatsapp(user.mobile, test_message)
+            
+            print(f"📬 Response status: {result.get('status_code')}")
+            print(f"📬 Success: {result.get('success')}")
+            print(f"📬 Error: {result.get('error', 'None')}")
+            print(f"📬 Response preview: {result.get('response', '')[:200]}")
+            print("=" * 50)
+            
+            return {
+                "status": "test_complete",
+                "success": result.get('success'),
+                "error": result.get('error'),
+                "response": result.get('response'),
+                "user": user.username,
+                "phone": user.mobile,
+                "formatted": formatted
+            }
         
     except Exception as e:
+        print(f"❌ TEST ERROR: {str(e)}")
         return {"status": "error", "message": str(e)}
 
 # ==================== API ENDPOINTS ====================
 
+@app.route('/test-whatsapp-api', methods=['GET'])
+def test_whatsapp_api_route():
+    """Test EndlessMessages WhatsApp API"""
+    from flask import jsonify
+    result = test_whatsapp_api(app=current_app._get_current_object())
+    return jsonify(result)
+
 @app.route('/send-whatsapp-bulk', methods=['POST'])
 def send_whatsapp_bulk_route():
-    """API endpoint for WhatsApp bulk (NO BAN)"""
+    """Send WhatsApp bulk via EndlessMessages"""
     from flask import request, jsonify
     
     data = request.get_json()
@@ -4182,67 +4200,47 @@ def send_whatsapp_bulk_route():
     if not message:
         return jsonify({'error': 'Message required'}), 400
     
-    result = whatsapp_bulk(message, user_ids if user_ids else None, 
+    result = whatsapp_bulk(message, user_ids if user_ids else None,
                           app=current_app._get_current_object())
     
     return jsonify(result), 202
 
-@app.route('/send-sms-bulk', methods=['POST'])
-def send_sms_bulk_route():
-    """API endpoint for SMS bulk"""
-    from flask import request, jsonify
+@app.cli.command('test-whatsapp')
+def test_whatsapp_cli():
+    """CLI to test WhatsApp"""
+    import click
     
-    data = request.get_json()
-    message = data.get('message')
-    user_ids = data.get('user_ids', [])
+    @click.command()
+    @click.option('--user-id', type=int, help='Test with specific user')
+    def test_whatsapp_cmd(user_id):
+        """Test WhatsApp API"""
+        from flask import current_app
+        app = current_app._get_current_object()
+        result = test_whatsapp_api(user_id, app=app)
+        click.echo(f"Test result: {result}")
     
-    if not message:
-        return jsonify({'error': 'Message required'}), 400
-    
-    result = sms_bulk(message, user_ids if user_ids else None,
-                     app=current_app._get_current_object())
-    
-    return jsonify(result), 202
+    test_whatsapp_cmd()
 
 @app.cli.command('send-whatsapp')
-def send_whatsapp_command():
-    """CLI command for WhatsApp"""
+def send_whatsapp_cli():
+    """CLI to send WhatsApp"""
     import click
     
     @click.command()
     @click.option('--message', prompt='Message', help='WhatsApp message')
     @click.option('--user-ids', multiple=True, type=int, help='User IDs')
-    @click.option('--test', is_flag=True, help='Test mode')
-    def send_whatsapp(message, user_ids, test):
+    def send_whatsapp_cmd(message, user_ids):
         """Send WhatsApp messages"""
         from flask import current_app
-        
         app = current_app._get_current_object()
-        
-        if test:
-            click.echo(f"TEST MODE: Would send WhatsApp: '{message}'")
-            if user_ids:
-                click.echo(f"To users: {user_ids}")
-            else:
-                with app.app_context():
-                    users = User.query.filter(User.mobile.isnot(None)).limit(3).all()
-                    click.echo(f"To ALL users (sample):")
-                    for user in users:
-                        click.echo(f"  {user.username}: {user.mobile}")
-        else:
-            result = whatsapp_bulk(message, list(user_ids) if user_ids else None, app=app)
-            click.echo(f"✅ WhatsApp sending started: {result}")
+        result = whatsapp_bulk(message, list(user_ids) if user_ids else None, app=app)
+        click.echo(f"WhatsApp sending started: {result}")
     
-    send_whatsapp()
+    send_whatsapp_cmd()
 
-
-print("🚀 WhatsApp Anti-BAN service loaded successfully!")
-print("✅ Features:")
-print("   - Randomized delays (no pattern detection)")
-print("   - Hourly & daily rate limiting")
-print("   - Message personalization")
-print("   - Human-like breaks")
-print("   - 500 messages/day safe limit")
+print("✅ EndlessMessages WhatsApp service loaded!")
+print("📱 Use: whatsapp_bulk('Your message')")
+print("🧪 Test first: test_whatsapp_api()")
 # ==================== END SMS SERVICE ====================
 
 from datetime import datetime, timedelta
