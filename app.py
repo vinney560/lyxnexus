@@ -3595,13 +3595,13 @@ notificationapi.init(
 @app.route('/admin/phone')
 @admin_required
 @login_required
-def serve_call_html():
+def serve_call():
     return render_template('call.html')
 
 @app.route('/send-notification', methods=['POST'])
 @admin_required
 @login_required
-def send_notification():
+def phone_call():
     try:
         data = request.get_json()
         
@@ -3689,7 +3689,7 @@ class SMSDeliveryService:
         self.api_key = api_key or current_app.config.get('SMS_API_KEY', 'd3dd8ae41cd64c6a89556876648e28f9')
         self.server_url = server_url or current_app.config.get('SMS_SERVER_URL', 'https://w2.endlessmessages.com')
         self.server_host = self.server_url.replace("https://", "")
-        self.rate_limit_delay = 6  # seconds between messages
+        self.rate_limit_delay = 6 
         self.max_retries = 2
         
     def format_phone_number(self, phone_number):
@@ -3699,25 +3699,18 @@ class SMSDeliveryService:
             
         cleaned = re.sub(r'[\s\-\(\)]', '', str(phone_number))
         
-        # Handle 01XXXXXXXX (10 digits) - typically landlines
         if cleaned.startswith('01') and len(cleaned) == 10:
-            return f"+254{cleaned[1:]}"  # Replace 0 with +254
-        # Handle 07XXXXXXXX (10 digits) - typically mobiles
+            return f"+254{cleaned[1:]}" 
         elif cleaned.startswith('07') and len(cleaned) == 10:
-            return f"+254{cleaned[1:]}"  # Replace 0 with +254
-        # Handle 1XXXXXXXX (9 digits) - missing leading 0
+            return f"+254{cleaned[1:]}"  
         elif cleaned.startswith('1') and len(cleaned) == 9:
             return f"+254{cleaned}"
-        # Handle 7XXXXXXXX (9 digits) - missing leading 0
         elif cleaned.startswith('7') and len(cleaned) == 9:
             return f"+254{cleaned}"
-        # Already in +254 format
         elif cleaned.startswith('+254') and len(cleaned) == 13:
-            return cleaned
-        # 254 format without +
+            return cleaned        
         elif cleaned.startswith('254') and len(cleaned) == 12:
             return f"+{cleaned}"
-        # Any other number starting with 0
         elif cleaned.startswith('0'):
             return f"+254{cleaned[1:]}"
         else:
@@ -3727,7 +3720,6 @@ class SMSDeliveryService:
         """Validate if phone number is in correct format (supports both 01 and 07)"""
         formatted = self.format_phone_number(phone_number)
         if formatted and formatted.startswith('+254') and len(formatted) == 13:
-            # Check if it's a valid Kenyan number (starts with +2541 or +2547)
             return formatted[4:].isdigit() and formatted[3] in ['1', '7']
         return False
     
@@ -3746,7 +3738,7 @@ class SMSDeliveryService:
         payload = {
             "number": formatted_number,
             "apikey": self.api_key,
-            "text": message[:160],  # Truncate to 160 chars
+            "text": message[:160], 
             "fileData": "",
             "fileName": "",
             "priority": priority,
@@ -3774,9 +3766,8 @@ class SMSDeliveryService:
                 'response': response_text
             }
             
-            # Retry logic for failed attempts
             if not success and retry_count < self.max_retries:
-                time.sleep(2)  # Wait before retry
+                time.sleep(2) 
                 return self.send_single_sms(phone_number, message, priority, retry_count + 1)
                 
             return result
@@ -3813,7 +3804,6 @@ class SMSDeliveryService:
         
         for index, user in enumerate(user_list):
             try:
-                # Extract phone number from User object or dict
                 if hasattr(user, 'mobile'):
                     phone = user.mobile
                     username = user.username if hasattr(user, 'username') else 'N/A'
@@ -3823,7 +3813,6 @@ class SMSDeliveryService:
                 else:
                     continue
                 
-                # Skip if no phone number
                 if not phone:
                     result = {
                         'success': False,
@@ -3836,7 +3825,6 @@ class SMSDeliveryService:
                     results['failed'] += 1
                     continue
                 
-                # Validate phone number
                 if not self.validate_phone_number(phone):
                     result = {
                         'success': False,
@@ -3849,11 +3837,9 @@ class SMSDeliveryService:
                     results['invalid_numbers'] += 1
                     continue
                 
-                # Send SMS with rate limiting
                 time.sleep(self.rate_limit_delay)
                 result = self.send_single_sms(phone, message)
                 
-                # Add username to result
                 result['username'] = username
                 
                 if result['success']:
@@ -3863,11 +3849,9 @@ class SMSDeliveryService:
                 
                 results['details'].append(result)
                 
-                # Call callback if provided
                 if callback:
                     callback(result)
                 
-                # Log progress
                 current_app.logger.info(
                     f"SMS Progress: {index + 1}/{len(user_list)} - "
                     f"{username}: {'Success' if result['success'] else 'Failed'}"
@@ -3886,10 +3870,9 @@ class SMSDeliveryService:
         
         return results
 
-    def send_to_all_users(self, message, batch_size=50):
+    def send_to_all_users(self, message, batch_size=5):
         """Send SMS to all users in database in batches"""
         try:
-            # Get all users with mobile numbers (both 01 and 07)
             users = User.query.filter(User.mobile.isnot(None)).all()
             
             total_users = len(users)
@@ -3901,7 +3884,6 @@ class SMSDeliveryService:
                 'batches': []
             }
             
-            # Process in batches
             for i in range(0, total_users, batch_size):
                 batch = users[i:i + batch_size]
                 batch_result = self.send_bulk_sms(batch, message)
@@ -3933,7 +3915,6 @@ class SMSDeliveryService:
             }
 
 
-# Thread-safe SMS service instance
 _sms_service = None
 
 def get_sms_service():
@@ -3944,7 +3925,6 @@ def get_sms_service():
     return _sms_service
 
 
-# Flask route decorators and helpers
 def async_sms_task(f):
     """Decorator to run SMS tasks in background thread"""
     @wraps(f)
@@ -4013,6 +3993,7 @@ def bulk_message(message="Default message", user_ids=None):
             sms_service = get_sms_service()
             results = sms_service.send_bulk_sms(users, message)
             current_app.logger.info(f"Bulk SMS completed: {len(users)} users")
+            print(f"Bulk SMS completed: {len(users)} users")
             return results
         
         send_background()
@@ -4068,10 +4049,8 @@ def send_single_sms_route():
         return jsonify({'error': 'Message is required'}), 400
     
     if user_id:
-        # Send to user by ID
         result = single_message(user_id, message)
     elif phone:
-        # Send directly to phone number
         result = send_to_phone(phone, message)
     else:
         return jsonify({'error': 'Either user_id or phone is required'}), 400
@@ -4097,7 +4076,6 @@ def send_bulk_sms_route():
     if not message:
         return jsonify({'error': 'Message is required'}), 400
     
-    # Use the simple bulk_message function
     result = bulk_message(message, user_ids if user_ids else None)
     
     if result['status'] == 'started':
@@ -4118,7 +4096,6 @@ def get_sms_status():
     })
 
 
-# Command line interface for manual SMS sending
 @app.cli.command('send-sms')
 def send_sms_command():
     """CLI command to send SMS to users"""
@@ -4175,21 +4152,16 @@ def format_message_time(created_at):
     delta = now - created_at
 
     if delta < timedelta(days=1):
-        # Less than a day: show time
         return created_at.strftime('%H:%M')
     elif delta < timedelta(days=7):
-        # Less than a week: show weekday
-        return created_at.strftime('%a')  # Mon, Tue, Wed, ...
+        return created_at.strftime('%a')
     elif delta < timedelta(days=30):
-        # Less than a month: show weeks ago
         weeks = delta.days // 7
         return f"{weeks} week{'s' if weeks > 1 else ''} ago"
     elif delta < timedelta(days=365):
-        # Less than a year: show months ago
         months = delta.days // 30
         return f"{months} month{'s' if months > 1 else ''} ago"
     else:
-        # A year or more: show years ago
         years = delta.days // 365
         return f"{years} year{'s' if years > 1 else ''} ago"
 
@@ -4208,7 +4180,6 @@ def messages():
     try:
         room = request.args.get('room', 'general')
         
-        # (last 50 messages)
         messages = Message.query.filter_by(
             room=room, 
             is_deleted=False
@@ -6035,6 +6006,7 @@ def update_announcement(id):
         'timestamp': datetime.utcnow().isoformat()
     }
     send_webpush(data)
+    bulk_message(f"Announcement eddited: {announcement.title}")
 
     return jsonify({'message': 'Announcement updated successfully'})
 
@@ -6071,6 +6043,7 @@ def delete_announcement(id):
     db.session.delete(announcement)
     db.session.commit()
     send_webpush(data)
+    bulk_message(f"Announcement delete: {announcement.title}")
 
     return jsonify({'message': 'Announcement deleted successfully'})
 
@@ -6154,6 +6127,7 @@ def create_assignment():
         'timestamp': datetime.utcnow().isoformat()
     }
     send_webpush(data)
+    bulk_message(f"New assignment: {assignment.title}")
 
     return jsonify({'message': 'Assignment created successfully', 'id': assignment.id}), 201
 
