@@ -3608,7 +3608,7 @@ def send_notification():
         mobile_number = data.get('mobile')
         message_content = data.get('message')
         
-        print(f"[{datetime.now()}] Sending notification to: {mobile_number}")
+        print(f"[{(datetime.now() + timedelta(hours=3))}] Sending notification to: {mobile_number}")
         print(f"Message: {message_content[:100]}...")
             
         notification_payload = {
@@ -3635,7 +3635,7 @@ def send_notification():
             "message": "Notification sent successfully",
             "data": {
                 "to": mobile_number,
-                "timestamp": datetime.now().isoformat(),
+                "timestamp": (datetime.now() + timedelta(hours=3)).isoformat(),
                 "message_preview": message_content[:50] + "..." if len(message_content) > 50 else message_content
             },
             "response": {
@@ -3653,18 +3653,18 @@ def send_notification():
         error_data = {
             "success": False,
             "error": str(e),
-            "timestamp": datetime.now().isoformat(),
+            "timestamp": (datetime.now() + timedelta(hours=3)).isoformat(),
             "suggestion": "Check if the phone number is valid and you have sufficient credits."
         }
-        print(f"[ERROR] {datetime.now()}: {str(e)}")
+        print(f"[ERROR] {(datetime.now() + timedelta(hours=3))}: {str(e)}")
         return jsonify(error_data), 500
 
 @app.route('/health', methods=['GET'])
 def health_check():
     return jsonify({
         "status": "healthy",
-        "service": "Pushify Notification API",
-        "timestamp": datetime.now().isoformat(),
+        "service": "LyxPhone Notification API",
+        "timestamp": (datetime.now() + timedelta(hours=3)).isoformat(),
         "endpoints": {
             "/": "HTML Interface",
             "/send-notification": "Send notifications (POST)",
