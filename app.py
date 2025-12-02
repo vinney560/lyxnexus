@@ -3693,7 +3693,7 @@ class WhatsAppSafeService:
         
         # WhatsApp-optimized settings (CRITICAL for no ban!)
         if service_type == 'whatsapp':
-            self.base_delay = 0.3  # 300ms base (NOT 6 seconds!)
+            self.base_delay = 3.1  # 3.1 seconds base delay
             self.random_variance = 0.2  # ±200ms random
             self.max_per_hour = 80  # Conservative hourly limit
             self.max_per_day = 500  # Daily limit
@@ -4075,7 +4075,7 @@ def whatsapp_bulk(message="Message", user_ids=None, app=None):
             
             # Estimate time (for user info)
             if total_users > 0:
-                estimated_time = total_users * 1.5  # 1.5 seconds per message
+                estimated_time = total_users * 3.1  # 3.1 seconds per message
                 estimated_minutes = estimated_time / 60
                 print(f"📱 Sending {total_users} WhatsApp messages")
                 print(f"⏱️ Estimated time: {estimated_minutes:.1f} minutes")
