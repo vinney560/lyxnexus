@@ -954,6 +954,9 @@
         font-size: 0.85rem;
         font-weight: 500;
         border: 1px solid rgba(139, 92, 246, 0.3);
+        align-items: center;
+        justify-content: center;
+        text-align: center;
     }
     
     .assignment-header {
@@ -1822,7 +1825,7 @@
                 return `
                     <div class="announcement-card">
                         <div class="announcement-header">
-                            <h3 class="announcement-title">${escapeHtml(a.title || '')}</h3>
+                            <h3 class="announcement-title underline underline-offset-3 decoration-blue-400">${escapeHtml(a.title || '')}</h3>
                             <div class="action-buttons">
                                 <button class="btn btn-warning" onclick="editAnnouncement(${a.id})">
                                     <i class="fas fa-edit mr-1"></i> Edit
@@ -1920,9 +1923,9 @@
                     <div class="announcement-card">
                         <div class="assignment-header">
                             <div class="flex-1">
-                                <h3 class="assignment-title">${escapeHtml(assignment.title)}</h3>
+                                <h3 class="assignment-title underline decoration-blue-400">${escapeHtml(assignment.title)}</h3>
                                 ${assignment.topic?.name ? `
-                                    <div class="topic-badge mt-2">
+                                    <div class="topic-badge w-fit mt-2">
                                         <i class="fas fa-folder mr-1"></i>${escapeHtml(assignment.topic.name)}
                                     </div>
                                 ` : ''}
