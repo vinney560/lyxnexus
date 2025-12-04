@@ -1549,7 +1549,38 @@
         box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
         transform: translateY(-2px) scale(0.93);
         transition: transform 0.3s ease-out, box-shadow 0.3s ease-out, border-color 0.3s ease-out;
-    }    
+    }  
+
+    .announcement-text.expanded {
+        max-height: none !important;
+    }
+
+    .announcement-text:not(.expanded) {
+        max-height: 150px;
+        overflow: hidden;
+        position: relative;
+        margin-top: 10px;
+    }
+
+    .announcement-text:not(.expanded)::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 40px;
+        bottom: -20px; 
+        background: linear-gradient(to bottom, transparent, rgba(15, 23, 42, 0.9));
+        pointer-events: none;
+    }
+
+    .show-more-btn {
+        transition: all 0.2s ease;
+    }
+
+    .show-more-btn:hover {
+        transform: translateY(-1px);
+    }      
 </style>
 <body>
     <!-- Toast Container -->
@@ -3909,6 +3940,27 @@
             return iconMap[ext] || 'fas fa-file';
         }
 
+        function shouldTruncate(text, maxLength = 300) {
+            if (!text) return false;
+            return text.length > maxLength;
+        }
+
+        function truncateText(text, maxLength = 300) {
+            if (!text || text.length <= maxLength) return text;
+
+            // Find a clean break point (space or punctuation)
+            let truncated = text.substr(0, maxLength);
+            const lastSpace = truncated.lastIndexOf(' ');
+            const lastPeriod = truncated.lastIndexOf('.');
+            const breakPoint = Math.max(lastSpace, lastPeriod);
+
+            if (breakPoint > maxLength * 0.7) { 
+                truncated = text.substr(0, breakPoint);
+            }
+
+            return truncated + '...';
+        }        
+
         // Load announcements
         async function loadAnnouncements(isRefresh = false) {
             const container = document.getElementById("announcements-container");
@@ -4024,7 +4076,7 @@
                             }
                         
                             return `
-                                <div class="announcement-card ${neonBorderClass} ${newClass} bg-gray-900/60 rounded-2xl transition duration-200 ease-in-out overflow-hidden card-hover-lift fade-in announcement-content">
+                                <div class="announcement-card ${neonBorderClass} ${newClass} bg-gray-900/60 rounded-2xl transition duration-200 ease-in-out overflow-hidden card-hover-lift fade-in announcement-content" data-announcement-id="${announcement.id}">
                                     <!-- Pin button -->
                                     <button 
                                         onclick="togglePin(${announcement.id})"
@@ -4072,7 +4124,23 @@
                                             </div>
                                         </div>
                                     
-                                        <p class="mb-4 break-all hyphens-auto text-slate-300 leading-relaxed list-inside formatted-text">${formatText(announcement.content)}</p>
+                                        <div class="announcement-content-wrapper mb-4">
+                                            
+                                            <div class="announcement-text break-all hyphens-auto text-slate-300 leading-relaxed list-inside formatted-text">${(() => {const formattedContent = formatText(announcement.content); const shouldTruncateContent = shouldTruncate(announcement.content, 300); const displayContent = shouldTruncateContent ? truncateText(formattedContent, 300) : formattedContent;return displayContent;})()}</div>
+
+                                            ${(() => {
+                                                if (shouldTruncate(announcement.content, 250)) {
+                                                    return `
+                                                        <button onclick="toggleExpand(${announcement.id})" 
+                                                                class="show-more-btn mt-2 text-blue-400 hover:text-blue-300 text-sm font-medium flex items-center gap-1 transition-colors">
+                                                            <i class="fas fa-chevron-down text-xs"></i>
+                                                            <span>Show more</span>
+                                                        </button>
+                                                    `;
+                                                }
+                                                return '';
+                                            })()}
+                                        </div>                                        
                                     
                                         <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mt-auto pt-4 border-t border-gray-700">
                                             <span class="text-gray-400 text-xs sm:text-sm">
@@ -4140,7 +4208,36 @@
                 localStorage.setItem("pinnedAnnouncements", JSON.stringify(pinnedIds));
                 renderAnnouncements();
             };
-        
+            
+            window.toggleExpand = function(id) {
+                const announcementCard = document.querySelector(`[data-announcement-id="${id}"]`);
+                if (!announcementCard) return;
+
+                const textElement = announcementCard.querySelector('.announcement-text');
+                const button = announcementCard.querySelector('.show-more-btn');
+
+                if (textElement.classList.contains('expanded')) {
+                    // Collapse
+                    const originalContent = textElement.getAttribute('data-original');
+                    if (originalContent) {
+                        textElement.innerHTML = truncateText(originalContent, 300);
+                    }
+                    textElement.classList.remove('expanded');
+                    if (button) {
+                        button.innerHTML = '<i class="fas fa-chevron-down text-xs"></i><span>Show more</span>';
+                    }
+                } else {
+                    // Expand
+                    const fullContent = textElement.getAttribute('data-full') || textElement.innerHTML;
+                    textElement.setAttribute('data-original', textElement.innerHTML);
+                    textElement.setAttribute('data-full', formatText(announcements.find(a => a.id === id)?.content || ''));
+                    textElement.innerHTML = textElement.getAttribute('data-full');
+                    textElement.classList.add('expanded');
+                    if (button) {
+                        button.innerHTML = '<i class="fas fa-chevron-up text-xs"></i><span>Show less</span>';
+                    }
+                }
+            };        
             // Image modal
             window.openImagePreview = function(src) {
                 let modal = document.getElementById("image-preview-modal");
