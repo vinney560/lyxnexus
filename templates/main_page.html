@@ -4146,7 +4146,7 @@
                                             <div class="announcement-text break-all hyphens-auto text-slate-300 leading-relaxed list-inside formatted-text">${(() => {const formattedContent = formatText(announcement.content); const shouldTruncateContent = shouldTruncate(announcement.content, 300); const displayContent = shouldTruncateContent ? truncateText(formattedContent, 300) : formattedContent;return displayContent;})()}</div>
 
                                             ${(() => {
-                                                if (shouldTruncate(announcement.content, 250)) {
+                                                if (shouldTruncate(announcement.content, 300)) {
                                                     return `
                                                         <button onclick="toggleExpand(${announcement.id})" 
                                                                 class="show-more-btn mt-2 text-green-400 hover:text-blue-300 text-sm font-medium flex items-center gap-1 transition-colors">
