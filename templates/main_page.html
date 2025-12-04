@@ -1567,6 +1567,7 @@
         position: absolute;
         left: 0;
         right: 0;
+        bottom: -20px;
         height: 40px;
         background: linear-gradient(to bottom, transparent 0%, rgba(15, 23, 42, 0.95) 70%);
         pointer-events: none;
@@ -1576,7 +1577,7 @@
     .announcement-text.expanded::after {
         content: '';
         position: absolute;
-        bottom: -15px;
+        bottom: -20px;
         left: 0;
         right: 0;
         height: 40px;
@@ -4236,7 +4237,7 @@
                     }
                 }
             };            
-            
+
             // Image modal
             window.openImagePreview = function(src) {
                 let modal = document.getElementById("image-preview-modal");
