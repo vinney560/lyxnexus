@@ -69,6 +69,12 @@ projects = {
         'status': 'active',
         'description': 'Currently being integrated with LyxLab - LyxPinger'
     },
+    'https://lyxnexus.onrender.com/test/web-scraper': {  
+        'name': 'LyxWebScraper',
+        'credentials': None,
+        'status': 'active',
+        'description': 'Currently being integrated with LyxLab - LyxWebScraper'
+    },
 }
 
 @lyxlab_bp.route('/')
