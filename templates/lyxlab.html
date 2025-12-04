@@ -197,8 +197,7 @@
         </div>
 
         <!-- Projects Grid -->
-        <div id="projectsGrid" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <!-- Projects will be dynamically inserted here -->
+        <div id="projectsGrid" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">        
         </div>
     </div>
 
@@ -440,7 +439,6 @@
         // Initialize when page loads
         document.addEventListener('DOMContentLoaded', loadProjects);
 
-        // Optional: Auto-refresh every 5 minutes
         setInterval(loadProjects, 5 * 60 * 1000);
     </script>
 </body>

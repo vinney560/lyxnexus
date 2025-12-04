@@ -1610,7 +1610,6 @@
             }
         });
 
-        /* ======= CONFIG ======= */
         const API_BASE = '/api';
         const ENDPOINTS = {
           ANNOUNCEMENTS: `${API_BASE}/announcements`,
@@ -1650,7 +1649,6 @@
             return result;
         }
 
-        /* ======= TAB MANAGEMENT ======= */
         function openTab(tabId) {
             // Hide all tab contents
             const tabContents = document.querySelectorAll('.tab-content');
@@ -1696,7 +1694,6 @@
             }
         }
 
-        /* ======= HELPERS ======= */
         async function fetchData(url) {
           try {
             const res = await fetch(url);
@@ -1756,7 +1753,6 @@
         }
 
         function getFormData(formEl) {
-          // Returns plain object for simple forms (no file handling)
           const data = {};
           if (!formEl) return data;
           const fd = new FormData(formEl);
@@ -1766,7 +1762,6 @@
           return data;
         }
 
-        /* ======= FILE / ASSIGNMENT FILE HANDLING ======= */
         function handleAssignmentFileSelect(event) {
           const file = event.target.files[0];
           if (file) {
@@ -1787,7 +1782,6 @@
           if (infoEl) infoEl.style.display = 'none';
         }
         
-        /* ======= ENHANCED LOADERS ======= */
         async function loadAnnouncements() {
             const container = document.getElementById('announcements-list');
             if (!container) return;
@@ -1815,12 +1809,8 @@
                 const fileUrl = hasAttachment ? `/announcement-file/${a.id}/${encodeURIComponent(a.file_name)}` : '#';
                 const fileIcon = hasAttachment ? getFileIcon(a.file_name) : 'fa-file';
                 
-                // Content preview logic
                 let contentPreview = escapeHtml(a.content || '');
                 const shouldTruncate = contentPreview.length > 300;
-                if (shouldTruncate) {
-                    contentPreview = contentPreview.substring(0, 300) + '...';
-                }
                 
                 return `
                     <div class="announcement-card">
@@ -1878,7 +1868,7 @@
                                             <div class="attachment-name">${escapeHtml(a.file_name)}</div>
                                             <div class="attachment-details">
                                                 <span><i class="fas fa-file"></i> ${escapeHtml(a.file_type || 'File')}</span>
-                                                <span><i class="fas fa-hdd"></i> ${formatFileSize(a.file_size)}</span>
+                                                <span><i class="fas fa-hdd"></i> ${formatFileSize(1122)}</span>
                                             </div>
                                         </div>
                                         <i class="fas fa-download text-blue-400"></i>
@@ -1976,7 +1966,7 @@
                                         <div class="attachment-name">${escapeHtml(assignment.file_name)}</div>
                                         <div class="attachment-details">
                                             <span><i class="fas fa-file"></i> ${escapeHtml(assignment.file_type || 'File')}</span>
-                                            <span><i class="fas fa-hdd"></i> ${formatFileSize(assignment.file_size)}</span>
+                                            <span><i class="fas fa-hdd"></i> ${formatFileSize(4791)}</span>
                                         </div>
                                     </div>
                                     <i class="fas fa-download text-blue-400"></i>
@@ -2067,7 +2057,6 @@
           }).join('');
         }
           
-        /* ======= Extra(s) >> escape and date ======= */
         function escapeHtml(str) {
           if (!str && str !== 0) return '';
           return String(str)
@@ -2087,7 +2076,6 @@
           }
         }
           
-        /* ======= EDIT / DELETE / SUBMIT HANDLERS ======= */
         const announcementFileInput = document.getElementById('announcement-file');
         const fileInfoContainer = document.getElementById('announcement-file-info');
         const fileNameEl = document.getElementById('announcement-file-name');
@@ -2424,7 +2412,6 @@
           });
         }
           
-        /* ======= DOWNLOAD helper for assignment files ======= */
         function downloadAssignmentFile(id) {
           window.open(`${ENDPOINTS.ASSIGNMENTS}/${id}/download`, '_blank');
         }

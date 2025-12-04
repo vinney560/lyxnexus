@@ -803,7 +803,7 @@ def auto_close_sessions():
             except Exception as e:
                 print(f"ℹ️ Initial count failed: {e}")
 
-            # Kill idle connections --> LImit 20
+            # Kill idle connections --> Limit to 20 for Aiven's max conn limit
             try:
                 with db.engine.connect() as conn:
                     
@@ -815,7 +815,7 @@ def auto_close_sessions():
                         AND pid <> pg_backend_pid();
                     """))
                     killed_connections = kill_result.rowcount
-                    print(f"🔫 Killed {killed_connections} idle connections")
+                    print(f"=== Killed {killed_connections} idle connections===")
                     
             except Exception as e:
                 print(f"Connection killing failed: {e}")
@@ -3364,6 +3364,13 @@ def check():
             return redirect(url_for('main_page'))
     else:
         return redirect(url_for('login'))
+#--------------------------------------------------------------------
+@app.route('/auto-authenticate', methods=['POST'])
+def auto_authenticate():
+    if current_user.is_authenticated:
+        return jsonify({'status': 'success', 'is_admin': current_user.is_admin})
+    else:
+        return jsonify({'status': 'failure'}), 401
 #--------------------------------------------------------------------
 @app.route('/logout')
 @login_required

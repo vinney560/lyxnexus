@@ -812,7 +812,7 @@
                 <a href="/terms" class="nav-link">Terms</a>
             </div>
             <div class="flex space-x-3">
-                <button class="btn btn-sm pulse" onclick="window.location.href='/login-check'">
+                <button class="btn btn-sm pulse" onclick="window.location.href='/login'">
                     <i class="fas fa-sign-in-alt"></i>
                     <span class="sm:inline">Login Portal</span>
                 </button>
@@ -1303,7 +1303,7 @@
             container.addEventListener('click', (e) => {
               const btn = e.target.closest('.view-details-btn');
               if (btn) {
-                window.location.href = '/login';
+                window.location.href = '/login-check';
               }
             });
           } catch (error) {

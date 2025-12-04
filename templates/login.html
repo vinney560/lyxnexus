@@ -831,12 +831,19 @@
         autoAuthenticateBtn.addEventListener('click', () => {
             autoAuthenticateBtn.innerHTML = '<i class="fas fa-spin fa-spinner">';
             autoAuthenticateBtn.disabled = true;
-            window.location.href = '/login-check'
-            setTimeout(() => {
-                autoAuthenticateBtn.disabled = false
-                autoAuthenticateBtn.innerHTML = '<i class="fas fa-sign-in-alt mr-2"> Auto Authenticate';
-                showToast('Auto Authenication Failed', 'error', 'Failed To Authenticate');
-            }, 1500);
+            const res = await fetch('/auto-authenticate', { method: 'POST' });
+            const data = await res.json();
+            if (data.success) {
+                if (data.is_admin) {
+                    window.location.href = '/admin';
+                } else {
+                    window.location.href = '/main-page';
+                }
+            } else {
+                showToast('Auto authentication failed. Please login manually.', 'error');
+                autoAuthenticateBtn.innerHTML = '<i class="fas fa-sign-in-alt mr-2"></i> Auto Authenticate';
+                autoAuthenticateBtn.disabled = false;
+            }
         });
 
         class MobileValidator {

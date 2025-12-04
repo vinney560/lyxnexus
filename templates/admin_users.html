@@ -1279,8 +1279,6 @@
                 // Calculate activity for each day
                 const activityData = last7Days.map(day => {
                     return users.filter(user => {
-                        // For demo purposes, we'll use a random algorithm
-                        // In a real app, this would use actual activity logs
                         const userDate = new Date(user.created_at).toISOString().split('T')[0];
                         return userDate === day;
                     }).length;
@@ -1567,11 +1565,8 @@
 
         }
 
-
-        // Enhanced statistics calculation - FIXED to use backend stats
         function updateStatistics(users, stats = null) {
             if (stats) {
-                // Use backend statistics if provided
                 document.getElementById('total-users').textContent = stats.total_users || 0;
                 document.getElementById('admin-users').textContent = stats.admin_users || 0;
                 document.getElementById('regular-users').textContent = stats.regular_users || 0;
@@ -1581,7 +1576,6 @@
                 document.getElementById('avg-activity').textContent = stats.avg_activity || 0;
                 document.getElementById('total-activity').textContent = stats.total_activity || 0;
             } else {
-                // Fallback to frontend calculation if no stats provided
                 const totalUsers = users.length;
                 const adminUsers = users.filter(user => user.is_admin).length;
                 const regularUsers = totalUsers - adminUsers;
@@ -1593,7 +1587,6 @@
                     return userDate >= today;
                 }).length;
                 
-                // Calculate active users (today)
                 const activeToday = users.filter(user => {
                     return Math.random() > 0.7; // 30% of users are "active today"
                 }).length;
@@ -1614,10 +1607,8 @@
             }
         }
 
-        // FIXED: Properly handle backend response structure with pagination
         async function fetchUsers(page = 1) {
             try {
-                // Build query parameters for pagination and filtering
                 const params = new URLSearchParams({
                     page: page,
                     per_page: usersPerPage
@@ -1648,7 +1639,6 @@
             }
         }
 
-        // FIXED: Properly extract users array from response and handle pagination
         async function loadUsers(page = 1) {
             if (isRefreshing) return;
 
@@ -1690,6 +1680,7 @@
                 showToast('Failed to load users', 'error');
             }
         }
+
         function displayUsers(users) {
             const container = document.getElementById('users-table-body');
             
@@ -1943,8 +1934,6 @@
         }
 
         function exportUserData() {
-            // In a real app, you would generate a CSV or Excel file
-            // For this demo, we'll just show a toast
             showToast('User data export started. This may take a moment.', 'info');
             
             // Simulate export process
