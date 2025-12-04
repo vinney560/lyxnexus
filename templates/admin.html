@@ -772,11 +772,348 @@
         .mobile-grid-btn.btn-danger {
             grid-column: 1;
         }
-    }    
+    }
+    
+    /* ===== ENHANCED UI STYLES ===== */
+    .announcement-card {
+        background: rgba(30, 30, 40, 0.9);
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 20px;
+        border-left: 4px solid #3B82F6;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .announcement-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        background: linear-gradient(to bottom, #3B82F6, #8B5CF6);
+        opacity: 0.6;
+    }
+    
+    .announcement-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 30px rgba(59, 130, 246, 0.15);
+    }
+    
+    .announcement-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 15px;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    
+    .announcement-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #fff;
+        line-height: 1.3;
+        flex: 1;
+    }
+    
+    .announcement-meta {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 12px;
+        flex-wrap: wrap;
+    }
+    
+    .announcement-author {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #9CA3AF;
+        font-size: 0.9rem;
+    }
+    
+    .announcement-date {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #9CA3AF;
+        font-size: 0.9rem;
+    }
+    
+    .announcement-content {
+        color: #D1D5DB;
+        line-height: 1.6;
+        margin-bottom: 20px;
+        padding-left: 10px;
+        border-left: 2px solid rgba(59, 130, 246, 0.2);
+        padding-left: 15px;
+    }
+    
+    .attachment-container {
+        background: rgba(59, 130, 246, 0.08);
+        border-radius: 10px;
+        padding: 15px;
+        margin-top: 20px;
+        border: 1px solid rgba(59, 130, 246, 0.2);
+    }
+    
+    .attachment-title {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #9CA3AF;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .attachment-preview {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px;
+        background: rgba(30, 30, 40, 0.6);
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .attachment-preview:hover {
+        background: rgba(59, 130, 246, 0.1);
+        transform: translateY(-2px);
+    }
+    
+    .attachment-icon {
+        width: 48px;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+        border-radius: 10px;
+        font-size: 20px;
+        color: white;
+        flex-shrink: 0;
+    }
+    
+    .attachment-info {
+        flex: 1;
+        min-width: 0;
+    }
+    
+    .attachment-name {
+        font-weight: 500;
+        color: white;
+        margin-bottom: 4px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    .attachment-details {
+        display: flex;
+        gap: 12px;
+        font-size: 0.8rem;
+        color: #9CA3AF;
+    }
+    
+    .image-preview {
+        width: 100%;
+        max-height: 300px;
+        object-fit: cover;
+        border-radius: 10px;
+        margin-top: 15px;
+        cursor: zoom-in;
+        transition: transform 0.3s ease;
+    }
+    
+    .image-preview:hover {
+        transform: scale(1.02);
+    }
+    
+    .due-badge {
+        background: linear-gradient(135deg, #EF4444, #DC2626);
+        color: white;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+    
+    .topic-badge {
+        background: rgba(139, 92, 246, 0.2);
+        color: #8B5CF6;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        border: 1px solid rgba(139, 92, 246, 0.3);
+    }
+    
+    .assignment-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    
+    .assignment-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #fff;
+        line-height: 1.3;
+        flex: 1;
+    }
+    
+    .assignment-meta {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 12px;
+        flex-wrap: wrap;
+    }
+    
+    .assignment-description {
+        color: #D1D5DB;
+        line-height: 1.6;
+        margin-bottom: 20px;
+        padding-left: 15px;
+        border-left: 2px solid rgba(59, 130, 246, 0.2);
+    }
+    
+    .time-remaining {
+        font-size: 0.9rem;
+        color: #F59E0B;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-weight: 500;
+    }
+    
+    .image-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.9);
+        z-index: 2000;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    .image-modal img {
+        max-width: 90%;
+        max-height: 90%;
+        border-radius: 10px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #9CA3AF;
+    }
+    
+    .empty-state i {
+        font-size: 48px;
+        margin-bottom: 20px;
+        color: #4B5563;
+    }
+    
+    .empty-state h3 {
+        font-size: 1.25rem;
+        margin-bottom: 10px;
+        color: #D1D5DB;
+    }
+    
+    .empty-state p {
+        max-width: 400px;
+        margin: 0 auto 20px;
+        line-height: 1.6;
+    }
+    
+    .file-type-icon {
+        font-size: 24px;
+        color: #3B82F6;
+    }
+    
+    .preview-overlay {
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .preview-overlay::after {
+        content: 'Preview';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(0, 0, 0, 0.7);
+        color: white;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    
+    .preview-overlay:hover::after {
+        opacity: 1;
+    }
+    
+    .content-preview {
+        max-height: 200px;
+        overflow: hidden;
+        position: relative;
+    }
+    
+    .content-preview::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 60px;
+        background: linear-gradient(to bottom, transparent, rgba(30, 30, 40, 0.9));
+    }
+    
+    .read-more-btn {
+        background: transparent;
+        border: none;
+        color: #3B82F6;
+        cursor: pointer;
+        font-weight: 500;
+        padding: 5px 0;
+        margin-top: 5px;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        transition: color 0.3s ease;
+    }
+    
+    .read-more-btn:hover {
+        color: #60A5FA;
+    }
 </style>
 <body>
     <!-- Toast Container -->
     <div class="toast-container" id="toast-container"></div>
+    
+    <!-- Image Preview Modal -->
+    <div id="image-modal" class="image-modal">
+        <img id="modal-image" src="" alt="Preview">
+    </div>
 
     <nav class="glass-morph sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 py-4">
@@ -1145,6 +1482,97 @@
             return toastManager.show(title || titles[type], message, type);
         }
 
+        // Image modal functionality
+        const imageModal = document.getElementById('image-modal');
+        const modalImage = document.getElementById('modal-image');
+        
+        function openImageModal(src) {
+            modalImage.src = src;
+            imageModal.style.display = 'flex';
+        }
+        
+        function closeImageModal() {
+            imageModal.style.display = 'none';
+            modalImage.src = '';
+        }
+        
+        // Close image modal when clicking outside
+        imageModal.addEventListener('click', function(e) {
+            if (e.target === imageModal || e.target.classList.contains('image-modal')) {
+                closeImageModal();
+            }
+        });
+        
+        // Close image modal with ESC key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && imageModal.style.display === 'flex') {
+                closeImageModal();
+            }
+        });
+
+        // Get file type icon
+        function getFileIcon(filename) {
+            if (!filename) return 'fa-file';
+            
+            const ext = filename.split('.').pop().toLowerCase();
+            const icons = {
+                pdf: 'fa-file-pdf',
+                doc: 'fa-file-word',
+                docx: 'fa-file-word',
+                txt: 'fa-file-alt',
+                zip: 'fa-file-archive',
+                jpg: 'fa-file-image',
+                jpeg: 'fa-file-image',
+                png: 'fa-file-image',
+                gif: 'fa-file-image',
+                mp4: 'fa-file-video',
+                mp3: 'fa-file-audio'
+            };
+            
+            return icons[ext] || 'fa-file';
+        }
+        
+        // Check if file is an image
+        function isImageFile(filename) {
+            if (!filename) return false;
+            const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'];
+            const ext = filename.split('.').pop().toLowerCase();
+            return imageExtensions.includes(ext);
+        }
+        
+        // Format file size
+        function formatFileSize(bytes) {
+            if (!bytes) return '0 KB';
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+            return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+        }
+        
+        // Get time remaining until due date
+        function getTimeRemaining(dueDate) {
+            if (!dueDate) return '';
+            const now = new Date();
+            const due = new Date(dueDate);
+            const diffMs = due - now;
+            
+            if (diffMs < 0) {
+                const daysAgo = Math.floor(Math.abs(diffMs) / (1000 * 60 * 60 * 24));
+                if (daysAgo === 0) return 'Due today';
+                return `${daysAgo} day${daysAgo > 1 ? 's' : ''} ago`;
+            }
+            
+            const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            
+            if (days > 0) {
+                return `${days} day${days > 1 ? 's' : ''}, ${hours} hour${hours > 1 ? 's' : ''} left`;
+            } else if (hours > 0) {
+                return `${hours} hour${hours > 1 ? 's' : ''} left`;
+            } else {
+                return 'Due today';
+            }
+        }
+
         const mobileMenuBtn = document.getElementById('mobile-menu-btn');
         const mobileMenu = document.getElementById('mobile-menu');
         let isMenuOpen = false;
@@ -1355,107 +1783,206 @@
           const infoEl = document.getElementById('assignment-file-info');
           if (infoEl) infoEl.style.display = 'none';
         }
-        /* ======= LOADERS (render lists) ======= */
+        
+        /* ======= ENHANCED LOADERS ======= */
         async function loadAnnouncements() {
-          const container = document.getElementById('announcements-list') || document.getElementById('announcements-container');
-          if (!container) return;
+            const container = document.getElementById('announcements-list');
+            if (!container) return;
         
-          container.innerHTML = `<div class="loading"><div class="spinner"></div></div>`;
+            container.innerHTML = `<div class="loading"><div class="spinner"></div></div>`;
         
-          const items = await fetchData(ENDPOINTS.ANNOUNCEMENTS);
-          if (!items || items.length === 0) {
-            container.innerHTML = '<p class="text-center text-gray-400">No announcements available.</p>';
-            return;
-          }
-        
-          container.innerHTML = items.map(a => `
-            <div class="admin-card enhanced-border">
-              <div class="admin-card-content">
-                <div class="flex-1 mb-4 lg:mb-0">
-                  <h3 class="admin-title">${escapeHtml(a.title || '')}</h3>
-                  <p class="text-gray-400 hyphens-auto break-all mt-1">${escapeHtml(a.content || '')}</p>
-                
-                  ${a.file_name ? `
-                    <div class="mt-2">
-                      <strong>Attachment:</strong> 
-                      <a href="/announcement-file/${a.id}/${encodeURIComponent(a.file_name)}" target="_blank" class="text-blue-400 underline hover:text-blue-300">
-                        ${a.file_name}
-                      </a>
+            const items = await fetchData(ENDPOINTS.ANNOUNCEMENTS);
+            if (!items || items.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-bullhorn"></i>
+                        <h3>No Announcements Yet</h3>
+                        <p>Create your first announcement to keep everyone informed</p>
+                        <button class="btn btn-success mt-4" onclick="openModal('announcement-modal')">
+                            <i class="fas fa-plus mr-2"></i> Create Announcement
+                        </button>
                     </div>
-                  ` : ''}
-                  
-                  <div class="flex items-center mt-2 text-sm text-gray-500">
-                    <span>By: ${a.author?.username || 'Unknown'}</span>
-                    <span class="mx-2">•</span>
-                    <span>${formatDateSafe(a.created_at)}</span>
-                  </div>
-                </div>
-              
-                <div class="action-buttons">
-                  <button class="btn btn-warning" onclick="editAnnouncement(${a.id})">
-                    <i class="fas fa-edit mr-1"></i> Edit
-                  </button>
-                  <button class="btn btn-danger" onclick="deleteAnnouncement(${a.id})">
-                    <i class="fas fa-trash mr-1"></i> Delete
-                  </button>
-                </div>
-              </div>
-            </div>
-          `).join('');
+                `;
+                return;
+            }
+        
+            container.innerHTML = items.map(a => {
+                const hasAttachment = a.file_name && a.file_name.trim() !== '';
+                const isImage = hasAttachment && isImageFile(a.file_name);
+                const fileUrl = hasAttachment ? `/announcement-file/${a.id}/${encodeURIComponent(a.file_name)}` : '#';
+                const fileIcon = hasAttachment ? getFileIcon(a.file_name) : 'fa-file';
+                
+                // Content preview logic
+                let contentPreview = escapeHtml(a.content || '');
+                const shouldTruncate = contentPreview.length > 300;
+                if (shouldTruncate) {
+                    contentPreview = contentPreview.substring(0, 300) + '...';
+                }
+                
+                return `
+                    <div class="announcement-card">
+                        <div class="announcement-header">
+                            <h3 class="announcement-title">${escapeHtml(a.title || '')}</h3>
+                            <div class="action-buttons">
+                                <button class="btn btn-warning" onclick="editAnnouncement(${a.id})">
+                                    <i class="fas fa-edit mr-1"></i> Edit
+                                </button>
+                                <button class="btn btn-danger" onclick="deleteAnnouncement(${a.id})">
+                                    <i class="fas fa-trash mr-1"></i> Delete
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="announcement-meta">
+                            <div class="announcement-author">
+                                <i class="fas fa-user-circle"></i>
+                                <span>${escapeHtml(a.author?.username || 'Unknown')}</span>
+                            </div>
+                            <div class="announcement-date">
+                                <i class="fas fa-clock"></i>
+                                <span>${formatDateSafe(a.created_at)}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="announcement-content content-preview">
+                            ${contentPreview}
+                        </div>
+                        
+                        ${shouldTruncate ? `
+                            <button class="read-more-btn" onclick="this.previousElementSibling.classList.toggle('content-preview')">
+                                <i class="fas fa-chevron-down mr-1"></i>
+                                <span>Read more</span>
+                            </button>
+                        ` : ''}
+                        
+                        ${hasAttachment ? `
+                            <div class="attachment-container">
+                                <div class="attachment-title">
+                                    <i class="fas fa-paperclip"></i>
+                                    <span>Attachment</span>
+                                </div>
+                                ${isImage ? `
+                                    <img src="${fileUrl}" 
+                                         alt="${escapeHtml(a.file_name)}" 
+                                         class="image-preview preview-overlay"
+                                         onclick="openImageModal('${fileUrl}')">
+                                ` : `
+                                    <a href="${fileUrl}" target="_blank" class="attachment-preview">
+                                        <div class="attachment-icon">
+                                            <i class="fas ${fileIcon}"></i>
+                                        </div>
+                                        <div class="attachment-info">
+                                            <div class="attachment-name">${escapeHtml(a.file_name)}</div>
+                                            <div class="attachment-details">
+                                                <span><i class="fas fa-file"></i> ${escapeHtml(a.file_type || 'File')}</span>
+                                                <span><i class="fas fa-hdd"></i> ${formatFileSize(a.file_size)}</span>
+                                            </div>
+                                        </div>
+                                        <i class="fas fa-download text-blue-400"></i>
+                                    </a>
+                                `}
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }).join('');
         }
 
         async function loadAssignments() {
-          const container = document.getElementById('assignments-list') || document.getElementById('assignments-container');
-          if (!container) return;
-          container.innerHTML = `<div class="loading"><div class="spinner"></div></div>`;
-          const items = await fetchData(ENDPOINTS.ASSIGNMENTS);
-          if (!items || items.length === 0) {
-            container.innerHTML = '<p class="text-center text-gray-400">No assignments available.</p>';
-            return;
-          }
+            const container = document.getElementById('assignments-list');
+            if (!container) return;
+            container.innerHTML = `<div class="loading"><div class="spinner"></div></div>`;
+            const items = await fetchData(ENDPOINTS.ASSIGNMENTS);
+            
+            if (!items || items.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-tasks"></i>
+                        <h3>No Assignments Yet</h3>
+                        <p>Create your first assignment to get started</p>
+                        <button class="btn btn-success mt-4" onclick="openModal('assignment-modal')">
+                            <i class="fas fa-plus mr-2"></i> Create Assignment
+                        </button>
+                    </div>
+                `;
+                return;
+            }
         
-          container.innerHTML = items.map(assignment => {
-            const due = assignment.due_date ? formatDateSafe(assignment.due_date) : 'No due date';
-            const fileSection = assignment.file_name ? `
-              <div class="file-info mt-2 relative pr-12">
-                  <i class="fas fa-file"></i>
-                  <div class="flex-1">
-                      <div class="font-medium truncate text-white" style="overflow: hidden; text-overflow: ellipsis; color: white;">${escapeHtml(truncateFilename(assignment.file_name))}</div>
-                      <div class="text-sm text-gray-400">${escapeHtml(assignment.file_type || 'Unknown')}</div>
-                  </div>
-
-                  <!-- Download button positioned absolutely -->
-                  <div class="file-actions absolute right-0 top-1/2 transform -translate-y-1/2">
-                      <button class="btn bg-blue-600 text-white hover:bg-blue-700 text-sm w-8 h-8 flex items-center justify-center" onclick="downloadAssignmentFile(${assignment.id})">
-                          <i class="fas fa-download text-sm"></i>
-                      </button>
-                  </div>
-              </div>` : '';
-          
-            return `
-              <div class="admin-card enhanced-border">
-                <div class="admin-card-content">
-                  <div class="flex-1 mb-4 lg:mb-0">
-                    <div class="flex flex-col sm:flex-row sm:items-center">
-                      <h3 class="admin-title">${escapeHtml(assignment.title)}</h3>
-                      <span class="bg-blue-500 text-white px-2 py-1 rounded-full text-xs mt-2 sm:mt-0 sm:ml-2">Due: ${due}</span>
+            container.innerHTML = items.map(assignment => {
+                const due = assignment.due_date ? formatDateSafe(assignment.due_date) : 'No due date';
+                const timeRemaining = getTimeRemaining(assignment.due_date);
+                const hasFile = assignment.file_name && assignment.file_name.trim() !== '';
+                const fileUrl = hasFile ? `${ENDPOINTS.ASSIGNMENTS}/${assignment.id}/download` : '#';
+                const fileIcon = hasFile ? getFileIcon(assignment.file_name) : 'fa-file';
+                const isOverdue = assignment.due_date && new Date(assignment.due_date) < new Date();
+                
+                return `
+                    <div class="announcement-card">
+                        <div class="assignment-header">
+                            <div class="flex-1">
+                                <h3 class="assignment-title">${escapeHtml(assignment.title)}</h3>
+                                ${assignment.topic?.name ? `
+                                    <div class="topic-badge mt-2">
+                                        <i class="fas fa-folder mr-1"></i>${escapeHtml(assignment.topic.name)}
+                                    </div>
+                                ` : ''}
+                            </div>
+                            <div class="action-buttons">
+                                <button class="btn btn-warning" onclick="editAssignment(${assignment.id})">
+                                    <i class="fas fa-edit mr-1"></i> Edit
+                                </button>
+                                <button class="btn btn-danger" onclick="deleteAssignment(${assignment.id})">
+                                    <i class="fas fa-trash mr-1"></i> Delete
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="announcement-meta">
+                            <div class="announcement-author">
+                                <i class="fas fa-user-circle"></i>
+                                <span>${assignment.creator?.username || 'Unknown'}</span>
+                            </div>
+                            <div class="due-badge ${isOverdue ? 'bg-red-500' : 'bg-blue-500'}">
+                                <i class="fas fa-calendar-alt mr-1"></i>
+                                <span>Due: ${due}</span>
+                            </div>
+                        </div>
+                        
+                        ${timeRemaining ? `
+                            <div class="time-remaining mb-3">
+                                <i class="fas fa-hourglass-half"></i>
+                                <span>${timeRemaining}</span>
+                            </div>
+                        ` : ''}
+                        
+                        <div class="assignment-description">
+                            ${escapeHtml(assignment.description || 'No description provided')}
+                        </div>
+                        
+                        ${hasFile ? `
+                            <div class="attachment-container">
+                                <div class="attachment-title">
+                                    <i class="fas fa-paperclip"></i>
+                                    <span>Assignment File</span>
+                                </div>
+                                <a href="${fileUrl}" target="_blank" class="attachment-preview">
+                                    <div class="attachment-icon">
+                                        <i class="fas ${fileIcon}"></i>
+                                    </div>
+                                    <div class="attachment-info">
+                                        <div class="attachment-name">${escapeHtml(assignment.file_name)}</div>
+                                        <div class="attachment-details">
+                                            <span><i class="fas fa-file"></i> ${escapeHtml(assignment.file_type || 'File')}</span>
+                                            <span><i class="fas fa-hdd"></i> ${formatFileSize(assignment.file_size)}</span>
+                                        </div>
+                                    </div>
+                                    <i class="fas fa-download text-blue-400"></i>
+                                </a>
+                            </div>
+                        ` : ''}
                     </div>
-                    <p class="text-gray-400 break-all hyphens-auto mt-1">${escapeHtml(assignment.description || '')}</p>
-                    ${fileSection}
-                    <div class="flex items-center mt-2 text-sm text-gray-500">
-                      <span>Topic: ${assignment.topic?.name || 'General'}</span>
-                      <span class="mx-2">•</span>
-                      <span>By: ${assignment.creator?.username || 'Unknown'}</span>
-                    </div>
-                  </div>
-                  <div class="action-buttons">
-                    <button class="btn btn-warning" onclick="editAssignment(${assignment.id})"><i class="fas fa-edit mr-1"></i> Edit</button>
-                    <button class="btn btn-danger" onclick="deleteAssignment(${assignment.id})"><i class="fas fa-trash mr-1"></i> Delete</button>
-                  </div>
-                </div>
-              </div>
-            `;
-          }).join('');
+                `;
+            }).join('');
         }
           
         async function loadTopics() {
