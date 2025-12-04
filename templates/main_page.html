@@ -1565,13 +1565,25 @@
     .announcement-text:not(.expanded)::after {
         content: '';
         position: absolute;
-        bottom: 0;
         left: 0;
         right: 0;
         height: 40px;
-        bottom: -20px; 
-        background: linear-gradient(to bottom, transparent, rgba(15, 23, 42, 0.9));
+        background: linear-gradient(to bottom, transparent 0%, rgba(15, 23, 42, 0.95) 70%);
         pointer-events: none;
+        z-index: 1;
+    }
+
+    .announcement-text.expanded::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 0;
+        right: 0;
+        height: 40px;
+        background: linear-gradient(to bottom, transparent 0%, rgba(15, 23, 42, 0.95) 70%);
+        pointer-events: none;
+        z-index: 1;
+        display: none;
     }
 
     .show-more-btn {
