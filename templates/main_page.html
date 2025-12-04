@@ -3954,12 +3954,17 @@
 
         function shouldTruncate(text, maxLength = 300) {
             if (!text) return false;
+            if (text.includes('<') && text.includes('>')) {
+                text = text.replace(/<[^>]*>/g, '');
+            }
             return text.length > maxLength;
         }
 
         function truncateText(text, maxLength = 300) {
             if (!text || text.length <= maxLength) return text;
-
+            if (text.includes('<') && text.includes('>')) {
+                text = text.replace(/<[^>]*>/g, '');
+            }
             // Find a clean break point (space or punctuation)
             let truncated = text.substr(0, maxLength);
             const lastSpace = truncated.lastIndexOf(' ');
@@ -4144,7 +4149,7 @@
                                                 if (shouldTruncate(announcement.content, 250)) {
                                                     return `
                                                         <button onclick="toggleExpand(${announcement.id})" 
-                                                                class="show-more-btn mt-2 text-blue-400 hover:text-blue-300 text-sm font-medium flex items-center gap-1 transition-colors">
+                                                                class="show-more-btn mt-2 text-green-400 hover:text-blue-300 text-sm font-medium flex items-center gap-1 transition-colors">
                                                             <i class="fas fa-chevron-down text-xs"></i>
                                                             <span>Show more</span>
                                                         </button>
