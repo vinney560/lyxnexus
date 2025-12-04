@@ -3959,25 +3959,7 @@
             }
             return text.length > maxLength;
         }
-
-        function truncateText(text, maxLength = 290) {
-            if (!text || text.length <= maxLength) return text;
-            if (text.includes('<') && text.includes('>')) {
-                text = text.replace(/<[^>]*>/g, '');
-            }
-            // Find a clean break point (space or punctuation)
-            let truncated = text.substr(0, maxLength);
-            const lastSpace = truncated.lastIndexOf(' ');
-            const lastPeriod = truncated.lastIndexOf('.');
-            const breakPoint = Math.max(lastSpace, lastPeriod);
-
-            if (breakPoint > maxLength * 0.7) { 
-                truncated = text.substr(0, breakPoint);
-            }
-
-            return truncated + '...';
-        }        
-
+        
         // Load announcements
         async function loadAnnouncements(isRefresh = false) {
             const container = document.getElementById("announcements-container");
@@ -4143,7 +4125,7 @@
                                     
                                         <div class="announcement-content-wrapper mb-4">
                                             
-                                            <div class="announcement-text break-all hyphens-auto text-slate-300 leading-relaxed list-inside formatted-text">${(() => {const formattedContent = formatText(announcement.content); const shouldTruncateContent = shouldTruncate(announcement.content, 300); const displayContent = shouldTruncateContent ? truncateText(formattedContent, 300) : formattedContent;return displayContent;})()}</div>
+                                            <div class="announcement-text break-all hyphens-auto text-slate-300 leading-relaxed list-inside formatted-text">${formatText(announcement.content)}</div>
 
                                             ${(() => {
                                                 if (shouldTruncate(announcement.content, 300)) {
