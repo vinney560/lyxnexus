@@ -828,18 +828,27 @@
         };
 
         const autoAuthenticateBtn = document.getElementById('autoAuthenticate');
-        autoAuthenticateBtn.addEventListener('click', () => {
-            autoAuthenticateBtn.innerHTML = '<i class="fas fa-spin fa-spinner">';
+        autoAuthenticateBtn.addEventListener('click', async () => { 
+            autoAuthenticateBtn.innerHTML = '<i class="fas fa-spin fa-spinner"></i>';  
             autoAuthenticateBtn.disabled = true;
-            const res = await fetch('/auto-authenticate', { method: 'POST' });
-            const data = await res.json();
-            if (data.success) {
-                if (data.is_admin) {
-                    window.location.href = '/admin';
+
+            try {
+                const res = await fetch('/auto-authenticate', { method: 'POST' });
+                const data = await res.json();
+
+                if (data.status === 'success') {
+                    if (data.is_admin) {
+                        window.location.href = '/admin';
+                    } else {
+                        window.location.href = '/main-page';
+                    }
                 } else {
-                    window.location.href = '/main-page';
+                    showToast('Auto authentication failed. Please login manually.', 'error');
+                    autoAuthenticateBtn.innerHTML = '<i class="fas fa-sign-in-alt mr-2"></i> Auto Authenticate';
+                    autoAuthenticateBtn.disabled = false;
                 }
-            } else {
+            } catch (error) {
+                console.error('Auto-auth error:', error);
                 showToast('Auto authentication failed. Please login manually.', 'error');
                 autoAuthenticateBtn.innerHTML = '<i class="fas fa-sign-in-alt mr-2"></i> Auto Authenticate';
                 autoAuthenticateBtn.disabled = false;
