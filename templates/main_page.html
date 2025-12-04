@@ -4211,32 +4211,32 @@
             window.toggleExpand = function(id) {
                 const announcementCard = document.querySelector(`[data-announcement-id="${id}"]`);
                 if (!announcementCard) return;
-
+            
                 const textElement = announcementCard.querySelector('.announcement-text');
                 const button = announcementCard.querySelector('.show-more-btn');
-
+            
                 if (textElement.classList.contains('expanded')) {
-                    // Collapse
+                    
                     const originalContent = textElement.getAttribute('data-original');
                     if (originalContent) {
-                        textElement.innerHTML = truncateText(originalContent, 300);
+                        textElement.innerHTML = originalContent;
                     }
                     textElement.classList.remove('expanded');
                     if (button) {
                         button.innerHTML = '<i class="fas fa-chevron-down text-xs"></i><span>Show more</span>';
                     }
                 } else {
-                    // Expand
                     const fullContent = textElement.getAttribute('data-full') || textElement.innerHTML;
-                    textElement.setAttribute('data-original', textElement.innerHTML);
+                    textElement.setAttribute('data-original', textElement.innerHTML); 
                     textElement.setAttribute('data-full', formatText(announcements.find(a => a.id === id)?.content || ''));
-                    textElement.innerHTML = textElement.getAttribute('data-full');
+                    textElement.innerHTML = textElement.getAttribute('data-full'); 
                     textElement.classList.add('expanded');
                     if (button) {
                         button.innerHTML = '<i class="fas fa-chevron-up text-xs"></i><span>Show less</span>';
                     }
                 }
-            };        
+            };            
+            
             // Image modal
             window.openImagePreview = function(src) {
                 let modal = document.getElementById("image-preview-modal");
