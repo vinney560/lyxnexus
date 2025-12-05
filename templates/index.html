@@ -740,9 +740,9 @@
     }
     
     .quick-action:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
-        border-color: rgba(59, 130, 246, 0.3);
+        transform: translateY(-4px);
+        border-color: var(--accent-blue);
+        box-shadow: 0 15px 30px rgba(59, 130, 246, 0.2);
     }
     
     .quick-action-icon {
@@ -756,6 +756,10 @@
         color: #3B82F6;
         font-size: 22px;
         margin: 0 auto 12px;
+    }
+    .quick-action-icon:hover {
+        transform: rotate(360deg) scale(1.1);
+        background: rgba(59, 130, 246, 0.2);
     }
 
     .formatted-text {
@@ -819,7 +823,7 @@
     
     .showcase-visual {
         position: relative;
-        height: 300px;
+        height: 350px;
     }
     
     .visual-element {
@@ -889,7 +893,7 @@
         position: absolute;
         background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple));
         border-radius: 50%;
-        opacity: 0.1;
+        opacity: 0.4;
         animation: floatDot linear infinite;
     }
     
@@ -974,18 +978,11 @@
             </div>
             <section class="showcase-section">
                 <div class="showcase-grid">
-                    <div class="showcase-content fade-in">
-                        <h2 class="showcase-title">Interactive Experience</h2>
-                        <p class="showcase-text">
-                            Dive into a world of interactive retrieval of information, notes, resources with real-time collaboration, multimedia integration, and seamless communication tools designed for modern education.
-                        </p>
-                    </div>
-
                     <div class="showcase-visual fade-in delay-1">
                         <div class="visual-element">
                             <div class="visual-content">
                                 <i class="fas fa-graduation-cap" style="font-size: 3rem; color: var(--accent-blue); margin-bottom: 1rem;"></i>
-                                <h3 style="font-size: 1.5rem; margin-bottom: 0.5rem; font-weight: 700;">Login Our Portal</h3>
+                                <h3 style="font-size: 1.5rem; margin-bottom: 0.5rem; font-weight: 800;" class="underline decoration-blue-500">Login Our Portal</h3>
                                 <p style="color: #cbd5e1;">Experience the interface</p>
                             </div>
                         </div>
@@ -1626,7 +1623,6 @@
                 const dot = document.createElement('div');
                 dot.className = 'dot';
                 
-                // Random properties
                 const size = Math.random() * 4 + 1;
                 const left = Math.random() * 100;
                 const duration = Math.random() * 10 + 10;
@@ -1650,7 +1646,6 @@
             document.querySelector('.scroll-progress').style.width = scrolled + "%";
         }
 
-        // Fade in animation on scroll
         function animateOnScroll() {
             const fadeElements = document.querySelectorAll('.fade-in');
             
@@ -1674,13 +1669,11 @@
                 el.style.transition = "opacity 0.8s ease, transform 0.8s ease";
             });
             
-            // Add scroll event listeners
             window.addEventListener('scroll', () => {
                 updateScrollProgress();
                 animateOnScroll();
             });
             
-            // Initial animations
             setTimeout(() => {
                 animateOnScroll();
             }, 100);
