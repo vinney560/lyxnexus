@@ -1127,8 +1127,9 @@ def login():
         # Validate username
         if not username or len(username) < 3 or len(username) > 30:
             validation_errors.append('Username must be at least 3 characters and at most 30 characters long')
-        elif not re.match(r'^[a-zA-Z0-9_. -]+$', username):
-            validation_errors.append('Username can only contain letters, numbers, dots, hyphens, underscores, and spaces')
+        elif not re.match(r'^[a-zA-Z0-9_.\/ -]+$', username):
+            validation_errors.append('Username can only contain letters, numbers, dots, hyphens, underscores, slashes, and spaces')
+
         
         # Validate mobile number
         if not mobile or len(mobile) != 10 or not mobile.startswith(('07', '01')):
