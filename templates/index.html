@@ -911,6 +911,76 @@
             opacity: 0;
         }
     }
+    
+    .showcase-visual {
+        width: 100%;
+        height: 300px;
+        margin-top: 2rem;
+    }
+
+    .visual-element {
+        width: 100%;
+        height: 100%;
+        background: var(--card-bg);
+        border-radius: 16px;
+        border: 1px solid var(--border-color);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .visual-content {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        right: 20px;
+        bottom: 20px;
+        background: var(--bg-color);
+        border-radius: 12px;
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+    }
+
+    @media (max-width: 640px) {
+        .showcase-visual {
+            height: 250px;
+            margin-top: 1.5rem;
+        }
+
+        .visual-content {
+            padding: 1rem;
+            top: 15px;
+            left: 15px;
+            right: 15px;
+            bottom: 15px;
+        }
+
+        .visual-content i {
+            font-size: 2rem !important;
+        }
+
+        .visual-content h3 {
+            font-size: 1.1rem !important;
+        }
+
+        .visual-content p {
+            font-size: 0.8rem !important;
+        }
+    }
+
+    .visual-element::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: conic-gradient(transparent, var(--accent-blue), transparent 30%);
+        animation: rotate 4s linear infinite;
+    }    
 </style>
 <body class="custom-bg">
     
@@ -950,40 +1020,45 @@
         </div>
     </nav>
 
-    <header class="py-16 md:py-20 content-container">
-        <div class="max-w-6xl mx-auto px-4 flex flex-col md:flex-row items-center">
-            <div class="md:w-1/2 mb-10 md:mb-0">
-                <div class="accent-line"></div>
-                <h1 class="text-4xl md:text-5xl font-bold text-slate-100 mb-6 tracking-tight">Welcome to <span class="gradient-text font-bold">LyxNexus</span></h1>
-                <p class="text-lg text-slate-300 mb-8" id="description"></p>
-                <div class="accent-line"></div>
+    <header class="py-12 md:py-20 content-container">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="flex flex-col lg:flex-row items-center gap-8 lg:gap-12">
+                <div class="w-full lg:w-1/2 order-1 lg:order-1">
+                    <div class="accent-line mb-6"></div>
+                    <h1 class="text-3xl md:text-5xl font-bold text-slate-100 mb-4 md:mb-6 tracking-tight">
+                        Welcome to <span class="gradient-text font-bold">LyxNexus</span>
+                    </h1>
+                    <p class="text-base md:text-lg text-slate-300 mb-6 md:mb-8" id="description"></p>
+                    <div class="accent-line mb-8 md:mb-12"></div>
 
-                <div class="grid grid-cols-3 gap-4 mt-12">
-                    <div class="stat-card">
-                        <div class="stat-number" id="announcements-count">0</div>
-                        <div class="stat-label break-all overflow-hidden">Announcements</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number" id="assignments-count">0</div>
-                        <div class="stat-label break-all overflow-hidden">Assignments</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number" id="topics-count">0</div>
-                        <div class="stat-label break-all overflow-hidden">Course Units</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="md:w-1/2 md:pl-10">
-                <div class="showcase-visual fade-in delay-1">
-                    <div class="visual-element">
-                        <div class="visual-content">
-                            <i class="fas fa-graduation-cap" style="font-size: 3rem; color: var(--accent-blue); margin-bottom: 1rem;"></i>
-                            <h3 style="font-size: 1.5rem; margin-bottom: 0.2rem; font-weight: 800;" class="gradient-text">Live Preview</h3>
-                            <p style="color: #cbd5e1;">Experience the interface</p>
+                    <div class="grid grid-cols-3 gap-3 md:gap-4">
+                        <div class="stat-card">
+                            <div class="stat-number text-2xl md:text-3xl" id="announcements-count">0</div>
+                            <div class="stat-label text-xs md:text-sm">Announcements</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number text-2xl md:text-3xl" id="assignments-count">0</div>
+                            <div class="stat-label text-xs md:text-sm">Assignments</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number text-2xl md:text-3xl" id="topics-count">0</div>
+                            <div class="stat-label text-xs md:text-sm">Course Units</div>
                         </div>
                     </div>
                 </div>
+
+                <div class="w-full lg:w-1/2 order-2 lg:order-2">
+                    <div class="showcase-visual fade-in delay-1" style="height: 300px; width: 100%;">
+                        <div class="visual-element" style="height: 100%;">
+                            <div class="visual-content" style="padding: 1.5rem;">
+                                <i class="fas fa-graduation-cap" style="font-size: 2.5rem; color: var(--accent-blue); margin-bottom: 0.75rem;"></i>
+                                <h3 class="gradient-text" style="font-size: 1.25rem; margin-bottom: 0.5rem; font-weight: 800;">Live Preview</h3>
+                                <p style="color: #cbd5e1; font-size: 0.9rem;">Experience the interface</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
     </header>
