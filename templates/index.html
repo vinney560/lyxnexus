@@ -792,8 +792,15 @@
     }
 
     .showcase-section {
-        padding: 5rem 2rem;
-        position: relative;
+        width: 100%;
+        padding: 0;
+    }
+
+    @media (min-width: 768px) {
+        .showcase-section {
+            width: 50%;
+            padding-left: 2rem;
+        }
     }
     
     .showcase-content {
