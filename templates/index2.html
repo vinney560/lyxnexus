@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Class Portal | LyxNexus</title>
+    
+    <!-- SEO Meta -->
+    <meta name="description" content="LyxNexus is a simple yet powerful class hub designed to keep everything in one place — from announcements and assignments to topics and class discussions." />
+    <meta name="keywords" content="education, coding, programming, web development, technology, online courses, learn to code" />
+    <meta name="author" content="Vincent Kipngetich" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://lyxnexus.onrender.com/" />
+    <link rel="icon" href="https://lyxnexus.onrender.com/uploads/favicon-1.png"/>
+    
+    <meta property="og:title" content="LyxNexus | Class Portal" />
+    <meta property="og:description" content="LyxNexus is a simple yet powerful class hub designed to keep everything in one place — from announcements and assignments to topics and class discussions." />
+    <meta property="og:image" content="https://lyxnexus.onrender.com/favicon.ico" />
+    <meta property="og:url" content="https://lyxnexus.onrender.com/" />
+    
+    <meta name="twitter:card" content="summary" />
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/typed.js@2.0.12"></script>
+    
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --text-color: #f1f5f9;
+            --accent-blue: #3b82f6;
+            --accent-purple: #8b5cf6;
+            --card-bg: rgba(30, 41, 59, 0.8);
+            --border-color: rgba(100, 116, 139, 0.3);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        /* ===== BACKGROUND EFFECTS ===== */
+        .bg-gradient {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(59, 130, 246, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(139, 92, 246, 0.05) 0%, transparent 50%);
+            z-index: -2;
+        }
+        
+        .floating-dots {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+        
+        .dot {
+            position: absolute;
+            background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple));
+            border-radius: 50%;
+            opacity: 0.1;
+            animation: floatDot linear infinite;
+        }
+        
+        @keyframes floatDot {
+            0% {
+                transform: translateY(100vh) translateX(0) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.1;
+            }
+            90% {
+                opacity: 0.1;
+            }
+            100% {
+                transform: translateY(-100px) translateX(100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+        
+        /* ===== NAVIGATION ===== */
+        .nav-glass {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(59, 130, 246, 0.1);
+            z-index: 1000;
+            padding: 1rem 2rem;
+        }
+        
+        .nav-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.5rem;
+            font-weight: 800;
+            text-decoration: none;
+        }
+        
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+        
+        .logo-text {
+            background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .nav-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .nav-btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple));
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+        }
+        
+        /* ===== HERO SECTION ===== */
+        .hero-section {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 6rem 2rem 2rem;
+            position: relative;
+        }
+        
+        .hero-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        
+        .hero-title {
+            font-size: 4rem;
+            font-weight: 900;
+            margin-bottom: 1.5rem;
+            line-height: 1.1;
+        }
+        
+        .gradient-title {
+            background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .hero-subtitle {
+            font-size: 1.25rem;
+            color: #cbd5e1;
+            max-width: 600px;
+            margin: 0 auto 3rem;
+            line-height: 1.6;
+        }
+        
+        .hero-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-bottom: 4rem;
+        }
+        
+        .primary-btn {
+            padding: 1rem 2rem;
+            background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple));
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            transition: all 0.3s ease;
+        }
+        
+        .primary-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(59, 130, 246, 0.4);
+        }
+        
+        .secondary-btn {
+            padding: 1rem 2rem;
+            background: transparent;
+            color: var(--accent-blue);
+            border: 2px solid var(--accent-blue);
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            transition: all 0.3s ease;
+        }
+        
+        .secondary-btn:hover {
+            background: var(--accent-blue);
+            color: white;
+            transform: translateY(-3px);
+        }
+        
+        /* ===== STATS GRID ===== */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .stat-item {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 16px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+        
+        .stat-item:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent-blue);
+            box-shadow: 0 15px 30px rgba(59, 130, 246, 0.2);
+        }
+        
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-label {
+            color: #cbd5e1;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+        
+        /* ===== FEATURES SECTION ===== */
+        .features-section {
+            padding: 6rem 2rem;
+        }
+        
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+        
+        .section-title {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+        }
+        
+        .section-subtitle {
+            color: #cbd5e1;
+            font-size: 1.125rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .feature-card {
+            background: var(--card-bg);
+            padding: 2.5rem;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.1), transparent);
+            transition: left 0.6s ease;
+        }
+        
+        .feature-card:hover::before {
+            left: 100%;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--accent-blue);
+            box-shadow: 0 20px 40px rgba(59, 130, 246, 0.2);
+        }
+        
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            background: rgba(59, 130, 246, 0.1);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+            color: var(--accent-blue);
+            transition: all 0.3s ease;
+        }
+        
+        .feature-card:hover .feature-icon {
+            transform: rotate(360deg) scale(1.1);
+            background: rgba(59, 130, 246, 0.2);
+        }
+        
+        .feature-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        
+        .feature-description {
+            color: #cbd5e1;
+            line-height: 1.6;
+        }
+        
+        /* ===== ANIMATED SHOWCASE ===== */
+        .showcase-section {
+            padding: 6rem 2rem;
+            position: relative;
+        }
+        
+        .showcase-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 4rem;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .showcase-content {
+            padding-right: 2rem;
+        }
+        
+        .showcase-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+        }
+        
+        .showcase-text {
+            color: #cbd5e1;
+            line-height: 1.7;
+            margin-bottom: 2rem;
+        }
+        
+        .showcase-visual {
+            position: relative;
+            height: 400px;
+        }
+        
+        .visual-element {
+            width: 100%;
+            height: 100%;
+            background: var(--card-bg);
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .visual-element::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(transparent, var(--accent-blue), transparent 30%);
+            animation: rotate 4s linear infinite;
+        }
+        
+        @keyframes rotate {
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+        
+        .visual-content {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            bottom: 20px;
+            background: var(--bg-color);
+            border-radius: 15px;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        
+        /* ===== CTA SECTION ===== */
+        .cta-section {
+            padding: 6rem 2rem;
+            text-align: center;
+        }
+        
+        .cta-card {
+            max-width: 800px;
+            margin: 0 auto;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+            border-radius: 30px;
+            padding: 4rem;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .cta-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+        }
+        
+        .cta-text {
+            color: #cbd5e1;
+            font-size: 1.125rem;
+            max-width: 500px;
+            margin: 0 auto 2rem;
+            line-height: 1.6;
+        }
+        
+        /* ===== FOOTER ===== */
+        .footer {
+            padding: 3rem 2rem;
+            border-top: 1px solid var(--border-color);
+            margin-top: 4rem;
+        }
+        
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        
+        .footer-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .footer-text {
+            color: #94a3b8;
+            max-width: 400px;
+            margin: 0 auto 2rem;
+        }
+        
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .social-link {
+            width: 45px;
+            height: 45px;
+            border-radius: 10px;
+            background: var(--card-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #94a3b8;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+        
+        .social-link:hover {
+            color: var(--accent-blue);
+            transform: translateY(-3px);
+            background: rgba(59, 130, 246, 0.1);
+        }
+        
+        .copyright {
+            color: #64748b;
+            font-size: 0.875rem;
+            margin-top: 2rem;
+        }
+        
+        /* ===== RESPONSIVE DESIGN ===== */
+        @media (max-width: 1024px) {
+            .features-grid,
+            .showcase-grid {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+            
+            .hero-title {
+                font-size: 3rem;
+            }
+            
+            .section-title {
+                font-size: 2.5rem;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .nav-glass {
+                padding: 1rem;
+            }
+            
+            .hero-title {
+                font-size: 2.5rem;
+            }
+            
+            .hero-actions {
+                flex-direction: column;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            
+            .showcase-content {
+                padding-right: 0;
+            }
+            
+            .cta-card {
+                padding: 2rem;
+            }
+        }
+        
+        /* ===== ANIMATIONS ===== */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .fade-in {
+            animation: fadeInUp 0.8s ease forwards;
+        }
+        
+        .delay-1 {
+            animation-delay: 0.2s;
+        }
+        
+        .delay-2 {
+            animation-delay: 0.4s;
+        }
+        
+        .delay-3 {
+            animation-delay: 0.6s;
+        }
+        
+        /* ===== SCROLL PROGRESS ===== */
+        .scroll-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple));
+            z-index: 1001;
+            transition: width 0.1s ease;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Background Effects -->
+    <div class="bg-gradient"></div>
+    <div class="floating-dots" id="dots"></div>
+    
+    <!-- Scroll Progress -->
+    <div class="scroll-progress"></div>
+    
+    <!-- Navigation -->
+    <nav class="nav-glass">
+        <div class="nav-content">
+            <a href="#" class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-cube"></i>
+                </div>
+                <span class="logo-text">LyxNexus</span>
+            </a>
+            <div class="nav-buttons">
+                <a href="#" class="nav-btn">
+                    <i class="fas fa-arrow-right"></i>
+                    Login
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="hero-content">
+            <h1 class="hero-title fade-in">
+                Welcome to <span class="gradient-title">LyxNexus</span>
+            </h1>
+            
+            <p class="hero-subtitle fade-in delay-1" id="typed-text">
+                Your modern gateway to seamless classroom management and collaboration.
+            </p>
+            
+            <div class="hero-actions fade-in delay-2">
+                <button class="primary-btn">
+                    <i class="fas fa-play-circle"></i>
+                    Launch Portal
+                </button>
+                <button class="secondary-btn">
+                    <i class="fas fa-book"></i>
+                    View Features
+                </button>
+            </div>
+            
+            <!-- Stats Grid -->
+            <div class="stats-grid fade-in delay-3">
+                <div class="stat-item">
+                    <div class="stat-number" id="announcements-count">12</div>
+                    <div class="stat-label">Announcements</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="assignments-count">8</div>
+                    <div class="stat-label">Assignments</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="topics-count">15</div>
+                    <div class="stat-label">Course Units</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features-section">
+        <div class="section-header">
+            <h2 class="section-title fade-in">Why Choose LyxNexus?</h2>
+            <p class="section-subtitle fade-in delay-1">
+                Experience the future of classroom management with our innovative platform
+            </p>
+        </div>
+        
+        <div class="features-grid">
+            <div class="feature-card fade-in delay-1">
+                <div class="feature-icon">
+                    <i class="fas fa-bolt"></i>
+                </div>
+                <h3 class="feature-title">Lightning Fast</h3>
+                <p class="feature-description">
+                    Experience blazing fast performance with our optimized architecture and modern technology stack.
+                </p>
+            </div>
+            
+            <div class="feature-card fade-in delay-2">
+                <div class="feature-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <h3 class="feature-title">Secure & Reliable</h3>
+                <p class="feature-description">
+                    Enterprise-grade security with end-to-end encryption and reliable cloud infrastructure.
+                </p>
+            </div>
+            
+            <div class="feature-card fade-in delay-3">
+                <div class="feature-icon">
+                    <i class="fas fa-palette"></i>
+                </div>
+                <h3 class="feature-title">Beautiful Design</h3>
+                <p class="feature-description">
+                    Enjoy a stunning, intuitive interface designed for both educators and students.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Animated Showcase -->
+    <section class="showcase-section">
+        <div class="showcase-grid">
+            <div class="showcase-content fade-in">
+                <h2 class="showcase-title">Interactive Learning Experience</h2>
+                <p class="showcase-text">
+                    Dive into a world of interactive learning with real-time collaboration, multimedia integration, and seamless communication tools designed for modern education.
+                </p>
+            </div>
+            
+            <div class="showcase-visual fade-in delay-1">
+                <div class="visual-element">
+                    <div class="visual-content">
+                        <i class="fas fa-graduation-cap" style="font-size: 3rem; color: var(--accent-blue); margin-bottom: 1rem;"></i>
+                        <h3 style="font-size: 1.5rem; margin-bottom: 0.5rem; font-weight: 700;">Live Preview</h3>
+                        <p style="color: #cbd5e1;">Experience the interface</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="cta-card fade-in">
+            <h2 class="cta-title">Ready to Transform Your Classroom?</h2>
+            <p class="cta-text">
+                Join educators worldwide who are revolutionizing their teaching experience with LyxNexus.
+            </p>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-logo">
+                <div class="logo-icon" style="width: 32px; height: 32px;">
+                    <i class="fas fa-cube"></i>
+                </div>
+                <span class="logo-text">LyxNexus</span>
+            </div>
+            
+            <p class="footer-text">
+                A modern solution for modern education. Empowering educators and students worldwide.
+            </p>
+            
+            <div class="social-links">
+                <a href="https://wa.me/254740694312" target="_blank" class="social-link">
+                    <i class="fab fa-whatsapp"></i>
+                </a>
+                <a href="mailto:vincentkipgetich479@gmail.com" class="social-link">
+                    <i class="fas fa-envelope"></i>
+                </a>
+                <a href="https://www.linkedin.com/in/vincent-kipngetich-44bb84394/" target="_blank" class="social-link">
+                    <i class="fab fa-linkedin"></i>
+                </a>
+            </div>
+            
+            <p class="copyright">
+                © 2024 LyxNexus. All rights reserved.<br>
+                <span style="font-size: 0.75rem; opacity: 0.7;">Innovating education, one classroom at a time</span>
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        // Typed.js Animation
+        new Typed('#typed-text', {
+            strings: [
+                'Your modern gateway to seamless classroom management and collaboration.',
+                'Experience education reimagined with cutting-edge technology.',
+                'Transform your teaching workflow with intuitive tools.',
+                'Connect, collaborate, and create amazing learning experiences.'
+            ],
+            typeSpeed: 40,
+            backSpeed: 20,
+            backDelay: 3000,
+            loop: true,
+            showCursor: true,
+            cursorChar: '|'
+        });
+
+        // Create floating dots
+        function createFloatingDots() {
+            const container = document.getElementById('dots');
+            const dotCount = 50;
+            
+            for (let i = 0; i < dotCount; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'dot';
+                
+                // Random properties
+                const size = Math.random() * 4 + 1;
+                const left = Math.random() * 100;
+                const duration = Math.random() * 10 + 10;
+                const delay = Math.random() * 5;
+                
+                dot.style.width = `${size}px`;
+                dot.style.height = `${size}px`;
+                dot.style.left = `${left}%`;
+                dot.style.animationDuration = `${duration}s`;
+                dot.style.animationDelay = `${delay}s`;
+                
+                container.appendChild(dot);
+            }
+        }
+
+        // Scroll progress
+        function updateScrollProgress() {
+            const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrolled = (winScroll / height) * 100;
+            document.querySelector('.scroll-progress').style.width = scrolled + "%";
+        }
+
+        // Fade in animation on scroll
+        function animateOnScroll() {
+            const fadeElements = document.querySelectorAll('.fade-in');
+            
+            fadeElements.forEach(element => {
+                const elementTop = element.getBoundingClientRect().top;
+                const elementVisible = 150;
+                
+                if (elementTop < window.innerHeight - elementVisible) {
+                    element.style.opacity = "1";
+                    element.style.transform = "translateY(0)";
+                }
+            });
+        }
+
+        // Initialize everything
+        document.addEventListener('DOMContentLoaded', () => {
+            createFloatingDots();
+            
+            // Add fade-in animation to elements
+            document.querySelectorAll('.fade-in').forEach(el => {
+                el.style.opacity = "0";
+                el.style.transform = "translateY(30px)";
+                el.style.transition = "opacity 0.8s ease, transform 0.8s ease";
+            });
+            
+            // Add scroll event listeners
+            window.addEventListener('scroll', () => {
+                updateScrollProgress();
+                animateOnScroll();
+            });
+            
+            // Initial animations
+            setTimeout(() => {
+                animateOnScroll();
+            }, 100);
+            
+            // Add hover effects to buttons
+            document.querySelectorAll('.primary-btn, .secondary-btn, .nav-btn').forEach(button => {
+                button.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-3px) scale(1.05)';
+                });
+                
+                button.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0) scale(1)';
+                });
+            });
+            
+            // Stats counter animation
+            function animateStats() {
+                const stats = [
+                    { element: document.getElementById('announcements-count'), target: 12 },
+                    { element: document.getElementById('assignments-count'), target: 8 },
+                    { element: document.getElementById('topics-count'), target: 15 }
+                ];
+                
+                stats.forEach(stat => {
+                    let current = 0;
+                    const increment = stat.target / 50;
+                    const timer = setInterval(() => {
+                        current += increment;
+                        if (current >= stat.target) {
+                            current = stat.target;
+                            clearInterval(timer);
+                        }
+                        stat.element.textContent = Math.round(current);
+                    }, 30);
+                });
+            }
+            
+            // Start stats animation after a delay
+            setTimeout(animateStats, 1500);
+            
+            // Add ripple effect to buttons
+            document.querySelectorAll('.primary-btn, .secondary-btn').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    const x = e.clientX - e.target.getBoundingClientRect().left;
+                    const y = e.clientY - e.target.getBoundingClientRect().top;
+                    
+                    const ripple = document.createElement('span');
+                    ripple.style.position = 'absolute';
+                    ripple.style.borderRadius = '50%';
+                    ripple.style.background = 'rgba(255, 255, 255, 0.3)';
+                    ripple.style.transform = 'scale(0)';
+                    ripple.style.animation = 'ripple 0.6s linear';
+                    ripple.style.left = `${x}px`;
+                    ripple.style.top = `${y}px`;
+                    
+                    this.appendChild(ripple);
+                    
+                    setTimeout(() => ripple.remove(), 600);
+                });
+            });
+            
+            // Add CSS for ripple animation
+            const rippleStyle = document.createElement('style');
+            rippleStyle.textContent = `
+                @keyframes ripple {
+                    to {
+                        transform: scale(4);
+                        opacity: 0;
+                    }
+                }
+            `;
+            document.head.appendChild(rippleStyle);
+        });
+
+    </script>
+</body>
+</html>
