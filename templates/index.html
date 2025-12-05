@@ -55,6 +55,8 @@
         --secondary-color: #8b5cf6;
         --card-bg: rgba(30, 41, 59, 0.8);
         --border-color: rgba(100, 116, 139, 0.3);
+        --accent-blue: #3b82f6;
+        --accent-purple: #8b5cf6;
     }
     
     body {
@@ -704,8 +706,9 @@
     }
     
     .stat-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+        transform: translateY(-4px);
+        border-color: var(--accent-blue);
+        box-shadow: 0 15px 30px rgba(59, 130, 246, 0.2);
     }
     
     .stat-number {
