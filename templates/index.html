@@ -815,7 +815,6 @@
     .showcase-visual {
         position: relative;
         height: 400px;
-        min-width: 300px;
     }
     
     .visual-element {
@@ -946,13 +945,12 @@
 
     <header class="py-16 md:py-20 content-container">
         <div class="max-w-6xl mx-auto px-4 flex flex-col md:flex-row items-center">
-            <section class="md:w-1/2 mb-10 md:mb-0">
+            <div class="md:w-1/2 mb-10 md:mb-0">
                 <div class="accent-line"></div>
                 <h1 class="text-4xl md:text-5xl font-bold text-slate-100 mb-6 tracking-tight">Welcome to <span class="gradient-text font-bold">LyxNexus</span></h1>
                 <p class="text-lg text-slate-300 mb-8" id="description"></p>
                 <div class="accent-line"></div>
-                
-                <!-- Quick Stats -->
+
                 <div class="grid grid-cols-3 gap-4 mt-12">
                     <div class="stat-card">
                         <div class="stat-number" id="announcements-count">0</div>
@@ -967,18 +965,19 @@
                         <div class="stat-label break-all overflow-hidden">Course Units</div>
                     </div>
                 </div>
-            </section>
-            <section class="showcase-section">
+            </div>
+
+            <div class="md:w-1/2 md:pl-10">
                 <div class="showcase-visual fade-in delay-1">
                     <div class="visual-element">
                         <div class="visual-content">
                             <i class="fas fa-graduation-cap" style="font-size: 3rem; color: var(--accent-blue); margin-bottom: 1rem;"></i>
-                            <h3 style="font-size: 1.5rem; margin-bottom: 0.2rem; font-weight: 800;">Live Preview</h3>
+                            <h3 style="font-size: 1.5rem; margin-bottom: 0.2rem; font-weight: 800;" class="gradient-text">Live Preview</h3>
                             <p style="color: #cbd5e1;">Experience the interface</p>
                         </div>
                     </div>
                 </div>
-            </section>
+            </div>
         </div>
     </header>
 
