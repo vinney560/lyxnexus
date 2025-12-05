@@ -815,7 +815,6 @@
     .showcase-visual {
         position: relative;
         height: 400px;
-        width: 100%;
     }
     
     .visual-element {
@@ -885,7 +884,7 @@
         position: absolute;
         background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple));
         border-radius: 50%;
-        opacity: 0.4;
+        opacity: 0.7;
         animation: floatDot linear infinite;
     }
     
@@ -895,10 +894,10 @@
             opacity: 0;
         }
         10% {
-            opacity: 0.1;
+            opacity: 0.5;
         }
         90% {
-            opacity: 0.1;
+            opacity: 0.7;
         }
         100% {
             transform: translateY(-100px) translateX(100px) rotate(360deg);
@@ -946,7 +945,7 @@
 
     <header class="py-16 md:py-20 content-container">
         <div class="max-w-6xl mx-auto px-4 flex flex-col md:flex-row items-center">
-            <div class="md:w-1/2 mb-10 md:mb-0">
+            <section class="md:w-1/2 mb-10 md:mb-0">
                 <div class="accent-line"></div>
                 <h1 class="text-4xl md:text-5xl font-bold text-slate-100 mb-6 tracking-tight">Welcome to <span class="gradient-text font-bold">LyxNexus</span></h1>
                 <p class="text-lg text-slate-300 mb-8" id="description"></p>
@@ -967,18 +966,18 @@
                         <div class="stat-label break-all overflow-hidden">Course Units</div>
                     </div>
                 </div>
-            </div>
+            </section>
             <section class="showcase-section">
                 <div class="showcase-visual fade-in delay-1">
                     <div class="visual-element">
                         <div class="visual-content">
                             <i class="fas fa-graduation-cap" style="font-size: 3rem; color: var(--accent-blue); margin-bottom: 1rem;"></i>
-                            <h3 style="font-size: 1.5rem; margin-bottom: 0.5rem; font-weight: 800;" class="underline decoration-blue-500">Login Our Portal</h3>
+                            <h3 style="font-size: 1.5rem; margin-bottom: 0.2rem; font-weight: 800;">Live Preview</h3>
                             <p style="color: #cbd5e1;">Experience the interface</p>
                         </div>
                     </div>
                 </div>
-            </section>            
+            </section>
         </div>
     </header>
 
