@@ -1549,7 +1549,12 @@
         box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
         transform: translateY(-2px) scale(0.93);
         transition: transform 0.3s ease-out, box-shadow 0.3s ease-out, border-color 0.3s ease-out;
-    }  
+    }
+
+    .announcement-text {
+        padding-bottom: 20px;
+        position: relative;
+    }
 
     .announcement-text:not(.expanded) {
         display: -webkit-box;
@@ -1567,7 +1572,7 @@
         position: absolute;
         left: 0;
         right: 0;
-        bottom: -25px;
+        bottom: 0;
         height: 40px;
         background: linear-gradient(to bottom, transparent 0%, var(--bg-color) 90%);
         pointer-events: none;
