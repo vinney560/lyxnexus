@@ -1572,8 +1572,8 @@
         position: absolute;
         left: 0;
         right: 0;
-        bottom: 0;
-        height: 40px;
+        bottom: -10;
+        height: 20px;
         background: linear-gradient(to bottom, transparent 0%, var(--bg-color) 90%);
         pointer-events: none;
         z-index: 1;
@@ -4053,14 +4053,8 @@
 
             // Get new announcement IDs
             const newIds = new Set(newAnnouncements.map(a => a.id));
-
-            // Find announcements to add (in new but not in current)
             const announcementsToAdd = newAnnouncements.filter(a => !currentIds.has(a.id));
-
-            // Find announcements to remove (in current but not in new)
             const idsToRemove = [...currentIds].filter(id => !newIds.has(id));
-
-            // Update existing announcements (check for content changes)
             const existingAnnouncements = newAnnouncements.filter(a => currentIds.has(a.id));
 
             // 1. Remove deleted announcements
