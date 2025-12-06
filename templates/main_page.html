@@ -1574,7 +1574,6 @@
         height: 20px;
         background: linear-gradient(to bottom, transparent 0%, var(--bg-color) 90%);
         pointer-events: none;
-        display: none;
     }
 
     .announcement-text.expanded {
@@ -4147,7 +4146,7 @@
                                 // Update show more button if needed
                                 const showMoreBtn = existingElement.querySelector('.show-more-btn');
                                 if (showMoreBtn) {
-                                    if (shouldTruncate(newAnnouncement.content, 300)) {
+                                    if (shouldTruncate(newAnnouncement.content, 280)) {
                                         showMoreBtn.style.display = 'flex';
                                         showMoreBtn.onclick = () => toggleExpand(newAnnouncement.id);
                                     } else {
@@ -4397,7 +4396,7 @@
                             <div class="announcement-text break-all hyphens-auto text-slate-300 leading-relaxed list-inside formatted-text">${formatText(announcement.content)}</div>
 
                             ${(() => {
-                                if (shouldTruncate(announcement.content, 300)) {
+                                if (shouldTruncate(announcement.content, 280)) {
                                     return `
                                         <button onclick="toggleExpand(${announcement.id})" 
                                                 class="show-more-btn mt-2 text-green-400 hover:text-blue-300 text-sm font-medium flex items-center gap-1 transition-colors">
