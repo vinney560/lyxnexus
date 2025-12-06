@@ -1552,19 +1552,19 @@
     }
 
     .announcement-text {
-        padding-bottom: 20px;
+        padding-bottom: 25px;
         position: relative;
     }
 
     .announcement-text:not(.expanded) {
         display: -webkit-box;
         -webkit-box-orient: vertical;
-        -webkit-line-clamp: 6;
+        -webkit-line-clamp: 7;
         overflow: hidden;
         position: relative;
         margin-top: 10px;
         line-height: 1.5;
-        max-height: calc(6 * 1.5em);
+        max-height: calc(7 * 1.5em);
     }
 
     .announcement-text:not(.expanded)::after {
@@ -3965,7 +3965,7 @@
             return iconMap[ext] || 'fas fa-file';
         }
 
-        function shouldTruncate(text, maxLength = 300) {
+        function shouldTruncate(text, maxLength = 280) {
             if (!text) return false;
             if (text.includes('<') && text.includes('>')) {
                 text = text.replace(/<[^>]*>/g, '');
