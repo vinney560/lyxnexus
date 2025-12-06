@@ -1551,16 +1551,15 @@
         transition: transform 0.3s ease-out, box-shadow 0.3s ease-out, border-color 0.3s ease-out;
     }  
 
-    .announcement-text.expanded {
-        max-height: none !important;
-    }
-
     .announcement-text:not(.expanded) {
-        max-height: 350px;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 6;
         overflow: hidden;
         position: relative;
         margin-top: 10px;
-        padding-bottom: 25px;
+        line-height: 1.5;
+        max-height: calc(6 * 1.5em);
     }
 
     .announcement-text:not(.expanded)::after {
@@ -1568,26 +1567,33 @@
         position: absolute;
         left: 0;
         right: 0;
-        bottom: -25px;
+        bottom: 0;
         height: 40px;
-        background: linear-gradient(to bottom, transparent 0%, rgba(15, 23, 42, 0.95) 70%);
+        background: linear-gradient(to bottom, transparent 0%, var(--bg-color) 90%);
         pointer-events: none;
         z-index: 1;
+    }
+
+    .announcement-text.expanded {
+        display: block;
+        -webkit-line-clamp: unset;
+        max-height: none !important;
     }
 
     .announcement-text.expanded::after {
-        content: '';
-        position: absolute;
-        bottom: -25px;
-        left: 0;
-        right: 0;
-        height: 40px;
-        background: linear-gradient(to bottom, transparent 0%, rgba(15, 23, 42, 0.95) 70%);
-        pointer-events: none;
-        z-index: 1;
         display: none;
     }
 
+    .announcement-text.short:not(.expanded)::after {
+        display: none;
+    }
+
+    .announcement-text.short:not(.expanded) {
+        -webkit-line-clamp: unset;
+        max-height: none;
+        overflow: visible;
+    }
+    
     .show-more-btn {
         transition: all 0.2s ease;
     }
@@ -4828,6 +4834,7 @@
             }
         }
         
+        // Smart refresh
         let isRefreshing = false;
         let refreshTimeout = null;
 
@@ -4894,10 +4901,6 @@
                 }, 1000);
             
                 setInterval(performSmartRefresh, 60 * 1000);
-                
-                setInterval(() => {
-                    loadUserData();
-                }, 60 * 1000);
             
                 // Heavy refresh - 300 seconds --> 5 min
                 setInterval(() => {
