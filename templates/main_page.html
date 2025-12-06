@@ -3988,283 +3988,563 @@
             }
         
             const newAnnouncements = (await fetchData(ENDPOINTS.ANNOUNCEMENTS)) || [];
-
+        
             if (newAnnouncements.length === 0) {
-                container.innerHTML = '<p class="text-center text-gray-400 py-8">No announcements available.</p>';
+                if (!isRefresh) {
+                    container.innerHTML = '<p class="text-center text-gray-400 py-8">No announcements available.</p>';
+                }
                 document.getElementById("announcements-count").textContent = "0";
                 return;
             }
-
+        
             document.getElementById("announcements-count").textContent = `${newAnnouncements.length}`;
         
             let pinnedIds = JSON.parse(localStorage.getItem("pinnedAnnouncements") || "[]");
         
-            // Check for new announcements
-            const newItems = isRefresh ? findNewItems(announcements, newAnnouncements, 'id') : [];
-            announcements = newAnnouncements;
-            window.announcements = announcements;
-        
-            // Render announcements (pinned first)
-            function renderAnnouncements() {
-                const sorted = [...announcements].sort((a, b) => {
-                    const aPinned = pinnedIds.includes(a.id);
-                    const bPinned = pinnedIds.includes(b.id);
-                    return aPinned === bPinned ? 0 : aPinned ? -1 : 1;
-                });
-            
-                // grid wrapper and updated card structure
-                container.innerHTML = `
-                    <div class="announcements-grid">
-                        ${sorted.map((announcement) => {
-                            const urlMatch = announcement.content.match(/https?:\/\/[^\s]+/);
-                            const url = urlMatch ? urlMatch[0] : null;
-                            const previewId = `og-preview-${announcement.id || Math.random().toString(36).slice(2)}`;
-                            const isPinned = pinnedIds.includes(announcement.id);
-                            const createdAt = new Date(announcement.created_at);
-                            const now = new Date();
-                            const diffHours = (now - createdAt) / (1000 * 60 * 60);
-                            const isRecent = diffHours < 3;
-
-                            const isNew = newItems.some(item => item.id === announcement.id);
-                            const newClass = isNew ? 'new-item-highlight' : '';
-                        
-                            const neonBorderClass = isRecent
-                                ? "border-l-2 border-l-yellow-600 border-t border-t-amber-600 border-r border-r-orange-600 border-b border-b-orange-600 shadow-sm"
-                                : "border border-blue-600 shadow-md";
-                        
-                            // File preview (image or link)
-                            let filePreview = "";
-                            if (announcement.has_file && announcement.file_type?.startsWith("image/")) {
-                                filePreview = `
-                                    <div class="mb-2 w-full h-52 rounded-lg overflow-hidden bg-gray-700 flex items-center justify-center cursor-pointer card-hover-lift border-gray-600 border"
-                                         onclick="openImagePreview('${announcement.file_url}')">
-                                        <img src="${announcement.file_url}" alt="${announcement.file_name}" class="object-cover w-full h-full">
-                                    </div>
-                                `;
-                            } else if (announcement.has_file) {
-                                filePreview = `
-                                    <div class="mb-4">
-                                        <a href="${announcement.file_url}" target="_blank" 
-                                           class="inline-flex items-center gap-3 px-4 py-3 bg-gray-800/70 hover:bg-gray-700/80 border border-gray-600 hover:border-blue-400/50 rounded-xl transition-all duration-300 card-hover-lift group">
-                                            <i class="${getFileIcon(announcement.file_name)} text-blue-400 text-lg group-hover:scale-110 transition-transform duration-300"></i>
-                                            <div class="flex-1 min-w-0">
-                                                <div class="text-white font-medium text-sm truncate word-break overflow-break">
-                                                    ${(() => {
-                                                        const filename = announcement.file_name;
-                                                        const lastDotIndex = filename.lastIndexOf('.');
-                                                        const extension = lastDotIndex !== -1 ? filename.slice(lastDotIndex) : '';
-                                                        const nameWithoutExt = lastDotIndex !== -1 ? filename.slice(0, lastDotIndex) : filename;
-
-                                                        const words = nameWithoutExt.split(/[\s_-]+/).filter(word => word.length > 0);
-                                                        const truncatedWords = words.slice(0, 20);
-
-                                                        if (words.length > 20) {
-                                                            return truncatedWords.join(' ') + '@LN' + (extension ? extension : '');
-                                                        }
-
-                                                        return truncatedWords.join(' ') + (extension ? extension : '');
-                                                    })()}
-                                                </div>
-                                                <div class="text-gray-400 text-xs flex items-center gap-1">
-                                                    <i class="fas fa-external-link-alt text-xs"></i>
-                                                    <span>Click to download</span>
-                                                </div>
-                                            </div>
-                                            <i class="fas fa-download text-gray-400 group-hover:text-blue-400 transition-colors duration-300"></i>
-                                        </a>
-                                    </div>
-                                `;
-                            }
-                        
-                            return `
-                                <div class="announcement-card ${neonBorderClass} ${newClass} bg-gray-900/60 rounded-2xl transition duration-200 ease-in-out overflow-hidden card-hover-lift fade-in announcement-content" data-announcement-id="${announcement.id}">
-                                    <!-- Pin button -->
-                                    <button 
-                                        onclick="togglePin(${announcement.id})"
-                                        class="absolute top-3 right-3 p-1 rounded-full transition duration-200 z-10 ${
-                                            isPinned
-                                            ? "bg-yellow-400/20 text-yellow-400 hover:bg-yellow-400/30"
-                                            : "text-gray-500 hover:text-yellow-400 hover:bg-gray-800/40"
-                                        }"
-                                        title="${isPinned ? "Unpin" : "Pin"}"
-                                    >
-                                        <svg xmlns="http://www.w3.org/2000/svg" 
-                                            viewBox="0 0 24 24" 
-                                            fill="${isPinned ? 'currentColor' : 'none'}" 
-                                            stroke="currentColor" 
-                                            stroke-width="1.9" 
-                                            class="w-6 h-6 drop-shadow-sm">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 2c.8 0 1.5.7 1.5 1.5V9l3 3v1.5h-3l-.25 6.5a.75.75 0 01-1.5 0L11 13.5H8V12l3-3V3.5C11 2.7 11.7 2 12 2z" />
-                                        </svg>
-                                    </button>
-
-                                    <!-- New item indicator -->
-                                    ${isNew ? `<div class="absolute top-3 left-3 w-3 h-3 bg-green-500 rounded-full animate-pulse z-10"></div>` : ''}
-                                
-                                    <!-- OG Preview -->
-                                    <div id="${previewId}" class="w-full border-b border-gray-800 rounded-lg mb-2"></div>
-                                
-                                    <!-- File/Image Preview -->
-                                    ${filePreview}
-                                
-                                    <!-- Announcement Body -->
-                                    <div class="announcement-body p-4 sm:p-5">
-                                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-3 gap-2">
-                                            <h3 class="text-xl uppercase break-all underline underline-offset-8 decoration-red-500 decoration-double sm:text-2xl font-extrabold text-white leading-snug break-words">
-                                                ${announcement.title}
-                                            </h3>
-
-                                            <div class="flex items-center gap-2">
-                                                <i class="fa fa-clock text-gray-400"></i>
-                                                <span class="text-xs sm:text-sm whitespace-nowrap font-bold 
-                                                           underline underline-offset-2 decoration-blue-400 
-                                                           text-transparent bg-clip-text 
-                                                           bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400">
-                                                    ${formatDate(announcement.created_at)}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    
-                                        <div class="announcement-content-wrapper mb-4">
-                                            
-                                            <div class="announcement-text break-all hyphens-auto text-slate-300 leading-relaxed list-inside formatted-text">${formatText(announcement.content)}</div>
-
-                                            ${(() => {
-                                                if (shouldTruncate(announcement.content, 300)) {
-                                                    return `
-                                                        <button onclick="toggleExpand(${announcement.id})" 
-                                                                class="show-more-btn mt-2 text-green-400 hover:text-blue-300 text-sm font-medium flex items-center gap-1 transition-colors">
-                                                            <i class="fas fa-chevron-down text-xs"></i>
-                                                            <span>Show more</span>
-                                                        </button>
-                                                    `;
-                                                }
-                                                return '';
-                                            })()}
-                                        </div>                                        
-                                    
-                                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mt-auto pt-4 border-t border-gray-700">
-                                            <span class="text-gray-400 text-xs sm:text-sm">
-                                                By: ${announcement.author?.username || "Unknown"}
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                            `;
-                        }).join('')}
-                    </div>
-                `;
-                
-                // Render OG previews
-                sorted.forEach((announcement) => {
-                    const urlMatch = announcement.content.match(/https?:\/\/[^\s]+/);
-                    if (!urlMatch) return;
-                
-                    const url = urlMatch[0];
-                    const previewId = `og-preview-${announcement.id || Math.random().toString(36).slice(2)}`;
-                    const previewEl = document.getElementById(previewId);
-                
-                    fetch(`/api/preview?url=${encodeURIComponent(url)}`)
-                        .then((res) => res.json())
-                        .then((data) => {
-                            if (!data.title && !data.image) return;
-                        
-                            previewEl.innerHTML = `
-                                <a href="${url}" target="_blank" class="flex items-center gap-3 p-3 sm:p-4 bg-gray-800/70 hover:bg-gray-800/90 transition duration-200 ease-in-out card-hover-lift rounded-lg border border-gray-600 hover:border-blue-400/50">
-                                    ${
-                                        data.image
-                                            ? `<div class="flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden bg-gray-700 flex items-center justify-center">
-                                                 <img src="${data.image}" alt="" class="object-cover w-full h-full cursor-pointer" onclick="openImagePreview('${data.image}')">
-                                               </div>`
-                                            : `<div class="flex-shrink-0 w-16 h-16 rounded-lg bg-gray-700 flex items-center justify-center text-gray-500 text-xs italic">
-                                                 No image
-                                               </div>`
-                                    }
-                                    <div class="flex-1">
-                                        <h3 class="text-white font-semibold text-sm sm:text-base mb-1 line-clamp-1">
-                                            ${data.title || "Untitled"}
-                                        </h3>
-                                        <p class="text-gray-400 text-xs sm:text-sm line-clamp-2">
-                                            ${data.description || ""}
-                                        </p>
-                                    </div>
-                                </a>
-                            `;
-                        })
-                        .catch(() => console.warn("No OG preview found for", url));
-                });
-
-                // Restore scroll position after refresh
-                if (isRefresh) {
-                    restoreScrollPosition('announcements');
-                }
+            // For refreshes, use smart update
+            if (isRefresh && !isInitialLoad && announcements.length > 0) {
+                await smartUpdateAnnouncements(newAnnouncements, pinnedIds);
+            } else {
+                // Initial load or first refresh
+                announcements = newAnnouncements;
+                window.announcements = announcements;
+                renderFullAnnouncements(announcements, pinnedIds);
             }
         
-            window.togglePin = function (id) {
-                if (pinnedIds.includes(id)) {
-                    pinnedIds = pinnedIds.filter((x) => x !== id);
-                } else {
-                    pinnedIds.push(id);
-                }
-                localStorage.setItem("pinnedAnnouncements", JSON.stringify(pinnedIds));
-                renderAnnouncements();
-            };
-            
-            window.toggleExpand = function(id) {
-                const announcementCard = document.querySelector(`[data-announcement-id="${id}"]`);
-                if (!announcementCard) return;
-            
-                const textElement = announcementCard.querySelector('.announcement-text');
-                const button = announcementCard.querySelector('.show-more-btn');
-            
-                if (textElement.classList.contains('expanded')) {
-                    
-                    const originalContent = textElement.getAttribute('data-original');
-                    if (originalContent) {
-                        textElement.innerHTML = originalContent;
-                    }
-                    textElement.classList.remove('expanded');
-                    if (button) {
-                        button.innerHTML = '<i class="fas fa-chevron-down text-xs"></i><span>Show more</span>';
-                    }
-                } else {
-                    const fullContent = textElement.getAttribute('data-full') || textElement.innerHTML;
-                    textElement.setAttribute('data-original', textElement.innerHTML); 
-                    textElement.setAttribute('data-full', formatText(announcements.find(a => a.id === id)?.content || ''));
-                    textElement.innerHTML = textElement.getAttribute('data-full'); 
-                    textElement.classList.add('expanded');
-                    if (button) {
-                        button.innerHTML = '<i class="fas fa-chevron-up text-xs"></i><span>Show less</span>';
-                    }
-                }
-            };            
-
-            // Image modal
-            window.openImagePreview = function(src) {
-                let modal = document.getElementById("image-preview-modal");
-                let img = document.getElementById("image-preview-img");
-                if (!modal || !img) return;
-                img.src = src;
-                modal.classList.remove("hidden");
-                modal.classList.add("flex");
-            };
-        
-            window.closeImagePreview = function() {
-                let modal = document.getElementById("image-preview-modal");
-                let img = document.getElementById("image-preview-img");
-                if (!modal || !img) return;
-                modal.classList.add("hidden");
-                modal.classList.remove("flex");
-                img.src = "";
-            };
-        
-            // Close modal when clicking outside the image
-            document.getElementById("image-preview-modal")?.addEventListener("click", e => {
-                if (e.target.id === "image-preview-modal") closeImagePreview();
-            });
-        
-            renderAnnouncements();
+            // Restore scroll position after refresh
+            if (isRefresh) {
+                restoreScrollPosition('announcements');
+            }
         }
+        
+        async function smartUpdateAnnouncements(newAnnouncements, pinnedIds) {
+            const container = document.getElementById("announcements-container");
+            const grid = container.querySelector('.announcements-grid');
+            
+            if (!grid) {
+                // If no grid exists, render everything
+                announcements = newAnnouncements;
+                window.announcements = announcements;
+                renderFullAnnouncements(announcements, pinnedIds);
+                return;
+            }
+            
+            // Track scroll position BEFORE any updates
+            const scrollTop = container.scrollTop;
+            
+            // Get current announcement IDs from DOM
+            const currentIds = new Set();
+            const announcementElements = grid.querySelectorAll('[data-announcement-id]');
+            announcementElements.forEach(el => {
+                const id = parseInt(el.getAttribute('data-announcement-id'));
+                if (id) currentIds.add(id);
+            });
+            
+            // Get new announcement IDs
+            const newIds = new Set(newAnnouncements.map(a => a.id));
+            
+            // Find announcements to add (in new but not in current)
+            const announcementsToAdd = newAnnouncements.filter(a => !currentIds.has(a.id));
+            
+            // Find announcements to remove (in current but not in new)
+            const idsToRemove = [...currentIds].filter(id => !newIds.has(id));
+            
+            // Update existing announcements (check for content changes)
+            const existingAnnouncements = newAnnouncements.filter(a => currentIds.has(a.id));
+            
+            // 1. Remove deleted announcements
+            idsToRemove.forEach(id => {
+                const elementToRemove = grid.querySelector(`[data-announcement-id="${id}"]`);
+                if (elementToRemove) {
+                    // Add fade-out animation
+                    elementToRemove.style.transition = 'all 0.3s ease';
+                    elementToRemove.style.opacity = '0';
+                    elementToRemove.style.transform = 'translateY(-10px)';
+                    elementToRemove.style.height = '0';
+                    elementToRemove.style.marginBottom = '0';
+                    elementToRemove.style.padding = '0';
+                    elementToRemove.style.overflow = 'hidden';
+                    
+                    setTimeout(() => {
+                        if (elementToRemove.parentNode) {
+                            elementToRemove.parentNode.removeChild(elementToRemove);
+                        }
+                    }, 300);
+                }
+            });
+            
+            // 2. Update existing announcements (only if content changed)
+            existingAnnouncements.forEach(newAnnouncement => {
+                const existingElement = grid.querySelector(`[data-announcement-id="${newAnnouncement.id}"]`);
+                if (existingElement) {
+                    // Check if pinned status changed
+                    const wasPinned = existingElement.querySelector('[title="Unpin"]') !== null;
+                    const isNowPinned = pinnedIds.includes(newAnnouncement.id);
+                    
+                    if (wasPinned !== isNowPinned) {
+                        // Update pin button
+                        const pinButton = existingElement.querySelector('button[onclick*="togglePin"]');
+                        if (pinButton) {
+                            pinButton.innerHTML = `
+                                <svg xmlns="http://www.w3.org/2000/svg" 
+                                    viewBox="0 0 24 24" 
+                                    fill="${isNowPinned ? 'currentColor' : 'none'}" 
+                                    stroke="currentColor" 
+                                    stroke-width="1.9" 
+                                    class="w-6 h-6 drop-shadow-sm">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 2c.8 0 1.5.7 1.5 1.5V9l3 3v1.5h-3l-.25 6.5a.75.75 0 01-1.5 0L11 13.5H8V12l3-3V3.5C11 2.7 11.7 2 12 2z" />
+                                </svg>
+                            `;
+                            pinButton.title = isNowPinned ? "Unpin" : "Pin";
+                            pinButton.className = `absolute top-3 right-3 p-1 rounded-full transition duration-200 z-10 ${
+                                isNowPinned
+                                ? "bg-yellow-400/20 text-yellow-400 hover:bg-yellow-400/30"
+                                : "text-gray-500 hover:text-yellow-400 hover:bg-gray-800/40"
+                            }`;
+                        }
+                        
+                        // Reorder if needed (pinned announcements should be first)
+                        if (isNowPinned) {
+                            const firstNonPinned = Array.from(grid.children).find(child => {
+                                const childId = parseInt(child.getAttribute('data-announcement-id'));
+                                return childId && !pinnedIds.includes(childId);
+                            });
+                            
+                            if (firstNonPinned && existingElement !== firstNonPinned) {
+                                grid.insertBefore(existingElement, firstNonPinned);
+                            }
+                        } else {
+                            // Find position among non-pinned announcements
+                            const pinnedElements = Array.from(grid.children).filter(child => {
+                                const childId = parseInt(child.getAttribute('data-announcement-id'));
+                                return childId && pinnedIds.includes(childId);
+                            });
+                            
+                            const lastPinned = pinnedElements[pinnedElements.length - 1];
+                            if (lastPinned && existingElement !== lastPinned.nextElementSibling) {
+                                grid.insertBefore(existingElement, lastPinned.nextElementSibling);
+                            }
+                        }
+                    }
+                    
+                    // Update content if changed (check by comparing content hash)
+                    const currentContent = existingElement.querySelector('.announcement-text')?.textContent || '';
+                    const newContent = newAnnouncement.content || '';
+                    
+                    if (currentContent !== newContent) {
+                        // Update the content with a subtle animation
+                        const contentElement = existingElement.querySelector('.announcement-text');
+                        if (contentElement) {
+                            contentElement.style.transition = 'all 0.3s ease';
+                            contentElement.style.opacity = '0.5';
+                            setTimeout(() => {
+                                contentElement.innerHTML = formatText(newAnnouncement.content);
+                                contentElement.style.opacity = '1';
+                                
+                                // Update show more button if needed
+                                const showMoreBtn = existingElement.querySelector('.show-more-btn');
+                                if (showMoreBtn) {
+                                    if (shouldTruncate(newAnnouncement.content, 300)) {
+                                        showMoreBtn.style.display = 'flex';
+                                        showMoreBtn.onclick = () => toggleExpand(newAnnouncement.id);
+                                    } else {
+                                        showMoreBtn.style.display = 'none';
+                                    }
+                                }
+                            }, 150);
+                        }
+                    }
+                    
+                    // Update timestamp
+                    const timeElement = existingElement.querySelector('.text-xs.sm\\:text-sm');
+                    if (timeElement) {
+                        timeElement.textContent = formatDate(newAnnouncement.created_at);
+                    }
+                }
+            });
+            
+            // 3. Add new announcements (with animation)
+            if (announcementsToAdd.length > 0) {
+                // Sort by pin status and date
+                const sortedNewAnnouncements = [...announcementsToAdd].sort((a, b) => {
+                    const aPinned = pinnedIds.includes(a.id);
+                    const bPinned = pinnedIds.includes(b.id);
+                    if (aPinned && !bPinned) return -1;
+                    if (!aPinned && bPinned) return 1;
+                    return new Date(b.created_at) - new Date(a.created_at);
+                });
+                
+                // Create fragment for batch DOM insertion
+                const fragment = document.createDocumentFragment();
+                
+                sortedNewAnnouncements.forEach(announcement => {
+                    const announcementHTML = createAnnouncementHTML(announcement, pinnedIds, true);
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = announcementHTML;
+                    const element = tempDiv.firstElementChild;
+                    
+                    // Add new-item highlight
+                    element.classList.add('new-item-highlight', 'slide-in-up');
+                    element.style.opacity = '0';
+                    element.style.transform = 'translateY(20px)';
+                    element.style.transition = 'all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)';
+                    
+                    fragment.appendChild(element);
+                });
+                
+                // Determine where to insert (pinned announcements go to top)
+                const firstNonPinned = Array.from(grid.children).find(child => {
+                    const id = parseInt(child.getAttribute('data-announcement-id'));
+                    return id && !pinnedIds.includes(id);
+                });
+                
+                if (firstNonPinned) {
+                    grid.insertBefore(fragment, firstNonPinned);
+                } else {
+                    grid.appendChild(fragment);
+                }
+                
+                // Animate new elements in
+                setTimeout(() => {
+                    const newElements = grid.querySelectorAll('.slide-in-up');
+                    newElements.forEach((el, index) => {
+                        setTimeout(() => {
+                            el.style.opacity = '1';
+                            el.style.transform = 'translateY(0)';
+                        }, index * 150); // Staggered animation
+                    });
+                    
+                    // Remove animation classes after animation
+                    setTimeout(() => {
+                        newElements.forEach(el => {
+                            el.classList.remove('slide-in-up');
+                            el.style.opacity = '';
+                            el.style.transform = '';
+                            el.style.transition = '';
+                        });
+                    }, 500 + (newElements.length * 150));
+                }, 10);
+                
+                // Load OG previews for new announcements
+                setTimeout(() => {
+                    sortedNewAnnouncements.forEach(announcement => {
+                        const urlMatch = announcement.content.match(/https?:\/\/[^\s]+/);
+                        if (!urlMatch) return;
+                        
+                        const url = urlMatch[0];
+                        const previewId = `og-preview-${announcement.id}`;
+                        const previewEl = document.getElementById(previewId);
+                        
+                        if (previewEl) {
+                            fetch(`/api/preview?url=${encodeURIComponent(url)}`)
+                                .then((res) => res.json())
+                                .then((data) => {
+                                    if (!data.title && !data.image) return;
+                                    
+                                    previewEl.innerHTML = createOGPreviewHTML(data, url);
+                                })
+                                .catch(() => console.warn("No OG preview found for", url));
+                        }
+                    });
+                }, 500);
+            }
+            
+            // Update the global announcements array
+            announcements = newAnnouncements;
+            window.announcements = announcements;
+            
+            // Restore scroll position AFTER DOM updates
+            requestAnimationFrame(() => {
+                container.scrollTop = scrollTop;
+            });
+        }
+        
+        function renderFullAnnouncements(announcements, pinnedIds) {
+            const container = document.getElementById("announcements-container");
+            
+            // Sort announcements (pinned first)
+            const sorted = [...announcements].sort((a, b) => {
+                const aPinned = pinnedIds.includes(a.id);
+                const bPinned = pinnedIds.includes(b.id);
+                return aPinned === bPinned ? 0 : aPinned ? -1 : 1;
+            });
+            
+            // Render all announcements
+            container.innerHTML = `
+                <div class="announcements-grid">
+                    ${sorted.map(announcement => createAnnouncementHTML(announcement, pinnedIds, false)).join('')}
+                </div>
+            `;
+            
+            // Render OG previews
+            setTimeout(() => {
+                renderOGPreviews();
+            }, 100);
+        }
+        
+        function createAnnouncementHTML(announcement, pinnedIds, isNew = false) {
+            const urlMatch = announcement.content.match(/https?:\/\/[^\s]+/);
+            const url = urlMatch ? urlMatch[0] : null;
+            const previewId = `og-preview-${announcement.id || Math.random().toString(36).slice(2)}`;
+            const isPinned = pinnedIds.includes(announcement.id);
+            const createdAt = new Date(announcement.created_at);
+            const now = new Date();
+            const diffHours = (now - createdAt) / (1000 * 60 * 60);
+            const isRecent = diffHours < 3;
+        
+            const newClass = isNew ? 'new-item-highlight' : '';
+            
+            const neonBorderClass = isRecent
+                ? "border-l-2 border-l-yellow-600 border-t border-t-amber-600 border-r border-r-orange-600 border-b border-b-orange-600 shadow-sm"
+                : "border border-blue-600 shadow-md";
+            
+            // File preview (image or link)
+            let filePreview = "";
+            if (announcement.has_file && announcement.file_type?.startsWith("image/")) {
+                filePreview = `
+                    <div class="mb-2 w-full h-52 rounded-lg overflow-hidden bg-gray-700 flex items-center justify-center cursor-pointer card-hover-lift border-gray-600 border"
+                         onclick="openImagePreview('${announcement.file_url}')">
+                        <img src="${announcement.file_url}" alt="${announcement.file_name}" class="object-cover w-full h-full">
+                    </div>
+                `;
+            } else if (announcement.has_file) {
+                filePreview = `
+                    <div class="mb-4">
+                        <a href="${announcement.file_url}" target="_blank" 
+                           class="inline-flex items-center gap-3 px-4 py-3 bg-gray-800/70 hover:bg-gray-700/80 border border-gray-600 hover:border-blue-400/50 rounded-xl transition-all duration-300 card-hover-lift group">
+                            <i class="${getFileIcon(announcement.file_name)} text-blue-400 text-lg group-hover:scale-110 transition-transform duration-300"></i>
+                            <div class="flex-1 min-w-0">
+                                <div class="text-white font-medium text-sm truncate word-break overflow-break">
+                                    ${(() => {
+                                        const filename = announcement.file_name;
+                                        const lastDotIndex = filename.lastIndexOf('.');
+                                        const extension = lastDotIndex !== -1 ? filename.slice(lastDotIndex) : '';
+                                        const nameWithoutExt = lastDotIndex !== -1 ? filename.slice(0, lastDotIndex) : filename;
+                                    
+                                        const words = nameWithoutExt.split(/[\s_-]+/).filter(word => word.length > 0);
+                                        const truncatedWords = words.slice(0, 20);
+                                    
+                                        if (words.length > 20) {
+                                            return truncatedWords.join(' ') + '@LN' + (extension ? extension : '');
+                                        }
+                                    
+                                        return truncatedWords.join(' ') + (extension ? extension : '');
+                                    })()}
+                                </div>
+                                <div class="text-gray-400 text-xs flex items-center gap-1">
+                                    <i class="fas fa-external-link-alt text-xs"></i>
+                                    <span>Click to download</span>
+                                </div>
+                            </div>
+                            <i class="fas fa-download text-gray-400 group-hover:text-blue-400 transition-colors duration-300"></i>
+                        </a>
+                    </div>
+                `;
+            }
+            
+            return `
+                <div class="announcement-card ${neonBorderClass} ${newClass} bg-gray-900/60 rounded-2xl transition duration-200 ease-in-out overflow-hidden card-hover-lift fade-in announcement-content" data-announcement-id="${announcement.id}">
+                    <!-- Pin button -->
+                    <button 
+                        onclick="togglePin(${announcement.id})"
+                        class="absolute top-3 right-3 p-1 rounded-full transition duration-200 z-10 ${
+                            isPinned
+                            ? "bg-yellow-400/20 text-yellow-400 hover:bg-yellow-400/30"
+                            : "text-gray-500 hover:text-yellow-400 hover:bg-gray-800/40"
+                        }"
+                        title="${isPinned ? "Unpin" : "Pin"}"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" 
+                            viewBox="0 0 24 24" 
+                            fill="${isPinned ? 'currentColor' : 'none'}" 
+                            stroke="currentColor" 
+                            stroke-width="1.9" 
+                            class="w-6 h-6 drop-shadow-sm">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 2c.8 0 1.5.7 1.5 1.5V9l3 3v1.5h-3l-.25 6.5a.75.75 0 01-1.5 0L11 13.5H8V12l3-3V3.5C11 2.7 11.7 2 12 2z" />
+                        </svg>
+                    </button>
+                
+                    <!-- New item indicator -->
+                    ${isNew ? `<div class="absolute top-3 left-3 w-3 h-3 bg-green-500 rounded-full animate-pulse z-10"></div>` : ''}
+                
+                    <!-- OG Preview -->
+                    <div id="${previewId}" class="w-full border-b border-gray-800 rounded-lg mb-2"></div>
+                
+                    <!-- File/Image Preview -->
+                    ${filePreview}
+                
+                    <!-- Announcement Body -->
+                    <div class="announcement-body p-4 sm:p-5">
+                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-3 gap-2">
+                            <h3 class="text-xl uppercase break-all underline underline-offset-8 decoration-red-500 decoration-double sm:text-2xl font-extrabold text-white leading-snug break-words">
+                                ${announcement.title}
+                            </h3>
+                        
+                            <div class="flex items-center gap-2">
+                                <i class="fa fa-clock text-gray-400"></i>
+                                <span class="text-xs sm:text-sm whitespace-nowrap font-bold 
+                                           underline underline-offset-2 decoration-blue-400 
+                                           text-transparent bg-clip-text 
+                                           bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400">
+                                    ${formatDate(announcement.created_at)}
+                                </span>
+                            </div>
+                        </div>
+                    
+                        <div class="announcement-content-wrapper mb-4">
+                            
+                            <div class="announcement-text break-all hyphens-auto text-slate-300 leading-relaxed list-inside formatted-text">${formatText(announcement.content)}</div>
+                        
+                            ${(() => {
+                                if (shouldTruncate(announcement.content, 300)) {
+                                    return `
+                                        <button onclick="toggleExpand(${announcement.id})" 
+                                                class="show-more-btn mt-2 text-green-400 hover:text-blue-300 text-sm font-medium flex items-center gap-1 transition-colors">
+                                            <i class="fas fa-chevron-down text-xs"></i>
+                                            <span>Show more</span>
+                                        </button>
+                                    `;
+                                }
+                                return '';
+                            })()}
+                        </div>                                    
+                    
+                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mt-auto pt-4 border-t border-gray-700">
+                            <span class="text-gray-400 text-xs sm:text-sm">
+                                By: ${announcement.author?.username || "Unknown"}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function createOGPreviewHTML(data, url) {
+            return `
+                <a href="${url}" target="_blank" class="flex items-center gap-3 p-3 sm:p-4 bg-gray-800/70 hover:bg-gray-800/90 transition duration-200 ease-in-out card-hover-lift rounded-lg border border-gray-600 hover:border-blue-400/50">
+                    ${
+                        data.image
+                            ? `<div class="flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden bg-gray-700 flex items-center justify-center">
+                                 <img src="${data.image}" alt="" class="object-cover w-full h-full cursor-pointer" onclick="openImagePreview('${data.image}')">
+                               </div>`
+                            : `<div class="flex-shrink-0 w-16 h-16 rounded-lg bg-gray-700 flex items-center justify-center text-gray-500 text-xs italic">
+                                 No image
+                               </div>`
+                    }
+                    <div class="flex-1">
+                        <h3 class="text-white font-semibold text-sm sm:text-base mb-1 line-clamp-1">
+                            ${data.title || "Untitled"}
+                        </h3>
+                        <p class="text-gray-400 text-xs sm:text-sm line-clamp-2">
+                            ${data.description || ""}
+                        </p>
+                    </div>
+                </a>
+            `;
+        }
+        
+        async function renderOGPreviews() {
+            const previewElements = document.querySelectorAll('[id^="og-preview-"]');
+            
+            for (const previewEl of previewElements) {
+                const announcementId = previewEl.id.replace('og-preview-', '');
+                const announcement = announcements.find(a => a.id == announcementId || a.id?.toString() === announcementId);
+                
+                if (!announcement) continue;
+                
+                const urlMatch = announcement.content.match(/https?:\/\/[^\s]+/);
+                if (!urlMatch) continue;
+                
+                const url = urlMatch[0];
+                
+                try {
+                    const response = await fetch(`/api/preview?url=${encodeURIComponent(url)}`);
+                    const data = await response.json();
+                    
+                    if (data.title || data.image) {
+                        previewEl.innerHTML = createOGPreviewHTML(data, url);
+                    }
+                } catch (error) {
+                    console.warn("No OG preview found for", url);
+                }
+            }
+        }
+        
+        // Helper function to find new items (keep your existing one)
+        function findNewItems(oldItems, newItems, idField) {
+            if (!oldItems || oldItems.length === 0) return [];
+            
+            const oldIds = new Set(oldItems.map(item => item[idField]));
+            return newItems.filter(item => !oldIds.has(item[idField]));
+        }
+        
+        // Keep your existing togglePin function
+        window.togglePin = function (id) {
+            let pinnedIds = JSON.parse(localStorage.getItem("pinnedAnnouncements") || "[]");
+            
+            if (pinnedIds.includes(id)) {
+                pinnedIds = pinnedIds.filter((x) => x !== id);
+            } else {
+                pinnedIds.push(id);
+            }
+            localStorage.setItem("pinnedAnnouncements", JSON.stringify(pinnedIds));
+            
+            // Re-render with updated pin status
+            renderFullAnnouncements(announcements, pinnedIds);
+        };
+        
+        // Keep your existing toggleExpand function
+        window.toggleExpand = function(id) {
+            const announcementCard = document.querySelector(`[data-announcement-id="${id}"]`);
+            if (!announcementCard) return;
+        
+            const textElement = announcementCard.querySelector('.announcement-text');
+            const button = announcementCard.querySelector('.show-more-btn');
+        
+            if (textElement.classList.contains('expanded')) {
+                const originalContent = textElement.getAttribute('data-original');
+                if (originalContent) {
+                    textElement.innerHTML = originalContent;
+                }
+                textElement.classList.remove('expanded');
+                if (button) {
+                    button.innerHTML = '<i class="fas fa-chevron-down text-xs"></i><span>Show more</span>';
+                }
+            } else {
+                const fullContent = textElement.getAttribute('data-full') || textElement.innerHTML;
+                textElement.setAttribute('data-original', textElement.innerHTML); 
+                textElement.setAttribute('data-full', formatText(announcements.find(a => a.id === id)?.content || ''));
+                textElement.innerHTML = textElement.getAttribute('data-full'); 
+                textElement.classList.add('expanded');
+                if (button) {
+                    button.innerHTML = '<i class="fas fa-chevron-up text-xs"></i><span>Show less</span>';
+                }
+            }
+        };
+        
+        // Keep your existing image modal functions
+        window.openImagePreview = function(src) {
+            let modal = document.getElementById("image-preview-modal");
+            let img = document.getElementById("image-preview-img");
+            if (!modal || !img) return;
+            img.src = src;
+            modal.classList.remove("hidden");
+            modal.classList.add("flex");
+        };
+        
+        window.closeImagePreview = function() {
+            let modal = document.getElementById("image-preview-modal");
+            let img = document.getElementById("image-preview-img");
+            if (!modal || !img) return;
+            modal.classList.add("hidden");
+            modal.classList.remove("flex");
+            img.src = "";
+        };
+        
+        // Close modal when clicking outside the image (keep existing)
+        document.getElementById("image-preview-modal")?.addEventListener("click", e => {
+            if (e.target.id === "image-preview-modal") closeImagePreview();
+        });        
         
         // Helper function to find new items
         function findNewItems(oldItems, newItems, idField) {
