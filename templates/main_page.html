@@ -1560,7 +1560,7 @@
         overflow: hidden;
         position: relative;
         margin-top: 10px;
-        padding-bottom: 20px;
+        padding-bottom: 25px;
     }
 
     .announcement-text:not(.expanded)::after {
@@ -4828,11 +4828,57 @@
             }
         }
         
+        let isRefreshing = false;
+        let refreshTimeout = null;
+
+        async function performSmartRefresh() {
+            if (isRefreshing) return;
+
+            const isAnnouncementsActive = document.querySelector('#announcements.content-section.active') !== null;
+            const isUserInteracting = document.querySelector(':focus') !== null;
+
+            if (isUserInteracting) {
+                clearTimeout(refreshTimeout);
+                refreshTimeout = setTimeout(performSmartRefresh, 30 * 1000);
+                return;
+            }
+
+            isRefreshing = true;
+
+            try {
+                await loadUserData();
+
+                if (isAnnouncementsActive || shouldCheckForUpdates()) {
+                    await loadAnnouncements(true);
+                }
+
+                if (window.notificationOverlay) {
+                    await window.notificationOverlay.checkNow();
+                }
+            } catch (error) {
+                console.log('Auto-refresh failed:', error);
+            } finally {
+                isRefreshing = false;
+            }
+        }
+
+        function shouldCheckForUpdates() {
+            const lastCheck = localStorage.getItem('lastUpdateCheck') || 0;
+            const now = Date.now();
+            const fiveMinutes = 5 * 60 * 1000;
+
+            if (now - lastCheck > fiveMinutes) {
+                localStorage.setItem('lastUpdateCheck', now);
+                return true;
+            }
+            return false;
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             analytics.initialize();
             window.searchSystem.init();
             const isMainPage = document.querySelector('.content-container') !== null;
-            
+
             if (isMainPage) {
                 setupNavigation(); 
                 setupScrollAnimations();
@@ -4847,28 +4893,66 @@
                     isInitialLoad = false;
                 }, 1000);
             
-                // Light refresh - every 1 min
+                setInterval(performSmartRefresh, 60 * 1000);
+                
                 setInterval(() => {
                     loadUserData();
-                    loadAnnouncements(true);
                 }, 60 * 1000);
             
                 // Heavy refresh - 300 seconds --> 5 min
                 setInterval(() => {
                     loadAssignments(true);
                 }, 5 * 60 * 1000);
-                
+
                 // SUPER HEAVY refresh ---> 10 min
                 setInterval(() => {
                     loadTopics(true);
                     loadTimetable(true);
                 }, 10 * 60 * 1000);
             } else {
-                // Run only global functions on other pages
                 checkForFlaskMessages();
                 loadUserData(); 
             }
-        });        
+        });
+
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) {
+                // Page became visible, refresh if needed
+                const lastVisible = localStorage.getItem('lastVisibleTime') || 0;
+                const now = Date.now();
+                const twoMinutes = 2 * 60 * 1000;
+
+                if (now - lastVisible > twoMinutes) {
+                    performSmartRefresh();
+                }
+                localStorage.setItem('lastVisibleTime', now);
+            }
+        });
+
+        // Add network status awareness
+        let isOnline = navigator.onLine;
+        window.addEventListener('online', () => {
+            isOnline = true;
+            // Refresh when coming back online
+            performSmartRefresh();
+        });
+
+        window.addEventListener('offline', () => {
+            isOnline = false;
+            // Clear any pending refreshes
+            clearTimeout(refreshTimeout);
+        });
+
+        let scrollTimeout;
+        window.addEventListener('scroll', () => {
+            clearTimeout(scrollTimeout);
+            scrollTimeout = setTimeout(() => {
+                const isAnnouncementsActive = document.querySelector('#announcements.content-section.active') !== null;
+                if (isAnnouncementsActive && !isRefreshing) {
+                    performSmartRefresh();
+                }
+            }, 5000);
+        });
         
         if ('serviceWorker' in navigator) {
           window.addEventListener('load', () => {

@@ -20,3 +20,45 @@
     <iframe src="https://chatgpt.com/"></iframe>
 </body>
 </html>
+
+document.addEventListener('DOMContentLoaded', function() {
+            analytics.initialize();
+            window.searchSystem.init();
+            const isMainPage = document.querySelector('.content-container') !== null;
+            
+            if (isMainPage) {
+                setupNavigation(); 
+                setupScrollAnimations();
+                checkForFlaskMessages();
+                loadUserData();
+                loadAnnouncements();
+                loadAssignments();
+                loadTopics();
+                loadTimetable();
+                updateProfileStats();
+                setTimeout(() => {
+                    isInitialLoad = false;
+                }, 1000);
+            
+                // Light refresh - every 1 min
+                setInterval(() => {
+                    loadUserData();
+                    loadAnnouncements(true);
+                }, 60 * 1000);
+            
+                // Heavy refresh - 300 seconds --> 5 min
+                setInterval(() => {
+                    loadAssignments(true);
+                }, 5 * 60 * 1000);
+                
+                // SUPER HEAVY refresh ---> 10 min
+                setInterval(() => {
+                    loadTopics(true);
+                    loadTimetable(true);
+                }, 10 * 60 * 1000);
+            } else {
+                // Run only global functions on other pages
+                checkForFlaskMessages();
+                loadUserData(); 
+            }
+        });        
