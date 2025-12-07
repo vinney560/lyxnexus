@@ -1476,8 +1476,8 @@
             container.innerHTML = announcements.map(announcement => {
               const formattedContent = formatText(announcement.content);
               const plainText = announcement.content.replace(/[&<>"']/g, ''); // Basic cleanup
-              const displayContent = plainText.length > 200 ? 
-                formattedContent.substring(0, 200) + "....." : 
+              const displayContent = plainText.length > 600 ? 
+                formattedContent.substring(0, 600) + "....." : 
                 formattedContent;
             
               return `
