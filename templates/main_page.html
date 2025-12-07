@@ -1976,7 +1976,7 @@
                 <span>LyxLab</span>
             </button>
         </div>
-    </div>
+    </div>    
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             window.Userstatus = {{ current_user.status|tojson }};
@@ -2746,7 +2746,7 @@
                 }
                          
                 const searchHTML = `
-                    <div class="flex items-center justify-center flex-col small-header bg-gray-800 w-full h-24 p-4 rounded-xl mb-3 md:hidden">
+                    <div class="flex items-center justify-center flex-col small-header bg-gray-800 w-full h-24 p-4 rounded-xl mb-3 md:hidden" id="mobile-header">
                         <h2 class="gradient-text underline decoration-2 decoration-indigo-500 text-2xl font-bold mx-auto my-auto">
                             LyxNexus
                         </h2>
@@ -5633,5 +5633,113 @@
             document.head.appendChild(style);
         });
     </script>
+    <script>
+        // Complete Christmas transformation
+        function fullChristmasTransformation() {
+            const mobileHeader = document.getElementById("mobile-header")
+            if (!mobileHeader) return;
+        
+            mobileHeader.style.background = 'linear-gradient(135deg, #0f172a 0%, #1e3a8a 30%, #1e40af 50%, #1d4ed8 70%, #0ea5e9 100%)';
+        
+            const snowContainer = document.createElement('div');
+            snowContainer.className = 'snow-container';
+            snowContainer.style.cssText = `
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                pointer-events: none;
+                overflow: hidden;
+                border-radius: 0.75rem;
+                z-index: 1;
+            `;
+        
+            // Create snowflakes
+            for (let i = 0; i < 30; i++) {
+                const snowflake = document.createElement('div');
+                snowflake.innerHTML = '❄';
+                snowflake.style.cssText = `
+                    position: absolute;
+                    top: -20px;
+                    left: ${Math.random() * 100}%;
+                    font-size: ${Math.random() * 8 + 8}px;
+                    opacity: ${Math.random() * 0.4 + 0.2};
+                    animation: snowfall ${Math.random() * 5 + 3}s linear infinite;
+                    animation-delay: ${Math.random() * 2}s;
+                    color: white;
+                `;
+                snowContainer.appendChild(snowflake);
+            }
+        
+            // Add Christmas icons
+            const icons = ['🎄', '🎅', '🦌', '🎁', '🌟', '❄️'];
+            for (let i = 0; i < 4; i++) {
+                const icon = document.createElement('div');
+                icon.innerHTML = icons[Math.floor(Math.random() * icons.length)];
+                icon.style.cssText = `
+                    position: absolute;
+                    font-size: 20px;
+                    animation: float ${Math.random() * 3 + 2}s ease-in-out infinite;
+                    animation-delay: ${Math.random() * 2}s;
+                    opacity: 0.7;
+                `;
+            
+                if (i % 2 === 0) {
+                    icon.style.left = '10px';
+                    icon.style.top = `${20 + i * 20}px`;
+                } else {
+                    icon.style.right = '10px';
+                    icon.style.top = `${20 + i * 20}px`;
+                }
+            
+                mobileHeader.appendChild(icon);
+            }
+        
+            // Add animation styles
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes snowfall {
+                    0% {
+                        transform: translateY(-20px) rotate(0deg);
+                        opacity: 0.5;
+                    }
+                    100% {
+                        transform: translateY(120px) rotate(360deg);
+                        opacity: 0;
+                    }
+                }
+        
+                @keyframes float {
+                    0%, 100% { transform: translateY(0) rotate(0deg); }
+                    50% { transform: translateY(-10px) rotate(10deg); }
+                }
+        
+                .gradient-text {
+                    animation: christmas-glow 2s ease-in-out infinite alternate;
+                    text-shadow: 0 0 10px rgba(220, 38, 38, 0.5);
+                }
+        
+                @keyframes christmas-glow {
+                    0% {
+                        text-shadow: 0 0 10px rgba(220, 38, 38, 0.5),
+                                    0 0 20px rgba(220, 38, 38, 0.3);
+                    }
+                    100% {
+                        text-shadow: 0 0 20px rgba(22, 163, 74, 0.5),
+                                    0 0 30px rgba(22, 163, 74, 0.3),
+                                    0 0 40px rgba(22, 163, 74, 0.2);
+                    }
+                }
+            `;
+        
+            document.mobileHeader.appendChild(style);
+            mobileHeader.appendChild(snowContainer);
+            mobileHeader.style.position = 'relative';
+            mobileHeader.style.overflow = 'hidden';
+        }
+    
+        document.addEventListener('DOMContentLoaded', fullChristmasTransformation);
+    </script>    
 </body>
 </html>
