@@ -1858,6 +1858,7 @@ We're excited to welcome you! {emojis[4]}
 {emojis[1]} *Account Details:*
 • Username: {username}
 • Mobile: {format_mobile_display(mobile)}
+• Created at: {(datetime.now() + timedelta(hours=3)).strftime('%d/%m/%Y | %H:%M:%S')}
 • Status: Active {emojis[2]}
 
 {emojis[2]} *Getting Started:*
@@ -1865,6 +1866,8 @@ We're excited to welcome you! {emojis[4]}
 2. Meet peers
 3. Start learning!
 
+• https://lyxnexus.onrender.com
+• Tell a friend to tell a friend. Let's Grow Together.
 Best,
 LyxNexus Team {emojis[0]}""",
         
@@ -1873,27 +1876,33 @@ LyxNexus Team {emojis[0]}""",
 
 Hey {username}! {emojis[3]}
 
-✅ Account created successfully
-📱 {format_mobile_display(mobile)}
-📅 {(datetime.now() + timedelta(hours=3)).strftime('%d/%m')}
+✅ Account created successfully!
+
+Mobile: *{format_mobile_display(mobile)}*
+Created at: {(datetime.now() + timedelta(hours=3)).strftime('%d/%m/%Y | %H:%M:%S')}
 
 {emojis[1]} Ready to begin?
 {emojis[2]} Login now!
 
+• https://lyxnexus.onrender.com
+• Share with friends. Let's Grow Together.
 – LyxNexus {emojis[4]}""",
         
         # Message 3
-        f"""Greetings {username}! {emojis[0]}
+        f"""Greetings *{username}*! {emojis[0]}
 
 Welcome to LyxNexus {emojis[1]}
 
 Your learning journey starts now {emojis[2]}
 
-📋 Registered: {format_mobile_display(mobile)}
+• Registered: *{format_mobile_display(mobile)}*
+• Created at: {(datetime.now() + timedelta(hours=3)).strftime('%d/%m/%Y | %H:%M:%S')}
 🔐 Account secured
 
 {emojis[3]} Explore. Learn. Grow.
 
+• https://lyxnexus.onrender.com
+• Share with a friend with a friend. Let's Grow Together.
 LyxNexus Team {emojis[4]}"""
     ]
     
@@ -1923,13 +1932,14 @@ def handle_student_login(user, username, mobile, login_subtype, next_page):
         new_user = User(username=username, mobile=mobile, is_admin=False)
         db.session.add(new_user)
         db.session.commit()
-
+        """ Send WhatsApp Welcome Message! """
         welcome_message = get_random_welcome_message(username, mobile)
         whatsapp_result = whatsapp_single(mobile, welcome_message)
         if whatsapp_result:
             print("WhatsApp message sent successfully!")
         else:
             print("WhatsApp not sent!!!")
+
         login_user(new_user)
         return redirect(url_for('nav_guide'))
     
