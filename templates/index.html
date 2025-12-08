@@ -869,7 +869,7 @@
         left: 20px;
         right: 20px;
         bottom: 20px;
-        background: var(--bg1-color);
+        background: transparent !important;
         border-radius: 15px;
         padding: 2rem;
         display: flex;
@@ -877,6 +877,11 @@
         justify-content: center;
         align-items: center;
         text-align: center;
+    }
+
+    #visual-content-cnt {
+        position: relative;
+        overflow: hidden;
     }
     
     .scroll-progress {
@@ -1063,13 +1068,13 @@
                     <div class="showcase-visual fade-in delay-1" style="height: 300px; width: 100%;">
                         <div class="visual-element" style="height: 100%;">
                             <div class="visual-content" style="padding: 1.5rem;" id="visual-content-cnt">
-                                <i class="fas fa-graduation-cap" style="font-size: 2.5rem; color: var(--accent-blue); margin-bottom: 0.75rem;"></i>
-                                <h3 class="gradient-text font-extrabold" style="margin-bottom: 0.5rem; text-decoration: underline; text-decoration-color: #3b82f6; font-size: 1.6rem; font-weight: 800;">Live Previews</h3>
-                                <p style="color: #cbd5e1; font-size: 0.9rem;">Login To Experience The Full Interface</p>
+                                <i class="fas fa-graduation-cap" style="font-size: 2.5rem; color: white; margin-bottom: 0.75rem;"></i>
+                                <h3 class="gradient-text font-extrabold" style="margin-bottom: 0.5rem; text-decoration: underline; text-decoration-color: #3b82f6; font-size: 1.6rem; font-weight: 800; z-index: 4; position: relative;">Live Previews</h3>
+                                <p style="color: white; font-size: 0.9rem; z-index: 4; position: relative;">Login To Experience The Full Interface</p>
                             </div>
                         </div>
                     </div>
-                </div>
+                </div>                
             </div>
         </div>
     </header>
@@ -1766,8 +1771,11 @@
         function fullChristmasTransformation() {
             const header = document.getElementById('visual-content-cnt');
             if (!header) return;
-
+        
             header.style.background = 'linear-gradient(135deg, #0f172a 0%, #14532d 20%, #166534 35%, #dc2626 50%, #b91c1c 65%, #0f172a 80%, #16a34a 100%)';
+
+            header.style.position = 'relative';
+            header.style.overflow = 'hidden';
 
             const snowContainer = document.createElement('div');
             snowContainer.style.cssText = `
@@ -1778,7 +1786,7 @@
                 height: 100%;
                 pointer-events: none;
                 overflow: hidden;
-                border-radius: 0.75rem;
+                border-radius: 15px;
                 z-index: 1;
             `;
 
@@ -1804,7 +1812,7 @@
                     }
                 `;
 
-                snowflake.appendChild(snowflakeStyle);
+                document.head.appendChild(snowflakeStyle);
                 snowflake.style.cssText = `
                     position: absolute;
                     top: -20px;
@@ -1815,12 +1823,24 @@
                     pointer-events: none;
                     animation: ${animName} ${duration}s linear infinite;
                     animation-delay: ${delay}s;
+                    z-index: 2;
                 `;
 
                 snowContainer.appendChild(snowflake);
             }
 
             const icons = ['🎄', '🎅', '🦌', '🎁', '🌟', '❄️'];
+            const iconContainer = document.createElement('div');
+            iconContainer.style.cssText = `
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                pointer-events: none;
+                z-index: 3;
+            `;
+
             for (let i = 0; i < 5; i++) {
                 const icon = document.createElement('div');
                 icon.innerHTML = icons[Math.floor(Math.random() * icons.length)];
@@ -1841,26 +1861,25 @@
                     }
                 `;
 
-                icon.appendChild(floatStyle);
+                document.head.appendChild(floatStyle);
                 icon.style.cssText = `
                     position: absolute;
                     font-size: 18px;
                     opacity: 0.7;
                     pointer-events: none;
-                    z-index: 2;
                     animation: ${floatAnimName} ${floatDuration}s ease-in-out infinite;
                     animation-delay: ${floatDelay}s;
                 `;
 
                 if (i % 2 === 0) {
-                    icon.style.left = '5px';
-                    icon.style.top = `${15 + i * 20}px`;
+                    icon.style.left = '15px';
+                    icon.style.top = `${20 + i * 50}px`;
                 } else {
-                    icon.style.right = '5px';
-                    icon.style.top = `${15 + i * 20}px`;
+                    icon.style.right = '15px';
+                    icon.style.top = `${20 + i * 50}px`;
                 }
 
-                header.appendChild(icon);
+                iconContainer.appendChild(icon);
             }
 
             const gradientText = header.querySelector('.gradient-text');
@@ -1879,13 +1898,12 @@
                         }
                     }
                 `;
-                gradientText.appendChild(glowStyle);
+                document.head.appendChild(glowStyle);
                 gradientText.style.animation = 'christmas-glow 2s ease-in-out infinite alternate';
             }
 
             header.appendChild(snowContainer);
-            header.style.position = 'relative';
-            header.style.overflow = 'hidden';
+            header.appendChild(iconContainer);
         }
 
         if (document.readyState === 'loading') {
@@ -1893,6 +1911,6 @@
         } else {
             fullChristmasTransformation();
         }
-    </script>
+    </script>    
 </body>
 </html>
