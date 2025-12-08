@@ -863,27 +863,6 @@
         }
     }
     
-    .visual-content {
-        position: absolute;
-        top: 20px;
-        left: 20px;
-        right: 20px;
-        bottom: 20px;
-        background: transparent !important;
-        border-radius: 15px;
-        padding: 2rem;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        text-align: center;
-    }
-
-    #visual-content-cnt {
-        position: relative;
-        overflow: hidden;
-    }
-    
     .scroll-progress {
         position: fixed;
         top: 0;
@@ -945,20 +924,33 @@
         overflow: hidden;
     }
 
+    .showcase-visual {
+        border-radius: 20px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .visual-element {
+        position: relative;
+        height: 100%;
+        width: 100%;
+    }
+
     .visual-content {
         position: absolute;
         top: 20px;
         left: 20px;
         right: 20px;
         bottom: 20px;
-        background: var(--bg-color);
-        border-radius: 12px;
-        padding: 1.5rem;
+        background: transparent !important;
+        border-radius: 15px;
+        padding: 2rem;
         display: flex;
         flex-direction: column;
         justify-content: center;
         align-items: center;
         text-align: center;
+        z-index: 2;
     }
 
     @media (max-width: 640px) {
@@ -987,17 +979,7 @@
             font-size: 0.8rem !important;
         }
     }
-
-    .visual-element::before {
-        content: '';
-        position: absolute;
-        top: -50%;
-        left: -50%;
-        width: 200%;
-        height: 200%;
-        background: conic-gradient(transparent, var(--accent-blue), transparent 30%);
-        animation: rotate 4s linear infinite;
-    }    
+    
 </style>
 <body class="custom-bg">
     
@@ -1065,16 +1047,16 @@
                 </div>
 
                 <div class="w-full lg:w-1/2 order-2 lg:order-2">
-                    <div class="showcase-visual fade-in delay-1" style="height: 300px; width: 100%;">
+                    <div class="showcase-visual fade-in delay-1" style="height: 300px; width: 100%; position: relative;">
                         <div class="visual-element" style="height: 100%;">
                             <div class="visual-content" style="padding: 1.5rem;" id="visual-content-cnt">
-                                <i class="fas fa-graduation-cap" style="font-size: 2.5rem; color: var(--accent-blue); margin-bottom: 0.75rem;"></i>
-                                <h3 class="gradient-text font-extrabold" style="margin-bottom: 0.5rem; text-decoration: underline; text-decoration-color: #3b82f6; font-size: 1.6rem; font-weight: 800; z-index: 4; position: relative;">Live Previews</h3>
+                                <i class="fas fa-graduation-cap" style="font-size: 2.5rem; color: white; margin-bottom: 0.75rem; z-index: 4; position: relative;"></i>
+                                <h3 class="gradient-text font-extrabold" style="margin-bottom: 0.5rem; text-decoration: underline; text-decoration-color: #3b82f6; font-size: 1.6rem; font-weight: 800;">Live Previews</h3>
                                 <p style="color: white; font-size: 0.9rem; z-index: 4; position: relative;">Login To Experience The Full Interface</p>
                             </div>
                         </div>
                     </div>
-                </div>                
+                </div>                    
             </div>
         </div>
     </header>
@@ -1770,13 +1752,94 @@
     <script>
         function fullChristmasTransformation() {
             const header = document.getElementById('visual-content-cnt');
-            if (!header) return;
-        
+            const showcaseVisual = document.querySelector('.showcase-visual');
+            if (!header || !showcaseVisual) return;
+
+            // Apply Christmas gradient background to the inner container
             header.style.background = 'linear-gradient(135deg, #0f172a 0%, #14532d 20%, #166534 35%, #dc2626 50%, #b91c1c 65%, #0f172a 80%, #16a34a 100%)';
 
-            header.style.position = 'relative';
-            header.style.overflow = 'hidden';
+            // Create Christmas border lighting effect on the outer container
+            showcaseVisual.style.cssText += `
+                position: relative;
+                overflow: visible;
+                border-radius: 20px;
+            `;
 
+            // Create the border lighting container
+            const borderLightContainer = document.createElement('div');
+            borderLightContainer.style.cssText = `
+                position: absolute;
+                top: -5px;
+                left: -5px;
+                right: -5px;
+                bottom: -5px;
+                border-radius: 25px;
+                overflow: hidden;
+                pointer-events: none;
+                z-index: 0;
+            `;
+
+            // Create animated border lights
+            const lights = ['🔴', '🟢', '🟡', '🔵', '⚪'];
+            for (let i = 0; i < 20; i++) {
+                const light = document.createElement('div');
+                light.innerHTML = lights[i % lights.length];
+
+                const rotateAnimName = `rotate-light-${i}`;
+                const duration = 20 + Math.random() * 10;
+                const delay = Math.random() * 5;
+
+                const lightStyle = document.createElement('style');
+                lightStyle.textContent = `
+                    @keyframes ${rotateAnimName} {
+                        0% {
+                            transform: rotate(${i * 18}deg) translateX(calc(50% + 5px)) rotate(-${i * 18}deg);
+                        }
+                        100% {
+                            transform: rotate(${i * 18 + 360}deg) translateX(calc(50% + 5px)) rotate(-${i * 18 + 360}deg);
+                        }
+                    }
+                `;
+
+                document.head.appendChild(lightStyle);
+
+                light.style.cssText = `
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    font-size: 14px;
+                    opacity: 0.8;
+                    filter: drop-shadow(0 0 3px currentColor);
+                    animation: ${rotateAnimName} ${duration}s linear infinite;
+                    animation-delay: ${delay}s;
+                    transform-origin: left center;
+                    z-index: 1;
+                `;
+
+                borderLightContainer.appendChild(light);
+            }
+
+            // Add pulsing glow effect to the border
+            const glowStyle = document.createElement('style');
+            glowStyle.textContent = `
+                @keyframes border-pulse {
+                    0%, 100% {
+                        box-shadow: 0 0 10px rgba(220, 38, 38, 0.3),
+                                    0 0 20px rgba(22, 163, 74, 0.2),
+                                    0 0 30px rgba(37, 99, 235, 0.1);
+                    }
+                    50% {
+                        box-shadow: 0 0 15px rgba(220, 38, 38, 0.5),
+                                    0 0 30px rgba(22, 163, 74, 0.3),
+                                    0 0 45px rgba(37, 99, 235, 0.2);
+                    }
+                }
+            `;
+            document.head.appendChild(glowStyle);
+
+            showcaseVisual.style.animation = 'border-pulse 3s ease-in-out infinite';
+
+            // Create snow container INSIDE the header
             const snowContainer = document.createElement('div');
             snowContainer.style.cssText = `
                 position: absolute;
@@ -1790,6 +1853,7 @@
                 z-index: 1;
             `;
 
+            // Create snowflakes (inside the header)
             for (let i = 0; i < 25; i++) {
                 const snowflake = document.createElement('div');
                 snowflake.innerHTML = '❄';
@@ -1829,6 +1893,7 @@
                 snowContainer.appendChild(snowflake);
             }
 
+            // Create floating Christmas icons (inside the header)
             const icons = ['🎄', '🎅', '🦌', '🎁', '🌟', '❄️'];
             const iconContainer = document.createElement('div');
             iconContainer.style.cssText = `
@@ -1882,10 +1947,11 @@
                 iconContainer.appendChild(icon);
             }
 
+            // Apply glow effect to gradient text
             const gradientText = header.querySelector('.gradient-text');
             if (gradientText) {
-                const glowStyle = document.createElement('style');
-                glowStyle.textContent = `
+                const textGlowStyle = document.createElement('style');
+                textGlowStyle.textContent = `
                     @keyframes christmas-glow {
                         0% {
                             text-shadow: 0 0 10px rgba(220, 38, 38, 0.5),
@@ -1898,19 +1964,25 @@
                         }
                     }
                 `;
-                document.head.appendChild(glowStyle);
+                document.head.appendChild(textGlowStyle);
                 gradientText.style.animation = 'christmas-glow 2s ease-in-out infinite alternate';
+                gradientText.style.position = 'relative';
+                gradientText.style.zIndex = '4';
             }
 
+            // Append elements
+            showcaseVisual.insertBefore(borderLightContainer, showcaseVisual.firstChild);
             header.appendChild(snowContainer);
             header.appendChild(iconContainer);
+            header.style.position = 'relative';
         }
 
+        // Execute transformation
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', fullChristmasTransformation);
         } else {
             fullChristmasTransformation();
         }
-    </script>    
+    </script>
 </body>
 </html>
