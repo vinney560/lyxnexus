@@ -1016,7 +1016,6 @@ Sitemap: https://lyxnexus.lyxnexus.xo.je/sitemap.xml
 from datetime import datetime, timezone, timedelta
 @app.route('/sitemap.xml')
 def sitemap():
-    # Get base URL dynamically
     base_url = request.url_root.rstrip('/')
     current_date = datetime.now(timezone(timedelta(hours=3))).strftime('%Y-%m-%d')
     
@@ -1849,17 +1848,17 @@ def get_random_welcome_message(username, mobile):
     
     messages = [
         # Message 1
-        f"""{emojis[0]} *WELCOME TO LyxNexus* {emojis[0]}
+        f"""{emojis[0]} *Welcome To LyxNexus* {emojis[0]}
 
-Hello *{username}*! {emojis[3]}
+Hello *{username.capitalize()}*! {emojis[3]}
 
 We're excited to welcome you! {emojis[4]}
 
 {emojis[1]} *Account Details:*
-• Username: {username}
-• Mobile: *{format_mobile_display(mobile)}*
-• Created at: {(datetime.now() + timedelta(hours=3)).strftime('%d/%m/%Y | %H:%M:%S')}
-• Status: Active {emojis[2]}
+> • Username: {username.capitalize()}
+> • Mobile: *{format_mobile_display(mobile)}*
+> • Created at: {(datetime.now() + timedelta(hours=3)).strftime('%d/%m/%Y | %H:%M:%S')}
+> • Status: Active {emojis[2]}
 
 {emojis[2]} *Getting Started:*
 1. Explore dashboard
@@ -1874,12 +1873,13 @@ LyxNexus Team {emojis[0]}""",
         # Message 2
         f"""{emojis[0]} YOU'RE IN! {emojis[0]}
 
-Hey *{username}*! {emojis[3]}
+Hey *{username.capitalize()}*! {emojis[3]}
 
 ✅ Account created successfully!
 
-Mobile: *{format_mobile_display(mobile)}*
-Created at: {(datetime.now() + timedelta(hours=3)).strftime('%d/%m/%Y | %H:%M:%S')}
+> • Username: *{username.capitalize()}*
+> • Mobile: *{format_mobile_display(mobile)}*
+> • Created at: {(datetime.now() + timedelta(hours=3)).strftime('%d/%m/%Y | %H:%M:%S')}
 
 {emojis[1]} Ready to begin?
 {emojis[2]} Login now!
@@ -1889,14 +1889,15 @@ Created at: {(datetime.now() + timedelta(hours=3)).strftime('%d/%m/%Y | %H:%M:%S
 – LyxNexus {emojis[4]}""",
         
         # Message 3
-        f"""Greetings *{username}*! {emojis[0]}
+        f"""Greetings *{username.capitalize()}*! {emojis[0]}
 
 Welcome to LyxNexus {emojis[1]}
 
 Your learning journey starts now {emojis[2]}
 
-• Registered: *{format_mobile_display(mobile)}*
-• Created at: {(datetime.now() + timedelta(hours=3)).strftime('%d/%m/%Y | %H:%M:%S')}
+> • Username: *{username.capitalize()}*
+> • Mobile: *{format_mobile_display(mobile)}*
+> • Created at: {(datetime.now() + timedelta(hours=3)).strftime('%d/%m/%Y | %H:%M:%S')}
 🔐 Account secured
 
 {emojis[3]} Explore. Learn. Grow.

@@ -187,6 +187,7 @@
     
     .announcement-card:hover {
         transform: translateY(-3px);
+        border: 1px solid rgb(59, 131, 246);
         box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
     }
     
@@ -203,6 +204,7 @@
     
     .assignment-card:hover {
         transform: translateY(-3px);
+        border: 1px solid rgb(59, 131, 246);
         box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
     }
     
@@ -862,6 +864,7 @@
         z-index: 1001;
         transition: width 0.1s ease;
     }  
+
     .floating-dots {
         position: fixed;
         top: 0;
@@ -910,6 +913,8 @@
         border-radius: 16px;
         border: 1px solid var(--border-color);
         position: relative;
+        align-items: center;
+        justify-content: center;
         overflow: hidden;
     }
 
@@ -967,8 +972,36 @@
         .visual-content p {
             font-size: 0.8rem !important;
         }
+    } 
+
+    .view-details-btn {
+        color: #2111f9c7;
+        font-size: 0.875rem;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        cursor: pointer;
+        padding: 0.5rem 1rem;
+        border-radius: 0.375rem;
+        background-color: transparent;
+        border: 1px solid #60a5fa;
+        transition: all 0.2s;
     }
     
+    .view-details-btn:hover {
+        color: #93c5fd;
+        background-color: rgba(59, 130, 246, 0.05);
+        transform: scale(0.98);
+    }
+
+    .view-details-btn:focus {
+        outline: 2px solid #60a5fa;
+        outline-offset: 2px;
+    }
+
+    .view-details-btn:active {
+        transform: translateY(1px);
+    }
 </style>
 <body class="custom-bg">
     
@@ -1476,7 +1509,7 @@
                 <p class="mb-3 break-all hyphens-auto text-slate-300 leading-relaxed list-inside formatted-text">${displayContent}</p>
                 <div class="flex justify-between items-center">
                   <span class="text-slate-400 text-sm">By: ${announcement.author?.username || 'Unknown'}</span>
-                  <button class="view-details-btn text-blue-400 hover:text-blue-300 text-sm flex items-center gap-1">
+                  <button class="view-details-btn">
                     View Details <i class="fas fa-arrow-right text-xs"></i>
                   </button>
                 </div>
@@ -1672,7 +1705,6 @@
     })();
     </script>    
     <script>
-        // Create floating dots
         function createFloatingDots() {
             const container = document.getElementById('dots');
             const dotCount = 50;
@@ -1745,6 +1777,8 @@
             if (!header || !showcaseVisual) return;
 
             header.style.background = 'linear-gradient(135deg, #0f172a 0%, #14532d 20%, #166534 35%, #dc2626 50%, #b91c1c 65%, #0f172a 80%, #16a34a 100%)';
+            header.style.alignItems = 'center';
+            header.style.alignContent = 'center';
 
             showcaseVisual.style.cssText += `
                 position: relative;
@@ -1838,7 +1872,7 @@
                 z-index: 1;
             `;
 
-            for (let i = 0; i < 25; i++) {
+            for (let i = 0; i < 30; i++) {
                 const snowflake = document.createElement('div');
                 snowflake.innerHTML = '❄';
 
