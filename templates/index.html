@@ -22,7 +22,7 @@
     <meta name="twitter:card" content="summary" />
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="{{ url_for('static', filename='css/tailwind.min.css') }}" rel="stylesheet">
+    <link href="/static/css/tailwind.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/typed.js@2.0.12"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
@@ -846,17 +846,6 @@
         overflow: hidden;
     }
     
-    .visual-element::before {
-        content: '';
-        position: absolute;
-        top: -50%;
-        left: -50%;
-        width: 200%;
-        height: 200%;
-        background: conic-gradient(transparent, var(--accent-blue), transparent 30%);
-        animation: rotate 4s linear infinite;
-    }
-    
     @keyframes rotate {
         100% {
             transform: rotate(360deg);
@@ -1050,7 +1039,7 @@
                     <div class="showcase-visual fade-in delay-1" style="height: 300px; width: 100%; position: relative;">
                         <div class="visual-element" style="height: 100%;">
                             <div class="visual-content" style="padding: 1.5rem;" id="visual-content-cnt">
-                                <i class="fas fa-graduation-cap" style="font-size: 2.5rem; color: white; margin-bottom: 0.75rem; z-index: 4; position: relative;"></i>
+                                <i class="fas fa-graduation-cap" style="font-size: 2.5rem; color: var(--accent-blue); margin-bottom: 0.75rem; z-index: 4; position: relative;"></i>
                                 <h3 class="gradient-text font-extrabold" style="margin-bottom: 0.5rem; text-decoration: underline; text-decoration-color: #3b82f6; font-size: 1.6rem; font-weight: 800;">Live Previews</h3>
                                 <p style="color: white; font-size: 0.9rem; z-index: 4; position: relative;">Login To Experience The Full Interface</p>
                             </div>
@@ -1210,7 +1199,7 @@
                 </div>
             </div>
             <div class="mt-8 pt-8 border-t border-slate-800 text-center text-slate-500 text-sm">
-                <p>© {{ year }} LyxNexus. All rights reserved.</p>
+                <p>© 2025 LyxNexus. All rights reserved.</p>
             </div>
         </div>
     </footer>
@@ -1645,7 +1634,7 @@
           }
         });
 
-        const flashedMessages = {{ get_flashed_messages(with_categories=true) | tojson }};
+        const flashedMessages = [];
         
         document.addEventListener('DOMContentLoaded', function() {
             if (flashedMessages && flashedMessages.length > 0) {
@@ -1755,17 +1744,14 @@
             const showcaseVisual = document.querySelector('.showcase-visual');
             if (!header || !showcaseVisual) return;
 
-            // Apply Christmas gradient background to the inner container
             header.style.background = 'linear-gradient(135deg, #0f172a 0%, #14532d 20%, #166534 35%, #dc2626 50%, #b91c1c 65%, #0f172a 80%, #16a34a 100%)';
 
-            // Create Christmas border lighting effect on the outer container
             showcaseVisual.style.cssText += `
                 position: relative;
                 overflow: visible;
                 border-radius: 20px;
             `;
 
-            // Create the border lighting container
             const borderLightContainer = document.createElement('div');
             borderLightContainer.style.cssText = `
                 position: absolute;
@@ -1839,7 +1825,6 @@
 
             showcaseVisual.style.animation = 'border-pulse 3s ease-in-out infinite';
 
-            // Create snow container INSIDE the header
             const snowContainer = document.createElement('div');
             snowContainer.style.cssText = `
                 position: absolute;
@@ -1853,7 +1838,6 @@
                 z-index: 1;
             `;
 
-            // Create snowflakes (inside the header)
             for (let i = 0; i < 25; i++) {
                 const snowflake = document.createElement('div');
                 snowflake.innerHTML = '❄';
@@ -1893,7 +1877,6 @@
                 snowContainer.appendChild(snowflake);
             }
 
-            // Create floating Christmas icons (inside the header)
             const icons = ['🎄', '🎅', '🦌', '🎁', '🌟', '❄️'];
             const iconContainer = document.createElement('div');
             iconContainer.style.cssText = `
@@ -1947,7 +1930,6 @@
                 iconContainer.appendChild(icon);
             }
 
-            // Apply glow effect to gradient text
             const gradientText = header.querySelector('.gradient-text');
             if (gradientText) {
                 const textGlowStyle = document.createElement('style');
@@ -1970,14 +1952,12 @@
                 gradientText.style.zIndex = '4';
             }
 
-            // Append elements
             showcaseVisual.insertBefore(borderLightContainer, showcaseVisual.firstChild);
             header.appendChild(snowContainer);
             header.appendChild(iconContainer);
             header.style.position = 'relative';
         }
 
-        // Execute transformation
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', fullChristmasTransformation);
         } else {
