@@ -1865,7 +1865,7 @@ We're excited to welcome you! {emojis[4]}
 2. Meet peers
 3. Start learning!
 
-• https://lyxnexus.onrender.com
+• https://lyxnexus.lyxnexus.xo.je
 • Tell a friend to tell a friend. Let's Grow Together.
 Best,
 LyxNexus Team {emojis[0]}""",
@@ -1884,7 +1884,7 @@ Hey *{username.capitalize()}*! {emojis[3]}
 {emojis[1]} Ready to begin?
 {emojis[2]} Login now!
 
-• https://lyxnexus.onrender.com
+• https://lyxnexus.lyxnexus.xo.je
 • Share with friends. Let's Grow Together.
 – LyxNexus {emojis[4]}""",
         
@@ -1902,7 +1902,7 @@ Your learning journey starts now {emojis[2]}
 
 {emojis[3]} Explore. Learn. Grow.
 
-• https://lyxnexus.onrender.com
+• https://lyxnexus.lyxnexus.xo.je
 • Share with a friend with a friend. Let's Grow Together.
 LyxNexus Team {emojis[4]}"""
     ]
