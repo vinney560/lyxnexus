@@ -1857,7 +1857,7 @@ We're excited to welcome you! {emojis[4]}
 
 {emojis[1]} *Account Details:*
 • Username: {username}
-• Mobile: {format_mobile_display(mobile)}
+• Mobile: *{format_mobile_display(mobile)}*
 • Created at: {(datetime.now() + timedelta(hours=3)).strftime('%d/%m/%Y | %H:%M:%S')}
 • Status: Active {emojis[2]}
 
@@ -1874,7 +1874,7 @@ LyxNexus Team {emojis[0]}""",
         # Message 2
         f"""{emojis[0]} YOU'RE IN! {emojis[0]}
 
-Hey {username}! {emojis[3]}
+Hey *{username}*! {emojis[3]}
 
 ✅ Account created successfully!
 
