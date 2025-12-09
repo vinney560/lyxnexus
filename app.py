@@ -6209,7 +6209,7 @@ def update_announcement(id):
 
     send_notification(
         current_user.id,
-        'Editted Announcement Created',
+        'Edited Announcement Created',
         f'You created: {announcement.title}'
     )
     
