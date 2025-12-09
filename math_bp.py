@@ -16,7 +16,7 @@ API_KEYS = [
     os.getenv("GEMINI_KEY_1"),
     os.getenv("GEMINI_KEY_2")
 ]
-MODEL = "gemini-2.0-flash"
+MODEL = "gemini-robotics-er-1.5-preview"
 
 class MathAssignmentService:
     """

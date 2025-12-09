@@ -3405,7 +3405,7 @@ def call_gemini_api(prompt):
         os.getenv("GEMINI_KEY_1"),
         os.getenv("GEMINI_KEY_2")
     ]
-    MODEL = "gemini-2.0-flash-lite"
+    MODEL = "gemini-robotics-er-1.5-preview"
 
     for API_KEY in API_KEYS:
         API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/{MODEL}:generateContent?key={API_KEY}"

@@ -13,7 +13,7 @@ class QuizGenerator:
             os.getenv("GEMINI_KEY_2")
         ]
         self.current_key_index = 0
-        self.model_name = "gemini-2.5-flash-lite"
+        self.model_name = "gemini-robotics-er-1.5-preview"
         self.setup_genai()
     
     def setup_genai(self):
