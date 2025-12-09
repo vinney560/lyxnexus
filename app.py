@@ -6158,7 +6158,16 @@ def create_announcement():
         'New Announcement Created',
         f'You created: {announcement.title}'
     )
-    
+
+    # Broadcast to all users
+    socketio.emit('push_notification', {
+        'title': 'Announcement Created',
+        'message': f'announcement created: {announcement.title}',
+        'type': 'announcement',
+        'announcement_id': announcement.id,
+        'timestamp': datetime.utcnow().isoformat()
+    }) 
+
     # Prepare notification payload once
     data = {
         'title': 'New Announcement',
@@ -6168,10 +6177,7 @@ def create_announcement():
         'timestamp': datetime.utcnow().isoformat()
     }
 
-    # Broadcast via Socket.IO
-    socketio.emit('push_notification', data)
-
-    # Mirror to browser push (system notification)
+    # Mirror to browser push
     send_webpush(data)
     #whatsapp_bulk(f"New announcement: *{announcement.title}*.\n\n"
     #              f"🔗 *LyxNexus Bot*.\n\n")
@@ -6209,15 +6215,15 @@ def update_announcement(id):
     
     # Broadcast to all users
     socketio.emit('push_notification', {
-        'title': 'Announcement Editted',
-        'message': f'announcement eddited: {announcement.title}',
+        'title': 'Announcement Edited',
+        'message': f'announcement edited: {announcement.title}',
         'type': 'announcement',
         'announcement_id': announcement.id,
         'timestamp': datetime.utcnow().isoformat()
     })   
     data = {
-        'title': 'Announcement Editted',
-        'message': f'announcement eddited: {announcement.title}',
+        'title': 'Announcement Edited',
+        'message': f'announcement edited: {announcement.title}',
         'type': 'announcement', 
         'announcement_id': announcement.id,
         'timestamp': datetime.utcnow().isoformat()
