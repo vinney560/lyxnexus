@@ -553,29 +553,20 @@ from sqlalchemy import text
 """Initialize the creation of database and any SQL Operations"""
 with app.app_context():
     try:
+        # Create tables if they don't exist
         db.create_all()
-        
-        # For PostgreSQL - check if column exists
-        result = db.session.execute(text("""
-            SELECT column_name 
-            FROM information_schema.columns 
-            WHERE table_name = 'announcement' 
-            AND column_name = 'highlighted'
-        """))
-        
-        if not result.fetchone():
-            db.session.execute(text('ALTER TABLE "announcement" ADD COLUMN highlighted BOOLEAN DEFAULT FALSE'))
-            db.session.commit()
-            print("✅ Column 'highlighted' added successfully!")
-        else:
-            print("✅ Column 'highlighted' already exists")
-        
+        db.session.commit()
+        print("✅ Database tables created successfully!")
+
+        # initialize admin or other setup code
         initialize_admin_code()
+
         print("✅ Initialization Done!")
-        
+
     except Exception as e:
         db.session.rollback()
         print(f"⚠️ Database initialization error: {e}")
+
 #========================================
 #          HELPERS && BACKGROUND WORKERS
 #==========================================
@@ -6157,10 +6148,6 @@ def create_announcement():
     content = request.form.get('content')
     import json
     highlighted = json.loads(request.form.get('highlight', 'false').lower())
-    if highlighted:
-        print(f"Checked Boolean: {highlighted}")
-    else:
-        print(f"Unchecked: {highlighted}")
 
     file = request.files.get('file')
     file_name = shorten_filename_create(secure_filename(file.filename)) if file else None

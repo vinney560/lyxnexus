@@ -4299,13 +4299,14 @@
 
             const newClass = isNew ? 'new-item-highlight' : '';
 
-            const neonBorderClass = !isHighlighted && isRecent
-                ? "border-l-2 border-l-yellow-600 border-t border-t-amber-600 border-r border-r-orange-600 border-b border-b-orange-600 shadow-sm"
-                : "border border-blue-600 shadow-md";
-
-            const highlightBorder = isHighlighted
-                ? "border-2 border-t-yellow-500 border-r-orange-500 border-b-red-500 border-l-amber-500 shadow-lg shadow-orange-500/30"
-                : "border border-gray-300";
+            let borderClass;
+            if (isHighlighted) {
+                borderClass = "border-2 border-t-yellow-500 border-r-orange-500 border-b-red-500 border-l-amber-500 shadow-lg shadow-orange-500/30";
+            } else if (isRecent) {
+                borderClass = "border-l-2 border-l-yellow-600 border-t border-t-amber-600 border-r border-r-orange-600 border-b border-b-orange-600 shadow-sm";
+            } else {
+                borderClass = "border border-blue-600 shadow-md";
+            }            
             // File preview (image or link)
             let filePreview = "";
             if (announcement.has_file && announcement.file_type?.startsWith("image/")) {
@@ -4351,7 +4352,7 @@
             }
 
             return `
-                <div class="announcement-card ${neonBorderClass} ${newClass} bg-gray-900/60 rounded-2xl transition duration-200 ease-in-out overflow-hidden card-hover-lift fade-in announcement-content" data-announcement-id="${announcement.id}">
+                <div class="announcement-card ${borderClass} ${newClass} bg-gray-900/60 rounded-2xl transition duration-200 ease-in-out overflow-hidden card-hover-lift fade-in announcement-content" data-announcement-id="${announcement.id}">
                     <!-- Pin button -->
                     <button 
                         onclick="togglePin(${announcement.id})"
