@@ -1278,6 +1278,7 @@
         
           <input type="text" id="announcement-title" class="form-input" placeholder="Title" required>
           <textarea id="announcement-content" class="form-input" rows="5" placeholder="Content" required></textarea>
+          <label class="flex items-center space-x-2 cursor-pointer mb-4"><input type="checkbox" class="appearance-none w-6 h-6 border-2 border-gray-300 rounded checked:bg-green-500 checked:border-green-500 checked:bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTIiIHZpZXdCb3g9IjAgMCAxNiAxMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMSA2LjVMNS41IDEwLjVMMTUgMS41IiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjwvc3ZnPg==')] bg-center bg-no-repeat cursor-pointer transition-all duration-200 peer" id="highlight"><span class="peer-checked:line-through peer-checked:text-gray-500 peer-checked:opacity-75">Highlight</span></label>
         
           <!-- File Upload Section -->
           <div id="announcement-file-section">
@@ -1797,7 +1798,7 @@
                         <h3>No Announcements Yet</h3>
                         <p>Create your first announcement to keep everyone informed</p>
                         <button class="btn btn-success mt-4" onclick="openModal('announcement-modal')">
-                            <i class="fas fa-plus mr-2"></i> Create Announcement
+                            <i class="fas fa-plus mr-1"></i> Create Announcement
                         </button>
                     </div>
                 `;
@@ -2114,6 +2115,8 @@
 
           const t = document.getElementById('announcement-title');
           const c = document.getElementById('announcement-content');
+          const h = document.getElementById('highlight');
+          if (h) h.checked = !!item.content;
           if (t) t.value = item.title || '';
           if (c) c.value = item.content || '';
 
@@ -2168,6 +2171,7 @@
               const formData = new FormData();
               formData.append('title', document.getElementById('announcement-title')?.value || '');
               formData.append('content', document.getElementById('announcement-content')?.value || '');
+              formData.append('highlight', document.getElementById('highlight')?.checked);
             
               const fileInput = document.getElementById('announcement-file');
               if (fileInput && fileInput.files.length > 0) {
@@ -2225,6 +2229,7 @@
           currentEditingId = id;
           openModal('assignment-modal');
         }
+        
         async function deleteAssignment(id) {
           if (!confirm('Delete this assignment?')) return;
           try {

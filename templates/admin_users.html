@@ -836,6 +836,13 @@
                 <div class="quick-stat-value" id="total-activity">0</div>
                 <div class="quick-stat-label">Total Activities</div>
             </div>
+            <div class="quick-stat highlight-card">
+                <div class="stats-icon text-yellow-400">
+                    <i class="fas fa-bell"></i>
+                </div>
+                <div class="quick-stat-value" id="all-subs-users">0</div>
+                <div class="quick-stat-label">Enabled WebPush</div>
+            </div>
         </div>
 
         <!-- Online Users Panel -->
@@ -1578,6 +1585,7 @@
                 document.getElementById('online-users').textContent = stats.online_users || 0;
                 document.getElementById('avg-activity').textContent = stats.avg_activity || 0;
                 document.getElementById('total-activity').textContent = stats.total_activity || 0;
+                document.getElementById('all-subs-users').textContent = stats.total_webpush_users || 0;
             } else {
                 const totalUsers = users.length;
                 const adminUsers = users.filter(user => user.is_admin).length;

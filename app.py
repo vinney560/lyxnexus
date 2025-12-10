@@ -192,6 +192,7 @@ class Announcement(db.Model):
     title = db.Column(db.String(200), nullable=True)
     content = db.Column(db.Text, nullable=True)
     created_at = db.Column(db.DateTime, default=nairobi_time)
+    highlighted = db.Column(db.Boolean, default=False, nullable=True)
     
     #Relationships
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
@@ -554,6 +555,7 @@ with app.app_context():
     try:
         # Create tables if they don't exist
         db.create_all()
+        db.session.execute('ALTER TABLE announcement ADD COLUMN highlighted BOOLEAN DEFAULT FALSE')
         db.session.commit()
         print("✅ Database tables created successfully!")
 
@@ -5212,12 +5214,11 @@ def get_message_replies(message_id):
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
-#=========Handle Private Room
+#========= Handle Private Room
 #=======================
 import hashlib
 import secrets
 
-# Simple in-memory storage for private rooms (replace with database in production)
 private_rooms = {}
 
 @app.route('/api/private-rooms/create', methods=['POST'])
@@ -5967,6 +5968,14 @@ def get_user_statistics():
             (db.func.count(Announcement.id) + db.func.count(Assignment.id)) <= 3
         ).count()
     }
+
+    subs = len(
+        PushSubscription.query
+        .join(User)
+        .filter(User.status == True)
+        .all()
+    )
+
     
     return {
         'total_users': total_users,
@@ -5982,7 +5991,8 @@ def get_user_statistics():
         'role_distribution': {
             'admins': admin_users,
             'regular_users': regular_users
-        }
+        },
+        'total_webpush_users': subs
     }
 
 @app.route('/api/users/<int:user_id>/delete', methods=['POST'])
@@ -6110,6 +6120,7 @@ def get_announcements():
             'id': a.id,
             'title': a.title,
             'content': a.content,
+            'highlighted': a.highlighted,
             'created_at': a.created_at.isoformat(),
             'author': {'id': a.author.id, 'username': a.author.username} if a.author else None,
             'has_file': a.has_file(),
@@ -6136,6 +6147,12 @@ def create_announcement():
 
     title = request.form.get('title')
     content = request.form.get('content')
+    import json
+    highlighted = json.loads(request.form.get('highlight', 'false').lower())
+    if highlighted:
+        print(f"Checked Boolean: {highlighted}")
+    else:
+        print(f"Unchecked: {highlighted}")
 
     file = request.files.get('file')
     file_name = shorten_filename_create(secure_filename(file.filename)) if file else None
@@ -6145,6 +6162,7 @@ def create_announcement():
     announcement = Announcement(
         title=title,
         content=content,
+        highlighted=highlighted,
         user_id=current_user.id,
         file_name=file_name,
         file_type=file_type,

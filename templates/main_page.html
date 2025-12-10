@@ -4295,13 +4295,17 @@
             const now = new Date();
             const diffHours = (now - createdAt) / (1000 * 60 * 60);
             const isRecent = diffHours < 3;
+            const isHighlighted = Boolean(announcement.highlighted);
 
             const newClass = isNew ? 'new-item-highlight' : '';
 
-            const neonBorderClass = isRecent
+            const neonBorderClass = !isHighlighted && isRecent
                 ? "border-l-2 border-l-yellow-600 border-t border-t-amber-600 border-r border-r-orange-600 border-b border-b-orange-600 shadow-sm"
                 : "border border-blue-600 shadow-md";
 
+            const highlightBorder = isHighlighted
+                ? "border-2 border-t-yellow-500 border-r-orange-500 border-b-red-500 border-l-amber-500 shadow-lg shadow-orange-500/30"
+                : "border border-gray-300";
             // File preview (image or link)
             let filePreview = "";
             if (announcement.has_file && announcement.file_type?.startsWith("image/")) {
