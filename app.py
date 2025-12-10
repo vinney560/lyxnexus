@@ -564,7 +564,7 @@ with app.app_context():
         """))
         
         if not result.fetchone():
-            db.session.execute(text('ALTER TABLE announcement ADD COLUMN highlighted BOOLEAN DEFAULT FALSE'))
+            db.session.execute(text('ALTER TABLE "announcement" ADD COLUMN highlighted BOOLEAN DEFAULT FALSE'))
             db.session.commit()
             print("✅ Column 'highlighted' added successfully!")
         else:
