@@ -553,21 +553,29 @@ from sqlalchemy import text
 """Initialize the creation of database and any SQL Operations"""
 with app.app_context():
     try:
-        # Create tables if they don't exist
         db.create_all()
-        db.session.execute('ALTER TABLE announcement ADD COLUMN highlighted BOOLEAN DEFAULT FALSE')
-        db.session.commit()
-        print("✅ Database tables created successfully!")
-
-        # initialize admin or other setup code
+        
+        # For PostgreSQL - check if column exists
+        result = db.session.execute(text("""
+            SELECT column_name 
+            FROM information_schema.columns 
+            WHERE table_name = 'announcement' 
+            AND column_name = 'highlighted'
+        """))
+        
+        if not result.fetchone():
+            db.session.execute(text('ALTER TABLE announcement ADD COLUMN highlighted BOOLEAN DEFAULT FALSE'))
+            db.session.commit()
+            print("✅ Column 'highlighted' added successfully!")
+        else:
+            print("✅ Column 'highlighted' already exists")
+        
         initialize_admin_code()
-
         print("✅ Initialization Done!")
-
+        
     except Exception as e:
         db.session.rollback()
         print(f"⚠️ Database initialization error: {e}")
-
 #========================================
 #          HELPERS && BACKGROUND WORKERS
 #==========================================
@@ -6214,9 +6222,15 @@ def update_announcement(id):
     title = request.form.get('title', announcement.title)
     content = request.form.get('content', announcement.content)
     file = request.files.get('file')
+    highlighted = json.loads(request.form.get('highlight', 'false').lower())
+    if highlighted:
+        print(f"Checked Boolean: {highlighted}")
+    else:
+        print(f"Unchecked: {highlighted}")
 
     announcement.title = title
     announcement.content = content
+    announcement.highlighted = highlighted
 
     if file:
         announcement.file_name = shorten_filename_create(secure_filename(file.filename))
