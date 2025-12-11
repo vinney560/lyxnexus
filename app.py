@@ -176,7 +176,7 @@ class User(db.Model, UserMixin):
                                   backref='creator', 
                                   lazy=True)
     specific_notifications = db.relationship('NotificationSpecificUser', 
-                                           backref='notification_user', 
+                                           backref='notification_user',
                                            lazy=True,
                                            cascade='all, delete-orphan')
     
@@ -270,7 +270,7 @@ class Timetable(db.Model):
     topic_id = db.Column(db.Integer, db.ForeignKey('topic.id'), nullable=True)
     
     # Relationship
-    topic = db.relationship('Topic', backref='timetable_slots', lazy=True, cascade='all, delete-orphan')
+    topic = db.relationship('Topic', backref='timetable_slots', lazy=True)
 
 # =========================================
 # MESSAGE MODELS
@@ -349,7 +349,7 @@ class File(db.Model):
     uploaded_by = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     
     # Relationships
-    uploader = db.relationship('User', backref=db.backref('uploaded_files', lazy=True, cascade='all, delete-orphan'))
+    uploader = db.relationship('User', backref=db.backref('uploaded_files', lazy=True))
     
     def __repr__(self):
         return f'<File {self.name}>'
@@ -364,8 +364,8 @@ class TopicMaterial(db.Model):
     created_at = db.Column(db.DateTime, default=nairobi_time)
     
     # Relationships
-    topic = db.relationship('Topic', backref=db.backref('topic_materials', lazy=True, cascade='all, delete-orphan'))
-    file = db.relationship('File', backref=db.backref('material_references', lazy=True, cascade='all, delete-orphan'))
+    topic = db.relationship('Topic', backref=db.backref('topic_materials', lazy=True))
+    file = db.relationship('File', backref=db.backref('material_references', lazy=True))
     
     def __repr__(self):
         return f'<TopicMaterial {self.display_name or self.file.name}>'
