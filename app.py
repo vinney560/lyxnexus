@@ -176,15 +176,14 @@ class User(db.Model, UserMixin):
                                   backref='creator', 
                                   lazy=True)
     specific_notifications = db.relationship('NotificationSpecificUser', 
-                                           backref='user', 
+                                           backref='notification_user', 
                                            lazy=True,
                                            cascade='all, delete-orphan')
     
     notifications = db.relationship('UserNotification', 
-                                   backref='notification_user', 
+                                   backref='notification_recipient',
                                    lazy=True,
                                    cascade='all, delete-orphan')
-    
     def validate_mobile(self, mobile):
         """Validate mobile number format"""
         if not mobile:
