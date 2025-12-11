@@ -767,7 +767,7 @@ def keep_databases_alive():
 scheduler = BackgroundScheduler()
 scheduler.add_job(
     func=keep_databases_alive,
-    trigger=IntervalTrigger(minutes=3),
+    trigger=IntervalTrigger(hours=12),
     id="db_keep_alive_both",
     replace_existing=True
 )
