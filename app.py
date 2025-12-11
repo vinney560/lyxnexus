@@ -169,9 +169,22 @@ class User(db.Model, UserMixin):
     status = db.Column(db.Boolean, default=True, nullable=True)
 
     # Relationships
-    announcements = db.relationship('Announcement', backref='author', lazy=True)
-    assignments = db.relationship('Assignment', backref='creator', lazy=True)
-
+    announcements = db.relationship('Announcement', 
+                                    backref='author', 
+                                    lazy=True)
+    assignments = db.relationship('Assignment', 
+                                  backref='creator', 
+                                  lazy=True)
+    specific_notifications = db.relationship('NotificationSpecificUser', 
+                                           backref='user', 
+                                           lazy=True,
+                                           cascade='all, delete-orphan')
+    
+    notifications = db.relationship('UserNotification', 
+                                   backref='user', 
+                                   lazy=True,
+                                   cascade='all, delete-orphan')
+    
     def validate_mobile(self, mobile):
         """Validate mobile number format"""
         if not mobile:
@@ -508,7 +521,7 @@ class Notification(db.Model):
     expires_at = db.Column(db.DateTime, nullable=True)
     
     # Relationships
-    user_notifications = db.relationship('UserNotification', backref='notification', lazy=True, cascade='all, delete-orphan') # I think for easy deletion, no errors
+    user_notifications = db.relationship('UserNotification', backref='notification', lazy=True, cascade='all, delete-orphan')
     specific_users = db.relationship('NotificationSpecificUser', backref='notification', lazy=True, cascade='all, delete-orphan')
 
 class NotificationSpecificUser(db.Model):
@@ -517,7 +530,7 @@ class NotificationSpecificUser(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     
     # Relationship
-    user = db.relationship('User', backref='specific_notifications')
+    user = db.relationship('User', backref='specific_notifications', lazy=True, cascade='all, delete-orphan')
 
 class UserNotification(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -528,7 +541,7 @@ class UserNotification(db.Model):
     created_at = db.Column(db.DateTime, default=nairobi_time)
     
     # Relationship
-    user = db.relationship('User', backref='notifications')
+    user = db.relationship('User', backref='notifications', lazy=True, cascade='all, delete-orphan')
 #===============================================
 
 # Master key for Admin Access  
