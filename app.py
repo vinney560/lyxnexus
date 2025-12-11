@@ -175,15 +175,6 @@ class User(db.Model, UserMixin):
     assignments = db.relationship('Assignment', 
                                   backref='creator', 
                                   lazy=True)
-    specific_notifications = db.relationship('NotificationSpecificUser', 
-                                           backref='notification_user',
-                                           lazy=True,
-                                           cascade='all, delete-orphan')
-    
-    notifications = db.relationship('UserNotification', 
-                                   backref='notification_recipient',
-                                   lazy=True,
-                                   cascade='all, delete-orphan')
     def validate_mobile(self, mobile):
         """Validate mobile number format"""
         if not mobile:
@@ -6088,8 +6079,14 @@ def delete_user(user_id):
         db.session.query(UserActivity).filter_by(user_id=user.id).delete(synchronize_session=False)
         db.session.query(AdminCode).filter_by(user_id=user.id).delete(synchronize_session=False)
 
+        # =========================
+        # 9. Delete Notification Link
+        # =========================
+        db.session.query(NotificationSpecificUser).filter_by(user_id=user_id).delete(synchronize_session=False)
+        db.session.query(UserNotification).filter_by(user_id=user_id).delete(synchronize_session=False)
+            
         # =============================
-        # 9️. Finally delete the user 😤
+        # 10. Finally delete the user 😤
         # =============================
         db.session.delete(user)
         db.session.commit()
