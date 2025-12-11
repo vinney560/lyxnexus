@@ -520,7 +520,7 @@ class NotificationSpecificUser(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     
     # Relationship
-    user = db.relationship('User', backref='specific_notifications', lazy=True, cascade='all, delete-orphan')
+    user = db.relationship('User', backref='specific_notifications', lazy=True)
 
 class UserNotification(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -531,7 +531,7 @@ class UserNotification(db.Model):
     created_at = db.Column(db.DateTime, default=nairobi_time)
     
     # Relationship
-    user = db.relationship('User', backref='notifications', lazy=True, cascade='all, delete-orphan')
+    user = db.relationship('User', backref='notifications', lazy=True)
 #===============================================
 
 # Master key for Admin Access  
@@ -6079,15 +6079,15 @@ def delete_user(user_id):
         db.session.query(UserActivity).filter_by(user_id=user.id).delete(synchronize_session=False)
         db.session.query(AdminCode).filter_by(user_id=user.id).delete(synchronize_session=False)
 
-        # =========================
+        # ===========================
         # 9. Delete Notification Link
-        # =========================
+        # ===========================
         db.session.query(NotificationSpecificUser).filter_by(user_id=user_id).delete(synchronize_session=False)
         db.session.query(UserNotification).filter_by(user_id=user_id).delete(synchronize_session=False)
             
-        # =============================
+        # ===============================
         # 10. Finally delete the user 😤
-        # =============================
+        # ===============================
         db.session.delete(user)
         db.session.commit()
 
