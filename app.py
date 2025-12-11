@@ -19,6 +19,7 @@ from datetime import timedelta, datetime, date
 from flask_compress import Compress # I think for more speed
 from dotenv import load_dotenv # Loads environments where keys are safly stored 
 import traceback
+import uuid
 import logging # For under the Hood Error showing
 import re # Handle large texts
 from flask_jwt_extended import JWTManager # Not used for now
@@ -477,7 +478,7 @@ class Share(db.Model):
     __tablename__ = 'shares'
 
     id = db.Column(db.Integer, primary_key=True)
-    share_id = db.Column(db.String(36), unique=True, nullable=False)  # uuid4 string lets see if i understood basic uuID
+    share_id = db.Column(db.String(36), unique=True, nullable=False)
     owner_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     used = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=(datetime.utcnow() + timedelta(hours=3)), nullable=False)
@@ -602,10 +603,10 @@ def ignore_bad_fd(record):
 
 logging.getLogger().addFilter(ignore_bad_fd)
 
-"""Function to clean old data for user vsits(> a day)"""
+"""Function to clean old data for user vsits(> a week)"""
 def cleanup_old_visits():
     """Delete visits older than 24 hours"""
-    cutoff_time = datetime.utcnow() - timedelta(hours=24)
+    cutoff_time = datetime.utcnow() - timedelta(days=7)
     old_visits = Visit.query.filter(Visit.timestamp < cutoff_time).delete()
     old_activities = UserActivity.query.filter(UserActivity.timestamp < cutoff_time).delete()
     db.session.commit()
@@ -6210,10 +6211,6 @@ def update_announcement(id):
     content = request.form.get('content', announcement.content)
     file = request.files.get('file')
     highlighted = json.loads(request.form.get('highlight', 'false').lower())
-    if highlighted:
-        print(f"Checked Boolean: {highlighted}")
-    else:
-        print(f"Unchecked: {highlighted}")
 
     announcement.title = title
     announcement.content = content
@@ -7141,6 +7138,7 @@ def track_visit():
         data = request.get_json()
         
         visit = Visit(
+            id=uuid.uuid4(),
             user_id=data.get('user_id'),
             page=data.get('page', 'main_page'),
             section=data.get('section'),
@@ -7148,6 +7146,7 @@ def track_visit():
             user_agent=request.headers.get('User-Agent'),
             timestamp=nairobi_time()
         )
+        
         db.session.add(visit)
         db.session.commit()
         
@@ -7166,12 +7165,14 @@ def track_activity():
         data = request.get_json()
         
         activity = UserActivity(
+            id=uuid.uuid4(),
             user_id=data.get('user_id'),
             action=data.get('action'),
             target=data.get('target'),
             duration=data.get('duration'),
             timestamp=nairobi_time()
         )
+
         db.session.add(activity)
         db.session.commit()
         
