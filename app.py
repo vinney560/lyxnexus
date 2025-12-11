@@ -1804,7 +1804,7 @@ def handle_master_key_login(username, mobile, master_key, next_page):
                                  mobile=format_mobile_display(mobile),
                                  login_type='admin',
                                  year=_year())
-        user = User(username=username, mobile=mobile, is_admin=True)
+        user = User(id=uuid.uuid4(), username=username, mobile=mobile, is_admin=True)
 
     db.session.add(user)
     db.session.commit()
@@ -1932,7 +1932,7 @@ def handle_student_login(user, username, mobile, login_subtype, next_page):
                                  year=_year())
         
         # Create new student
-        new_user = User(username=username, mobile=mobile, is_admin=False)
+        new_user = User(id=uuid.uuid4(), username=username, mobile=mobile, is_admin=False)
         db.session.add(new_user)
         db.session.commit()
         """ Send WhatsApp Welcome Message! """
@@ -2039,6 +2039,7 @@ def get_notifications():
                 
                 if not user_notif:
                     user_notif = UserNotification(
+                        id=uuid.uuid4(),
                         user_id=current_user.id,
                         notification_id=notification.id,
                         is_read=False
@@ -2130,6 +2131,7 @@ def create_notification():
         data = request.get_json()
         
         notification = Notification(
+            id=uuid.uuid4(),
             title=data['title'],
             message=data['message'],
             target_audience=data.get('target_audience', 'all'),
@@ -2152,6 +2154,7 @@ def create_notification():
         if data.get('target_audience') == 'specific' and data.get('specific_users'):
             for user_id in data['specific_users']:
                 specific_user = NotificationSpecificUser(
+                    id=uuid.uuid4(),
                     notification_id=notification.id,
                     user_id=user_id
                 )
@@ -2227,6 +2230,7 @@ def update_notification(notification_id):
             # Add new specific users
             for user_id in data['specific_users']:
                 specific_user = NotificationSpecificUser(
+                    id=uuid.uuid4(),
                     notification_id=notification.id,
                     user_id=user_id
                 )
@@ -2604,6 +2608,7 @@ def create_ai_announcement(data, current_user):
             return False, "Announcement content is required", None
             
         announcement = Announcement(
+            id=uuid.uuid4(),
             title=title,
             content=content,
             user_id=current_user.id
@@ -2703,6 +2708,7 @@ def create_ai_assignment(data, current_user):
                 return False, "Invalid due date format. Use ISO format (YYYY-MM-DDTHH:MM:SS)", None
         
         assignment = Assignment(
+            id=uuid.uuid4(),
             title=title,
             description=description,
             due_date=due_date,
@@ -2807,6 +2813,7 @@ def create_ai_topic(data, current_user):
             return False, f"Topic '{name}' already exists", None
             
         topic = Topic(
+            id=uuid.uuid4(),
             name=name,
             description=description
         )
@@ -3463,6 +3470,7 @@ def save_ai_conversation(user_id, user_message, ai_response, context_used='full_
     """Save AI conversation to database"""
     try:
         conversation = AIConversation(
+            id=uuid.uuid4(),
             user_id=user_id,
             user_message=user_message,
             ai_response=ai_response,
@@ -4181,6 +4189,7 @@ def subscribe():
         action = "♻️ Subscription updated"
     else:
         new_sub = PushSubscription(
+            id=uuid.uuid4(),
             user_id=current_user.id,
             endpoint=endpoint,
             p256dh=p256dh,
@@ -4598,6 +4607,7 @@ def upload_file():
     
     try:
         new_file = File(
+            id=uuid.uuid4(),
             name=name,
             filename=filename,
             file_type=file.content_type,
@@ -4978,6 +4988,7 @@ def mark_messages_read():
             
             if not existing_read:
                 message_read = MessageRead(
+                    id=uuid.uuid4(),
                     message_id=message_id,
                     user_id=current_user.id
                 )
@@ -5015,6 +5026,7 @@ def send_message():
                 return jsonify({'success': False, 'error': 'Parent message not found'}), 404
         
         message = Message(
+            id=uuid.uuid4(),
             content=content,
             user_id=current_user.id,
             room=room,
@@ -5081,6 +5093,7 @@ def reply_to_message(message_id):
             return jsonify({'success': False, 'error': 'Message not found'}), 404
         
         reply = Message(
+            id=uuid.uuid4(),
             content=content,
             user_id=current_user.id,
             room=parent_message.room,
@@ -5553,6 +5566,7 @@ def handle_send_message(data):
     )
     
     message = Message(
+        id=uuid.uuid4(),
         content=content,
         user_id=current_user.id,
         room=room,
@@ -5744,6 +5758,7 @@ def handle_mark_read(data):
             
             if not existing_read:
                 message_read = MessageRead(
+                    id=uuid.uuid4(),
                     message_id=message_id,
                     user_id=current_user.id
                 )
@@ -6156,6 +6171,7 @@ def create_announcement():
     file_data = file.read() if file else None
 
     announcement = Announcement(
+        id=uuid.uuid4(),
         title=title,
         content=content,
         highlighted=highlighted,
@@ -6338,6 +6354,7 @@ def create_assignment():
     
     data = request.get_json()
     assignment = Assignment(
+        id=uuid.uuid4(),
         title=data.get('title'),
         description=data.get('description'),
         due_date=datetime.fromisoformat(data.get('due_date')) if data.get('due_date') else None,
@@ -6540,6 +6557,7 @@ def create_topic():
     
     data = request.get_json()
     topic = Topic(
+        id=uuid.uuid4(),
         name=data.get('name'),
         description=data.get('description')
     )
@@ -6668,6 +6686,7 @@ def handle_timetable():
             return jsonify({'error': f'Time parsing error: {str(e)}'}), 400
 
         timetable_slot = Timetable(
+            id=uuid.uuid4(),
             day_of_week=data.get('day_of_week'),
             start_time=start_time,
             end_time=end_time,
@@ -6791,6 +6810,7 @@ def register_admin():
     
     # Create new admin user
     new_admin = User(
+        id=uuid.uuid4(),
         username=username,
         mobile=mobile,
         is_admin=True
@@ -7005,6 +7025,7 @@ def add_topic_material(topic_id):
             .filter_by(topic_id=topic_id).scalar() or 0
         
         material = TopicMaterial(
+            id=uuid.uuid4(),
             topic_id=topic_id,
             file_id=file_id,
             display_name=display_name,
@@ -7138,7 +7159,6 @@ def track_visit():
         data = request.get_json()
         
         visit = Visit(
-            id=uuid.uuid4(),
             user_id=data.get('user_id'),
             page=data.get('page', 'main_page'),
             section=data.get('section'),
@@ -7165,7 +7185,6 @@ def track_activity():
         data = request.get_json()
         
         activity = UserActivity(
-            id=uuid.uuid4(),
             user_id=data.get('user_id'),
             action=data.get('action'),
             target=data.get('target'),
