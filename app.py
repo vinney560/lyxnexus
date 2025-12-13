@@ -2816,7 +2816,6 @@ def create_ai_topic(data, current_user):
             return False, f"Topic '{name}' already exists", None
             
         topic = Topic(
-            
             name=name,
             description=description
         )

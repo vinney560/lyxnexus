@@ -480,6 +480,61 @@
         display: none;
     }
 
+    .mobile-nav-badge {
+        position: absolute;
+        top: 2px;
+        right: 2px;
+        background: linear-gradient(135deg, #EF4444, #DC2626);
+        color: white;
+        font-size: 9px;
+        font-weight: bold;
+        min-width: 16px;
+        height: 16px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 4px;
+        border: 2px solid rgba(30, 30, 40, 0.9);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        z-index: 10;
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0% {
+            transform: scale(1);
+            box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+        }
+        70% {
+            transform: scale(1);
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0);
+        }
+        100% {
+            transform: scale(1);
+            box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+        }
+    }
+
+    .mobile-nav-btn.active .mobile-nav-badge {
+        border-color: rgba(59, 130, 246, 0.1);
+        animation: none;
+    }
+
+    .mobile-nav-badge.hidden {
+        display: none;
+    }
+
+    .mobile-nav-badge.small-text {
+        font-size: 8px;
+        padding: 0 3px;
+    }
+
+    .mobile-nav-badge.tiny-text {
+        font-size: 7px;
+        padding: 0 2px;
+    }
+
     @media (max-width: 768px) {
         header {
             display: none;
@@ -1963,7 +2018,8 @@
             <button class="mobile-nav-btn" onclick="location.href='/messages'" id="mobile-messages">
                 <i class="fas fa-comments text-green-500"></i>
                 <span>Chats</span>
-            </button>
+                <span class="mobile-nav-badge hidden" id="chat-badge">0</span>
+            </button>            
             <button class="mobile-nav-btn" onclick="location.href='/terms'" id="mobile-terms">
                 <i class="fas fa-file-contract"></i>
                 <span>Terms</span>
@@ -2139,6 +2195,116 @@
                 return text; // fallback
             }
         }
+
+        class ChatBadge {
+            constructor() {
+                this.badgeElement = document.getElementById('chat-badge');
+                this.buttonElement = document.getElementById('mobile-messages');
+                this.unreadCount = 0;
+                this.maxCount = 20;
+
+                this.init();
+            }
+
+            init() {
+                this.updateBadge(this.getRandomCount());
+                window.addEventListener('load', () => {
+                    this.updateBadge(this.getRandomCount());
+                });
+
+                this.setupMockUpdates();
+                this.setupClickHandler();
+            }
+
+            getRandomCount() {
+                return Math.floor(Math.random() * this.maxCount) + 1;
+            }
+
+            updateBadge(count) {
+                this.unreadCount = count;
+                this.badgeElement.textContent = count > 99 ? '99+' : count;
+
+                if (count > 0) {
+                    this.badgeElement.classList.remove('hidden');
+                    this.badgeElement.classList.remove('small-text', 'tiny-text');
+                    if (count > 9 && count <= 99) {
+                        this.badgeElement.classList.add('small-text');
+                    } else if (count > 99) {
+                        this.badgeElement.classList.add('tiny-text');
+                    }
+                } else {
+                    this.badgeElement.classList.add('hidden');
+                }
+
+                const messageText = count === 1 ? '1 unread message' : `${count} unread messages`;
+                this.buttonElement.setAttribute('title', `Chats - ${messageText}`);
+            }
+
+            incrementBadge() {
+                const newCount = Math.min(this.unreadCount + 1, 99);
+                this.updateBadge(newCount);
+            }
+
+            decrementBadge() {
+                const newCount = Math.max(this.unreadCount - 1, 0);
+                this.updateBadge(newCount);
+            }
+
+            clearBadge() {
+                this.updateBadge(0);
+            }
+
+            setupClickHandler() {
+                this.buttonElement.addEventListener('click', (e) => {
+                    this.clearBadge();
+                    this.badgeElement.style.animation = 'none';
+
+                    setTimeout(() => {
+                        this.badgeElement.style.animation = 'pulse 2s infinite';
+                    }, 2000);
+                });
+            }
+
+            setupMockUpdates() {
+                setInterval(() => {
+                    if (Math.random() > 0.7) { // 30% chance of new message
+                        const newMessages = Math.floor(Math.random() * 3) + 1;
+                        this.updateBadge(this.unreadCount + newMessages);
+
+                        this.animateNewMessage();
+                    }
+                }, 10000);
+
+                setInterval(() => {
+                    if (this.unreadCount > 0 && Math.random() > 0.8) {
+                        const readMessages = Math.floor(Math.random() * Math.min(3, this.unreadCount)) + 1;
+                        this.updateBadge(Math.max(0, this.unreadCount - readMessages));
+                    }
+                }, 7000);
+            }
+
+            animateNewMessage() {
+                this.badgeElement.style.transform = 'scale(1.3)';
+                this.badgeElement.style.transition = 'transform 0.2s ease';
+
+                setTimeout(() => {
+                    this.badgeElement.style.transform = 'scale(1)';
+                }, 200);
+            }
+
+            setCount(count) {
+                const validCount = Math.max(0, Math.min(count, 99));
+                this.updateBadge(validCount);
+            }
+
+            getCount() {
+                return this.unreadCount;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            window.chatBadge = new ChatBadge();
+        });
     </script>
     <script>
         window.currentUserId = {{ current_user.id }};
