@@ -365,7 +365,7 @@
                                       target.getAttribute('href')?.startsWith('javascript:') ||
                                       target.getAttribute('href')?.startsWith('mailto:') ||
                                       target.hasAttribute('onclick') || 
-                                      target.getAttribute('onclick')?.includes('window.location.href')||
+                                      target.getAttribute('onclick')?.includes('window.location.href') ||
                                       target.getAttribute('href')?.startsWith('tel:');
                     
                     if (!isSamePage && !isExternal) {
