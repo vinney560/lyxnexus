@@ -2727,7 +2727,10 @@
                             notification.unread = false;
                         });
                         this.unreadCount = 0;
-
+                        if (this.markAllReadBtn) {
+                            this.markAllReadBtn.disabled = true;
+                            this.markAllReadBtn.classList.add('opacity-60', 'cursor-not-allowed');
+                        }
                         this.renderNotifications();
                         this.updateNotificationBadge();
 
