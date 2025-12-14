@@ -919,6 +919,17 @@
         overflow: hidden;
     }
 
+    .visual-element::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: conic-gradient(transparent, var(--accent-blue), transparent 30%);
+        animation: rotate 4s linear infinite;
+    }
+
     .showcase-visual {
         border-radius: 20px;
         position: relative;
@@ -1070,11 +1081,11 @@
                 </div>
 
                 <div class="w-full lg:w-1/2 order-2 lg:order-2">
-                    <div class="showcase-visual fade-in delay-1" style="height: 300px; width: 100%; position: relative;">
+                    <div class="showcase-visual fade-in delay-1" style="height: 300px; width: 100%;">
                         <div class="visual-element" style="height: 100%;">
                             <div class="visual-content" style="padding: 1.5rem;" id="visual-content-cnt">
-                                <i class="fas fa-graduation-cap" style="font-size: 2.5rem; color: var(--accent-blue); margin-bottom: 0.75rem; z-index: 4; position: relative;"></i>
-                                <h3 class="gradient-text font-extrabold" style="margin-bottom: 0.5rem; text-decoration: underline; text-decoration-color: #3b82f6; font-size: 1.6rem; font-weight: 800;">Live Previews</h3>
+                                <i class="fas fa-graduation-cap" style="font-size: 2.5rem; color: var(--accent-blue); margin-bottom: 0.75rem;"></i>
+                                <h3 class="gradient-text font-extrabold" style="margin-bottom: 0.5rem; text-decoration: underline; text-decoration-color: #3b82f6; font-size: 1.6rem; font-weight: 800; z-index: 4; position: relative;">Live Previews</h3>
                                 <p style="color: white; font-size: 0.9rem; z-index: 4; position: relative;">Login To Experience The Full Interface</p>
                             </div>
                         </div>
