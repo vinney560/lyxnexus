@@ -728,6 +728,7 @@ def clone_db_route():
 
 SRC_DB_URL = os.getenv("DATABASE_URL")
 TGT_DB_URL = os.getenv("DATABASE_URL_2")
+VTV_DB_URL = os.getenv("VTV_DATABASE_URL")
 
 src_engine = create_engine(
     SRC_DB_URL,
@@ -736,6 +737,12 @@ src_engine = create_engine(
 )
 tgt_engine = create_engine(
     TGT_DB_URL,
+    pool_pre_ping=True,
+    connect_args={"connect_timeout": 5}
+)
+
+vtv_engine = create_engine(
+    VTV_DB_URL,
     pool_pre_ping=True,
     connect_args={"connect_timeout": 5}
 )
@@ -753,7 +760,7 @@ def log_status(message: str):
 
 """ACtual Funtion To be Called"""
 def keep_databases_alive():
-    for name, engine in [("Source", src_engine), ("Target", tgt_engine)]:
+    for name, engine in [("Source", src_engine), ("Target", tgt_engine), ("ViewTv", vtv_engine)]:
         try:
             with engine.connect() as conn:
                 conn.execute(text("SELECT 1"))

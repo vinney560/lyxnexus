@@ -20,7 +20,7 @@ target_urls = [
     't-give-3.onrender.com/home',
     'lyxnexus.xo.je',
     'lyxnexus.lyxnexus.xo.je',
-    'viewtv.viewtv.gt.tc'
+    'viewtv.viewtv.gt.tc/home_2'
 ]
 
 def ping_urls():
