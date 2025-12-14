@@ -2629,9 +2629,20 @@
                             <p class="text-sm mt-2">We'll notify you when there's something new</p>
                         </div>
                     `;
+                    
+                    if (this.markAllReadBtn) {
+                        this.markAllReadBtn.disabled = true;
+                        this.markAllReadBtn.classList.add('opacity-60', 'cursor-not-allowed');
+                        this.markAllReadBtn.classList.add('text-gray-400');
+                    }
                     return;
                 }
-            
+
+                if (this.markAllReadBtn) {
+                    this.markAllReadBtn.disabled = false;
+                    this.markAllReadBtn.classList.remove('opacity-60', 'cursor-not-allowed', 'text-gray-400');
+                }
+ 
                 const notificationsHTML = this.notifications.map(notification => `
                     <div class="notification-item ${notification.unread ? 'unread' : ''}">
                         ${notification.unread ? '<div class="notification-badge">!</div>' : ''}

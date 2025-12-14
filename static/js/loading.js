@@ -355,27 +355,38 @@
         document.addEventListener('click', (e) => {
             let target = e.target;
             
-            // Find parent link if clicked element is inside a link
             while (target && target !== document) {
+                // Handle anchor tags
                 if (target.tagName === 'A' && target.href) {
-                    // Check if it's an external link or same-page anchor
-                    const isSamePage = target.getAttribute('href')?.startsWith('#');
-                    const isExternal = target.target === '_blank' || 
-                                      target.hasAttribute('download') ||
-                                      target.getAttribute('href')?.startsWith('javascript:') ||
-                                      target.getAttribute('href')?.startsWith('mailto:') ||
-                                      target.hasAttribute('onclick') || 
-                                      target.getAttribute('onclick')?.includes('window.location.href') ||
-                                      target.getAttribute('href')?.startsWith('tel:');
-                    
-                    if (!isSamePage && !isExternal) {
-                        // Show loader for navigation
+                    const href = target.getAttribute('href');
+                    const isSamePage = href?.startsWith('#');
+                    const isExternalUrl = href?.startsWith('http') && !href.startsWith(window.location.origin);
+
+                    const isExternal = 
+                        target.target === '_blank' || 
+                        target.hasAttribute('download') ||
+                        href?.startsWith('javascript:') ||
+                        href?.startsWith('mailto:') ||
+                        href?.startsWith('tel:') ||
+                        isExternalUrl;
+                
+                    if (!isSamePage && !isExternal && !isExternalUrl) {
                         showLoader('Navigating...');
                     }
                     break;
                 }
+
+                // Handle buttons with onclick navigation
+                if (target.tagName === 'BUTTON') {
+                    const onclick = target.getAttribute('onclick');
+                    if (onclick?.includes('window.location.href')) {
+                        showLoader('Navigating...');
+                        break;
+                    }
+                }
+
                 target = target.parentNode;
-            }
+            }            
         });
     }
     
