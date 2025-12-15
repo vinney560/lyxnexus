@@ -379,7 +379,7 @@
                 // Handle buttons with onclick navigation
                 if (target.tagName === 'BUTTON') {
                     const onclick = target.getAttribute('onclick');
-                    if (onclick?.includes('window.location.href')) {
+                    if (onclick?.includes('window.location.href') || onclick?.includes('location.href')) {
                         showLoader('Navigating...');
                         break;
                     }
