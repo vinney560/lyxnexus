@@ -4646,6 +4646,103 @@ def upload_file():
         print(f'Error Saving Files: {e}')
         return jsonify({'error': 'Failed to upload file'}), 500
 
+@app.route('/api/files/upload-multiple', methods=['POST'])
+@login_required
+@admin_required
+def upload_multiple_files():
+    """Upload multiple files at once"""
+    if 'files' not in request.files:
+        return jsonify({'error': 'No files provided'}), 400
+    
+    files = request.files.getlist('files')
+    if len(files) == 0 or (len(files) == 1 and files[0].filename == ''):
+        return jsonify({'error': 'No files selected'}), 400
+    
+    name = request.form.get('name', '')
+    description = request.form.get('description', '')[:12000]
+    category = request.form.get('category', 'general')
+    
+    uploaded = 0
+    failed = 0
+    errors = []
+    uploaded_files = []
+    
+    # Process each file
+    for file in files:
+        try:
+            if file.filename == '':
+                failed += 1
+                errors.append('Empty filename in one of the files')
+                continue
+            
+            # Validate individual file size (10MB limit)
+            file_data = file.read()
+            file.seek(0)  # Reset file pointer for next read
+            
+            if len(file_data) > 10 * 1024 * 1024:
+                failed += 1
+                errors.append(f'{file.filename}: File size exceeds 10MB limit')
+                continue
+            
+            # Check for duplicates
+            existing_file = File.query.filter_by(filename=file.filename).first()
+            if existing_file:
+                failed += 1
+                errors.append(f'{file.filename}: A file with this name already exists')
+                continue
+            
+            # Use custom name or filename
+            file_name = name if name and len(files) == 1 else file.filename
+            filename = shorten_filename(file.filename)
+            
+            # Create file record
+            new_file = File(
+                name=file_name[:100],
+                filename=filename,
+                file_type=file.content_type,
+                file_size=len(file_data),
+                file_data=file_data,
+                description=description,
+                category=category,
+                uploaded_by=current_user.id
+            )
+            
+            db.session.add(new_file)
+            uploaded_files.append({
+                'id': new_file.id,
+                'name': new_file.name,
+                'filename': new_file.filename,
+                'size': new_file.file_size
+            })
+            uploaded += 1
+            
+        except Exception as e:
+            failed += 1
+            errors.append(f'{file.filename}: {str(e)}')
+            print(f'Error processing {file.filename}: {e}')
+    
+    try:
+        # Commit all successful uploads
+        db.session.commit()
+        
+        return jsonify({
+            'message': f'Uploaded {uploaded} file(s), {failed} failed',
+            'uploaded': uploaded,
+            'failed': failed,
+            'files': uploaded_files,
+            'errors': errors if failed > 0 else []
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        print(f'Error saving files: {e}')
+        return jsonify({
+            'error': 'Failed to upload files',
+            'uploaded': 0,
+            'failed': len(files),
+            'errors': [str(e)]
+        }), 500
+    
 from uuid import uuid4
 from datetime import datetime, timedelta
 
