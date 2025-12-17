@@ -6568,8 +6568,6 @@ def delete_assignment(id):
 @admin_required
 def upload_assignment_file(id):
     """Upload file for assignment (Admin/Teacher only)"""
-    if not current_user.is_admin:
-        return jsonify({'error': 'Unauthorized'}), 403
     
     assignment = Assignment.query.get_or_404(id)
     
@@ -6580,14 +6578,51 @@ def upload_assignment_file(id):
     if file.filename == '':
         return jsonify({'error': 'No file selected'}), 400
     
-    assignment.file_data = file.read()
-    assignment.file_name = file.filename
-    assignment.file_type = file.content_type
+    filename = secure_filename(file.filename)
+    if not filename:
+        return jsonify({'error': 'Invalid filename'}), 400
     
-    db.session.commit()
+    file_extension = os.path.splitext(filename)[1].lower()
     
-    return jsonify({'message': 'File uploaded successfully'})
-
+    ALLOWED_EXTENSIONS = {
+        '.pdf',
+        '.doc', '.docx',
+        '.xls', '.xlsx',
+        '.ppt', '.pptx',
+        '.txt',
+        '.zip',
+        '.c', '.cpp', '.h', '.hpp',
+        '.jpg', '.jpeg', '.png', '.gif'
+    }
+    
+    if file_extension not in ALLOWED_EXTENSIONS:
+        return jsonify({'error': f'File type {file_extension} not allowed'}), 400
+    
+    MAX_FILE_SIZE = 10 * 1024 * 1024
+        
+    file_content = file.read()
+    
+    if len(file_content) > MAX_FILE_SIZE:
+        return jsonify({'error': 'File size exceeds 10MB limit'}), 400
+    
+    try:
+        assignment.file_data = file_content
+        assignment.file_name = filename
+        assignment.file_type = file.content_type
+        
+        db.session.commit()
+        
+        return jsonify({
+            'message': 'File uploaded successfully',
+            'filename': filename,
+            'file_type': file.content_type,
+            'assignment_id': assignment.id
+        })
+    
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': 'Failed to save file'}), 500
+    
 @app.route('/api/assignments/<int:id>/download')
 def download_assignment_file(id):
     """Download assignment file"""

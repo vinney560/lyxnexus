@@ -1640,14 +1640,15 @@
           
             const fileExt = filename.split('.').pop();
             const nameWithoutExt = filename.slice(0, filename.lastIndexOf('.'));
+            const cleanName = nameWithoutExt.replace(/[^\w\s_-]/g, '');
           
             // If filename is already short enough
-            if (nameWithoutExt.length <= maxLength) {
+            if (cleanName.length <= maxLength) {
                 return filename;
             }
           
             // Truncate and add ellipsis
-            const result = nameWithoutExt.substring(0, maxLength) + '@LN' + '.' + fileExt;
+            const result = cleanName.substring(0, maxLength) + '@LN' + '.' + fileExt;
             return result;
         }
 

@@ -182,6 +182,24 @@
         justify-content: center;
         align-items: center;
         animation: fadeIn 0.3s ease;
+        overflow-y: scroll;
+    }
+    .modal::-webkit-scrollbar {
+        width: 4px;
+    }
+
+    .modal::-webkit-scrollbar-track {
+        background: rgba(30, 30, 40, 0.5);
+        border-radius: 4px;
+    }
+
+    .modal::-webkit-scrollbar-thumb {
+        background: rgba(59, 130, 246, 0.5);
+        border-radius: 4px;
+    }
+
+    .modal::-webkit-scrollbar-thumb:hover {
+        background: rgba(59, 130, 246, 0.7);
     }
     
     .modal-content {
@@ -564,7 +582,7 @@
     }
 
     .file-list-container::-webkit-scrollbar {
-        width: 8px;
+        width: 4px;
     }
 
     .file-list-container::-webkit-scrollbar-track {
@@ -1411,7 +1429,6 @@
                 formData.append('description', fileDescription);
                 formData.append('category', fileCategory);
 
-                // Note: We'll use a new endpoint for multiple files
                 const response = await fetch('/api/files/upload-multiple', {
                     method: 'POST',
                     body: formData
