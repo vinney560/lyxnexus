@@ -606,10 +606,10 @@ def ignore_bad_fd(record):
 
 logging.getLogger().addFilter(ignore_bad_fd)
 
-"""Function to clean old data for user vsits(> a week)"""
+"""Function to clean old data for user vsits(> a month)"""
 def cleanup_old_visits():
-    """Delete visits older than 24 hours"""
-    cutoff_time = datetime.utcnow() - timedelta(days=7)
+    """Delete visits older than 30 days"""
+    cutoff_time = datetime.utcnow() - timedelta(days=30)
     old_visits = Visit.query.filter(Visit.timestamp < cutoff_time).delete()
     old_activities = UserActivity.query.filter(UserActivity.timestamp < cutoff_time).delete()
     db.session.commit()
