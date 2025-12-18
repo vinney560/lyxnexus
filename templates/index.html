@@ -1458,6 +1458,28 @@
             return date.toLocaleString(undefined, options);
         }
         
+        function getFileIcon(filename) {
+            const ext = filename.split('.').pop().toLowerCase();
+            const iconMap = {
+                'pdf': 'fas fa-file-pdf',
+                'doc': 'fas fa-file-word',
+                'docx': 'fas fa-file-word',
+                'xls': 'fas fa-file-excel',
+                'xlsx': 'fas fa-file-excel',
+                'ppt': 'fas fa-file-powerpoint',
+                'pptx': 'fas fa-file-powerpoint',
+                'txt': 'fas fa-file-alt',
+                'zip': 'fas fa-file-archive',
+                'rar': 'fas fa-file-archive',
+                'mp3': 'fas fa-file-audio',
+                'wav': 'fas fa-file-audio',
+                'mp4': 'fas fa-file-video',
+                'avi': 'fas fa-file-video',
+                'csv': 'fas fa-file-csv'
+            };
+            return iconMap[ext] || 'fas fa-file';
+        }
+
         async function fetchData(endpoint) {
             try {
                 const response = await fetch(endpoint);
@@ -1506,9 +1528,51 @@
               const displayContent = plainText.length > 450 ? 
                 formattedContent.substring(0, 450) + "........" : 
                 formattedContent;
+              let filePreview = "";
+              if (announcement.has_file && announcement.file_type?.startsWith("image/")) {
+                  filePreview = `
+                      <div class="absolute -top-4 -right-4 bg-blue-500 text-white px-3 py-1 rounded-full text-sm font-bold">
+                        <i class="fas fa-copy mr-1"> Image
+                      </div>
+                  `;
+              } else if (announcement.has_file) {
+                  filePreview = `
+                      <div class="mb-4">
+                          <a href="/login"
+                             class="inline-flex items-center gap-3 px-4 py-3 bg-gray-800/70 hover:bg-gray-700/80 border border-gray-600 hover:border-blue-400/50 rounded-xl transition-all duration-300 card-hover-lift group">
+                              <i class="${getFileIcon(announcement.file_name)} text-blue-400 text-lg group-hover:scale-110 transition-transform duration-300"></i>
+                              <div class="flex-1 min-w-0">
+                                  <div class="text-white font-medium text-sm truncate word-break overflow-break">
+                                      ${(() => {
+                                          const filename = announcement.file_name;
+                                          const lastDotIndex = filename.lastIndexOf('.');
+                                          const extension = lastDotIndex !== -1 ? filename.slice(lastDotIndex) : '';
+                                          const nameWithoutExt = lastDotIndex !== -1 ? filename.slice(0, lastDotIndex) : filename;
+  
+                                          const words = nameWithoutExt.split(/[\s_-]+/).filter(word => word.length > 0);
+                                          const truncatedWords = words.slice(0, 20);
+  
+                                          if (words.length > 20) {
+                                              return truncatedWords.join(' ') + '@LN' + (extension ? extension : '');
+                                          }
+  
+                                          return truncatedWords.join(' ') + (extension ? extension : '');
+                                      })()}
+                                  </div>
+                                  <div class="text-gray-400 text-xs flex items-center gap-1">
+                                      <i class="fas fa-external-link-alt text-xs"></i>
+                                      <span>Click to download</span>
+                                  </div>
+                              </div>
+                              <i class="fas fa-download text-gray-400 group-hover:text-blue-400 transition-colors duration-300"></i>
+                          </a>
+                      </div>
+                  `;
+              }              
             
               return `
               <div class="announcement-card b-l-4 b-blue-500">
+                ${filePreview}
                 <div class="flex justify-between items-start mb-3">
                   <h3 class="text-xl text-slate-100 uppercase underline underline-offset-4 decoration-sky-500 decoration-double font-bold">
                     ${announcement.title}
