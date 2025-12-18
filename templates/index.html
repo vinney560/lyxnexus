@@ -1470,14 +1470,14 @@
                 'ppt': 'fas fa-file-powerpoint',
                 'pptx': 'fas fa-file-powerpoint',
                 'txt': 'fas fa-file-alt',
-                
+
                 // Archive files
                 'zip': 'fas fa-file-archive',
                 'rar': 'fas fa-file-archive',
                 '7z': 'fas fa-file-archive',
                 'tar': 'fas fa-file-archive',
                 'gz': 'fas fa-file-archive',
-                
+
                 // Audio files
                 'mp3': 'fas fa-file-audio',
                 'wav': 'fas fa-file-audio',
@@ -1485,7 +1485,7 @@
                 'flac': 'fas fa-file-audio',
                 'm4a': 'fas fa-file-audio',
                 'ogg': 'fas fa-file-audio',
-                
+
                 // Video files
                 'mp4': 'fas fa-file-video',
                 'avi': 'fas fa-file-video',
@@ -1494,7 +1494,7 @@
                 'mkv': 'fas fa-file-video',
                 'flv': 'fas fa-file-video',
                 'webm': 'fas fa-file-video',
-                
+
                 // Image files
                 'jpg': 'fas fa-file-image',
                 'jpeg': 'fas fa-file-image',
@@ -1505,7 +1505,7 @@
                 'webp': 'fas fa-file-image',
                 'tiff': 'fas fa-file-image',
                 'ico': 'fas fa-file-image',
-                
+
                 // Code files
                 'html': 'fas fa-file-code',
                 'css': 'fas fa-file-code',
@@ -1517,7 +1517,7 @@
                 'cpp': 'fas fa-file-code',
                 'c': 'fas fa-file-code',
                 'php': 'fas fa-file-code',
-                
+
                 // Other files
                 'csv': 'fas fa-file-csv',
                 'exe': 'fas fa-cogs',
@@ -1705,16 +1705,16 @@
                 }
 
                 let hasFile = "";
-                if (announcement.file_data && announcement.file_name !== '') {
+                if (assignment.file_data && assignment.file_name !== '') {
                     hasFile = `
                     <div class="mb-4">
                         <a href="/login"
                            class="inline-flex items-center gap-3 px-4 py-3 bg-gray-800/70 hover:bg-gray-700/80 border border-gray-600 hover:border-blue-400/50 rounded-xl transition-all duration-300 card-hover-lift group">
-                            <i class="${getFileIcon(announcement.file_name)} text-blue-400 text-lg group-hover:scale-110 transition-transform duration-300"></i>
+                            <i class="${getFileIcon(assignment.file_name)} text-blue-400 text-lg group-hover:scale-110 transition-transform duration-300"></i>
                             <div class="flex-1 min-w-0">
                                 <div class="text-white font-medium text-sm truncate word-break overflow-break">
                                     ${(() => {
-                                        const filename = announcement.file_name;
+                                        const filename = assignment.file_name;
                                         const lastDotIndex = filename.lastIndexOf('.');
                                         const extension = lastDotIndex !== -1 ? filename.slice(lastDotIndex) : '';
                                         const nameWithoutExt = lastDotIndex !== -1 ? filename.slice(0, lastDotIndex) : filename;

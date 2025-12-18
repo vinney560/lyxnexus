@@ -4882,16 +4882,16 @@
                         const isNew = newItems.some(item => item.id === assignment.id);
                         const newClass = isNew ? 'new-item-highlight' : '';
                         let hasFile = "";
-                        if (announcement.file_data && announcement.file_data !== '') {
+                        if (assignment.file_data && assignment.file_data !== '') {
                             hasFile = `
                             <div class="mb-4">
-                                <a href="/login"
+                                <a href="/assignment/${assignment.id}"
                                    class="inline-flex items-center gap-3 px-4 py-3 bg-gray-800/70 hover:bg-gray-700/80 border border-gray-600 hover:border-blue-400/50 rounded-xl transition-all duration-300 card-hover-lift group">
-                                    <i class="${getFileIcon(announcement.file_name)} text-blue-400 text-lg group-hover:scale-110 transition-transform duration-300"></i>
+                                    <i class="${getFileIcon(assignment.file_name)} text-blue-400 text-lg group-hover:scale-110 transition-transform duration-300"></i>
                                     <div class="flex-1 min-w-0">
                                         <div class="text-white font-medium text-sm truncate word-break overflow-break">
                                             ${(() => {
-                                                const filename = announcement.file_name;
+                                                const filename = assignment.file_name;
                                                 const lastDotIndex = filename.lastIndexOf('.');
                                                 const extension = lastDotIndex !== -1 ? filename.slice(lastDotIndex) : '';
                                                 const nameWithoutExt = lastDotIndex !== -1 ? filename.slice(0, lastDotIndex) : filename;
