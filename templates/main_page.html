@@ -4127,6 +4127,7 @@
         function getFileIcon(filename) {
             const ext = filename.split('.').pop().toLowerCase();
             const iconMap = {
+                // Document files
                 'pdf': 'fas fa-file-pdf',
                 'doc': 'fas fa-file-word',
                 'docx': 'fas fa-file-word',
@@ -4135,13 +4136,61 @@
                 'ppt': 'fas fa-file-powerpoint',
                 'pptx': 'fas fa-file-powerpoint',
                 'txt': 'fas fa-file-alt',
+
+                // Archive files
                 'zip': 'fas fa-file-archive',
                 'rar': 'fas fa-file-archive',
+                '7z': 'fas fa-file-archive',
+                'tar': 'fas fa-file-archive',
+                'gz': 'fas fa-file-archive',
+
+                // Audio files
                 'mp3': 'fas fa-file-audio',
                 'wav': 'fas fa-file-audio',
+                'aac': 'fas fa-file-audio',
+                'flac': 'fas fa-file-audio',
+                'm4a': 'fas fa-file-audio',
+                'ogg': 'fas fa-file-audio',
+
+                // Video files
                 'mp4': 'fas fa-file-video',
                 'avi': 'fas fa-file-video',
-                'csv': 'fas fa-file-csv'
+                'mov': 'fas fa-file-video',
+                'wmv': 'fas fa-file-video',
+                'mkv': 'fas fa-file-video',
+                'flv': 'fas fa-file-video',
+                'webm': 'fas fa-file-video',
+
+                // Image files
+                'jpg': 'fas fa-file-image',
+                'jpeg': 'fas fa-file-image',
+                'png': 'fas fa-file-image',
+                'gif': 'fas fa-file-image',
+                'bmp': 'fas fa-file-image',
+                'svg': 'fas fa-file-image',
+                'webp': 'fas fa-file-image',
+                'tiff': 'fas fa-file-image',
+                'ico': 'fas fa-file-image',
+
+                // Code files
+                'html': 'fas fa-file-code',
+                'css': 'fas fa-file-code',
+                'js': 'fas fa-file-code',
+                'json': 'fas fa-file-code',
+                'xml': 'fas fa-file-code',
+                'py': 'fas fa-file-code',
+                'java': 'fas fa-file-code',
+                'cpp': 'fas fa-file-code',
+                'c': 'fas fa-file-code',
+                'php': 'fas fa-file-code',
+
+                // Other files
+                'csv': 'fas fa-file-csv',
+                'exe': 'fas fa-cogs',
+                'apk': 'fas fa-mobile-alt',
+                'dmg': 'fas fa-compact-disc',
+                'psd': 'fas fa-file-image',
+                'ai': 'fas fa-file-image'
             };
             return iconMap[ext] || 'fas fa-file';
         }
@@ -4832,10 +4881,49 @@
                     
                         const isNew = newItems.some(item => item.id === assignment.id);
                         const newClass = isNew ? 'new-item-highlight' : '';
+                        let hasFile = "";
+                        if (announcement.file_data && announcement.file_data !== '') {
+                            hasFile = `
+                            <div class="mb-4">
+                                <a href="/login"
+                                   class="inline-flex items-center gap-3 px-4 py-3 bg-gray-800/70 hover:bg-gray-700/80 border border-gray-600 hover:border-blue-400/50 rounded-xl transition-all duration-300 card-hover-lift group">
+                                    <i class="${getFileIcon(announcement.file_name)} text-blue-400 text-lg group-hover:scale-110 transition-transform duration-300"></i>
+                                    <div class="flex-1 min-w-0">
+                                        <div class="text-white font-medium text-sm truncate word-break overflow-break">
+                                            ${(() => {
+                                                const filename = announcement.file_name;
+                                                const lastDotIndex = filename.lastIndexOf('.');
+                                                const extension = lastDotIndex !== -1 ? filename.slice(lastDotIndex) : '';
+                                                const nameWithoutExt = lastDotIndex !== -1 ? filename.slice(0, lastDotIndex) : filename;
+                                            
+                                                const words = nameWithoutExt.split(/[\s_-]+/).filter(word => word.length > 0);
+                                                const truncatedWords = words.slice(0, 20);
+                                            
+                                                if (words.length > 20) {
+                                                    return truncatedWords.join(' ') + '@LN' + (extension ? extension : '');
+                                                }
+                                            
+                                                return truncatedWords.join(' ') + (extension ? extension : '');
+                                            })()}
+                                        </div>
+                                        <div class="text-gray-400 text-xs flex items-center gap-1">
+                                            <i class="fas fa-external-link-alt text-xs"></i>
+                                            <span>Click to download</span>
+                                        </div>
+                                    </div>
+                                    <i class="fas fa-download text-gray-400 group-hover:text-blue-400 transition-colors duration-300"></i>
+                                </a>
+                                <div class="absolute -top-4 -right-2 bg-blue-500 text-white px-3 py-1 rounded-full text-sm font-bold">
+                                    <i class="fas fa-image mr-1"></i> Has File
+                                </div>
+                            </div>
+                            `;
+                        }                 
                     
                         return `
                             <div class="assignment-card border-l-4 border-blue-500 border border-blue-500 bg-gray-800/50 rounded-xl shadow-md hover:shadow-lg transition duration-200 ease-in-out card-hover-lift fade-in ${newClass} assignment-content">
                                 ${isNew ? `<div class="absolute top-3 left-3 w-3 h-3 bg-green-500 rounded-full animate-pulse z-10"></div>` : ''}
+                                ${hasFile}
                             
                                 <div class="assignment-body p-3 sm:p-2">
                                     <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-2 gap-2">
