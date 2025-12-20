@@ -734,7 +734,7 @@
                     <label class="block text-sm font-medium mb-2">Year</label>
                     <select id="year-filter" class="form-select">
                         <option value="">All Years</option>
-                        {% for year in range(2025, 2015, -1) %}
+                        {% for year in range(2026, 2015, -1) %}
                         <option value="{{ year }}">{{ year }}</option>
                         {% endfor %}
                     </select>
@@ -743,10 +743,8 @@
                     <label class="block text-sm font-medium mb-2">Semester</label>
                     <select id="semester-filter" class="form-select">
                         <option value="">All Semesters</option>
-                        <option value="Spring">Spring</option>
-                        <option value="Fall">Fall</option>
-                        <option value="Summer">Summer</option>
-                        <option value="Winter">Winter</option>
+                        <option value="sem1">Semister 1</option>
+                        <option value="sem2">Semister 2</option>
                     </select>
                 </div>
                 <div>
@@ -754,7 +752,7 @@
                     <select id="exam-type-filter" class="form-select">
                         <option value="">All Types</option>
                         <option value="Final">Final Exam</option>
-                        <option value="Midterm">Midterm</option>
+                        <option value="Midterm">MidSem</option>
                         <option value="Quiz">Quiz</option>
                         <option value="Assignment">Assignment</option>
                     </select>
@@ -834,7 +832,7 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium mb-2">Course Code</label>
-                        <input type="text" id="course-code" class="form-input" placeholder="e.g., CS101">
+                        <input type="text" id="course-code" class="form-input" placeholder="e.g., IN17">
                     </div>
                 </div>
                 
@@ -843,7 +841,7 @@
                         <label class="block text-sm font-medium mb-2">Year *</label>
                         <select id="paper-year" class="form-select">
                             <option value="">Select Year</option>
-                            {% for year in range(2025, 2015, -1) %}
+                            {% for year in range(2026, 2015, -1) %}
                             <option value="{{ year }}">{{ year }}</option>
                             {% endfor %}
                         </select>
@@ -852,10 +850,8 @@
                         <label class="block text-sm font-medium mb-2">Semester</label>
                         <select id="paper-semester" class="form-select">
                             <option value="">Select Semester</option>
-                            <option value="Spring">Spring</option>
-                            <option value="Fall">Fall</option>
-                            <option value="Summer">Summer</option>
-                            <option value="Winter">Winter</option>
+                            <option value="sem1">1</option>
+                            <option value="sem2">2</option>
                         </select>
                     </div>
                 </div>
@@ -866,7 +862,7 @@
                         <select id="exam-type" class="form-select">
                             <option value="">Select Type</option>
                             <option value="Final">Final Exam</option>
-                            <option value="Midterm">Midterm</option>
+                            <option value="Midterm">MidSem</option>
                             <option value="Quiz">Quiz</option>
                             <option value="Assignment">Assignment</option>
                             <option value="Other">Other</option>
