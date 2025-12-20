@@ -546,7 +546,7 @@ class PastPaper(db.Model):
     course_code = db.Column(db.String(50))
     exam_type = db.Column(db.String(50))  # e.g., "Final", "Midterm", "Quiz"
     uploaded_at = db.Column(db.DateTime, default=datetime.utcnow)
-    uploaded_by = db.Column(db.Integer, db.ForeignKey('users.id'))
+    uploaded_by = db.Column(db.Integer, db.ForeignKey('user.id'))
     download_count = db.Column(db.Integer, default=0)
     is_active = db.Column(db.Boolean, default=True)
     
