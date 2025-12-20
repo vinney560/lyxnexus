@@ -1686,10 +1686,10 @@
                 const dueDate = new Date(assignment.due_date);
                 const now = new Date();
                 const daysUntilDue = Math.ceil((dueDate - now) / (1000 * 60 * 60 * 24));
-                
+
                 let statusClass = 'status-due-soon';
                 let statusText = 'Due Soon';
-                
+
                 if (daysUntilDue < 0) {
                     statusClass = 'status-urgent';
                     statusText = 'Overdue';
@@ -1703,10 +1703,11 @@
                     statusClass = 'status-completed';
                     statusText = 'Upcoming';
                 }
-
-                let hasFile = "";
-                if (assignment.file_data && assignment.file_name !== '') {
-                    hasFile = `
+            
+                // Build file preview section
+                let filePreview2 = '';
+                if (assignment.file_name) {
+                    filePreview2 = `
                     <div class="mb-4">
                         <a href="/login"
                            class="inline-flex items-center gap-3 px-4 py-3 bg-gray-800/70 hover:bg-gray-700/80 border border-gray-600 hover:border-blue-400/50 rounded-xl transition-all duration-300 card-hover-lift group">
@@ -1738,16 +1739,23 @@
                         </a>
                     </div>
                     `;
-                }             
-
+                }
+            
                 return `
                 <div class="assignment-card">
-                    ${hasFile}
+                    <!-- Header with title and status -->
                     <div class="flex justify-between items-start mb-3">
                         <h3 class="text-xl font-bold text-slate-100 underline underline-offset-4 decoration-sky-500 decoration-double">${assignment.title}</h3>
                         <span class="status-badge ${statusClass}">${statusText}: ${formatDate(assignment.due_date)}</span>
                     </div>
+
+                    <!-- File preview section (only if file exists) -->
+                    ${filePreview2}
+
+                    <!-- Description -->
                     <p class="mb-4 text-slate-300 break-all hyphens-auto leading-relaxed whitespace-pre-line list-inside">${formatMath(assignment.description)}</p>
+
+                    <!-- Footer with topic and button -->
                     <div class="flex justify-between items-center">
                         <span class="text-slate-400 text-sm">Topic: ${assignment.topic?.name || 'General'}</span>
                         <button onclick="window.location.href='/assignment/${assignment.id}'" class="btn btn-sm">
@@ -1757,7 +1765,7 @@
                     </div>
                 </div>
                 `;
-            }).join('');
+            }).join('');            
         }
 
         // Load topics

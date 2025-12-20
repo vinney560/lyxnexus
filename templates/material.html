@@ -1,4 +1,3 @@
-<!-- templates/material.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -22,7 +21,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <style>
-    /* Reuse all the CSS styles from files.html */
     :root {
         --bg-color: #111827;
         --text-color: #F9FAFB;
@@ -189,7 +187,7 @@
         border-radius: 15px;
         padding: 30px;
         width: 90%;
-        max-width: 600px;
+        max-width: 800px;
         border: 1px solid rgba(59, 130, 246, 0.3);
         animation: slideUp 0.3s ease;
         max-height: 90vh;
@@ -389,6 +387,98 @@
         background: rgba(255, 255, 255, 0.1);
     }
 
+    .multi-select-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    
+    .selected-count {
+        background: rgba(59, 130, 246, 0.2);
+        color: #3B82F6;
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-size: 14px;
+        font-weight: 500;
+    }
+    
+    .select-actions {
+        display: flex;
+        gap: 10px;
+    }
+    
+    .select-all-btn, .deselect-all-btn {
+        padding: 8px 15px;
+        border-radius: 8px;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .select-all-btn {
+        background: rgba(16, 185, 129, 0.2);
+        color: #10B981;
+        border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    
+    .select-all-btn:hover {
+        background: rgba(16, 185, 129, 0.3);
+    }
+    
+    .deselect-all-btn {
+        background: rgba(239, 68, 68, 0.2);
+        color: #EF4444;
+        border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+    
+    .deselect-all-btn:hover {
+        background: rgba(239, 68, 68, 0.3);
+    }
+    
+    .file-card.selected {
+        border: 2px solid #10B981;
+        background: rgba(16, 185, 129, 0.1);
+    }
+    
+    .file-card .checkbox-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 12px;
+    }
+    
+    .file-card .checkbox {
+        width: 20px;
+        height: 20px;
+        border-radius: 6px;
+        border: 2px solid #4B5563;
+        background: transparent;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .file-card.selected .checkbox {
+        background: #10B981;
+        border-color: #10B981;
+    }
+    
+    .file-card .checkbox i {
+        color: white;
+        font-size: 12px;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    
+    .file-card.selected .checkbox i {
+        opacity: 1;
+    }
+    
     @media (max-width: 768px) {
         nav.glass-morph {
             position: static !important;
@@ -424,6 +514,16 @@
         
         .toast {
             max-width: none;
+        }
+        
+        .multi-select-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .select-actions {
+            width: 100%;
+            justify-content: space-between;
         }
     }
     
@@ -539,6 +639,21 @@
         <div class="modal-content">
             <h3 class="text-xl font-bold mb-4">Add Material to Topic</h3>
             
+            <!-- Multi-select header -->
+            <div class="multi-select-header">
+                <div class="selected-count">
+                    <span id="selected-count">0 files selected</span>
+                </div>
+                <div class="select-actions">
+                    <div class="select-all-btn" onclick="selectAllFiles()">
+                        <i class="fas fa-check-square mr-1"></i> Select All
+                    </div>
+                    <div class="deselect-all-btn" onclick="deselectAllFiles()">
+                        <i class="fas fa-times-circle mr-1"></i> Deselect All
+                    </div>
+                </div>
+            </div>
+            
             <!-- Search Files -->
             <div class="mb-4">
                 <input type="text" id="file-search" class="form-input" placeholder="Search available files...">
@@ -551,22 +666,10 @@
                 </div>
             </div>
             
-            <div id="customization-form" class="hidden">
-                <div class="form-group">
-                    <label class="form-label" for="material-display-name">Display Name (Optional)</label>
-                    <input type="text" id="material-display-name" class="form-input" placeholder="Custom name for this material">
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label" for="material-description">Description (Optional)</label>
-                    <textarea id="material-description" class="form-input" rows="3" placeholder="Custom description for this material"></textarea>
-                </div>
-            </div>
-            
             <div class="flex flex-col-reverse sm:flex-row justify-end space-y-4 sm:space-y-0 space-y-reverse sm:space-x-3 mt-4">
                 <button type="button" class="btn btn-secondary w-full sm:w-auto" onclick="closeModal('add-material-modal')">Cancel</button>
-                <button type="button" class="btn btn-success w-full sm:w-auto mb-4 sm:mb-0 hidden" id="add-material-btn" onclick="addMaterial()">
-                    <i class="fas fa-plus mr-2"></i> Add Material
+                <button type="button" class="btn btn-success w-full sm:w-auto mb-4 sm:mb-0" id="add-materials-btn" onclick="addMaterials()">
+                    <i class="fas fa-plus mr-2"></i> Add Selected Files
                 </button>
             </div>
         </div>
@@ -600,7 +703,7 @@
         const TOPIC_ID = {{ topic_id }};
         
         // Global variables
-        let selectedFileId = null;
+        let selectedFiles = new Set();
         let currentDragItem = null;
 
         class ToastManager {
@@ -841,23 +944,29 @@
                     
                     return `
                     <div class="file-card glass-morph rounded-lg p-4 mb-3 cursor-pointer transition-all transform hover:scale-95"
-                         onclick="selectFile(${file.id}, '${file.name.replace(/'/g, "\\'")}', '${file.description ? file.description.replace(/'/g, "\\'") : ''}')">
+                         onclick="toggleFileSelection(${file.id})"
+                         data-file-id="${file.id}">
                         <div class="flex items-center">
+                            <div class="checkbox-container">
+                                <div class="checkbox">
+                                    <i class="fas fa-check"></i>
+                                </div>
+                            </div>
                             <div class="file-icon ${fileIcon.class}">
                                 <i class="fas ${fileIcon.icon}"></i>
                             </div>
-                            <div class="flex-1 min-w-0"> <!-- Added min-w-0 here -->
+                            <div class="flex-1 min-w-0">
                                 <h4 class="font-semibold text-white truncate">${file.name}</h4>
                                 <p class="text-sm text-gray-400 filename">${file.filename} • ${formatFileSize(file.file_size)}</p>
                                 ${file.description ? `<p class="text-sm text-gray-500 mt-1 truncate">${file.description}</p>` : ''}
-                            </div>
-                            <div class="text-green-500 hidden selected-indicator ml-2 flex-shrink-0">
-                                <i class="fas fa-check-circle"></i>
                             </div>
                         </div>
                     </div>
                     `;
                 }).join('');
+                
+                // Update selection state for already selected files
+                updateFileSelectionUI();
                 
             } catch (error) {
                 container.innerHTML = `
@@ -869,62 +978,80 @@
             }
         }
 
-        function selectFile(fileId, fileName, fileDescription) {
-            selectedFileId = fileId;
+        function toggleFileSelection(fileId) {
+            if (selectedFiles.has(fileId)) {
+                selectedFiles.delete(fileId);
+            } else {
+                selectedFiles.add(fileId);
+            }
             
-            document.querySelectorAll('.file-card').forEach(card => {
-                card.classList.remove('border-2', 'border-green-500');
-                card.querySelector('.selected-indicator').classList.add('hidden');
-            });
-            
-            const selectedCard = event.currentTarget;
-            selectedCard.classList.add('border-2', 'border-green-500');
-            selectedCard.querySelector('.selected-indicator').classList.remove('hidden');
-            
-            document.getElementById('customization-form').classList.remove('hidden');
-            document.getElementById('add-material-btn').classList.remove('hidden');
-            
-            document.getElementById('material-display-name').value = fileName;
-            document.getElementById('material-description').value = fileDescription || '';
+            updateFileSelectionUI();
+            updateSelectedCount();
         }
 
-        async function addMaterial() {
-            if (!selectedFileId) {
-                showToast('Please select a file', 'error');
+        function updateFileSelectionUI() {
+            const fileCards = document.querySelectorAll('.file-card');
+            fileCards.forEach(card => {
+                const fileId = parseInt(card.dataset.fileId);
+                if (selectedFiles.has(fileId)) {
+                    card.classList.add('selected');
+                } else {
+                    card.classList.remove('selected');
+                }
+            });
+        }
+
+        function updateSelectedCount() {
+            const count = selectedFiles.size;
+            document.getElementById('selected-count').textContent = `${count} file${count !== 1 ? 's' : ''} selected`;
+        }
+
+        function selectAllFiles() {
+            const fileCards = document.querySelectorAll('.file-card');
+            fileCards.forEach(card => {
+                const fileId = parseInt(card.dataset.fileId);
+                selectedFiles.add(fileId);
+            });
+            updateFileSelectionUI();
+            updateSelectedCount();
+        }
+
+        function deselectAllFiles() {
+            selectedFiles.clear();
+            updateFileSelectionUI();
+            updateSelectedCount();
+        }
+
+        async function addMaterials() {
+            if (selectedFiles.size === 0) {
+                showToast('Please select at least one file', 'error');
                 return;
             }
             
-            const displayName = document.getElementById('material-display-name').value;
-            const description = document.getElementById('material-description').value;
-            
             try {
-                const response = await fetch(`${API_BASE}/topics/${TOPIC_ID}/materials`, {
+                const response = await fetch(`${API_BASE}/topics/${TOPIC_ID}/materials/batch`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        file_id: selectedFileId,
-                        display_name: displayName || null,
-                        description: description || null
+                        file_ids: Array.from(selectedFiles)
                     })
                 });
                 
                 const data = await response.json();
                 
                 if (!response.ok) {
-                    throw new Error(data.error || 'Failed to add material');
+                    throw new Error(data.error || 'Failed to add materials');
                 }
                 
-                showToast('Material added successfully', 'success');
+                showToast(`Successfully added ${data.added_count} material(s)`, 'success');
                 closeModal('add-material-modal');
                 loadTopicMaterials();
                 
-                document.getElementById('customization-form').classList.add('hidden');
-                document.getElementById('add-material-btn').classList.add('hidden');
-                document.getElementById('material-display-name').value = '';
-                document.getElementById('material-description').value = '';
-                selectedFileId = null;
+                // Reset selection
+                selectedFiles.clear();
+                updateSelectedCount();
                 
             } catch (error) {
                 showToast(error.message, 'error', 'Add Failed');
@@ -1050,6 +1177,8 @@
             document.getElementById(modalId).style.display = 'flex';
             if (modalId === 'add-material-modal') {
                 loadAvailableFiles();
+                selectedFiles.clear();
+                updateSelectedCount();
             }
         }
 
@@ -1057,9 +1186,8 @@
             document.getElementById(modalId).style.display = 'none';
             if (modalId === 'add-material-modal') {
                 document.getElementById('file-search').value = '';
-                document.getElementById('customization-form').classList.add('hidden');
-                document.getElementById('add-material-btn').classList.add('hidden');
-                selectedFileId = null;
+                selectedFiles.clear();
+                updateSelectedCount();
             }
         }
 
@@ -1067,9 +1195,8 @@
             if (event.target.classList.contains('modal')) {
                 event.target.style.display = 'none';
                 document.getElementById('file-search').value = '';
-                document.getElementById('customization-form').classList.add('hidden');
-                document.getElementById('add-material-btn').classList.add('hidden');
-                selectedFileId = null;
+                selectedFiles.clear();
+                updateSelectedCount();
             }
         }
 
