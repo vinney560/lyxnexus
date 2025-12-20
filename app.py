@@ -533,6 +533,42 @@ class UserNotification(db.Model):
     # Relationship
     user = db.relationship('User', backref='notifications', lazy=True)
 #===============================================
+# models.py - Add these classes
+
+class PastPaper(db.Model):
+    __tablename__ = 'past_papers'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200), nullable=False)
+    description = db.Column(db.Text)
+    year = db.Column(db.Integer)
+    semester = db.Column(db.String(50))
+    course_code = db.Column(db.String(50))
+    exam_type = db.Column(db.String(50))  # e.g., "Final", "Midterm", "Quiz"
+    uploaded_at = db.Column(db.DateTime, default=datetime.utcnow)
+    uploaded_by = db.Column(db.Integer, db.ForeignKey('users.id'))
+    download_count = db.Column(db.Integer, default=0)
+    is_active = db.Column(db.Boolean, default=True)
+    
+    # Relationships
+    uploaded_by_user = db.relationship('User', backref='uploaded_past_papers')
+    files = db.relationship('PastPaperFile', backref='past_paper', lazy=True, cascade='all, delete-orphan')
+
+class PastPaperFile(db.Model):
+    __tablename__ = 'past_paper_files'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    past_paper_id = db.Column(db.Integer, db.ForeignKey('past_papers.id', ondelete='CASCADE'), nullable=False)
+    file_id = db.Column(db.Integer, db.ForeignKey('files.id', ondelete='CASCADE'), nullable=False)
+    display_name = db.Column(db.String(200))
+    description = db.Column(db.Text)
+    order = db.Column(db.Integer, default=0)
+    added_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    file = db.relationship('File', backref='past_paper_files')
+
+# ======================================================    
 
 # Master key for Admin Access  
 def initialize_admin_code():
@@ -6916,6 +6952,230 @@ def get_timetable_by_day(day):
     
     return jsonify(result)
 
+# =======================================================
+@app.route('/past-papers')
+@login_required
+def past_papers():
+    """Past papers main page"""
+    return render_template('past_papers.html')
+
+@app.route('/past-papers/<int:paper_id>')
+@login_required
+def view_past_paper(paper_id):
+    """View a specific past paper"""
+    return render_template('past_paper_detail.html', paper_id=paper_id)
+
+@app.route('/past-papers/upload', methods=['POST'])
+@login_required
+@admin_required
+def upload_past_paper():
+    """Upload a new past paper"""
+    data = request.get_json()
+    
+    # Create past paper entry
+    past_paper = PastPaper(
+        title=data['title'],
+        description=data.get('description'),
+        year=data.get('year'),
+        semester=data.get('semester'),
+        course_code=data.get('course_code'),
+        exam_type=data.get('exam_type'),
+        uploaded_by=current_user.id
+    )
+    
+    db.session.add(past_paper)
+    db.session.flush()  # Get the ID
+    
+    # Add files
+    for file_id in data['file_ids']:
+        past_paper_file = PastPaperFile(
+            past_paper_id=past_paper.id,
+            file_id=file_id,
+            display_name=data.get('display_names', {}).get(str(file_id)),
+            description=data.get('descriptions', {}).get(str(file_id))
+        )
+        db.session.add(past_paper_file)
+    
+    db.session.commit()
+    
+    return jsonify({
+        'success': True,
+        'message': 'Past paper uploaded successfully',
+        'paper_id': past_paper.id
+    })
+
+@app.route('/api/past-papers')
+@login_required
+def get_past_papers():
+    """Get all past papers with pagination"""
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 20, type=int)
+    
+    # Filtering
+    year = request.args.get('year')
+    semester = request.args.get('semester')
+    course_code = request.args.get('course_code')
+    exam_type = request.args.get('exam_type')
+    search = request.args.get('search')
+    
+    query = PastPaper.query.filter_by(is_active=True)
+    
+    if year:
+        query = query.filter_by(year=year)
+    if semester:
+        query = query.filter_by(semester=semester)
+    if course_code:
+        query = query.filter_by(course_code=course_code)
+    if exam_type:
+        query = query.filter_by(exam_type=exam_type)
+    if search:
+        query = query.filter(
+            db.or_(
+                PastPaper.title.ilike(f'%{search}%'),
+                PastPaper.description.ilike(f'%{search}%'),
+                PastPaper.course_code.ilike(f'%{search}%')
+            )
+        )
+    
+    # Order by year descending, then title
+    papers = query.order_by(PastPaper.year.desc(), PastPaper.title.asc())\
+                  .paginate(page=page, per_page=per_page)
+    
+    return jsonify({
+        'papers': [{
+            'id': paper.id,
+            'title': paper.title,
+            'description': paper.description,
+            'year': paper.year,
+            'semester': paper.semester,
+            'course_code': paper.course_code,
+            'exam_type': paper.exam_type,
+            'uploaded_at': paper.uploaded_at.isoformat(),
+            'uploaded_by': paper.uploaded_by_user.name if paper.uploaded_by_user else 'Unknown',
+            'download_count': paper.download_count,
+            'file_count': len(paper.files)
+        } for paper in papers.items],
+        'total': papers.total,
+        'pages': papers.pages,
+        'current_page': papers.page
+    })
+
+@app.route('/api/past-papers/<int:paper_id>')
+@login_required
+def get_past_paper_detail(paper_id):
+    """Get detailed information about a specific past paper"""
+    paper = PastPaper.query.get_or_404(paper_id)
+    
+    if not paper.is_active and not current_user.is_admin:
+        abort(404)
+    
+    return jsonify({
+        'paper': {
+            'id': paper.id,
+            'title': paper.title,
+            'description': paper.description,
+            'year': paper.year,
+            'semester': paper.semester,
+            'course_code': paper.course_code,
+            'exam_type': paper.exam_type,
+            'uploaded_at': paper.uploaded_at.isoformat(),
+            'uploaded_by': paper.uploaded_by_user.name if paper.uploaded_by_user else 'Unknown',
+            'download_count': paper.download_count
+        },
+        'files': [{
+            'id': pp_file.id,
+            'file_id': pp_file.file_id,
+            'display_name': pp_file.display_name,
+            'description': pp_file.description,
+            'added_at': pp_file.added_at.isoformat(),
+            'filename': pp_file.file.filename,
+            'file_size': pp_file.file.file_size,
+            'file_type': pp_file.file.file_type,
+            'uploaded_at': pp_file.file.uploaded_at.isoformat()
+        } for pp_file in sorted(paper.files, key=lambda x: x.order)]
+    })
+
+@app.route('/api/past-papers/<int:paper_id>/download')
+@login_required
+def download_past_paper(paper_id):
+    """Download a past paper file"""
+    file_id = request.args.get('file_id')
+    
+    if file_id:
+        # Download specific file
+        pp_file = PastPaperFile.query.filter_by(
+            past_paper_id=paper_id,
+            file_id=file_id
+        ).first_or_404()
+        
+        # Increment download count for the past paper
+        paper = PastPaper.query.get(paper_id)
+        if paper:
+            paper.download_count += 1
+            db.session.commit()
+        
+        return send_file(pp_file.file.filepath, 
+                        as_attachment=True, 
+                        download_name=pp_file.file.filename)
+    
+    # Download all files as zip (optional implementation)
+    # You can implement zip download if needed
+
+@app.route('/api/past-papers/<int:paper_id>', methods=['DELETE'])
+@login_required
+@admin_required
+def delete_past_paper(paper_id):
+    """Delete a past paper (soft delete)"""
+    paper = PastPaper.query.get_or_404(paper_id)
+    paper.is_active = False
+    db.session.commit()
+    
+    return jsonify({
+        'success': True,
+        'message': 'Past paper deleted successfully'
+    })
+
+@app.route('/api/past-papers/<int:paper_id>/files/<int:file_id>', methods=['DELETE'])
+@login_required
+@admin_required
+def remove_past_paper_file(paper_id, file_id):
+    """Remove a file from past paper"""
+    pp_file = PastPaperFile.query.filter_by(
+        past_paper_id=paper_id,
+        file_id=file_id
+    ).first_or_404()
+    
+    db.session.delete(pp_file)
+    db.session.commit()
+    
+    return jsonify({
+        'success': True,
+        'message': 'File removed from past paper'
+    })
+
+@app.route('/api/past-papers/<int:paper_id>/reorder', methods=['POST'])
+@login_required
+@admin_required
+def reorder_past_paper_files(paper_id):
+    """Reorder files in past paper"""
+    data = request.get_json()
+    order = data.get('order', [])
+    
+    for index, file_id in enumerate(order):
+        pp_file = PastPaperFile.query.filter_by(
+            past_paper_id=paper_id,
+            file_id=file_id
+        ).first()
+        
+        if pp_file:
+            pp_file.order = index
+    
+    db.session.commit()
+    
+    return jsonify({
+        'success': True,
+        'message': 'Files reordered successfully'
+    })
 #==========================================
 #           REGISTERING ADMIN API
 #==========================================
