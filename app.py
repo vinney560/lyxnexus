@@ -559,7 +559,7 @@ class PastPaperFile(db.Model):
     
     id = db.Column(db.Integer, primary_key=True)
     past_paper_id = db.Column(db.Integer, db.ForeignKey('past_papers.id', ondelete='CASCADE'), nullable=False)
-    file_id = db.Column(db.Integer, db.ForeignKey('files.id', ondelete='CASCADE'), nullable=False)
+    file_id = db.Column(db.Integer, db.ForeignKey('file.id', ondelete='CASCADE'), nullable=False)
     display_name = db.Column(db.String(200))
     description = db.Column(db.Text)
     order = db.Column(db.Integer, default=0)
