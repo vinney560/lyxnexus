@@ -21,7 +21,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <style>
-    /* Reuse all the CSS styles from past_papers.html */
     :root {
         --bg-color: #111827;
         --text-color: #F9FAFB;
@@ -543,6 +542,7 @@
 
     <script>
         const API_BASE = '/api';
+        const FILES_ENDPOINT = `${API_BASE}/files`;
         const PAPER_ID = {{ paper_id }};
         const IS_ADMIN = {% if current_user.is_admin %}true{% else %}false{% endif %};
         let selectedFiles = new Set();
@@ -949,7 +949,7 @@
         }
 
         function downloadFile(fileId) {
-            window.open(`${API_BASE}/past-papers/${PAPER_ID}/download?file_id=${fileId}`, '_blank');
+            window.open(`${FILES_ENDPOINT}/${fileId}/download`);
         }
 
         async function removeFile(fileId) {
