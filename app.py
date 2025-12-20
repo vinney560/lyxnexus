@@ -7079,7 +7079,7 @@ def get_past_paper_detail(paper_id):
             'course_code': paper.course_code,
             'exam_type': paper.exam_type,
             'uploaded_at': paper.uploaded_at.isoformat(),
-            'uploaded_by': paper.uploaded_by_user.name if paper.uploaded_by_user else 'Unknown',
+            'uploaded_by': paper.uploaded_by_user.username if paper.uploaded_by_user else 'Unknown',
             'download_count': paper.download_count
         },
         'files': [{
