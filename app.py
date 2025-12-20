@@ -7118,9 +7118,6 @@ def download_past_paper(paper_id):
                         as_attachment=True, 
                         download_name=pp_file.file.filename)
     
-    # Download all files as zip (optional implementation)
-    # You can implement zip download if needed
-
 @app.route('/api/past-papers/<int:paper_id>', methods=['DELETE'])
 @login_required
 @admin_required
