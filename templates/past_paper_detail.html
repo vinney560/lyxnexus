@@ -714,6 +714,7 @@
     <script>
         const API_BASE = '/api';
         const PAPER_ID = {{ paper_id }};
+        const FILES_ENDPOINT = `${API_BASE}/files`;
         const IS_ADMIN = {% if current_user.is_admin %}true{% else %}false{% endif %};
         let selectedFiles = new Set();
         let currentDragItem = null;
@@ -1114,7 +1115,8 @@
         }
 
         function downloadFile(fileId) {
-            window.open(`${API_BASE}/past-papers/${PAPER_ID}/download?file_id=${fileId}`, '_blank');
+            window.open(`${API_BASE}/past-papers/${PAPER_ID}/download?file_id=${fileId}`); // TO register downloads
+            window.open(`${FILES_ENDPOINT}/${fileId}/download`);
         }
 
         async function removeFile(fileId) {
