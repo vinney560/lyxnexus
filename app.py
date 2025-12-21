@@ -7175,6 +7175,102 @@ def reorder_past_paper_files(paper_id):
         'success': True,
         'message': 'Files reordered successfully'
     })
+
+@app.route('/api/past-papers/<int:paper_id>/files', methods=['POST'])
+@login_required
+@admin_required
+def add_file_to_past_paper(paper_id):
+    """Add a file to a past paper (single file)"""
+    data = request.get_json()
+    
+    if not data or 'file_id' not in data:
+        return jsonify({'error': 'File ID is required'}), 400
+    
+    # Check if past paper exists and is active
+    past_paper = PastPaper.query.get(paper_id)
+    if not past_paper:
+        return jsonify({'error': 'Past paper not found'}), 404
+    if not past_paper.is_active:
+        return jsonify({'error': 'Past paper is not active'}), 400
+    
+    # Check if file exists
+    file = File.query.get(data['file_id'])
+    if not file:
+        return jsonify({'error': 'File not found'}), 404
+    
+    # Check if file is already added to this paper
+    existing_file = PastPaperFile.query.filter_by(
+        past_paper_id=paper_id,
+        file_id=data['file_id']
+    ).first()
+    
+    if existing_file:
+        return jsonify({'error': 'File already added to this past paper'}), 400
+    
+    # Get the highest order number for this paper
+    max_order = db.session.query(db.func.max(PastPaperFile.order)).filter_by(
+        past_paper_id=paper_id
+    ).scalar() or 0
+    
+    # Create the past paper file entry
+    past_paper_file = PastPaperFile(
+        past_paper_id=paper_id,
+        file_id=data['file_id'],
+        display_name=data.get('display_name'),
+        description=data.get('description'),
+        order=max_order + 1
+    )
+    
+    db.session.add(past_paper_file)
+    db.session.commit()
+    
+    return jsonify({
+        'success': True,
+        'message': 'File added to past paper successfully',
+        'paper_file_id': past_paper_file.id
+    })
+
+@app.route('/api/files/available')
+@login_required
+def get_available_files():
+    """Get files that are not already in the past paper"""
+    search = request.args.get('search', '')
+    paper_id = request.args.get('paper_id', type=int)
+    
+    # Build query
+    query = File.query.filter_by(is_active=True)
+    
+    # Apply search filter
+    if search:
+        query = query.filter(
+            db.or_(
+                File.filename.ilike(f'%{search}%'),
+                File.name.ilike(f'%{search}%'),
+                File.description.ilike(f'%{search}%')
+            )
+        )
+    
+    if paper_id:
+        existing_file_ids = db.session.query(PastPaperFile.file_id)\
+            .filter_by(past_paper_id=paper_id)\
+            .subquery()
+        
+        query = query.filter(~File.id.in_(existing_file_ids))
+    
+    files = query.order_by(File.uploaded_at.desc()).limit(100).all()
+    
+    return jsonify({
+        'files': [{
+            'id': file.id,
+            'filename': file.filename,
+            'name': file.name or file.filename,
+            'description': file.description,
+            'file_type': file.file_type,
+            'file_size': file.file_size,
+            'uploaded_at': file.uploaded_at.isoformat() if file.uploaded_at else None,
+            'uploaded_by': file.uploaded_by_user.name if file.uploaded_by_user else 'Unknown'
+        } for file in files]
+    })        
 #==========================================
 #           REGISTERING ADMIN API
 #==========================================

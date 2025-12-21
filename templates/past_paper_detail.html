@@ -975,18 +975,19 @@
 
         async function loadAvailableFiles(search = '') {
             const container = document.getElementById('available-files');
-            
+
             try {
                 const params = new URLSearchParams();
                 if (search) params.append('search', search);
-                
+                params.append('paper_id', PAPER_ID);
+
                 const response = await fetch(`${API_BASE}/files/available?${params}`);
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
-                
+
                 const data = await response.json();
-                
+
                 if (data.files.length === 0) {
                     container.innerHTML = `
                         <div class="text-center py-8">
@@ -996,10 +997,10 @@
                     `;
                     return;
                 }
-                
+
                 container.innerHTML = data.files.map(file => {
                     const fileIcon = getFileIcon(file.file_type, file.filename);
-                    
+
                     return `
                     <div class="file-card glass-morph rounded-lg p-4 mb-3 cursor-pointer transition-all transform hover:scale-95"
                          onclick="toggleFileSelection(${file.id})"
@@ -1022,9 +1023,9 @@
                     </div>
                     `;
                 }).join('');
-                
+
                 updateFileSelectionUI();
-                
+
             } catch (error) {
                 container.innerHTML = `
                     <div class="text-center py-8">
