@@ -1007,6 +1007,8 @@
         document.getElementById('backMain').addEventListener('click', () => {
             const backMain = document.getElementById("backMain");
             const originalContent = backMain.innerHTML;
+            IS_ADMIN = {{ current_user.is_admin }};
+            backMainNav = IS_ADMIN ? '/admin' : '/main-page';
         
             backMain.innerHTML = '<i class="fas fa-spinner fa-spin"></i> exiting...';
             backMain.style.transition = 'opacity 0.3s';
@@ -1017,7 +1019,7 @@
             }, 200);
         
             setTimeout(() => {
-                window.location.href = '/main-page';
+                window.location.href = backMainNav;
                 backMain.innerHTML = '<i class="fas fa-arrow-left mr-2"></i> Back ';
                 backMain.style.opacity = 1;
             }, 500);

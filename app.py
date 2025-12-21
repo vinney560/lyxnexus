@@ -6953,6 +6953,8 @@ def get_timetable_by_day(day):
     return jsonify(result)
 
 # =======================================================
+# Archives Papers
+# =======================================================
 @app.route('/past-papers')
 @login_required
 def past_papers():
