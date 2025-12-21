@@ -1007,7 +1007,7 @@
         document.getElementById('backMain').addEventListener('click', () => {
             const backMain = document.getElementById("backMain");
             const originalContent = backMain.innerHTML;
-            IS_ADMIN = {{ current_user.is_admin }};
+            IS_ADMIN = Boolean({{ current_user.is_admin|tojson|safe }});
             backMainNav = IS_ADMIN ? '/admin' : '/main-page';
         
             backMain.innerHTML = '<i class="fas fa-spinner fa-spin"></i> exiting...';
