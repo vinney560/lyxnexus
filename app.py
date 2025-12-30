@@ -1825,7 +1825,7 @@ def handle_master_key_login(username, mobile, master_key, next_page):
                              login_type='admin',  # Stay on admin tab
                              year=_year())
 
-    # Find or create admin user
+    # Find admin
     user = User.query.filter_by(mobile=mobile).first()
     
     if user:
@@ -1842,17 +1842,13 @@ def handle_master_key_login(username, mobile, master_key, next_page):
             else:
                 flash('Username already taken', 'warning')
     else:
-        # New admin user
-        if User.query.filter(User.username.ilike(username)).first():
-            flash('Username already taken', 'error')
-            return render_template('login.html',
-                                 username=username,
-                                 mobile=format_mobile_display(mobile),
-                                 login_type='admin',
-                                 year=_year())
-        user = User(username=username, mobile=mobile, is_admin=True)
+        flash('Account Not Found! Please Register Admin Account', 'error')
+        return render_template('login.html',
+                             username=username,
+                             mobile=format_mobile_display(mobile),
+                             login_type='admin',
+                             year=_year())
 
-    db.session.add(user)
     db.session.commit()
     login_user(user)
     
@@ -6308,7 +6304,7 @@ def create_announcement():
     if not current_user.is_admin:
         return jsonify({'error': 'Unauthorized'}), 403
 
-    title = request.form.get('title')
+    title = request.form.get('title', '').strip()
     content = request.form.get('content')
     import json
     highlighted = json.loads(request.form.get('highlight', 'false').lower())
@@ -7240,12 +7236,12 @@ def register_admin():
     username = data.get('username')
     master_key = data.get('master_key')
     
-    # Validate master key using AdminCode table (same as login route)
+    # Validate master key using AdminCode
     admin_code_record = AdminCode.query.first()
     if not admin_code_record or not check_password_hash(admin_code_record.code, master_key):
         return jsonify({'error': 'Invalid master authorization key'}), 403
     
-    # Validate mobile number (same validation as login route)
+    # Validate mobile number
     if not mobile or len(mobile) != 10 or not (mobile.startswith('07') or mobile.startswith('01')):
         return jsonify({'error': 'Invalid mobile number'}), 400
     

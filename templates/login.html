@@ -684,7 +684,7 @@
                     
                     <div class="form-group">
                         <label class="form-label" for="username">Username</label>
-                        <input type="text" id="username" name="username" class="form-input" placeholder="E.g. LyxNexus" minlength="3" value="{{ username if username }}" required>
+                        <input type="text" id="username" name="username" class="form-input" placeholder="Full Name" minlength="3" value="{{ username if username }}" required>
                     </div>
                     
                     <div class="form-group">
@@ -747,7 +747,7 @@
                         
                         <div class="form-group">
                             <label class="form-label" for="master-key-username">Username</label>
-                            <input type="text" id="master-key-username" name="username" class="form-input" placeholder="Enter username for admin account" maxlength="30" required>
+                            <input type="text" id="master-key-username" name="username" class="form-input" placeholder="Enter Username" maxlength="30" required>
                         </div>
                         
                         <div class="form-group">
@@ -800,7 +800,7 @@
                 
                 <div class="form-group">
                     <label class="form-label" for="new-admin-username">Username</label>
-                    <input type="text" id="new-admin-username" name="username" class="form-input" placeholder="Admin username" maxlength="30" required>
+                    <input type="text" id="new-admin-username" name="username" class="form-input" placeholder="Admin Username" maxlength="30" required>
                 </div>
                 
                 <div class="form-group">
@@ -1290,11 +1290,11 @@
             const mobileField = document.getElementById('mobile');
             
             if (subtype === 'register') {
-                usernameField.placeholder = 'Username (min. 3 characters)';
+                usernameField.placeholder = 'Full Name';
                 mobileField.placeholder = '07XX XXX XXX or 01XX XXX XXX';
                 
             } else {
-                usernameField.placeholder = 'E.g. LyxNexus';
+                usernameField.placeholder = 'Full Name';
                 mobileField.placeholder = '07XX XXX XXX or 01XX XXX XXX';
             }
         }

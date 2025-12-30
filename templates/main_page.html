@@ -3920,7 +3920,7 @@
         
             const optionsDate = { 
                 year: 'numeric', 
-                month: 'long', 
+                month: 'short', 
                 day: 'numeric'
             };
             const optionsTime = {
@@ -4626,16 +4626,6 @@
                             <h3 class="text-xl uppercase break-all underline underline-offset-8 decoration-red-500 decoration-double sm:text-2xl font-extrabold text-white leading-snug break-words">
                                 ${announcement.title}
                             </h3>
-
-                            <div class="flex items-center gap-2">
-                                <i class="fa fa-clock text-gray-400"></i>
-                                <span class="text-xs sm:text-sm whitespace-nowrap font-bold 
-                                           underline underline-offset-2 decoration-blue-400 
-                                           text-transparent bg-clip-text 
-                                           bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400">
-                                    ${formatDate(announcement.created_at)}
-                                </span>
-                            </div>
                         </div>
 
                         <div class="announcement-content-wrapper mb-4">
@@ -4660,6 +4650,15 @@
                             <span class="text-gray-400 text-xs sm:text-sm">
                                 By: ${announcement.author?.username || "Unknown"}
                             </span>
+                            <div class="flex items-center gap-2">
+                                <i class="fa fa-clock text-gray-400"></i>
+                                <span class="text-xs sm:text-sm whitespace-nowrap font-bold 
+                                           underline underline-offset-2 decoration-blue-400 
+                                           text-transparent bg-clip-text 
+                                           bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400">
+                                    ${formatDate(announcement.created_at)}
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </div>

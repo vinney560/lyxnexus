@@ -635,9 +635,9 @@ class MockDataGenerator:
         # Generate announcements
         announcements = []
         announcement_titles = [
-            "Important System Update",
-            "New Assignment Posted",
-            "Class Schedule Changes",
+            "",
+            "",
+            "",
             "Holiday Announcement",
             "Workshop Opportunity",
             "Exam Schedule Released",
@@ -664,7 +664,7 @@ class MockDataGenerator:
             
             announcements.append({
                 'id': i,
-                'title': random.choice(announcement_titles) + f" #{i}",
+                'title': random.choice(announcement_titles),
                 'content': content,
                 'author': random.choice(users),
                 'has_file': has_file,
