@@ -4648,7 +4648,7 @@
 
                         <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mt-auto pt-4 border-t border-gray-700">
                             <span class="text-gray-400 text-xs sm:text-sm">
-                                By: ${announcement.author?.username || "Unknown"}
+                                <i class="fas fa-user text-xs mr-1"></i>${announcement.author?.username || "Unknown"}
                             </span>
                             <div class="flex items-center gap-2">
                                 <i class="fa fa-clock text-gray-400"></i>
@@ -5971,7 +5971,7 @@
                 snowContainer.appendChild(snowflake);
             }
 
-            const icons = ['🎄', '🎅', '🦌', '🎁', '🌟', '❄️'];
+            const icons = ['📔', '📕', '📖', '📗', '📑', '📚', '📘'];
             for (let i = 0; i < 4; i++) {
                 const icon = document.createElement('div');
                 icon.innerHTML = icons[Math.floor(Math.random() * icons.length)];
