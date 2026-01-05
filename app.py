@@ -7112,9 +7112,12 @@ def download_past_paper(paper_id):
             paper.download_count += 1
             db.session.commit()
         
-        return send_file(pp_file.file.filepath, 
-                        as_attachment=True, 
-                        download_name=pp_file.file.filename)
+        return jsonify(
+            {
+                'success': True,
+                'message': 'Download Started'
+            }
+        )
     
 @app.route('/api/past-papers/<int:paper_id>', methods=['DELETE'])
 @login_required

@@ -1122,8 +1122,9 @@
         }
 
         function downloadFile(fileId) {
-            window.open(`${API_BASE}/past-papers/${PAPER_ID}/download?file_id=${fileId}`); // TO register downloads
             window.open(`${FILES_ENDPOINT}/${fileId}/download`);
+            window.open(`${API_BASE}/past-papers/${PAPER_ID}/download?file_id=${fileId}`); // TO register downloads
+            showToast('Download started', 'info');
         }
 
         async function removeFile(fileId) {
