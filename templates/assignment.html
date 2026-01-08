@@ -117,7 +117,40 @@
         border-radius: 15px;
         padding: 20px;
         margin-bottom: 20px;
-        border-left: 4px solid #8B5CF6;
+        border-left: 2px solid #8B5CF6;
+        border-right: 1px solid rgb(29, 153, 255);
+        border-top: 1px solid rgb(29, 153, 255);
+        border-bottom: 1px solid rgb(29, 153, 255);
+    }
+
+    .description-content {
+        display: flex;
+        background-color: #111827;
+        border: 1px solid rgb(4, 81, 107);
+        border-radius: 7px;
+        padding: 7px 5px 15px;
+        overflow-x: scroll;
+        word-break: normal;
+        line-break: auto;
+        word-wrap: break-word;
+    }
+
+    .description-content::-webkit-scrollbar {
+        width: 6px;
+        height: 3px;
+    }
+    
+    .description-content::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    
+    .description-content::-webkit-scrollbar-thumb {
+        background: rgba(59, 130, 246, 0.3);
+        border-radius: 3px;
+    }
+    
+    .description-content::-webkit-scrollbar-thumb:hover {
+        background: rgba(59, 130, 246, 0.5);
     }
     
     .file-preview-container {
@@ -201,7 +234,6 @@
         overflow-y: hidden;
     }
 
-    /* Popup Modal Styles */
     .popup-overlay {
         position: fixed;
         top: 0;
@@ -382,13 +414,13 @@
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div class="assignment-detail-card">
                 <div class="flex justify-between items-start mb-4">
-                    <h2 class="text-2xl font-bold">{{ assignment.title }}</h2>
+                    <h2 class="text-2xl font-bold underline underline-offset-2">{{ assignment.title }}</h2>
                     <span id="statusBadge" class="status-badge">
                         Calculating...
                     </span>
                 </div>
                 
-                <div class="mb-6 text-gray-300 math-content" id="assignmentDescription">
+                <div class="mb-6 text-gray-300 description-content math-content" id="assignmentDescription">
                     {{ assignment.description or 'No description provided.' }}
                 </div>
                 

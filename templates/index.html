@@ -1011,6 +1011,26 @@
     .view-details-btn:active {
         transform: translateY(1px);
     }
+
+    .social-link {
+        width: 45px;
+        height: 45px;
+        border-radius: 10px;
+        background: var(--card-bg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #94a3b8;
+        font-size: 1.2rem;
+        transition: all 0.3s ease;
+        text-decoration: none;
+    }
+    
+    .social-link:hover {
+        color: var(--accent-blue);
+        transform: translateY(-3px);
+        background: rgba(59, 130, 246, 0.1);
+    }
 </style>
 <body class="custom-bg">
     
@@ -1214,7 +1234,7 @@
         </section>
     </main>
 
-    <footer class="mt-20 py-10 border-t border-slate-800">
+    <footer class="mt-20 mb-20 y-10 border-t border-slate-800">
         <div class="max-w-6xl mx-auto px-4">
             <div class="flex flex-col md:flex-row justify-between items-center">
                 <div class="mb-6 md:mb-0">
@@ -1234,14 +1254,14 @@
                     <p class="mt-2 text-slate-400">Flexibity and Innovation is the key to success.</p>
                 </div>
                 <div class="flex space-x-6">
-                    <a href="https://wa.me/254740694312" target="_blank" class="text-slate-400 hover:text-blue-400 transition-colors text-lg"><i class="fab fa-whatsapp"></i></a>
-                    <a href="mailto:vincentkipgetich479@gmail.com" target="_blank" class="text-slate-400 hover:text-blue-400 transition-colors text-lg"><i class="fas fa-envelope"></i></a>
-                    <a href="https://www.linkedin.com/in/vincent-kipngetich-44bb84394/" target="_blank" class="text-slate-400 hover:text-blue-400 transition-colors text-lg"><i class="fab fa-linkedin"></i></a>
-                    <a href="https://www.tiktok.com/@daudikibetrono" target="_blank" class="text-slate-400 hover:text-blue-400 transition-colors text-lg"><i class="fab fa-tiktok"></i></a>
+                    <a href="https://wa.me/254740694312" target="_blank" class="social-link"><i class="fab fa-whatsapp"></i></a>
+                    <a href="mailto:vincentkipgetich479@gmail.com" target="_blank" class="social-link"><i class="fas fa-envelope"></i></a>
+                    <a href="https://www.linkedin.com/in/vincent-kipngetich-44bb84394/" target="_blank" class="social-link"><i class="fab fa-linkedin"></i></a>
+                    <a href="https://www.tiktok.com/@daudikibetrono" target="_blank" class="social-link"><i class="fab fa-tiktok"></i></a>
                 </div>
             </div>
-            <div class="mt-8 pt-8 border-t border-slate-800 text-center text-slate-500 text-sm">
-                <p>© 2025 LyxNexus. All rights reserved.</p>
+            <div class="mt-4 pt-8 border-t border-slate-800 text-center text-slate-500 text-sm">
+                <p>© {{ year }} LyxNexus. All rights reserved.</p>
             </div>
         </div>
     </footer>

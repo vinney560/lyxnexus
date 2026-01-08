@@ -7100,12 +7100,6 @@ def download_past_paper(paper_id):
     file_id = request.args.get('file_id')
     
     if file_id:
-        # Download specific file
-        pp_file = PastPaperFile.query.filter_by(
-            past_paper_id=paper_id,
-            file_id=file_id
-        ).first_or_404()
-        
         # Increment download count for the past paper
         paper = PastPaper.query.get(paper_id)
         if paper:
