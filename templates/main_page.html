@@ -6,14 +6,14 @@
     <title>Main | LyxNexus</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="manifest" href="/manifest.json">
-    <meta name="keywords" content="education, coding, programming, web development, technology, online courses, learn to code" />
+    <meta name="keywords" content="Lyx Nexus, Kisii LyxNexus, kisii lyxnexus, kisii university lyxnexus, kisii university lyx nexus, lyx nexus, lyxnexus" />
     <meta name="author" content="Vincent Kipngetich" />
     <meta name="robots" content="index, follow" />
     <link rel="canonical" href="https://lyxnexus.onrender.com/" />
     <link rel="icon" href="https://lyxnexus.onrender.com/uploads/favicon-1.png"/>
 
     <meta property="og:title" content="Main Page | LyxNexus" />
-    <meta property="og:description" content="LyxNexus is a simple yet powerful class hub designed to keep everything in one place — from announcements and assignments to topics and class discussions." />
+    <meta property="og:description" content="LyxNexus Main Page is a simple yet powerful class hub designed to keep everything in one place — from announcements and assignments to topics and class discussions." />
     <meta property="og:image" content="https://lyxnexus.onrender.com/favicon.ico" />
     <meta property="og:url" content="https://lyxnexus.onrender.com/" />
 
@@ -1814,9 +1814,6 @@
                     <button class="btn" id="mark-all-read-btn">
                         <i class="fas fa-check-double mr-2"></i>Mark All as Read
                     </button>
-                    <button class="btn btn-secondary" id="close-notification-btn">
-                        <i class="fas fa-times mr-2"></i>Close
-                    </button>
                 </div>
             </div>
         </div>                            
@@ -2539,7 +2536,6 @@
             constructor() {
                 this.overlay = document.getElementById('notification-overlay');
                 this.closeBtn = document.getElementById('close-notification-overlay');
-                this.closeNotificationBtn = document.getElementById('close-notification-btn');
                 this.markAllReadBtn = document.getElementById('mark-all-read-btn');
                 this.notificationContent = document.getElementById('notification-content');
                 this.notifications = [];
@@ -2553,12 +2549,11 @@
                     this.closeBtn.addEventListener('click', () => this.hide());
                 }
             
-                if (this.closeNotificationBtn) {
-                    this.closeNotificationBtn.addEventListener('click', () => this.hide());
-                }
-            
                 if (this.markAllReadBtn) {
-                    this.markAllReadBtn.addEventListener('click', () => this.markAllAsRead());
+                    this.markAllReadBtn.addEventListener('click', () => {
+                        this.markAllAsRead();
+                        this.hide();
+                    });
                 }
             
                 this.overlay.addEventListener('click', (e) => {
@@ -3558,7 +3553,7 @@
                                 <button onclick="window.location.href='/assignment/${assignment.id}'" 
                                         class="btn text-sm sm:text-base px-4 py-2 text-blue-400 border border-blue-500 rounded-lg hover:bg-blue-600/20 transition-colors flex items-center gap-1 self-start sm:self-auto">
                                     <i class="fas fa-paper-plane mr-2" style="color: white;"></i>
-                                    <span style="color: white;"> View File</span>
+                                    <span style="color: white;"> More Info</span>
                                 </button>
                             </div>
                         </div>
@@ -3576,7 +3571,7 @@
                             <h3 class="text-xl font-bold mb-2">${this.highlightText(topic.name, this.currentQuery)}</h3>
                             <p class="text-gray-300 mb-2 whitespace-pre-wrap break-words break-all">${this.highlightText(topic.description, this.currentQuery)}</p>
                             <button class="btn text-sm px-4 py-2 w-full" onclick="window.location.href='/material/${topic.id}'">
-                                <i class="fas fa-folder-open mr-1"></i> View Materials
+                                <i class="fas fa-folder-open mr-1"></i> View Notes
                             </button>
                         </div>
                     `;
@@ -4962,7 +4957,7 @@
                                             <button onclick="window.location.href='/assignment/${assignment.id}'" 
                                                     class="btn text-sm sm:text-base px-4 py-2 text-blue-400 border border-blue-500 rounded-lg hover:bg-blue-600/20 transition-colors flex items-center gap-1 self-start sm:self-auto flex-shrink-0">
                                                 <i class="fas fa-paper-plane mr-2" style="color: white;"></i>
-                                                <span style="color: white;">View File</span>
+                                                <span style="color: white;">More Info</span>
                                             </button>
                                         </div>
                                     </div>
@@ -5016,7 +5011,7 @@
                     <h3 class="text-xl font-bold mb-2">${topic.name}</h3>
                     <p class="text-gray-300 mb-2 whitespace-pre-wrap break-words break-all">${topic.description}</p>
                     <button class="btn text-sm px-4 py-2 w-full" onclick="window.location.href='/material/${topic.id}'">
-                        <i class="fas fa-folder-open mr-1"></i> View Materials
+                        <i class="fas fa-folder-open mr-1"></i> View Notes
                     </button>
                 </div>
                 `;

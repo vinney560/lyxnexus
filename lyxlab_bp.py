@@ -33,7 +33,7 @@ projects = {
         'name': 'LyxNexus',
         'credentials': {
             'username': 'LyxNexus',
-            'mobile': '0795959595'
+            'mobile': '0112167194'
         },
         'status': 'active'
     },

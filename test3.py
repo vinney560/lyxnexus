@@ -120,7 +120,7 @@ def login():
     
     # GET request - render login page
     return render_template('login.html', 
-                         year=datetime.datetime.now().year,
+                         year=datetime.now().year,
                          username=request.args.get('username', ''),
                          mobile=request.args.get('mobile', ''))
 
@@ -356,11 +356,11 @@ def navigation_guide():
 # Error handlers
 @app.errorhandler(404)
 def not_found_error(error):
-    return render_template('404.html', year=datetime.datetime.now().year), 404
+    return render_template('404.html', year=datetime.now().year), 404
 
 @app.errorhandler(500)
 def internal_error(error):
-    return render_template('500.html', year=datetime.datetime.now().year), 500
+    return render_template('500.html', year=datetime.now().year), 500
 
 @app.route('/dashboard')
 def dashboard():

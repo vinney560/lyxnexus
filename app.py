@@ -6,7 +6,7 @@ eventlet.monkey_patch()
 from flask_socketio import SocketIO, emit, join_room, leave_room
 
 import os
-from flask import Flask, jsonify, request, abort, send_from_directory, render_template, redirect, url_for, flash, session
+from flask import Flask, jsonify, request, abort, send_from_directory, render_template, redirect, url_for, flash, session, request, make_response
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from flask import jsonify, request, send_file
 from io import BytesIO # For file handling & Download
@@ -819,7 +819,7 @@ scheduler.start()
 
 log_status("Keep-alive scheduler started — pinging both DBs every 3 minutes")
 atexit.register(lambda: scheduler.shutdown(wait=False))
-#------------------------------ Aiven max conn pool Close ------------
+#------------------- Aiven max conn pool Close ------------------
 
 """Closes any Ideal Conn to prevent Max conn Limit"""
 def auto_close_sessions():
@@ -837,7 +837,7 @@ def auto_close_sessions():
                 with db.engine.connect() as conn:
                     # Get current database name
                     db_result = conn.execute(text("SELECT current_database();"))
-                    db_name = db_result.scalar()
+                    db_name = db_result.scalar() 
                     
                     # Count connections to current database only
                     result = conn.execute(text("""
@@ -1049,14 +1049,11 @@ with app.app_context():
 
 
 #===========================================================
-from flask import Flask, render_template, request, make_response
-
 @app.route('/robots.txt')
 def robots():
     return """User-agent: *
 Allow: /
 Disallow: /admin/
-Disallow: /private/
 
 Sitemap: https://lyxnexus.lyxnexus.xo.je/sitemap.xml
 """
@@ -1097,7 +1094,19 @@ def sitemap():
     <loc>{base_url}/files</loc>
     <lastmod>{current_date}</lastmod>
     <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>{base_url}/profile</loc>
+    <lastmod>{current_date}</lastmod>
+    <changefreq>montlyly</changefreq>
     <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>{base_url}/terms</loc>
+    <lastmod>{current_date}</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>1.0</priority>
   </url>
 </urlset>'''
     

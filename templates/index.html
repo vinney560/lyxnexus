@@ -7,8 +7,7 @@
     <title>Class Portal | LyxNexus</title>
     
     <!-- SEO Meta -->
-    <meta name="description" content="LyxNexus is a simple yet powerful class hub designed to keep everything in one place — from announcements and assignments to topics and class discussions." />
-    <meta name="keywords" content="education, coding, programming, web development, technology, online courses, learn to code" />
+    <meta name="keywords" content="Lyx Nexus, Kisii LyxNexus, kisii lyxnexus, kisii university lyxnexus, kisii university lyx nexus, lyx nexus, lyxnexus" />
     <meta name="author" content="Vincent Kipngetich" />
     <meta name="robots" content="index, follow" />
     <link rel="canonical" href="https://lyxnexus.onrender.com/" />
@@ -1234,7 +1233,7 @@
         </section>
     </main>
 
-    <footer class="mt-20 mb-20 y-10 border-t border-slate-800">
+    <footer class="mt-22 mb-24 y-10 border-t border-slate-800">
         <div class="max-w-6xl mx-auto px-4">
             <div class="flex flex-col md:flex-row justify-between items-center">
                 <div class="mb-6 md:mb-0">
@@ -1251,7 +1250,7 @@
                         </div>
                         <span class="text-xl font-bold gradient-text">LyxNexus</span>
                     </div>
-                    <p class="mt-2 text-slate-400">Flexibity and Innovation is the key to success.</p>
+                    <p class="mt-4 text-slate-400">Flexibity and Innovation is the key to success.</p>
                 </div>
                 <div class="flex space-x-6">
                     <a href="https://wa.me/254740694312" target="_blank" class="social-link"><i class="fab fa-whatsapp"></i></a>
@@ -1678,7 +1677,7 @@
                     </div>
                   </div>
                   <button class="view-details-btn">
-                    View Details <i class="fas fa-arrow-right text-xs ml-1"></i>
+                    Read More <i class="fas fa-arrow-right text-xs ml-1"></i>
                   </button>
                 </div>                
               </div>
@@ -1788,7 +1787,7 @@
                         <span class="text-slate-400 text-sm">Topic: ${assignment.topic?.name || 'General'}</span>
                         <button onclick="window.location.href='/assignment/${assignment.id}'" class="btn btn-sm">
                             <i class="fas fa-paper-plane"></i>
-                            View File
+                            More Details
                         </button>
                     </div>
                 </div>
@@ -1814,11 +1813,11 @@
                     <div class="feature-icon">
                         <i class="fas fa-book"></i>
                     </div>
-                    <h3 class="text-xl font-bold mb-4 text-slate-100">${topic.name}</h3>
+                    <h3 class="text-xl font-bold mb-4 text-slate-100 underline">${topic.name}</h3>
                     <p class="text-slate-300 mb-4 break-all hyphens-auto whitespace-pre-wrap break-words">${topic.description}</p>
                     <button class="btn btn-sm w-full" onclick="window.location.href='/material/${topic.id}'">
                         <i class="fas fa-folder-open"></i>
-                        View Materials
+                        View Notes
                     </button>
                 </div>
             `).join('');

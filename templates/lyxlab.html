@@ -6,8 +6,7 @@
     <title>LyxLab Projects</title>
     
     <!-- SEO Meta -->
-    <meta name="description" content="LyxLab is a collection of all the projects I have made." />
-    <meta name="keywords" content="education, coding, programming, web development, technology, online courses, learn to code" />
+    <meta name="keywords" content="Lyx Nexus, Kisii LyxNexus, kisii lyxnexus, kisii university lyxnexus, kisii university lyx nexus, lyx nexus, lyxnexus" />
     <meta name="author" content="Vincent Kipngetich" />
     <meta name="robots" content="index, follow" />
     <link rel="canonical" href="https://lyxnexus.onrender.com/" />
@@ -151,14 +150,26 @@
         .password-value {
             color: #f87171;
         }
+
+        .logo-container {
+            display: contents;
+            border: 2px solid #44ff0b;
+        }
+
+        .logo-container:hover {
+            transform: scale(1.035);
+            border: 3px solid #37d506;
+        }
     </style>
 </head>
 <body class="bg-gray-900 text-white min-h-screen">
     <div class="container mx-auto px-4 py-8">
         <!-- Header -->
         <header class="text-center mb-12">
-            <div class="logo-container inline-block p-4 rounded-2xl bg-gradient-to-r from-blue-500 to-purple-600 mb-4">
-                <i class="fas fa-flask text-white text-4xl"></i>
+            <div class="logo-container inline-block rounded-full bg-gradient-to-r from-blue-500 to-purple-600 mb-4">
+                <img src="{{ url_for('uploaded_file', filename='lyxlab.png') }}"
+                    alt="LyxLab Intelligence"
+                    class="w-20 h-20 rounded-full object-cover"/>
             </div>
             <h1 class="text-4xl font-bold gradient-text mb-2">LyxLab</h1>
             <p class="text-gray-400 text-lg">Explore my projects and demo credentials</p>

@@ -5,14 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login | LyxNexus</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <meta name="keywords" content="education, coding, programming, web development, technology, online courses, learn to code" />
+    <meta name="keywords" content="Lyx Nexus, Kisii LyxNexus, kisii lyxnexus, kisii university lyxnexus, kisii university lyx nexus, lyx nexus, lyxnexus" />
     <meta name="author" content="Vincent Kipngetich" />
     <meta name="robots" content="index, follow" />
     <link rel="canonical" href="https://lyxnexus.onrender.com/" />
     <link rel="icon" href="https://lyxnexus.onrender.com/uploads/favicon-1.png"/>
         
     <meta property="og:title" content="Login | LyxNexus" />
-    <meta property="og:description" content="LyxNexus is a simple yet powerful class hub designed to keep everything in one place — from announcements and assignments to topics and class discussions." />
+    <meta property="og:description" content="LyxNexus Login require very simple steps; Enter your Username and Mobile Number to continue" />
     <meta property="og:image" content="https://lyxnexus.onrender.com/favicon.ico" />
     <meta property="og:url" content="https://lyxnexus.onrender.com/" />
         
@@ -610,6 +610,62 @@
     .custom-bg {
         background-image: url('/uploads/OIP10.jpg');
     }
+
+    .confirm-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    .confirm-modal-content {
+        text-align: center;
+        background: var(--bg-color);
+        border-radius: 15px;
+        padding: 30px;
+        width: 90%;
+        max-width: 500px;
+        border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+
+    .confirm-modal.active {
+        display: flex;
+    }
+    
+    .loading {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 40px;
+    }
+    
+    .spinner {
+        border: 4px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        border-top: 4px solid #3B82F6;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    .btn-danger {
+        background: linear-gradient(90deg, #EF4444, #DC2626);
+    }
+
+    .btn-secondary {
+        background: linear-gradient(90deg, #6B7280, #4B5563);
+    }
 </style>
 <body class="custom-bg bg-fixed bg-center bg-cover">
     <header class="nav-header">
@@ -818,6 +874,21 @@
             </form>
         </div>
     </div>
+
+    <div id="confirm-modal" class="confirm-modal">
+        <div class="confirm-modal-content">
+            <h3 class="text-2xl font-bold mb-4 gradient-text" id="confirm-title">Confirm Action</h3>
+            <p class="text-gray-400 font-awesome"> Hope this is your mobile. <span id="confirm-mobile" class="text-gray-300 mb-1 font-bold underline"></span></p>
+            <p class="text-gray-300 mb-6">By continuing, you agree to our <a href="/terms" class="font-bold text-purple-400 hover:underline">Terms of Usage</a></p>
+            <div class="flex flex-col-reverse sm:flex-row justify-end space-y-4 sm:space-y-0 space-y-reverse sm:space-x-3">
+                <button type="button" class="btn btn-secondary" id="confirm-cancel-btn">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirm-action-btn">
+                    <span class="btn-spinner"></span>
+                    Yes
+                </button>
+            </div>
+        </div>
+    </div>    
 
     <script>
         const API_BASE = '/api';
@@ -1299,6 +1370,33 @@
             }
         }
 
+        function showConfirmModal(mobile) {
+            const modal = document.getElementById('confirm-modal');
+            const mobileElement = document.getElementById('confirm-mobile');
+            mobileElement.textContent = mobile;
+            modal.classList.add('active');
+
+            document.getElementById('confirm-action-btn').onclick = function() {
+                const event = window.pendingFormEvent;
+                const loginButton = document.getElementById('login-student');
+                const subtype = document.getElementById('student-login-subtype').value;
+
+                if (subtype === 'login') {
+                    loginButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in...';
+                    showToast('Logging in...', 'info', 'Please Wait');
+                } else {
+                    loginButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Registering...';
+                    showToast('Creating account...', 'info', 'Please Wait');
+                }
+                loginButton.disabled = true;
+                modal.classList.remove('active');
+                event.target.submit();
+            };
+
+            document.getElementById('confirm-cancel-btn').onclick = function() {
+                modal.classList.remove('active');
+            };
+        }    
         // FORM VALIDATION FUNCTIONS
         function validateStudentForm(event) {
             const mobile = document.getElementById('mobile').value;
@@ -1326,12 +1424,14 @@
             
             let confirmMessage;
             if (subtype === 'login') {
-                confirmMessage = `Is this your mobile number? ${validation.formatted}. By continuing, you agree to our terms and conditions.`;
+                mobileValue = `${validation.formatted}`;
             } else {
-                confirmMessage = `Register with mobile number: ${validation.formatted}. By continuing, you agree to our terms and conditions.`;
+                mobileValue = `${validation.formatted}`;
             }
             
-            const confirmAction = confirm(confirmMessage);
+            window.pendingFormEvent = event;
+            showConfirmModal(mobileValue);
+            return false;
             if (!confirmAction) {
                 event.preventDefault();
                 return false;
@@ -1589,7 +1689,6 @@
             document.getElementById(modalId).style.display = 'none';
         }
 
-        // Initialize everything when DOM is loaded
         document.addEventListener('DOMContentLoaded', function() {
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}

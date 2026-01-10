@@ -6,7 +6,7 @@ app = Flask(__name__)
 
 @app.route('/main-page')
 def main_page():
-    return render_template('main_page.html')
+    return render_template('main_page.html', current_user=current_user)
 
 @app.route('/')
 def main():
