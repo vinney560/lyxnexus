@@ -24,6 +24,7 @@ def uploaded_file(filename):
 
 @app.route("/nav")
 def nav_guide():
+    
     return render_template("navigation.html")
 if __name__ == '__main__':
     app.run()
