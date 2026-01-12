@@ -1813,8 +1813,8 @@
                     <div class="feature-icon">
                         <i class="fas fa-book"></i>
                     </div>
-                    <h3 class="text-xl font-bold mb-4 text-slate-100 underline">${topic.name}</h3>
-                    <p class="text-slate-300 mb-4 break-all hyphens-auto whitespace-pre-wrap break-words">${topic.lecturer || 'N/A'}</p>
+                    <h3 class="text-xl font-bold mb-2 text-slate-100 underline">${topic.name}</h3>
+                    <p class="mb-4 break-all hyphens-auto whitespace-pre-wrap break-words text-gray-400 text-sm">Lecturer: ${topic.lecturer}</p>
                     <p class="text-slate-300 mb-4 break-all hyphens-auto whitespace-pre-wrap break-words">${topic.description}</p>
                     <button class="btn btn-sm w-full" onclick="window.location.href='/material/${topic.id}'">
                         <i class="fas fa-folder-open"></i>
