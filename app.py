@@ -222,7 +222,7 @@ class Topic(db.Model):
     name = db.Column(db.String(200), unique=True, nullable=True)
     description = db.Column(db.Text, nullable=True)
     lecturer = db.Column(db.String(200), nullable=True)
-    #contact = db.Column(db.String(100), nullable=True)
+    contact = db.Column(db.String(100), nullable=True)
     created_at = db.Column(db.DateTime, default=nairobi_time)
 
     # Relationship
@@ -597,7 +597,7 @@ with app.app_context():
     try:
         # Create tables if they don't exist
         db.create_all()
-        db.session.execute(text('ALTER TABLE "topic" ADD COLUMN lecturer VARCHAR(200)'))
+        db.session.execute(text('ALTER TABLE "topic" ADD COLUMN contact VARCHAR(100)'))
         db.session.commit()
         print("✅ Database tables created successfully!")
 
@@ -6734,6 +6734,8 @@ def get_topics():
             'id': topic.id,
             'name': topic.name,
             'description': topic.description,
+            'lecturer': topic.lecturer,
+            'contact': topic.contact,
             'created_at': topic.created_at.isoformat()
         })
     return jsonify(result)
@@ -6750,7 +6752,9 @@ def create_topic():
     topic = Topic(
         
         name=data.get('name'),
-        description=data.get('description')
+        description=data.get('description'),
+        lecturer=data.get('lecturer'),
+        contact=data.get('contact')
     )
     db.session.add(topic)
     db.session.commit()
@@ -6770,6 +6774,8 @@ def update_topic(id):
     
     topic.name = data.get('name', topic.name)
     topic.description = data.get('description', topic.description)
+    topic.lecturer = data.get('lecturer', topic.lecturer)
+    topic.contact = data.get('contact', topic.contact)
     db.session.commit()
     
     return jsonify({'message': 'Topic updated successfully'})

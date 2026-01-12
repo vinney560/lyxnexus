@@ -1365,6 +1365,8 @@
             <form id="topic-form">
                 <input type="hidden" id="topic-id">
                 <input type="text" id="topic-name" class="form-input" placeholder="Topic Name" required>
+                <input type="text" id="topic-lecturer" class="form-input" placeholder="Topic Lecturer" required>
+                <input type="text" id="topic-contact" class="form-input" placeholder="Lecturer Contact" required>
                 <textarea id="topic-description" class="form-input" rows="3" placeholder="Description" required></textarea>
                 <div class="flex flex-col-reverse sm:flex-row justify-end space-y-4 sm:space-y-0 space-y-reverse sm:space-x-3 mt-4">
                     <button type="button" class="btn bg-gray-600 hover:bg-gray-700 w-full sm:w-auto" onclick="closeModal('topic-modal')">Cancel</button>
@@ -1996,6 +1998,8 @@
               <div class="admin-card-content">
                 <div class="flex-1 mb-4 lg:mb-0">
                   <h3 class="admin-title">${escapeHtml(t.name)}</h3>
+                  <p class="text-gray-400 break-all hyphens-auto mt-1 whitespace-pre-wrap break-words mb-2">Lecturer: ${escapeHtml(t.lecturer || 'N/A')}</p>
+                  <p class="text-gray-400 break-all hyphens-auto mt-1 whitespace-pre-wrap break-words mb-2">Contact: ${escapeHtml(t.contact || 'N/A')}</p>
                   <p class="text-gray-400 break-all hyphens-auto mt-1 whitespace-pre-wrap break-words mb-2">${escapeHtml(t.description || '')}</p>
                   <div class="text-sm text-gray-500 mt-2">Created: ${formatDateSafe(t.created_at)}</div>
                 </div>
@@ -2297,6 +2301,8 @@
           if (!item) return alert('Topic not found');
           document.getElementById('topic-id') && (document.getElementById('topic-id').value = item.id);
           document.getElementById('topic-name') && (document.getElementById('topic-name').value = item.name || '');
+          document.getElementById('topic-lecturer') && (document.getElementById('topic-lecturer').value = item.lecturer || '');
+          document.getElementById('topic-contact') && (document.getElementById('topic-contact').value = item.contact || '');
           document.getElementById('topic-description') && (document.getElementById('topic-description').value = item.description || '');
           document.getElementById('topic-modal-title') && (document.getElementById('topic-modal-title').textContent = 'Edit Topic');
           document.getElementById('topic-submit-btn') && (document.getElementById('topic-submit-btn').textContent = 'Update Topic');
@@ -2324,7 +2330,9 @@
             try {
               const data = {
                 name: document.getElementById('topic-name')?.value || '',
-                description: document.getElementById('topic-description')?.value || ''
+                description: document.getElementById('topic-description')?.value || '',
+                lecturer: document.getElementById('topic-lecturer')?.value || '',
+                contact: document.getElementById('topic-contact')?.value || '',
               };
               if (currentEditingId) {
                 await sendData(`${ENDPOINTS.TOPICS}/${currentEditingId}`, data, 'PUT');
