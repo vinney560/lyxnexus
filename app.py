@@ -597,7 +597,6 @@ with app.app_context():
     try:
         # Create tables if they don't exist
         db.create_all()
-        db.session.execute(text('ALTER TABLE "topic" ADD COLUMN contact VARCHAR(100)'))
         db.session.commit()
         print("✅ Database tables created successfully!")
 
