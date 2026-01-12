@@ -215,12 +215,14 @@ class Announcement(db.Model):
         return f"/announcement-file/{self.id}/{self.file_name}"
 
 # =========================================
-# TOPIC / THEME MODEL
+# TOPIC / UNIT MODEL
 # =========================================
 class Topic(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(200), unique=True, nullable=True)
     description = db.Column(db.Text, nullable=True)
+    lecturer = db.Column(db.String(200), nullable=True)
+    #contact = db.Column(db.String(100), nullable=True)
     created_at = db.Column(db.DateTime, default=nairobi_time)
 
     # Relationship
@@ -595,6 +597,7 @@ with app.app_context():
     try:
         # Create tables if they don't exist
         db.create_all()
+        db.session.execute(text('ALTER TABLE "topic" ADD COLUMN lecturer VARCHAR(200)'))
         db.session.commit()
         print("✅ Database tables created successfully!")
 
@@ -7102,26 +7105,22 @@ def get_past_paper_detail(paper_id):
         } for pp_file in sorted(paper.files, key=lambda x: x.order)]
     })
 
-@app.route('/api/past-papers/<int:paper_id>/download')
+@app.route('/api/past-papers/<int:paper_id>/download', methods=['GET'])
 @login_required
 def download_past_paper(paper_id):
-    """Download a past paper file"""
-    file_id = request.args.get('file_id')
-    
-    if file_id:
-        # Increment download count for the past paper
+    """Increment download count for a past paper"""
+    try:
         paper = PastPaper.query.get(paper_id)
         if paper:
             paper.download_count += 1
             db.session.commit()
-        
-        return jsonify(
-            {
-                'success': True,
-                'message': 'Download Started'
-            }
-        )
-    
+            print(f"Download count incremented for paper {paper_id}: {paper.download_count}")
+        else:
+            print(f"Paper with ID {paper_id} not found")
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error incrementing download count for paper {paper_id}: {str(e)}")
+            
 @app.route('/api/past-papers/<int:paper_id>', methods=['DELETE'])
 @login_required
 @admin_required
