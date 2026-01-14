@@ -1712,7 +1712,31 @@ print("📱 Use: whatsapp_bulk('Your message')")
 print("🧪 Test first: test_whatsapp_api()")
 # ==================== END SMS SERVICE ====================
 
-#==========================================
+# ==================== START OF RAPID API WASMS ====================
+def send_msg(mobile, msg):
+    url = "https://whatsapp-messaging-hub.p.rapidapi.com/WhatsappSendMessage"
+
+    payload = {
+    	"token": "ZJszbHhdC1lfa7SisNDc40vd8euuScazWtIdKoLr4Nd98LDWtPzN6clxZ2VMdBae",
+    	"phone_number_or_group_id": mobile,
+    	"is_group": False,
+    	"message": msg,
+    	"quoted_message_id": "",
+    	"quoted_phone_number": "",
+    	"reply_privately": False,
+    	"reply_privately_group_id": ""
+    }
+    headers = {
+    	"x-rapidapi-key": "4406e83311msh635cb32b3525e4bp17f9c1jsn874626c65441",
+    	"x-rapidapi-host": "whatsapp-messaging-hub.p.rapidapi.com",
+    	"Content-Type": "application/json"
+    }
+
+    response = requests.post(url, json=payload, headers=headers)
+
+    print(response.json())
+
+#======== END OF RAPID API WASMS ==========
 #                  NORMAL ROUTES
 #==========================================
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -1990,7 +2014,7 @@ def handle_student_login(user, username, mobile, login_subtype, next_page):
         db.session.commit()
         """ Send WhatsApp Welcome Message! """
         welcome_message = get_random_welcome_message(username, mobile)
-        whatsapp_result = whatsapp_single(mobile, welcome_message)
+        whatsapp_result = send_msg(format_mobile_send(mobile), welcome_message)
         if whatsapp_result:
             print("WhatsApp message sent successfully!")
         else:
@@ -2023,6 +2047,15 @@ def format_mobile_display(mobile):
     """Format mobile number for display"""
     if len(mobile) == 10:
         return f"{mobile[:2]} {mobile[2:5]} {mobile[5:8]} {mobile[8:]}"
+    return mobile
+
+def format_mobile_send(mobile):
+    """Format mobile number for sending WAsms"""
+    digits = re.sub(r'\D', '', mobile)
+    if len(digits) == 10 and digits.startswith('0'):
+        return f"254{digits[1:]}"
+    elif len(digits) == 12 and digits.startswith('254'):
+        return f"{digits}"
     return mobile
 #===================================================================
 
