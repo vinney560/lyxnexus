@@ -1717,7 +1717,7 @@ def send_msg(mobile, msg):
     url = "https://whatsapp-messaging-hub.p.rapidapi.com/WhatsappSendMessage"
 
     payload = {
-    	"token": "ZJszbHhdC1lfa7SisNDc40vd8euuScazWtIdKoLr4Nd98LDWtPzN6clxZ2VMdBae",
+    	"token": os.getenv("TOKEN_WASMS"),
     	"phone_number_or_group_id": mobile,
     	"is_group": False,
     	"message": msg,
@@ -2014,11 +2014,7 @@ def handle_student_login(user, username, mobile, login_subtype, next_page):
         db.session.commit()
         """ Send WhatsApp Welcome Message! """
         welcome_message = get_random_welcome_message(username, mobile)
-        whatsapp_result = send_msg(format_mobile_send(mobile), welcome_message)
-        if whatsapp_result:
-            print("WhatsApp message sent successfully!")
-        else:
-            print("WhatsApp not sent!!!")
+        send_msg(format_mobile_send(mobile), welcome_message)
 
         login_user(new_user)
         return redirect(url_for('nav_guide'))
