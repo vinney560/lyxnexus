@@ -1600,9 +1600,6 @@
               if (announcement.has_file && announcement.file_type?.startsWith("image/")) {
                   filePreview = `
                       <div class="relative">
-                          <div class="absolute -top-4 -left-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-1.5 rounded-r-full rounded-tl-full text-sm font-bold shadow-lg">
-                              <i class="fas fa-graduation-cap mr-1"></i>Year 1
-                          </div>
                           <div class="mb-4">
                               <a href="/login"
                                  class="inline-flex items-center gap-3 px-4 py-3 bg-gray-800/70 hover:bg-gray-700/80 border border-gray-600 hover:border-blue-400/50 rounded-xl transition-all duration-300 card-hover-lift group">
@@ -1661,6 +1658,9 @@
             
               return `
               <div class="announcement-card b-l-4 b-blue-500">
+                <div class="absolute -top-4 -left-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-1.5 rounded-r-full rounded-tl-full text-sm font-bold shadow-lg">
+                    <i class="fas fa-graduation-cap mr-1"></i>Year 1
+                </div>
                 ${filePreview}
                 <div class="flex justify-between items-start mb-3">
                   <h3 class="text-xl text-slate-100 uppercase underline underline-offset-4 decoration-sky-500 decoration-double font-bold">
