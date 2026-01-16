@@ -2320,10 +2320,10 @@
         const API_BASE = '/api';
         const ENDPOINTS = {
             USER: `${API_BASE}/user`,
-            ANNOUNCEMENTS: `${API_BASE}/announcements`,
-            ASSIGNMENTS: `${API_BASE}/assignments`,
-            TIMETABLE: `${API_BASE}/timetable`,
-            TOPICS: `${API_BASE}/topics`
+            ANNOUNCEMENTS: `${API_BASE}/announcements/specified`,
+            ASSIGNMENTS: `${API_BASE}/assignments/specified`,
+            TIMETABLE: `${API_BASE}/timetable/specified`,
+            TOPICS: `${API_BASE}/topics/specified`
         };
         
         let currentActiveSection = localStorage.getItem('activeSection') || 'announcements';

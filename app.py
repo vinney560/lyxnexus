@@ -601,11 +601,6 @@ with app.app_context():
     try:
         # Create tables if they don't exist
         db.create_all()
-        # Safer approach with existence check and proper column definition
-        db.session.execute(text('''
-            ALTER TABLE "timetable" 
-            ADD COLUMN IF NOT EXISTS user_id INTEGER;
-        '''))
         db.session.commit()
         print("✅ Database tables created successfully!")
 
@@ -6345,8 +6340,8 @@ def toggle_status(user_id):
 # =========================================
 import io
 
-@app.route('/api/announcements')
-def get_announcements():
+@app.route('/api/announcements/specified')
+def get_specified_announcements():
     try:
         announcements = Announcement.query\
             .join(User, Announcement.user_id == User.id)\
@@ -6371,6 +6366,30 @@ def get_announcements():
     except Exception as e:
         app.logger.exception("Failed to fetch announcements")
         return jsonify({'error': 'Failed to fetch announcements'}), 500
+
+@app.route('/api/announcements')
+def get_announcements():
+    try:
+        announcements = Announcement.query\
+            .order_by(Announcement.created_at.desc())\
+            .all()        
+        result = [{
+            'id': a.id,
+            'title': a.title,
+            'content': a.content,
+            'highlighted': a.highlighted,
+            'created_at': a.created_at.isoformat(),
+            'author': {'id': a.author.id, 'username': a.author.username} if a.author else None,
+            'has_file': a.has_file(),
+            'file_name': a.file_name,
+            'file_type': a.file_type,
+            'file_url': a.get_file_url()
+        } for a in announcements]
+        return jsonify(result)
+    except Exception as e:
+        app.logger.exception("Failed to fetch announcements")
+        return jsonify({'error': 'Failed to fetch announcements'}), 500
+
 
 from werkzeug.utils import secure_filename
 def shorten_filename_create(filename, length=17):
@@ -6543,14 +6562,41 @@ def serve_announcement_file(id, filename):
 # ASSIGNMENT API ROUTES
 # =========================================
 
-@app.route('/api/assignments')
-def get_assignments():
+@app.route('/api/assignments/specified')
+def get_specified_assignments():
     """Get all assignments"""
     assignments = Assignment.query\
             .join(User, Assignment.user_id == User.id)\
             .filter(
                 User.year == current_user.year,
             )\
+            .order_by(Assignment.due_date.asc())\
+            .all()
+    result = []
+    for assignment in assignments:
+        result.append({
+            'id': assignment.id,
+            'title': assignment.title,
+            'description': assignment.description,
+            'due_date': assignment.due_date.isoformat() if assignment.due_date else None,
+            'created_at': assignment.created_at.isoformat(),
+            'file_name': assignment.file_name,
+            'file_type': assignment.file_type,
+            'topic': {
+                'id': assignment.topic.id,
+                'name': assignment.topic.name
+            } if assignment.topic else None,
+            'creator': {
+                'id': assignment.creator.id,
+                'username': assignment.creator.username
+            } if assignment.creator else None
+        })
+    return jsonify(result)
+
+@app.route('/api/assignments')
+def get_assignments():
+    """Get all assignments"""
+    assignments = Assignment.query\
             .order_by(Assignment.due_date.asc())\
             .all()
     result = []
@@ -6798,11 +6844,29 @@ def preview():
 #              TOPIC API ROUTES
 # =========================================
 
+@app.route('/api/topics/specified')
+def get_specified_topics():
+    """Get all topics"""
+    topics = Topic.query\
+            .filter(Topic.user_id == current_user.id)\
+            .order_by(Topic.created_at.desc())\
+            .all()
+    result = []
+    for topic in topics:
+        result.append({
+            'id': topic.id,
+            'name': topic.name,
+            'description': topic.description,
+            'lecturer': topic.lecturer,
+            'contact': topic.contact,
+            'created_at': topic.created_at.isoformat()
+        })
+    return jsonify(result)
+
 @app.route('/api/topics')
 def get_topics():
     """Get all topics"""
     topics = Topic.query\
-            .filter(Topic.user_id == current_user.id)\
             .order_by(Topic.created_at.desc())\
             .all()
     result = []
@@ -6874,16 +6938,83 @@ def delete_topic(id):
 #==========================================
 #            TIMETABLE API ROUTES
 #==========================================
+@app.route('/api/timetable/specified', methods=['GET', 'POST'])
+def handle_timetable():
+    if request.method == 'GET':
+        timetable_slots = Timetable.query\
+            .join(User, Timetable.user_id == User.id)\
+            .filter(
+                User.year == current_user.year
+            )\
+            .order_by(
+                Timetable.day_of_week, 
+                Timetable.start_time
+            )\
+            .all()
+        
+        result = []
+        for slot in timetable_slots:
+            result.append({
+                'id': slot.id,
+                'day_of_week': slot.day_of_week,
+                'start_time': slot.start_time.strftime('%H:%M'),
+                'end_time': slot.end_time.strftime('%H:%M'),
+                'subject': slot.subject,
+                'room': slot.room,
+                'teacher': slot.teacher,
+                'topic': {
+                    'id': slot.topic.id,
+                    'name': slot.topic.name
+                } if slot.topic else None
+            })
+        return jsonify(result)
+
+    if request.method == 'POST':
+        if not current_user.is_admin:
+            return jsonify({'error': 'Unauthorized'}), 403
+
+        data = request.get_json()
+
+        try:
+            start_time_str = data.get('start_time')
+            end_time_str = data.get('end_time')
+
+            start_time = datetime.strptime(start_time_str, '%H:%M').time()
+            end_time = datetime.strptime(end_time_str, '%H:%M').time()
+
+            if start_time >= end_time:
+                return jsonify({'error': 'End time must be after start time'}), 400
+
+        except ValueError:
+            return jsonify({'error': 'Invalid time format. Use HH:MM format'}), 400
+        except Exception as e:
+            return jsonify({'error': f'Time parsing error: {str(e)}'}), 400
+
+        timetable_slot = Timetable(
+            id=gen_unique_id(Timetable),
+            day_of_week=data.get('day_of_week'),
+            start_time=start_time,
+            end_time=end_time,
+            subject=data.get('subject'),
+            room=data.get('room'),
+            teacher=data.get('teacher'),
+            topic_id=data.get('topic_id')
+        )
+
+        db.session.add(timetable_slot)
+        db.session.commit()
+
+        return jsonify({
+            'message': 'Timetable slot created successfully',
+            'id': timetable_slot.id
+        }), 201
+
 @app.route('/api/timetable/grouped', methods=['GET'])
 def get_timetable():
     """Get timetable grouped by day"""
 
     try:
         timetable_slots = Timetable.query\
-            .join(User, Timetable.user_id == User.id)\
-            .filter(
-                User.year == current_user.year
-            )\
             .order_by(
                 Timetable.day_of_week, 
                 Timetable.start_time
@@ -6923,10 +7054,6 @@ def get_timetable():
 def handle_timetable():
     if request.method == 'GET':
         timetable_slots = Timetable.query\
-            .join(User, Timetable.user_id == User.id)\
-            .filter(
-                User.year == current_user.year
-            )\
             .order_by(
                 Timetable.day_of_week, 
                 Timetable.start_time

@@ -857,29 +857,7 @@
                         <span class="text-sm">Admin access requires special privileges</span>
                     </div>
                 </div>
-                <!-- Year Selection Trigger -->
-                <div class="form-group">
-                    <label class="form-label">
-                        <i class="fas fa-calendar-alt mr-2"></i>Academic Year
-                    </label>
-                    <div id="year-display" class="glass-morph rounded-lg p-4 mb-4 hidden">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center">
-                                <i class="fas fa-graduation-cap text-blue-400 mr-3 text-lg"></i>
-                                <div>
-                                    <p class="text-sm text-gray-400">Academic Year</p>
-                                    <p class="font-semibold" id="display-year">Not selected</p>
-                                </div>
-                            </div>
-                            <button type="button" onclick="openYearModal('student')" class="text-sm text-blue-400 hover:text-blue-300 flex items-center">
-                                <i class="fas fa-edit mr-1"></i> Change
-                            </button>
-                        </div>
-                    </div>
-                    <button type="button" onclick="openYearModal('student')" class="btn-outline w-full" id="year-select-btn">
-                        <i class="fas fa-calendar-plus mr-2"></i> Select Academic Year
-                    </button>
-                </div>
+                
                 <div class="flex border-b border-gray-700 mb-4">
                     <button class="subtab-button active" data-subtab="admin-login-tab">Admin Login</button>
                     <button class="subtab-button" data-subtab="master-key-tab">Master Key Access</button>
@@ -1891,17 +1869,19 @@
             const subtype = document.getElementById('student-login-subtype').value;
             currentFormType = 'student';
 
-            const yearInput = document.getElementById('year-data');
-            if (!yearInput.value) {
-                event.preventDefault();
-                showToast('Please select your academic year', 'error', 'Year Validation Error');
-                openYearModal('student');
-                return false;
-            }
-            
-            if (!validateYearSelection()) {
-                event.preventDefault();
-                return false;
+            if (subtype === 'register') {
+                const yearInput = document.getElementById('year-data');
+                if (!yearInput.value) {
+                    event.preventDefault();
+                    showToast('Please select your academic year', 'error', 'Year Validation Error');
+                    openYearModal('student');
+                    return false;
+                }
+
+                if (!validateYearSelection()) {
+                    event.preventDefault();
+                    return false;
+                }
             }
 
             if (!username.trim()) {
@@ -1960,19 +1940,6 @@
             const loginButton = document.getElementById('admin-login-btn');
             currentFormType = 'admin';
 
-            const yearInput = document.getElementById('year-data');
-            if (!yearInput.value) {
-                event.preventDefault();
-                showToast('Please select your academic year', 'error', 'Validation Error');
-                openYearModal('student');
-                return false;
-            }
-
-            if (!validateYearSelection()) {
-                event.preventDefault();
-                return false;
-            }
-
             if (!username.trim()) {
                 event.preventDefault();
                 showToast('Please enter a username', 'error', 'Validation Error');
@@ -2007,18 +1974,6 @@
             const loginButton = document.getElementById('master-key-btn');
             currentFormType = 'master';
 
-            const yearInput = document.getElementById('year-data');
-            if (!yearInput.value) {
-                event.preventDefault();
-                showToast('Please select your academic year', 'error', 'Validation Error');
-                openYearModal('student');
-                return false;
-            }
-
-            if (!validateYearSelection()) {
-                event.preventDefault();
-                return false;
-            }
             if (!username.trim()) {
                 event.preventDefault();
                 showToast('Please enter a username', 'error', 'Validation Error');
