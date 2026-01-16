@@ -7474,8 +7474,72 @@ def add_file_to_past_paper(paper_id):
 #==========================================
 
 @limiter.limit("5 per minute") 
-@app.route('/api/register-admin', methods=['POST'])
+@app.route('/api/register-admin', methods=['POST', 'GET'])
 def register_admin():
+    """Register a new admin user via API"""
+    data = request.get_json()
+    
+    mobile = data.get('mobile')
+    username = data.get('username')
+    master_key = data.get('master_key')
+    
+    year_str = data.get('year')
+    if year_str is None:
+        # Handle the error
+        return jsonify({'error': 'Year is required'}), 400
+
+    year = int(year_str)
+
+    if year is None:
+        return jsonify({'error': 'Year of study missing!'}), 400
+    
+    # Validate master key using AdminCode
+    admin_code_record = AdminCode.query.first()
+    if not admin_code_record or not check_password_hash(admin_code_record.code, master_key):
+        return jsonify({'error': 'Invalid master authorization key'}), 403
+    
+    # Validate mobile number
+    if not mobile or len(mobile) != 10 or not (mobile.startswith('07') or mobile.startswith('01')):
+        return jsonify({'error': 'Invalid mobile number'}), 400
+    
+    # Validate username
+    if not username or len(username.strip()) == 0:
+        return jsonify({'error': 'Username is required'}), 400
+    
+    username = username.strip().lower()
+    
+    # Check if user already exists
+    existing_user = User.query.filter_by(mobile=mobile).first()
+    if existing_user:
+        return jsonify({'error': 'User with this mobile already exists'}), 409
+    
+    # Check if username is already taken
+    existing_username = User.query.filter_by(username=username).first()
+    if existing_username:
+        return jsonify({'error': 'Username already taken'}), 409
+    
+    # Create new admin user
+    new_admin = User(
+        id=gen_unique_id(User),
+        year=year,
+        username=username,
+        mobile=mobile,
+        is_admin=True
+    )
+    
+    db.session.add(new_admin)
+    db.session.commit()
+    
+    return jsonify({
+        'message': 'Admin user created successfully',
+        'user_id': new_admin.id,
+        'username': new_admin.username,
+        'mobile': new_admin.mobile
+    }), 201
+
+@limiter.limit("5 per minute") 
+@app.route('/api/promote-to-admin', methods=['POST', 'GET'])
+def promote_admin():
     """Register a new admin user via API"""
     data = request.get_json()
     
@@ -7484,7 +7548,7 @@ def register_admin():
     master_key = data.get('master_key')
     year = request.form.get('year', '').strip()
 
-    if not year:
+    if year is None:
         return jsonify({'error': 'Year of study missing!'}), 400
     
     # Validate master key using AdminCode
