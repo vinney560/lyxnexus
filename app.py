@@ -254,7 +254,7 @@ class Assignment(db.Model):
 
     # Foreign keys
     topic_id = db.Column(db.Integer, db.ForeignKey('topic.id'), nullable=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 # =========================================
 # TIMETABLE MODEL
 # =========================================
@@ -270,7 +270,7 @@ class Timetable(db.Model):
     updated_at = db.Column(db.DateTime, default=nairobi_time, onupdate=nairobi_time)
 
     topic_id = db.Column(db.Integer, db.ForeignKey('topic.id'), nullable=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     
     # Relationship
     topic = db.relationship('Topic', backref='timetable_slots', lazy=True)
@@ -6906,6 +6906,7 @@ def create_topic():
     data = request.get_json()
     topic = Topic(
         id=gen_unique_id(Topic),
+        user_id=current_user.id,
         name=data.get('name'),
         description=data.get('description'),
         lecturer=data.get('lecturer'),
@@ -7070,6 +7071,8 @@ def get_timetable():
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/timetable', methods=['GET', 'POST'])
+@login_required
+@admin_required
 def handle_timetable():
     if request.method == 'GET':
         timetable_slots = Timetable.query\
@@ -7092,51 +7095,100 @@ def handle_timetable():
                 'topic': {
                     'id': slot.topic.id,
                     'name': slot.topic.name
-                } if slot.topic else None
+                } if slot.topic else None,
+                'created_by': slot.user.username if slot.user else None,
+                'year': slot.user.year if slot.user else None
             })
         return jsonify(result)
 
     if request.method == 'POST':
+        # Debug: Print what we receive
+        print(f"=== TIMETABLE POST REQUEST ===")
+        print(f"Current User: {current_user.username} (Admin: {current_user.is_admin})")
+        
         if not current_user.is_admin:
+            print("ERROR: User is not admin")
             return jsonify({'error': 'Unauthorized'}), 403
 
-        data = request.get_json()
-
         try:
-            start_time_str = data.get('start_time')
-            end_time_str = data.get('end_time')
+            data = request.get_json()
+            print(f"Received JSON data: {data}")
+            
+            if not data:
+                print("ERROR: No data received")
+                return jsonify({'error': 'No data provided'}), 400
+            
+            # Validate required fields
+            required_fields = ['day_of_week', 'start_time', 'end_time', 'subject']
+            missing_fields = []
+            
+            for field in required_fields:
+                if field not in data or data[field] is None or str(data[field]).strip() == '':
+                    missing_fields.append(field)
+            
+            if missing_fields:
+                print(f"ERROR: Missing fields: {missing_fields}")
+                return jsonify({'error': f'Missing required fields: {", ".join(missing_fields)}'}), 400
+            
+            print(f"Validating times: {data['start_time']} - {data['end_time']}")
+            
+            try:
+                start_time_str = data.get('start_time')
+                end_time_str = data.get('end_time')
 
-            start_time = datetime.strptime(start_time_str, '%H:%M').time()
-            end_time = datetime.strptime(end_time_str, '%H:%M').time()
+                start_time = datetime.strptime(start_time_str, '%H:%M').time()
+                end_time = datetime.strptime(end_time_str, '%H:%M').time()
 
-            if start_time >= end_time:
-                return jsonify({'error': 'End time must be after start time'}), 400
+                if start_time >= end_time:
+                    print(f"ERROR: Time validation failed: {start_time} >= {end_time}")
+                    return jsonify({'error': 'End time must be after start time'}), 400
+                    
+            except ValueError as ve:
+                print(f"ERROR: Time parsing error: {ve}")
+                return jsonify({'error': 'Invalid time format. Use HH:MM format (e.g., 09:00, 14:30)'}), 400
+            
+            # Validate day_of_week
+            valid_days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+            day_of_week = data.get('day_of_week')
+            if day_of_week not in valid_days:
+                print(f"ERROR: Invalid day: {day_of_week}")
+                return jsonify({'error': f'Invalid day. Must be one of: {", ".join(valid_days)}'}), 400
+            
+            # Create timetable slot
+            print(f"Creating timetable slot for user_id: {current_user.id}")
+            
+            timetable_slot = Timetable(
+                id=gen_unique_id(Timetable),
+                user_id=current_user.id,
+                day_of_week=day_of_week,
+                start_time=start_time,
+                end_time=end_time,
+                subject=data.get('subject'),
+                room=data.get('room'),
+                teacher=data.get('teacher'),
+                topic_id=data.get('topic_id')
+            )
 
-        except ValueError:
-            return jsonify({'error': 'Invalid time format. Use HH:MM format'}), 400
+            db.session.add(timetable_slot)
+            db.session.commit()
+            
+            print(f"SUCCESS: Created timetable slot ID: {timetable_slot.id}")
+            
+            return jsonify({
+                'message': 'Timetable slot created successfully',
+                'id': timetable_slot.id,
+                'day': timetable_slot.day_of_week,
+                'time': f"{timetable_slot.start_time.strftime('%H:%M')} - {timetable_slot.end_time.strftime('%H:%M')}",
+                'subject': timetable_slot.subject
+            }), 201
+
         except Exception as e:
-            return jsonify({'error': f'Time parsing error: {str(e)}'}), 400
-
-        timetable_slot = Timetable(
-            id=gen_unique_id(Timetable),
-            user_id=current_user.id,
-            day_of_week=data.get('day_of_week'),
-            start_time=start_time,
-            end_time=end_time,
-            subject=data.get('subject'),
-            room=data.get('room'),
-            teacher=data.get('teacher'),
-            topic_id=data.get('topic_id')
-        )
-
-        db.session.add(timetable_slot)
-        db.session.commit()
-
-        return jsonify({
-            'message': 'Timetable slot created successfully',
-            'id': timetable_slot.id
-        }), 201
-
+            db.session.rollback()
+            print(f"EXCEPTION: {str(e)}")
+            import traceback
+            traceback.print_exc()
+            return jsonify({'error': f'Internal server error: {str(e)}'}), 500
+        
 @app.route('/api/timetable/<int:id>', methods=['PUT'])
 @login_required
 @admin_required
