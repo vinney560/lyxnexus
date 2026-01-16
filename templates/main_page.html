@@ -1932,6 +1932,10 @@
                                 <span id="detail-mobile" class="font-medium">Loading...</span>
                             </div>
                             <div class="flex justify-between py-3 border-b border-gray-700">
+                                <span class="text-gray-400">Year:</span>
+                                <span id="detail-year" class="font-medium">Loading...</span>
+                            </div>
+                            <div class="flex justify-between py-3 border-b border-gray-700">
                                 <span class="text-gray-400">Member Since:</span>
                                 <span id="detail-joined" class="font-medium">Loading...</span>
                             </div>
@@ -4089,6 +4093,7 @@
             document.getElementById('profile-username').textContent = currentUser.username;
             document.getElementById('detail-username').textContent = currentUser.username;
             document.getElementById('detail-mobile').textContent = currentUser.mobile || 'Not provided';
+            document.getElementById('detail-year').textContent = currentUser.year || 'Not provided';
             document.getElementById('detail-joined').textContent = formatDate(currentUser.created_at);
             document.getElementById('detail-type').textContent = currentUser.is_admin ? 'Administrator' : 'Student';
             document.getElementById('detail-type').className = currentUser.is_admin ? 

@@ -882,6 +882,10 @@
                                     <span class="font-semibold text-blue-400 text-sm" id="profile-id">--</span>
                                 </div>
                                 <div class="flex justify-between items-center p-3 bg-gray-800/30 rounded-lg">
+                                    <span class="text-gray-400 text-sm"><i class="fas fa-id-card mr-2"></i>Year</span>
+                                    <span class="font-semibold text-blue-400 text-sm" id="study-year">--</span>
+                                </div>
+                                <div class="flex justify-between items-center p-3 bg-gray-800/30 rounded-lg">
                                     <span class="text-gray-400 text-sm"><i class="fas fa-mobile mr-2"></i>Mobile</span>
                                     <span class="font-semibold text-green-400 text-sm" id="profile-mobile">--</span>
                                 </div>
@@ -1053,6 +1057,7 @@
             
             // Update user details
             document.getElementById('profile-id').textContent = user.id;
+            document.getElementById('study-year').textContent = user.year || 'Not set';
             document.getElementById('profile-mobile').textContent = user.mobile || 'Not set';
             document.getElementById('profile-joined').textContent = user.created_at;
             document.getElementById('profile-admin').textContent = user.is_admin ? 'Yes' : 'No';

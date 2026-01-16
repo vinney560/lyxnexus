@@ -167,7 +167,7 @@ class User(db.Model, UserMixin):
     created_at = db.Column(db.DateTime, default=nairobi_time)
     is_admin = db.Column(db.Boolean, default=False)
     status = db.Column(db.Boolean, default=True, nullable=True)
-    year = db.Column(db.Integer, default=1 nullable=True)
+    year = db.Column(db.Integer, default=1, nullable=True)
 
     # Relationships
     announcements = db.relationship('Announcement', 
@@ -598,7 +598,11 @@ with app.app_context():
     try:
         # Create tables if they don't exist
         db.create_all()
-        db.session.execute(text('ALTER TABLE "user" ADD COLUMN year INTEGER DEFAULT 1'))
+        # Safer approach with existence check and proper column definition
+        db.session.execute(text('''
+            ALTER TABLE "user" 
+            ADD COLUMN IF NOT EXISTS year INTEGER DEFAULT 1;
+        '''))
         db.session.commit()
         print("✅ Database tables created successfully!")
 
