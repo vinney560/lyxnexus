@@ -18,7 +18,7 @@
         
     <meta name="twitter:card" content="summary" />
 
-    <link href="{{ url_for('static', filename='css/tailwind.min.css') }}" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
     <script src="{{ url_for('static', filename='js/loading.js') }}"></script>
 
@@ -665,6 +665,56 @@
 
     .btn-secondary {
         background: linear-gradient(90deg, #6B7280, #4B5563);
+    } 
+    
+    .modal-body::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .modal-body::-webkit-scrollbar-track {
+        background: rgba(55, 65, 81, 0.3);
+        border-radius: 10px;
+        margin: 4px 0;
+    }
+
+    .modal-body::-webkit-scrollbar-thumb {
+        background: linear-gradient(to bottom, #3b82f6, #8b5cf6);
+        border-radius: 10px;
+        border: 2px solid rgba(31, 41, 55, 0.5);
+    }
+
+    .modal-body::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(to bottom, #2563eb, #7c3aed);
+    }
+
+    .modal-body {
+        scrollbar-width: thin;
+        scrollbar-color: #3b82f6 rgba(55, 65, 81, 0.3);
+    }
+
+    .modal-content {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .modal-body {
+        flex: 1;
+        padding-bottom: 0;
+    }
+
+    .modal-footer {
+        flex-shrink: 0;
+    }
+
+    .selected-year-display {
+        margin-top: auto;
+        position: relative;
+        z-index: 5;
+    }
+
+    #year-validation {
+        position: relative;
+        z-index: 5;
     }
 </style>
 <body class="custom-bg bg-fixed bg-center bg-cover">
@@ -715,6 +765,21 @@
                     <i class="fas fa-sign-in-alt mr-2"></i> Auto Authenticate
                 </button>
                 <p class="text-gray-400 mt-2">Enter your credentials to continue</p>
+<!-- Year Display in Form (Add this in the form sections) -->
+                <div id="year-display" class="glass-morph rounded-lg p-4 mb-4 hidden">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <i class="fas fa-graduation-cap text-blue-400 mr-3 text-lg"></i>
+                            <div>
+                                <p class="text-sm text-gray-400">Academic Year</p>
+                                <p class="font-semibold" id="display-year">Not selected</p>
+                            </div>
+                        </div>
+                        <button type="button" onclick="openYearModal()" class="text-sm text-blue-400 hover:text-blue-300 flex items-center">
+                            <i class="fas fa-edit mr-1"></i> Change
+                        </button>
+                    </div>
+                </div>                            
             </div>
 
             <div class="flex border-b border-gray-700 mb-6">
@@ -733,10 +798,33 @@
                         Register
                     </div>
                 </div>
-
+                <!-- Year Selection Trigger -->
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-calendar-alt mr-2"></i>Academic Year
+                    </label>
+                    <div id="year-display" class="glass-morph rounded-lg p-4 mb-4 hidden">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <i class="fas fa-graduation-cap text-blue-400 mr-3 text-lg"></i>
+                                <div>
+                                    <p class="text-sm text-gray-400">Academic Year</p>
+                                    <p class="font-semibold" id="display-year">Not selected</p>
+                                </div>
+                            </div>
+                            <button type="button" onclick="openYearModal('student')" class="text-sm text-blue-400 hover:text-blue-300 flex items-center">
+                                <i class="fas fa-edit mr-1"></i> Change
+                            </button>
+                        </div>
+                    </div>
+                    <button type="button" onclick="openYearModal('student')" class="btn-outline w-full" id="year-select-btn">
+                        <i class="fas fa-calendar-plus mr-2"></i> Select Academic Year
+                    </button>
+                </div>
                 <form id="student-login-form" method="POST" onsubmit="return validateStudentForm(event)">
                     <input type="hidden" name="login_type" value="student">
                     <input type="hidden" name="login_subtype" id="student-login-subtype" value="login">
+                    <input type="hidden" id="year-data" name="year" value="">
                     
                     <div class="form-group">
                         <label class="form-label" for="username">Username</label>
@@ -769,7 +857,29 @@
                         <span class="text-sm">Admin access requires special privileges</span>
                     </div>
                 </div>
-                
+                <!-- Year Selection Trigger -->
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-calendar-alt mr-2"></i>Academic Year
+                    </label>
+                    <div id="year-display" class="glass-morph rounded-lg p-4 mb-4 hidden">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <i class="fas fa-graduation-cap text-blue-400 mr-3 text-lg"></i>
+                                <div>
+                                    <p class="text-sm text-gray-400">Academic Year</p>
+                                    <p class="font-semibold" id="display-year">Not selected</p>
+                                </div>
+                            </div>
+                            <button type="button" onclick="openYearModal('student')" class="text-sm text-blue-400 hover:text-blue-300 flex items-center">
+                                <i class="fas fa-edit mr-1"></i> Change
+                            </button>
+                        </div>
+                    </div>
+                    <button type="button" onclick="openYearModal('student')" class="btn-outline w-full" id="year-select-btn">
+                        <i class="fas fa-calendar-plus mr-2"></i> Select Academic Year
+                    </button>
+                </div>
                 <div class="flex border-b border-gray-700 mb-4">
                     <button class="subtab-button active" data-subtab="admin-login-tab">Admin Login</button>
                     <button class="subtab-button" data-subtab="master-key-tab">Master Key Access</button>
@@ -779,6 +889,7 @@
                 <div id="admin-login-tab" class="subtab-content active">
                     <form id="admin-login-form" method="POST" onsubmit="return validateAdminForm(event)">
                         <input type="hidden" name="login_type" value="admin">
+                        <input type="hidden" id="admin-year-data" name="year" value="">
                         
                         <div class="form-group">
                             <label class="form-label" for="admin-username">Username</label>
@@ -800,6 +911,7 @@
                 <div id="master-key-tab" class="subtab-content">
                     <form id="master-key-form" method="POST" onsubmit="return validateMasterKeyForm(event)">
                         <input type="hidden" name="login_type" value="admin">
+                        <input type="hidden" id="master-year-data" name="year" value="">
                         
                         <div class="form-group">
                             <label class="form-label" for="master-key-username">Username</label>
@@ -847,8 +959,31 @@
                     <span class="text-sm">Admin registration requires master authorization</span>
                 </div>
             </div>
-            
+            <!-- Year Selection Trigger -->
+            <div class="form-group">
+                <label class="form-label">
+                    <i class="fas fa-calendar-alt mr-2"></i>Academic Year
+                </label>
+                <div id="year-display" class="glass-morph rounded-lg p-4 mb-4 hidden">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <i class="fas fa-graduation-cap text-blue-400 mr-3 text-lg"></i>
+                            <div>
+                                <p class="text-sm text-gray-400">Academic Year</p>
+                                <p class="font-semibold" id="display-year">Not selected</p>
+                            </div>
+                        </div>
+                        <button type="button" onclick="openYearModal('student')" class="text-sm text-blue-400 hover:text-blue-300 flex items-center">
+                            <i class="fas fa-edit mr-1"></i> Change
+                        </button>
+                    </div>
+                </div>
+                <button type="button" onclick="openYearModal('student')" class="btn-outline w-full" id="year-select-btn">
+                    <i class="fas fa-calendar-plus mr-2"></i> Select Academic Year
+                </button>
+            </div>
             <form id="register-admin-form" onsubmit="return validateRegisterAdminForm(event)">
+                <input type="hidden" id="register-admin-year-data" name="year" value="">
                 <div class="form-group">
                     <label class="form-label" for="new-admin-mobile">Mobile Number</label>
                     <input type="tel" id="new-admin-mobile" name="mobile" class="form-input" placeholder="07XX XXX XXX or 01XX XXX XXX" required>
@@ -889,6 +1024,132 @@
             </div>
         </div>
     </div>    
+
+    <div id="year-modal" class="modal hidden fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+        <div class="modal-content relative bg-gradient-to-br from-gray-900 to-gray-950 border border-gray-700 rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-hidden">
+            <!-- Modal Header -->
+            <div class="modal-header sticky top-0 z-10 bg-gradient-to-r from-gray-900 to-gray-800 border-b border-gray-700/50 px-6 py-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div class="p-2 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600">
+                            <i class="fas fa-graduation-cap text-white text-lg"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-white">Select Academic Year</h3>
+                    </div>
+                    <button class="modal-close p-2 rounded-lg bg-gray-800/50 border border-gray-600/30 text-gray-400 hover:text-white hover:bg-gray-700/50 hover:border-gray-500/50 transition-all duration-200"
+                            onclick="closeYearModal()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <p class="text-gray-400 text-sm mt-2">
+                    Choose your current year of study
+                </p>
+            </div>
+
+            <!-- Year Modal Body -->
+            <div class="modal-body px-6 py-4 overflow-y-auto max-h-[calc(90vh-180px)] scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800/30 scrollbar-thumb-rounded-full">
+                <div class="year-grid space-y-3 mb-4">
+                    <div id="year-validation" class="hidden bg-red-500/10 border border-red-500/20 rounded-lg p-3 mb-6">
+                        <div class="flex items-center text-red-400">
+                            <i class="fas fa-exclamation-circle mr-2"></i>
+                            <span class="text-sm">Please select an academic year</span>
+                        </div>
+                    </div>
+
+                    <div class="year-option group cursor-pointer p-4 rounded-xl border-2 border-transparent bg-gray-800/30 hover:bg-gray-800/50 hover:border-blue-500/30 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+                         data-year="1" onclick="selectYearOption(1)">
+                        <div class="flex items-center">
+                            <div class="year-icon w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center mr-4">
+                                <i class="fas fa-1 text-white text-xl font-bold"></i>
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="text-lg font-semibold text-white">First Year</h4>
+                                <p class="text-gray-400 text-sm">Foundation courses</p>
+                            </div>
+                            <div class="year-checkbox w-6 h-6 rounded-md border-2 border-gray-600 group-[.selected]:border-blue-500 group-[.selected]:bg-blue-500 flex items-center justify-center">
+                                <i class="fas fa-check text-white text-xs opacity-0 group-[.selected]:opacity-100 transition-opacity"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="year-option group cursor-pointer p-4 rounded-xl border-2 border-transparent bg-gray-800/30 hover:bg-gray-800/50 hover:border-purple-500/30 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+                         data-year="2" onclick="selectYearOption(2)">
+                        <div class="flex items-center">
+                            <div class="year-icon w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center mr-4">
+                                <i class="fas fa-2 text-white text-xl font-bold"></i>
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="text-lg font-semibold text-white">Second Year</h4>
+                                <p class="text-gray-400 text-sm">Intermediate level</p>
+                            </div>
+                            <div class="year-checkbox w-6 h-6 rounded-md border-2 border-gray-600 group-[.selected]:border-purple-500 group-[.selected]:bg-purple-500 flex items-center justify-center">
+                                <i class="fas fa-check text-white text-xs opacity-0 group-[.selected]:opacity-100 transition-opacity"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="year-option group cursor-pointer p-4 rounded-xl border-2 border-transparent bg-gray-800/30 hover:bg-gray-800/50 hover:border-green-500/30 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+                         data-year="3" onclick="selectYearOption(3)">
+                        <div class="flex items-center">
+                            <div class="year-icon w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-green-700 flex items-center justify-center mr-4">
+                                <i class="fas fa-3 text-white text-xl font-bold"></i>
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="text-lg font-semibold text-white">Third Year</h4>
+                                <p class="text-gray-400 text-sm">Advanced courses</p>
+                            </div>
+                            <div class="year-checkbox w-6 h-6 rounded-md border-2 border-gray-600 group-[.selected]:border-green-500 group-[.selected]:bg-green-500 flex items-center justify-center">
+                                <i class="fas fa-check text-white text-xs opacity-0 group-[.selected]:opacity-100 transition-opacity"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="year-option group cursor-pointer p-4 rounded-xl border-2 border-transparent bg-gray-800/30 hover:bg-gray-800/50 hover:border-yellow-500/30 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+                         data-year="4" onclick="selectYearOption(4)">
+                        <div class="flex items-center">
+                            <div class="year-icon w-12 h-12 rounded-xl bg-gradient-to-br from-yellow-500 to-yellow-700 flex items-center justify-center mr-4">
+                                <i class="fas fa-4 text-white text-xl font-bold"></i>
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="text-lg font-semibold text-white">Fourth Year</h4>
+                                <p class="text-gray-400 text-sm">Final year projects</p>
+                            </div>
+                            <div class="year-checkbox w-6 h-6 rounded-md border-2 border-gray-600 group-[.selected]:border-yellow-500 group-[.selected]:bg-yellow-500 flex items-center justify-center">
+                                <i class="fas fa-check text-white text-xs opacity-0 group-[.selected]:opacity-100 transition-opacity"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="selected-year-display bg-gray-800/40 border border-gray-700/50 rounded-xl p-4 mt-2 mb-6">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <i class="fas fa-calendar-check text-blue-400 mr-3 text-lg"></i>
+                            <div>
+                                <p class="text-sm text-gray-400">Selected Year</p>
+                                <p id="selected-year-text" class="text-lg font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                                    No year selected
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer bg-gradient-to-t from-gray-900 via-gray-900 to-gray-900 px-6 py-4 border-t border-gray-700/50">
+                <div class="flex space-x-3">
+                    <button class="flex-1 py-3 px-4 rounded-xl bg-gray-800/50 border border-gray-600/30 text-gray-300 hover:text-white hover:bg-gray-700/50 hover:border-gray-500/50 transition-all duration-200 font-medium"
+                            onclick="clearYearSelection()">
+                        <i class="fas fa-undo-alt mr-2"></i>Clear
+                    </button>
+                    <button class="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-blue-500 to-purple-600 text-white font-medium hover:from-blue-600 hover:to-purple-700 hover:shadow-lg hover:shadow-blue-500/25 transition-all duration-200"
+                            onclick="confirmYearSelection()">
+                        <i class="fas fa-check mr-2"></i>Confirm
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script>
         const API_BASE = '/api';
@@ -1162,7 +1423,232 @@
         }
 
         const mobileValidator = new MobileValidator();
+        let selectedYear = null;
+        let currentFormType = null; // 'student', 'admin', 'master', 'register-admin'
 
+        // Open the year selection modal
+        function openYearModal(formType) {
+            currentFormType = formType;
+            document.getElementById('year-modal').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+            document.getElementById('year-validation').classList.add('hidden');
+
+            let savedYear;
+            switch(formType) {
+                case 'student':
+                    savedYear = document.getElementById('year-data').value;
+                    break;
+                case 'admin':
+                    savedYear = document.getElementById('admin-year-data').value;
+                    break;
+                case 'master':
+                    savedYear = document.getElementById('master-year-data').value;
+                    break;
+                case 'register-admin':
+                    savedYear = document.getElementById('register-admin-year-data').value;
+                    break;
+            }
+
+            if (savedYear) {
+                selectYearOption(parseInt(savedYear));
+            } else {
+                selectedYear = null;
+                document.querySelectorAll('.year-option').forEach(option => {
+                    option.classList.remove('selected');
+                });
+                document.getElementById('selected-year-text').textContent = 'No year selected';
+            }
+        }
+
+        // Close the year selection modal
+        function closeYearModal() {
+            document.getElementById('year-modal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        // Select a year option
+        function selectYearOption(year) {
+            selectedYear = year;
+            document.querySelectorAll('.year-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            const selectedOption = document.querySelector(`.year-option[data-year="${year}"]`);
+            selectedOption.classList.add('selected');
+
+            // Update selected year display
+            const yearNames = {
+                1: 'First Year (Year 1)',
+                2: 'Second Year (Year 2)',
+                3: 'Third Year (Year 3)',
+                4: 'Fourth Year (Year 4)'
+            };
+
+            document.getElementById('selected-year-text').innerHTML = `
+                <span style="color: #3b82f6">${yearNames[year]}</span>
+            `;
+            document.getElementById('year-validation').classList.add('hidden');
+        }
+
+        // Confirm the year selection
+        function confirmYearSelection() {
+            if (!selectedYear) {
+                document.getElementById('year-validation').classList.remove('hidden');
+
+                // Shake animation for error
+                const modalContent = document.querySelector('.modal-content');
+                modalContent.style.animation = 'none';
+                setTimeout(() => {
+                    modalContent.style.animation = 'shake 0.5s ease';
+                }, 10);
+
+                return;
+            }
+
+            // Set the hidden input value based on current form type
+            let yearInputId, displayElementId, yearDisplayId, yearSelectBtnId;
+
+            switch(currentFormType) {
+                case 'student':
+                    yearInputId = 'year-data';
+                    yearDisplayId = 'year-display';
+                    displayElementId = 'display-year';
+                    yearSelectBtnId = 'year-select-btn';
+                    break;
+                case 'admin':
+                    yearInputId = 'admin-year-data';
+                    yearDisplayId = 'admin-year-display';
+                    displayElementId = 'admin-display-year';
+                    yearSelectBtnId = 'admin-year-select-btn';
+                    break;
+                case 'master':
+                    yearInputId = 'master-year-data';
+                    yearDisplayId = 'master-year-display';
+                    displayElementId = 'master-display-year';
+                    yearSelectBtnId = 'master-year-select-btn';
+                    break;
+                case 'register-admin':
+                    yearInputId = 'register-admin-year-data';
+                    yearDisplayId = 'register-admin-year-display';
+                    displayElementId = 'register-admin-display-year';
+                    yearSelectBtnId = 'register-admin-year-select-btn';
+                    break;
+            }
+
+            // Set the hidden input value
+            document.getElementById(yearInputId).value = selectedYear;
+
+            // Update display in form
+            const yearNames = {
+                1: 'Year 1',
+                2: 'Year 2',
+                3: 'Year 3',
+                4: 'Year 4'
+            };
+
+            if (displayElementId && document.getElementById(displayElementId)) {
+                document.getElementById(displayElementId).textContent = yearNames[selectedYear];
+            }
+
+            if (yearDisplayId && document.getElementById(yearDisplayId)) {
+                document.getElementById(yearDisplayId).classList.remove('hidden');
+            }
+
+            if (yearSelectBtnId && document.getElementById(yearSelectBtnId)) {
+                document.getElementById(yearSelectBtnId).classList.add('hidden');
+            }
+
+            // Close modal
+            closeYearModal();
+
+            // Show success notification
+            showYearSelectionSuccess(selectedYear);
+        }
+
+        function showYearSelectionSuccess(year) {
+            showToast(`Academic year set to Year ${year}`, 'success', 'Year Selected');
+        }
+
+        function clearYearSelection() {
+            selectedYear = null;
+
+            // Clear modal selection
+            const yearOptions = document.querySelectorAll('.year-option');
+            if (yearOptions.length > 0) {
+                yearOptions.forEach(option => {
+                    option.classList.remove('selected');
+                });
+            }
+
+            const selectedYearText = document.getElementById('selected-year-text');
+            if (selectedYearText) {
+                selectedYearText.textContent = 'No year selected';
+            }
+
+            const yearValidation = document.getElementById('year-validation');
+            if (yearValidation) {
+                yearValidation.classList.add('hidden');
+            }
+
+            // Clear hidden input values in all forms
+            const yearInputs = [
+                'year-data',
+                'admin-year-data', 
+                'master-year-data',
+                'register-admin-year-data'
+            ];
+
+            yearInputs.forEach(inputId => {
+                const input = document.getElementById(inputId);
+                if (input) {
+                    input.value = '';
+                }
+            });
+
+            if (selectedYearText || yearValidation) {
+                showToast('Year selection cleared', 'success', 'Selection Cleared');
+            }
+        }        
+
+        // Validate year selection in form submission
+        function validateYearSelection() {
+            let yearInput;
+
+            switch(currentFormType) {
+                case 'student':
+                    yearInput = document.getElementById('year-data');
+                    break;
+                case 'admin':
+                    yearInput = document.getElementById('admin-year-data');
+                    break;
+                case 'master':
+                    yearInput = document.getElementById('master-year-data');
+                    break;
+                case 'register-admin':
+                    yearInput = document.getElementById('register-admin-year-data');
+                    break;
+                default:
+                    yearInput = document.getElementById('year-data');
+            }
+
+            if (!yearInput || !yearInput.value) {
+                // Open modal if no year selected
+                if (currentFormType) {
+                    openYearModal(currentFormType);
+                } else {
+                    openYearModal('student');
+                }
+
+                // Show error in modal
+                setTimeout(() => {
+                    document.getElementById('year-validation').classList.remove('hidden');
+                }, 300);
+
+                return false;
+            }
+
+            return true;
+        }
+        
         class ToastManager {
             constructor() {
                 this.container = document.getElementById('toast-container');
@@ -1403,10 +1889,24 @@
             const username = document.getElementById('username').value;
             const loginButton = document.getElementById('login-student');
             const subtype = document.getElementById('student-login-subtype').value;
+            currentFormType = 'student';
+
+            const yearInput = document.getElementById('year-data');
+            if (!yearInput.value) {
+                event.preventDefault();
+                showToast('Please select your academic year', 'error', 'Year Validation Error');
+                openYearModal('student');
+                return false;
+            }
             
+            if (!validateYearSelection()) {
+                event.preventDefault();
+                return false;
+            }
+
             if (!username.trim()) {
                 event.preventDefault();
-                showToast('Please enter a username', 'error', 'Validation Error');
+                showToast('Please enter a username', 'error', 'Year Validation Error');
                 return false;
             }
             
@@ -1458,7 +1958,21 @@
             const mobile = document.getElementById('admin-mobile').value;
             const username = document.getElementById('admin-username').value;
             const loginButton = document.getElementById('admin-login-btn');
-            
+            currentFormType = 'admin';
+
+            const yearInput = document.getElementById('year-data');
+            if (!yearInput.value) {
+                event.preventDefault();
+                showToast('Please select your academic year', 'error', 'Validation Error');
+                openYearModal('student');
+                return false;
+            }
+
+            if (!validateYearSelection()) {
+                event.preventDefault();
+                return false;
+            }
+
             if (!username.trim()) {
                 event.preventDefault();
                 showToast('Please enter a username', 'error', 'Validation Error');
@@ -1491,7 +2005,20 @@
             const username = document.getElementById('master-key-username').value;
             const masterKey = document.getElementById('master-key-input').value;
             const loginButton = document.getElementById('master-key-btn');
-            
+            currentFormType = 'master';
+
+            const yearInput = document.getElementById('year-data');
+            if (!yearInput.value) {
+                event.preventDefault();
+                showToast('Please select your academic year', 'error', 'Validation Error');
+                openYearModal('student');
+                return false;
+            }
+
+            if (!validateYearSelection()) {
+                event.preventDefault();
+                return false;
+            }
             if (!username.trim()) {
                 event.preventDefault();
                 showToast('Please enter a username', 'error', 'Validation Error');
@@ -1526,7 +2053,20 @@
 
         function validateRegisterAdminForm(event) {
             event.preventDefault();
-            
+            currentFormType = 'register-admin';
+
+            const yearInput = document.getElementById('year-data');
+            if (!yearInput.value) {
+                event.preventDefault();
+                showToast('Please select your academic year', 'error', 'Validation Error');
+                openYearModal('student');
+                return false;
+            }
+
+            if (!validateYearSelection()) {
+                event.preventDefault();
+                return false;
+            }
             const mobile = document.getElementById('new-admin-mobile').value;
             const username = document.getElementById('new-admin-username').value;
             const masterKey = document.getElementById('register-master-key').value;
@@ -1712,6 +2252,38 @@
                     openSubTab(subTabName);
                 });
             });
+            // Year modal close when clicking outside
+            document.getElementById('year-modal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeYearModal();
+                }
+            });
+
+            // Keyboard support for year modal
+            document.addEventListener('keydown', function(e) {
+                const modal = document.getElementById('year-modal');
+                if (modal.style.display === 'flex') {
+                    if (e.key === 'Escape') {
+                        closeYearModal();
+                    } else if (e.key === 'Enter') {
+                        confirmYearSelection();
+                    } else if (e.key >= '1' && e.key <= '4') {
+                        selectYearOption(parseInt(e.key));
+                    }
+                }
+            });
+
+            // Make year options keyboard accessible
+            document.querySelectorAll('.year-option').forEach(option => {
+                option.tabIndex = 0;
+                option.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        const year = parseInt(this.dataset.year);
+                        selectYearOption(year);
+                    }
+                });
+            });            
             
             // Student subtype tabs
             setupStudentSubtypeTabs();

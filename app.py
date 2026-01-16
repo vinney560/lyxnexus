@@ -167,6 +167,7 @@ class User(db.Model, UserMixin):
     created_at = db.Column(db.DateTime, default=nairobi_time)
     is_admin = db.Column(db.Boolean, default=False)
     status = db.Column(db.Boolean, default=True, nullable=True)
+    year = db.Column(db.Integer, default=1 nullable=True)
 
     # Relationships
     announcements = db.relationship('Announcement', 
@@ -597,6 +598,7 @@ with app.app_context():
     try:
         # Create tables if they don't exist
         db.create_all()
+        db.session.execute(text('ALTER TABLE "user" ADD COLUMN year INTEGER DEFAULT 1'))
         db.session.commit()
         print("✅ Database tables created successfully!")
 
@@ -1737,18 +1739,22 @@ def send_msg(mobile, msg):
     print(response.json())
 
 #======== END OF RAPID API WASMS ==========
+import secrets
 
-# =========== ID Generator Algorithm ========
-""" postgreSQL sequencing error handler """
-def gen_unique_id(_tablename):
-    r_id = random.choice(range(00000, 99999))
-    u_id = _tablename.query.filter_by(id=r_id).first()
-    if u_id:
-        print("Duplicate ID Detected by server!!! Remaking ID")
-        r_id = random.choice(range(0000, 99999))
-    return r_id    
-
-# ==========================================
+def gen_unique_id(_tablename, max_attempts=100):
+    for attempt in range(max_attempts):
+        r_id = secrets.randbelow(900000) + 100000
+        
+        # Use database transaction to prevent race conditions
+        with db.session.begin_nested():
+            existing = db.session.query(_tablename.id).filter_by(id=r_id).with_for_update().first()
+            if not existing:
+                return r_id
+        
+        if attempt >= max_attempts - 1:
+            raise ValueError(f"Failed to generate unique ID after {max_attempts} attempts")
+    
+    raise ValueError("Failed to generate unique ID")
 
 #                  NORMAL ROUTES
 #==========================================
