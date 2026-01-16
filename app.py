@@ -6959,10 +6959,8 @@ def get_specified_timetable():
 
     try:
         timetable_slots = Timetable.query\
-            .order_by(
-                Timetable.day_of_week, 
-                Timetable.start_time
-            )\
+            .filter(Timetable.year == current_user.year)\
+            .order_by(Timetable.day_of_week, Timetable.start_time)\
             .all()
 
         days_order = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
