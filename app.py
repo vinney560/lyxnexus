@@ -225,8 +225,10 @@ class Topic(db.Model):
     lecturer = db.Column(db.String(200), nullable=True)
     contact = db.Column(db.String(100), nullable=True)
     created_at = db.Column(db.DateTime, default=nairobi_time)
+    
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
 
-    # Relationship
+    # Relationships
     assignments = db.relationship('Assignment', backref='topic', lazy=True)
 
 # =========================================
@@ -262,6 +264,7 @@ class Timetable(db.Model):
     updated_at = db.Column(db.DateTime, default=nairobi_time, onupdate=nairobi_time)
 
     topic_id = db.Column(db.Integer, db.ForeignKey('topic.id'), nullable=True)
+    
     
     # Relationship
     topic = db.relationship('Topic', backref='timetable_slots', lazy=True)
@@ -600,8 +603,8 @@ with app.app_context():
         db.create_all()
         # Safer approach with existence check and proper column definition
         db.session.execute(text('''
-            ALTER TABLE "user" 
-            ADD COLUMN IF NOT EXISTS year INTEGER DEFAULT 1;
+            ALTER TABLE "topic" 
+            ADD COLUMN IF NOT EXISTS user_id INTEGER;
         '''))
         db.session.commit()
         print("✅ Database tables created successfully!")
@@ -6543,7 +6546,13 @@ def serve_announcement_file(id, filename):
 @app.route('/api/assignments')
 def get_assignments():
     """Get all assignments"""
-    assignments = Assignment.query.order_by(Assignment.created_at.desc()).all()
+    assignments = Assignment.query\
+            .join(User, Assignment.user_id == User.id)\
+            .filter(
+                User.year == current_user.year,
+            )\
+            .order_by(Assignment.due_date.asc())\
+            .all()
     result = []
     for assignment in assignments:
         result.append({
@@ -6792,7 +6801,10 @@ def preview():
 @app.route('/api/topics')
 def get_topics():
     """Get all topics"""
-    topics = Topic.query.all()
+    topics = Topic.query\
+            .filter(Topic.user_id == current_user.id)\
+            .order_by(Topic.created_at.desc())\
+            .all()
     result = []
     for topic in topics:
         result.append({
