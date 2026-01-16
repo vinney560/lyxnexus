@@ -176,6 +176,12 @@ class User(db.Model, UserMixin):
     assignments = db.relationship('Assignment', 
                                   backref='creator', 
                                   lazy=True)
+    topics = db.relationship('Topic',
+                             backref='author',
+                             lazy=True)
+    timetables = db.relationship('Timetable', 
+                                 backref='author',
+                                 lazy=True)        
     def validate_mobile(self, mobile):
         """Validate mobile number format"""
         if not mobile:
@@ -6379,7 +6385,7 @@ def get_announcements():
             'content': a.content,
             'highlighted': a.highlighted,
             'created_at': a.created_at.isoformat(),
-            'author': {'id': a.author.id, 'username': a.author.username} if a.author else None,
+            'author': {'id': a.author.id, 'username': a.author.username, 'year': a.author.year} if a.author else None,
             'has_file': a.has_file(),
             'file_name': a.file_name,
             'file_type': a.file_type,
@@ -6615,7 +6621,8 @@ def get_assignments():
             } if assignment.topic else None,
             'creator': {
                 'id': assignment.creator.id,
-                'username': assignment.creator.username
+                'username': assignment.creator.username,
+                'year': assignment.creator.year
             } if assignment.creator else None
         })
     return jsonify(result)
@@ -6877,7 +6884,12 @@ def get_topics():
             'description': topic.description,
             'lecturer': topic.lecturer,
             'contact': topic.contact,
-            'created_at': topic.created_at.isoformat()
+            'created_at': topic.created_at.isoformat(),
+            'author': {
+                'id': topic.author.id,
+                'username': topic.author.username,
+                'year': topic.author.year
+            } if topic.author else None
         })
     return jsonify(result)
 
@@ -6939,7 +6951,7 @@ def delete_topic(id):
 #            TIMETABLE API ROUTES
 #==========================================
 @app.route('/api/timetable/specified', methods=['GET', 'POST'])
-def handle_timetable():
+def get_specific_timetable():
     if request.method == 'GET':
         timetable_slots = Timetable.query\
             .join(User, Timetable.user_id == User.id)\
@@ -7036,7 +7048,11 @@ def get_timetable():
                 'topic': {
                     'id': slot.topic.id,
                     'name': slot.topic.name
-                } if slot.topic else None
+                } if slot.topic else None,
+                'author': {
+                    'id': slot.author.id,
+                    'year': slot.author.year
+                } if slot.author else None
             })
 
         result = [
