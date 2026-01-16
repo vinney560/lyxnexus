@@ -232,7 +232,8 @@ class Topic(db.Model):
     contact = db.Column(db.String(100), nullable=True)
     created_at = db.Column(db.DateTime, default=nairobi_time)
     
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    year = db.Column(db.Integer, default=1, nullable=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
     # Relationships
     assignments = db.relationship('Assignment', backref='topic', lazy=True)
@@ -271,6 +272,7 @@ class Timetable(db.Model):
 
     topic_id = db.Column(db.Integer, db.ForeignKey('topic.id'), nullable=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    year = db.Column(db.Integer, default=1, nullable=True)
     
     # Relationship
     topic = db.relationship('Topic', backref='timetable_slots', lazy=True)
@@ -607,6 +609,14 @@ with app.app_context():
     try:
         # Create tables if they don't exist
         db.create_all()
+        db.session.execute(text('''
+            ALTER TABLE "topic" 
+            ADD COLUMN IF NOT EXISTS year INTEGER DEFAULT 1;
+        '''))
+        db.session.execute(text('''
+            ALTER TABLE "timetable" 
+            ADD COLUMN IF NOT EXISTS year INTEGER DEFAULT 1;
+        '''))
         db.session.commit()
         print("✅ Database tables created successfully!")
 
@@ -6857,7 +6867,7 @@ def preview():
 def get_specified_topics():
     """Get all topics"""
     topics = Topic.query\
-            .filter(Topic.user_id == current_user.id)\
+            .filter(Topic.year == current_user.id)\
             .order_by(Topic.created_at.desc())\
             .all()
     result = []
@@ -6868,7 +6878,8 @@ def get_specified_topics():
             'description': topic.description,
             'lecturer': topic.lecturer,
             'contact': topic.contact,
-            'created_at': topic.created_at.isoformat()
+            'created_at': topic.created_at.isoformat(),
+            'year': topic.year
         })
     return jsonify(result)
 
@@ -6887,11 +6898,7 @@ def get_topics():
             'lecturer': topic.lecturer,
             'contact': topic.contact,
             'created_at': topic.created_at.isoformat(),
-            'author': {
-                'id': topic.author.id,
-                'username': topic.author.username,
-                'year': topic.author.year
-            } if topic.author else None
+            'year': topic.year
         })
     return jsonify(result)
 
@@ -6910,7 +6917,8 @@ def create_topic():
         name=data.get('name'),
         description=data.get('description'),
         lecturer=data.get('lecturer'),
-        contact=data.get('contact')
+        contact=data.get('contact'),
+        year=current_user.year
     )
     db.session.add(topic)
     db.session.commit()
@@ -6957,7 +6965,7 @@ def delete_topic(id):
 def get_specific_timetable():
     if request.method == 'GET':
         timetable_slots = Timetable.query\
-            .join(User, Timetable.user_id == User.id)\
+            .join(User, Timetable.year == User.id)\
             .filter(
                 User.year == current_user.year
             )\
@@ -7053,10 +7061,7 @@ def get_timetable():
                     'id': slot.topic.id,
                     'name': slot.topic.name
                 } if slot.topic else None,
-                'author': {
-                    'id': slot.author.id,
-                    'year': slot.author.year
-                } if slot.author else None
+                'year': slot.year
             })
 
         result = [
@@ -7095,7 +7100,7 @@ def handle_timetable():
                     'name': slot.topic.name
                 } if slot.topic else None,
                 'created_by': slot.user.username if slot.user else None,
-                'year': slot.user.year if slot.user else None
+                'year': slot.year
             })
         return jsonify(result)
 
