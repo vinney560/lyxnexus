@@ -6954,7 +6954,7 @@ def delete_topic(id):
 #            TIMETABLE API ROUTES
 #==========================================
 @app.route('api/timetable/specified/grouped', methods=['GET'])
-def get_timetable():
+def get_specified_timetable():
     """Get timetable grouped by day"""
 
     try:
