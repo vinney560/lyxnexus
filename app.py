@@ -6071,6 +6071,7 @@ def get_users():
             'id': user.id,
             'username': user.username,
             'mobile': user.mobile,
+            'year': user.year,
             'created_at': user.created_at.isoformat() if user.created_at else None,
             'is_admin': user.is_admin,
             'status': user.status,
@@ -7005,6 +7006,7 @@ def get_specific_timetable():
 
         timetable_slot = Timetable(
             id=gen_unique_id(Timetable),
+            user_id=current_user.id,
             day_of_week=data.get('day_of_week'),
             start_time=start_time,
             end_time=end_time,
@@ -7117,6 +7119,7 @@ def handle_timetable():
 
         timetable_slot = Timetable(
             id=gen_unique_id(Timetable),
+            user_id=current_user.id,
             day_of_week=data.get('day_of_week'),
             start_time=start_time,
             end_time=end_time,
