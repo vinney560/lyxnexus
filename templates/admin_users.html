@@ -971,6 +971,7 @@
                     <thead>
                         <tr>
                             <th>ID</th>
+                            <th>Year</th>
                             <th>Username</th>
                             <th>Mobile</th>
                             <th>Role</th>
@@ -1715,6 +1716,7 @@
                 return `
                 <tr>
                     <td class="font-mono text-sm">#${user.id}</td>
+                    <td class="text-center">${user.year || 'N/A'}</td>
                     <td>
                         <div class="font-medium">${user.username || 'N/A'}</div>
                         <div class="text-xs text-gray-400">ID: ${user.id}</div>

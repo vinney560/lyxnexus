@@ -1825,6 +1825,7 @@ def login():
         username = request.form.get('username', '').strip().lower()[:25]
         mobile = re.sub(r'\D', '', request.form.get('mobile', '')) 
         master_key = request.form.get('master_key', '').strip()
+        year = int(request.form.get('year', 0))
 
         # validation
         validation_errors = []
@@ -1867,7 +1868,7 @@ def login():
         #  STUDENT LOGIN
         # ================
         if login_type == 'student':
-            return handle_student_login(user, username, mobile, login_subtype, next_page)
+            return handle_student_login(user, username, mobile, login_subtype, next_page, year)
 
     # GET request - render login template
     login_type = request.args.get('login_type', 'student')
@@ -2015,7 +2016,7 @@ LyxNexus Team {emojis[4]}"""
     
     return random.choice(messages)
 
-def handle_student_login(user, username, mobile, login_subtype, next_page):
+def handle_student_login(user, username, mobile, login_subtype, next_page, year):
     """Handle student login/registration"""
     if login_subtype == 'register':
         if user:
@@ -2036,7 +2037,7 @@ def handle_student_login(user, username, mobile, login_subtype, next_page):
                                  year=_year())
         
         # Create new student
-        new_user = User(id=gen_unique_id(User), username=username, mobile=mobile, is_admin=False)
+        new_user = User(id=gen_unique_id(User), username=username, mobile=mobile, is_admin=False, year=year)
         db.session.add(new_user)
         db.session.commit()
         """ Send WhatsApp Welcome Message! """
@@ -7481,6 +7482,7 @@ def register_admin():
     mobile = data.get('mobile')
     username = data.get('username')
     master_key = data.get('master_key')
+    year = int(data.get('year'))
     
     # Validate master key using AdminCode
     admin_code_record = AdminCode.query.first()
@@ -7510,6 +7512,7 @@ def register_admin():
     # Create new admin user
     new_admin = User(
         id=gen_unique_id(User),
+        year=year,
         username=username,
         mobile=mobile,
         is_admin=True
