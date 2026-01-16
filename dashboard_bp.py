@@ -48,6 +48,7 @@ def user_data():
             'id': current_user.id,
             'username': current_user.username,
             'mobile': current_user.mobile,
+            'year': current_user.year,
             'status': current_user.status, # True or False
             'is_admin': current_user.is_admin, # True or False
             'created_at': current_user.created_at.strftime('%Y-%m-%d %H:%M:%S') if current_user.created_at else 'Unknown',

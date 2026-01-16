@@ -6345,7 +6345,13 @@ import io
 @app.route('/api/announcements')
 def get_announcements():
     try:
-        announcements = Announcement.query.order_by(Announcement.created_at.desc()).all()
+        announcements = Announcement.query\
+            .join(User, Announcement.user_id == User.id)\
+            .filter(
+                User.year == current_user.year
+            )\
+            .order_by(Announcement.created_at.desc())\
+            .all()        
         result = [{
             'id': a.id,
             'title': a.title,
@@ -7475,6 +7481,7 @@ def current_user_info():
         'id': current_user.id,
         'username': current_user.username,
         'mobile': current_user.mobile,
+        'year': current_user.year,
         'is_admin': current_user.is_admin,
         'created_at': current_user.created_at.isoformat()
     })
