@@ -7071,8 +7071,6 @@ def get_timetable():
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/timetable', methods=['GET', 'POST'])
-@login_required
-@admin_required
 def handle_timetable():
     if request.method == 'GET':
         timetable_slots = Timetable.query\
