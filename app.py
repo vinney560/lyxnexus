@@ -264,7 +264,7 @@ class Timetable(db.Model):
     updated_at = db.Column(db.DateTime, default=nairobi_time, onupdate=nairobi_time)
 
     topic_id = db.Column(db.Integer, db.ForeignKey('topic.id'), nullable=True)
-    
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
     
     # Relationship
     topic = db.relationship('Topic', backref='timetable_slots', lazy=True)
@@ -603,7 +603,7 @@ with app.app_context():
         db.create_all()
         # Safer approach with existence check and proper column definition
         db.session.execute(text('''
-            ALTER TABLE "topic" 
+            ALTER TABLE "timetable" 
             ADD COLUMN IF NOT EXISTS user_id INTEGER;
         '''))
         db.session.commit()
@@ -6879,10 +6879,16 @@ def get_timetable():
     """Get timetable grouped by day"""
 
     try:
-        timetable_slots = Timetable.query.order_by(
-            Timetable.day_of_week, 
-            Timetable.start_time
-        ).all()
+        timetable_slots = Timetable.query\
+            .join(User, Timetable.user_id == User.id)\
+            .filter(
+                User.year == current_user.year
+            )\
+            .order_by(
+                Timetable.day_of_week, 
+                Timetable.start_time
+            )\
+            .all()
 
         days_order = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
         timetable_by_day = {day: [] for day in days_order}
@@ -6916,10 +6922,16 @@ def get_timetable():
 @app.route('/api/timetable', methods=['GET', 'POST'])
 def handle_timetable():
     if request.method == 'GET':
-        timetable_slots = Timetable.query.order_by(
-            Timetable.day_of_week,
-            Timetable.start_time
-        ).all()
+        timetable_slots = Timetable.query\
+            .join(User, Timetable.user_id == User.id)\
+            .filter(
+                User.year == current_user.year
+            )\
+            .order_by(
+                Timetable.day_of_week, 
+                Timetable.start_time
+            )\
+            .all()
         
         result = []
         for slot in timetable_slots:
