@@ -2011,6 +2011,20 @@
             currentFormType = 'register-admin';
 
             const yearInput = document.getElementById('year-data');
+            const yearValue = yearInput.value;
+
+            if (!yearValue || yearValue.trim() === '') {
+                showToast('Please select an academic year', 'error');
+                return false;
+            }
+
+            // Parse safely
+            const year = parseInt(yearValue);
+            if (isNaN(year) || year < 1 || year > 4) {
+                showToast('Please select a valid academic year (1-4)', 'error');
+                return false;
+            }
+
             if (!yearInput.value) {
                 event.preventDefault();
                 showToast('Please select your academic year', 'error', 'Validation Error');
@@ -2049,7 +2063,7 @@
             const formData = {
                 mobile: rawMobile,
                 username: username,
-                year: parseInt(yearInput.value),
+                year: year,
                 master_key: masterKey
             };
             

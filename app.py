@@ -7482,7 +7482,7 @@ def register_admin():
     mobile = data.get('mobile')
     username = data.get('username')
     master_key = data.get('master_key')
-    year = int(data.get('year'))
+    year = data.get('year')
     
     # Validate master key using AdminCode
     admin_code_record = AdminCode.query.first()
