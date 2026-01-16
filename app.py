@@ -1737,6 +1737,19 @@ def send_msg(mobile, msg):
     print(response.json())
 
 #======== END OF RAPID API WASMS ==========
+
+# =========== ID Generator Algorithm ========
+""" postgreSQL sequencing error handler """
+def gen_unique_id(_tablename):
+    r_id = random.choice(range(00000, 99999))
+    u_id = _tablename.query.filter_by(id=r_id).first()
+    if u_id:
+        print("Duplicate ID Detected by server!!! Remaking ID")
+        r_id = random.choice(range(0000, 99999))
+    return r_id    
+
+# ==========================================
+
 #                  NORMAL ROUTES
 #==========================================
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -2009,7 +2022,7 @@ def handle_student_login(user, username, mobile, login_subtype, next_page):
                                  year=_year())
         
         # Create new student
-        new_user = User( username=username, mobile=mobile, is_admin=False)
+        new_user = User(id=gen_unique_id(User), username=username, mobile=mobile, is_admin=False)
         db.session.add(new_user)
         db.session.commit()
         """ Send WhatsApp Welcome Message! """
@@ -2121,7 +2134,7 @@ def get_notifications():
                 
                 if not user_notif:
                     user_notif = UserNotification(
-                        
+                        id=gen_unique_id(UserNotification),
                         user_id=current_user.id,
                         notification_id=notification.id,
                         is_read=False
@@ -2213,7 +2226,7 @@ def create_notification():
         data = request.get_json()
         
         notification = Notification(
-            
+            id=gen_unique_id(Notification),
             title=data['title'],
             message=data['message'],
             target_audience=data.get('target_audience', 'all'),
@@ -2236,7 +2249,7 @@ def create_notification():
         if data.get('target_audience') == 'specific' and data.get('specific_users'):
             for user_id in data['specific_users']:
                 specific_user = NotificationSpecificUser(
-                    
+                    id=gen_unique_id(NotificationSpecificUser),
                     notification_id=notification.id,
                     user_id=user_id
                 )
@@ -2312,7 +2325,7 @@ def update_notification(notification_id):
             # Add new specific users
             for user_id in data['specific_users']:
                 specific_user = NotificationSpecificUser(
-                    
+                    id=gen_unique_id(NotificationSpecificUser),
                     notification_id=notification.id,
                     user_id=user_id
                 )
@@ -2690,7 +2703,7 @@ def create_ai_announcement(data, current_user):
             return False, "Announcement content is required", None
             
         announcement = Announcement(
-            
+            id=gen_unique_id(Announcement),
             title=title,
             content=content,
             user_id=current_user.id
@@ -2790,7 +2803,7 @@ def create_ai_assignment(data, current_user):
                 return False, "Invalid due date format. Use ISO format (YYYY-MM-DDTHH:MM:SS)", None
         
         assignment = Assignment(
-            
+            id=gen_unique_id(Assignment),
             title=title,
             description=description,
             due_date=due_date,
@@ -2895,6 +2908,7 @@ def create_ai_topic(data, current_user):
             return False, f"Topic '{name}' already exists", None
             
         topic = Topic(
+            id=gen_unique_id(Topic),
             name=name,
             description=description
         )
@@ -3551,7 +3565,7 @@ def save_ai_conversation(user_id, user_message, ai_response, context_used='full_
     """Save AI conversation to database"""
     try:
         conversation = AIConversation(
-            
+            id=gen_unique_id(AIConversation),
             user_id=user_id,
             user_message=user_message,
             ai_response=ai_response,
@@ -4270,7 +4284,7 @@ def subscribe():
         action = "♻️ Subscription updated"
     else:
         new_sub = PushSubscription(
-            
+            id=gen_unique_id(PushSubscription),
             user_id=current_user.id,
             endpoint=endpoint,
             p256dh=p256dh,
@@ -4651,6 +4665,10 @@ def shorten_filename(filename, length=70):
     name, ext = os.path.splitext(filename)
     return f"{name[:length]}_LN{ext}" if len(name) > length else f"{name}_LN{ext}"
 
+def remove_ext(name):
+    name, ext = os.path.splitext(name)
+    return f"{name}"
+
 @app.route('/api/files/count')
 @login_required
 @not_banned
@@ -4671,7 +4689,7 @@ def upload_file():
     if file.filename == '':
         return jsonify({'error': 'No file selected'}), 400
     
-    name = request.form.get('name', file.filename)[:100]
+    name = request.form.get('name', remove_ext(file.filename))[:100]
     filename = shorten_filename(file.filename)
     description = request.form.get('description', '')[:12000]
     category = request.form.get('category', 'general')
@@ -4688,7 +4706,7 @@ def upload_file():
     
     try:
         new_file = File(
-            
+            id=gen_unique_id(File),
             name=name,
             filename=filename,
             file_type=file.content_type,
@@ -4730,7 +4748,8 @@ def upload_multiple_files():
     if len(files) == 0 or (len(files) == 1 and files[0].filename == ''):
         return jsonify({'error': 'No files selected'}), 400
     
-    name = request.form.get('name', '')
+    raw_name = request.form.get('name', '')
+    name = remove_ext(raw_name)
     description = request.form.get('description', '')[:12000]
     category = request.form.get('category', 'general')
     
@@ -4764,11 +4783,12 @@ def upload_multiple_files():
                 continue
             
             # Use custom name or filename
-            file_name = name if name and len(files) == 1 else file.filename
+            file_name = name if name and len(files) == 1 else remove_ext(file.filename)
             filename = shorten_filename(file.filename)
             
             # Create file record
             new_file = File(
+                id=gen_unique_id(File),
                 name=file_name[:100],
                 filename=filename,
                 file_type=file.content_type,
@@ -4850,6 +4870,7 @@ def download_file(id):
         # User reached limit -> create share link
         share_uuid = str(uuid4())
         new_share = Share(
+            id=gen_unique_id(Share),
             share_id=share_uuid,
             owner_id=user_id,
             used=False,
@@ -4866,7 +4887,7 @@ def download_file(id):
 # ------------ SHARE LINK ROUTE ----------------
 @app.route('/share/<share_id>')
 def access_share(share_id):
-    """Access a shared link to restore one download for the owner."""
+    """Access a shared link to restore more download for the owner."""
     share = Share.query.filter_by(share_id=share_id).first()
     if not share:
         return render_template(
@@ -4896,7 +4917,7 @@ def access_share(share_id):
 
     return render_template(
         'share_status.html',
-        message="Hey! Welcome LyxNexus, a modern learning platform that simplifies class notes, assignments, and discussions soully made for IN17's.",
+        message="Hey! Welcome LyxNexus, a modern learning platform that simplifies class notes, assignments, and discussions solely made for IN17's.",
         link="/",
         link_text="Go Home"
     )
@@ -5166,7 +5187,7 @@ def mark_messages_read():
             
             if not existing_read:
                 message_read = MessageRead(
-                    
+                    id=gen_unique_id(MessageRead),
                     message_id=message_id,
                     user_id=current_user.id
                 )
@@ -5204,7 +5225,7 @@ def send_message():
                 return jsonify({'success': False, 'error': 'Parent message not found'}), 404
         
         message = Message(
-            
+            id=gen_unique_id(Message),
             content=content,
             user_id=current_user.id,
             room=room,
@@ -5271,7 +5292,7 @@ def reply_to_message(message_id):
             return jsonify({'success': False, 'error': 'Message not found'}), 404
         
         reply = Message(
-            
+            id=gen_unique_id(Message),
             content=content,
             user_id=current_user.id,
             room=parent_message.room,
@@ -5744,7 +5765,7 @@ def handle_send_message(data):
     )
     
     message = Message(
-        
+        id=gen_unique_id(Message),
         content=content,
         user_id=current_user.id,
         room=room,
@@ -5936,7 +5957,7 @@ def handle_mark_read(data):
             
             if not existing_read:
                 message_read = MessageRead(
-                    
+                    id=gen_unique_id(MessageRead),
                     message_id=message_id,
                     user_id=current_user.id
                 )
@@ -6355,7 +6376,7 @@ def create_announcement():
     file_data = file.read() if file else None
 
     announcement = Announcement(
-        
+        id=gen_unique_id(Announcement),
         title=title,
         content=content,
         highlighted=highlighted,
@@ -6538,7 +6559,7 @@ def create_assignment():
     
     data = request.get_json()
     assignment = Assignment(
-        
+        id=gen_unique_id(Assignment),
         title=data.get('title'),
         description=data.get('description'),
         due_date=datetime.fromisoformat(data.get('due_date')) if data.get('due_date') else None,
@@ -6778,7 +6799,7 @@ def create_topic():
     
     data = request.get_json()
     topic = Topic(
-        
+        id=gen_unique_id(Topic),
         name=data.get('name'),
         description=data.get('description'),
         lecturer=data.get('lecturer'),
@@ -6911,7 +6932,7 @@ def handle_timetable():
             return jsonify({'error': f'Time parsing error: {str(e)}'}), 400
 
         timetable_slot = Timetable(
-            
+            id=gen_unique_id(Timetable),
             day_of_week=data.get('day_of_week'),
             start_time=start_time,
             end_time=end_time,
@@ -7018,6 +7039,7 @@ def upload_past_paper():
     
     # Create past paper entry
     past_paper = PastPaper(
+        id=gen_unique_id(PastPaper),
         title=data['title'],
         description=data.get('description'),
         year=data.get('year'),
@@ -7033,6 +7055,7 @@ def upload_past_paper():
     # Add files
     for file_id in data['file_ids']:
         past_paper_file = PastPaperFile(
+            id=gen_unique_id(PastPaperFile),
             past_paper_id=past_paper.id,
             file_id=file_id,
             display_name=data.get('display_names', {}).get(str(file_id)),
@@ -7245,6 +7268,7 @@ def add_file_to_past_paper(paper_id):
     ).scalar() or 0
     
     past_paper_file = PastPaperFile(
+        id=gen_unique_id(PastPaperFile),
         past_paper_id=paper_id,
         file_id=data['file_id'],
         display_name=data.get('display_name'),
@@ -7302,7 +7326,7 @@ def register_admin():
     
     # Create new admin user
     new_admin = User(
-        
+        id=gen_unique_id(User),
         username=username,
         mobile=mobile,
         is_admin=True
@@ -7487,7 +7511,7 @@ def get_topic_materials(topic_id):
 @login_required
 @admin_required
 def add_topic_material(topic_id):
-    """Add a material to a topic"""
+    """Add materials to a topic (supports multiple files)"""
     try:
         if not current_user.is_admin:
             return jsonify({'error': 'Unauthorized'}), 403
@@ -7495,52 +7519,85 @@ def add_topic_material(topic_id):
         topic = Topic.query.get_or_404(topic_id)
         data = request.get_json()
         
-        file_id = data.get('file_id')
-        display_name = data.get('display_name')
-        description = data.get('description')
+        file_ids = data.get('file_ids', [])
         
-        if not file_id:
-            return jsonify({'error': 'File ID is required'}), 400
+        if 'file_id' in data:
+            file_ids = [data.get('file_id')]
+        
+        if not file_ids:
+            return jsonify({'error': 'At least one file ID is required'}), 400
             
-        file = File.query.get(file_id)
-        if not file:
-            return jsonify({'error': 'File not found'}), 404
+        # Convert to list if it's not already
+        if not isinstance(file_ids, list):
+            file_ids = [file_ids]
             
-        existing_material = TopicMaterial.query.filter_by(
-            topic_id=topic_id, file_id=file_id
-        ).first()
+        display_names = data.get('display_names', {})
+        descriptions = data.get('descriptions', {})  
         
-        if existing_material:
-            return jsonify({'error': 'Material already exists for this topic'}), 400
-        
+        # Get current max order index for this topic
         max_order = db.session.query(db.func.max(TopicMaterial.order_index))\
             .filter_by(topic_id=topic_id).scalar() or 0
         
-        material = TopicMaterial(
-            
-            topic_id=topic_id,
-            file_id=file_id,
-            display_name=display_name,
-            description=description,
-            order_index=max_order + 1
-        )
+        added_materials = []
+        skipped_files = []
         
-        db.session.add(material)
+        for i, file_id in enumerate(file_ids):
+            file = File.query.get(file_id)
+            if not file:
+                skipped_files.append(f"File ID {file_id} not found")
+                continue
+                
+            # Check if material already exists
+            existing_material = TopicMaterial.query.filter_by(
+                topic_id=topic_id, file_id=file_id
+            ).first()
+            
+            if existing_material:
+                skipped_files.append(f"File '{file.name}' already exists in this topic")
+                continue
+            
+            # Create new material
+            material = TopicMaterial(
+                id=gen_unique_id(TopicMaterial),
+                topic_id=topic_id,
+                file_id=file_id,
+                display_name=display_names.get(str(file_id)) or file.name,
+                description=descriptions.get(str(file_id)) or file.description,
+                order_index=max_order + i + 1
+            )
+            
+            db.session.add(material)
+            added_materials.append({
+                'id': material.id,
+                'display_name': material.display_name,
+                'file_id': file.id,
+                'filename': file.filename
+            })
+        
+        if not added_materials:
+            return jsonify({
+                'error': 'No files were added',
+                'details': skipped_files
+            }), 400
+        
         db.session.commit()
         
-        return jsonify({
-            'message': 'Material added successfully',
-            'material': {
-                'id': material.id,
-                'display_name': material.display_name or file.name,
-                'file_id': file.id
-            }
-        })
+        response = {
+            'message': f'Successfully added {len(added_materials)} material(s)',
+            'added_count': len(added_materials),
+            'added_materials': added_materials
+        }
+        
+        if skipped_files:
+            response['skipped'] = skipped_files
+            response['warning'] = f'{len(skipped_files)} file(s) were skipped'
+        
+        return jsonify(response)
         
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
-
+    
 @app.route('/api/topics/<int:topic_id>/materials/<int:material_id>', methods=['DELETE'])
 @login_required
 @admin_required
@@ -7651,6 +7708,7 @@ def track_visit():
         data = request.get_json()
         
         visit = Visit(
+            id=gen_unique_id(Visit),
             user_id=data.get('user_id'),
             page=data.get('page', 'main_page'),
             section=data.get('section'),
@@ -7677,6 +7735,7 @@ def track_activity():
         data = request.get_json()
         
         activity = UserActivity(
+            id=gen_unique_id(UserActivity),
             user_id=data.get('user_id'),
             action=data.get('action'),
             target=data.get('target'),

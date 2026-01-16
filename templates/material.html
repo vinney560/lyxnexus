@@ -1029,7 +1029,7 @@
             }
             
             try {
-                const response = await fetch(`${API_BASE}/topics/${TOPIC_ID}/materials/batch`, {
+                const response = await fetch(`${API_BASE}/topics/${TOPIC_ID}/materials`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -1045,7 +1045,13 @@
                     throw new Error(data.error || 'Failed to add materials');
                 }
                 
-                showToast(`Successfully added ${data.added_count} material(s)`, 'success');
+                // Show success message
+                let message = data.message;
+                if (data.warning) {
+                    message += ` (${data.warning})`;
+                }
+                showToast(message, 'success');
+                
                 closeModal('add-material-modal');
                 loadTopicMaterials();
                 

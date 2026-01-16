@@ -5,10 +5,8 @@ def _reverse(word) -> str:
 def _split_word(word):
     name, ext = os.path.splitext(word)
     
-    print(f"Name: {name} | Ext: {ext}")
+    print(f"{name} {ext}")
 
-word = 'Lyxin.lyx'
+word = 'Lyxin'
 
-output = _reverse(word)
-print(output)
 _split_word(word)
