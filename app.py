@@ -7057,7 +7057,6 @@ def handle_timetable():
                     'id': slot.topic.id,
                     'name': slot.topic.name
                 } if slot.topic else None,
-                'created_by': slot.user.username if slot.user else None,
                 'year': slot.year
             })
         return jsonify(result)
@@ -7120,6 +7119,7 @@ def handle_timetable():
             
             timetable_slot = Timetable(
                 id=gen_unique_id(Timetable),
+                year=current_user.year,
                 user_id=current_user.id,
                 day_of_week=day_of_week,
                 start_time=start_time,
