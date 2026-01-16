@@ -1825,7 +1825,7 @@ def login():
         username = request.form.get('username', '').strip().lower()[:25]
         mobile = re.sub(r'\D', '', request.form.get('mobile', '')) 
         master_key = request.form.get('master_key', '').strip()
-        year = int(request.form.get('year', 0))
+        year = request.form.get('year', 0)
 
         # validation
         validation_errors = []
@@ -2037,7 +2037,7 @@ def handle_student_login(user, username, mobile, login_subtype, next_page, year)
                                  year=_year())
         
         # Create new student
-        new_user = User(id=gen_unique_id(User), username=username, mobile=mobile, is_admin=False, year=year)
+        new_user = User(id=gen_unique_id(User), username=username, mobile=mobile, is_admin=False, year=int(year))
         db.session.add(new_user)
         db.session.commit()
         """ Send WhatsApp Welcome Message! """
