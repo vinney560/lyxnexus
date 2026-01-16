@@ -1829,13 +1829,13 @@
             container.innerHTML = topics.map(topic => `
                 <div class="modern-card text-center">
                     <div class="absolute -top-4 -left-2 
-                        ${topic.author?.year == 1 ? 'bg-gradient-to-r from-blue-500 to-blue-700' : 
-                          topic.author?.year == 2 ? 'bg-gradient-to-r from-purple-500 to-purple-700' : 
-                          topic.author?.year == 3 ? 'bg-gradient-to-r from-green-500 to-green-700' : 
-                          topic.author?.year == 4 ? 'bg-gradient-to-r from-yellow-500 to-yellow-700' : 
+                        ${topic.year == 1 ? 'bg-gradient-to-r from-blue-500 to-blue-700' : 
+                          topic.year == 2 ? 'bg-gradient-to-r from-purple-500 to-purple-700' : 
+                          topic.year == 3 ? 'bg-gradient-to-r from-green-500 to-green-700' : 
+                          topic.year == 4 ? 'bg-gradient-to-r from-yellow-500 to-yellow-700' : 
                           'bg-gradient-to-r from-gray-500 to-gray-700'}
                         text-white px-4 py-1.5 rounded-r-full rounded-tl-full text-sm font-bold shadow-lg">
-                        <i class="fas fa-graduation-cap mr-1"></i>Year ${topic.author?.year || 'N/A'}
+                        <i class="fas fa-graduation-cap mr-1"></i>Year ${topic.year || 'N/A'}
                     </div>
                     <div class="feature-icon">
                         <i class="fas fa-book"></i>
@@ -1864,13 +1864,13 @@
             container.innerHTML = timetable.map(daySchedule => `
                 <div class="timetable-day">
                     <div class="absolute -top-4 -left-2 
-                        ${slot.author?.year == 1 ? 'bg-gradient-to-r from-blue-500 to-blue-700' : 
-                          slot.author?.year == 2 ? 'bg-gradient-to-r from-purple-500 to-purple-700' : 
-                          slot.author?.year == 3 ? 'bg-gradient-to-r from-green-500 to-green-700' : 
-                          slot.author?.year == 4 ? 'bg-gradient-to-r from-yellow-500 to-yellow-700' : 
+                        ${slot.year == 1 ? 'bg-gradient-to-r from-blue-500 to-blue-700' : 
+                          slot.year == 2 ? 'bg-gradient-to-r from-purple-500 to-purple-700' : 
+                          slot.year == 3 ? 'bg-gradient-to-r from-green-500 to-green-700' : 
+                          slot.year == 4 ? 'bg-gradient-to-r from-yellow-500 to-yellow-700' : 
                           'bg-gradient-to-r from-gray-500 to-gray-700'}
                         text-white px-4 py-1.5 rounded-r-full rounded-tl-full text-sm font-bold shadow-lg">
-                        <i class="fas fa-graduation-cap mr-1"></i>Year ${slot.author?.year || 'N/A'}
+                        <i class="fas fa-graduation-cap mr-1"></i>Year ${slot.year || 'N/A'}
                     </div>
                     <h3 class="text-xl font-bold mb-4 border-b border-slate-700 pb-2 text-slate-100">${daySchedule.day}</h3>
                     ${daySchedule.slots.map(slot => `

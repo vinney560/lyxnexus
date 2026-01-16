@@ -609,14 +609,6 @@ with app.app_context():
     try:
         # Create tables if they don't exist
         db.create_all()
-        db.session.execute(text('''
-            ALTER TABLE "topic" 
-            ADD COLUMN IF NOT EXISTS year INTEGER DEFAULT 1;
-        '''))
-        db.session.execute(text('''
-            ALTER TABLE "timetable" 
-            ADD COLUMN IF NOT EXISTS year INTEGER DEFAULT 1;
-        '''))
         db.session.commit()
         print("✅ Database tables created successfully!")
 
@@ -6867,9 +6859,9 @@ def preview():
 def get_specified_topics():
     """Get all topics"""
     topics = Topic.query\
-            .filter(Topic.year == current_user.id)\
-            .order_by(Topic.created_at.desc())\
-            .all()
+        .filter(Topic.year == current_user.year)\
+        .order_by(Topic.created_at.desc())\
+        .all()
     result = []
     for topic in topics:
         result.append({
@@ -6965,14 +6957,8 @@ def delete_topic(id):
 def get_specific_timetable():
     if request.method == 'GET':
         timetable_slots = Timetable.query\
-            .join(User, Timetable.year == User.id)\
-            .filter(
-                User.year == current_user.year
-            )\
-            .order_by(
-                Timetable.day_of_week, 
-                Timetable.start_time
-            )\
+            .filter(Timetable.year == current_user.year)\
+            .order_by(Timetable.day_of_week, Timetable.start_time)\
             .all()
         
         result = []
