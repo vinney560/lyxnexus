@@ -6953,72 +6953,47 @@ def delete_topic(id):
 #==========================================
 #            TIMETABLE API ROUTES
 #==========================================
-@app.route('/api/timetable/specified', methods=['GET', 'POST'])
-def get_specific_timetable():
-    if request.method == 'GET':
+@app.route('api/timetable/specified/grouped', methods=['GET'])
+def get_timetable():
+    """Get timetable grouped by day"""
+
+    try:
         timetable_slots = Timetable.query\
-            .filter(Timetable.year == current_user.year)\
-            .order_by(Timetable.day_of_week, Timetable.start_time)\
+            .order_by(
+                Timetable.day_of_week, 
+                Timetable.start_time
+            )\
             .all()
-        
-        result = []
+
+        days_order = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+        timetable_by_day = {day: [] for day in days_order}
+
         for slot in timetable_slots:
-            result.append({
+            timetable_by_day[slot.day_of_week].append({
                 'id': slot.id,
-                'day_of_week': slot.day_of_week,
                 'start_time': slot.start_time.strftime('%H:%M'),
                 'end_time': slot.end_time.strftime('%H:%M'),
+                'time': f"{slot.start_time.strftime('%H:%M')} - {slot.end_time.strftime('%H:%M')}",
                 'subject': slot.subject,
                 'room': slot.room,
                 'teacher': slot.teacher,
                 'topic': {
                     'id': slot.topic.id,
                     'name': slot.topic.name
-                } if slot.topic else None
+                } if slot.topic else None,
             })
-        return jsonify(result)
 
-    if request.method == 'POST':
-        if not current_user.is_admin:
-            return jsonify({'error': 'Unauthorized'}), 403
+        result = [
+            {'day': day, 'slots': timetable_by_day[day]}
+            for day in days_order if timetable_by_day[day]
+        ]
 
-        data = request.get_json()
+        return jsonify(result), 200
 
-        try:
-            start_time_str = data.get('start_time')
-            end_time_str = data.get('end_time')
-
-            start_time = datetime.strptime(start_time_str, '%H:%M').time()
-            end_time = datetime.strptime(end_time_str, '%H:%M').time()
-
-            if start_time >= end_time:
-                return jsonify({'error': 'End time must be after start time'}), 400
-
-        except ValueError:
-            return jsonify({'error': 'Invalid time format. Use HH:MM format'}), 400
-        except Exception as e:
-            return jsonify({'error': f'Time parsing error: {str(e)}'}), 400
-
-        timetable_slot = Timetable(
-            id=gen_unique_id(Timetable),
-            user_id=current_user.id,
-            day_of_week=data.get('day_of_week'),
-            start_time=start_time,
-            end_time=end_time,
-            subject=data.get('subject'),
-            room=data.get('room'),
-            teacher=data.get('teacher'),
-            topic_id=data.get('topic_id')
-        )
-
-        db.session.add(timetable_slot)
-        db.session.commit()
-
-        return jsonify({
-            'message': 'Timetable slot created successfully',
-            'id': timetable_slot.id
-        }), 201
-
+    except Exception as e:
+        print("[ERROR] Failed to get timetable:", str(e))
+        return jsonify({'error': str(e)}), 500
+    
 @app.route('/api/timetable/grouped', methods=['GET'])
 def get_timetable():
     """Get timetable grouped by day"""
@@ -7047,7 +7022,6 @@ def get_timetable():
                     'id': slot.topic.id,
                     'name': slot.topic.name
                 } if slot.topic else None,
-                'year': slot.year
             })
 
         result = [
