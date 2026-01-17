@@ -422,9 +422,10 @@ class TopicMaterial(db.Model):
     # Relationships
     topic = db.relationship('Topic', backref=db.backref('topic_materials', lazy=True))
     file = db.relationship('File', backref=db.backref('material_references', lazy=True))
+    c_file = db.relationship('UploadedFile', backref=db.backref('materials', lazy=True))
     
     def __repr__(self):
-        return f'<TopicMaterial {self.display_name or self.file.name}>'
+        return f'<TopicMaterial {self.display_name or self.file.filename}>'
 
 # Ai DB for conversation btwn Admin and Super AI Assistant
 class AIConversation(db.Model):
@@ -8290,6 +8291,59 @@ def get_available_files():
         })
         
     except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/archieves/available')
+@login_required
+def get_available_archieves():
+    """Get files that can be added to topics"""
+    try:
+        search = request.args.get('search', '')
+        page = request.args.get('page', 1, type=int)
+        per_page = 20
+        
+        query = UploadedFile.query
+        
+        if search:
+            query = query.filter(
+                db.or_(
+                    UploadedFile.filename.ilike(f'%{search}%'),
+                    UploadedFile.file_type.ilike(f'%{search}%')
+                )
+            )
+        
+        files = query.order_by(UploadedFile.created_at.desc())\
+            .paginate(page=page, per_page=per_page, error_out=False)
+        
+        files_data = []
+        for file in files.items:
+            files_data.append({
+                'id': file.id,
+                'name': file.filename.rsplit('.', 1)[0] if '.' in file.filename else file.filename,
+                'filename': file.filename,
+                'file_type': file.file_type,
+                'file_size': file.file_size,
+                'description': f"{file.file_type.capitalize()} file uploaded on {file.created_at.strftime('%Y-%m-%d')}",
+                'category': file.file_type,
+                'uploaded_at': file.created_at.isoformat() if file.created_at else None,
+                'uploaded_by': 'Admin',  # You can update this based on your user model
+                'url': file.url,
+                'public_id': file.public_id,
+                'format': file.file_format,
+                'is_document': file.resource_type == 'raw'
+            })
+        
+        return jsonify({
+            'files': files_data,
+            'has_next': files.has_next,
+            'has_prev': files.has_prev,
+            'current_page': files.page,
+            'pages': files.pages,
+            'total': files.total
+        })
+        
+    except Exception as e:
+        current_app.logger.error(f'Error fetching available files: {str(e)}')
         return jsonify({'error': str(e)}), 500
 #==========================================
 from sqlalchemy import func, extract
