@@ -413,7 +413,7 @@ class FileTag(db.Model):
 class TopicMaterial(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     topic_id = db.Column(db.Integer, db.ForeignKey('topic.id'), nullable=False)
-    file_id = db.Column(db.Integer, db.ForeignKey('uploaded_files.id'), nullable=False)  # Changed to uploaded_files
+    file_id = db.Column(db.Integer, db.ForeignKey('uploaded_files.id'), nullable=False)
     display_name = db.Column(db.String(255), nullable=True)
     description = db.Column(db.Text, nullable=True)
     order_index = db.Column(db.Integer, default=0)
@@ -421,7 +421,7 @@ class TopicMaterial(db.Model):
     
     # Relationships
     topic = db.relationship('Topic', backref=db.backref('topic_materials', lazy=True))
-    file = db.relationship('UploadedFile', backref=db.backref('material_references', lazy=True))  # Changed to UploadedFile
+    file = db.relationship('UploadedFile', backref=db.backref('material_references', lazy=True))
     
     def __repr__(self):
         return f'<TopicMaterial {self.display_name or self.file.filename}>'
@@ -674,7 +674,26 @@ with app.app_context():
     try:
         # Create tables if they don't exist
         db.create_all()
-        TopicMaterial.query.delete()
+        # 1. Drop the old foreign key constraint
+        db.session.execute(text('ALTER TABLE topic_material DROP CONSTRAINT IF EXISTS topic_material_file_id_fkey'))
+        
+        # 2. Add new foreign key constraint to uploaded_files
+        db.session.execute(text('''
+            ALTER TABLE topic_material 
+            ADD CONSTRAINT topic_material_file_id_fkey 
+            FOREIGN KEY (file_id) 
+            REFERENCES uploaded_files(id)
+        '''))
+        
+        # 3. Optional: Add ON DELETE CASCADE (if you want)
+        db.session.execute(text('''
+            ALTER TABLE topic_material 
+            DROP CONSTRAINT IF EXISTS topic_material_file_id_fkey,
+            ADD CONSTRAINT topic_material_file_id_fkey 
+            FOREIGN KEY (file_id) 
+            REFERENCES uploaded_files(id) 
+            ON DELETE CASCADE
+        '''))        
         db.session.commit()
         print("✅ Database tables created successfully!")
 
