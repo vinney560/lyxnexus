@@ -2024,7 +2024,7 @@ def handle_master_key_login(username, mobile, master_key, next_page):
         db.session.commit()
         login_user(user)
         
-        return redirect(next_page or url_for('index'))
+        return redirect(next_page or url_for('admin_page'))
     
     # Neither code matched
     else:
