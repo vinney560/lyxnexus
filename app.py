@@ -7680,7 +7680,7 @@ def get_past_paper_detail(paper_id):
         'files': [{
             'id': pp_file.id,
             'file_id': pp_file.file_id,
-            'display_name': pp_file.display_name,
+            'display_name': remove_ext(pp_file.filename),
             'description': pp_file.description,
             'added_at': pp_file.added_at.isoformat(),
             'filename': pp_file.file.filename,

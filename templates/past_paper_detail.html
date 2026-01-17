@@ -937,8 +937,8 @@
                             <div class="flex-1">
                                 <div class="flex items-start">
                                     <div class="flex-1">
-                                        <h3 class="text-lg sm:text-xl font-extrabold text-white underline underline-offset-4 decoration-blue-500 leading-snug break-words">
-                                            ${file.display_name || file.filename}
+                                        <h3 class="text-lg sm:text-xl font-extrabold text-white underline underline-offset-4 decoration-blue-500 leading-snug break-words break-all truncate">
+                                            ${file.display_name}
                                         </h3>
                                         <p class="text-gray-400 text-sm">${file.description || 'No description'}</p>
                                     </div>
@@ -1023,7 +1023,7 @@
                                 <i class="fas ${fileIcon.icon}"></i>
                             </div>
                             <div class="flex-1 min-w-0">
-                                <h4 class="font-semibold text-white truncate">${file.name}</h4>
+                                <h4 class="font-semibold text-white truncate whitespace-normal break-words overflow-hidden">${file.name}</h4>
                                 <p class="text-sm text-gray-400 filename">${file.filename} • ${formatFileSize(file.file_size)}</p>
                                 ${file.description ? `<p class="text-sm text-gray-500 mt-1 truncate">${file.description}</p>` : ''}
                             </div>
