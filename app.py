@@ -359,6 +359,57 @@ class File(db.Model):
     def __repr__(self):
         return f'<File {self.name}>'
 
+class UploadedFile(db.Model):
+    __tablename__ = 'uploaded_files'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    public_id = db.Column(db.String(200), unique=True, nullable=False)
+    filename = db.Column(db.String(200), nullable=False)
+    url = db.Column(db.Text, nullable=False)
+    file_type = db.Column(db.String(50), nullable=False)  # 'image', 'video', 'audio', 'document', 'other'
+    file_format = db.Column(db.String(20))
+    file_size = db.Column(db.Integer, default=0)  # in bytes
+    width = db.Column(db.Integer)
+    height = db.Column(db.Integer)
+    duration = db.Column(db.Float)  # for videos/audio
+    resource_type = db.Column(db.String(20))  # 'image', 'video', 'raw'
+    folder = db.Column(db.String(100), default='flask_uploads')
+    created_at = db.Column(db.DateTime, default=nairobi_time)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    def to_dict(self):
+        """Convert model to dictionary"""
+        return {
+            'id': self.public_id,
+            'public_id': self.public_id,
+            'filename': self.filename,
+            'url': self.url,
+            'type': self.file_type,
+            'format': self.file_format,
+            'size': self.file_size,
+            'width': self.width,
+            'height': self.height,
+            'duration': self.duration,
+            'created_at': self.created_at.strftime('%Y-%m-%d %H:%M:%S') if self.created_at else None,
+            'updated_at': self.updated_at.strftime('%Y-%m-%d %H:%M:%S') if self.updated_at else None,
+            'resource_type': self.resource_type,
+            'folder': self.folder,
+            'is_document': self.resource_type == 'raw'
+        }    
+    def __repr__(self):
+        return f'<UploadedFile {self.filename}>'
+
+class FileTag(db.Model):
+    __tablename__ = 'file_tags'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    file_id = db.Column(db.Integer, db.ForeignKey('uploaded_files.id'), nullable=False)
+    tag = db.Column(db.String(50), nullable=False)
+    
+    file = db.relationship('UploadedFile', backref=db.backref('tags', lazy=True))
+    
+    __table_args__ = (db.UniqueConstraint('file_id', 'tag', name='unique_file_tag'),)
+
 class TopicMaterial(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     topic_id = db.Column(db.Integer, db.ForeignKey('topic.id'), nullable=False)
@@ -371,6 +422,7 @@ class TopicMaterial(db.Model):
     # Relationships
     topic = db.relationship('Topic', backref=db.backref('topic_materials', lazy=True))
     file = db.relationship('File', backref=db.backref('material_references', lazy=True))
+    c_file = db.relationship('uploadedFile', backref=db.backref('url_references', lazy=True))
     
     def __repr__(self):
         return f'<TopicMaterial {self.display_name or self.file.name}>'
@@ -4376,6 +4428,16 @@ from lyxlab_bp import lyxlab_bp
 from url_ping_bp import url_ping_bp
 from test import test_routes
 from chloe import _chloe_ai
+from file_storage import storage_bp
+
+import cloudinary
+# Cloudinary Configuration
+cloudinary.config(
+    cloud_name='dmkfmr8ry',
+    api_key='656547737882229',
+    api_secret='CzJjWSFZ6XDqDPhSaen9XHDre3E',
+    secure=True
+)
 
 # Register the blueprint
 app.register_blueprint(gemini_bp)
@@ -4385,6 +4447,7 @@ app.register_blueprint(dashboard_bp)
 app.register_blueprint(math_bp)
 app.register_blueprint(lyxlab_bp)
 app.register_blueprint(cloud_migration_bp)
+app.register_blueprint(storage_bp)
 app.register_blueprint(url_ping_bp)
 app.register_blueprint(test_routes)
 app.register_blueprint(_chloe_ai)

@@ -1,0 +1,442 @@
+# storage_bp.py
+from flask import Blueprint, render_template, request, jsonify, flash, Response, current_app
+from werkzeug.utils import secure_filename
+from datetime import datetime
+import cloudinary.uploader
+import cloudinary.api
+import requests
+from sqlalchemy.exc import IntegrityError
+from app import db, UploadedFile, FileTag
+from datetime import timedelta
+
+storage_bp = Blueprint('file_store', __name__, url_prefix='/store')
+
+# File upload settings
+ALLOWED_EXTENSIONS = {
+    'png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp', 'svg',
+    'pdf', 'doc', 'docx', 'txt', 'xls', 'xlsx', 'ppt', 'pptx', 
+    'odt', 'ods', 'odp', 'rtf',
+    'zip', 'rar', '7z',
+    'mp3', 'wav', 'ogg', 'm4a', 'flac',
+    'mp4', 'mov', 'avi', 'mkv', 'webm', 'flv'
+}
+MAX_FILE_SIZE = 50 * 1024 * 1024  # 50MB
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def get_file_type(filename):
+    """Determine file type from filename"""
+    if not filename:
+        return 'other'
+    
+    ext = filename.rsplit('.', 1)[1].lower() if '.' in filename else ''
+    
+    document_ext = {'pdf', 'doc', 'docx', 'txt', 'xls', 'xlsx', 'ppt', 'pptx', 'odt', 'ods', 'odp', 'rtf'}
+    image_ext = {'png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp', 'svg', 'tiff', 'ico'}
+    video_ext = {'mp4', 'mov', 'avi', 'mkv', 'webm', 'flv', 'wmv', 'm4v', 'mpg', 'mpeg'}
+    audio_ext = {'mp3', 'wav', 'ogg', 'm4a', 'flac', 'aac', 'wma'}
+    archive_ext = {'zip', 'rar', '7z', 'tar', 'gz'}
+    
+    if ext in image_ext:
+        return 'image'
+    elif ext in video_ext:
+        return 'video'
+    elif ext in audio_ext:
+        return 'audio'
+    elif ext in document_ext:
+        return 'document'
+    elif ext in archive_ext:
+        return 'archive'
+    else:
+        return 'other'
+
+def format_file_size(bytes):
+    if bytes == 0:
+        return '0 Bytes'
+    sizes = ['Bytes', 'KB', 'MB', 'GB']
+    i = 0
+    while bytes >= 1024 and i < len(sizes)-1:
+        bytes /= 1024
+        i += 1
+    return f"{bytes:.2f} {sizes[i]}"
+
+@storage_bp.route('/')
+def file_store():
+    """Render the main files page"""
+    return render_template('file_store.html')
+
+@storage_bp.route('/api/upload', methods=['POST'])
+def upload_file():
+    """Handle file upload to Cloudinary"""
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file selected'}), 400
+    
+    file = request.files['file']
+    
+    if file.filename == '':
+        return jsonify({'error': 'No file selected'}), 400
+    
+    if not allowed_file(file.filename):
+        return jsonify({'error': f'File type not allowed. Allowed: {", ".join(ALLOWED_EXTENSIONS)}'}), 400
+    
+    try:
+        file_content = file.read()
+        
+        if len(file_content) > MAX_FILE_SIZE:
+            return jsonify({'error': f'File too large. Max size: {MAX_FILE_SIZE//(1024*1024)}MB'}), 400
+        
+        filename = secure_filename(file.filename)
+        file_ext = filename.rsplit('.', 1)[1].lower() if '.' in filename else ''
+        base_name = filename.rsplit('.', 1)[0]
+        
+        document_extensions = {'pdf', 'doc', 'docx', 'txt', 'xls', 'xlsx', 'ppt', 'pptx'}
+        video_extensions = {'mp4', 'mov', 'avi', 'mkv', 'webm', 'flv'}
+        audio_extensions = {'mp3', 'wav', 'ogg', 'm4a'}
+        
+        if file_ext in document_extensions:
+            resource_type = 'raw'
+        elif file_ext in video_extensions:
+            resource_type = 'video'
+        elif file_ext in audio_extensions:
+            resource_type = 'video'
+        else:
+            resource_type = 'auto'
+        
+        upload_result = cloudinary.uploader.upload(
+            file_content,
+            folder="flask_uploads",
+            resource_type=resource_type,
+            public_id=base_name,
+            overwrite=True,
+            use_filename=True,
+            unique_filename=True,
+            **({'type': 'authenticated'} if resource_type == 'raw' else {})
+        )
+        
+        file_type = get_file_type(filename)
+        
+        existing_file = UploadedFile.query.filter_by(public_id=upload_result['public_id']).first()
+        if existing_file:
+            existing_file.filename = filename
+            existing_file.url = upload_result['secure_url']
+            existing_file.file_size = upload_result.get('bytes', 0)
+            existing_file.file_format = upload_result.get('format', file_ext)
+            existing_file.width = upload_result.get('width')
+            existing_file.height = upload_result.get('height')
+            existing_file.duration = upload_result.get('duration')
+            existing_file.resource_type = upload_result.get('resource_type', resource_type)
+            existing_file.file_type = file_type
+            existing_file.updated_at = datetime.utcnow()
+        else:
+            new_file = UploadedFile(
+                public_id=upload_result['public_id'],
+                filename=filename,
+                url=upload_result['secure_url'],
+                file_type=file_type,
+                file_format=upload_result.get('format', file_ext),
+                file_size=upload_result.get('bytes', 0),
+                width=upload_result.get('width'),
+                height=upload_result.get('height'),
+                duration=upload_result.get('duration'),
+                resource_type=upload_result.get('resource_type', resource_type),
+                folder=upload_result.get('folder', 'flask_uploads'),
+                created_at=datetime.utcnow() + timedelta(hours=3),
+                updated_at=datetime.utcnow() + timedelta(hours=3)
+            )
+            db.session.add(new_file)
+        
+        db.session.commit()
+        
+        file_record = UploadedFile.query.filter_by(public_id=upload_result['public_id']).first()
+        
+        current_app.logger.info(f'File uploaded: {filename} | Type: {file_type} | Resource: {resource_type}')
+        
+        return jsonify({
+            'success': True,
+            'message': 'File uploaded successfully',
+            'file': file_record.to_dict()
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        error_msg = str(e)
+        if 'File size too large' in error_msg:
+            return jsonify({'error': 'File size exceeds Cloudinary limits (10MB for images, 100MB for videos)'}), 400
+        elif 'Invalid image file' in error_msg:
+            return jsonify({'error': 'Invalid file format or corrupted file'}), 400
+        else:
+            return jsonify({'error': f'Cloudinary error: {error_msg}'}), 500
+            
+    except IntegrityError:
+        db.session.rollback()
+        return jsonify({'error': 'File with this name already exists'}), 400
+        
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f'Upload error: {str(e)}')
+        return jsonify({'error': f'Upload failed: {str(e)}'}), 500
+
+@storage_bp.route('/api/upload-multiple', methods=['POST'])
+def upload_multiple_files():
+    """Handle multiple file uploads"""
+    if 'files' not in request.files:
+        return jsonify({'error': 'No files selected'}), 400
+    
+    files = request.files.getlist('files')
+    if not files or files[0].filename == '':
+        return jsonify({'error': 'No files selected'}), 400
+    
+    uploaded_count = 0
+    failed_count = 0
+    errors = []
+    
+    for file in files:
+        try:
+            if not allowed_file(file.filename):
+                errors.append(f"{file.filename}: File type not allowed")
+                failed_count += 1
+                continue
+            
+            file_content = file.read()
+            file.seek(0)
+            
+            if len(file_content) > MAX_FILE_SIZE:
+                errors.append(f"{file.filename}: File too large")
+                failed_count += 1
+                continue
+            
+            # Reuse the upload logic from upload_file endpoint
+            response = upload_file()
+            if response[1] != 200:
+                errors.append(f"{file.filename}: {response[0].get_json().get('error', 'Unknown error')}")
+                failed_count += 1
+            else:
+                uploaded_count += 1
+                
+        except Exception as e:
+            errors.append(f"{file.filename}: {str(e)}")
+            failed_count += 1
+    
+    return jsonify({
+        'success': True,
+        'uploaded': uploaded_count,
+        'failed': failed_count,
+        'errors': errors if errors else None,
+        'message': f'Successfully uploaded {uploaded_count} file(s)' + (f', {failed_count} failed' if failed_count > 0 else '')
+    })
+
+@storage_bp.route('/api/files')
+def get_files():
+    """Get all uploaded files (API endpoint)"""
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 10, type=int)
+    category = request.args.get('category', '')
+    search = request.args.get('search', '')
+    
+    query = UploadedFile.query
+    
+    if category:
+        query = query.filter_by(file_type=category)
+    
+    if search:
+        search_term = f'%{search}%'
+        query = query.filter(
+            (UploadedFile.filename.ilike(search_term)) |
+            (UploadedFile.file_type.ilike(search_term))
+        )
+    
+    files = query.order_by(UploadedFile.created_at.desc()).paginate(
+        page=page, per_page=per_page, error_out=False
+    )
+    
+    # Format response for the template
+    file_list = []
+    for f in files.items:
+        file_list.append({
+            'id': f.id,
+            'filename': f.filename,
+            'name': f.filename.rsplit('.', 1)[0] if '.' in f.filename else f.filename,
+            'description': f'Uploaded on {f.created_at.strftime("%Y-%m-%d")}',
+            'file_size': f.file_size,
+            'file_type': f.file_type,
+            'uploaded_at': f.created_at.isoformat() if f.created_at else None,
+            'uploaded_by': 'Admin',  # You can update this based on your user model
+            'category': f.file_type,
+            'url': f.url,
+            'public_id': f.public_id
+        })
+    
+    return jsonify({
+        'files': file_list,
+        'total': files.total,
+        'pages': files.pages,
+        'current_page': files.page,
+        'per_page': files.per_page,
+        'has_next': files.has_next,
+        'has_prev': files.has_prev
+    })
+
+@storage_bp.route('/api/files/count')
+def get_file_count():
+    """Get total file count"""
+    count = UploadedFile.query.count()
+    return jsonify({'count': count})
+
+@storage_bp.route('/api/files/categories')
+def get_categories():
+    """Get unique file categories"""
+    categories = db.session.query(UploadedFile.file_type).distinct().all()
+    category_list = [cat[0] for cat in categories if cat[0]]
+    return jsonify({'categories': category_list})
+
+@storage_bp.route('/api/files/<int:file_id>')
+def get_file(file_id):
+    """Get single file details"""
+    file = UploadedFile.query.get_or_404(file_id)
+    return jsonify({'file': {
+        'id': file.id,
+        'filename': file.filename,
+        'url': file.url,
+        'file_type': file.file_type,
+        'file_size': file.file_size,
+        'created_at': file.created_at.isoformat() if file.created_at else None
+    }})
+
+@storage_bp.route('/api/files/<int:file_id>/download')
+def download_file(file_id):
+    """Download file through Flask"""
+    try:
+        file = UploadedFile.query.get_or_404(file_id)
+        file_url = file.url
+        
+        response = requests.get(file_url, stream=True)
+        response.raise_for_status()
+        
+        flask_response = Response(
+            response.iter_content(chunk_size=8192),
+            content_type=response.headers.get('Content-Type', 'application/octet-stream')
+        )
+        
+        filename = file.filename.encode('utf-8').decode('latin-1')
+        flask_response.headers['Content-Disposition'] = f'attachment; filename="{filename}"'
+        flask_response.headers['Content-Length'] = response.headers.get('Content-Length', file.file_size)
+        flask_response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        flask_response.headers['Pragma'] = 'no-cache'
+        flask_response.headers['Expires'] = '0'
+        
+        return flask_response
+        
+    except requests.exceptions.RequestException as e:
+        current_app.logger.error(f'Cloudinary request error: {str(e)}')
+        return jsonify({'error': 'Failed to fetch file'}), 500
+    except Exception as e:
+        current_app.logger.error(f'Download error: {str(e)}')
+        return jsonify({'error': f'Download failed: {str(e)}'}), 500
+
+@storage_bp.route('/api/files/<int:file_id>', methods=['DELETE'])
+def delete_file(file_id):
+    """Delete file from Cloudinary and database"""
+    try:
+        file = UploadedFile.query.get_or_404(file_id)
+        public_id = file.public_id
+        
+        result = cloudinary.uploader.destroy(public_id)
+        
+        if result.get('result') == 'ok':
+            FileTag.query.filter_by(file_id=file.id).delete()
+            db.session.delete(file)
+            db.session.commit()
+            
+            return jsonify({
+                'success': True,
+                'message': 'File deleted successfully'
+            })
+        else:
+            return jsonify({'error': 'Failed to delete file from Cloudinary'}), 500
+            
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
+@storage_bp.route('/api/files/search')
+def search_files():
+    """Search files by filename or tags"""
+    query = request.args.get('q', '').strip()
+    if not query:
+        return jsonify({'error': 'Search query required'}), 400
+    
+    files_by_name = UploadedFile.query.filter(
+        UploadedFile.filename.ilike(f'%{query}%')
+    ).all()
+    
+    files_by_tag = UploadedFile.query.join(FileTag).filter(
+        FileTag.tag.ilike(f'%{query}%')
+    ).distinct().all()
+    
+    all_files = {f.id: f for f in files_by_name + files_by_tag}
+    
+    return jsonify({
+        'files': [f.to_dict() for f in all_files.values()],
+        'count': len(all_files)
+    })
+
+@storage_bp.route('/api/stats')
+def get_stats():
+    """Get file statistics"""
+    total_files = UploadedFile.query.count()
+    
+    type_counts = db.session.query(
+        UploadedFile.file_type, 
+        db.func.count(UploadedFile.id)
+    ).group_by(UploadedFile.file_type).all()
+    
+    total_size = db.session.query(db.func.sum(UploadedFile.file_size)).scalar() or 0
+    
+    week_ago = datetime.utcnow().timestamp() - (7 * 24 * 60 * 60)
+    recent_uploads = UploadedFile.query.filter(
+        db.func.strftime('%s', UploadedFile.created_at) > week_ago
+    ).count()
+    
+    top_tags = db.session.query(
+        FileTag.tag, 
+        db.func.count(FileTag.id)
+    ).group_by(FileTag.tag).order_by(db.func.count(FileTag.id).desc()).limit(10).all()
+    
+    return jsonify({
+        'total_files': total_files,
+        'type_counts': dict(type_counts),
+        'total_size': total_size,
+        'total_size_formatted': format_file_size(total_size),
+        'recent_uploads': recent_uploads,
+        'top_tags': dict(top_tags)
+    })
+
+@storage_bp.route('/api/cloudinary-info')
+def cloudinary_info():
+    """Get Cloudinary account info"""
+    try:
+        usage = cloudinary.api.usage()
+        resources = cloudinary.api.resources(max_results=1)
+        
+        return jsonify({
+            'account': {
+                'cloud_name': cloudinary.config().cloud_name,
+                'plan': usage.get('plan'),
+            },
+            'usage': usage,
+            'total_resources': resources.get('total_count', 0)
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@storage_bp.errorhandler(404)
+def not_found_error(error):
+    return jsonify({'error': 'Resource not found'}), 404
+
+@storage_bp.errorhandler(500)
+def internal_error(error):
+    db.session.rollback()
+    return jsonify({'error': 'Internal server error'}), 500
+
+print("File storage blueprint loaded. ✅")
