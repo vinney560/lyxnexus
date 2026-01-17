@@ -61,6 +61,21 @@ def format_file_size(bytes):
         bytes /= 1024
         i += 1
     return f"{bytes:.2f} {sizes[i]}"
+import secrets
+def gen_unique_id(_tablename, max_attempts=100):
+    for attempt in range(max_attempts):
+        r_id = secrets.randbelow(900000) + 100000
+        
+        # Use database transaction to prevent race conditions
+        with db.session.begin_nested():
+            existing = db.session.query(_tablename.id).filter_by(id=r_id).with_for_update().first()
+            if not existing:
+                return r_id
+        
+        if attempt >= max_attempts - 1:
+            raise ValueError(f"Failed to generate unique ID after {max_attempts} attempts")
+    
+    raise ValueError("Failed to generate unique ID")
 
 @storage_bp.route('/')
 def file_store():
@@ -74,9 +89,6 @@ def upload_multiple_files():
         return jsonify({'error': 'No files selected'}), 400
     
     files = request.files.getlist('files')
-    if not files or files[0].filename == '':
-        return jsonify({'error': 'No files selected'}), 400
-    
     # Get form data
     name = request.form.get('name', '')
     description = request.form.get('description', '')
@@ -161,6 +173,7 @@ def upload_multiple_files():
             else:
                 # Create new record
                 new_file = UploadedFile(
+                    id=gen_unique_id(UploadedFile),
                     public_id=upload_result['public_id'],
                     filename=filename,
                     url=upload_result['secure_url'],
