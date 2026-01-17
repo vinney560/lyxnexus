@@ -768,7 +768,7 @@ def get_current_user():
     """Get current user data"""
     return jsonify(current_user)
 
-@app.route('/api/announcements')
+@app.route('/api/announcements/specified')
 def get_announcements():
     """Get all announcements"""
     return jsonify(mock_data['announcements'])

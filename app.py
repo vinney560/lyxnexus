@@ -413,7 +413,7 @@ class FileTag(db.Model):
 class TopicMaterial(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     topic_id = db.Column(db.Integer, db.ForeignKey('topic.id'), nullable=False)
-    file_id = db.Column(db.Integer, db.ForeignKey('file.id'), nullable=False)
+    file_id = db.Column(db.Integer, db.ForeignKey('uploaded_files.id'), nullable=False)  # Changed to uploaded_files
     display_name = db.Column(db.String(255), nullable=True)
     description = db.Column(db.Text, nullable=True)
     order_index = db.Column(db.Integer, default=0)
@@ -421,11 +421,11 @@ class TopicMaterial(db.Model):
     
     # Relationships
     topic = db.relationship('Topic', backref=db.backref('topic_materials', lazy=True))
-    file = db.relationship('File', backref=db.backref('material_references', lazy=True))
+    file = db.relationship('UploadedFile', backref=db.backref('material_references', lazy=True))  # Changed to UploadedFile
     
     def __repr__(self):
         return f'<TopicMaterial {self.display_name or self.file.filename}>'
-
+    
 # Ai DB for conversation btwn Admin and Super AI Assistant
 class AIConversation(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -674,6 +674,7 @@ with app.app_context():
     try:
         # Create tables if they don't exist
         db.create_all()
+        TopicMaterial.query.delete()
         db.session.commit()
         print("✅ Database tables created successfully!")
 
