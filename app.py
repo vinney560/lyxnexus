@@ -674,14 +674,6 @@ with app.app_context():
     try:
         # Create tables if they don't exist
         db.create_all()
-        try:
-            db.session.execute(text('ALTER TABLE "topic_material" DROP CONSTRAINT IF EXISTS topic_material_file_id_fkey'))
-            db.session.execute(text('ALTER TABLE "topic_material" ADD CONSTRAINT topic_material_file_id_fkey FOREIGN KEY (file_id) REFERENCES uploaded_files(id)'))
-            db.session.commit()
-            print("Foreign key updated successfully")
-        except Exception as e:
-            db.session.rollback()
-            print(f"Error: {e}")
         db.session.commit()
         print("✅ Database tables created successfully!")
 
@@ -8085,8 +8077,7 @@ def get_topic_materials(topic_id):
     try:
         topic = Topic.query.get_or_404(topic_id)
         materials = TopicMaterial.query.filter_by(topic_id=topic_id)\
-            .order_by(TopicMaterial.order_index).all()
-        
+            .order_by(TopicMaterial.order_index).all()        
         materials_data = []
         for material in materials:
             materials_data.append({
@@ -8097,8 +8088,8 @@ def get_topic_materials(topic_id):
                 'filename': material.file.filename,
                 'file_type': material.file.file_type,
                 'file_size': material.file.file_size,
-                'uploaded_at': material.file.uploaded_at.isoformat(),
-                'uploaded_by': material.file.uploader.username,
+                'uploaded_at': material.file.created_at.isoformat(),
+                'uploaded_by': 'Admin',
                 'order_index': material.order_index
             })
         
