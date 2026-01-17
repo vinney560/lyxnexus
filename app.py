@@ -675,8 +675,8 @@ with app.app_context():
         # Create tables if they don't exist
         db.create_all()
         try:
-            db.session.execute(text('ALTER TABLE topic_material DROP CONSTRAINT IF EXISTS topic_material_file_id_fkey'))
-            db.session.execute(text('ALTER TABLE topic_material ADD CONSTRAINT topic_material_file_id_fkey FOREIGN KEY (file_id) REFERENCES uploaded_files(id)'))
+            db.session.execute(text('ALTER TABLE "topic_material" DROP CONSTRAINT IF EXISTS topic_material_file_id_fkey'))
+            db.session.execute(text('ALTER TABLE "topic_material" ADD CONSTRAINT topic_material_file_id_fkey FOREIGN KEY (file_id) REFERENCES uploaded_files(id)'))
             db.session.commit()
             print("Foreign key updated successfully")
         except Exception as e:
