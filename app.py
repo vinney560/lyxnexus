@@ -674,6 +674,7 @@ with app.app_context():
     try:
         # Create tables if they don't exist
         db.create_all()
+        File.query.delete()
         db.session.commit()
         print("✅ Database tables created successfully!")
 

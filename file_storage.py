@@ -112,8 +112,6 @@ def upload_multiple_files():
     files = request.files.getlist('files')
     # Get form data
     name = request.form.get('name', '')
-    description = request.form.get('description', '')
-    category = request.form.get('category', 'documents')
     
     uploaded_count = 0
     failed_count = 0

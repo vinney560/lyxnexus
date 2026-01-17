@@ -861,22 +861,7 @@
             <form id="upload-form">
                 <div class="form-group">
                     <label class="form-label" for="file-name">File Name</label>
-                    <input type="text" id="file-name" class="form-input" placeholder="Enter a descriptive name" required>
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label" for="file-description">Description</label>
-                    <textarea id="file-description" class="form-input" rows="3" placeholder="Enter file description"></textarea>
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label" for="file-category">Category</label>
-                    <select id="file-category" class="form-input" required>
-                        <option value="documents">Documents</option>
-                        <option value="images">Images</option>
-                        <option value="archives">Archives</option>
-                        <option value="other">Other</option>
-                    </select>
+                    <input type="text" id="file-name" class="form-input" placeholder="Enter a descriptive name">
                 </div>
                 
                 <div class="form-group">
@@ -1391,8 +1376,6 @@
 
             const fileInput = document.getElementById('file-input');
             const fileName = document.getElementById('file-name').value;
-            const fileDescription = document.getElementById('file-description').value;
-            const fileCategory = document.getElementById('file-category').value;
             const files = fileInput.files;
 
             if (files.length === 0) {
@@ -1425,10 +1408,7 @@
                 for (let i = 0; i < files.length; i++) {
                     formData.append('files', files[i]);
                 }
-
                 formData.append('name', fileName);
-                formData.append('description', fileDescription);
-                formData.append('category', fileCategory);
 
                 // UPDATED: Using the blueprint endpoint
                 const response = await fetch(UPLOAD_MULTIPLE_ENDPOINT, {
