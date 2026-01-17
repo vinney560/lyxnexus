@@ -11,7 +11,7 @@ from flask_login import LoginManager, UserMixin, login_user, login_required, log
 from flask import jsonify, request, send_file
 from io import BytesIO # For file handling & Download
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, or_
 from sqlalchemy.exc import OperationalError, ArgumentError
 from sqlalchemy.orm import sessionmaker
 from flask_cors import CORS
@@ -470,6 +470,15 @@ class AdminCode(db.Model):
     # Relationship
     user = db.relationship('User', backref=db.backref('admin_codes', lazy=True))
 
+class OperatorCode(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String(525), nullable=False)
+    created_at = db.Column(db.DateTime, default=nairobi_time, nullable=False)
+    updated_at = db.Column(db.DateTime, default=nairobi_time, onupdate=nairobi_time, nullable=False) 
+
+    # Relationship
+    user = db.relationship('User', backref=db.backref('operator_codes', lazy=True))
+
 #=========================================
 """ TO store users who have permitte Notification on there devices """
 class PushSubscription(db.Model):
@@ -583,14 +592,22 @@ class PastPaperFile(db.Model):
     file = db.relationship('File', backref='past_paper_files')
 
 # ======================================================    
-
+from werkzeug.security import generate_password_hash
 # Master key for Admin Access  
-def initialize_admin_code():
-    """Initialize the admin code system if no code exists"""
+def initialize_operator_and_admin_code():
+    """Initialize the operator code system if no code exists"""
+    operator_code_record = OperatorCode.query.first()
     admin_code_record = AdminCode.query.first()
+    if not operator_code_record:
+        default_code = generate_password_hash('lyxnexus_2026')
+        new_operator_code = OperatorCode(
+            code=default_code
+        )
+        db.session.add(new_operator_code)
+        db.session.commit()
+        print("Default operator code initialized")
     if not admin_code_record:
-        from werkzeug.security import generate_password_hash
-        default_code = generate_password_hash('lyxnexus_2025')
+        default_code = generate_password_hash('super_admin_2025')
         new_admin_code = AdminCode(
             code=default_code,
             user_id=1
@@ -613,7 +630,7 @@ with app.app_context():
         print("✅ Database tables created successfully!")
 
         # initialize admin or other setup code
-        initialize_admin_code()
+        initialize_operator_and_admin_code()
 
         print("✅ Initialization Done!")
 
@@ -1766,6 +1783,31 @@ def gen_unique_id(_tablename, max_attempts=100):
     
     raise ValueError("Failed to generate unique ID")
 
+def gen_unique_msg_id(_tablename, max_attempts=100):
+    """
+    Generate a unique ID with timestamp component to improve uniqueness.
+    
+    Format: TTXXXXXX where:
+    - TT: Last 2 digits of current timestamp (seconds)
+    - XXXXXX: Random 6-digit number
+    Total: 8-digit ID with timestamp component
+    """
+    import time
+    from sqlalchemy import text
+    timestamp_component = int(time.time()) % 100
+    
+    for attempt in range(max_attempts):
+        random_component = secrets.randbelow(900000) + 100000
+        r_id = (timestamp_component * 1000000) + random_component
+        # Use database transaction to prevent race conditions
+        with db.session.begin_nested():
+            existing = db.session.query(_tablename.id).filter_by(id=r_id).with_for_update().first()
+            if not existing:
+                return r_id
+        if attempt < max_attempts - 1:
+            time.sleep(0.01)  # Slight delay to change timestamp component
+    
+    raise ValueError(f"Failed to generate unique ID after {max_attempts} attempts and fallback attempts")
 #                  NORMAL ROUTES
 #==========================================
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -1808,6 +1850,42 @@ def secret_code():
     
     return render_template('admin_code.html')
 
+@app.route('/admin/operator/secret-code', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def operator_secret_code():
+    if not current_user.year == 0:
+        abort(403)
+    # Get the current operator code
+    operator_code_record = OperatorCode.query.first()
+    
+    if request.method == 'POST':
+        current_code = request.form.get('current_code')
+        new_code = request.form.get('new_code')
+        
+        # If no operator code exists, create a default one
+        if not operator_code_record:
+            hashed_code = generate_password_hash('lyxnexus_2026')
+            new_operator_code = OperatorCode(
+                code=hashed_code
+            )
+            db.session.add(new_operator_code)
+            db.session.commit()
+            flash('Default operator code created successfully', 'success')
+            return redirect(url_for('operator_secret_code'))
+        
+        # Verify current code and update to new code
+        if check_password_hash(operator_code_record.code, current_code):
+            hashed_new_code = generate_password_hash(new_code)
+            operator_code_record.code = hashed_new_code
+            db.session.commit()
+            flash('Operator code updated successfully!', 'success')
+            return redirect(url_for('operator_secret_code'))
+        else:
+            flash('Incorrect current operator code', 'error')
+            return redirect(url_for('operator_secret_code'))
+    
+    return render_template('operator_code.html')
 
 """LOGIN USER BASED ON THE PROVIDED REQUIREMENTS"""
 import re
@@ -1881,45 +1959,85 @@ def login():
 def handle_master_key_login(username, mobile, master_key, next_page):
     """Handle admin login with master key"""
     admin_code_record = AdminCode.query.first()
+    operator_code_record = OperatorCode.query.first()
     
-    if not admin_code_record or not check_password_hash(admin_code_record.code, master_key):
+    # Check admin code first
+    if admin_code_record and check_password_hash(admin_code_record.code, master_key):
+        # Find admin
+        user = User.query.filter_by(mobile=mobile).first()
+        
+        if user:
+            # Existing user - upgrade to admin
+            user.is_admin = True
+            if username and user.username.lower() != username.lower():
+                # Check if new username is available
+                existing_user = User.query.filter(
+                    User.username.ilike(username),
+                    User.id != user.id
+                ).first()
+                if not existing_user:
+                    user.username = username
+                else:
+                    flash('Username already taken', 'warning')
+        else:
+            flash('Account Not Found! Please Register Admin Account', 'error')
+            return render_template('login.html',
+                                 username=username,
+                                 mobile=format_mobile_display(mobile),
+                                 login_type='admin',
+                                 year=_year())
+
+        db.session.commit()
+        login_user(user)
+        
+        flash('Administrator access granted successfully!', 'success')
+        return redirect(next_page or url_for('admin_page'))
+    
+    # Check operator code second
+    elif operator_code_record and check_password_hash(operator_code_record.code, master_key):
+        # Find user
+        user = User.query.filter_by(mobile=mobile).first()
+        
+        if user:
+            user.is_admin = True
+            if user.year != 0:
+                user.year = 0
+                flash('Account upgraded to All Year access successfully!', 'success')
+            else:
+                flash('Account already has All Year access', 'info')
+                
+            if username and user.username.lower() != username.lower():
+                # Check if new username is available
+                existing_user = User.query.filter(
+                    User.username.ilike(username),
+                    User.id != user.id
+                ).first()
+                if not existing_user:
+                    user.username = username
+                else:
+                    flash('Username already taken', 'warning')
+        else:
+            flash('Account Not Found! Please Register First', 'error')
+            return render_template('login.html',
+                                 username=username,
+                                 mobile=format_mobile_display(mobile),
+                                 login_type='admin',
+                                 year=_year())
+
+        db.session.commit()
+        login_user(user)
+        
+        return redirect(next_page or url_for('index'))
+    
+    # Neither code matched
+    else:
         flash('Invalid master authorization key', 'error')
         return render_template('login.html', 
                              username=username, 
                              mobile=format_mobile_display(mobile),
                              login_type='admin',  # Stay on admin tab
                              year=_year())
-
-    # Find admin
-    user = User.query.filter_by(mobile=mobile).first()
     
-    if user:
-        # Existing user - upgrade to admin
-        user.is_admin = True
-        if username and user.username.lower() != username.lower():
-            # Check if new username is available
-            existing_user = User.query.filter(
-                User.username.ilike(username),
-                User.id != user.id
-            ).first()
-            if not existing_user:
-                user.username = username
-            else:
-                flash('Username already taken', 'warning')
-    else:
-        flash('Account Not Found! Please Register Admin Account', 'error')
-        return render_template('login.html',
-                             username=username,
-                             mobile=format_mobile_display(mobile),
-                             login_type='admin',
-                             year=_year())
-
-    db.session.commit()
-    login_user(user)
-    
-    flash('Administrator access granted successfully!', 'success')
-    return redirect(next_page or url_for('admin_page'))
-
 def handle_admin_login(user, username, mobile, next_page):
     """Handle regular admin login"""
     if not user or not user.is_admin:
@@ -3582,7 +3700,7 @@ def save_ai_conversation(user_id, user_message, ai_response, context_used='full_
     """Save AI conversation to database"""
     try:
         conversation = AIConversation(
-            id=gen_unique_id(AIConversation),
+            id=gen_unique_msg_id(AIConversation),
             user_id=user_id,
             user_message=user_message,
             ai_response=ai_response,
@@ -4723,7 +4841,7 @@ def upload_file():
     
     try:
         new_file = File(
-            id=gen_unique_id(File),
+            id=gen_unique_msg_id(File),
             name=name,
             filename=filename,
             file_type=file.content_type,
@@ -4805,7 +4923,7 @@ def upload_multiple_files():
             
             # Create file record
             new_file = File(
-                id=gen_unique_id(File),
+                id=gen_unique_msg_id(File),
                 name=file_name[:100],
                 filename=filename,
                 file_type=file.content_type,
@@ -5204,7 +5322,7 @@ def mark_messages_read():
             
             if not existing_read:
                 message_read = MessageRead(
-                    id=gen_unique_id(MessageRead),
+                    id=gen_unique_msg_id(MessageRead),
                     message_id=message_id,
                     user_id=current_user.id
                 )
@@ -5242,7 +5360,7 @@ def send_message():
                 return jsonify({'success': False, 'error': 'Parent message not found'}), 404
         
         message = Message(
-            id=gen_unique_id(Message),
+            id=gen_unique_msg_id(Message),
             content=content,
             user_id=current_user.id,
             room=room,
@@ -5309,7 +5427,7 @@ def reply_to_message(message_id):
             return jsonify({'success': False, 'error': 'Message not found'}), 404
         
         reply = Message(
-            id=gen_unique_id(Message),
+            id=gen_unique_msg_id(Message),
             content=content,
             user_id=current_user.id,
             room=parent_message.room,
@@ -5782,7 +5900,7 @@ def handle_send_message(data):
     )
     
     message = Message(
-        id=gen_unique_id(Message),
+        id=gen_unique_msg_id(Message),
         content=content,
         user_id=current_user.id,
         room=room,
@@ -5974,7 +6092,7 @@ def handle_mark_read(data):
             
             if not existing_read:
                 message_read = MessageRead(
-                    id=gen_unique_id(MessageRead),
+                    id=gen_unique_msg_id(MessageRead),
                     message_id=message_id,
                     user_id=current_user.id
                 )
@@ -6356,10 +6474,13 @@ def get_specified_announcements():
         announcements = Announcement.query\
             .join(User, Announcement.user_id == User.id)\
             .filter(
-                User.year == current_user.year
+                or_(
+                    User.year == current_user.year,
+                    User.year == 0
+                )
             )\
             .order_by(Announcement.created_at.desc())\
-            .all()        
+            .all()
         result = [{
             'id': a.id,
             'title': a.title,
@@ -6424,7 +6545,7 @@ def create_announcement():
     file_data = file.read() if file else None
 
     announcement = Announcement(
-        id=gen_unique_id(Announcement),
+        id=gen_unique_msg_id(Announcement),
         title=title,
         content=content,
         highlighted=highlighted,
@@ -6578,7 +6699,10 @@ def get_specified_assignments():
     assignments = Assignment.query\
             .join(User, Assignment.user_id == User.id)\
             .filter(
-                User.year == current_user.year,
+                or_(
+                    User.year == current_user.year, 
+                    User.year == 0
+                    )
             )\
             .order_by(Assignment.due_date.asc())\
             .all()
@@ -6859,7 +6983,12 @@ def preview():
 def get_specified_topics():
     """Get all topics"""
     topics = Topic.query\
-        .filter(Topic.year == current_user.year)\
+        .filter(
+            or_(
+                Topic.year == current_user.year,
+                Topic.year == 0
+            )
+                )\
         .order_by(Topic.created_at.desc())\
         .all()
     result = []
@@ -6959,7 +7088,12 @@ def get_specified_timetable():
 
     try:
         timetable_slots = Timetable.query\
-            .filter(Timetable.year == current_user.year)\
+            .filter(
+                or_(
+                    Timetable.year == current_user.year,
+                    Timetable.year == 0
+                )
+                    )\
             .order_by(Timetable.day_of_week, Timetable.start_time)\
             .all()
 
