@@ -674,26 +674,14 @@ with app.app_context():
     try:
         # Create tables if they don't exist
         db.create_all()
-        # 1. Drop the old foreign key constraint
-        db.session.execute(text('ALTER TABLE :topic_material" DROP CONSTRAINT IF EXISTS topic_material_file_id_fkey'))
-
-        # 2. Add new foreign key constraint to uploaded_files
-        db.session.execute(text('''
-            ALTER TABLE "topic_material" 
-            ADD CONSTRAINT topic_material_file_id_fkey 
-            FOREIGN KEY (file_id) 
-            REFERENCES uploaded_files(id)
-        '''))
-
-        # 3. Optional: Add ON DELETE CASCADE (if you want)
-        db.session.execute(text('''
-            ALTER TABLE "topic_material" 
-            DROP CONSTRAINT IF EXISTS topic_material_file_id_fkey,
-            ADD CONSTRAINT topic_material_file_id_fkey 
-            FOREIGN KEY (file_id) 
-            REFERENCES uploaded_files(id) 
-            ON DELETE CASCADE
-        '''))        
+        try:
+            db.session.execute(text('ALTER TABLE topic_material DROP CONSTRAINT IF EXISTS topic_material_file_id_fkey'))
+            db.session.execute(text('ALTER TABLE topic_material ADD CONSTRAINT topic_material_file_id_fkey FOREIGN KEY (file_id) REFERENCES uploaded_files(id)'))
+            db.session.commit()
+            print("Foreign key updated successfully")
+        except Exception as e:
+            db.session.rollback()
+            print(f"Error: {e}")
         db.session.commit()
         print("✅ Database tables created successfully!")
 
