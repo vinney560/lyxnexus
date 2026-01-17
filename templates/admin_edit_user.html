@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit User | LyxNexus Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --surface-color: #1e293b;
+            --surface-elevated: #334155;
+            --primary: #3b82f6;
+            --success: #10b981;
+            --error: #ef4444;
+            --warning: #f59e0b;
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-color);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 1rem;
+        }
+
+        .gradient-text {
+            background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .glass-morph {
+            background: rgba(30, 30, 40, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            box-shadow: 0 8px 32px rgba(0, 31, 135, 0.2);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .glass-morph:hover {
+            box-shadow: 0 12px 40px rgba(0, 31, 135, 0.3);
+            border: 1px solid rgba(59, 130, 246, 0.5);
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .status-active {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .status-inactive {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .admin-badge {
+            background: rgba(139, 92, 246, 0.2);
+            color: #8b5cf6;
+            border: 1px solid rgba(139, 92, 246, 0.3);
+        }
+
+        .year-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .year-0 { background: linear-gradient(135deg, #ef4444, #dc2626); }
+        .year-1 { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
+        .year-2 { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+        .year-3 { background: linear-gradient(135deg, #10b981, #059669); }
+        .year-4 { background: linear-gradient(135deg, #f59e0b, #d97706); }
+
+        .stat-card {
+            background: rgba(51, 65, 85, 0.5);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            background: rgba(51, 65, 85, 0.7);
+        }
+
+        .input-field {
+            background: rgba(51, 65, 85, 0.5);
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            border-radius: 0.5rem;
+            padding: 0.75rem 1rem;
+            color: var(--text-primary);
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--surface-elevated);
+            color: var(--text-primary);
+            border: 1px solid rgba(148, 163, 184, 0.3);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--primary);
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            padding: 1rem 1.5rem;
+            border-radius: 0.75rem;
+            background: var(--surface-color);
+            border-left: 4px solid;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: transform 0.4s ease, opacity 0.4s ease;
+            z-index: 1000;
+            max-width: 400px;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .toast.success {
+            border-left-color: var(--success);
+        }
+
+        .toast.error {
+            border-left-color: var(--error);
+        }
+
+        .toast.warning {
+            border-left-color: var(--warning);
+        }
+
+        .toast-icon {
+            font-size: 1.25rem;
+        }
+
+        .toast.success .toast-icon { color: var(--success); }
+        .toast.error .toast-icon { color: var(--error); }
+        .toast.warning .toast-icon { color: var(--warning); }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 30px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #475569;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(30px);
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <!-- Toast Container -->
+    <div id="toast"></div>
+    <header class="glass-morph sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-4">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-4">
+                    <a href="/" class="flex items-center space-x-3">
+                        <div class="logo-container">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                                <polyline points="7.5 4.21 12 6.81 16.5 4.21"></polyline>
+                                <polyline points="7.5 19.79 7.5 14.6 3 12"></polyline>
+                                <polyline points="21 12 16.5 14.6 16.5 19.79"></polyline>
+                                <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                                <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                            </svg>
+                        </div>
+                        <h1 class="text-2xl font-bold gradient-text">LN</h1>
+                    </a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span class="text-gray-300 text-conspicuous">Welcome, {{ current_user.username }}</span>
+                </div>
+            </div>
+        </div>
+    </header>
+    <div class="container mx-auto px-4 py-8 max-w-6xl">
+        <!-- Header -->
+        <div class="flex justify-between items-center mb-8">
+            <div>
+                <h1 class="text-3xl font-bold gradient-text">Edit User</h1>
+                <p class="text-gray-400 mt-2">Update user details in real-time</p>
+            </div>
+            <a href="{{ url_for('admin_users') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left mr-2"></i> Back to Admin
+            </a>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Left Column: User Stats -->
+            <div class="lg:col-span-1">
+                <div class="glass-panel p-6 mb-6">
+                    <div class="flex items-center space-x-4 mb-6">
+                        <div class="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-2xl font-bold">
+                            {{ user.username[0] if user.username else 'U' }}
+                        </div>
+                        <div>
+                            <h2 class="text-xl font-bold" id="display-username">{{ user.username }}</h2>
+                            <p class="text-gray-400" id="display-mobile">{{ user.mobile or 'No mobile' }}</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-400">Status</span>
+                            <span id="display-status" class="status-badge status-{{ 'active' if user.status else 'inactive' }}">
+                                {{ 'Active' if user.status else 'Inactive' }}
+                            </span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-400">Year</span>
+                            <span id="display-year" class="year-badge year-{{ user.year }}">
+                                {{ 'All Year' if user.year == 5 else f'Year {user.year}' }}
+                            </span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-400">Admin</span>
+                            <span id="display-admin" class="status-badge {{ 'admin-badge' if user.is_admin else 'status-inactive' }}">
+                                {{ 'Yes' if user.is_admin else 'No' }}
+                            </span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-400">Joined</span>
+                            <span class="text-gray-300">{{ user.created_at.strftime('%Y-%m-%d') }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- User Stats -->
+                <div class="glass-panel p-6">
+                    <h3 class="text-lg font-semibold mb-4">User Activity</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="stat-card text-center">
+                            <div class="text-2xl font-bold text-blue-400" id="announcements-count">0</div>
+                            <div class="text-gray-400 text-sm">Announcements</div>
+                        </div>
+                        <div class="stat-card text-center">
+                            <div class="text-2xl font-bold text-purple-400" id="assignments-count">0</div>
+                            <div class="text-gray-400 text-sm">Assignments</div>
+                        </div>
+                        <div class="stat-card text-center">
+                            <div class="text-2xl font-bold text-green-400" id="topics-count">0</div>
+                            <div class="text-gray-400 text-sm">Topics</div>
+                        </div>
+                        <div class="stat-card text-center">
+                            <div class="text-2xl font-bold text-yellow-400" id="timetables-count">0</div>
+                            <div class="text-gray-400 text-sm">Timetables</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Edit Form -->
+            <div class="lg:col-span-2">
+                <div class="glass-panel p-6">
+                    <h3 class="text-xl font-semibold mb-6">Edit Details</h3>
+                    
+                    <form id="editUserForm">
+                        <!-- Username -->
+                        <div class="mb-6">
+                            <label class="block text-gray-400 mb-2">Username</label>
+                            <input type="text" 
+                                   id="username" 
+                                   value="{{ user.username }}" 
+                                   class="input-field"
+                                   placeholder="Enter username">
+                            <div class="text-sm text-gray-500 mt-1">Minimum 3 characters</div>
+                        </div>
+
+                        <!-- Mobile -->
+                        <div class="mb-6">
+                            <label class="block text-gray-400 mb-2">Mobile Number</label>
+                            <input type="text" 
+                                   id="mobile" 
+                                   value="{{ user.mobile or '' }}" 
+                                   class="input-field"
+                                   placeholder="07XXXXXXXX or 01XXXXXXXX">
+                            <div class="text-sm text-gray-500 mt-1">10 digits starting with 07 or 01</div>
+                        </div>
+
+                        <!-- Year -->
+                        <div class="mb-6">
+                            <label class="block text-gray-400 mb-2">Year</label>
+                            <select id="year" class="input-field">
+                                <option value="5" {{ 'selected' if user.year == 5 }}>All Year</option>
+                                <option value="1" {{ 'selected' if user.year == 1 }}>Year 1</option>
+                                <option value="2" {{ 'selected' if user.year == 2 }}>Year 2</option>
+                                <option value="3" {{ 'selected' if user.year == 3 }}>Year 3</option>
+                                <option value="4" {{ 'selected' if user.year == 4 }}>Year 4</option>
+                            </select>
+                        </div>
+
+                        <!-- Status & Admin Toggles -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                            <div>
+                                <label class="block text-gray-400 mb-2">Account Status</label>
+                                <label class="switch">
+                                    <input type="checkbox" id="status" {{ 'checked' if user.status }}>
+                                    <span class="slider"></span>
+                                </label>
+                                <div class="text-sm text-gray-500 mt-2">Active users can access the system</div>
+                            </div>
+                            <div>
+                                <label class="block text-gray-400 mb-2">Admin Privileges</label>
+                                <label class="switch">
+                                    <input type="checkbox" id="is_admin" {{ 'checked' if user.is_admin }}>
+                                    <span class="slider"></span>
+                                </label>
+                                <div class="text-sm text-gray-500 mt-2">Admins have full system access</div>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="flex space-x-4">
+                            <button type="button" 
+                                    id="updateBtn" 
+                                    class="btn btn-primary flex-1">
+                                <i class="fas fa-save mr-2"></i>
+                                <span>Update User</span>
+                            </button>
+                            <button type="button" 
+                                    id="resetBtn" 
+                                    class="btn btn-secondary">
+                                <i class="fas fa-undo mr-2"></i>
+                                Reset
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Recent Activity (Optional) -->
+                <div class="glass-panel p-6 mt-6">
+                    <h3 class="text-lg font-semibold mb-4">Update Log</h3>
+                    <div id="updateLog" class="text-gray-400 text-sm">
+                        <p>No updates yet...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const userId = {{ user.id }};
+        let originalData = {};
+
+        // Toast function
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const icons = {
+                success: 'check-circle',
+                error: 'exclamation-circle',
+                warning: 'exclamation-triangle'
+            };
+
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `
+                <i class="fas fa-${icons[type]} toast-icon"></i>
+                <div>${message}</div>
+            `;
+            toast.classList.add('show');
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 4000);
+        }
+
+        // Load user data
+        async function loadUserData() {
+            try {
+                const response = await fetch(`/api/admin/get_user/${userId}`);
+                if (!response.ok) throw new Error('Failed to load user data');
+                
+                const data = await response.json();
+                
+                // Store original data
+                originalData = {
+                    username: data.username,
+                    mobile: data.mobile,
+                    year: data.year,
+                    status: data.status,
+                    is_admin: data.is_admin
+                };
+
+                // Update stats
+                document.getElementById('announcements-count').textContent = data.announcements_count;
+                document.getElementById('assignments-count').textContent = data.assignments_count;
+                document.getElementById('topics-count').textContent = data.topics_count;
+                document.getElementById('timetables-count').textContent = data.timetables_count;
+
+                return data;
+            } catch (error) {
+                console.error('Error loading user data:', error);
+                showToast('Failed to load user data', 'error');
+            }
+        }
+
+        // Update user function
+        async function updateUser() {
+            const updateBtn = document.getElementById('updateBtn');
+            const originalHtml = updateBtn.innerHTML;
+            
+            // Show loading
+            updateBtn.innerHTML = '<div class="loading-spinner mr-2"></div> Updating...';
+            updateBtn.disabled = true;
+
+            const updates = {
+                username: document.getElementById('username').value.trim(),
+                mobile: document.getElementById('mobile').value.trim(),
+                year: parseInt(document.getElementById('year').value),
+                status: document.getElementById('status').checked,
+                is_admin: document.getElementById('is_admin').checked
+            };
+
+            try {
+                const response = await fetch(`/api/admin/update_user/${userId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(updates)
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Update failed');
+                }
+
+                // Update display
+                document.getElementById('display-username').textContent = data.user.username;
+                document.getElementById('display-mobile').textContent = data.user.mobile || 'No mobile';
+                
+                // Update status badge
+                const statusBadge = document.getElementById('display-status');
+                statusBadge.textContent = data.user.status ? 'Active' : 'Inactive';
+                statusBadge.className = `status-badge status-${data.user.status ? 'active' : 'inactive'}`;
+                
+                // Update year badge
+                const yearBadge = document.getElementById('display-year');
+                yearBadge.textContent = data.user.year === 5 ? 'All Year' : `Year ${data.user.year}`;
+                yearBadge.className = `year-badge year-${data.user.year}`;
+                
+                // Update admin badge
+                const adminBadge = document.getElementById('display-admin');
+                adminBadge.textContent = data.user.is_admin ? 'Yes' : 'No';
+                adminBadge.className = `status-badge ${data.user.is_admin ? 'admin-badge' : 'status-inactive'}`;
+
+                // Update original data
+                originalData = {
+                    username: data.user.username,
+                    mobile: data.user.mobile,
+                    year: data.user.year,
+                    status: data.user.status,
+                    is_admin: data.user.is_admin
+                };
+
+                // Add to update log
+                const updateLog = document.getElementById('updateLog');
+                const time = new Date().toLocaleTimeString();
+                const logEntry = document.createElement('div');
+                logEntry.className = 'mb-2 p-2 bg-gray-800/50 rounded';
+                logEntry.innerHTML = `
+                    <div class="flex justify-between">
+                        <span class="text-green-400">✓ Updated successfully</span>
+                        <span class="text-gray-500">${time}</span>
+                    </div>
+                    ${Object.keys(data.updates).map(field => 
+                        `<div class="text-gray-300 text-xs mt-1">• ${field}: ${data.updates[field]}</div>`
+                    ).join('')}
+                `;
+                updateLog.insertBefore(logEntry, updateLog.firstChild);
+
+                showToast('User updated successfully!', 'success');
+
+            } catch (error) {
+                console.error('Update error:', error);
+                showToast(error.message, 'error');
+            } finally {
+                updateBtn.innerHTML = originalHtml;
+                updateBtn.disabled = false;
+            }
+        }
+
+        // Reset form to original values
+        function resetForm() {
+            document.getElementById('username').value = originalData.username || '';
+            document.getElementById('mobile').value = originalData.mobile || '';
+            document.getElementById('year').value = originalData.year;
+            document.getElementById('status').checked = originalData.status;
+            document.getElementById('is_admin').checked = originalData.is_admin;
+            
+            showToast('Form reset to original values', 'warning');
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Load initial data
+            await loadUserData();
+            
+            // Set up event listeners
+            document.getElementById('updateBtn').addEventListener('click', updateUser);
+            document.getElementById('resetBtn').addEventListener('click', resetForm);
+            
+            // Auto-save on field change (optional)
+            const fields = ['username', 'mobile', 'year'];
+            fields.forEach(field => {
+                const element = document.getElementById(field);
+                if (element) {
+                    element.addEventListener('change', () => {
+                        if (element.value !== originalData[field]) {
+                            element.classList.add('border-blue-500', 'bg-blue-900/10');
+                        } else {
+                            element.classList.remove('border-blue-500', 'bg-blue-900/10');
+                        }
+                    });
+                }
+            });
+            
+            // Add keyboard shortcuts
+            document.addEventListener('keydown', (e) => {
+                if (e.ctrlKey && e.key === 's') {
+                    e.preventDefault();
+                    updateUser();
+                }
+                if (e.key === 'Escape') {
+                    resetForm();
+                }
+            });
+            
+            showToast('User data loaded successfully', 'success');
+        });
+    </script>
+</body>
+</html>

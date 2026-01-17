@@ -2563,6 +2563,140 @@ def get_notification_details(notification_id):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 #===================================================================
+# ============ Modify User =================
+from flask import jsonify, request
+from sqlalchemy.exc import IntegrityError
+
+@app.route('/admin/<int:user_id>/modify', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def admin_edit_user(user_id):
+    """Admin edit user details page"""
+    if not current_user.year == 5:
+        flash('Admin access required', 'error')
+        return redirect(url_for('admin_users'))
+    
+    user = User.query.get_or_404(user_id)
+    
+    if request.method == 'GET':
+        return render_template('admin_edit_user.html', user=user)
+    
+    # For POST requests - update user
+    return jsonify({'error': 'Use AJAX endpoints'}), 400
+
+@app.route('/api/admin/update_user/<int:user_id>', methods=['PUT'])
+@login_required
+def api_update_user(user_id):
+    """API endpoint to update user details"""
+    if not current_user.year == 5:
+        return jsonify({'error': 'Unauthorized'}), 403
+    
+    user = User.query.get_or_404(user_id)
+    data = request.get_json()
+    
+    updates = {}
+    
+    # Update username
+    if 'username' in data:
+        new_username = data['username'].strip()
+        if new_username and new_username != user.username:
+            # Check if username is taken by another user
+            existing = User.query.filter(
+                User.username.ilike(new_username),
+                User.id != user.id
+            ).first()
+            if existing:
+                return jsonify({'error': 'Username already taken'}), 400
+            updates['username'] = new_username
+            user.username = new_username
+    
+    # Update mobile
+    if 'mobile' in data:
+        mobile = data['mobile'].strip()
+        if mobile != user.mobile:
+            try:
+                user.set_mobile(mobile)
+            except ValueError as e:
+                return jsonify({'error': str(e)}), 400
+            
+            # Check if mobile is taken by another user
+            existing = User.query.filter(
+                User.mobile == mobile,
+                User.id != user.id
+            ).first()
+            if existing:
+                return jsonify({'error': 'Mobile number already registered'}), 400
+    
+    # Update year
+    if 'year' in data:
+        year = data['year']
+        if year not in [5, 1, 2, 3, 4]:
+            return jsonify({'error': 'Invalid year value'}), 400
+        updates['year'] = year
+        user.year = year
+    
+    # Update status
+    if 'status' in data:
+        status = bool(data['status'])
+        updates['status'] = status
+        user.status = status
+    
+    # Update admin status
+    if 'is_admin' in data:
+        is_admin = bool(data['is_admin'])
+        updates['is_admin'] = is_admin
+        user.is_admin = is_admin
+    
+    try:
+        db.session.commit()
+        
+        # Prepare response
+        response_data = {
+            'success': True,
+            'message': 'User updated successfully',
+            'user': {
+                'id': user.id,
+                'username': user.username,
+                'mobile': user.mobile,
+                'year': user.year,
+                'status': user.status,
+                'is_admin': user.is_admin,
+                'created_at': user.created_at.strftime('%Y-%m-%d %H:%M')
+            },
+            'updates': updates
+        }
+        
+        return jsonify(response_data), 200
+        
+    except IntegrityError:
+        db.session.rollback()
+        return jsonify({'error': 'Database integrity error'}), 500
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/admin/get_user/<int:user_id>')
+@login_required
+def api_get_user(user_id):
+    """API endpoint to get user details"""
+    if not current_user.year == 5:
+        return jsonify({'error': 'Unauthorized'}), 403
+    
+    user = User.query.get_or_404(user_id)
+    
+    return jsonify({
+        'id': user.id,
+        'username': user.username,
+        'mobile': user.mobile,
+        'year': user.year,
+        'status': user.status,
+        'is_admin': user.is_admin,
+        'created_at': user.created_at.strftime('%Y-%m-%d %H:%M'),
+        'announcements_count': len(user.announcements),
+        'assignments_count': len(user.assignments),
+        'topics_count': len(user.topics),
+        'timetables_count': len(user.timetables)
+    })
 # =========================================
 # AI CHAT ROUTES 
 # =========================================
