@@ -316,7 +316,11 @@
                         <div class="flex items-center justify-between">
                             <span class="text-gray-400">Year</span>
                             <span id="display-year" class="year-badge year-{{ user.year }}">
-                                {{ 'All Year' if user.year == 5 else f'Year {user.year}' }}
+                                {% if user.year == 5 %}
+                                    All Year
+                                {% else %}
+                                    Year {{ user.year }}
+                                {% endif %}
                             </span>
                         </div>
                         <div class="flex items-center justify-between">
