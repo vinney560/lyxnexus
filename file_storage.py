@@ -9,8 +9,26 @@ import requests
 from sqlalchemy.exc import IntegrityError
 from app import db, UploadedFile, FileTag
 from datetime import timedelta
+from functools import wraps
+from flask import abort, redirect, url_for
 
 storage_bp = Blueprint('file_store', __name__, url_prefix='/store')
+
+def admin_required(f):
+    @wraps(f)
+    def decorator(*args, **kwargs):
+        if not current_user.is_authenticated:
+            # for AJAX/API
+            if request.path.startswith('/api/') or request.is_json:
+                return jsonify({'error': 'Authentication required'}), 401
+            flash('Login first to access the page', 'error')
+            return redirect(url_for('login'))
+        if not current_user.is_admin:
+            if request.path.startswith('/api/') or request.is_json:
+                return jsonify({'error': 'Access denied.'}), 403
+            abort(403)
+        return f(*args, **kwargs)
+    return decorator
 
 # File upload settings
 ALLOWED_EXTENSIONS = {
@@ -82,6 +100,7 @@ def file_store():
     """Render the main files page"""
     return render_template('file_store.html')
 
+@admin_required
 @storage_bp.route('/api/upload-multiple', methods=['POST'])
 def upload_multiple_files():
     """Handle single or multiple file uploads to Cloudinary"""
@@ -99,7 +118,7 @@ def upload_multiple_files():
     errors = []
     uploaded_files = []
     
-    for file in files:
+    for index, file in enumerate(files):
         try:
             # Check file
             if file.filename == '':
@@ -124,7 +143,14 @@ def upload_multiple_files():
             # Secure filename
             filename = secure_filename(file.filename)
             file_ext = filename.rsplit('.', 1)[1].lower() if '.' in filename else ''
-            base_name = name if name else filename.rsplit('.', 1)[0]
+            
+            # IMPORTANT FIX: Create unique base name for each file
+            if name:
+                # If name is provided, append index or timestamp to make it unique
+                base_name = f"{name}_{index}_{int(time.time())}"
+            else:
+                # Use filename without extension
+                base_name = filename.rsplit('.', 1)[0] if '.' in filename else filename
             
             # Determine resource type
             document_extensions = {'pdf', 'doc', 'docx', 'txt', 'xls', 'xlsx', 'ppt', 'pptx'}
@@ -155,8 +181,9 @@ def upload_multiple_files():
             # Determine file type for database
             file_type = get_file_type(filename)
             
-            # Check if file already exists
-            existing_file = UploadedFile.query.filter_by(public_id=upload_result['public_id']).first()
+            # Check if file already exists - use the actual public_id from Cloudinary
+            actual_public_id = upload_result.get('public_id')
+            existing_file = UploadedFile.query.filter_by(public_id=actual_public_id).first()
             if existing_file:
                 # Update existing
                 existing_file.filename = filename
@@ -174,7 +201,7 @@ def upload_multiple_files():
                 # Create new record
                 new_file = UploadedFile(
                     id=gen_unique_id(UploadedFile),
-                    public_id=upload_result['public_id'],
+                    public_id=actual_public_id,  # Use actual public_id from Cloudinary
                     filename=filename,
                     url=upload_result['secure_url'],
                     file_type=file_type,
@@ -198,7 +225,7 @@ def upload_multiple_files():
             
             current_app.logger.info(f'File uploaded: {filename} | Type: {file_type} | Resource: {resource_type}')
             
-        except Exception as e:
+        except cloudinary.api.Error as e:
             db.session.rollback()
             error_msg = str(e)
             if 'File size too large' in error_msg:
@@ -207,11 +234,13 @@ def upload_multiple_files():
                 errors.append(f"{file.filename}: Invalid file format or corrupted file")
             else:
                 errors.append(f"{file.filename}: Cloudinary error: {error_msg}")
+            current_app.logger.error(f'Cloudinary error for {file.filename}: {error_msg}')
             failed_count += 1
             
         except IntegrityError:
             db.session.rollback()
-            errors.append(f"{file.filename}: File with this name already exists")
+            errors.append(f"{file.filename}: Database error - possible duplicate")
+            current_app.logger.error(f'Integrity error for {file.filename}')
             failed_count += 1
             
         except Exception as e:
