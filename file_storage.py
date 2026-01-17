@@ -1,6 +1,6 @@
 # storage_bp.py
 from flask import Blueprint, render_template, request, jsonify, flash, Response, current_app
-from flask_login import current_user
+from flask_login import current_user, login_required
 from werkzeug.utils import secure_filename
 from datetime import datetime
 import cloudinary.uploader
@@ -9,6 +9,7 @@ import requests
 from sqlalchemy.exc import IntegrityError
 from app import db, UploadedFile, FileTag
 from datetime import timedelta
+import time
 from functools import wraps
 from flask import abort, redirect, url_for
 
@@ -95,6 +96,7 @@ def gen_unique_id(_tablename, max_attempts=100):
     
     raise ValueError("Failed to generate unique ID")
 
+@login_required
 @storage_bp.route('/')
 def file_store():
     """Render the main files page"""
@@ -147,7 +149,7 @@ def upload_multiple_files():
             # IMPORTANT FIX: Create unique base name for each file
             if name:
                 # If name is provided, append index or timestamp to make it unique
-                base_name = f"{name}_{index}_{int(time.time())}"
+                base_name = f"{name}_{index}_{int(time.time())}_LN"
             else:
                 # Use filename without extension
                 base_name = filename.rsplit('.', 1)[0] if '.' in filename else filename
@@ -267,6 +269,7 @@ def upload_multiple_files():
         'files': uploaded_files
     })
 
+@login_required
 @storage_bp.route('/api/files')
 def get_files():
     """Get all uploaded files (API endpoint)"""
@@ -318,12 +321,14 @@ def get_files():
         'has_prev': files.has_prev
     })
 
+@login_required
 @storage_bp.route('/api/files/count')
 def get_file_count():
     """Get total file count"""
     count = UploadedFile.query.count()
     return jsonify({'count': count})
 
+@login_required
 @storage_bp.route('/api/files/categories')
 def get_categories():
     """Get unique file categories"""
@@ -331,6 +336,7 @@ def get_categories():
     category_list = [cat[0] for cat in categories if cat[0]]
     return jsonify({'categories': category_list})
 
+@login_required
 @storage_bp.route('/api/files/<int:file_id>')
 def get_file(file_id):
     """Get single file details"""
@@ -344,6 +350,7 @@ def get_file(file_id):
         'created_at': file.created_at.isoformat() if file.created_at else None
     }})
 
+@login_required
 @storage_bp.route('/api/files/<int:file_id>/download')
 def download_file(file_id):
     """Download file through Flask"""
@@ -375,6 +382,7 @@ def download_file(file_id):
         current_app.logger.error(f'Download error: {str(e)}')
         return jsonify({'error': f'Download failed: {str(e)}'}), 500
 
+@login_required
 @storage_bp.route('/api/files/<int:file_id>', methods=['DELETE'])
 def delete_file(file_id):
     """Delete file from Cloudinary and database"""
@@ -400,6 +408,7 @@ def delete_file(file_id):
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
 
+@login_required
 @storage_bp.route('/api/files/search')
 def search_files():
     """Search files by filename or tags"""
@@ -422,6 +431,7 @@ def search_files():
         'count': len(all_files)
     })
 
+@login_required
 @storage_bp.route('/api/stats')
 def get_stats():
     """Get file statistics"""
@@ -452,6 +462,7 @@ def get_stats():
         'recent_uploads': recent_uploads,
         'top_tags': dict(top_tags)
     })
+
 
 @storage_bp.route('/api/cloudinary-info')
 def cloudinary_info():

@@ -1662,6 +1662,117 @@
     .show-more-btn:hover {
         transform: translateY(-1px);
     }      
+    
+    .like-badge-container {
+        position: relative;
+        display: inline-block;
+    }
+
+    .like-badge {
+        background: linear-gradient(135deg, #ec4899, #ef4444);
+        color: white;
+        border-radius: 9999px;
+        padding: 6px 12px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(236, 72, 153, 0.3);
+        border: 2px solid rgba(255, 255, 255, 0.1);
+        user-select: none;
+    }
+
+    .like-badge:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(236, 72, 153, 0.4);
+    }
+
+    .like-badge.liked {
+        background: linear-gradient(135deg, #8b5cf6, #ec4899);
+        cursor: default;
+    }
+
+    .like-badge.liked:hover {
+        transform: none;
+        box-shadow: 0 4px 12px rgba(236, 72, 153, 0.3);
+    }
+
+    .like-icon {
+        font-size: 12px;
+        transition: transform 0.3s ease;
+    }
+
+    .like-badge:hover .like-icon {
+        transform: scale(1.2);
+    }
+
+    .like-count {
+        min-width: 20px;
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+
+    /* Animations */
+    @keyframes heartBeat {
+        0% { transform: scale(1); }
+        14% { transform: scale(1.3); }
+        28% { transform: scale(1); }
+        42% { transform: scale(1.3); }
+        70% { transform: scale(1); }
+    }
+
+    @keyframes badgePop {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.15); }
+        100% { transform: scale(1); }
+    }
+
+    .heart-beat {
+        animation: heartBeat 0.6s ease;
+    }
+
+    .badge-pop {
+        animation: badgePop 0.5s ease;
+    }
+
+    .like-tooltip {
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        margin-bottom: 8px;
+        background: rgba(0, 0, 0, 0.9);
+        color: white;
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-size: 12px;
+        white-space: nowrap;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+        z-index: 1000;
+        pointer-events: none;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .like-tooltip.show {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .like-tooltip::after {
+        content: '';
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        border-width: 5px;
+        border-style: solid;
+        border-color: rgba(0, 0, 0, 0.9) transparent transparent transparent;
+    }    
 </style>
 <body>
     <!-- Toast Container -->
@@ -2060,6 +2171,228 @@
             
         });
         
+        class LikeBadge {
+            constructor(options = {}) {
+                this.options = {
+                    initialLikes: 217,
+                    storageKey: 'like_badge_data',
+                    badgeId: 'likeBadge',
+                    containerId: 'likeBadgeContainer',
+                    iconId: 'likeIcon',
+                    countId: 'likeCount',
+                    tooltipId: 'likeTooltip',
+                    ...options
+                };
+
+                // State
+                this.likes = this.options.initialLikes;
+                this.hasLiked = false;
+
+                // Initialize
+                this.init();
+            }
+
+            init() {
+                this.loadState();
+                this.render();
+                this.setupEvents();
+            }
+
+            loadState() {
+                try {
+                    const saved = localStorage.getItem(this.options.storageKey);
+                    if (saved) {
+                        const data = JSON.parse(saved);
+                        this.likes = data.likes || this.options.initialLikes;
+                        this.hasLiked = data.hasLiked || false;
+                    }
+                } catch (e) {
+                    console.log('Could not load like state, using defaults');
+                }
+            }
+
+            saveState() {
+                const data = {
+                    likes: this.likes,
+                    hasLiked: this.hasLiked
+                };
+                localStorage.setItem(this.options.storageKey, JSON.stringify(data));
+            }
+
+            like() {
+                if (this.hasLiked) {
+                    this.showTooltip("Already liked!");
+                    return false;
+                }
+                this.likes++;
+                this.hasLiked = true;
+                this.saveState();
+                this.animate();
+                this.showTooltip("Liked! +1");
+                this.render();
+                this.dispatchLikeEvent();
+
+                return true;
+            }
+
+            animate() {
+                const badge = this.getBadge();
+                const icon = this.getIcon();
+                const count = this.getCount();
+                badge.classList.add('badge-pop');
+                icon.classList.add('heart-beat');
+                setTimeout(() => {
+                    badge.classList.remove('badge-pop');
+                    icon.classList.remove('heart-beat');
+                }, 600);
+
+                count.style.transform = 'translateY(-3px)';
+                setTimeout(() => {
+                    count.style.transform = '';
+                }, 300);
+            }
+
+            showTooltip(message, duration = 1500) {
+                const tooltip = document.getElementById(this.options.tooltipId);
+                if (!tooltip) return;
+
+                tooltip.textContent = message;
+                tooltip.classList.add('show');
+
+                // Auto hide
+                if (duration > 0) {
+                    setTimeout(() => {
+                        tooltip.classList.remove('show');
+                    }, duration);
+                }
+            }
+
+            hideTooltip() {
+                const tooltip = document.getElementById(this.options.tooltipId);
+                if (tooltip) {
+                    tooltip.classList.remove('show');
+                }
+            }
+
+            render() {
+                const badge = this.getBadge();
+                const icon = this.getIcon();
+                const count = this.getCount();
+                count.textContent = this.likes;
+                if (this.hasLiked) {
+                    badge.classList.add('liked');
+                    icon.style.color = '#f0abfc'; // Light pink
+                } else {
+                    badge.classList.remove('liked');
+                    icon.style.color = '';
+                }
+                this.updateBadgeGradient();
+            }
+
+            updateBadgeGradient() {
+                const badge = this.getBadge();
+                if (!badge) return;
+                badge.className = badge.className.replace(/bg-gradient-to-\w+/g, '');
+                badge.style.background = '';
+
+                let gradient;
+                if (this.likes < 20) {
+                    gradient = 'linear-gradient(135deg, #ec4899, #ef4444)';
+                } else if (this.likes < 50) {
+                    gradient = 'linear-gradient(135deg, #8b5cf6, #ec4899)';
+                } else if (this.likes < 100) {
+                    gradient = 'linear-gradient(135deg, #ef4444, #f97316)';
+                } else {
+                    gradient = 'linear-gradient(135deg, #f59e0b, #ef4444)';
+                }
+
+                badge.style.background = gradient;
+            }
+
+            setupEvents() {
+                const badge = this.getBadge();
+                if (!badge) return;
+
+                // Click to like
+                badge.addEventListener('click', () => this.like());
+
+                // Hover for tooltip
+                badge.addEventListener('mouseenter', () => {
+                    if (!this.hasLiked) {
+                        this.showTooltip("Click to like", 0);
+                    } else {
+                        this.showTooltip("You liked this!", 0);
+                    }
+                });
+
+                badge.addEventListener('mouseleave', () => {
+                    this.hideTooltip();
+                });
+
+                // Keyboard shortcut
+                document.addEventListener('keydown', (e) => {
+                    if ((e.key === 'l' || e.key === 'L') && e.altKey) {
+                        e.preventDefault();
+                        this.like();
+                    }
+                });
+
+                badge.addEventListener('dblclick', (e) => {
+                    e.preventDefault();
+                    if (confirm('Reset likes to initial value?')) {
+                        this.reset();
+                    }
+                });
+            }
+
+            reset() {
+                this.likes = this.options.initialLikes;
+                this.hasLiked = false;
+                this.saveState();
+                this.render();
+                this.showTooltip("Reset complete!");
+            }
+
+            getLikes() {
+                return this.likes;
+            }
+
+            hasUserLiked() {
+                return this.hasLiked;
+            }
+
+            dispatchLikeEvent() {
+                const event = new CustomEvent('liked', {
+                    detail: {
+                        likes: this.likes,
+                        timestamp: new Date().toISOString()
+                    }
+                });
+                document.dispatchEvent(event);
+            }
+
+            getBadge() {
+                return document.getElementById(this.options.badgeId);
+            }
+
+            getIcon() {
+                return document.getElementById(this.options.iconId);
+            }
+
+            getCount() {
+                return document.getElementById(this.options.countId);
+            }
+        }
+        document.addEventListener('DOMContentLoaded', function() {            
+            if (document.getElementById('likeBadge')) {
+                window.likeBadge = new LikeBadge();
+
+                document.addEventListener('liked', function(e) {
+                    console.log('User liked! Total likes:', e.detail.likes);
+                });
+            }
+        });
+
         document.addEventListener('DOMContentLoaded', function() {
             const mobileNav = document.querySelector('.mobile-nav');
             if (!mobileNav) return;
@@ -4636,7 +4969,14 @@
 
                     <!-- File/Image Preview -->
                     ${filePreview}
-
+                    <!-- Like Badge Component -->
+                    <div class="like-badge-container" id="likeBadgeContainer">
+                        <div class="like-badge" id="likeBadge">
+                            <i class="fas fa-heart like-icon" id="likeIcon"></i>
+                            <span class="like-count" id="likeCount">27</span>
+                        </div>
+                        <div class="like-tooltip" id="likeTooltip">Click to like</div>
+                    </div>
                     <!-- Announcement Body -->
                     <div class="announcement-body p-4 sm:p-5">
                         <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-3 gap-2">
