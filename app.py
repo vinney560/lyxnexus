@@ -376,7 +376,7 @@ class UploadedFile(db.Model):
     folder = db.Column(db.String(100), default='flask_uploads')
     created_at = db.Column(db.DateTime, default=nairobi_time)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    c_file = db.relationship('TopicMaterial', backref=db.backref('materials', lazy=True))
+    #c_file = db.relationship('TopicMaterial', backref=db.backref('materials', lazy=True))
     
     def to_dict(self):
         """Convert model to dictionary"""
