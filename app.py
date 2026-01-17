@@ -422,7 +422,6 @@ class TopicMaterial(db.Model):
     # Relationships
     topic = db.relationship('Topic', backref=db.backref('topic_materials', lazy=True))
     file = db.relationship('File', backref=db.backref('material_references', lazy=True))
-    c_file = db.relationship('uploadedFile', backref=db.backref('url_references', lazy=True))
     
     def __repr__(self):
         return f'<TopicMaterial {self.display_name or self.file.name}>'
