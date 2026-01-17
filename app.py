@@ -476,9 +476,6 @@ class OperatorCode(db.Model):
     created_at = db.Column(db.DateTime, default=nairobi_time, nullable=False)
     updated_at = db.Column(db.DateTime, default=nairobi_time, onupdate=nairobi_time, nullable=False) 
 
-    # Relationship
-    user = db.relationship('User', backref=db.backref('operator_codes', lazy=True))
-
 #=========================================
 """ TO store users who have permitte Notification on there devices """
 class PushSubscription(db.Model):
