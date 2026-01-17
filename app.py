@@ -8151,7 +8151,7 @@ def add_topic_material(topic_id):
             ).first()
             
             if existing_material:
-                skipped_files.append(f"File '{file.name}' already exists in this topic")
+                skipped_files.append(f"File '{file.filename}' already exists in this topic")
                 continue
             
             # Create new material
@@ -8159,8 +8159,8 @@ def add_topic_material(topic_id):
                 id=gen_unique_id(TopicMaterial),
                 topic_id=topic_id,
                 file_id=file_id,
-                display_name=display_names.get(str(file_id)) or file.name,
-                description=descriptions.get(str(file_id)) or file.description,
+                display_name=display_names.get(str(file_id)) or file.filename,
+                description=descriptions.get(str(file_id)) or f"Uploaded at {file.created_at.strftime('%Y-%m-%d')}",
                 order_index=max_order + i + 1
             )
             
