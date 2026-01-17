@@ -674,8 +674,6 @@ with app.app_context():
     try:
         # Create tables if they don't exist
         db.create_all()
-        PastPaper.query.delete()
-        PastPaperFile.query.delete()
         db.session.commit()
         print("✅ Database tables created successfully!")
 
@@ -7688,7 +7686,7 @@ def get_past_paper_detail(paper_id):
             'filename': pp_file.file.filename,
             'file_size': pp_file.file.file_size,
             'file_type': pp_file.file.file_type,
-            'uploaded_at': pp_file.file.uploaded_at.isoformat()
+            'uploaded_at': pp_file.file.created_at.isoformat()
         } for pp_file in sorted(paper.files, key=lambda x: x.order)]
     })
 
@@ -7781,7 +7779,7 @@ def add_file_to_past_paper(paper_id):
         return jsonify({'error': 'Past paper is not active'}), 400
     
     # Check if file exists
-    file = File.query.get(data['file_id'])
+    file = UploadedFile.query.get(data['file_id'])
     if not file:
         return jsonify({'error': 'File not found'}), 404
     
