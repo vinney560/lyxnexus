@@ -248,6 +248,10 @@
                             <span class="info-value" id="user-id">-</span>
                         </div>
                         <div class="info-item">
+                            <span class="info-label">Year:</span>
+                            <span class="info-value" id="user-year">-</span>
+                        </div>
+                        <div class="info-item">
                             <span class="info-label">Account Created:</span>
                             <span class="info-value" id="created-at">-</span>
                         </div>
@@ -448,6 +452,7 @@
                 
                 // Populate read-only fields
                 document.getElementById('user-id').textContent = userData.id;
+                document.getElementById('user-year').textContent = userData.year;
                 document.getElementById('created-at').textContent = formatDate(userData.created_at);
                 document.getElementById('user-role').textContent = userData.is_admin ? 'Administrator' : 'User';
                 document.getElementById('user-status').textContent = userData.status ? 'Active' : 'Banned';

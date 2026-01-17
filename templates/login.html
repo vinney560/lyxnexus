@@ -992,7 +992,11 @@
         <div class="confirm-modal-content">
             <h3 class="text-2xl font-bold mb-4 gradient-text" id="confirm-title">Confirm Action</h3>
             <p class="text-gray-400 font-awesome"> Hope this is your mobile. <span id="confirm-mobile" class="text-gray-300 mb-1 font-bold underline"></span></p>
-            <p class="text-gray-300 mb-6">By continuing, you agree to our <a href="/terms" class="font-bold text-purple-400 hover:underline">Terms of Usage</a></p>
+            <p class="text-gray-300 mb-4">By continuing, you agree to our <a href="/terms" class="font-bold text-purple-400 hover:underline">Terms of Usage</a></p>
+            <p id="billing-info" class="hidden text-sm mb-6 text-blue-400/80 bg-blue-950/30 border border-blue-500/30 rounded-lg px-4 py-2.5 inline-flex items-center gap-2 backdrop-blur-sm">
+                <i class="fas fa-bolt text-yellow-400 text-xs"></i>
+                <span>Billing on registration will be added soon! <span class="font-semibold text-blue-300">Stay tuned.</span></span>
+            </p>
             <div class="flex flex-col-reverse sm:flex-row justify-end space-y-4 sm:space-y-0 space-y-reverse sm:space-x-3">
                 <button type="button" class="btn btn-secondary" id="confirm-cancel-btn">Cancel</button>
                 <button type="button" class="btn btn-danger" id="confirm-action-btn">
@@ -1834,11 +1838,17 @@
             }
         }
 
-        function showConfirmModal(mobile) {
+        function showConfirmModal(mobile, billingInfo) {
             const modal = document.getElementById('confirm-modal');
+            const billingElement = document.getElementById('billing-info');
             const mobileElement = document.getElementById('confirm-mobile');
             mobileElement.textContent = mobile;
             modal.classList.add('active');
+            if (billingInfo) {
+                billingElement.classList.remove('hidden');
+            } else {
+                billingElement.classList.add('hidden');
+            }
 
             document.getElementById('confirm-action-btn').onclick = function() {
                 const event = window.pendingFormEvent;
@@ -1905,12 +1915,14 @@
             let confirmMessage;
             if (subtype === 'login') {
                 mobileValue = `${validation.formatted}`;
-            } else {
+                billingInfo = false;
+            } else if (subtype === 'register') {
                 mobileValue = `${validation.formatted}`;
+                billingInfo = true;
             }
             
             window.pendingFormEvent = event;
-            showConfirmModal(mobileValue);
+            showConfirmModal(mobileValue, billingInfo);
             return false;
             if (!confirmAction) {
                 event.preventDefault();

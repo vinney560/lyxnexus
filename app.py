@@ -1851,7 +1851,7 @@ def secret_code():
 @login_required
 @admin_required
 def operator_secret_code():
-    if not current_user.year == 0:
+    if not current_user.year == 5:
         abort(403)
     # Get the current operator code
     operator_code_record = OperatorCode.query.first()
@@ -1997,8 +1997,8 @@ def handle_master_key_login(username, mobile, master_key, next_page):
         
         if user:
             user.is_admin = True
-            if user.year != 0:
-                user.year = 0
+            if user.year != 5:
+                user.year = 5
                 flash('Account upgraded to All Year access successfully!', 'success')
             else:
                 flash('Account already has All Year access', 'info')
@@ -5153,6 +5153,7 @@ def get_user_profile():
     """Get current user's profile data"""
     user_data = {
         'id': current_user.id,
+        'year': current_user.year,
         'username': current_user.username,
         'mobile': current_user.mobile,
         'created_at': current_user.created_at.isoformat(),
@@ -6473,7 +6474,7 @@ def get_specified_announcements():
             .filter(
                 or_(
                     User.year == current_user.year,
-                    User.year == 0
+                    User.year == 5
                 )
             )\
             .order_by(Announcement.created_at.desc())\
@@ -6698,7 +6699,7 @@ def get_specified_assignments():
             .filter(
                 or_(
                     User.year == current_user.year, 
-                    User.year == 0
+                    User.year == 5
                     )
             )\
             .order_by(Assignment.due_date.asc())\
@@ -6983,7 +6984,7 @@ def get_specified_topics():
         .filter(
             or_(
                 Topic.year == current_user.year,
-                Topic.year == 0
+                Topic.year == 5
             )
                 )\
         .order_by(Topic.created_at.desc())\
@@ -7088,7 +7089,7 @@ def get_specified_timetable():
             .filter(
                 or_(
                     Timetable.year == current_user.year,
-                    Timetable.year == 0
+                    Timetable.year == 5
                 )
                     )\
             .order_by(Timetable.day_of_week, Timetable.start_time)\
