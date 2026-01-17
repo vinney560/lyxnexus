@@ -674,14 +674,8 @@ with app.app_context():
     try:
         # Create tables if they don't exist
         db.create_all()
-        try:
-            db.session.execute(text('ALTER TABLE "past_paper_files" DROP CONSTRAINT IF EXISTS past_paper_files_file_id_fkey'))
-            db.session.execute(text('ALTER TABLE "past_paper_files" ADD CONSTRAINT past_paper_files_file_id_fkey FOREIGN KEY (file_id) REFERENCES uploaded_files(id)'))
-            db.session.commit()
-            print("Foreign key updated successfully")
-        except Exception as e:
-            db.session.rollback()
-            print(f"Error: {e}")        
+        PastPaper.query.delete()
+        PastPaperFile.query.delete()
         db.session.commit()
         print("✅ Database tables created successfully!")
 

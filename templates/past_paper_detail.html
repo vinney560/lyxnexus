@@ -989,7 +989,7 @@
                 if (search) params.append('search', search);
                 params.append('paper_id', PAPER_ID);
 
-                const response = await fetch(`${API_BASE}/files/available?${params}`);
+                const response = await fetch(`${API_BASE}/archieves/available?${params}`);
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
@@ -1122,7 +1122,7 @@
         }
 
         function downloadFile(fileId) {
-            window.open(`${FILES_ENDPOINT}/${fileId}/download`);
+            window.open(`/store/api/files/${fileId}/download`);
             window.open(`${API_BASE}/past-papers/${PAPER_ID}/download?file_id=${fileId}`); // TO register downloads
             showToast('Download started', 'info');
         }

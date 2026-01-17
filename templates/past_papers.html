@@ -1253,7 +1253,7 @@
                 const params = new URLSearchParams();
                 if (search) params.append('search', search);
                 
-                const response = await fetch(`${API_BASE}/files/available?${params}`);
+                const response = await fetch(`${API_BASE}/archieves/available?${params}`);
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
