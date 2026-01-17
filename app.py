@@ -630,14 +630,14 @@ class PastPaperFile(db.Model):
     
     id = db.Column(db.Integer, primary_key=True)
     past_paper_id = db.Column(db.Integer, db.ForeignKey('past_papers.id', ondelete='CASCADE'), nullable=False)
-    file_id = db.Column(db.Integer, db.ForeignKey('file.id', ondelete='CASCADE'), nullable=False)
+    file_id = db.Column(db.Integer, db.ForeignKey('uploaded_files.id', ondelete='CASCADE'), nullable=False)
     display_name = db.Column(db.String(200))
     description = db.Column(db.Text)
     order = db.Column(db.Integer, default=0)
     added_at = db.Column(db.DateTime, default=datetime.utcnow)
     
     # Relationships
-    file = db.relationship('File', backref='past_paper_files')
+    file = db.relationship('UploadedFile', backref='past_paper_files')
 
 # ======================================================    
 from werkzeug.security import generate_password_hash
@@ -674,7 +674,14 @@ with app.app_context():
     try:
         # Create tables if they don't exist
         db.create_all()
-        File.query.delete()
+        try:
+            db.session.execute(text('ALTER TABLE "past_paper_files" DROP CONSTRAINT IF EXISTS past_paper_files_file_id_fkey'))
+            db.session.execute(text('ALTER TABLE "past_paper_files" ADD CONSTRAINT past_paper_files_file_id_fkey FOREIGN KEY (file_id) REFERENCES uploaded_files(id)'))
+            db.session.commit()
+            print("Foreign key updated successfully")
+        except Exception as e:
+            db.session.rollback()
+            print(f"Error: {e}")        
         db.session.commit()
         print("✅ Database tables created successfully!")
 
