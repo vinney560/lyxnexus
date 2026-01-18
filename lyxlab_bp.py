@@ -41,8 +41,14 @@ projects = {
         'name': 'LyxAI',
         'credentials': {
             'username': 'LyxNexus',
-            'mobile': '0740694311'
+            'mobile': '0112167194'
         },
+        'status': 'active'
+    },
+    'https://lyxnexus.onrender.com/fb': {
+        'name': 'LyxFB Video Downloader',
+        'credentials': None,
+        'description': 'LyxFB Video Downloader is a free online tool to download Facebook videos in HD quality. No software installation required.',
         'status': 'active'
     },
     'tonnymusic': {  

@@ -112,6 +112,10 @@ app.config["SESSION_TYPE"] = "filesystem"
 UPLOAD_FOLDER = os.path.join(app.root_path, 'uploads')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER # Where to save files --> We moved to DB saving
 
+app.config['MAX_CONTENT_LENGTH'] = 100 * 1024 * 1024  # 100MB max file size
+app.config['ALLOWED_EXTENSIONS'] = {'mp4', 'webm', 'mkv'}
+
+
 # --- Push Notification Configuration ---
 VAPID_PUBLIC_KEY = "BEk4C5_aQbjOMkvGYk4OFZMyMAInUdVP6oAFs9kAd7Gx3iog2UF4ZLwdQ8GmB0-i61FANGD6D0TCHsFYVOA45OQ"
 VAPID_PRIVATE_KEY = "42FlV4n_SjaTAcJnUcCi8bDrVEwX_8YCFJiCzAOhngw"
@@ -8652,6 +8656,674 @@ def get_users_list():
             'username': user.username,
             'mobile': user.mobile
         } for user in users]
+    })
+
+# =========== LyxNexus TOOLS ==============
+from bs4 import BeautifulSoup
+from urllib.parse import urlparse, parse_qs, unquote, quote
+import threading
+
+HEADERS = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+    'Accept-Language': 'en-US,en;q=0.9',
+    'Accept-Encoding': 'gzip, deflate, br',
+    'DNT': '1',
+    'Connection': 'keep-alive',
+    'Upgrade-Insecure-Requests': '1',
+    'Sec-Fetch-Dest': 'document',
+    'Sec-Fetch-Mode': 'navigate',
+    'Sec-Fetch-Site': 'none',
+    'Sec-Fetch-User': '?1',
+    'Cache-Control': 'max-age=0',
+    'sec-ch-ua': '"Not_A Brand";v="8", "Chromium";v="120", "Google Chrome";v="120"',
+    'sec-ch-ua-mobile': '?0',
+    'sec-ch-ua-platform': '"Windows"',
+}
+
+class FacebookVideoDownloader:
+    def __init__(self):
+        self.session = requests.Session()
+        self.session.headers.update(HEADERS)
+        # Add cookies to appear more like a real browser
+        self.session.cookies.update({
+            'locale': 'en_US',
+            'sb': 'random_string',
+            'datr': 'random_string',
+            'c_user': '1000',  # Generic user ID
+            'xs': 'random_string',
+        })
+        self.cache = {}
+        self.cache_timeout = 300
+        self.lock = threading.Lock()
+    
+    def is_valid_facebook_url(self, url):
+        """Check if URL is a valid Facebook video URL"""
+        try:
+            parsed = urlparse(url)
+            if not parsed.netloc.endswith('facebook.com') and 'fb.watch' not in parsed.netloc:
+                return False
+            
+            # Accept any Facebook URL that might contain a video
+            return True
+        except:
+            return False
+    
+    def get_actual_video_url(self, url):
+        """Try to get the actual video URL through various methods"""
+        try:
+            # Method 1: Direct fetch with headers
+            response = self.session.get(url, timeout=10, allow_redirects=True)
+            final_url = response.url
+            
+            # Check if we got redirected to login page
+            if 'login' in final_url or 'facebook.com/login' in final_url:
+                # Try with mobile user agent
+                mobile_headers = HEADERS.copy()
+                mobile_headers['User-Agent'] = 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15E148 Safari/604.1'
+                
+                response = requests.get(url, headers=mobile_headers, timeout=10, allow_redirects=True)
+                final_url = response.url
+            
+            return final_url, response.text
+            
+        except Exception as e:
+            print(f"Error getting actual URL: {e}")
+            return url, ""
+    
+    def extract_metadata(self, url):
+        """Extract metadata from Facebook video URL"""
+        cache_key = f"metadata_{hash(url)}"
+        current_time = time.time()
+        
+        # Check cache
+        with self.lock:
+            if cache_key in self.cache:
+                cached_data, timestamp = self.cache[cache_key]
+                if current_time - timestamp < self.cache_timeout:
+                    return cached_data
+        
+        try:
+            print(f"Processing URL: {url}")
+            
+            # Get actual URL and content
+            actual_url, html_content = self.get_actual_video_url(url)
+            print(f"Actual URL: {actual_url}")
+            
+            if not html_content:
+                return {'error': 'Could not fetch video page. The video might be private or require login.'}
+            
+            # Parse HTML
+            soup = BeautifulSoup(html_content, 'html.parser')
+            
+            # Check if we got a generic page
+            page_title = soup.title.string if soup.title else ""
+            print(f"Page title: {page_title}")
+            
+            if 'login' in page_title.lower() or 'log in' in page_title.lower():
+                return {'error': 'Facebook is requiring login. Try using a different video or check if the video is public.'}
+            
+            if 'discover popular videos' in page_title.lower():
+                return {'error': 'Facebook redirected to generic page. The video might not be accessible or the URL is incorrect.'}
+            
+            # Extract metadata using multiple methods
+            metadata = self.extract_metadata_from_html(soup, actual_url, html_content)
+            
+            # If no video URLs found, try alternative methods
+            if not metadata.get('video_urls'):
+                print("No video URLs found in primary extraction, trying alternatives...")
+                alternative_urls = self.extract_video_urls_alternative(html_content)
+                if alternative_urls:
+                    metadata['video_urls'] = alternative_urls
+                    metadata['quality_options'] = self.generate_quality_options(alternative_urls)
+            
+            # Cache result
+            with self.lock:
+                self.cache[cache_key] = (metadata, current_time)
+            
+            print(f"Extraction completed: {len(metadata.get('video_urls', []))} video URLs found")
+            return metadata
+            
+        except requests.exceptions.RequestException as e:
+            return {'error': f'Network error: {str(e)}'}
+        except Exception as e:
+            return {'error': f'Error extracting metadata: {str(e)}'}
+    
+    def extract_metadata_from_html(self, soup, url, html_content):
+        """Extract metadata from HTML content using multiple methods"""
+        metadata = {
+            'success': True,
+            'url': url,
+            'title': self.extract_title(soup, html_content),
+            'description': self.extract_description(soup, html_content),
+            'duration': self.extract_duration(html_content),
+            'views': self.extract_views(html_content),
+            'upload_date': self.extract_upload_date(html_content),
+            'uploader': self.extract_uploader(html_content),
+            'uploader_url': self.extract_uploader_url(html_content),
+            'thumbnail_url': self.extract_thumbnail(soup, html_content),
+            'video_urls': self.extract_video_urls(html_content),
+            'quality_options': [],
+            'formats': ['MP4'],
+            'extracted_at': datetime.now().isoformat(),
+            'message': 'Metadata extracted successfully'
+        }
+        
+        # Generate quality options if we have video URLs
+        if metadata['video_urls']:
+            metadata['quality_options'] = self.generate_quality_options(metadata['video_urls'])
+        
+        return metadata
+    
+    def extract_title(self, soup, html_content):
+        """Extract video title"""
+        # Try Open Graph title
+        og_title = soup.find('meta', property='og:title')
+        if og_title and og_title.get('content'):
+            return og_title.get('content')
+        
+        # Try meta name="title"
+        meta_title = soup.find('meta', {'name': 'title'})
+        if meta_title and meta_title.get('content'):
+            return meta_title.get('content')
+        
+        # Try JSON-LD
+        json_ld = soup.find('script', type='application/ld+json')
+        if json_ld:
+            try:
+                data = json.loads(json_ld.string)
+                if isinstance(data, dict) and 'name' in data:
+                    return data['name']
+            except:
+                pass
+        
+        # Try page title
+        if soup.title:
+            title = soup.title.string
+            if title and 'facebook' not in title.lower():
+                return title
+        
+        # Try to extract from JSON data in page
+        title_match = re.search(r'"videoTitle":"([^"]+)"', html_content)
+        if title_match:
+            return title_match.group(1).replace('\\', '')
+        
+        return 'Facebook Video'
+    
+    def extract_description(self, soup, html_content):
+        """Extract video description"""
+        # Try Open Graph description
+        og_desc = soup.find('meta', property='og:description')
+        if og_desc and og_desc.get('content'):
+            return og_desc.get('content')
+        
+        # Try meta description
+        meta_desc = soup.find('meta', {'name': 'description'})
+        if meta_desc and meta_desc.get('content'):
+            return meta_desc.get('content')
+        
+        # Try JSON-LD
+        json_ld = soup.find('script', type='application/ld+json')
+        if json_ld:
+            try:
+                data = json.loads(json_ld.string)
+                if isinstance(data, dict) and 'description' in data:
+                    return data['description']
+            except:
+                pass
+        
+        # Try to extract from page
+        desc_match = re.search(r'"snippet":"([^"]+)"', html_content)
+        if desc_match:
+            return desc_match.group(1).replace('\\', '')
+        
+        return 'No description available'
+    
+    def extract_duration(self, html_content):
+        """Extract video duration"""
+        # Try multiple patterns
+        patterns = [
+            r'"playableDurationInMs":(\d+)',
+            r'"duration":(\d+)',
+            r'"video_duration":(\d+)',
+            r'"length":(\d+)',
+        ]
+        
+        for pattern in patterns:
+            match = re.search(pattern, html_content)
+            if match:
+                try:
+                    ms = int(match.group(1))
+                    minutes = ms // 60000
+                    seconds = (ms % 60000) // 1000
+                    return f"{minutes:02d}:{seconds:02d}"
+                except:
+                    pass
+        
+        return "00:00"
+    
+    def extract_views(self, html_content):
+        """Extract view count"""
+        patterns = [
+            r'"video_view_count":(\d+)',
+            r'"viewCount":(\d+)',
+            r'"views":(\d+)',
+            r'"interactionCount":(\d+)',
+        ]
+        
+        for pattern in patterns:
+            match = re.search(pattern, html_content)
+            if match:
+                try:
+                    views = int(match.group(1))
+                    if views >= 1000000:
+                        return f"{views/1000000:.1f}M"
+                    elif views >= 1000:
+                        return f"{views/1000:.1f}K"
+                    else:
+                        return str(views)
+                except:
+                    pass
+        
+        return "Unknown"
+    
+    def extract_upload_date(self, html_content):
+        """Extract upload date"""
+        patterns = [
+            r'"uploadDate":"([^"]+)"',
+            r'"datePublished":"([^"]+)"',
+            r'"dateCreated":"([^"]+)"',
+        ]
+        
+        for pattern in patterns:
+            match = re.search(pattern, html_content)
+            if match:
+                try:
+                    date_str = match.group(1)
+                    # Try to parse and format
+                    if 'T' in date_str:
+                        date_part = date_str.split('T')[0]
+                        return date_part
+                    return date_str
+                except:
+                    pass
+        
+        return datetime.now().strftime('%Y-%m-%d')
+    
+    def extract_uploader(self, html_content):
+        """Extract uploader name"""
+        patterns = [
+            r'"ownerName":"([^"]+)"',
+            r'"authorName":"([^"]+)"',
+            r'"uploader":"([^"]+)"',
+            r'"actor":"([^"]+)"',
+        ]
+        
+        for pattern in patterns:
+            match = re.search(pattern, html_content)
+            if match:
+                name = match.group(1).replace('\\', '')
+                if name and name != 'null':
+                    return name
+        
+        return "Unknown Uploader"
+    
+    def extract_uploader_url(self, html_content):
+        """Extract uploader URL"""
+        patterns = [
+            r'"ownerProfileURL":"([^"]+)"',
+            r'"authorUrl":"([^"]+)"',
+            r'"actorUrl":"([^"]+)"',
+        ]
+        
+        for pattern in patterns:
+            match = re.search(pattern, html_content)
+            if match:
+                url = match.group(1).replace('\\', '')
+                if url and url != 'null' and 'http' in url:
+                    return url
+        
+        return ""
+    
+    def extract_thumbnail(self, soup, html_content):
+        """Extract thumbnail URL"""
+        # Try Open Graph image
+        og_image = soup.find('meta', property='og:image')
+        if og_image and og_image.get('content'):
+            return og_image.get('content')
+        
+        # Try JSON-LD
+        json_ld = soup.find('script', type='application/ld+json')
+        if json_ld:
+            try:
+                data = json.loads(json_ld.string)
+                if isinstance(data, dict) and 'thumbnailUrl' in data:
+                    return data['thumbnailUrl']
+            except:
+                pass
+        
+        # Try to extract from page data
+        thumb_patterns = [
+            r'"thumbnailUrl":"([^"]+)"',
+            r'"thumbnail":"([^"]+)"',
+            r'"poster":"([^"]+)"',
+            r'"image":"([^"]+)"',
+        ]
+        
+        for pattern in thumb_patterns:
+            match = re.search(pattern, html_content)
+            if match:
+                thumb_url = match.group(1).replace('\\', '')
+                if thumb_url and 'http' in thumb_url:
+                    return thumb_url
+        
+        # Default thumbnail
+        return "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b8/YouTube_play_button_icon_%282013%E2%80%932017%29.svg/1200px-YouTube_play_button_icon_%282013%E2%80%932017%29.svg.png"
+    
+    def extract_video_urls(self, html_content):
+        """Extract video URLs from HTML content"""
+        video_urls = []
+        
+        # Look for video URLs in various patterns
+        patterns = [
+            r'"browser_native_hd_url":"([^"]+)"',
+            r'"browser_native_sd_url":"([^"]+)"',
+            r'"playable_url":"([^"]+)"',
+            r'"playable_url_quality_hd":"([^"]+)"',
+            r'"playable_url_quality_sd":"([^"]+)"',
+            r'"hd_src":"([^"]+)"',
+            r'"sd_src":"([^"]+)"',
+            r'"src":"([^"]+)"',
+            r'"source":"([^"]+)"',
+            r'"video_url":"([^"]+)"',
+            r'"contentUrl":"([^"]+)"',
+            r'"url":"([^"]+)"',
+        ]
+        
+        for pattern in patterns:
+            matches = re.findall(pattern, html_content)
+            for match in matches:
+                # Clean the URL
+                video_url = match.replace('\\/', '/')
+                video_url = unquote(video_url)
+                
+                # Check if it's a video URL
+                if any(ext in video_url.lower() for ext in ['.mp4', '.mov', '.avi', '.webm', 'video']):
+                    # Filter out non-video URLs
+                    if 'facebook.com' in video_url or 'fbcdn.net' in video_url:
+                        if video_url not in video_urls:
+                            video_urls.append(video_url)
+        
+        return list(set(video_urls))  # Remove duplicates
+    
+    def extract_video_urls_alternative(self, html_content):
+        """Alternative method to extract video URLs - more aggressive"""
+        video_urls = []
+        
+        # Look for any URLs that might be video files
+        url_pattern = r'(https?://[^\s"<>]*?(?:\.mp4|\.mov|\.avi|\.webm|/video/[^\s"<>]*))'
+        matches = re.findall(url_pattern, html_content, re.IGNORECASE)
+        
+        for url in matches:
+            # Clean URL
+            clean_url = url.replace('\\/', '/')
+            clean_url = unquote(clean_url)
+            
+            # Filter for Facebook/CDN URLs
+            if any(domain in clean_url for domain in ['facebook.com', 'fbcdn.net', 'cdn.fbsbx.com', 'video.xx.fbcdn.net']):
+                if clean_url not in video_urls:
+                    video_urls.append(clean_url)
+        
+        # Also look for base64 encoded video data
+        base64_pattern = r'data:video/[^;]+;base64,[A-Za-z0-9+/=]+'
+        base64_matches = re.findall(base64_pattern, html_content)
+        
+        return list(set(video_urls))
+    
+    def generate_quality_options(self, video_urls):
+        """Generate quality options from video URLs"""
+        qualities = []
+        
+        for i, url in enumerate(video_urls):            
+            quality = 'SD'
+            label = 'Standard Quality'
+            
+            if 'hd' in url.lower() or '720' in url or '1080' in url:
+                quality = 'HD'
+                label = 'High Definition'
+            elif '360' in url:
+                quality = '360p'
+                label = '360p Quality'
+            elif '480' in url:
+                quality = '480p'
+                label = '480p Quality'
+            elif '720' in url:
+                quality = '720p'
+                label = '720p HD'
+            elif '1080' in url:
+                quality = '1080p'
+                label = '1080p Full HD'
+            
+            qualities.append({
+                'url': url,
+                'quality': quality,
+                'label': label,
+                'index': i
+            })
+        
+        # Sort by quality (HD first)
+        quality_order = {'1080p': 0, '720p': 1, 'HD': 2, '480p': 3, '360p': 4, 'SD': 5}
+        qualities.sort(key=lambda x: quality_order.get(x['quality'], 6))
+        
+        return qualities
+    
+    def download_video(self, url, quality_index=0):
+        """Download video from URL"""
+        try:
+            # Extract metadata first
+            metadata = self.extract_metadata(url)
+            
+            if 'error' in metadata:
+                return {'error': metadata['error']}
+            
+            if not metadata.get('video_urls'):
+                return {'error': 'No video URLs found. The video might be private or restricted.'}
+            
+            # Select video URL based on quality index
+            if quality_index >= len(metadata['video_urls']):
+                quality_index = 0
+            
+            video_url = metadata['video_urls'][quality_index]
+            
+            # Generate filename
+            filename = self.generate_filename(metadata)
+            download_path = os.path.join(app.config['DOWNLOAD_FOLDER'], filename)
+            
+            print(f"Downloading video from: {video_url[:100]}...")
+            
+            # Download with headers
+            headers = HEADERS.copy()
+            headers['Referer'] = 'https://www.facebook.com/'
+            headers['Origin'] = 'https://www.facebook.com'
+            
+            response = requests.get(video_url, headers=headers, stream=True, timeout=60)
+            response.raise_for_status()
+            
+            # Get file size
+            total_size = int(response.headers.get('content-length', 0))
+            
+            # Download file
+            with open(download_path, 'wb') as f:
+                for chunk in response.iter_content(chunk_size=8192):
+                    if chunk:
+                        f.write(chunk)
+            
+            # Verify download
+            if not os.path.exists(download_path) or os.path.getsize(download_path) == 0:
+                return {'error': 'Download failed - file is empty'}
+            
+            file_size_mb = os.path.getsize(download_path) / (1024 * 1024)
+            
+            return {
+                'success': True,
+                'filename': filename,
+                'path': download_path,
+                'size': os.path.getsize(download_path),
+                'size_mb': round(file_size_mb, 2),
+                'metadata': metadata,
+                'message': f'Video downloaded successfully ({file_size_mb:.2f} MB)'
+            }
+            
+        except requests.exceptions.RequestException as e:
+            return {'error': f'Network error during download: {str(e)}'}
+        except Exception as e:
+            return {'error': f'Download failed: {str(e)}'}
+    
+    def generate_filename(self, metadata):
+        """Generate a safe filename for the video"""
+        title = metadata.get('title', 'facebook_video')
+        
+        # Clean title for filename
+        title_clean = re.sub(r'[^\w\s-]', '', title)
+        title_clean = re.sub(r'\s+', '_', title_clean)
+        title_clean = title_clean[:50]
+        
+        # Add date
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        
+        return f"fb_video_{title_clean}_{timestamp}.mp4"
+
+# Initialize downloader
+downloader = FacebookVideoDownloader()
+
+@app.route('/fb')
+def facebook_v_downloader():
+    return render_template('facebook_video_downloader.html')
+
+@app.route('/api/extract/metadata', methods=['POST'])
+def extract_metadata():
+    try:
+        # Get URL from request
+        if request.is_json:
+            data = request.json
+            url = data.get('url', '').strip()
+        else:
+            url = request.form.get('url', '').strip()
+        
+        if not url:
+            return jsonify({
+                'success': False,
+                'error': 'URL is required',
+                'message': 'Please enter a Facebook video URL'
+            }), 400
+        
+        # Clean URL
+        try:
+            url = unquote(url)
+        except:
+            pass
+        # Extract metadata
+        metadata = downloader.extract_metadata(url)
+        
+        # Debug output
+        if 'error' in metadata:
+            print(f"ERROR: {metadata['error']}")
+        else:
+            for i, video_url in enumerate(metadata.get('video_urls', [])[:3]):
+                print(f"  URL {i+1}: {video_url[:100]}...")
+        
+        # Always return JSON with consistent structure
+        if 'error' in metadata:
+            return jsonify({
+                'success': False,
+                'error': metadata['error'],
+                'message': metadata['error']
+            }), 400
+        
+        # Ensure success flag
+        metadata['success'] = True
+        
+        return jsonify(metadata)
+        
+    except Exception as e:
+        print(f"Unexpected error in extract_metadata: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'message': f'Unexpected error: {str(e)}'
+        }), 500
+
+@app.route('/api/direct-download/video', methods=['POST'])
+def direct_download():
+    try:
+        # Get parameters
+        if request.is_json:
+            data = request.json
+            url = data.get('url', '').strip()
+            quality_index = int(data.get('quality_index', 0))
+        else:
+            url = request.form.get('url', '').strip()
+            quality_index = int(request.form.get('quality_index', 0))
+        
+        if not url:
+            return jsonify({
+                'success': False,
+                'error': 'URL is required'
+            }), 400
+        
+        # Clean URL
+        try:
+            url = unquote(url)
+        except:
+            pass
+        
+        # Download video
+        result = downloader.download_video(url, quality_index)
+        
+        if 'error' in result:
+            return jsonify({
+                'success': False,
+                'error': result['error']
+            }), 400
+        
+        # Send file
+        return send_file(
+            result['path'],
+            as_attachment=True,
+            download_name=result['filename'],
+            mimetype='video/mp4'
+        )
+        
+    except Exception as e:
+        print(f"Download error: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/api/test', methods=['GET'])
+def test_endpoint():
+    """Test endpoint to check if the server is working"""
+    test_urls = [
+        "https://www.facebook.com/share/r/182Z8s6rAg/",
+        "https://fb.watch/abc123def/",
+        "https://www.facebook.com/watch/?v=123456789"
+    ]
+    
+    return jsonify({
+        'status': 'online',
+        'service': 'Facebook Video Downloader',
+        'test_urls': test_urls,
+        'timestamp': datetime.now().isoformat()
+    })
+
+@app.route('/api/health', methods=['GET'])
+def health_check():
+    return jsonify({
+        'status': 'healthy',
+        'timestamp': datetime.now().isoformat(),
+        'service': 'Facebook Video Downloader',
+        'version': '3.0'
     })
 #==========================================
 # Error Handlers
