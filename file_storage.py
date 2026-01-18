@@ -144,9 +144,7 @@ def upload_multiple_files():
             filename = secure_filename(file.filename)
             file_ext = filename.rsplit('.', 1)[1].lower() if '.' in filename else ''
             
-            # IMPORTANT FIX: Create unique base name for each file
             if name:
-                # If name is provided, append index or timestamp to make it unique
                 base_name = f"{name}_{index}_{int(time.time())}_LN"
             else:
                 # Use filename without extension

@@ -8298,7 +8298,7 @@ def get_available_archieves():
     try:
         search = request.args.get('search', '')
         page = request.args.get('page', 1, type=int)
-        per_page = 20
+        per_page = 30
         
         query = UploadedFile.query
         
@@ -8324,7 +8324,7 @@ def get_available_archieves():
                 'description': f"{file.file_type.capitalize()} file uploaded on {file.created_at.strftime('%Y-%m-%d')}",
                 'category': file.file_type,
                 'uploaded_at': file.created_at.isoformat() if file.created_at else None,
-                'uploaded_by': 'Admin',  # You can update this based on your user model
+                'uploaded_by': 'Admin',
                 'url': file.url,
                 'public_id': file.public_id,
                 'format': file.file_format,
@@ -8343,6 +8343,7 @@ def get_available_archieves():
     except Exception as e:
         current_app.logger.error(f'Error fetching available files: {str(e)}')
         return jsonify({'error': str(e)}), 500
+    
 #==========================================
 from sqlalchemy import func, extract
 

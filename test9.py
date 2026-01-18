@@ -1,12 +1,4 @@
-import os
-def _reverse(word) -> str:
-    _reversed = word[::-1]
-    return _reversed
-def _split_word(word):
-    name, ext = os.path.splitext(word)
-    
-    print(f"{name} {ext}")
-
-word = 'Lyxin'
-
-_split_word(word)
+def get_file_ext(filename: str) -> str:
+    file_ext = filename.rsplit('.', 1)[1].lower() if '.' in filename else ''
+    return file_ext
+print(get_file_ext("example.txt"))  # Output: txt

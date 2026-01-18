@@ -798,24 +798,26 @@
         }
 
         function getFileIcon(fileType, filename) {
-            if (fileType.includes('pdf')) {
+            if (filename.match(/\.(pdf)$/i)) {
                 return { icon: 'fa-file-pdf', class: 'file-icon-pdf' };
             } else if (fileType.includes('image')) {
                 return { icon: 'fa-file-image', class: 'file-icon-image' };
-            } else if (fileType.includes('zip') || fileType.includes('rar') || fileType.includes('tar') || fileType.includes('7z')) {
+            } else if (fileType.includes('video') || filename.match(/\.(mp4|mov|avi|mkv|wmv|flv|webm)$/i)) {
+                return { icon: 'fa-file-video', class: 'file-icon-video' };
+            } else if (fileType.includes('archive') || filename.match(/\.(zip|rar|7z|tar|gz)$/i)) {
                 return { icon: 'fa-file-archive', class: 'file-icon-archive' };
-            } else if (fileType.includes('word') || fileType.includes('document') || filename.match(/\.(doc|docx)$/i)) {
+            } else if (filename.match(/\.(doc|docx)$/i)) {
                 return { icon: 'fa-file-word', class: 'file-icon-doc' };
-            } else if (fileType.includes('excel') || filename.match(/\.(xls|xlsx)$/i)) {
+            } else if (filename.match(/\.(xls|xlsx)$/i)) {
                 return { icon: 'fa-file-excel', class: 'file-icon-doc' };
-            } else if (fileType.includes('powerpoint') || filename.match(/\.(ppt|pptx)$/i)) {
+            } else if (filename.match(/\.(ppt|pptx)$/i)) {
                 return { icon: 'fa-file-powerpoint', class: 'file-icon-doc' };
-            } else if (fileType.includes('text') || filename.match(/\.(txt|rtf)$/i)) {
-                return { icon: 'fa-file-alt', class: 'file-icon-doc' };
+            } else if (filename.match(/\.(txt|rtf)$/i)) {
+                return { icon: 'fa-file-text', class: 'file-icon-doc' };
             } else {
                 return { icon: 'fa-file', class: 'file-icon-generic' };
             }
-        }
+        }        
 
         async function loadTopicMaterials() {
             const container = document.getElementById('materials-container');
