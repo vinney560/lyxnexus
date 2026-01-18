@@ -692,33 +692,37 @@
             });
         }
         
+        // Download video - UPDATED for streaming
         async function downloadVideo() {
             if (!currentMetadata || !currentMetadata.url) {
                 showToast('No video metadata available', 'error');
                 return;
             }
-            
+
             if (downloadInProgress) {
                 showToast('Download already in progress', 'warning');
                 return;
             }
-            
+
             downloadInProgress = true;
             abortController = new AbortController();
-            
+
+            // Show download progress
             downloadProgress.classList.remove('hidden');
             const progressFill = document.getElementById('progressFill');
             const progressPercentage = document.getElementById('progressPercentage');
             const progressFileName = document.getElementById('progressFileName');
-            
+
             progressFileName.textContent = 'Starting download...';
             progressFill.style.width = '0%';
             progressPercentage.textContent = '0%';
-            
+
+            // Disable download button
             downloadBtn.disabled = true;
             downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Downloading...';
-            
+
             try {
+                // Send download request
                 const response = await fetch('/api/direct-download/video', {
                     method: 'POST',
                     headers: {
@@ -730,38 +734,41 @@
                     }),
                     signal: abortController.signal
                 });
-                
+
                 if (!response.ok) {
                     const errorData = await response.json().catch(() => ({}));
                     throw new Error(errorData.error || errorData.message || `Download failed: ${response.status}`);
                 }
-                
+
+                // Get filename from headers
                 const contentDisposition = response.headers.get('Content-Disposition');
                 let filename = 'facebook_video.mp4';
-                
+
                 if (contentDisposition) {
-                    const matches = contentDisposition.match(/filename="?([^"]+)"?/);
-                    if (matches && matches[1]) {
-                        filename = matches[1];
+                    const matches = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+                    if (matches != null && matches[1]) {
+                        filename = matches[1].replace(/['"]/g, '');
                     }
                 }
-                
+
                 progressFileName.textContent = `Downloading: ${filename}`;
-                
+
+                // Get total size for progress
                 const totalSize = parseInt(response.headers.get('content-length') || 0);
                 let downloadedSize = 0;
-                
+
+                // Create blob from stream
                 const reader = response.body.getReader();
                 const chunks = [];
-                
+
                 while (true) {
                     const { done, value } = await reader.read();
-                    
+
                     if (done) break;
-                    
+
                     chunks.push(value);
                     downloadedSize += value.length;
-                    
+
                     // Update progress
                     if (totalSize > 0) {
                         const percentage = Math.round((downloadedSize / totalSize) * 100);
@@ -769,7 +776,7 @@
                         progressPercentage.textContent = `${percentage}%`;
                     }
                 }
-                
+
                 // Create blob and trigger download
                 const blob = new Blob(chunks);
                 const downloadUrl = window.URL.createObjectURL(blob);
@@ -780,18 +787,19 @@
                 a.click();
                 document.body.removeChild(a);
                 window.URL.revokeObjectURL(downloadUrl);
-                
+
+                // Hide progress
                 downloadProgress.classList.add('hidden');
-                
+
                 showToast('Video downloaded successfully!', 'success');
-                
+
             } catch (error) {
                 if (error.name === 'AbortError') {
                     showToast('Download cancelled', 'warning');
                 } else {
                     showToast(`Download failed: ${error.message}`, 'error');
                 }
-                
+
                 downloadProgress.classList.add('hidden');
             } finally {
                 downloadInProgress = false;
@@ -799,7 +807,7 @@
                 downloadBtn.disabled = false;
                 downloadBtn.innerHTML = '<i class="fas fa-download mr-2"></i> Download Video';
             }
-        }
+        }        
         
         function cancelDownload() {
             if (abortController) {

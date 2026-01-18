@@ -114,9 +114,6 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER # Where to save files --> We moved t
 
 app.config['MAX_CONTENT_LENGTH'] = 100 * 1024 * 1024  # 100MB max file size
 app.config['ALLOWED_EXTENSIONS'] = {'mp4', 'webm', 'mkv'}
-app.config['DOWNLOAD_FOLDER'] = 'downloads'
-
-os.makedirs(app.config['DOWNLOAD_FOLDER'], exist_ok=True)
 
 # --- Push Notification Configuration ---
 VAPID_PUBLIC_KEY = "BEk4C5_aQbjOMkvGYk4OFZMyMAInUdVP6oAFs9kAd7Gx3iog2UF4ZLwdQ8GmB0-i61FANGD6D0TCHsFYVOA45OQ"
@@ -9120,9 +9117,9 @@ class FacebookVideoDownloader:
         return qualities
     
     def download_video(self, url, quality_index=0):
-        """Download video from URL"""
+        """Get video URL and metadata (no disk saving)"""
         try:
-            # Extract metadata first
+            # Extract metadata
             metadata = self.extract_metadata(url)
             
             if 'error' in metadata:
@@ -9139,48 +9136,36 @@ class FacebookVideoDownloader:
             
             # Generate filename
             filename = self.generate_filename(metadata)
-            download_path = os.path.join(app.config['DOWNLOAD_FOLDER'], filename)
             
-            print(f"Downloading video from: {video_url[:100]}...")
-            
-            # Download with headers
+            # Get video info without downloading
             headers = HEADERS.copy()
-            headers['Referer'] = 'https://www.facebook.com/'
-            headers['Origin'] = 'https://www.facebook.com'
-            
-            response = requests.get(video_url, headers=headers, stream=True, timeout=60)
-            response.raise_for_status()
-            
-            # Get file size
-            total_size = int(response.headers.get('content-length', 0))
-            
-            # Download file
-            with open(download_path, 'wb') as f:
-                for chunk in response.iter_content(chunk_size=8192):
-                    if chunk:
-                        f.write(chunk)
-            
-            # Verify download
-            if not os.path.exists(download_path) or os.path.getsize(download_path) == 0:
-                return {'error': 'Download failed - file is empty'}
-            
-            file_size_mb = os.path.getsize(download_path) / (1024 * 1024)
+            headers['Range'] = 'bytes=0-1'  # Just get headers
+            try:
+                head_response = requests.head(video_url, headers=headers, timeout=10)
+                if head_response.status_code == 200 or head_response.status_code == 206:
+                    content_length = head_response.headers.get('content-length', '0')
+                    size_mb = int(content_length) / (1024 * 1024) if content_length.isdigit() else 0
+                else:
+                    # Try with GET for first few bytes
+                    test_response = requests.get(video_url, headers=headers, stream=True, timeout=10)
+                    content_length = test_response.headers.get('content-length', '0')
+                    size_mb = int(content_length) / (1024 * 1024) if content_length.isdigit() else 0
+            except:
+                size_mb = 0
             
             return {
                 'success': True,
+                'video_url': video_url,
                 'filename': filename,
-                'path': download_path,
-                'size': os.path.getsize(download_path),
-                'size_mb': round(file_size_mb, 2),
+                'size_mb': round(size_mb, 2),
                 'metadata': metadata,
-                'message': f'Video downloaded successfully ({file_size_mb:.2f} MB)'
+                'message': f'Video ready to download ({size_mb:.2f} MB)'
             }
             
         except requests.exceptions.RequestException as e:
-            return {'error': f'Network error during download: {str(e)}'}
+            return {'error': f'Network error: {str(e)}'}
         except Exception as e:
-            return {'error': f'Download failed: {str(e)}'}
-    
+            return {'error': f'Failed to prepare video: {str(e)}'}    
     def generate_filename(self, metadata):
         """Generate a safe filename for the video"""
         title = metadata.get('title', 'facebook_video')
@@ -9188,13 +9173,13 @@ class FacebookVideoDownloader:
         # Clean title for filename
         title_clean = re.sub(r'[^\w\s-]', '', title)
         title_clean = re.sub(r'\s+', '_', title_clean)
-        title_clean = title_clean[:50]
+        title_clean = title_clean[:30]  # Shorter limit
         
         # Add date
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         
-        return f"fb_video_{title_clean}_{timestamp}.mp4"
-
+        return f"fb_{title_clean}_{timestamp}.mp4"    
+    
 # Initialize downloader
 downloader = FacebookVideoDownloader()
 
@@ -9224,6 +9209,10 @@ def extract_metadata():
             url = unquote(url)
         except:
             pass
+        
+        print(f"\n=== EXTRACTING METADATA ===")
+        print(f"Input URL: {url}")
+        
         # Extract metadata
         metadata = downloader.extract_metadata(url)
         
@@ -9231,8 +9220,12 @@ def extract_metadata():
         if 'error' in metadata:
             print(f"ERROR: {metadata['error']}")
         else:
+            print(f"SUCCESS: Title='{metadata.get('title', 'N/A')}'")
+            print(f"Video URLs found: {len(metadata.get('video_urls', []))}")
             for i, video_url in enumerate(metadata.get('video_urls', [])[:3]):
                 print(f"  URL {i+1}: {video_url[:100]}...")
+        
+        print("=== EXTRACTION COMPLETE ===\n")
         
         # Always return JSON with consistent structure
         if 'error' in metadata:
@@ -9254,6 +9247,10 @@ def extract_metadata():
             'error': str(e),
             'message': f'Unexpected error: {str(e)}'
         }), 500
+
+
+import requests
+from flask import Response
 
 @app.route('/api/direct-download/video', methods=['POST'])
 def direct_download():
@@ -9279,28 +9276,85 @@ def direct_download():
         except:
             pass
         
-        # Download video
-        result = downloader.download_video(url, quality_index)
+        print(f"Downloading video: {url[:100]}..., quality index: {quality_index}")
         
-        if 'error' in result:
+        # First extract metadata to get video URL
+        metadata = downloader.extract_metadata(url)
+        
+        if 'error' in metadata:
             return jsonify({
                 'success': False,
-                'error': result['error']
+                'error': metadata['error']
             }), 400
         
-        # Send file
-        return send_file(
-            result['path'],
-            as_attachment=True,
-            download_name=result['filename'],
-            mimetype='video/mp4'
+        if not metadata.get('video_urls'):
+            return jsonify({
+                'success': False,
+                'error': 'No video URLs found'
+            }), 400
+        
+        # Select video URL based on quality index
+        if quality_index >= len(metadata['video_urls']):
+            quality_index = 0
+        
+        video_url = metadata['video_urls'][quality_index]
+        
+        # Generate filename
+        filename = downloader.generate_filename(metadata)
+        
+        print(f"Streaming video from: {video_url[:100]}...")
+        
+        # Stream video directly to user
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Accept': '*/*',
+            'Accept-Language': 'en-US,en;q=0.9',
+            'Referer': 'https://www.facebook.com/',
+            'Origin': 'https://www.facebook.com',
+            'Sec-Fetch-Dest': 'video',
+            'Sec-Fetch-Mode': 'no-cors',
+            'Sec-Fetch-Site': 'cross-site',
+        }
+        
+        # Make request to video URL
+        video_response = requests.get(video_url, headers=headers, stream=True, timeout=60)
+        video_response.raise_for_status()
+        
+        # Get content type and size
+        content_type = video_response.headers.get('Content-Type', 'video/mp4')
+        content_length = video_response.headers.get('Content-Length', '')
+        
+        # Create a streaming response
+        def generate():
+            for chunk in video_response.iter_content(chunk_size=8192):
+                if chunk:
+                    yield chunk
+        
+        # Return streaming response
+        return Response(
+            generate(),
+            headers={
+                'Content-Type': content_type,
+                'Content-Disposition': f'attachment; filename="{filename}"',
+                'Content-Length': content_length,
+                'Cache-Control': 'no-cache, no-store, must-revalidate',
+                'Pragma': 'no-cache',
+                'Expires': '0',
+            },
+            direct_passthrough=True
         )
         
+    except requests.exceptions.RequestException as e:
+        print(f"Network error during download: {e}")
+        return jsonify({
+            'success': False,
+            'error': f'Network error: {str(e)}'
+        }), 500
     except Exception as e:
         print(f"Download error: {e}")
         return jsonify({
             'success': False,
-            'error': str(e)
+            'error': f'Download failed: {str(e)}'
         }), 500
 
 @app.route('/api/test', methods=['GET'])
