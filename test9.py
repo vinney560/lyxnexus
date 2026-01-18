@@ -1,4 +1,3 @@
-def get_file_ext(filename: str) -> str:
-    file_ext = filename.rsplit('.', 1)[1].lower() if '.' in filename else ''
-    return file_ext
-print(get_file_ext("example.txt"))  # Output: txt
+mobile = "0712345678"
+phone = f"+254{mobile.strip()[1:] if mobile.startswith('0') else mobile.strip()}"
+print(phone)  # Output: +254712345678

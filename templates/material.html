@@ -860,7 +860,7 @@
                                             <h3 class="text-lg sm:text-xl font-extrabold text-white underline underline-offset-4 decoration-blue-500 leading-snug break-words">
                                                 ${material.display_name}
                                             </h3>
-                                            <p class="text-gray-400 text-sm">${material.description || 'No description'}</p>
+                                            <p class="text-gray-400 text-sm break-all">${material.description || 'No description'}</p>
                                         </div>
                                         {% if current_user.is_admin %}
                                         <div class="drag-handle ml-4" draggable="false">
@@ -870,7 +870,7 @@
                                     </div>
                                     <div class="flex flex-wrap items-center mt-2 text-sm text-gray-500">
                                         <span class="mr-4">
-                                            <i class="fas fa-file mr-1"></i> ${material.filename}
+                                            <i class="fas fa-file mr-1 break-all"></i> ${material.filename}
                                         </span>
                                         <span class="mr-4">
                                             <i class="fas fa-database mr-1"></i> ${formatFileSize(material.file_size)}
@@ -958,9 +958,9 @@
                                 <i class="fas ${fileIcon.icon}"></i>
                             </div>
                             <div class="flex-1 min-w-0">
-                                <h4 class="font-semibold text-white truncate">${file.name}</h4>
-                                <p class="text-sm text-gray-400 filename">${file.filename} • ${formatFileSize(file.file_size)}</p>
-                                ${file.description ? `<p class="text-sm text-gray-500 mt-1 truncate">${file.description}</p>` : ''}
+                                <h4 class="font-semibold text-white truncate break-all">${file.name}</h4>
+                                <p class="text-sm text-gray-400 filename truncate break-all">${file.filename} • ${formatFileSize(file.file_size)}</p>
+                                ${file.description ? `<p class="text-sm text-gray-500 mt-1 truncate break-all">${file.description}</p>` : ''}
                             </div>
                         </div>
                     </div>

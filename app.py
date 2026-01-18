@@ -1939,6 +1939,49 @@ def operator_secret_code():
 import re
 from sqlalchemy import or_
 
+RAPIDAPI_KEY = os.getenv('RAPIDAPI_KEY', '4406e83311msh635cb32b3525e4bp17f9c1jsn874626c65441')
+RAPIDAPI_HOST = "veriphone.p.rapidapi.com"
+def verify_phone(mobile):
+    """API endpoint to verify phone number"""
+    try:
+        phone = f"+254{mobile.strip()[1:] if mobile.startswith('0') else mobile.strip()}"
+        
+        # Prepare the request to Veriphone API
+        url = "https://veriphone.p.rapidapi.com/verify"
+        querystring = {
+            "phone": phone,
+            "country_code": "KE",  # Default to Kenya, can be dynamic
+            "format": "json"
+        }
+        
+        headers = {
+            "x-rapidapi-key": RAPIDAPI_KEY,
+            "x-rapidapi-host": RAPIDAPI_HOST
+        }
+        
+        # Make API call
+        response = requests.get(url, headers=headers, params=querystring, timeout=10)
+        result = response.json()
+
+        # Return the verification result
+        return result.get('phone_valid', False)
+        
+    except requests.exceptions.Timeout:
+        return jsonify({
+            'success': False,
+            'message': 'Verification service timeout'
+        })
+    except requests.exceptions.RequestException as e:
+        return jsonify({
+            'success': False,
+            'message': f'Verification service error: {str(e)}'
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'message': f'An error occurred: {str(e)}'
+        })
+
 @app.route('/login', methods=['POST', 'GET'])
 @limiter.limit("10 per minute")
 def login():
@@ -2205,15 +2248,21 @@ def handle_student_login(user, username, mobile, login_subtype, next_page, year)
                                  year=_year())
         
         # Create new student
-        new_user = User(id=gen_unique_id(User), username=username, mobile=mobile, is_admin=False, year=int(year))
-        db.session.add(new_user)
-        db.session.commit()
-        """ Send WhatsApp Welcome Message! """
-        welcome_message = get_random_welcome_message(username, mobile)
-        send_msg(format_mobile_send(mobile), welcome_message)
+        mobile_valid=verify_phone(mobile=mobile)
+        if mobile_valid:
+            new_user = User(id=gen_unique_id(User), username=username, mobile=mobile, is_admin=False, year=int(year))
+            db.session.add(new_user)
+            db.session.commit()
+            """ Send WhatsApp Welcome Message! """
+            welcome_message = get_random_welcome_message(username, mobile)
+            send_msg(format_mobile_send(mobile), welcome_message)
 
-        login_user(new_user)
-        return redirect(url_for('nav_guide'))
+            login_user(new_user)
+            return redirect(url_for('nav_guide'))
+        else: 
+            flash('The provided mobile number is not valid. Please check and try again.', 'error')
+            return render_template('login.html', username=username, mobile=format_mobile_display(mobile), year=_year())
+
     
     else:  # login subtype
         if not user:
