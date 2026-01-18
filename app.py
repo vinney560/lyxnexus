@@ -114,7 +114,9 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER # Where to save files --> We moved t
 
 app.config['MAX_CONTENT_LENGTH'] = 100 * 1024 * 1024  # 100MB max file size
 app.config['ALLOWED_EXTENSIONS'] = {'mp4', 'webm', 'mkv'}
+app.config['DOWNLOAD_FOLDER'] = 'downloads'
 
+os.makedirs(app.config['DOWNLOAD_FOLDER'], exist_ok=True)
 
 # --- Push Notification Configuration ---
 VAPID_PUBLIC_KEY = "BEk4C5_aQbjOMkvGYk4OFZMyMAInUdVP6oAFs9kAd7Gx3iog2UF4ZLwdQ8GmB0-i61FANGD6D0TCHsFYVOA45OQ"
