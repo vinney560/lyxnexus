@@ -9316,15 +9316,6 @@ def test_endpoint():
         'test_urls': test_urls,
         'timestamp': datetime.now().isoformat()
     })
-
-@app.route('/api/health', methods=['GET'])
-def health_check():
-    return jsonify({
-        'status': 'healthy',
-        'timestamp': datetime.now().isoformat(),
-        'service': 'Facebook Video Downloader',
-        'version': '3.0'
-    })
 #==========================================
 # Error Handlers
 #==========================================

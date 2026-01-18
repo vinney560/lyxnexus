@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LyxFB Downloader | LyxNexus</title>
+    
+    <meta name="keywords" content="Lyx Nexus, Kisii LyxNexus, kisii lyxnexus, kisii university lyxnexus, kisii university lyx nexus, lyx nexus, lyxnexus" />
+    <meta name="author" content="Vincent Kipngetich" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://lyxnexus.onrender.com/" />
+    <link rel="icon" href="https://lyxnexus.onrender.com/uploads/favicon-1.png"/>
+        
+    <meta property="og:title" content="LyxFB Video Downloader | LyxNexus" />
+    <meta property="og:description" content="LyxNexus LyxFB Video Downloader is a tool that allows you to download any facebook video by just entering the URL." />
+    <meta property="og:image" content="https://lyxnexus.onrender.com/favicon.ico" />
+    <meta property="og:url" content="https://lyxnexus.onrender.com/" />
+        
+    <meta name="twitter:card" content="summary" />
+    <!-- Fonts & Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --primary-dark: #1d4ed8;
+            --secondary: #8b5cf6;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --dark: #111827;
+            --light: #f9fafb;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            min-height: 100vh;
+            color: var(--light);
+        }
+        
+        .glass-card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 31, 135, 0.2);
+        }
+        
+        .gradient-text {
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+        }
+        
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        .loading-spinner {
+            border: 3px solid rgba(59, 130, 246, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 16px 20px;
+            border-radius: 10px;
+            background: rgba(30, 41, 59, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            transform: translateX(400px);
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            z-index: 1000;
+            max-width: 400px;
+        }
+        
+        .toast.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border-radius: 4px;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+        
+        .quality-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .quality-hd {
+            background: linear-gradient(135deg, var(--success), #059669);
+            color: white;
+        }
+        
+        .quality-sd {
+            background: linear-gradient(135deg, var(--warning), #d97706);
+            color: white;
+        }
+        
+        .info-card {
+            background: rgba(30, 41, 59, 0.5);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+        }
+        
+        .info-label {
+            color: #94a3b8;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+        
+        .info-value {
+            color: white;
+            font-weight: 500;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <div id="toastContainer"></div>
+    <div class="container mx-auto px-4 py-8 max-w-6xl">
+        <header class="text-center mb-12">
+            <div class="flex items-center justify-center gap-3 mb-6">
+                <div class="w-14 h-14 rounded-xl glass-card flex items-center justify-center">
+                    <i class="fas fa-video text-3xl gradient-text"></i>
+                </div>
+                <div>
+                    <h1 class="text-4xl font-bold gradient-text">LyxFB Video Downloader</h1>
+                    <p class="text-gray-400 mt-2">Extract metadata and download Facebook videos easily</p>
+                </div>
+            </div>
+            
+            <div class="flex flex-wrap gap-3 justify-center mb-6">
+                <div class="px-4 py-2 rounded-full bg-blue-500/20 text-blue-400 text-sm font-medium">
+                    <i class="fas fa-check mr-2"></i> Powered By LyxScripting
+                </div>
+                <div class="px-4 py-2 rounded-full bg-purple-500/20 text-purple-400 text-sm font-medium">
+                    <i class="fas fa-bolt mr-2"></i> Fast Extraction
+                </div>
+                <div class="px-4 py-2 rounded-full bg-green-500/20 text-green-400 text-sm font-medium">
+                    <i class="fas fa-download mr-2"></i> Multiple Qualities
+                </div>
+            </div>
+        </header>
+        
+        <div class="glass-card rounded-2xl p-6 mb-8">
+            <div class="mb-8">
+                <h2 class="text-2xl font-bold mb-4">Enter Facebook Video URL</h2>
+                <p class="text-gray-400 mb-6">Paste the URL of any Facebook video (public, groups, pages, reels, or share links)</p>
+                
+                <div class="flex flex-col md:flex-row gap-3 mb-4">
+                    <div class="flex-1">
+                        <input 
+                            type="url" 
+                            id="videoUrl" 
+                            placeholder="https://www.facebook.com/share/r/123abc/ or https://fb.watch/..."
+                            class="w-full px-4 py-3 rounded-xl bg-gray-900 border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                        >
+                    </div>
+                    <button 
+                        id="extractBtn" 
+                        onclick="extractMetadata()"
+                        class="btn-primary px-8 py-3 rounded-xl flex items-center justify-center gap-2"
+                    >
+                        <i class="fas fa-search"></i>
+                        <span>Extract Metadata</span>
+                    </button>
+                </div>
+                
+                <div class="text-sm text-gray-500 flex items-center gap-2">
+                    <i class="fas fa-info-circle"></i>
+                    <span>Supports: Videos, Reels, Share Links, Groups, Pages</span>
+                </div>
+            </div>
+            
+            <div id="loadingSection" class="hidden text-center py-12">
+                <div class="loading-spinner mx-auto mb-6"></div>
+                <h3 class="text-xl font-bold mb-2">Extracting Video Metadata</h3>
+                <p class="text-gray-400">Please wait while we extract video information...</p>
+                <p class="text-sm text-gray-500 mt-2">This may take 10-20 seconds</p>
+            </div>
+            
+            <div id="errorSection" class="hidden text-center py-12">
+                <div class="w-20 h-20 mx-auto mb-6 rounded-full bg-red-500/20 flex items-center justify-center">
+                    <i class="fas fa-exclamation-triangle text-3xl text-red-500"></i>
+                </div>
+                <h3 class="text-2xl font-bold mb-3" id="errorTitle">Extraction Failed</h3>
+                <p class="text-gray-300 mb-6" id="errorMessage"></p>
+                <div class="flex gap-3 justify-center">
+                    <button onclick="retryExtraction()" class="btn-primary">
+                        <i class="fas fa-redo mr-2"></i> Try Again
+                    </button>
+                    <button onclick="resetForm()" class="px-6 py-3 rounded-xl border border-gray-700 hover:bg-gray-800">
+                        <i class="fas fa-times mr-2"></i> Clear
+                    </button>
+                </div>
+            </div>
+            
+            <div id="resultsSection" class="hidden">
+                <div class="mb-8">
+                    <h3 class="text-2xl font-bold mb-6">Video Preview</h3>
+                    <div class="glass-card rounded-xl p-6">
+                        <div class="flex flex-col lg:flex-row gap-8">                            
+                            <div class="lg:w-1/3">
+                                <div id="thumbnailContainer" class="rounded-xl overflow-hidden bg-gray-900 aspect-video flex items-center justify-center relative">
+                                    <img id="videoThumbnail" src="" alt="Video Thumbnail" class="w-full h-full object-cover hidden">
+                                    <div id="thumbnailPlaceholder" class="text-center p-6">
+                                        <i class="fas fa-video text-5xl text-gray-700 mb-4"></i>
+                                        <p class="text-gray-500">Video Thumbnail</p>
+                                    </div>
+                                    <div class="absolute bottom-4 right-4">
+                                        <span id="durationBadge" class="px-3 py-1 rounded-full bg-black/70 text-white text-sm font-medium">00:00</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-6">
+                                    <h4 class="font-bold mb-3">Select Quality</h4>
+                                    <div id="qualityOptions" class="flex flex-wrap gap-2">                                        
+                                    </div>
+                                </div>
+                            </div>
+                                                        
+                            <div class="lg:w-2/3">
+                                <h4 id="videoTitle" class="text-2xl font-bold mb-4 line-clamp-2"></h4>
+                                <p id="videoDescription" class="text-gray-300 mb-6 line-clamp-3"></p>
+                                
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                                    <div class="info-card">
+                                        <div class="info-label">
+                                            <i class="fas fa-user mr-2"></i>Uploader
+                                        </div>
+                                        <div id="videoUploader" class="info-value"></div>
+                                    </div>
+                                    
+                                    <div class="info-card">
+                                        <div class="info-label">
+                                            <i class="fas fa-eye mr-2"></i>Views
+                                        </div>
+                                        <div id="videoViews" class="info-value"></div>
+                                    </div>
+                                    
+                                    <div class="info-card">
+                                        <div class="info-label">
+                                            <i class="fas fa-clock mr-2"></i>Duration
+                                        </div>
+                                        <div id="videoDuration" class="info-value"></div>
+                                    </div>
+                                    
+                                    <div class="info-card">
+                                        <div class="info-label">
+                                            <i class="fas fa-calendar mr-2"></i>Upload Date
+                                        </div>
+                                        <div id="videoUploadDate" class="info-value"></div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-6">
+                                    <div class="flex items-center justify-between mb-3">
+                                        <h4 class="font-bold">Available Video URLs</h4>
+                                        <span id="videoCount" class="text-sm text-gray-400">0 URLs</span>
+                                    </div>
+                                    <div id="urlsContainer" class="space-y-2 max-h-60 overflow-y-auto pr-2">                                        
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-8 pt-6 border-t border-gray-800">
+                                    <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-12 h-12 rounded-xl bg-gray-800 flex items-center justify-center">
+                                                <i class="fas fa-download text-blue-400 text-xl"></i>
+                                            </div>
+                                            <div>
+                                                <p class="text-sm text-gray-400">Ready to Download</p>
+                                                <p id="downloadInfo" class="font-medium">Select quality and click download</p>
+                                            </div>
+                                        </div>
+                                        
+                                        <button 
+                                            id="downloadBtn"
+                                            onclick="downloadVideo()"
+                                            class="btn-primary px-8 py-3 rounded-xl flex items-center gap-2"
+                                        >
+                                            <i class="fas fa-download"></i>
+                                            <span>Download Video</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="downloadProgress" class="hidden mb-8">
+                    <h3 class="text-2xl font-bold mb-6">Download Progress</h3>
+                    <div class="glass-card rounded-xl p-6">
+                        <div class="mb-6">
+                            <div class="flex justify-between text-sm mb-2">
+                                <span id="progressFileName" class="font-medium">Downloading video...</span>
+                                <span id="progressPercentage" class="font-bold">0%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div id="progressFill" class="progress-fill"></div>
+                            </div>
+                        </div>
+                        <div class="text-center">
+                            <button 
+                                id="cancelDownloadBtn"
+                                onclick="cancelDownload()"
+                                class="px-6 py-2 rounded-lg border border-red-500 text-red-400 hover:bg-red-500/10"
+                            >
+                                <i class="fas fa-times mr-2"></i> Cancel Download
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex flex-wrap gap-3 justify-center">
+                    <button onclick="extractAnother()" class="px-6 py-3 rounded-xl border border-gray-700 hover:bg-gray-800">
+                        <i class="fas fa-redo mr-2"></i> Extract Another Video
+                    </button>
+                    <button onclick="copyMetadata()" class="px-6 py-3 rounded-xl border border-gray-700 hover:bg-gray-800">
+                        <i class="fas fa-copy mr-2"></i> Copy Metadata
+                    </button>
+                    <button onclick="shareVideo()" class="px-6 py-3 rounded-xl border border-gray-700 hover:bg-gray-800">
+                        <i class="fas fa-share mr-2"></i> Share
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="glass-card rounded-2xl p-6 mb-8">
+            <h3 class="text-2xl font-bold mb-6 text-center">How to Download Facebook Videos</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="text-center">
+                    <div class="w-20 h-20 mx-auto mb-4 rounded-2xl bg-blue-500/20 flex items-center justify-center">
+                        <i class="fas fa-link text-3xl text-blue-400"></i>
+                    </div>
+                    <h4 class="font-bold mb-3">1. Copy Video URL</h4>
+                    <p class="text-gray-400">Copy the URL from any Facebook video post, reel, or share link</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-20 h-20 mx-auto mb-4 rounded-2xl bg-purple-500/20 flex items-center justify-center">
+                        <i class="fas fa-search text-3xl text-purple-400"></i>
+                    </div>
+                    <h4 class="font-bold mb-3">2. Extract Metadata</h4>
+                    <p class="text-gray-400">Paste the URL and click extract to get video information</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-20 h-20 mx-auto mb-4 rounded-2xl bg-green-500/20 flex items-center justify-center">
+                        <i class="fas fa-download text-3xl text-green-400"></i>
+                    </div>
+                    <h4 class="font-bold mb-3">3. Download</h4>
+                    <p class="text-gray-400">Choose quality and download the video to your device</p>
+                </div>
+            </div>
+        </div>
+        
+        <footer class="text-center text-gray-500 text-sm">
+            <p class="mb-2">© 2026 LyxFB Video Downloader. For educational purposes only.</p>
+            <p class="text-gray-600">Respect copyright laws. Download only videos you have permission to download.</p>
+        </footer>
+    </div>
+    
+    <script>
+        let currentMetadata = null;
+        let selectedQualityIndex = 0;
+        let downloadInProgress = false;
+        let abortController = null;
+        
+        const videoUrlInput = document.getElementById('videoUrl');
+        const extractBtn = document.getElementById('extractBtn');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const loadingSection = document.getElementById('loadingSection');
+        const errorSection = document.getElementById('errorSection');
+        const resultsSection = document.getElementById('resultsSection');
+        const downloadProgress = document.getElementById('downloadProgress');
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            videoUrlInput.focus();
+            const urlParams = new URLSearchParams(window.location.search);
+            const urlParam = urlParams.get('url');
+            if (urlParam) {
+                videoUrlInput.value = decodeURIComponent(urlParam);
+                setTimeout(() => extractMetadata(), 1000);
+            }
+            
+            videoUrlInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    extractMetadata();
+                }
+            });
+        });
+                
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            let icon = 'info-circle';
+            let color = 'blue-400';
+            if (type === 'success') {
+                icon = 'check-circle';
+                color = 'green-400';
+            } else if (type === 'error') {
+                icon = 'exclamation-triangle';
+                color = 'red-400';
+            } else if (type === 'warning') {
+                icon = 'exclamation-circle';
+                color = 'yellow-400';
+            }
+            
+            toast.innerHTML = `
+                <div class="flex items-center gap-3">
+                    <i class="fas fa-${icon} text-${color} text-lg"></i>
+                    <div class="flex-1">
+                        <p class="text-sm font-medium">${message}</p>
+                    </div>
+                    <button onclick="this.parentElement.parentElement.remove()" class="text-gray-400 hover:text-white">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+            
+            container.appendChild(toast);
+                        
+            setTimeout(() => {
+                toast.classList.add('show');
+            }, 10);
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.parentNode.removeChild(toast);
+                    }
+                }, 300);
+            }, 5000);
+        }
+                
+        async function extractMetadata() {
+            const url = videoUrlInput.value.trim();
+            
+            if (!url) {
+                showToast('Please enter a Facebook video URL', 'error');
+                videoUrlInput.focus();
+                return;
+            }
+            
+            if (!isValidFacebookUrl(url)) {
+                showToast('Please enter a valid Facebook video URL', 'error');
+                videoUrlInput.focus();
+                return;
+            }
+            
+            extractBtn.disabled = true;
+            extractBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Extracting...';
+            loadingSection.classList.remove('hidden');
+            errorSection.classList.add('hidden');
+            resultsSection.classList.add('hidden');
+            
+            try {
+                const response = await fetch('/api/extract/metadata', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ url: url })
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok || !data.success) {
+                    throw new Error(data.error || data.message || 'Failed to extract metadata');
+                }
+                
+                currentMetadata = data;
+                console.log('Metadata received:', data);
+                
+                updateMetadataUI(data);
+                
+                loadingSection.classList.add('hidden');
+                resultsSection.classList.remove('hidden');
+                
+                showToast(data.message || 'Metadata extracted successfully!', 'success');
+                
+            } catch (error) {
+                console.error('Extraction error:', error);
+                loadingSection.classList.add('hidden');
+                showError(error.message);
+            } finally {
+                extractBtn.disabled = false;
+                extractBtn.innerHTML = '<i class="fas fa-search mr-2"></i> Extract Metadata';
+            }
+        }
+        
+        function isValidFacebookUrl(url) {
+            const patterns = [
+                /facebook\.com\/.*\/videos\//i,
+                /facebook\.com\/watch/i,
+                /fb\.watch/i,
+                /facebook\.com\/share/i,
+                /facebook\.com\/reel/i,
+                /facebook\.com\/.*\/reel/i,
+                /facebook\.com\/.*\/posts/i,
+                /facebook\.com\/photo\.php/i,
+                /facebook\.com\/story\.php/i,
+            ];
+            return patterns.some(pattern => pattern.test(url));
+        }
+        
+        function updateMetadataUI(metadata) {            
+            document.getElementById('videoTitle').textContent = 
+                metadata.title || 'Facebook Video';
+            
+            document.getElementById('videoDescription').textContent = 
+                metadata.description || 'No description available';
+            
+            document.getElementById('videoUploader').textContent = 
+                metadata.uploader || 'Unknown';
+            
+            document.getElementById('videoViews').textContent = 
+                metadata.views || '0';
+            
+            document.getElementById('videoDuration').textContent = 
+                metadata.duration || '00:00';
+            
+            document.getElementById('durationBadge').textContent = 
+                metadata.duration || '00:00';
+            
+            document.getElementById('videoUploadDate').textContent = 
+                metadata.upload_date || 'Unknown';
+            
+            const thumbnailImg = document.getElementById('videoThumbnail');
+            const thumbnailPlaceholder = document.getElementById('thumbnailPlaceholder');
+            
+            if (metadata.thumbnail_url && metadata.thumbnail_url !== 'N/A') {
+                thumbnailImg.src = metadata.thumbnail_url;
+                thumbnailImg.onload = function() {
+                    thumbnailImg.classList.remove('hidden');
+                    thumbnailPlaceholder.classList.add('hidden');
+                };
+                thumbnailImg.onerror = function() {
+                    thumbnailImg.classList.add('hidden');
+                    thumbnailPlaceholder.classList.remove('hidden');
+                };
+            } else {
+                thumbnailImg.classList.add('hidden');
+                thumbnailPlaceholder.classList.remove('hidden');
+            }
+            
+            updateQualityOptions(metadata.quality_options || []);
+            updateVideoUrls(metadata.video_urls || []);
+            
+            const videoCount = metadata.video_urls ? metadata.video_urls.length : 0;
+            document.getElementById('videoCount').textContent = `${videoCount} video URL${videoCount !== 1 ? 's' : ''}`;
+            
+            const qualityOptions = metadata.quality_options || [];
+            if (qualityOptions.length > 0) {
+                const selected = qualityOptions[selectedQualityIndex];
+                document.getElementById('downloadInfo').textContent = 
+                    `Selected: ${selected.quality} quality`;
+            }
+        }
+        
+        function updateQualityOptions(qualityOptions) {
+            const container = document.getElementById('qualityOptions');
+            container.innerHTML = '';
+            
+            if (!qualityOptions || qualityOptions.length === 0) {
+                container.innerHTML = `
+                    <div class="text-gray-400 text-center py-4 w-full">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                        No quality options available
+                    </div>
+                `;
+                selectedQualityIndex = 0;
+                return;
+            }
+            
+            qualityOptions.forEach((option, index) => {
+                const isSelected = index === selectedQualityIndex;
+                const button = document.createElement('button');
+                button.className = `px-4 py-2 rounded-lg border ${isSelected ? 
+                    'bg-blue-500/20 border-blue-500 text-blue-400' : 
+                    'border-gray-700 text-gray-400 hover:border-gray-600 hover:text-gray-300'}`;
+                button.innerHTML = `
+                    <i class="fas fa-video mr-2"></i>
+                    ${option.quality}
+                `;
+                button.onclick = () => selectQuality(index, button);
+                container.appendChild(button);
+            });
+        }
+        
+        function selectQuality(index, button) {
+            selectedQualityIndex = index;
+            
+            document.querySelectorAll('#qualityOptions button').forEach(btn => {
+                btn.classList.remove('bg-blue-500/20', 'border-blue-500', 'text-blue-400');
+                btn.classList.add('border-gray-700', 'text-gray-400');
+            });
+            
+            button.classList.add('bg-blue-500/20', 'border-blue-500', 'text-blue-400');
+            button.classList.remove('border-gray-700', 'text-gray-400');
+            
+            if (currentMetadata && currentMetadata.quality_options) {
+                const selected = currentMetadata.quality_options[index];
+                document.getElementById('downloadInfo').textContent = 
+                    `Selected: ${selected.quality} quality`;
+            }
+            
+            showToast(`Selected ${currentMetadata?.quality_options?.[index]?.quality || 'unknown'} quality`, 'info');
+        }
+        
+        function updateVideoUrls(urls) {
+            const container = document.getElementById('urlsContainer');
+            container.innerHTML = '';
+            
+            if (!urls || urls.length === 0) {
+                container.innerHTML = `
+                    <div class="text-gray-400 text-center py-4">
+                        <i class="fas fa-exclamation-circle mr-2"></i>
+                        No video URLs found
+                    </div>
+                `;
+                return;
+            }
+            
+            urls.forEach((url, index) => {
+                const div = document.createElement('div');
+                div.className = 'bg-gray-900 rounded-lg p-3 flex items-center justify-between';
+                div.innerHTML = `
+                    <div class="flex items-center gap-3 flex-1 min-w-0">
+                        <span class="text-xs bg-gray-800 px-2 py-1 rounded whitespace-nowrap">URL ${index + 1}</span>
+                        <span class="text-sm text-gray-300 truncate">${url}</span>
+                    </div>
+                    <button onclick="copyToClipboard('${url.replace(/'/g, "\\'")}')" class="text-gray-400 hover:text-white ml-3">
+                        <i class="fas fa-copy"></i>
+                    </button>
+                `;
+                container.appendChild(div);
+            });
+        }
+        
+        async function downloadVideo() {
+            if (!currentMetadata || !currentMetadata.url) {
+                showToast('No video metadata available', 'error');
+                return;
+            }
+            
+            if (downloadInProgress) {
+                showToast('Download already in progress', 'warning');
+                return;
+            }
+            
+            downloadInProgress = true;
+            abortController = new AbortController();
+            
+            downloadProgress.classList.remove('hidden');
+            const progressFill = document.getElementById('progressFill');
+            const progressPercentage = document.getElementById('progressPercentage');
+            const progressFileName = document.getElementById('progressFileName');
+            
+            progressFileName.textContent = 'Starting download...';
+            progressFill.style.width = '0%';
+            progressPercentage.textContent = '0%';
+            
+            downloadBtn.disabled = true;
+            downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Downloading...';
+            
+            try {
+                const response = await fetch('/api/direct-download/video', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        url: currentMetadata.url,
+                        quality_index: selectedQualityIndex
+                    }),
+                    signal: abortController.signal
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.error || errorData.message || `Download failed: ${response.status}`);
+                }
+                
+                const contentDisposition = response.headers.get('Content-Disposition');
+                let filename = 'facebook_video.mp4';
+                
+                if (contentDisposition) {
+                    const matches = contentDisposition.match(/filename="?([^"]+)"?/);
+                    if (matches && matches[1]) {
+                        filename = matches[1];
+                    }
+                }
+                
+                progressFileName.textContent = `Downloading: ${filename}`;
+                
+                const totalSize = parseInt(response.headers.get('content-length') || 0);
+                let downloadedSize = 0;
+                
+                const reader = response.body.getReader();
+                const chunks = [];
+                
+                while (true) {
+                    const { done, value } = await reader.read();
+                    
+                    if (done) break;
+                    
+                    chunks.push(value);
+                    downloadedSize += value.length;
+                    
+                    // Update progress
+                    if (totalSize > 0) {
+                        const percentage = Math.round((downloadedSize / totalSize) * 100);
+                        progressFill.style.width = `${percentage}%`;
+                        progressPercentage.textContent = `${percentage}%`;
+                    }
+                }
+                
+                // Create blob and trigger download
+                const blob = new Blob(chunks);
+                const downloadUrl = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = downloadUrl;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(downloadUrl);
+                
+                downloadProgress.classList.add('hidden');
+                
+                showToast('Video downloaded successfully!', 'success');
+                
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    showToast('Download cancelled', 'warning');
+                } else {
+                    showToast(`Download failed: ${error.message}`, 'error');
+                }
+                
+                downloadProgress.classList.add('hidden');
+            } finally {
+                downloadInProgress = false;
+                abortController = null;
+                downloadBtn.disabled = false;
+                downloadBtn.innerHTML = '<i class="fas fa-download mr-2"></i> Download Video';
+            }
+        }
+        
+        function cancelDownload() {
+            if (abortController) {
+                abortController.abort();
+                showToast('Cancelling download...', 'warning');
+            }
+        }
+        
+        function showError(message) {
+            document.getElementById('errorTitle').textContent = 'Extraction Failed';
+            document.getElementById('errorMessage').textContent = message;
+            errorSection.classList.remove('hidden');
+            resultsSection.classList.add('hidden');
+        }
+        
+        function retryExtraction() {
+            errorSection.classList.add('hidden');
+            extractMetadata();
+        }
+        
+        function resetForm() {
+            videoUrlInput.value = '';
+            errorSection.classList.add('hidden');
+            resultsSection.classList.add('hidden');
+            videoUrlInput.focus();
+        }
+        
+        function extractAnother() {
+            resultsSection.classList.add('hidden');
+            videoUrlInput.value = '';
+            videoUrlInput.focus();
+            showToast('Enter a new Facebook video URL', 'info');
+        }
+        
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text)
+                .then(() => showToast('Copied to clipboard', 'success'))
+                .catch(() => showToast('Failed to copy', 'error'));
+        }
+        
+        function copyMetadata() {
+            if (!currentMetadata) {
+                showToast('No metadata to copy', 'error');
+                return;
+            }
+            
+            const metadataText = `Title: ${currentMetadata.title}
+Description: ${currentMetadata.description}
+Uploader: ${currentMetadata.uploader}
+Views: ${currentMetadata.views}
+Duration: ${currentMetadata.duration}
+URL: ${currentMetadata.url}`;
+            
+            copyToClipboard(metadataText);
+        }
+        
+        // Share video
+        function shareVideo() {
+            if (!currentMetadata || !currentMetadata.url) {
+                showToast('No video to share', 'error');
+                return;
+            }
+            
+            const shareUrl = `${window.location.origin}/?url=${encodeURIComponent(currentMetadata.url)}`;
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: currentMetadata.title,
+                    text: currentMetadata.description,
+                    url: shareUrl
+                });
+            } else {
+                copyToClipboard(shareUrl);
+            }
+        }
+        
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                e.preventDefault();
+                extractMetadata();
+            }
+            
+            if (e.key === 'Escape') {
+                resetForm();
+            }
+        });
+        
+        function insertExampleUrl() {
+            const examples = [
+                'https://www.facebook.com/share/r/182Z8s6rAg/',
+                'https://fb.watch/abc123def/',
+                'https://www.facebook.com/watch/?v=123456789',
+                'https://www.facebook.com/reel/123456789'
+            ];
+            const randomExample = examples[Math.floor(Math.random() * examples.length)];
+            videoUrlInput.value = randomExample;
+            videoUrlInput.focus();
+            showToast('Example URL inserted', 'info');
+        }
+    </script>
+</body>
+</html>
