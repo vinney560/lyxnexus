@@ -2265,7 +2265,7 @@ def handle_student_login(user, username, mobile, login_subtype, next_page, year)
                                  mobile=format_mobile_display(mobile),
                                  login_type='student',
                                  year=_year())
-        flash('Phone verification service is currently unavailable. Please try again later.', 'error')
+        flash('Phone verification service is currently unavailable. Please try again later or contact Admin.', 'error')
         return render_template('login.html',
                                          username=username,
                                          mobile=format_mobile_display(mobile),
