@@ -1964,7 +1964,7 @@ def verify_phone(mobile):
         result = response.json()
 
         # Return the verification result
-        return result.get('phone_valid', False)
+        return result
         
     except requests.exceptions.Timeout:
         return jsonify({
@@ -2248,21 +2248,29 @@ def handle_student_login(user, username, mobile, login_subtype, next_page, year)
                                  year=_year())
         
         # Create new student
-        mobile_valid=verify_phone(mobile=mobile)
-        if mobile_valid:
+        result = verify_phone(mobile=mobile)
+        if result.get('phone_valid') is True:
             new_user = User(id=gen_unique_id(User), username=username, mobile=mobile, is_admin=False, year=int(year))
             db.session.add(new_user)
             db.session.commit()
             """ Send WhatsApp Welcome Message! """
             welcome_message = get_random_welcome_message(username, mobile)
             send_msg(format_mobile_send(mobile), welcome_message)
-
             login_user(new_user)
-            return redirect(url_for('nav_guide'))
-        else: 
-            flash('The provided mobile number is not valid. Please check and try again.', 'error')
-            return render_template('login.html', username=username, mobile=format_mobile_display(mobile), year=_year())
-
+            return render_template("verification.html", verification_data=result)
+        if result.get('phone_valid') is False:
+            flash('The provided mobile number is invalid. Please check and try again.', 'error')
+            return render_template('login.html',
+                                 username=username,
+                                 mobile=format_mobile_display(mobile),
+                                 login_type='student',
+                                 year=_year())
+        flash('Phone verification service is currently unavailable. Please try again later.', 'error')
+        return render_template('login.html',
+                                         username=username,
+                                         mobile=format_mobile_display(mobile),
+                                         login_type='student',
+                                         year=_year())
     
     else:  # login subtype
         if not user:

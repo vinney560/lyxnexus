@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verification Complete | LyxNexus</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <meta name="keywords" content="Lyx Nexus, Kisii LyxNexus, kisii lyxnexus, kisii university lyxnexus, kisii university lyx nexus, lyx nexus, lyxnexus" />
+    <meta name="author" content="Vincent Kipngetich" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://lyxnexus.onrender.com/" />
+    <link rel="icon" href="https://lyxnexus.onrender.com/uploads/favicon-1.png"/>
+        
+    <meta property="og:title" content="Verification Complete | LyxNexus" />
+    <meta property="og:description" content="Phone number verification successful - Continue to LyxNexus" />
+    <meta property="og:image" content="https://lyxnexus.onrender.com/favicon.ico" />
+    <meta property="og:url" content="https://lyxnexus.onrender.com/" />
+        
+    <meta name="twitter:card" content="summary" />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<style>
+    :root {
+        --bg-color: #111827;
+        --text-color: #F9FAFB;
+        --accent-color: #4A90E2;
+        --secondary-color: #8B5CF6;
+        --success-color: #10B981;
+        --warning-color: #F59E0B;
+        --error-color: #EF4444;
+    }
+    
+    body {
+        font-family: 'Poppins', sans-serif;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow-x: hidden;
+        background-image: url('/uploads/OIP10.jpg');
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+    }
+    
+    .gradient-text {
+        background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        color: transparent;
+    }
+    
+    .glass-morph {
+        background: rgba(30, 30, 40, 0.6);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        box-shadow: 0 8px 32px rgba(0, 31, 135, 0.2);
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        transition: all 0.3s ease;
+    }
+    
+    .glass-morph:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 40px rgba(0, 31, 135, 0.3);
+    }
+    
+    .btn {
+        background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 50px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+        cursor: pointer;
+        width: 100%;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .btn::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        transform: translate(-50%, -50%);
+        transition: width 0.3s, height 0.3s;
+    }
+    
+    .btn:active::after {
+        width: 300px;
+        height: 300px;
+    }
+    
+    .btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+    }
+    
+    .btn-outline {
+        background: transparent;
+        border: 2px solid #3B82F6;
+        border-radius: 25px;
+        padding: 8px 20px;
+        color: #3B82F6;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-outline:hover {
+        background: #3B82F6;
+        color: white;
+        transform: translateY(-2px);
+    }
+    
+    .btn-success {
+        background: linear-gradient(90deg, #10B981, #059669);
+        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+    }
+    
+    .btn-success:hover {
+        box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+    }
+    
+    .logo-container {
+        background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+        border-radius: 20px;
+        padding: 15px;
+        display: inline-block;
+        margin-bottom: 10px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .logo-container:hover {
+        transform: scale(1.05);
+        box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+    }
+    
+    .floating {
+        animation: floating 3s ease-in-out infinite;
+    }
+    
+    @keyframes floating {
+        0% { transform: translate(0, 0px); }
+        50% { transform: translate(0, 15px); }
+        100% { transform: translate(0, -0px); }
+    }
+    
+    .nav-header {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        padding: 20px;
+        z-index: 100;
+    }
+    
+    .nav-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+    
+    .nav-logo {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        padding: 8px 16px;
+        border-radius: 12px;
+    }
+    
+    .nav-logo:hover {
+        background: rgba(59, 130, 246, 0.1);
+    }
+    
+    .nav-logo-text {
+        font-size: 24px;
+        font-weight: 700;
+        background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        color: transparent;
+    }
+    
+    .nav-links {
+        display: flex;
+        gap: 20px;
+    }
+    
+    .nav-link {
+        color: #9CA3AF;
+        text-decoration: none;
+        font-weight: 500;
+        padding: 8px 16px;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+    
+    .nav-link:hover {
+        color: white;
+        background: rgba(59, 130, 246, 0.1);
+    }
+    
+    .status-badge {
+        display: inline-block;
+        padding: 6px 15px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .status-valid {
+        background: linear-gradient(90deg, #10B981, #059669);
+        color: white;
+        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+    }
+    
+    .status-invalid {
+        background: linear-gradient(90deg, #EF4444, #DC2626);
+        color: white;
+        box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+    }
+    
+    .verification-card {
+        background: rgba(30, 30, 40, 0.8);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        border-radius: 20px;
+        padding: 30px;
+        margin: 20px 0;
+        transition: all 0.3s ease;
+    }
+    
+    .verification-card:hover {
+        transform: translateY(-5px);
+        border-color: rgba(59, 130, 246, 0.5);
+        box-shadow: 0 10px 30px rgba(0, 31, 135, 0.3);
+    }
+    
+    .info-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .info-item:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+    
+    .info-label {
+        color: #9CA3AF;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .info-icon {
+        color: #3B82F6;
+        font-size: 1.2rem;
+        width: 24px;
+    }
+    
+    .info-value {
+        color: white;
+        font-weight: 600;
+        font-size: 1.1rem;
+        text-align: right;
+    }
+    
+    .details-panel {
+        background: rgba(30, 30, 40, 0.6);
+        border: 1px solid rgba(139, 92, 246, 0.3);
+        border-radius: 12px;
+        padding: 20px;
+        margin-top: 20px;
+        display: none;
+        animation: fadeIn 0.3s ease;
+    }
+    
+    .details-panel.show {
+        display: block;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    
+    .raw-data {
+        font-family: 'Courier New', monospace;
+        font-size: 0.85rem;
+        background: rgba(20, 20, 30, 0.8);
+        padding: 15px;
+        border-radius: 8px;
+        overflow-x: auto;
+        color: #D1D5DB;
+        line-height: 1.6;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    
+    .success-icon {
+        font-size: 4rem;
+        margin-bottom: 20px;
+        display: inline-block;
+        background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+        color: white;
+        width: 100px;
+        height: 100px;
+        line-height: 100px;
+        border-radius: 50%;
+        box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3);
+        animation: successPulse 2s infinite;
+    }
+    
+    @keyframes successPulse {
+        0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
+        70% { box-shadow: 0 0 0 20px rgba(59, 130, 246, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+    }
+    
+    .toast-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        max-width: 400px;
+    }
+    
+    .toast {
+        background: rgba(30, 30, 40, 0.95);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        border-radius: 12px;
+        padding: 16px 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        transform: translateX(400px);
+        opacity: 0;
+        transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        max-width: 400px;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .toast::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 100%;
+        width: 4px;
+    }
+    
+    .toast.show {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    
+    .toast.hide {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+    
+    .toast-success {
+        border-color: rgba(16, 185, 129, 0.4);
+    }
+    
+    .toast-success::before {
+        background: var(--success-color);
+    }
+    
+    .toast-error {
+        border-color: rgba(239, 68, 68, 0.4);
+    }
+    
+    .toast-error::before {
+        background: var(--error-color);
+    }
+    
+    .toast-info {
+        border-color: rgba(59, 130, 246, 0.4);
+    }
+    
+    .toast-info::before {
+        background: var(--accent-color);
+    }
+    
+    .toast-icon {
+        font-size: 20px;
+        flex-shrink: 0;
+    }
+    
+    .toast-success .toast-icon {
+        color: var(--success-color);
+    }
+    
+    .toast-error .toast-icon {
+        color: var(--error-color);
+    }
+    
+    .toast-info .toast-icon {
+        color: var(--accent-color);
+    }
+    
+    .toast-content {
+        flex: 1;
+    }
+    
+    .toast-title {
+        font-weight: 600;
+        margin-bottom: 4px;
+        font-size: 14px;
+    }
+    
+    .toast-message {
+        font-size: 13px;
+        color: #D1D5DB;
+        line-height: 1.4;
+    }
+    
+    .toast-close {
+        background: none;
+        border: none;
+        color: #9CA3AF;
+        cursor: pointer;
+        font-size: 16px;
+        padding: 4px;
+        border-radius: 4px;
+        transition: all 0.2s ease;
+        flex-shrink: 0;
+    }
+    
+    .toast-close:hover {
+        color: white;
+        background: rgba(255, 255, 255, 0.1);
+    }
+    
+    .next-btn {
+        background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+        color: white;
+        border: none;
+        padding: 15px 30px;
+        border-radius: 50px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+        cursor: pointer;
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 20px;
+        width: 100%;
+    }
+    
+    .next-btn:hover:not(:disabled) {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+    }
+    
+    .next-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none !important;
+        box-shadow: none !important;
+    }
+    
+    @media (max-width: 768px) {
+        .toast-container {
+            right: 10px;
+            left: 10px;
+            max-width: none;
+        }
+        
+        .toast {
+            max-width: none;
+        }
+        
+        .nav-header {
+            padding: 15px;
+        }
+        
+        .nav-links {
+            display: none;
+        }
+        
+        .nav-logo-text {
+            font-size: 20px;
+        }
+        
+        .verification-card {
+            padding: 20px;
+            margin: 10px;
+        }
+        
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            line-height: 80px;
+            font-size: 3rem;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .info-item {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 5px;
+        }
+        
+        .info-value {
+            text-align: left;
+        }
+        
+        .btn, .next-btn {
+            padding: 12px 20px;
+        }
+    }
+</style>
+<body>
+    <!-- Navigation Header -->
+    <header class="nav-header">
+        <div class="nav-content">
+            <div class="nav-links">
+                <a href="#" class="nav-link" onclick="window.location.href='/terms'">
+                    <i class="fas fa-info-circle mr-2"></i>Terms
+                </a>
+                <a href="#" class="nav-link" onclick="showToast('+254740694312', 'info')">
+                    <i class="fas fa-envelope mr-2"></i>Contact
+                </a>
+                <a href="#" class="nav-link" onclick="window.location.href='/navigation-guide'">
+                    <i class="fas fa-question-circle mr-2"></i>Help
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- Main Content -->
+    <div class="w-full max-w-md mx-4">
+        <div class="glass-morph rounded-2xl p-8">
+            <div class="text-center mb-8">
+                <!-- Success/Error Icon based on phone_valid -->
+                {% if verification_data.phone_valid %}
+                <div class="success-icon" id="successIcon">
+                    <i class="fas fa-check"></i>
+                </div>
+                <h1 class="text-3xl font-bold gradient-text">Verification Complete</h1>
+                <p class="text-gray-400 mt-2">Your phone number has been verified successfully</p>
+                {% else %}
+                <div class="success-icon" id="successIcon" style="background: linear-gradient(90deg, #EF4444, #DC2626); animation: none;">
+                    <i class="fas fa-times"></i>
+                </div>
+                <h1 class="text-3xl font-bold gradient-text">Verification Failed</h1>
+                <p class="text-gray-400 mt-2">Phone number could not be verified</p>
+                {% endif %}
+            </div>
+
+            <!-- Verification Details Card -->
+            <div class="verification-card">
+                <div class="info-item">
+                    <div class="info-label">
+                        <i class="fas fa-mobile-alt info-icon"></i>
+                        Phone Number
+                    </div>
+                    <div class="info-value" id="verifiedPhone">
+                        {{ formatted_phone }}
+                    </div>
+                </div>
+                
+                <div class="info-item">
+                    <div class="info-label">
+                        <i class="fas fa-check-circle info-icon"></i>
+                        Status
+                    </div>
+                    <div class="info-value">
+                        {% if verification_data.phone_valid %}
+                        <span class="status-badge status-valid" id="statusBadge">Valid</span>
+                        {% else %}
+                        <span class="status-badge status-invalid" id="statusBadge">Invalid</span>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="info-item">
+                    <div class="info-label">
+                        <i class="fas fa-globe info-icon"></i>
+                        Country
+                    </div>
+                    <div class="info-value" id="countryInfo">
+                        {{ verification_data.country|default('N/A') }} ({{ verification_data.country_code|default('N/A') }})
+                    </div>
+                </div>
+                
+                <div class="info-item">
+                    <div class="info-label">
+                        <i class="fas fa-building info-icon"></i>
+                        Carrier
+                    </div>
+                    <div class="info-value" id="carrierInfo">
+                        {{ verification_data.carrier|default('Unknown Carrier') }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Show Next Button only if phone is valid -->
+            {% if verification_data.phone_valid %}
+            <button class="next-btn" id="nextBtn" onclick="proceedToRegistration()">
+                <i class="fas fa-arrow-right mr-2"></i>
+                Proceed to Main Page
+            </button>
+            {% else %}
+            <button class="next-btn" id="nextBtn" disabled style="background: linear-gradient(90deg, #6B7280, #4B5563);">
+                <i class="fas fa-times mr-2"></i>
+                Cannot Proceed
+            </button>
+            {% endif %}
+
+            <!-- Alternative Action -->
+            <button class="btn-outline mt-4 w-full" onclick="verifyAnother()">
+                <i class="fas fa-redo mr-2"></i>
+                Not my number? Verify Another
+            </button>
+
+            <!-- Back to Login -->
+            <div class="text-center mt-6">
+                <button class="text-gray-400 hover:text-white transition-colors" onclick="goToLogin()">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    Back
+                </button>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="text-center mt-6 text-gray-500 text-sm">
+            <p>&copy; {{ year }} LyxNexus. All rights reserved.</p>
+            <p class="mt-1 text-gray-600">Secured by Veriphone API</p>
+        </div>
+    </div>
+
+    <script>
+        // Toast Manager
+        class ToastManager {
+            constructor() {
+                this.container = document.getElementById('toast-container');
+                this.toasts = new Set();
+            }
+            
+            show(title, message, type = 'info', duration = 5000) {
+                const toast = document.createElement('div');
+                toast.className = `toast toast-${type}`;
+                
+                const icons = {
+                    success: 'fa-check-circle',
+                    error: 'fa-exclamation-triangle',
+                    warning: 'fa-exclamation-circle',
+                    info: 'fa-info-circle'
+                };
+                
+                toast.innerHTML = `
+                    <div class="toast-icon">
+                        <i class="fas ${icons[type]}"></i>
+                    </div>
+                    <div class="toast-content">
+                        <div class="toast-title">${title}</div>
+                        <div class="toast-message">${message}</div>
+                    </div>
+                    <button class="toast-close" onclick="toastManager.close(this.parentElement)">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <div class="toast-progress">
+                        <div class="toast-progress-bar" style="width: 100%"></div>
+                    </div>
+                `;
+                
+                this.container.appendChild(toast);
+                this.toasts.add(toast);
+                
+                setTimeout(() => {
+                    toast.classList.add('show');
+                }, 10);
+                
+                const progressBar = toast.querySelector('.toast-progress-bar');
+                let width = 100;
+                const interval = setInterval(() => {
+                    if (width <= 0) {
+                        clearInterval(interval);
+                        this.close(toast);
+                    } else {
+                        width -= (100 / (duration / 100));
+                        progressBar.style.width = `${width}%`;
+                    }
+                }, 100);
+                
+                setTimeout(() => {
+                    this.close(toast);
+                }, duration);
+                
+                return toast;
+            }
+            
+            close(toast) {
+                if (!this.toasts.has(toast)) return;
+                
+                toast.classList.remove('show');
+                toast.classList.add('hide');
+                
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.parentNode.removeChild(toast);
+                    }
+                    this.toasts.delete(toast);
+                }, 400);
+            }
+        }
+        
+        const toastManager = new ToastManager();
+        
+        function showToast(message, type = 'info', title = null) {
+            const titles = {
+                success: 'Success',
+                error: 'Error',
+                warning: 'Warning',
+                info: 'Information'
+            };
+            
+            return toastManager.show(title || titles[type], message, type);
+        }
+
+        // Proceed to registration
+        function proceedToRegistration() {
+            // Check if phone is valid (from Jinja context)
+            {% if verification_data.phone_valid %}
+            const nextBtn = document.getElementById('nextBtn');
+            nextBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Redirecting...';
+            nextBtn.disabled = true;
+            
+            showToast('Redirecting to main page...', 'info', 'Please Wait');
+            
+            setTimeout(() => {
+                window.location.href = '/navigation-guide';
+            }, 1500);
+            {% else %}
+            showToast('Cannot proceed with invalid phone number', 'error', 'Invalid Number');
+            {% endif %}
+        }
+
+        // Verify another number
+        function verifyAnother() {
+            window.location.href = '/login';
+        }
+
+        // Go back to login
+        function goToLogin() {
+            window.location.href = '/login';
+        }
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Show appropriate toast based on verification status
+            setTimeout(() => {
+                {% if verification_data.phone_valid %}
+                showToast('Phone number verified successfully! You can now proceed.', 'success', 'Verification Complete');
+                {% else %}
+                showToast('Phone number verification failed. Please try again with a valid number.', 'error', 'Verification Failed');
+                {% endif %}
+            }, 500);
+            
+            // Check if redirected from successful registration
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('verified') === 'true') {
+                showToast('You have been successfully verified. Please login to continue.', 'success', 'Welcome Back');
+            }
+            
+            // Auto-hide toasts after longer duration for important messages
+            const importantToasts = document.querySelectorAll('.toast-success, .toast-error');
+            importantToasts.forEach(toast => {
+                setTimeout(() => {
+                    toastManager.close(toast);
+                }, 8000);
+            });
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            {% if verification_data.phone_valid %}
+            if (e.key === 'Enter' && e.ctrlKey) {
+                proceedToRegistration();
+            }
+            {% endif %}
+            
+            if (e.key === 'Escape') {
+                goToLogin();
+            }
+            
+            if (e.key === 'Backspace' && e.altKey) {
+                verifyAnother();
+            }
+        });
+
+        // Debug: Show verification status in console
+        console.log("Phone valid from Flask:", {{ 'true' if verification_data.phone_valid else 'false' }});
+        console.log("Verification data:", {
+            phone: "{{ formatted_phone }}",
+            country: "{{ verification_data.country }}",
+            carrier: "{{ verification_data.carrier }}",
+            valid: {{ 'true' if verification_data.phone_valid else 'false' }}
+        });
+    </script>
+</body>
+</html>
