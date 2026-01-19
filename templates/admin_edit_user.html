@@ -315,7 +315,7 @@
                         </div>
                         <div class="flex items-center justify-between">
                             <span class="text-gray-400">Payment</span>
-                            <span id="display-status" class="status-badge status-{{ 'active' if user.status else 'inactive' }}">
+                            <span id="display-paid" class="status-badge status-{{ 'active' if user.paid else 'inactive' }}">
                                 {{ 'Paid' if user.paid else 'Unpaid' }}
                             </span>
                         </div>

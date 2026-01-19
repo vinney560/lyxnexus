@@ -286,10 +286,9 @@
     }
     
     .payment-icon {
-        background: linear-gradient(135deg, #10B981, #3B82F6);
         color: white;
-        width: 60px;
-        height: 60px;
+        width: 30px;
+        height: 30px;
         border-radius: 50%;
         display: flex;
         align-items: center;
@@ -807,8 +806,8 @@
     <div class="toast-container" id="toast-container"></div>
 
     <!-- Main Content -->
-    <div class="w-full max-w-2xl mx-4">
-        <div class="glass-morph rounded-2xl p-8">
+    <div class="w-full max-w-4xl">
+        <div class="glass-morph rounded-2xl p-2 shadow-lg">
             <div class="text-center mb-8">
                 <div class="success-icon">
                     <i class="fas fa-lock"></i>
@@ -1199,10 +1198,10 @@
                     statusTexts[1].classList.remove('text-gray-400');
                     statusTexts[1].classList.add('text-green-400');
                 }
-                
+                const mobile = document.getElementById('mobile').textContent.trim();
                 // Redirect after 3 seconds
                 setTimeout(() => {
-                    window.location.href = '/login';
+                    window.location.href = `/activation?mobile=${mobile}`;
                 }, 3000);
             }, 2000);
         }

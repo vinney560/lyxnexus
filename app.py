@@ -2315,7 +2315,19 @@ def format_mobile_send(mobile):
         return f"{digits}"
     return mobile
 #==================================================================
-
+@app.route('/activation')
+def payment_activation():
+    mobile = re.sub(r'\D', '', request.args.get('mobile', ''))
+    if mobile:
+        user = User.query.filter_by(mobile=mobile).first()
+        if user:
+            login_user(user)
+            return redirect(url_for('main_page'))
+        flash('Activation failed. User not found.', 'error')
+        return redirect(url_for('login'))
+    flash("Activation failed. Mobile number missing.", 'error')
+    return redirect(url_for("login"))
+    
 # =========================================
 # NOTIFICATION API ROUTES &&  RENDERING
 # =========================================
