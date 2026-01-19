@@ -678,7 +678,6 @@ with app.app_context():
     try:
         # Create tables if they don't exist
         db.create_all()
-        db.session.execute(text('ALTER TABLE "user" ADD COLUMN paid BOOLEAN DEFAULT FALSE'))
         db.session.commit()
         print("✅ Database tables created successfully!")
 
