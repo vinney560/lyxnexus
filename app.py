@@ -2297,7 +2297,6 @@ def handle_student_login(user, username, mobile, login_subtype, next_page, year)
                                  username=username,
                                  mobile=format_mobile_display(mobile),
                                  year=_year())
-        
         login_user(user)
         return redirect(next_page or url_for('main_page'))
 
