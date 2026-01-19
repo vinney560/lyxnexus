@@ -2319,7 +2319,6 @@ def format_mobile_send(mobile):
 # =========================================
 # NOTIFICATION API ROUTES &&  RENDERING
 # =========================================
-    
 @app.route('/api/notify')
 @login_required
 def get_notifications():
