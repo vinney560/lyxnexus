@@ -2291,8 +2291,8 @@ def handle_student_login(user, username, mobile, login_subtype, next_page, year)
                                  mobile=format_mobile_display(mobile),
                                  login_type='student',  # Stay on student tab
                                  year=_year())
-        if user.status is False:
-            flash('Your account is inactive. Please contact Admin for assistance.', 'error')
+        if user.paid is False:
+            flash('Your account is inactive. Pay you registration Fee or contact Admin for assistance.', 'error')
             return render_template('payment.html',
                                  username=username,
                                  mobile=format_mobile_display(mobile),
