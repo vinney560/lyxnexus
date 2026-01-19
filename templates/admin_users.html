@@ -976,6 +976,7 @@
                             <th>Mobile</th>
                             <th>Role</th>
                             <th>Status</th>
+                            <th>Payment</th>
                             <th>Seen</th>
                             <th>Created</th>
                             <th>Activity</th>
@@ -1739,6 +1740,17 @@
                         })()}
                     </td>
                     <td>
+                        ${(() => {
+                            const paid = (user.paid === true || user.paid === 'true' || user.paid === 1);
+                        
+                            return `
+                                <span class="status-badge ${paid ? 'status-allowed' : 'status-banned'}">
+                                    ${paid ? 'Paid' : 'Unpaid'}
+                                </span>
+                            `;
+                        })()}
+                    </td>
+                    <td>
                         <span class="status-badge ${isOnline ? 'status-online' : 'status-user'}">
                             ${isOnline ? 'Online' : 'Offline'}
                         </span>
@@ -1791,6 +1803,20 @@
                                         <i class="fas fa-user-check mr-1"></i> Unban
                                     </button>`;
                             })()}
+                            ${(() => {
+                                
+                                const paid = (user.paid === true || user.paid === 'true' || user.paid === 1);
+
+                                return paid ? 
+                                    `<button class="btn btn-danger btn-sm toggle-pay-btn" data-user-id="${user.id}">
+                                        <span class="btn-spinner"></span>
+                                        <i class="fas fa-user-slash mr-1"></i> Unpay
+                                    </button>` :
+                                    `<button class="btn btn-success btn-sm toggle-pay-btn" data-user-id="${user.id}">
+                                        <span class="btn-spinner"></span>
+                                        <i class="fas fa-user-check mr-1"></i> Pay
+                                    </button>`;
+                            })()}
                             ${user.year === 5 ? 
                                 `<div class="relative group">
                                     <button disabled 
@@ -1825,6 +1851,13 @@
                 btn.addEventListener('click', function() {
                     const userId = this.getAttribute('data-user-id');
                     toggleStatus(userId, this);
+                });
+            });
+
+            document.querySelectorAll('.toggle-pay-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const userId = this.getAttribute('data-user-id');
+                    togglePay(userId, this);
                 });
             });
 
@@ -1868,6 +1901,35 @@
 
                 const result = await response.json();
                 showToast(`User status updated successfully`, 'success');
+                await loadUsers(); //Refresh list
+            } catch (error) {
+                showToast('Error: ' + error.message, 'error');
+                setButtonLoading(button, false);
+            }
+        }
+
+        // Update user pay for control
+        async function togglepay(userId, button) {
+            if (!userId) return;
+            
+            try {
+                setButtonLoading(button, true);
+
+                const response = await fetch(`${USERS_ENDPOINT}/${userId}/toggle-pay`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    'X-CSRFToken': getCSRFToken()    
+                    }
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Failed to update user paid status');
+                }
+
+                const result = await response.json();
+                showToast(`User Paid Status updated successfully`, 'success');
                 await loadUsers(); //Refresh list
             } catch (error) {
                 showToast('Error: ' + error.message, 'error');

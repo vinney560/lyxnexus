@@ -314,6 +314,12 @@
                             </span>
                         </div>
                         <div class="flex items-center justify-between">
+                            <span class="text-gray-400">Payment</span>
+                            <span id="display-status" class="status-badge status-{{ 'active' if user.status else 'inactive' }}">
+                                {{ 'Paid' if user.paid else 'Unpaid' }}
+                            </span>
+                        </div>
+                        <div class="flex items-center justify-between">
                             <span class="text-gray-400">Year</span>
                             <span id="display-year" class="year-badge year-{{ user.year }}">
                                 {% if user.year == 5 %}

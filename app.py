@@ -171,6 +171,7 @@ class User(db.Model, UserMixin):
     is_admin = db.Column(db.Boolean, default=False)
     status = db.Column(db.Boolean, default=True, nullable=True)
     year = db.Column(db.Integer, default=1, nullable=True)
+    paid = db.Column(db.Boolean, default=False, nullable=True)
 
     # Relationships
     announcements = db.relationship('Announcement', 
@@ -2259,7 +2260,6 @@ def handle_student_login(user, username, mobile, login_subtype, next_page, year)
             """ Send WhatsApp Welcome Message! """
             welcome_message = get_random_welcome_message(username, mobile)
             send_msg(format_mobile_send(mobile), welcome_message)
-            login_user(new_user)
             return render_template("verification.html", verification_data=result)
         if result.get('phone_valid') is False:
             flash('The provided mobile number is invalid. Please check and try again.', 'error')
@@ -2291,7 +2291,12 @@ def handle_student_login(user, username, mobile, login_subtype, next_page, year)
                                  mobile=format_mobile_display(mobile),
                                  login_type='student',  # Stay on student tab
                                  year=_year())
-
+        if user.status is False:
+            flash('Your account is inactive. Please contact Admin for assistance.', 'error')
+            return render_template('payment.html',
+                                 username=username,
+                                 mobile=format_mobile_display(mobile),
+                                 year=_year())
         login_user(user)
         return redirect(next_page or url_for('main_page'))
 
@@ -6449,6 +6454,7 @@ def get_users():
             'created_at': user.created_at.isoformat() if user.created_at else None,
             'is_admin': user.is_admin,
             'status': user.status,
+            'paid': user.paid,
             'announcements_count': len(user.announcements),
             'assignments_count': len(user.assignments),
             'total_activity': total_activity,
@@ -6717,6 +6723,23 @@ def toggle_status(user_id):
         'message': 'User status updated successfully',
         'status': user.status
     })
+
+@app.route('/api/users/<int:user_id>/toggle-pay', methods=['PUT'])
+@admin_required
+def toggle_pay(user_id):
+    user = User.query.get_or_404(user_id)
+
+    if user.id == current_user.id:
+        return jsonify({'error': 'cannot modify self pay status'}), 400
+    
+    user.paid = not user.paid
+    print(f"User {user.username} pay changed to {user.paid}")
+    db.session.commit()
+
+    return jsonify({
+        'message': 'User paid status updated successfully',
+        'paid': user.paid
+    })
 # =========================================
 # ANNOUNCEMENT API ROUTES
 # =========================================
@@ -6742,7 +6765,7 @@ def get_specified_announcements():
             'highlighted': a.highlighted,
             'created_at': a.created_at.isoformat(),
             'author': {'id': a.author.id, 'username': a.author.username} if a.author else None,
-            'has_file': a.has_file(),
+            'has_file': a.has_file(), 
             'file_name': a.file_name,
             'file_type': a.file_type,
             'file_url': a.get_file_url()
@@ -6950,36 +6973,40 @@ def serve_announcement_file(id, filename):
 @app.route('/api/assignments/specified')
 def get_specified_assignments():
     """Get all assignments"""
-    assignments = Assignment.query\
-            .join(User, Assignment.user_id == User.id)\
-            .filter(
-                or_(
-                    User.year == current_user.year, 
-                    User.year == 5
-                    )
-            )\
-            .order_by(Assignment.due_date.asc())\
-            .all()
-    result = []
-    for assignment in assignments:
-        result.append({
-            'id': assignment.id,
-            'title': assignment.title,
-            'description': assignment.description,
-            'due_date': assignment.due_date.isoformat() if assignment.due_date else None,
-            'created_at': assignment.created_at.isoformat(),
-            'file_name': assignment.file_name,
-            'file_type': assignment.file_type,
-            'topic': {
-                'id': assignment.topic.id,
-                'name': assignment.topic.name
-            } if assignment.topic else None,
-            'creator': {
-                'id': assignment.creator.id,
-                'username': assignment.creator.username
-            } if assignment.creator else None
-        })
-    return jsonify(result)
+    try:
+        assignments = Assignment.query\
+                .join(User, Assignment.user_id == User.id)\
+                .filter(
+                    or_(
+                        User.year == current_user.year, 
+                        User.year == 5
+                        )
+                )\
+                .order_by(Assignment.due_date.asc())\
+                .all()
+        result = []
+        for assignment in assignments:
+            result.append({
+                'id': assignment.id,
+                'title': assignment.title,
+                'description': assignment.description,
+                'due_date': assignment.due_date.isoformat() if assignment.due_date else None,
+                'created_at': assignment.created_at.isoformat(),
+                'file_name': assignment.file_name,
+                'file_type': assignment.file_type,
+                'topic': {
+                    'id': assignment.topic.id,
+                    'name': assignment.topic.name
+                } if assignment.topic else None,
+                'creator': {
+                    'id': assignment.creator.id,
+                    'username': assignment.creator.username
+                } if assignment.creator else None
+            })
+        return jsonify(result)
+    except Exception as e:
+        app.logger.exception("Failed to fetch assignments")
+        return jsonify({'error': 'Failed to fetch assignments'}), 500
 
 @app.route('/api/assignments')
 def get_assignments():
@@ -7236,27 +7263,31 @@ def preview():
 @app.route('/api/topics/specified')
 def get_specified_topics():
     """Get all topics"""
-    topics = Topic.query\
-        .filter(
-            or_(
-                Topic.year == current_user.year,
-                Topic.year == 5
-            )
-                )\
-        .order_by(Topic.created_at.desc())\
-        .all()
-    result = []
-    for topic in topics:
-        result.append({
-            'id': topic.id,
-            'name': topic.name,
-            'description': topic.description,
-            'lecturer': topic.lecturer,
-            'contact': topic.contact,
-            'created_at': topic.created_at.isoformat(),
-            'year': topic.year
-        })
-    return jsonify(result)
+    try:
+        topics = Topic.query\
+            .filter(
+                or_(
+                    Topic.year == current_user.year,
+                    Topic.year == 5
+                )
+                    )\
+            .order_by(Topic.created_at.desc())\
+            .all()
+        result = []
+        for topic in topics:
+            result.append({
+                'id': topic.id,
+                'name': topic.name,
+                'description': topic.description,
+                'lecturer': topic.lecturer,
+                'contact': topic.contact,
+                'created_at': topic.created_at.isoformat(),
+                'year': topic.year
+            })
+        return jsonify(result)
+    except Exception as e:
+        app.logger.exception("Failed to fetch topics")
+        return jsonify({'error': 'Failed to fetch topics'}), 500
 
 @app.route('/api/topics')
 def get_topics():
