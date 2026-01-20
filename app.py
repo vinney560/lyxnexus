@@ -6420,7 +6420,7 @@ def get_users():
     # Apply payment filter
     if payment_filter == 'paid':
         query = query.filter(User.paid == True)
-    else:
+    elif payment_filter == 'unpaid':
         query = query.filter(User.paid == False)
     # Apply date filter
     if date_filter:
