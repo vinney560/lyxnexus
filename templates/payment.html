@@ -238,7 +238,6 @@
         box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
     }
     
-    /* Payment Procedure Styles */
     .payment-container {
         background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(59, 130, 246, 0.1));
         border: 2px solid rgba(16, 185, 129, 0.3);
@@ -785,7 +784,6 @@
     }
 </style>
 <body>
-    <!-- Navigation Header -->
     <header class="nav-header">
         <div class="nav-content">
             <div class="nav-links">
@@ -802,10 +800,8 @@
         </div>
     </header>
 
-    <!-- Toast Container -->
     <div class="toast-container" id="toast-container"></div>
 
-    <!-- Main Content -->
     <div class="w-full max-w-4xl">
         <div class="glass-morph rounded-2xl p-2 shadow-lg">
             <div class="text-center mb-8">
@@ -816,7 +812,6 @@
                 <p class="text-gray-400 mt-2">Complete your registration to access LyxNexus features</p>
             </div>
 
-            <!-- User Information Card -->
             <div class="user-info-card">
                 <div class="user-info-item">
                     <div class="user-info-label">
@@ -844,12 +839,11 @@
                         Registration Year
                     </div>
                     <div class="user-info-value" id="year">
-                        {{ year|default('2024') }}
+                        {{ year|default('2026') }}
                     </div>
                 </div>
             </div>
 
-            <!-- Payment Procedure Container -->
             <div class="payment-container" id="paymentProcedure">
                 <div class="payment-header">
                     <div class="payment-icon">
@@ -966,7 +960,7 @@
                         <div class="step-content">
                             <div class="step-title">Wait for Confirmation</div>
                             <div class="step-description">
-                                You will receive a confirmation SMS from MPESA (Transaction Code: MXXXXX...)
+                                You will receive a confirmation SMS from MPESA (Transaction Code: UAXXXX...)
                                 <div class="mt-2 text-sm text-blue-300">
                                     <i class="fas fa-clock mr-1"></i>Usually arrives within 30 seconds
                                 </div>
@@ -978,7 +972,7 @@
                         <div class="step-content">
                             <div class="step-title">Admin Approval</div>
                             <div class="step-description">
-                                The admin will review your payment and approve within 4 hours. If your account is not activated within this time, please <a href="https://wa.me/254740694312" class="text-blue-400 underline">contact support.</a>
+                                The admin will review your payment and approve within 4 hours. If your account is not activated within this time, please <a href="https://wa.me/254740694312" class="text-blue-400 underline">WhatsApp Support.</a>
                             </div>
                         </div>
                     </div>
@@ -1008,14 +1002,13 @@
                             </li>
                             <li class="flex items-start gap-2">
                                 <i class="fas fa-check-circle text-green-400 mt-1"></i>
-                                <span>For any issues, contact support with your MPESA transaction code</span>
+                                <span>For any issues, <a href="https://wa.me/254740694312" class="text-blue-400 font-bold underline">WhatsApp Support.</a>  with your MPESA transaction code</span>
                             </li>
                         </ul>
                     </div>
                 </div>
             </div>
 
-            <!-- Action Buttons -->
             <div class="mt-8 space-y-4">
                 <button class="next-btn completed-btn" onclick="markPaymentComplete()">
                     <i class="fas fa-check-circle mr-2"></i>
@@ -1034,7 +1027,6 @@
             </div>
         </div>
         
-        <!-- Footer -->
         <div class="text-center mt-8 text-gray-500 text-sm">
             <p>&copy; {{ year }} LyxNexus. All rights reserved.</p>
             <p class="mt-1 text-gray-600">Secured by Safaricom MPESA • Verified Payment Gateway</p>
@@ -1042,7 +1034,6 @@
     </div>
 
     <script>
-        // Toast Manager
         class ToastManager {
             constructor() {
                 this.container = document.getElementById('toast-container');
@@ -1115,8 +1106,7 @@
             return toastManager.show(title || titles[type], message, type);
         }
 
-        // Countdown Timer
-        let countdownTime = 15 * 60; // 15 minutes in seconds
+        let countdownTime = 15 * 60;
         const countdownElement = document.getElementById('countdown');
         
         function updateCountdown() {
@@ -1133,7 +1123,6 @@
             } else {
                 countdownTime--;
                 
-                // Color change for last 5 minutes
                 if (countdownTime <= 5 * 60) {
                     countdownElement.style.color = '#F59E0B';
                 }
@@ -1178,7 +1167,7 @@
             
             // Simulate payment verification
             setTimeout(() => {
-                showToast('Payment verified! Your account is being activated by admin.', 'success', 'Payment Verified');
+                showToast('Payment verified! Your account is being activated by admin, kindly be petient.', 'success', 'Payment Verified');
                 
                 // Update button
                 btn.innerHTML = '<i class="fas fa-check-circle mr-2"></i> Payment Verified';
@@ -1202,8 +1191,8 @@
                 // Redirect after 3 seconds
                 setTimeout(() => {
                     window.location.href = `/activation?mobile=${mobile}`;
-                }, 3000);
-            }, 2000);
+                }, 10000);
+            }, 5000);
         }
 
         // Show Help

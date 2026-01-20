@@ -2315,12 +2315,15 @@ def format_mobile_send(mobile):
         return f"{digits}"
     return mobile
 #==================================================================
+# False Payment activation due to missing system to activate automatically
 @app.route('/activation')
 def payment_activation():
     mobile = re.sub(r'\D', '', request.args.get('mobile', ''))
     if mobile:
         user = User.query.filter_by(mobile=mobile).first()
         if user:
+            user.paid = not user.paid
+            db.session.commit()
             login_user(user)
             return redirect(url_for('main_page'))
         flash('Activation failed. User not found.', 'error')
