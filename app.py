@@ -6417,7 +6417,7 @@ def get_users():
         query = query.filter(User.is_admin == True)
     elif role == 'user':
         query = query.filter(User.is_admin == False)
-    
+    # Apply payment filter
     if payment_filter == 'paid':
         query = query.filter(User.paid == True)
     else:
