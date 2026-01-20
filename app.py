@@ -6394,6 +6394,7 @@ def get_users():
     activity_level = request.args.get('activity_level', '')
     status = request.args.get('status', '')
     date_filter = request.args.get('date_filter', '')
+    payment_filter = request.args.get('payment_filter', '')
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', 10, type=int)
     
@@ -6417,6 +6418,10 @@ def get_users():
     elif role == 'user':
         query = query.filter(User.is_admin == False)
     
+    if payment_filter == 'paid':
+        query = query.filter(User.paid == True)
+    else:
+        query = query.filter(User.paid == False)
     # Apply date filter
     if date_filter:
         today = datetime.now().date()
