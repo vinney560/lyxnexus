@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Verification Complete | LyxNexus</title>
+    <title>Complete Payment | LyxNexus</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <meta name="keywords" content="Lyx Nexus, Kisii LyxNexus, kisii lyxnexus, kisii university lyxnexus, kisii university lyx nexus, lyx nexus, lyxnexus" />
     <meta name="author" content="Vincent Kipngetich" />
@@ -11,8 +11,8 @@
     <link rel="canonical" href="https://lyxnexus.onrender.com/" />
     <link rel="icon" href="https://lyxnexus.onrender.com/uploads/favicon-1.png"/>
         
-    <meta property="og:title" content="Verification Complete | LyxNexus" />
-    <meta property="og:description" content="Phone number verification successful - Continue to LyxNexus" />
+    <meta property="og:title" content="Complete Payment | LyxNexus" />
+    <meta property="og:description" content="Secure account activation payment - LyxNexus" />
     <meta property="og:image" content="https://lyxnexus.onrender.com/favicon.ico" />
     <meta property="og:url" content="https://lyxnexus.onrender.com/" />
         
@@ -238,71 +238,18 @@
         box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
     }
     
-    .verification-card {
-        background: rgba(30, 30, 40, 0.8);
-        backdrop-filter: blur(12px);
-        -webkit-background-filter: blur(12px);
-        border: 1px solid rgba(59, 130, 246, 0.3);
-        border-radius: 20px;
-        padding: 30px;
-        margin: 20px 0;
-        transition: all 0.3s ease;
-    }
-    
-    .verification-card:hover {
-        transform: translateY(-5px);
-        border-color: rgba(59, 130, 246, 0.5);
-        box-shadow: 0 10px 30px rgba(0, 31, 135, 0.3);
-    }
-    
-    .info-item {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 15px 0;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    }
-    
-    .info-item:last-child {
-        border-bottom: none;
-        padding-bottom: 0;
-    }
-    
-    .info-label {
-        color: #9CA3AF;
-        font-weight: 500;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-    
-    .info-icon {
-        color: #3B82F6;
-        font-size: 1.2rem;
-        width: 24px;
-    }
-    
-    .info-value {
-        color: white;
-        font-weight: 600;
-        font-size: 1.1rem;
-        text-align: right;
-    }
-    
-    /* Simple Payment Button Styles */
-    .payment-button-container {
+    .payment-container {
         background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(59, 130, 246, 0.1));
         border: 2px solid rgba(16, 185, 129, 0.3);
         border-radius: 20px;
-        padding: 25px;
+        padding: 30px;
         margin: 20px 0;
         animation: slideUp 0.5s ease-out;
         position: relative;
         overflow: hidden;
-        text-align: center;
     }
     
-    .payment-button-container::before {
+    .payment-container::before {
         content: '';
         position: absolute;
         top: 0;
@@ -330,52 +277,219 @@
         100% { background-position: 0% 50%; }
     }
     
-    .payment-message {
-        font-size: 1.1rem;
-        color: #D1D5DB;
+    .payment-header {
+        display: flex;
+        align-items: center;
+        gap: 15px;
         margin-bottom: 20px;
-        line-height: 1.5;
     }
     
-    .payment-icon-large {
-        font-size: 3rem;
-        margin-bottom: 15px;
-        display: inline-block;
-        background: linear-gradient(135deg, #10B981, #3B82F6);
+    .payment-icon {
+        color: white;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+        box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
+    }
+    
+    .payment-title {
+        font-size: 2.0rem;
+        font-weight: 800;
+        background: linear-gradient(90deg, #10B981, #3B82F6);
         -webkit-background-clip: text;
         background-clip: text;
         -webkit-text-fill-color: transparent;
     }
     
-    .details-panel {
-        background: rgba(30, 30, 40, 0.6);
-        border: 1px solid rgba(139, 92, 246, 0.3);
+    .payment-subtitle {
+        color: #9CA3AF;
+        font-size: 1rem;
+        margin-bottom: 10px;
+    }
+    
+    .user-info-card {
+        background: rgba(30, 30, 40, 0.7);
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        border-radius: 15px;
+        padding: 20px;
+        margin: 20px 0;
+    }
+    
+    .user-info-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .user-info-item:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+    
+    .user-info-label {
+        color: #9CA3AF;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .user-info-value {
+        color: white;
+        font-weight: 600;
+        font-size: 1.1rem;
+    }
+    
+    .step-container {
+        margin: 25px 0;
+    }
+    
+    .step-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 15px;
+        margin-bottom: 20px;
+        padding: 18px;
+        background: rgba(30, 30, 40, 0.5);
+        border-radius: 15px;
+        border-left: 4px solid #3B82F6;
+        transition: all 0.3s ease;
+    }
+    
+    .step-item:hover {
+        background: rgba(30, 30, 40, 0.8);
+        transform: translateX(5px);
+    }
+    
+    .step-number {
+        background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+        color: white;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1.2rem;
+        flex-shrink: 0;
+    }
+    
+    .step-content {
+        flex: 1;
+    }
+    
+    .step-title {
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: white;
+        font-size: 1.1rem;
+    }
+    
+    .step-description {
+        color: #D1D5DB;
+        font-size: 1rem;
+        line-height: 1.6;
+    }
+    
+    .highlight-box {
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(59, 130, 246, 0.15));
+        border: 1px solid rgba(16, 185, 129, 0.3);
         border-radius: 12px;
         padding: 20px;
-        margin-top: 20px;
-        display: none;
-        animation: fadeIn 0.3s ease;
+        margin: 20px 0;
+        text-align: center;
     }
     
-    .details-panel.show {
-        display: block;
+    @keyframes pulse {
+        0% { 
+            transform: scale(1);
+            box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
+        }
+        50% { 
+            transform: scale(1.02);
+            box-shadow: 0 0 20px 10px rgba(16, 185, 129, 0.2);
+        }
+        100% { 
+            transform: scale(1);
+            box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+        }
     }
     
-    @keyframes fadeIn {
-        from { opacity: 0; }
-        to { opacity: 1; }
-    }
-    
-    .raw-data {
-        font-family: 'Courier New', monospace;
-        font-size: 0.85rem;
-        background: rgba(20, 20, 30, 0.8);
+    .amount-box {
+        background: rgba(16, 185, 129, 0.1);
+        border: 2px dashed rgba(16, 185, 129, 0.5);
+        border-radius: 12px;
         padding: 15px;
-        border-radius: 8px;
-        overflow-x: auto;
+        text-align: center;
+        margin: 20px 0;
+    }
+
+    .mpesa-box {
+        background: rgba(16, 185, 129, 0.1);
+        border-radius: 12px;
+        padding: 15px;
+        text-align: center;
+        margin: 20px 0;
+        border: 2px double #059669;
+    }
+    
+    .amount-text {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #10B981;
+    }
+    
+    .note-box {
+        background: rgba(245, 158, 11, 0.1);
+        border: 1px solid rgba(245, 158, 11, 0.3);
+        border-radius: 12px;
+        padding: 20px;
+        margin-top: 25px;
+    }
+    
+    .note-title {
+        color: #F59E0B;
+        font-weight: 600;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 1.1rem;
+    }
+    
+    .note-content {
         color: #D1D5DB;
+        font-size: 0.95rem;
         line-height: 1.6;
-        border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    
+    .timer-container {
+        background: rgba(59, 130, 246, 0.1);
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        border-radius: 12px;
+        padding: 15px;
+        margin: 20px 0;
+        text-align: center;
+    }
+    
+    .timer-text {
+        color: #3B82F6;
+        font-weight: 600;
+        font-size: 1.1rem;
+    }
+    
+    .timer-value {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: white;
+        margin: 10px 0;
     }
     
     .success-icon {
@@ -551,6 +665,41 @@
         box-shadow: none !important;
     }
     
+    .completed-btn {
+        background: linear-gradient(90deg, #10B981, #059669);
+        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+    }
+    
+    .completed-btn:hover {
+        box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+    }
+    
+    .payment-status {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        margin: 15px 0;
+    }
+    
+    .status-indicator {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: #6B7280;
+        animation: statusPulse 1.5s infinite;
+    }
+    
+    .status-indicator.active {
+        background: #10B981;
+    }
+    
+    @keyframes statusPulse {
+        0% { opacity: 0.6; }
+        50% { opacity: 1; }
+        100% { opacity: 0.6; }
+    }
+    
     @media (max-width: 768px) {
         .toast-container {
             right: 10px;
@@ -574,14 +723,23 @@
             font-size: 20px;
         }
         
-        .verification-card {
-            padding: 20px;
-            margin: 10px;
-        }
-        
-        .payment-button-container {
+        .payment-container {
             padding: 20px;
             margin: 15px 10px;
+        }
+        
+        .payment-title {
+            font-size: 2.0rem;
+        }
+        
+        .step-item {
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .step-number {
+            width: 35px;
+            height: 35px;
         }
         
         .success-icon {
@@ -593,13 +751,13 @@
     }
     
     @media (max-width: 480px) {
-        .info-item {
+        .user-info-item {
             flex-direction: column;
             align-items: flex-start;
             gap: 5px;
         }
         
-        .info-value {
+        .user-info-value {
             text-align: left;
         }
         
@@ -607,9 +765,25 @@
             padding: 12px 20px;
         }
     }
+
+    .form-input {
+        background: rgba(30, 30, 40, 0.9);
+        border: 1px solid rgba(59, 130, 246, 0.4);
+        border-radius: 10px;
+        padding: 10px 12px;
+        color: white;
+        width: 90%;
+        margin-bottom: 15px;
+        transition: all 0.3s ease;
+    }
+    
+    .form-input:focus {
+        outline: none;
+        border-color: #3B82F6;
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+    }
 </style>
 <body>
-    <!-- Navigation Header -->
     <header class="nav-header">
         <div class="nav-content">
             <div class="nav-links">
@@ -626,123 +800,133 @@
         </div>
     </header>
 
-    <!-- Toast Container -->
     <div class="toast-container" id="toast-container"></div>
 
-    <!-- Main Content -->
-    <div class="w-full max-w-md mx-4">
-        <div class="glass-morph rounded-2xl p-8">
+    <div class="w-full max-w-4xl">
+        <div class="glass-morph rounded-2xl p-2 shadow-lg">
             <div class="text-center mb-8">
-                <!-- Success/Error Icon based on phone_valid -->
-                {% if verification_data.phone_valid %}
-                <div class="success-icon" id="successIcon">
-                    <i class="fas fa-check"></i>
+                <div class="success-icon">
+                    <i class="fas fa-lock"></i>
                 </div>
-                <h1 class="text-3xl font-bold gradient-text">Verification Complete</h1>
-                <p class="text-gray-400 mt-2">Your phone number has been verified successfully</p>
-                {% else %}
-                <div class="success-icon" id="successIcon" style="background: linear-gradient(90deg, #EF4444, #DC2626); animation: none;">
-                    <i class="fas fa-times"></i>
-                </div>
-                <h1 class="text-3xl font-bold gradient-text">Verification Failed</h1>
-                <p class="text-gray-400 mt-2">Phone number could not be verified</p>
-                {% endif %}
+                <h1 class="text-3xl font-bold gradient-text">Final Account Activation</h1>
+                <p class="text-gray-400 mt-2">Complete your verification to access LyxNexus features</p>
             </div>
 
-            <!-- Verification Details Card -->
-            <div class="verification-card">
-                <div class="info-item">
-                    <div class="info-label">
-                        <i class="fas fa-mobile-alt info-icon"></i>
-                        Phone Number
+            <div class="user-info-card">
+                <div class="user-info-item">
+                    <div class="user-info-label">
+                        <i class="fas fa-user text-blue-400"></i>
+                        Account Holder
                     </div>
-                    <div class="info-value" id="verifiedPhone">
-                        {{ verification_data.international_number }}
-                    </div>
-                </div>
-                
-                <div class="info-item">
-                    <div class="info-label">
-                        <i class="fas fa-check-circle info-icon"></i>
-                        Status
-                    </div>
-                    <div class="info-value">
-                        {% if verification_data.phone_valid %}
-                        <span class="status-badge status-valid" id="statusBadge">Valid</span>
-                        {% else %}
-                        <span class="status-badge status-invalid" id="statusBadge">Invalid</span>
-                        {% endif %}
+                    <div class="user-info-value" id="username">
+                        {{ username|default('Guest User') }}
                     </div>
                 </div>
                 
-                <div class="info-item">
-                    <div class="info-label">
-                        <i class="fas fa-globe info-icon"></i>
-                        Country
+                <div class="user-info-item">
+                    <div class="user-info-label">
+                        <i class="fas fa-mobile-alt text-blue-400"></i>
+                        Verified Phone
                     </div>
-                    <div class="info-value" id="countryInfo">
-                        {{ verification_data.country|default('N/A') }} ({{ verification_data.country_code|default('N/A') }})
+                    <div class="user-info-value" id="mobile">
+                        {{ mobile|default('Not provided') }}
                     </div>
                 </div>
                 
-                <div class="info-item">
-                    <div class="info-label">
-                        <i class="fas fa-building info-icon"></i>
-                        Carrier
+                <div class="user-info-item">
+                    <div class="user-info-label">
+                        <i class="fas fa-calendar-alt text-blue-400"></i>
+                        Registration Year
                     </div>
-                    <div class="info-value" id="carrierInfo">
-                        {{ verification_data.carrier|default('Unknown Carrier') }}
+                    <div class="user-info-value" id="year">
+                        {{ year|default('2026') }}
                     </div>
                 </div>
             </div>
 
-            {% if verification_data.phone_valid %}
-            <!-- Simple Payment Button Section -->
-            <div class="payment-button-container" id="paymentProcedure">
-                <div class="payment-icon-large">
-                    <i class="fas fa-credit-card"></i>
+            <div class="payment-container" id="paymentProcedure">
+                <div class="payment-header">
+                    <div class="payment-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <div>
+                        <h2 class="payment-title">Payment Verification</h2>
+                    </div>
                 </div>
-                <h2 class="payment-title text-center text-xl font-bold mb-4">Account Activation Required</h2>
-                <p class="payment-message">
-                    Click the button below to proceed to the secure payment page where you can complete your account activation.
-                </p>
-                <p class="payment-message text-sm text-gray-400 mt-4">
-                    A small one-time fee is required to activate your account and gain full access to LyxNexus features.
-                </p>
+                
+                <div class="payment-status">
+                    <div class="status-indicator active"></div>
+                    <span class="text-green-400 font-medium">Payment Pending</span>
+                    <div class="status-indicator"></div>
+                    <span class="text-gray-400">Account Activation</span>
+                </div>
+                
+                <div class="amount-box">
+                    <p class="text-sm text-gray-400 mb-1">One-Time Activation Fee</p>
+                    <div class="amount-text">Ksh. 19 Only</div>
+                    <p class="text-xs text-gray-500 mt-1">Non-refundable • Lifetime Access • Instant Activation</p>
+                </div>
+
+                <div class="timer-container">
+                    <div class="timer-text">Complete verification within</div>
+                    <div class="timer-value" id="countdown">15:00</div>
+                    <div class="text-sm text-gray-400">Session expires after 15 minutes</div>
+                </div>
+
+                <div class="mpesa-box">
+                    <p class="text-sm text-gray-400 mb-1">
+                        Enter the MPESA message here after successfully paying for Registration Fee.
+                    </p>
+                    <textarea id="mpesa-message" class="form-input" rows="6" placeholder="Mpesa Reciept (UA12D20MML or VBQ3HMIN)" required></textarea>
+                </div>
+                
+                <div class="note-box">
+                    <div class="note-title">
+                        <i class="fas fa-lightbulb"></i>Important Information
+                    </div>
+                    <div class="note-content">
+                        <ul class="space-y-3">
+                            <li class="flex items-start gap-2">
+                                <i class="fas fa-check-circle text-green-400 mt-1"></i>
+                                <span>Your account will be activated <strong>automatically</strong> within 5 minutes of payment confirmation</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <i class="fas fa-check-circle text-green-400 mt-1"></i>
+                                <span>This is a <strong>one-time payment only</strong> - no recurring charges</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <i class="fas fa-check-circle text-green-400 mt-1"></i>
+                                <span>Admin approval is automatic and takes less than 5 minutes after payment</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <i class="fas fa-check-circle text-green-400 mt-1"></i>
+                                <span>For any issues, <a href="https://wa.me/254740694312" class="text-blue-400 font-bold underline">WhatsApp Support.</a>  with your MPESA transaction code</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
             </div>
-            {% endif %}
 
-            <!-- Show Next Button only if phone is valid -->
-            {% if verification_data.phone_valid %}
-            <button class="next-btn" id="nextBtn" onclick="proceedToPaymentPage()">
-                <i class="fas fa-arrow-right mr-2"></i>
-                Proceed to Payment Page
-            </button>
-            {% else %}
-            <button class="next-btn" id="nextBtn" disabled style="background: linear-gradient(90deg, #6B7280, #4B5563);">
-                <i class="fas fa-times mr-2"></i>
-                Cannot Proceed
-            </button>
-            {% endif %}
-
-            <!-- Back to Login -->
-            <div class="text-center mt-6">
-                <button class="text-gray-400 hover:text-white transition-colors" onclick="goToLogin()">
-                    <i class="fas fa-arrow-left mr-2"></i>
-                    Back
+            <div class="mt-8 space-y-4">
+                <button class="next-btn completed-btn" onclick="markPaymentComplete()">
+                    <i class="fas fa-check-circle mr-2"></i>
+                    Approve and Login
+                </button>
+                
+                <button class="btn-outline w-full" onclick="showHelp()">
+                    <i class="fas fa-question-circle mr-2"></i>
+                    Need Help with Payment?
                 </button>
             </div>
         </div>
         
-        <!-- Footer -->
-        <div class="text-center mt-6 text-gray-500 text-sm">
+        <div class="text-center mt-8 text-gray-500 text-sm">
             <p>&copy; {{ year }} LyxNexus. All rights reserved.</p>
-            <p class="mt-1 text-gray-600">Secured by Veriphone API</p>
+            <p class="mt-1 text-gray-600">Secured by Safaricom MPESA • Verified Payment Gateway</p>
         </div>
     </div>
 
     <script>
-        // Toast Manager
         class ToastManager {
             constructor() {
                 this.container = document.getElementById('toast-container');
@@ -771,9 +955,6 @@
                     <button class="toast-close" onclick="toastManager.close(this.parentElement)">
                         <i class="fas fa-times"></i>
                     </button>
-                    <div class="toast-progress">
-                        <div class="toast-progress-bar" style="width: 100%"></div>
-                    </div>
                 `;
                 
                 this.container.appendChild(toast);
@@ -782,18 +963,6 @@
                 setTimeout(() => {
                     toast.classList.add('show');
                 }, 10);
-                
-                const progressBar = toast.querySelector('.toast-progress-bar');
-                let width = 100;
-                const interval = setInterval(() => {
-                    if (width <= 0) {
-                        clearInterval(interval);
-                        this.close(toast);
-                    } else {
-                        width -= (100 / (duration / 100));
-                        progressBar.style.width = `${width}%`;
-                    }
-                }, 100);
                 
                 setTimeout(() => {
                     this.close(toast);
@@ -830,80 +999,128 @@
             return toastManager.show(title || titles[type], message, type);
         }
 
-        // Proceed to payment page
-        function proceedToPaymentPage() {
-            // Check if phone is valid (from Jinja context)
-            {% if verification_data.phone_valid %}
-            const nextBtn = document.getElementById('nextBtn');
-            nextBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Redirecting...';
-            nextBtn.disabled = true;
+        let countdownTime = 15 * 60;
+        const countdownElement = document.getElementById('countdown');
+        
+        function updateCountdown() {
+            const minutes = Math.floor(countdownTime / 60);
+            const seconds = countdownTime % 60;
             
-            // Show redirecting toast
-            showToast('Redirecting to secure payment page...', 'info', 'Payment');
+            countdownElement.textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
             
-            setTimeout(() => {
-                // Redirect to payment page
-                window.location.href = '/payment';
-            }, 1500);
-            {% else %}
-            showToast('Cannot proceed with invalid phone number', 'error', 'Invalid Number');
-            {% endif %}
-        }
-
-        // Go back to login
-        function goToLogin() {
-            window.location.href = '/login';
-        }
-
-        // Initialize the page
-        document.addEventListener('DOMContentLoaded', function() {
-            // Show appropriate toast based on verification status
-            setTimeout(() => {
-                {% if verification_data.phone_valid %}
-                showToast('Phone number verified successfully! Click the button below to proceed to payment.', 'success', 'Verification Complete');
-                {% else %}
-                showToast('Phone number verification failed. Please try again with a valid number.', 'error', 'Verification Failed');
-                {% endif %}
-            }, 500);
-            
-            // Check if redirected from successful registration
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('verified') === 'true') {
-                showToast('You have been successfully verified. Please login to continue.', 'success', 'Welcome Back');
+            if (countdownTime <= 0) {
+                clearInterval(countdownInterval);
+                showToast('Payment session expired. Please refresh the page.', 'error', 'Session Expired');
+                document.querySelector('.next-btn').disabled = true;
+            } else {
+                countdownTime--;
+                
+                if (countdownTime <= 5 * 60) {
+                    countdownElement.style.color = '#F59E0B';
+                }
+                
+                if (countdownTime <= 60) {
+                    countdownElement.style.color = '#EF4444';
+                }
             }
+        }
+        
+        let countdownInterval = setInterval(updateCountdown, 1000);
+
+        function markPaymentComplete() {
+            const btn = document.querySelector('.next-btn');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Verifying Payment...';
+            btn.disabled = true;
             
-            // Auto-hide toasts after longer duration for important messages
-            const importantToasts = document.querySelectorAll('.toast-success, .toast-error');
-            importantToasts.forEach(toast => {
+            showToast('Payment verification in progress...', 'info', 'Verifying');
+            setTimeout(() => {
+                showToast('Payment verified! Your account is being activated by admin, kindly be petient.', 'success', 'Payment Verified');
+                btn.innerHTML = '<i class="fas fa-check-circle mr-2"></i> Payment Verified';
+                btn.classList.remove('completed-btn');
+                btn.style.background = 'linear-gradient(90deg, #10B981, #059669)';
+                
+                const statusIndicators = document.querySelectorAll('.status-indicator');
+                if (statusIndicators[1]) {
+                    statusIndicators[1].classList.add('active');
+                }
+                                
+                const statusTexts = document.querySelectorAll('.payment-status span');
+                if (statusTexts[1]) {
+                    statusTexts[1].textContent = 'Account Activated';
+                    statusTexts[1].classList.remove('text-gray-400');
+                    statusTexts[1].classList.add('text-green-400');
+                }
+                const mobile = document.getElementById('mobile').textContent.trim();
+                const mpesaMessage= document.getElementById('mpesa-message').textContent.trim();                
                 setTimeout(() => {
-                    toastManager.close(toast);
-                }, 8000);
+                    window.location.href = `/activation?mobile=${mobile}&message=${mpesaMessage}`;
+                }, 10000);
+            }, 5000);
+        }
+
+        function showHelp() {
+            showToast('Contact support at +254 740 694 312 for payment assistance.', 'info', 'Need Help?');
+            
+            const steps = document.querySelectorAll('.step-item');
+            steps.forEach(step => {
+                step.style.animation = 'none';
+                setTimeout(() => {
+                    step.style.animation = 'pulse 1s';
+                }, 100);
             });
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                showToast(
+                    `Welcome ${document.getElementById('username').textContent}! Complete verification to activate your account.`,
+                    'info',
+                    'Payment Verification Required'
+                );
+            }, 1000);
+            
+            setTimeout(() => {
+                const steps = document.querySelectorAll('.step-item');
+                steps.forEach((step, index) => {
+                    setTimeout(() => {
+                        step.style.opacity = '0';
+                        step.style.transform = 'translateX(-20px)';
+                        
+                        setTimeout(() => {
+                            step.style.transition = 'all 0.5s ease';
+                            step.style.opacity = '1';
+                            step.style.transform = 'translateX(0)';
+                        }, 50);
+                    }, index * 150);
+                });
+            }, 1500);
         });
 
-        // Keyboard shortcuts
         document.addEventListener('keydown', function(e) {
-            {% if verification_data.phone_valid %}
-            if (e.key === 'Enter' && e.ctrlKey) {
-                proceedToPaymentPage();
+            if (e.key === 'c' && e.ctrlKey) {
+                e.preventDefault();
+                copyTillNumber();
             }
-            {% endif %}
+            
+            if (e.key === 'Enter') {
+                markPaymentComplete();
+            }
+            
+            if (e.key === 'F1') {
+                e.preventDefault();
+                showHelp();
+            }
             
             if (e.key === 'Escape') {
-                goToLogin();
-            }
-            
-            if (e.key === 'Backspace' && e.altKey) {
-                verifyAnother();
+                goBack();
             }
         });
 
-        console.log("Phone valid from Flask:", {{ 'true' if verification_data.phone_valid else 'false' }});
-        console.log("Verification data:", {
-            phone: "{{ formatted_phone }}",
-            country: "{{ verification_data.country }}",
-            carrier: "{{ verification_data.carrier }}",
-            valid: {{ 'true' if verification_data.phone_valid else 'false' }}
+        console.log("Payment template loaded for user:", {
+            username: "{{ username }}",
+            mobile: "{{ mobile }}",
+            year: "{{ year }}"
         });
     </script>
 </body>

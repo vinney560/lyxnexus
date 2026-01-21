@@ -2258,9 +2258,11 @@ def handle_student_login(user, username, mobile, login_subtype, next_page, year)
             db.session.add(new_user)
             db.session.commit()
             """ Send WhatsApp Welcome Message! """
+            login_user(new_user)
             welcome_message = get_random_welcome_message(username, mobile)
             send_msg(format_mobile_send(mobile), welcome_message)
             return render_template("verification.html", verification_data=result)
+        
         if result.get('phone_valid') is False:
             flash('The provided mobile number is invalid. Please check and try again.', 'error')
             return render_template('login.html',
@@ -2292,11 +2294,10 @@ def handle_student_login(user, username, mobile, login_subtype, next_page, year)
                                  login_type='student',  # Stay on student tab
                                  year=_year())
         if user.paid is False:
+            login_user(user)
             flash('Your account is inactive. Pay you registration Fee or contact Admin for assistance.', 'error')
-            return render_template('payment.html',
-                                 username=username,
-                                 mobile=format_mobile_display(mobile),
-                                 year=_year())
+            return redirect(url_for('activation_payment'))
+        
         login_user(user)
         return redirect(next_page or url_for('main_page'))
 
@@ -2316,21 +2317,92 @@ def format_mobile_send(mobile):
     return mobile
 #==================================================================
 # False Payment activation due to missing system to activate automatically
-@app.route('/activation')
+@app.route('/payment')
+@login_required
+def activation_payment():
+    user = User.query.filter_by(id=current_user.id).first()
+    return render_template('payment.html',
+                                 username=user.username,
+                                 mobile=format_mobile_display(user.mobile),
+                                 year=_year())
+
+@app.route('/activation', methods=['GET', 'POST'])
 def payment_activation():
+    if request.method == 'POST':
+        try:
+            data = request.get_json()
+            mobile = re.sub(r'\D', '', data.get('mobile', ''))
+            mpesa_msg = re.sub(r'\W', '', data.get('mpesa_message', ''))[:10]
+
+            if not mpesa_msg or mpesa_msg == '':
+                return jsonify({
+                    'success': False,
+                    'message': 'Mpesa receipt missing'
+                }), 400
+            
+            good_msg = re.match(r'^[A-Z0-9]+$', mpesa_msg)
+            # Try soft mpesa message testing
+            if not good_msg:
+                return jsonify({
+                    'success': False,
+                    'message': 'Invalid Mpesa receipt format'
+                }), 400
+            
+            if mobile:
+                user = User.query.filter_by(mobile=mobile).first()
+                if user:
+                    user.paid = True
+                    db.session.commit()
+                    login_user(user)
+                    
+                    return jsonify({
+                        'success': True,
+                        'message': 'Payment verified successfully',
+                        'redirect_url': url_for('main_page')
+                    })
+                
+                return jsonify({
+                    'success': False,
+                    'message': 'Activation failed. User not found.'
+                }), 404
+            
+            return jsonify({
+                'success': False,
+                'message': 'Activation failed. Mobile number missing.'
+            }), 400
+            
+        except Exception as e:
+            print(f"Activation error: {str(e)}")
+            return jsonify({
+                'success': False,
+                'message': 'Server error during verification'
+            }), 500
+    
+    # Handle GET request (for backward compatibility)
     mobile = re.sub(r'\D', '', request.args.get('mobile', ''))
+    mpesa_msg = re.sub(r'\W', '', request.args.get('mpesa_message', ''))[:10]
+
+    if not mpesa_msg or mpesa_msg == '':
+        flash("Mpesa receipt missing", 'error')
+        return redirect(url_for('login'))
+    
+    good_msg = re.match(r'^[A-Z0-9]+$', mpesa_msg)
+    # Try soft mpesa message testing
+    if not good_msg:
+        flash("Invalid Mpesa receipt.", "error")
+        return redirect(url_for('login'))
     if mobile:
         user = User.query.filter_by(mobile=mobile).first()
         if user:
-            user.paid = not user.paid
+            user.paid = True
             db.session.commit()
             login_user(user)
             return redirect(url_for('main_page'))
         flash('Activation failed. User not found.', 'error')
         return redirect(url_for('login'))
     flash("Activation failed. Mobile number missing.", 'error')
-    return redirect(url_for("login"))
-    
+    return redirect(url_for("login"))             
+                    
 # =========================================
 # NOTIFICATION API ROUTES &&  RENDERING
 # =========================================
@@ -4551,6 +4623,9 @@ def check():
         if current_user.is_admin:
             return redirect(url_for('admin_page'))
         else:
+            if current_user.paid is False:
+                flash("Your account is inactive. Please complete the payment to activate your account.", 'error')
+                return redirect(url_for('activation_payment'))
             return redirect(url_for('main_page'))
     else:
         return redirect(url_for('login'))
@@ -6396,7 +6471,7 @@ def get_users():
     date_filter = request.args.get('date_filter', '')
     payment_filter = request.args.get('payment_filter', '')
     page = request.args.get('page', 1, type=int)
-    per_page = request.args.get('per_page', 10, type=int)
+    per_page = request.args.get('per_page', 20, type=int)
     
     # Base query
     query = User.query
@@ -7340,9 +7415,9 @@ def create_topic():
         id=gen_unique_id(Topic),
         user_id=current_user.id,
         name=data.get('name'),
-        description=data.get('description'),
-        lecturer=data.get('lecturer'),
-        contact=data.get('contact'),
+        description=data.get('description', ''),
+        lecturer=data.get('lecturer', ''),
+        contact=data.get('contact', ''),
         year=current_user.year
     )
     db.session.add(topic)
@@ -7354,10 +7429,6 @@ def create_topic():
 @login_required
 @admin_required
 def update_topic(id):
-    """Update a topic (Admin only)"""
-    if not current_user.is_admin:
-        return jsonify({'error': 'Unauthorized'}), 403
-    
     topic = Topic.query.get_or_404(id)
     data = request.get_json()
     
@@ -7374,14 +7445,32 @@ def update_topic(id):
 @admin_required
 def delete_topic(id):
     """Delete a topic (Admin only)"""
-    if not current_user.is_admin:
-        return jsonify({'error': 'Unauthorized'}), 403
-    
     topic = Topic.query.get_or_404(id)
-    db.session.delete(topic)
-    db.session.commit()
+    materials = TopicMaterial.query.filter_by(
+            topic_id=id
+        ).all()
     
-    return jsonify({'message': 'Topic deleted successfully'})
+    # First delete Materials related to topic to prevent SQLalchemyIntegrityError (Null Error)
+    if materials:
+        try:
+            db.session.delete(materials)
+            db.session.commit()
+            print("Materials related to topic deleted!!!")
+        except Exception as e:
+            db.session.rollback()
+            print(f"Failed to delete Materials related to topic!!!: {e}")
+    # Secondly dlete the actual topic after removing the materials
+    if topic:
+        try:
+            db.session.delete(topic)
+            db.session.commit()
+            print("Topic deleted!!!")
+        except Exception as e:
+            db.session.rollback()
+            print(f"Failed to delete Topic!!!: {e}")
+
+        return jsonify({'message': 'Topic deleted successfully'})
+    return jsonify({'message': 'Topic not deleted!'}), 500
 
 #==========================================
 #            TIMETABLE API ROUTES
@@ -8427,7 +8516,7 @@ def get_available_archieves():
         for file in files.items:
             files_data.append({
                 'id': file.id,
-                'name': file.filename.rsplit('.', 1)[0] if '.' in file.filename else file.filename,
+                'name': f"{file.filename.rsplit('.', 1)[0] if '.' in file.filename else file.filename}_FILE@LN",
                 'filename': file.filename,
                 'file_type': file.file_type,
                 'file_size': file.file_size,

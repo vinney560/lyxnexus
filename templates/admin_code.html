@@ -61,7 +61,6 @@
             50% { transform: translate(-10px, -10px); }
         }
 
-        /* Glass Container */
         .glass-container {
             background: rgba(17, 24, 39, 0.8);
             backdrop-filter: blur(20px) saturate(180%);
@@ -253,7 +252,6 @@
             font-size: 1.1rem;
         }
 
-        /* Back Button */
         .back-btn {
             position: absolute;
             top: 1.5rem;
@@ -278,7 +276,6 @@
             transform: translateX(-2px);
         }
 
-        /* Toast Container */
         .toast-container {
             position: fixed;
             top: 1rem;
@@ -367,7 +364,6 @@
             color: var(--text-primary);
         }
 
-        /* Requirements */
         .requirements {
             margin-top: 0.5rem;
             margin-bottom: 1.5rem;
@@ -379,7 +375,6 @@
             opacity: 0.7;
         }
 
-        /* Loading Spinner */
         .spinner {
             display: inline-block;
             width: 1.25rem;
@@ -394,7 +389,6 @@
             to { transform: rotate(360deg); }
         }
 
-        /* Responsive */
         @media (max-width: 480px) {
             .glass-container {
                 padding: 2rem 1.5rem;
@@ -413,15 +407,12 @@
     </style>
 </head>
 <body>
-    <!-- Back Button -->
     <button class="back-btn" id="backButton" onclick="goBack()">
         <i class="fas fa-arrow-left"></i>
     </button>
 
-    <!-- Toast Container -->
     <div class="toast-container" id="toastContainer"></div>
 
-    <!-- Main Form -->
     <div class="glass-container">
         <div class="header">
             <div class="logo">
@@ -484,7 +475,6 @@
     </div>
 
     <script>
-        // Toast System
         class Toast {
             constructor() {
                 this.container = document.getElementById('toastContainer');
@@ -511,10 +501,8 @@
 
                 this.container.appendChild(toast);
 
-                // Trigger animation
                 setTimeout(() => toast.classList.add('show'), 10);
 
-                // Auto remove
                 if (duration > 0) {
                     setTimeout(() => {
                         if (toast.parentNode) {
@@ -530,7 +518,6 @@
 
         const toast = new Toast();
 
-        // Password visibility toggle
         function setupPasswordToggle(buttonId, inputId) {
             const button = document.getElementById(buttonId);
             const input = document.getElementById(inputId);
@@ -539,8 +526,6 @@
                 const isPassword = input.type === 'password';
                 input.type = isPassword ? 'text' : 'password';
                 button.innerHTML = `<i class="fas fa-${isPassword ? 'eye-slash' : 'eye'}"></i>`;
-                
-                // Add subtle animation
                 button.style.transform = 'scale(1.1)';
                 setTimeout(() => button.style.transform = '', 200);
             });
@@ -549,14 +534,10 @@
         setupPasswordToggle('toggleCurrentPassword', 'currentCode');
         setupPasswordToggle('toggleNewPassword', 'newCode');
 
-        // Form validation and submission
         document.getElementById('adminCodeForm').addEventListener('submit', function(e) {
-            
             const currentCode = document.getElementById('currentCode').value.trim();
             const newCode = document.getElementById('newCode').value.trim();
             const submitBtn = document.getElementById('submitBtn');
-            
-            // Validation
             if (currentCode.length < 4 || currentCode.length > 16) {
                 e.preventDefault();
                 toast.show('Current code must be between 4 and 16 characters', 'error');

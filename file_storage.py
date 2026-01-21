@@ -145,10 +145,10 @@ def upload_multiple_files():
             file_ext = filename.rsplit('.', 1)[1].lower() if '.' in filename else ''
             
             if name:
-                base_name = f"{name}_{index}_{int(time.time())}_LN"
+                base_name = f"{name}_{index}_{int(time.time())}_FILE@LN"
             else:
                 # Use filename without extension
-                base_name = filename.rsplit('.', 1)[0] if '.' in filename else filename
+                base_name = f"{filename.rsplit('.', 1)[0] if '.' in filename else filename}_FILE@LN"
             
             # Determine resource type
             document_extensions = {'pdf', 'doc', 'docx', 'txt', 'xls', 'xlsx', 'ppt', 'pptx'}

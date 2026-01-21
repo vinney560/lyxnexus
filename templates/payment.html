@@ -782,6 +782,61 @@
             padding: 12px;
         }
     }
+
+    .form-input {
+        background: rgba(30, 30, 40, 0.9);
+        border: 1px solid rgba(59, 130, 246, 0.4);
+        border-radius: 10px;
+        padding: 10px 12px;
+        color: white;
+        width: 90%;
+        margin-bottom: 15px;
+        transition: all 0.3s ease;
+    }
+    
+    .form-input:focus {
+        outline: none;
+        border-color: #3B82F6;
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+    }
+
+    .mpesa-box {
+        background: rgba(16, 185, 129, 0.1);
+        border-radius: 12px;
+        padding: 15px;
+        text-align: center;
+        margin: 20px 0;
+        border: 2px double #059669;
+    }
+
+    .loading-spinner {
+        border: 3px solid rgba(59, 130, 246, 0.3);
+        border-radius: 50%;
+        border-top: 3px solid #3B82F6;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    .verification-status {
+        display: none;
+        text-align: center;
+        padding: 20px;
+        background: rgba(30, 30, 40, 0.8);
+        border-radius: 12px;
+        margin: 20px 0;
+    }
+
+    .verification-status.show {
+        display: block;
+        animation: fadeIn 0.5s ease;
+    }
 </style>
 <body>
     <header class="nav-header">
@@ -844,6 +899,14 @@
                 </div>
             </div>
 
+            <!-- Real-time Verification Status -->
+            <div class="verification-status" id="verificationStatus">
+                <div class="loading-spinner" id="verificationSpinner"></div>
+                <h3 class="text-xl font-semibold mt-4 mb-2" id="verificationTitle">Verifying Payment</h3>
+                <p class="text-gray-400" id="verificationMessage">Checking your payment details in real-time...</p>
+                <div class="mt-4" id="verificationResult"></div>
+            </div>
+
             <div class="payment-container" id="paymentProcedure">
                 <div class="payment-header">
                     <div class="payment-icon">
@@ -864,7 +927,7 @@
                 
                 <div class="highlight-box">
                     <p class="text-lg mb-3"><i class="fas fa-lock mr-2"></i>Secure MPESA Payment Required</p>
-                    <div class="till-number" id="tillNumber">3192338</div>
+                    <div class="till-number" id="tillNumber">3109959</div>
                     <p class="text-center text-sm text-gray-400 mt-2">Official Business Till Number</p>
                     <button class="btn-outline mt-4" onclick="copyTillNumber()">
                         <i class="far fa-copy mr-2"></i>Copy Till Number
@@ -883,6 +946,18 @@
                     <div class="text-sm text-gray-400">Session expires after 15 minutes</div>
                 </div>
                 
+                <div class="mpesa-box">
+                    <p class="text-sm text-gray-400 mb-1">
+                        Enter the MPESA transaction code here after successfully paying for Registration Fee.
+                    </p>
+                    <textarea id="mpesa-message" class="form-input" rows="3" placeholder="Enter MPESA transaction code" oninput="validateMpesaMessage()"></textarea>
+                    <div class="text-xs text-gray-500 mt-2">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        Find this code in your MPESA confirmation SMS
+                    </div>
+                    <div class="mt-2 text-xs" id="mpesaValidation"></div>
+                </div>
+
                 <h3 class="text-xl font-semibold mt-8 mb-4 flex items-center gap-2">
                     <i class="fas fa-list-ol text-blue-400"></i>
                     Step-by-Step Payment Guide:
@@ -923,7 +998,7 @@
                         <div class="step-content">
                             <div class="step-title">Enter Business Till Number</div>
                             <div class="step-description">
-                                Carefully enter the Till Number: <strong class="text-green-400 text-xl">3192338</strong>
+                                Carefully enter the Till Number: <strong class="text-green-400 text-xl">3109959</strong>
                                 <div class="mt-3 p-2 bg-yellow-900/20 border border-yellow-800/30 rounded">
                                     <i class="fas fa-exclamation-triangle text-yellow-400 mr-1"></i>
                                     <span class="text-yellow-300 text-sm">Important: Double-check the number before proceeding</span>
@@ -970,9 +1045,9 @@
                     <div class="step-item">
                         <div class="step-number">8</div>
                         <div class="step-content">
-                            <div class="step-title">Admin Approval</div>
+                            <div class="step-title">Payment Verification</div>
                             <div class="step-description">
-                                The admin will review your payment and approve within 4 hours. If your account is not activated within this time, please <a href="https://wa.me/254740694312" class="text-blue-400 underline">WhatsApp Support.</a>
+                                Enter the MPESA transaction code above and click "Verify Payment"
                             </div>
                         </div>
                     </div>
@@ -986,7 +1061,7 @@
                         <ul class="space-y-3">
                             <li class="flex items-start gap-2">
                                 <i class="fas fa-check-circle text-green-400 mt-1"></i>
-                                <span>Your account will be activated <strong>automatically</strong> within 5 minutes of payment confirmation</span>
+                                <span>Your account will be activated <strong>automatically</strong> within 5 minutes of payment confirmation and verification</span>
                             </li>
                             <li class="flex items-start gap-2">
                                 <i class="fas fa-check-circle text-green-400 mt-1"></i>
@@ -998,11 +1073,11 @@
                             </li>
                             <li class="flex items-start gap-2">
                                 <i class="fas fa-check-circle text-green-400 mt-1"></i>
-                                <span>Admin approval is automatic and takes less than 5 minutes after payment</span>
+                                <span>Real-time verification ensures instant activation</span>
                             </li>
                             <li class="flex items-start gap-2">
                                 <i class="fas fa-check-circle text-green-400 mt-1"></i>
-                                <span>For any issues, <a href="https://wa.me/254740694312" class="text-blue-400 font-bold underline">WhatsApp Support.</a>  with your MPESA transaction code</span>
+                                <span>For any issues, <a href="https://wa.me/254740694312" class="text-blue-400 font-bold underline">WhatsApp Support.</a> with your MPESA transaction code</span>
                             </li>
                         </ul>
                     </div>
@@ -1010,9 +1085,9 @@
             </div>
 
             <div class="mt-8 space-y-4">
-                <button class="next-btn completed-btn" onclick="markPaymentComplete()">
+                <button class="next-btn completed-btn" onclick="verifyPayment()" id="verifyBtn">
                     <i class="fas fa-check-circle mr-2"></i>
-                    I've Completed the Payment
+                    Verify Payment
                 </button>
                 
                 <button class="btn-outline w-full" onclick="showHelp()">
@@ -1119,7 +1194,7 @@
             if (countdownTime <= 0) {
                 clearInterval(countdownInterval);
                 showToast('Payment session expired. Please refresh the page.', 'error', 'Session Expired');
-                document.querySelector('.next-btn').disabled = true;
+                document.getElementById('verifyBtn').disabled = true;
             } else {
                 countdownTime--;
                 
@@ -1138,7 +1213,7 @@
         
         // Copy Till Number to Clipboard
         function copyTillNumber() {
-            const tillNumber = '3192338';
+            const tillNumber = '3109959';
             navigator.clipboard.writeText(tillNumber).then(() => {
                 showToast('Till number copied to clipboard!', 'success', 'Copied');
                 
@@ -1157,42 +1232,217 @@
             });
         }
 
-        // Mark Payment as Complete
-        function markPaymentComplete() {
-            const btn = document.querySelector('.next-btn');
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Verifying Payment...';
+        // Validate MPESA message as user types
+        function validateMpesaMessage() {
+            const mpesaMessage = document.getElementById('mpesa-message').value.trim();
+            const validationDiv = document.getElementById('mpesaValidation');
+            
+            if (mpesaMessage.length === 0) {
+                validationDiv.innerHTML = '';
+                return false;
+            }
+            
+            // Remove all non-alphanumeric characters for validation
+            const cleanMessage = mpesaMessage.replace(/[^A-Z0-9]/gi, '');
+            
+            if (cleanMessage.length < 8) {
+                validationDiv.innerHTML = '<span class="text-yellow-400"><i class="fas fa-exclamation-triangle mr-1"></i>Too short. Valid MPESA codes are usually 8-10 characters.</span>';
+                return false;
+            } else if (cleanMessage.length > 12) {
+                validationDiv.innerHTML = '<span class="text-yellow-400"><i class="fas fa-exclamation-triangle mr-1"></i>Too long. Please enter only the transaction code.</span>';
+                return false;
+            } else if (!/^[A-Z0-9]+$/i.test(cleanMessage)) {
+                validationDiv.innerHTML = '<span class="text-yellow-400"><i class="fas fa-exclamation-triangle mr-1"></i>Should contain only letters and numbers.</span>';
+                return false;
+            } else {
+                validationDiv.innerHTML = '<span class="text-green-400"><i class="fas fa-check-circle mr-1"></i>Valid format detected</span>';
+                return true;
+            }
+        }
+
+        // Verify Payment in Real-time
+        function verifyPayment() {
+            const btn = document.getElementById('verifyBtn');
+            const mpesaMessage = document.getElementById('mpesa-message').value.trim();
+            const mobile = document.getElementById('mobile').textContent.trim();
+            const verificationStatus = document.getElementById('verificationStatus');
+            const verificationTitle = document.getElementById('verificationTitle');
+            const verificationMessage = document.getElementById('verificationMessage');
+            const verificationResult = document.getElementById('verificationResult');
+            const paymentProcedure = document.getElementById('paymentProcedure');
+            
+            // Validate MPESA message
+            if (!validateMpesaMessage()) {
+                showToast('Please enter a valid MPESA transaction code', 'error', 'Invalid Code');
+                document.getElementById('mpesa-message').focus();
+                return;
+            }
+            
+            // Clean the message
+            const cleanMessage = mpesaMessage.replace(/[^A-Z0-9]/gi, '');
+            
+            // Disable button and show verification status
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Verifying...';
             btn.disabled = true;
             
-            showToast('Payment verification in progress...', 'info', 'Verifying');
+            // Show verification status panel
+            verificationStatus.classList.add('show');
+            verificationTitle.textContent = 'Verifying Payment';
+            verificationMessage.textContent = 'Checking your payment details in real-time...';
+            verificationResult.innerHTML = '';
             
-            // Simulate payment verification
-            setTimeout(() => {
-                showToast('Payment verified! Your account is being activated by admin, kindly be petient.', 'success', 'Payment Verified');
-                
-                // Update button
-                btn.innerHTML = '<i class="fas fa-check-circle mr-2"></i> Payment Verified';
-                btn.classList.remove('completed-btn');
-                btn.style.background = 'linear-gradient(90deg, #10B981, #059669)';
-                
-                // Update status indicator
-                const statusIndicators = document.querySelectorAll('.status-indicator');
-                if (statusIndicators[1]) {
-                    statusIndicators[1].classList.add('active');
+            // Hide payment procedure temporarily
+            paymentProcedure.style.opacity = '0.5';
+            paymentProcedure.style.pointerEvents = 'none';
+            
+            showToast('Verifying payment details...', 'info', 'Verification Started');
+            
+            // Prepare data for AJAX request
+            const payload = {
+                mobile: mobile,
+                mpesa_message: cleanMessage,
+                timestamp: new Date().toISOString()
+            };
+            
+            console.log('Sending verification request:', payload);
+            
+            // Make AJAX request to verify payment
+            fetch('/activation', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Verification response:', data);
                 
-                // Update status text
-                const statusTexts = document.querySelectorAll('.payment-status span');
-                if (statusTexts[1]) {
-                    statusTexts[1].textContent = 'Account Activated';
-                    statusTexts[1].classList.remove('text-gray-400');
-                    statusTexts[1].classList.add('text-green-400');
+                // Handle success response
+                if (data.success) {
+                    verificationTitle.textContent = 'Payment Verified!';
+                    verificationTitle.style.color = '#10B981';
+                    verificationMessage.textContent = 'Your payment has been successfully verified.';
+                    verificationResult.innerHTML = `
+                        <div class="bg-green-900/20 border border-green-800/30 rounded-lg p-4 mt-4">
+                            <div class="flex items-center justify-center gap-3 mb-3">
+                                <i class="fas fa-check-circle text-3xl text-green-400"></i>
+                                <div>
+                                    <h4 class="font-bold text-lg">Account Activated</h4>
+                                    <p class="text-sm text-gray-300">Redirecting to your dashboard...</p>
+                                </div>
+                            </div>
+                            <div class="text-sm text-gray-400 mt-2">
+                                <p><i class="fas fa-user mr-2"></i>Username: ${document.getElementById('username').textContent}</p>
+                                <p><i class="fas fa-mobile-alt mr-2"></i>Phone: ${mobile}</p>
+                                <p><i class="fas fa-receipt mr-2"></i>Transaction: ${cleanMessage}</p>
+                            </div>
+                        </div>
+                    `;
+                    
+                    // Update status indicator
+                    const statusIndicators = document.querySelectorAll('.status-indicator');
+                    if (statusIndicators[1]) {
+                        statusIndicators[1].classList.add('active');
+                    }
+                    
+                    // Update status text
+                    const statusTexts = document.querySelectorAll('.payment-status span');
+                    if (statusTexts[1]) {
+                        statusTexts[1].textContent = 'Account Activated';
+                        statusTexts[1].classList.remove('text-gray-400');
+                        statusTexts[1].classList.add('text-green-400');
+                    }
+                    
+                    showToast('Payment verified successfully! Redirecting...', 'success', 'Verification Complete');
+                    
+                    // Redirect after 3 seconds
+                    setTimeout(() => {
+                        window.location.href = data.redirect_url || '/main';
+                    }, 3000);
+                    
+                } else {
+                    // Handle verification failure
+                    verificationTitle.textContent = 'Verification Failed';
+                    verificationTitle.style.color = '#EF4444';
+                    verificationMessage.textContent = data.message || 'Payment verification failed.';
+                    verificationResult.innerHTML = `
+                        <div class="bg-red-900/20 border border-red-800/30 rounded-lg p-4 mt-4">
+                            <div class="flex items-center justify-center gap-3 mb-3">
+                                <i class="fas fa-exclamation-triangle text-3xl text-red-400"></i>
+                                <div>
+                                    <h4 class="font-bold text-lg">Verification Issue</h4>
+                                    <p class="text-sm text-gray-300">${data.message || 'Please check your payment details and try again.'}</p>
+                                </div>
+                            </div>
+                            <div class="mt-4 space-y-2">
+                                <button class="btn-outline w-full" onclick="retryVerification()">
+                                    <i class="fas fa-redo mr-2"></i>Try Again
+                                </button>
+                                <button class="btn-outline w-full" onclick="showHelp()">
+                                    <i class="fas fa-question-circle mr-2"></i>Get Help
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    
+                    showToast(data.message || 'Payment verification failed', 'error', 'Verification Failed');
+                    
+                    // Re-enable button for retry
+                    btn.innerHTML = '<i class="fas fa-check-circle mr-2"></i>Verify Payment';
+                    btn.disabled = false;
                 }
-                const mobile = document.getElementById('mobile').textContent.trim();
-                // Redirect after 3 seconds
-                setTimeout(() => {
-                    window.location.href = `/activation?mobile=${mobile}`;
-                }, 10000);
-            }, 5000);
+            })
+            .catch(error => {
+                console.error('Verification error:', error);
+                
+                verificationTitle.textContent = 'Connection Error';
+                verificationTitle.style.color = '#EF4444';
+                verificationMessage.textContent = 'Unable to connect to verification service.';
+                verificationResult.innerHTML = `
+                    <div class="bg-red-900/20 border border-red-800/30 rounded-lg p-4 mt-4">
+                        <div class="flex items-center justify-center gap-3 mb-3">
+                            <i class="fas fa-wifi-slash text-3xl text-red-400"></i>
+                            <div>
+                                <h4 class="font-bold text-lg">Network Issue</h4>
+                                <p class="text-sm text-gray-300">Please check your internet connection and try again.</p>
+                            </div>
+                        </div>
+                        <div class="mt-4 space-y-2">
+                            <button class="btn-outline w-full" onclick="retryVerification()">
+                                <i class="fas fa-redo mr-2"></i>Retry Verification
+                            </button>
+                            <button class="btn-outline w-full" onclick="showHelp()">
+                                <i class="fas fa-question-circle mr-2"></i>Contact Support
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                showToast('Network error. Please try again.', 'error', 'Connection Error');
+                
+                // Re-enable button for retry
+                btn.innerHTML = '<i class="fas fa-check-circle mr-2"></i>Verify Payment';
+                btn.disabled = false;
+            })
+            .finally(() => {
+                // Restore payment procedure visibility
+                paymentProcedure.style.opacity = '1';
+                paymentProcedure.style.pointerEvents = 'auto';
+            });
+        }
+
+        // Retry verification
+        function retryVerification() {
+            const verificationStatus = document.getElementById('verificationStatus');
+            verificationStatus.classList.remove('show');
+            document.getElementById('mpesa-message').focus();
         }
 
         // Show Help
@@ -1252,6 +1502,16 @@
                     tillNumber.style.transform = 'scale(1)';
                 }, 300);
             }, 10000);
+            
+            // Focus on MPESA message field when user clicks on step 7 or 8
+            document.querySelectorAll('.step-item').forEach((step, index) => {
+                if (index === 6 || index === 7) { // Step 7 or 8
+                    step.style.cursor = 'pointer';
+                    step.addEventListener('click', () => {
+                        document.getElementById('mpesa-message').focus();
+                    });
+                }
+            });
         });
 
         // Keyboard shortcuts
@@ -1262,9 +1522,9 @@
                 copyTillNumber();
             }
             
-            // Enter to mark payment complete
-            if (e.key === 'Enter') {
-                markPaymentComplete();
+            // Enter to verify payment
+            if (e.key === 'Enter' && !document.getElementById('verifyBtn').disabled) {
+                verifyPayment();
             }
             
             // F1 for help

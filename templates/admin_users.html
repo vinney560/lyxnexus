@@ -1509,6 +1509,7 @@
                 const matchesRole = !roleFilter || 
                     (roleFilter === 'admin' && user.is_admin) ||
                     (roleFilter === 'user' && !user.is_admin);
+                    
                 // Payment Status filter
                 const matchesPayment = !paymentStatusFilter || 
                     (paymentStatusFilter === 'paid' && user.paid) ||

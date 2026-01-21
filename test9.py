@@ -1,3 +1,10 @@
-mobile = "0712345678"
-phone = f"+254{mobile.strip()[1:] if mobile.startswith('0') else mobile.strip()}"
-print(phone)  # Output: +254712345678
+import re
+def confirm_msg(msg):
+    msgg = re.sub(r'\W', '', msg)[:10]
+    z = re.match(r'^[A-Z0-9]+$', msgg)
+    if not z:
+        print("Found")
+        return None
+    print(msgg)
+
+confirm_msg("1234567A9 0heheh")
