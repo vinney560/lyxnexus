@@ -186,12 +186,12 @@
         background-size: 200% 100%;
         animation: gradient-border 3s linear infinite;
     }
-
+    
     @keyframes gradient-border {
         0% { background-position: 200% 0; }
         100% { background-position: -200% 0; }
     }
-
+    
     @keyframes pulse-drag {
         0% { border-color: rgba(59, 130, 246, 0.3); }
         50% { border-color: rgba(139, 92, 246, 0.6); }
@@ -961,7 +961,7 @@
                                     <div class="file-icon ${fileIcon.class} flex-shrink-0">
                                         <i class="fas ${fileIcon.icon}"></i>
                                     </div>
-                                    <div class="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-blue-500 border-2 border-gray-900 ${material.display_order === 1 ? 'block' : 'hidden'}">
+                                    <div class="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-blue-500 border-2 border-gray-900 block">
                                         <i class="fas fa-star text-xs text-white absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"></i>
                                     </div>
                                 </div>
@@ -1016,8 +1016,9 @@
                         </div>
                         {% endif %}
                     </div>
-                    `;
-                }).join('');                
+                    `;                  
+                }).join('');
+                
                 {% if current_user.is_admin %}
                 initializeDragAndDrop();
                 {% endif %}
