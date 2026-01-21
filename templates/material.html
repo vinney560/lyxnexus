@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Topic Materials | LyxNexus</title>
+    <title>Unit Notes | LyxNexus</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="{{ url_for('static', filename='css/tailwind.min.css') }}" rel="stylesheet">
     <meta name="keywords" content="Lyx Nexus, Kisii LyxNexus, kisii lyxnexus, kisii university lyxnexus, kisii university lyx nexus, lyx nexus, lyxnexus" />
@@ -565,6 +565,37 @@
         word-break: break-all;
         overflow-wrap: anywhere;
     }    
+
+    .truncate-text {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .break-all {
+        word-break: break-all;
+    }
+
+    [class*="truncate-text"] {
+        position: relative;
+    }
+
+    [class*="truncate-text"]:hover::after {
+        content: attr(data-full-text);
+        position: absolute;
+        bottom: 100%;
+        left: 0;
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 4px 8px;
+        border-radius: 4px;
+        white-space: normal;
+        width: max-content;
+        max-width: 300px;
+        z-index: 10;
+        font-size: 12px;
+        margin-bottom: 4px;
+    }    
 </style>
 <body>
     <nav class="glass-morph sticky top-0 z-50">
@@ -581,7 +612,7 @@
                             <line x1="12" y1="22.08" x2="12" y2="12"></line>
                         </svg>
                     </div>
-                    <span class="text-xl sm:text-2xl font-bold gradient-text">Topic Materials</span>
+                    <span class="text-xl sm:text-2xl font-bold gradient-text">Unit Notes</span>
                 </div>
                 <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4 w-full sm:w-auto">
                     {% if current_user.is_admin %}
@@ -626,7 +657,7 @@
             <div class="glass-morph rounded-xl p-8 text-center">
                 <i class="fas fa-folder-open text-4xl text-gray-500 mb-4"></i>
                 <h3 class="text-xl font-bold text-gray-400 mb-2">No materials yet</h3>
-                <p class="text-gray-500">This topic doesn't have any materials yet.</p>
+                <p class="text-gray-500">This unit doesn't have any notes yet.</p>
                 {% if current_user.is_admin %}
                 <button class="btn btn-success mt-4" onclick="openModal('add-material-modal')">
                     <i class="fas fa-plus mr-2"></i> Add First Material
@@ -851,46 +882,50 @@
                     return `
                     <div class="material-card" data-material-id="${material.id}" draggable="true">
                         <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center">
-                            <div class="flex items-start mb-4 lg:mb-0 flex-1">
-                                <div class="file-icon ${fileIcon.class}">
+                            <div class="flex items-start mb-4 lg:mb-0 flex-1 min-w-0">
+                                <div class="file-icon ${fileIcon.class} flex-shrink-0">
                                     <i class="fas ${fileIcon.icon}"></i>
                                 </div>
-                                <div class="flex-1">
+                                <div class="flex-1 min-w-0 ml-3">
                                     <div class="flex items-start">
-                                        <div class="flex-1">
-                                            <h3 class="text-lg sm:text-xl font-extrabold text-white underline underline-offset-4 decoration-blue-500 leading-snug break-words break-all">
+                                        <div class="flex-1 min-w-0">
+                                            <h3 class="text-lg sm:text-xl font-extrabold text-white underline underline-offset-4 decoration-blue-500 leading-snug truncate-text" 
+                                                data-full-text="${material.display_name}">
                                                 ${material.display_name}
                                             </h3>
-                                            <p class="text-gray-400 text-sm break-all">${material.description || 'No description'}</p>
+                                            <p class="text-gray-400 text-sm truncate-text mt-1">
+                                                ${material.description || 'No description'}
+                                            </p>
                                         </div>
                                         {% if current_user.is_admin %}
-                                        <div class="drag-handle ml-4" draggable="false">
+                                        <div class="drag-handle ml-4 flex-shrink-0" draggable="false">
                                             <i class="fas fa-grip-vertical"></i>
                                         </div>
                                         {% endif %}
                                     </div>
                                     <div class="flex flex-wrap items-center mt-2 text-sm text-gray-500">
-                                        <span class="mr-4">
-                                            <i class="fas fa-file mr-1 break-all"></i> ${material.filename}
+                                        <span class="mr-4 truncate-text max-w-[200px]">
+                                            <i class="fas fa-file mr-1"></i> 
+                                            <span class="truncate-text inline-block align-bottom">${material.filename}</span>
                                         </span>
-                                        <span class="mr-4">
+                                        <span class="mr-4 flex-shrink-0">
                                             <i class="fas fa-database mr-1"></i> ${formatFileSize(material.file_size)}
                                         </span>
-                                        <span>
+                                        <span class="flex-shrink-0">
                                             <i class="fas fa-calendar mr-1"></i> ${formatDate(material.uploaded_at)}
                                         </span>
                                     </div>
-                                    <div class="text-xs text-gray-500 mt-1">
+                                    <div class="text-xs text-gray-500 mt-1 truncate-text">
                                         Uploaded by: ${material.uploaded_by}
                                     </div>
                                 </div>
                             </div>
-                            <div class="action-buttons">
+                            <div class="action-buttons flex-shrink-0 mt-4 lg:mt-0 lg:ml-4">
                                 <button class="btn" onclick="downloadMaterial(${material.file_id})">
                                     <i class="fas fa-download mr-1"></i> Download
                                 </button>
                                 {% if current_user.is_admin %}
-                                <button class="btn btn-danger" onclick="removeMaterial(${material.id})">
+                                <button class="btn btn-danger ml-2" onclick="removeMaterial(${material.id})">
                                     <i class="fas fa-trash mr-1"></i> Remove
                                 </button>
                                 {% endif %}
