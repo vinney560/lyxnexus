@@ -10,6 +10,7 @@ from sqlalchemy.exc import IntegrityError
 from app import db, UploadedFile, FileTag
 from datetime import timedelta
 import time
+import os
 from functools import wraps
 from flask import abort, redirect, url_for
 
@@ -141,7 +142,9 @@ def upload_multiple_files():
                 continue
             
             # Secure filename
-            filename = secure_filename(file.filename)
+            raw_filename = secure_filename(file.filename)
+            name, ext = os.path.splitext(raw_filename)
+            filename = f"{name}_FILE@LN{ext}"
             file_ext = filename.rsplit('.', 1)[1].lower() if '.' in filename else ''
             
             if name:
