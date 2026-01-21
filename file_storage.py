@@ -388,10 +388,19 @@ def delete_file(file_id):
     try:
         file = UploadedFile.query.get_or_404(file_id)
         public_id = file.public_id
+        resource_type = file.resource_type if file.resource_type else 'document'
         
-        result = cloudinary.uploader.destroy(public_id)
+        # Delete from Cloudinary with the correct resource_type
+        result = cloudinary.uploader.destroy(public_id, resource_type=resource_type)
         
         if result.get('result') == 'ok':
+            # Also try to delete any derived resources (transformations)
+            try:
+                cloudinary.uploader.destroy(public_id, resource_type=resource_type, invalidate=True)
+            except:
+                pass  # Ignore errors for derived resources
+            
+            # Delete from database
             FileTag.query.filter_by(file_id=file.id).delete()
             db.session.delete(file)
             db.session.commit()
@@ -401,12 +410,17 @@ def delete_file(file_id):
                 'message': 'File deleted successfully'
             })
         else:
-            return jsonify({'error': 'Failed to delete file from Cloudinary'}), 500
+            print(f"Cloudinary delete failed. Result: {result}")
+            return jsonify({
+                'error': 'Failed to delete file from Cloudinary',
+                'details': result.get('result', 'unknown error')
+            }), 500
             
     except Exception as e:
         db.session.rollback()
+        print(f"Error deleting file: {e}")
         return jsonify({'error': str(e)}), 500
-
+    
 @login_required
 @storage_bp.route('/api/files/search')
 def search_files():
