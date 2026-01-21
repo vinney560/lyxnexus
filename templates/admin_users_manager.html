@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Users Manager | LyxNexus Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --bg-color: #111827;
+            --text-color: #F9FAFB;
+            --accent-color: #4A90E2;
+            --success-color: #10B981;
+            --warning-color: #F59E0B;
+            --error-color: #EF4444;
+        }
+        
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        .glass-morph {
+            background: rgba(30, 30, 40, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 15px;
+            transition: all 0.3s ease;
+        }
+        
+        .glass-morph:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(0, 31, 135, 0.2);
+        }
+        
+        .btn {
+            background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+        }
+        
+        .btn-success {
+            background: linear-gradient(90deg, #10B981, #059669);
+        }
+        
+        .btn-warning {
+            background: linear-gradient(90deg, #F59E0B, #D97706);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(90deg, #EF4444, #DC2626);
+        }
+        
+        .stat-card {
+            background: rgba(30, 30, 40, 0.4);
+            border-radius: 12px;
+            padding: 20px;
+            border-left: 4px solid transparent;
+        }
+        
+        .stat-card-success {
+            border-left-color: #10B981;
+        }
+        
+        .stat-card-warning {
+            border-left-color: #F59E0B;
+        }
+        
+        .stat-card-info {
+            border-left-color: #3B82F6;
+        }
+        
+        .progress-bar {
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+            border-radius: 3px;
+            transition: width 0.5s ease;
+        }
+        
+        .import-preview {
+            max-height: 300px;
+            overflow-y: auto;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            padding: 15px;
+        }
+        
+        .result-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .badge-success {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10B981;
+        }
+        
+        .badge-warning {
+            background: rgba(245, 158, 11, 0.2);
+            color: #F59E0B;
+        }
+        
+        .badge-error {
+            background: rgba(239, 68, 68, 0.2);
+            color: #EF4444;
+        }
+        
+        .tab-button {
+            padding: 10px 20px;
+            background: transparent;
+            border: none;
+            color: #9CA3AF;
+            font-weight: 500;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+        
+        .tab-button.active {
+            color: #3B82F6;
+            border-bottom-color: #3B82F6;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background: var(--bg-color);
+            border-radius: 15px;
+            padding: 30px;
+            width: 90%;
+            max-width: 500px;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+        
+        .file-drop-zone {
+            border: 2px dashed rgba(59, 130, 246, 0.5);
+            border-radius: 10px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .file-drop-zone:hover {
+            border-color: #3B82F6;
+            background: rgba(59, 130, 246, 0.05);
+        }
+        
+        .file-drop-zone.dragover {
+            border-color: #10B981;
+            background: rgba(16, 185, 129, 0.05);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="glass-morph sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-4">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-3">
+                    <a href="/admin" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left mr-2"></i> Back to Admin
+                    </a>
+                    <h1 class="text-xl font-bold">
+                        <i class="fas fa-users-cog mr-2"></i>Users Manager
+                    </h1>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 py-8">
+        <!-- Stats Overview -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="stat-card stat-card-info">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-400 text-sm">Total Users</p>
+                        <h3 class="text-2xl font-bold">{{ total_users }}</h3>
+                    </div>
+                    <div class="bg-blue-500/20 p-3 rounded-lg">
+                        <i class="fas fa-users text-blue-500 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stat-card stat-card-success">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-400 text-sm">Active Users</p>
+                        <h3 class="text-2xl font-bold">{{ active_users }}</h3>
+                    </div>
+                    <div class="bg-green-500/20 p-3 rounded-lg">
+                        <i class="fas fa-user-check text-green-500 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stat-card stat-card-warning">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-400 text-sm">Administrators</p>
+                        <h3 class="text-2xl font-bold">{{ admin_count }}</h3>
+                    </div>
+                    <div class="bg-yellow-500/20 p-3 rounded-lg">
+                        <i class="fas fa-user-shield text-yellow-500 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="glass-morph rounded-xl overflow-hidden mb-6">
+            <div class="flex border-b border-gray-700">
+                <button class="tab-button active" onclick="switchTab('export')" id="tab-export">
+                    <i class="fas fa-download mr-2"></i> Export Users
+                </button>
+                <button class="tab-button" onclick="switchTab('import')" id="tab-import">
+                    <i class="fas fa-upload mr-2"></i> Import Users
+                </button>
+                <button class="tab-button" onclick="switchTab('backup')" id="tab-backup">
+                    <i class="fas fa-history mr-2"></i> Backup History
+                </button>
+            </div>
+            
+            <!-- Export Tab -->
+            <div id="export-content" class="p-6">
+                <div class="mb-8">
+                    <h2 class="text-xl font-bold mb-2">Export All Users</h2>
+                    <p class="text-gray-400 mb-6">Download a complete backup of all users in JSON format.</p>
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                        <div class="glass-morph rounded-lg p-6">
+                            <h3 class="font-bold mb-4">What's Included</h3>
+                            <ul class="space-y-3">
+                                <li class="flex items-center">
+                                    <i class="fas fa-check text-green-500 mr-3"></i>
+                                    <span>All user profiles with complete data</span>
+                                </li>
+                                <li class="flex items-center">
+                                    <i class="fas fa-check text-green-500 mr-3"></i>
+                                    <span>User permissions and settings</span>
+                                </li>
+                                <li class="flex items-center">
+                                    <i class="fas fa-check text-green-500 mr-3"></i>
+                                    <span>Export metadata and timestamps</span>
+                                </li>
+                                <li class="flex items-center">
+                                    <i class="fas fa-check text-green-500 mr-3"></i>
+                                    <span>Human-readable JSON format</span>
+                                </li>
+                            </ul>
+                        </div>
+                        
+                        <div class="glass-morph rounded-lg p-6">
+                            <h3 class="font-bold mb-4">Export Options</h3>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="flex items-center mb-2">
+                                        <input type="checkbox" id="include-statistics" checked class="mr-3">
+                                        <span>Include activity statistics</span>
+                                    </label>
+                                </div>
+                                <div>
+                                    <label class="flex items-center mb-2">
+                                        <input type="checkbox" id="compress-backup" class="mr-3">
+                                        <span>Compress backup file</span>
+                                    </label>
+                                    <p class="text-sm text-gray-500 ml-6">Smaller file size, requires extraction</p>
+                                </div>
+                                <div>
+                                    <label class="flex items-center mb-2">
+                                        <input type="checkbox" id="save-to-server" checked class="mr-3">
+                                        <span>Save backup to server</span>
+                                    </label>
+                                    <p class="text-sm text-gray-500 ml-6">Keeps a copy in uploads folder</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button onclick="startExport()" class="btn btn-success">
+                        <i class="fas fa-file-export mr-2"></i> Export Users as JSON
+                    </button>
+                    
+                    {% if last_backup %}
+                    <div class="mt-6 p-4 bg-gray-800/50 rounded-lg">
+                        <p class="text-gray-400">
+                            <i class="fas fa-info-circle mr-2"></i>
+                            Last backup created: <span class="text-white">{{ last_backup }}</span>
+                        </p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Import Tab -->
+            <div id="import-content" class="p-6 hidden">
+                <div class="mb-8">
+                    <h2 class="text-xl font-bold mb-2">Import Users</h2>
+                    <p class="text-gray-400 mb-6">Import users from a JSON backup file.</p>
+                    
+                    <!-- Import Source Selection -->
+                    <div class="mb-6">
+                        <h3 class="font-bold mb-4">Import Source</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                            <div class="flex items-center p-4 glass-morph rounded-lg cursor-pointer" 
+                                 onclick="selectImportSource('upload')">
+                                <input type="radio" name="import_source" value="upload" 
+                                       id="source-upload" checked class="mr-3">
+                                <div>
+                                    <label for="source-upload" class="font-bold text-white cursor-pointer">
+                                        <i class="fas fa-upload mr-2"></i>Upload File
+                                    </label>
+                                    <p class="text-sm text-gray-500 mt-1">Upload a JSON file from your computer</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center p-4 glass-morph rounded-lg cursor-pointer"
+                                 onclick="selectImportSource('url')">
+                                <input type="radio" name="import_source" value="url" 
+                                       id="source-url" class="mr-3">
+                                <div>
+                                    <label for="source-url" class="font-bold text-white cursor-pointer">
+                                        <i class="fas fa-link mr-2"></i>From URL
+                                    </label>
+                                    <p class="text-sm text-gray-500 mt-1">Use the latest server backup</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- File Upload Area -->
+                        <div id="upload-source" class="mb-6">
+                            <div class="file-drop-zone" id="file-drop-zone"
+                                 onclick="document.getElementById('json-file').click()">
+                                <div id="upload-placeholder">
+                                    <i class="fas fa-cloud-upload-alt text-4xl text-gray-500 mb-3"></i>
+                                    <p class="text-gray-400 mb-1">Click to select JSON file</p>
+                                    <p class="text-gray-500 text-sm">or drag and drop here</p>
+                                    <p class="text-gray-500 text-xs mt-2">Maximum file size: 10MB</p>
+                                </div>
+                                <div id="file-preview" class="hidden">
+                                    <div class="flex items-center justify-center space-x-3">
+                                        <i class="fas fa-file-code text-2xl text-blue-500"></i>
+                                        <div class="text-left">
+                                            <p class="text-white font-medium" id="selected-file-name"></p>
+                                            <p class="text-gray-400 text-sm" id="selected-file-size"></p>
+                                        </div>
+                                        <button type="button" onclick="removeSelectedFile()" 
+                                                class="text-red-500 hover:text-red-400">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <input type="file" id="json-file" accept=".json" class="hidden">
+                        </div>
+                        
+                        <!-- URL Source -->
+                        <div id="url-source" class="mb-6 hidden">
+                            <div class="glass-morph rounded-lg p-4">
+                                <div class="flex items-center mb-3">
+                                    <i class="fas fa-link text-blue-500 mr-3"></i>
+                                    <div>
+                                        <p class="font-bold">Latest Server Backup</p>
+                                        <p class="text-sm text-gray-500">Automatically uses the most recent backup</p>
+                                    </div>
+                                </div>
+                                <div class="mt-3 p-3 bg-gray-800/50 rounded">
+                                    <code class="text-sm text-gray-300 break-all">
+                                        https://lyxnexus.onrender.com/uploads/lyxnexus_backup_users.json
+                                    </code>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Import Options -->
+                    <div class="mb-8">
+                        <h3 class="font-bold mb-4">Import Settings</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <h4 class="font-bold mb-3">Duplicate Handling</h4>
+                                <div class="space-y-3">
+                                    <label class="flex items-center p-3 glass-morph rounded-lg cursor-pointer">
+                                        <input type="radio" name="duplicate_mode" value="skip" 
+                                               checked class="mr-3">
+                                        <div>
+                                            <span class="font-medium">Skip duplicates</span>
+                                            <p class="text-sm text-gray-500">Keep existing users</p>
+                                        </div>
+                                    </label>
+                                    <label class="flex items-center p-3 glass-morph rounded-lg cursor-pointer">
+                                        <input type="radio" name="duplicate_mode" value="update" 
+                                               class="mr-3">
+                                        <div>
+                                            <span class="font-medium">Update existing</span>
+                                            <p class="text-sm text-gray-500">Update matching users</p>
+                                        </div>
+                                    </label>
+                                    <label class="flex items-center p-3 glass-morph rounded-lg cursor-pointer">
+                                        <input type="radio" name="duplicate_mode" value="merge" 
+                                               class="mr-3">
+                                        <div>
+                                            <span class="font-medium">Merge data</span>
+                                            <p class="text-sm text-gray-500">Combine old and new data</p>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <h4 class="font-bold mb-3">Additional Options</h4>
+                                <div class="space-y-4">
+                                    <label class="flex items-center">
+                                        <input type="checkbox" id="send-notification" class="mr-3">
+                                        <span>Send welcome notification</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="checkbox" id="validate-data" checked class="mr-3">
+                                        <span>Validate data before import</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="checkbox" id="create-backup-first" checked class="mr-3">
+                                        <span>Create backup before import</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button onclick="startImport()" class="btn btn-success">
+                        <i class="fas fa-play mr-2"></i> Start Import
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Backup History Tab -->
+            <div id="backup-content" class="p-6 hidden">
+                <div class="mb-8">
+                    <h2 class="text-xl font-bold mb-2">Backup History</h2>
+                    <p class="text-gray-400 mb-6">View and manage previous backups.</p>
+                    
+                    <div class="glass-morph rounded-lg p-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="font-bold">Available Backups</h3>
+                            <button onclick="refreshBackups()" class="btn btn-secondary">
+                                <i class="fas fa-sync-alt mr-2"></i> Refresh
+                            </button>
+                        </div>
+                        
+                        <div id="backups-list">
+                            <!-- Backups will be loaded here -->
+                            <div class="text-center py-8">
+                                <div class="spinner inline-block w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                                <p class="text-gray-400 mt-4">Loading backups...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Results Area -->
+        <div id="results-area" class="glass-morph rounded-xl p-6 hidden">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold">Import Results</h3>
+                <button onclick="hideResults()" class="text-gray-400 hover:text-white">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="results-content">
+                <!-- Results will be shown here -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Loading Modal -->
+    <div id="loading-modal" class="modal">
+        <div class="modal-content">
+            <div class="text-center">
+                <div class="spinner inline-block w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+                <h3 id="loading-title" class="text-lg font-bold mb-2">Processing</h3>
+                <p id="loading-message" class="text-gray-400">Please wait...</p>
+                <div class="progress-bar mt-4">
+                    <div id="progress-fill" class="progress-fill" style="width: 0%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="success-modal" class="modal">
+        <div class="modal-content">
+            <div class="text-center">
+                <div class="bg-green-500/20 p-3 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                    <i class="fas fa-check text-green-500 text-2xl"></i>
+                </div>
+                <h3 id="success-title" class="text-lg font-bold mb-2">Success!</h3>
+                <p id="success-message" class="text-gray-400 mb-4"></p>
+                <button onclick="closeModal('success-modal')" class="btn">
+                    Continue
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error Modal -->
+    <div id="error-modal" class="modal">
+        <div class="modal-content">
+            <div class="text-center">
+                <div class="bg-red-500/20 p-3 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                    <i class="fas fa-exclamation-triangle text-red-500 text-2xl"></i>
+                </div>
+                <h3 id="error-title" class="text-lg font-bold mb-2">Error</h3>
+                <p id="error-message" class="text-gray-400 mb-4"></p>
+                <button onclick="closeModal('error-modal')" class="btn btn-danger">
+                    Try Again
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tab Management
+        function switchTab(tabName) {
+            // Hide all tabs
+            document.getElementById('export-content').classList.add('hidden');
+            document.getElementById('import-content').classList.add('hidden');
+            document.getElementById('backup-content').classList.add('hidden');
+            
+            // Remove active class from all tab buttons
+            document.getElementById('tab-export').classList.remove('active');
+            document.getElementById('tab-import').classList.remove('active');
+            document.getElementById('tab-backup').classList.remove('active');
+            
+            // Show selected tab
+            document.getElementById(`${tabName}-content`).classList.remove('hidden');
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+            
+            // Load backups if on backup tab
+            if (tabName === 'backup') {
+                loadBackups();
+            }
+        }
+        
+        // Import Source Selection
+        function selectImportSource(source) {
+            document.getElementById('upload-source').classList.toggle('hidden', source !== 'upload');
+            document.getElementById('url-source').classList.toggle('hidden', source !== 'url');
+        }
+        
+        // File Upload Handling
+        const fileDropZone = document.getElementById('file-drop-zone');
+        const fileInput = document.getElementById('json-file');
+        
+        fileDropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            fileDropZone.classList.add('dragover');
+        });
+        
+        fileDropZone.addEventListener('dragleave', () => {
+            fileDropZone.classList.remove('dragover');
+        });
+        
+        fileDropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            fileDropZone.classList.remove('dragover');
+            
+            if (e.dataTransfer.files.length) {
+                fileInput.files = e.dataTransfer.files;
+                previewSelectedFile(e.dataTransfer.files[0]);
+            }
+        });
+        
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length) {
+                previewSelectedFile(e.target.files[0]);
+            }
+        });
+        
+        function previewSelectedFile(file) {
+            if (!file) return;
+            
+            const uploadPlaceholder = document.getElementById('upload-placeholder');
+            const filePreview = document.getElementById('file-preview');
+            const fileName = document.getElementById('selected-file-name');
+            const fileSize = document.getElementById('selected-file-size');
+            
+            uploadPlaceholder.classList.add('hidden');
+            filePreview.classList.remove('hidden');
+            
+            fileName.textContent = file.name;
+            fileSize.textContent = formatFileSize(file.size);
+        }
+        
+        function removeSelectedFile() {
+            fileInput.value = '';
+            document.getElementById('upload-placeholder').classList.remove('hidden');
+            document.getElementById('file-preview').classList.add('hidden');
+        }
+        
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+        
+        // Export Function
+        function startExport() {
+            showLoading('Exporting Users', 'Preparing user data for export...');
+            
+            fetch('/admin/users-manager/export', {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.blob();
+                } else {
+                    return response.json().then(err => { throw new Error(err.error || 'Export failed') });
+                }
+            })
+            .then(blob => {
+                // Create download link
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `lyxnexus_users_backup_${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+                
+                closeModal('loading-modal');
+                showSuccess('Export Complete', 'User data has been exported successfully.');
+            })
+            .catch(error => {
+                closeModal('loading-modal');
+                showError('Export Failed', error.message);
+            });
+        }
+        
+        // Import Function
+        function startImport() {
+            const importSource = document.querySelector('input[name="import_source"]:checked').value;
+            const duplicateMode = document.querySelector('input[name="duplicate_mode"]:checked').value;
+            const sendNotification = document.getElementById('send-notification').checked;
+            
+            showLoading('Importing Users', 'Processing user data...');
+            
+            let formData = new FormData();
+            
+            if (importSource === 'upload') {
+                const file = fileInput.files[0];
+                if (!file) {
+                    showError('No File Selected', 'Please select a JSON file to import.');
+                    return;
+                }
+                formData.append('json_file', file);
+            }
+            
+            formData.append('import_source', importSource);
+            formData.append('duplicate_mode', duplicateMode);
+            formData.append('send_notification', sendNotification);
+            
+            fetch('/admin/users-manager/import', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                closeModal('loading-modal');
+                
+                if (data.error) {
+                    showError('Import Failed', data.error);
+                } else {
+                    showImportResults(data.results);
+                    showSuccess('Import Complete', 'User data has been imported successfully.');
+                }
+            })
+            .catch(error => {
+                closeModal('loading-modal');
+                showError('Import Failed', error.message);
+            });
+        }
+        
+        // Backup Loading
+        function loadBackups() {
+            const backupsList = document.getElementById('backups-list');
+            
+            // Simulate loading backups (you can implement actual API call)
+            setTimeout(() => {
+                backupsList.innerHTML = `
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between p-4 glass-morph rounded-lg">
+                            <div class="flex items-center">
+                                <i class="fas fa-file-code text-blue-500 text-xl mr-4"></i>
+                                <div>
+                                    <p class="font-bold">Latest Backup</p>
+                                    <p class="text-sm text-gray-500">Generated: {{ last_backup or 'No backups yet' }}</p>
+                                </div>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button onclick="downloadBackup('latest')" class="btn btn-secondary">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                                <button onclick="restoreBackup('latest')" class="btn btn-success">
+                                    <i class="fas fa-history"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }, 1000);
+        }
+        
+        function refreshBackups() {
+            const backupsList = document.getElementById('backups-list');
+            backupsList.innerHTML = `
+                <div class="text-center py-8">
+                    <div class="spinner inline-block w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                    <p class="text-gray-400 mt-4">Refreshing backups...</p>
+                </div>
+            `;
+            loadBackups();
+        }
+        
+        // Result Display
+        function showImportResults(results) {
+            const resultsArea = document.getElementById('results-area');
+            const resultsContent = document.getElementById('results-content');
+            
+            let html = `
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                    <div class="text-center p-4 bg-green-500/10 rounded-lg">
+                        <div class="text-2xl font-bold text-green-500">${results.imported}</div>
+                        <div class="text-sm text-gray-400">Imported</div>
+                    </div>
+                    <div class="text-center p-4 bg-yellow-500/10 rounded-lg">
+                        <div class="text-2xl font-bold text-yellow-500">${results.updated}</div>
+                        <div class="text-sm text-gray-400">Updated</div>
+                    </div>
+                    <div class="text-center p-4 bg-gray-500/10 rounded-lg">
+                        <div class="text-2xl font-bold text-gray-500">${results.skipped}</div>
+                        <div class="text-sm text-gray-400">Skipped</div>
+                    </div>
+                    <div class="text-center p-4 bg-red-500/10 rounded-lg">
+                        <div class="text-2xl font-bold text-red-500">${results.failed}</div>
+                        <div class="text-sm text-gray-400">Failed</div>
+                    </div>
+                </div>
+            `;
+            
+            if (results.errors && results.errors.length > 0) {
+                html += `
+                    <div class="mb-4">
+                        <h4 class="font-bold mb-2">Errors:</h4>
+                        <div class="import-preview">
+                            ${results.errors.slice(0, 5).map(error => `
+                                <div class="text-sm text-red-400 mb-1">• ${error}</div>
+                            `).join('')}
+                            ${results.errors.length > 5 ? 
+                                `<div class="text-sm text-gray-500">... and ${results.errors.length - 5} more errors</div>` : ''}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            resultsContent.innerHTML = html;
+            resultsArea.classList.remove('hidden');
+        }
+        
+        function hideResults() {
+            document.getElementById('results-area').classList.add('hidden');
+        }
+        
+        // Modal Functions
+        function showLoading(title, message) {
+            document.getElementById('loading-title').textContent = title;
+            document.getElementById('loading-message').textContent = message;
+            document.getElementById('loading-modal').style.display = 'flex';
+        }
+        
+        function showSuccess(title, message) {
+            document.getElementById('success-title').textContent = title;
+            document.getElementById('success-message').textContent = message;
+            document.getElementById('success-modal').style.display = 'flex';
+        }
+        
+        function showError(title, message) {
+            document.getElementById('error-title').textContent = title;
+            document.getElementById('error-message').textContent = message;
+            document.getElementById('error-modal').style.display = 'flex';
+        }
+        
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+        
+        // Close modals when clicking outside
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set default import source
+            selectImportSource('upload');
+        });
+    </script>
+</body>
+</html>

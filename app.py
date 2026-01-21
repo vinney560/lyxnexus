@@ -9503,6 +9503,312 @@ def test_endpoint():
         'test_urls': test_urls,
         'timestamp': datetime.now().isoformat()
     })
+
+# =========================================
+# DOWNLOAD && UPLOAD ALL USERS
+# =========================================
+
+import json
+import os
+import uuid
+from datetime import datetime
+from flask import make_response, request, render_template, jsonify
+from werkzeug.utils import secure_filename
+
+
+
+@app.route('/admin/users-manager')
+@login_required
+@admin_required
+def users_manager():
+    """Render the users manager template"""
+    if current_user.year != 5:
+        abort(403)
+    
+    # Get user statistics
+    total_users = User.query.count()
+    admin_count = User.query.filter_by(is_admin=True).count()
+    active_users = User.query.filter_by(status=True).count()
+    
+    # Get recent backup if exists in uploads
+    last_backup = None
+    backup_file = os.path.join(app.config['UPLOAD_FOLDER'], 'lyxnexus_backup_users.json')
+    if os.path.exists(backup_file):
+        last_backup = datetime.fromtimestamp(os.path.getmtime(backup_file)).strftime('%Y-%m-%d %H:%M')
+    
+    return render_template('admin_users_manager.html',
+                         total_users=total_users,
+                         admin_count=admin_count,
+                         active_users=active_users,
+                         last_backup=last_backup)
+
+@app.route('/admin/users-manager/export', methods=['GET'])
+@login_required
+@admin_required
+def export_users_json():
+    """Export users as JSON file that downloads automatically"""
+    try:
+        # Query all users
+        users = User.query.order_by(User.created_at.desc()).all()
+        
+        # Prepare export data
+        export_data = {
+            "metadata": {
+                "export_date": datetime.now(timezone(timedelta(hours=3))).isoformat(),
+                "exported_by": current_user.username,
+                "exported_by_id": current_user.id,
+                "total_users": len(users),
+                "system": "LyxNexus",
+                "format_version": "2.0",
+                "note": "This backup can be imported back using the Import feature"
+            },
+            "users": []
+        }
+        
+        for user in users:
+            user_dict = {
+                "id": user.id,
+                "username": user.username,
+                "mobile": user.mobile,
+                "created_at": user.created_at.isoformat() if user.created_at else None,
+                "is_admin": user.is_admin,
+                "status": user.status,
+                "year": user.year,
+                "paid": user.paid,
+                "activities": {
+                    "announcements": len(user.announcements),
+                    "assignments": len(user.assignments),
+                    "topics": len(user.topics),
+                    "timetables": len(user.timetables)
+                }
+            }
+            export_data["users"].append(user_dict)
+        
+        # Convert to JSON
+        json_data = json.dumps(export_data, indent=2, ensure_ascii=False)
+        
+        # Create downloadable response
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        filename = f"lyxnexus_users_backup_{timestamp}.json"
+        
+        response = make_response(json_data)
+        response.headers['Content-Type'] = 'application/json'
+        response.headers['Content-Disposition'] = f'attachment; filename="{filename}"'
+        
+        # Also save to uploads folder for backup
+        try:
+            uploads_dir = app.config['UPLOAD_FOLDER']
+            backup_path = os.path.join(uploads_dir, 'lyxnexus_backup_users.json')
+            with open(backup_path, 'w', encoding='utf-8') as f:
+                f.write(json_data)
+        except Exception as e:
+            print(f"Warning: Could not save backup to uploads folder: {e}")
+        
+        return response
+        
+    except Exception as e:
+        return jsonify({'error': f'Export failed: {str(e)}'}), 500
+
+@app.route('/admin/users-manager/import', methods=['POST'])
+@login_required
+@admin_required
+def import_users_json():
+    """Import users from JSON file with duplicate handling"""
+    try:
+        # Check if using uploaded file or URL
+        import_source = request.form.get('import_source', 'upload')
+        
+        if import_source == 'upload':
+            # Handle file upload
+            if 'json_file' not in request.files:
+                return jsonify({'error': 'No file selected'}), 400
+            
+            file = request.files['json_file']
+            
+            if file.filename == '':
+                return jsonify({'error': 'No file selected'}), 400
+            
+            if not file.filename.lower().endswith('.json'):
+                return jsonify({'error': 'Only JSON files are supported'}), 400
+            
+            # Read and parse file
+            file_content = file.read().decode('utf-8')
+            
+        elif import_source == 'url':
+            # Use the provided URL
+            url = "https://lyxnexus.onrender.com/uploads/lyxnexus_backup_users.json"
+            import requests
+            
+            try:
+                response = requests.get(url, timeout=10)
+                response.raise_for_status()
+                file_content = response.text
+            except Exception as e:
+                return jsonify({'error': f'Failed to fetch from URL: {str(e)}'}), 500
+        
+        else:
+            return jsonify({'error': 'Invalid import source'}), 400
+        
+        # Parse JSON
+        import_data = json.loads(file_content)
+        
+        # Validate structure
+        if not isinstance(import_data, dict) or 'users' not in import_data:
+            return jsonify({'error': 'Invalid JSON format: Missing users array'}), 400
+        
+        users_to_import = import_data['users']
+        
+        if not isinstance(users_to_import, list):
+            return jsonify({'error': 'Invalid JSON format: users must be an array'}), 400
+        
+        # Get import options
+        duplicate_mode = request.form.get('duplicate_mode', 'skip')
+        notification = request.form.get('send_notification') == 'true'
+        
+        # Process import
+        results = process_users_import(users_to_import, duplicate_mode)
+        
+        # Prepare response
+        response_data = {
+            'success': True,
+            'message': 'Import completed successfully',
+            'results': results
+        }
+        
+        if notification:
+            response_data['notification'] = 'Users will be notified'
+        
+        return jsonify(response_data)
+        
+    except json.JSONDecodeError:
+        return jsonify({'error': 'Invalid JSON file format'}), 400
+    except Exception as e:
+        return jsonify({'error': f'Import failed: {str(e)}'}), 500
+
+def process_users_import(users_data, duplicate_mode='skip'):
+    """Process users import with smart duplicate handling"""
+    results = {
+        'total': len(users_data),
+        'imported': 0,
+        'skipped': 0,
+        'updated': 0,
+        'failed': 0,
+        'duplicates_found': 0,
+        'errors': []
+    }
+    
+    # First pass: Identify duplicates
+    user_map = {}
+    for user_data in users_data:
+        key = None
+        
+        # Use mobile as primary key if available
+        if user_data.get('mobile'):
+            key = f"mobile:{user_data['mobile']}"
+        # Fallback to username
+        elif user_data.get('username'):
+            key = f"username:{user_data['username']}"
+        
+        if key:
+            if key in user_map:
+                user_map[key].append(user_data)
+                results['duplicates_found'] += 1
+            else:
+                user_map[key] = [user_data]
+    
+    # Process each unique user
+    for user_data in users_data:
+        try:
+            # Find existing user
+            existing_user = None
+            
+            # Try by mobile first
+            if user_data.get('mobile'):
+                existing_user = User.query.filter_by(mobile=user_data['mobile']).first()
+            
+            # Try by username if not found
+            if not existing_user and user_data.get('username'):
+                existing_user = User.query.filter_by(username=user_data['username']).first()
+            
+            if existing_user:
+                if duplicate_mode == 'skip':
+                    results['skipped'] += 1
+                    continue
+                elif duplicate_mode == 'update':
+                    # Update existing user
+                    update_existing_user(existing_user, user_data)
+                    results['updated'] += 1
+                elif duplicate_mode == 'merge':
+                    # Merge data (prefer imported data)
+                    merge_user_data(existing_user, user_data)
+                    results['updated'] += 1
+            else:
+                # Create new user
+                create_new_user_from_import(user_data)
+                results['imported'] += 1
+            
+            # Batch commit
+            if (results['imported'] + results['updated']) % 50 == 0:
+                db.session.commit()
+                
+        except Exception as e:
+            results['failed'] += 1
+            results['errors'].append(str(e))
+            db.session.rollback()
+    
+    # Final commit
+    try:
+        db.session.commit()
+    except Exception as e:
+        results['errors'].append(f"Database commit failed: {str(e)}")
+        db.session.rollback()
+    
+    return results
+
+def update_existing_user(user, new_data):
+    """Update existing user with imported data"""
+    updatable_fields = ['username', 'mobile', 'is_admin', 'status', 'year', 'paid']
+    
+    for field in updatable_fields:
+        if field in new_data and new_data[field] is not None:
+            setattr(user, field, new_data[field])
+    
+    # Validate mobile
+    if user.mobile and not user.validate_mobile(user.mobile):
+        raise ValueError(f"Invalid mobile number: {user.mobile}")
+
+def merge_user_data(user, new_data):
+    """Merge imported data with existing user (prefer non-null imported data)"""
+    fields = ['username', 'mobile', 'is_admin', 'status', 'year', 'paid']
+    
+    for field in fields:
+        if field in new_data and new_data[field] is not None:
+            current_value = getattr(user, field)
+            if current_value is None or current_value == '':
+                setattr(user, field, new_data[field])
+
+def create_new_user_from_import(user_data):
+    """Create new user from imported data"""
+    # Remove ID to let DB generate new one
+    user_dict = {k: v for k, v in user_data.items() if k != 'id' and k != 'activities'}
+    
+    # Handle date
+    if 'created_at' in user_dict and user_dict['created_at']:
+        try:
+            user_dict['created_at'] = datetime.fromisoformat(
+                user_dict['created_at'].replace('Z', '+00:00')
+            )
+        except:
+            user_dict['created_at'] = datetime.now()
+    
+    # Create user
+    new_user = User(**user_dict)
+    
+    # Validate mobile
+    if new_user.mobile and not new_user.validate_mobile(new_user.mobile):
+        raise ValueError(f"Invalid mobile number: {new_user.mobile}")
+    
+    db.session.add(new_user)    
 #==========================================
 # Error Handlers
 #==========================================

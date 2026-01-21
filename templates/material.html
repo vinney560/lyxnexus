@@ -542,11 +542,6 @@
         line-height: 1.4;
     }
 
-    .file-card .text-sm {
-        word-break: break-all;
-        overflow-wrap: anywhere;
-    }
-
     .modal-content {
         max-width: 95vw;
         box-sizing: border-box;
@@ -567,9 +562,12 @@
     }    
 
     .truncate-text {
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+        display: block !important;
+        word-break: normal !important;
+        overflow-wrap: normal !important;
     }
 
     .break-all {
