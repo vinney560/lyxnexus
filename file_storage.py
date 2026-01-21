@@ -384,195 +384,31 @@ def download_file(file_id):
 @login_required
 @storage_bp.route('/api/files/<int:file_id>', methods=['DELETE'])
 def delete_file(file_id):
-    """Delete file from Cloudinary and database - 0% failure rate"""
+    """Delete file record from database only"""
     try:
         file = UploadedFile.query.get_or_404(file_id)
         
-        print(f"DELETE DEBUG: Starting deletion for file_id={file_id}")
-        print(f"DELETE DEBUG: URL={file.url}")
-        print(f"DELETE DEBUG: Public_ID={file.public_id}")
-        print(f"DELETE DEBUG: Resource_Type={file.resource_type}")
+        print(f"Deleting file record {file_id} from database")
+        print(f"Filename: {file.filename}")
+        print(f"URL: {file.url}")
         
-        # ====== STEP 1: Extract CORRECT public_id from URL ======
-        def extract_public_id_from_url(url):
-            """Extract public_id from Cloudinary URL reliably"""
-            import urllib.parse
-            import re
-            
-            # URL decode first
-            decoded_url = urllib.parse.unquote(url)
-            
-            # Pattern 1: Authenticated URLs
-            # https://res.cloudinary.com/xxx/raw/authenticated/s--sig--/v1234567/folder/filename
-            auth_pattern = r'/authenticated/[^/]+/v\d+/(.+)\.\w+$'
-            
-            # Pattern 2: Regular upload URLs  
-            # https://res.cloudinary.com/xxx/raw/upload/v1234567/folder/filename
-            upload_pattern = r'/upload/(?:v\d+/)?(.+)\.\w+$'
-            
-            # Pattern 3: Any Cloudinary URL
-            # https://res.cloudinary.com/xxx/resource_type/upload/.../public_id
-            any_pattern = r'/(?:image|video|raw|auto)/(?:upload|authenticated)/(?:[^/]+/)*(?:v\d+/)?(.+)\.\w+$'
-            
-            for pattern in [auth_pattern, upload_pattern, any_pattern]:
-                match = re.search(pattern, decoded_url)
-                if match:
-                    public_id = match.group(1)
-                    print(f"DEBUG: Extracted with pattern: {public_id}")
-                    return public_id
-            
-            # If no pattern matches, try to extract manually
-            if 'res.cloudinary.com' in decoded_url:
-                # Split by known segments
-                parts = decoded_url.split('res.cloudinary.com/')[1].split('/')
-                if len(parts) > 3:
-                    # Skip cloud_name, resource_type, upload_type
-                    return '/'.join(parts[3:]).split('.')[0]
-            
-            return None
+        # Delete associated tags first
+        FileTag.query.filter_by(file_id=file.id).delete()
         
-        # Get the actual public_id from URL
-        actual_public_id = extract_public_id_from_url(file.url)
-        if not actual_public_id:
-            actual_public_id = file.public_id
+        # Delete the file record
+        db.session.delete(file)
+        db.session.commit()
         
-        print(f"DELETE DEBUG: Using public_id='{actual_public_id}'")
+        return jsonify({
+            'success': True,
+            'message': 'File record deleted from database'
+        })
         
-        # ====== STEP 2: Determine resource type ======
-        resource_type = file.resource_type or 'raw'
-        
-        # ====== STEP 3: Determine if authenticated ======
-        is_authenticated = 'authenticated' in file.url.lower()
-        
-        # ====== STEP 4: DELETE WITH ALL POSSIBLE COMBINATIONS ======
-        delete_attempts = []
-        
-        # Attempt 1: With correct parameters
-        params = {
-            'resource_type': resource_type,
-            'invalidate': True
-        }
-        if is_authenticated:
-            params['type'] = 'authenticated'
-        
-        result = cloudinary.uploader.destroy(actual_public_id, **params)
-        delete_attempts.append({'params': params.copy(), 'result': result})
-        
-        # Attempt 2: If failed, try without type parameter
-        if result.get('result') != 'ok' and is_authenticated:
-            params2 = {'resource_type': resource_type, 'invalidate': True}
-            result = cloudinary.uploader.destroy(actual_public_id, **params2)
-            delete_attempts.append({'params': params2.copy(), 'result': result})
-        
-        # Attempt 3: Try with 'raw' resource_type
-        if result.get('result') != 'ok':
-            params3 = {'resource_type': 'raw', 'invalidate': True}
-            if is_authenticated:
-                params3['type'] = 'authenticated'
-            result = cloudinary.uploader.destroy(actual_public_id, **params3)
-            delete_attempts.append({'params': params3.copy(), 'result': result})
-        
-        # Attempt 4: Try the stored public_id (original)
-        if result.get('result') != 'ok' and actual_public_id != file.public_id:
-            params4 = {'resource_type': resource_type, 'invalidate': True}
-            if is_authenticated:
-                params4['type'] = 'authenticated'
-            result = cloudinary.uploader.destroy(file.public_id, **params4)
-            delete_attempts.append({'params': params4.copy(), 'result': result})
-        
-        # Attempt 5: Try without _FILE@LN suffix
-        if result.get('result') != 'ok' and '_FILE@LN' in actual_public_id:
-            clean_id = actual_public_id.replace('_FILE@LN', '')
-            params5 = {'resource_type': resource_type, 'invalidate': True}
-            if is_authenticated:
-                params5['type'] = 'authenticated'
-            result = cloudinary.uploader.destroy(clean_id, **params5)
-            delete_attempts.append({'params': params5.copy(), 'result': result})
-        
-        # ====== STEP 5: Check if ANY attempt succeeded ======
-        success = False
-        for attempt in delete_attempts:
-            if attempt['result'].get('result') == 'ok':
-                success = True
-                print(f"DELETE SUCCESS with params: {attempt['params']}")
-                break
-        
-        # ====== STEP 6: Final verification ======
-        if success:
-            # Double-check by trying to fetch the resource (should fail)
-            try:
-                # This should raise an exception if file is truly deleted
-                cloudinary.api.resource(actual_public_id, resource_type=resource_type)
-                print("WARNING: File might still exist in Cloudinary!")
-            except:
-                print("VERIFIED: File successfully deleted from Cloudinary")
-            
-            # Delete from database
-            FileTag.query.filter_by(file_id=file.id).delete()
-            db.session.delete(file)
-            db.session.commit()
-            
-            return jsonify({
-                'success': True,
-                'message': 'File deleted successfully',
-                'debug_info': {
-                    'file_id': file_id,
-                    'public_id_used': actual_public_id,
-                    'attempts': delete_attempts
-                }
-            })
-        else:
-            # Last resort: Try ADMIN API with force
-            print("DELETE DEBUG: All standard attempts failed, trying admin API...")
-            try:
-                # Try to delete by asset ID (from URL)
-                from urllib.parse import urlparse
-                parsed = urlparse(file.url)
-                path_parts = parsed.path.split('/')
-                
-                # Look for asset ID pattern
-                for i, part in enumerate(path_parts):
-                    if part.startswith('v') and part[1:].isdigit():
-                        if i + 1 < len(path_parts):
-                            asset_path = '/'.join(path_parts[i+1:]).split('.')[0]
-                            result = cloudinary.uploader.destroy(asset_path, resource_type='raw')
-                            if result.get('result') == 'ok':
-                                FileTag.query.filter_by(file_id=file.id).delete()
-                                db.session.delete(file)
-                                db.session.commit()
-                                return jsonify({'success': True, 'message': 'Deleted via admin API'})
-            except Exception as e:
-                print(f"DELETE DEBUG: Admin API also failed: {e}")
-            
-            # If we get here, delete from DB anyway (orphaned record)
-            FileTag.query.filter_by(file_id=file.id).delete()
-            db.session.delete(file)
-            db.session.commit()
-            
-            return jsonify({
-                'success': True,
-                'message': 'File record removed from database (Cloudinary deletion may have failed)',
-                'warning': 'Could not delete from Cloudinary - manual cleanup may be needed',
-                'debug_info': {
-                    'file_id': file_id,
-                    'url': file.url,
-                    'all_attempts': delete_attempts
-                }
-            })
-            
     except Exception as e:
         db.session.rollback()
-        print(f"DELETE CRITICAL ERROR: {str(e)}")
-        import traceback
-        traceback.print_exc()
-        
-        # Even on error, try to return something useful
-        return jsonify({
-            'success': False,
-            'error': str(e),
-            'message': 'Deletion failed with unexpected error'
-        }), 500
-            
+        print(f"Database deletion error: {e}")
+        return jsonify({'error': str(e)}), 500
+
 @login_required
 @storage_bp.route('/api/files/search')
 def search_files():
