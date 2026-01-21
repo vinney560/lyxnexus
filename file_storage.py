@@ -464,9 +464,9 @@ def delete_file(file_id):
             result = cloudinary.uploader.destroy(actual_public_id, **params2)
             delete_attempts.append({'params': params2.copy(), 'result': result})
         
-        # Attempt 3: Try with 'auto' resource_type
+        # Attempt 3: Try with 'raw' resource_type
         if result.get('result') != 'ok':
-            params3 = {'resource_type': 'auto', 'invalidate': True}
+            params3 = {'resource_type': 'raw', 'invalidate': True}
             if is_authenticated:
                 params3['type'] = 'authenticated'
             result = cloudinary.uploader.destroy(actual_public_id, **params3)
