@@ -7440,38 +7440,30 @@ def update_topic(id):
     
     return jsonify({'message': 'Topic updated successfully'})
 
+# Using Bulk Delete TopicMaterials before deleting Topic
 @app.route('/api/topics/<int:id>', methods=['DELETE'])
 @login_required
 @admin_required
 def delete_topic(id):
     """Delete a topic (Admin only)"""
     topic = Topic.query.get_or_404(id)
-    materials = TopicMaterial.query.filter_by(
-            topic_id=id
-        ).all()
     
-    # First delete Materials related to topic to prevent SQLalchemyIntegrityError (Null Error)
-    if materials:
-        try:
-            db.session.delete(materials)
-            db.session.commit()
-            print("Materials related to topic deleted!!!")
-        except Exception as e:
-            db.session.rollback()
-            print(f"Failed to delete Materials related to topic!!!: {e}")
-    # Secondly dlete the actual topic after removing the materials
-    if topic:
-        try:
-            db.session.delete(topic)
-            db.session.commit()
-            print("Topic deleted!!!")
-        except Exception as e:
-            db.session.rollback()
-            print(f"Failed to delete Topic!!!: {e}")
-
+    try:
+        # Delete all related materials first
+        TopicMaterial.query.filter_by(topic_id=id).delete()
+        
+        # Delete the topic
+        db.session.delete(topic)
+        db.session.commit()
+        
+        print(f"Topic {id} and its materials deleted successfully!")
         return jsonify({'message': 'Topic deleted successfully'})
-    return jsonify({'message': 'Topic not deleted!'}), 500
-
+        
+    except Exception as e:
+        db.session.rollback()
+        print(f"Failed to delete topic {id}!!!: {e}")
+        return jsonify({'message': 'Failed to delete topic', 'error': str(e)}), 500
+    
 #==========================================
 #            TIMETABLE API ROUTES
 #==========================================
