@@ -9588,7 +9588,7 @@ def export_users_json():
         json_data = json.dumps(export_data, indent=2, ensure_ascii=False)
         
         # Create downloadable response
-        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        timestamp = datetime.now(timezone(timedelta(hours=3))).strftime('%Y%m%d_%H%M%S')
         filename = f"lyxnexus_users_backup_{timestamp}.json"
         
         response = make_response(json_data)
