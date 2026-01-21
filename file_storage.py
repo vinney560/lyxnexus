@@ -439,7 +439,7 @@ def delete_file(file_id):
         print(f"DELETE DEBUG: Using public_id='{actual_public_id}'")
         
         # ====== STEP 2: Determine resource type ======
-        resource_type = file.resource_type or 'auto'
+        resource_type = file.resource_type or 'raw'
         
         # ====== STEP 3: Determine if authenticated ======
         is_authenticated = 'authenticated' in file.url.lower()
@@ -535,7 +535,7 @@ def delete_file(file_id):
                     if part.startswith('v') and part[1:].isdigit():
                         if i + 1 < len(path_parts):
                             asset_path = '/'.join(path_parts[i+1:]).split('.')[0]
-                            result = cloudinary.uploader.destroy(asset_path, resource_type='auto')
+                            result = cloudinary.uploader.destroy(asset_path, resource_type='raw')
                             if result.get('result') == 'ok':
                                 FileTag.query.filter_by(file_id=file.id).delete()
                                 db.session.delete(file)
