@@ -409,6 +409,7 @@ def delete_file(file_id):
                 full_public_id = f"{file.folder}/{public_id}"
                 result = cloudinary.uploader.destroy(full_public_id, resource_type=resource_type)
                 print(f"DEBUG: Delete attempt 2 (with folder): {result}")
+                
             else:
                 # Try default folder
                 full_public_id = f"flask_uploads/{public_id}"
