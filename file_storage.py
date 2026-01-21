@@ -387,19 +387,52 @@ def delete_file(file_id):
     """Delete file from Cloudinary and database"""
     try:
         file = UploadedFile.query.get_or_404(file_id)
+        
+        # Get the public_id from database
         public_id = file.public_id
-        resource_type = file.resource_type if file.resource_type else 'document'
+        resource_type = file.resource_type or 'image'
         
-        # Delete from Cloudinary with the correct resource_type
+        print(f"DEBUG: public_id from DB: '{public_id}'")
+        print(f"DEBUG: folder from DB: '{file.folder}'")
+        
+        # Try deletion with different public_id formats
+        result = None
+        
+        # Option 1: Try with the stored public_id as-is
         result = cloudinary.uploader.destroy(public_id, resource_type=resource_type)
+        print(f"DEBUG: Delete attempt 1 (as-is): {result}")
         
+        # Option 2: If that fails, try with folder prefix
+        if result.get('result') == 'not found':
+            if file.folder:
+                # Add folder prefix
+                full_public_id = f"{file.folder}/{public_id}"
+                result = cloudinary.uploader.destroy(full_public_id, resource_type=resource_type)
+                print(f"DEBUG: Delete attempt 2 (with folder): {result}")
+            else:
+                # Try default folder
+                full_public_id = f"flask_uploads/{public_id}"
+                result = cloudinary.uploader.destroy(full_public_id, resource_type=resource_type)
+                print(f"DEBUG: Delete attempt 2 (default folder): {result}")
+        
+        # Option 3: If still not found, try without _FILE@LN suffix
+        if result.get('result') == 'not found':
+            # Remove _FILE@LN from the end of public_id (before extension)
+            if '_FILE@LN' in public_id:
+                # Remove _FILE@LN but keep extension
+                import re
+                clean_public_id = re.sub(r'_FILE@LN(?=\.\w+$|$)', '', public_id)
+                result = cloudinary.uploader.destroy(clean_public_id, resource_type=resource_type)
+                print(f"DEBUG: Delete attempt 3 (without _FILE@LN): {result}")
+                
+                # Also try with folder
+                if result.get('result') == 'not found' and file.folder:
+                    full_clean_id = f"{file.folder}/{clean_public_id}"
+                    result = cloudinary.uploader.destroy(full_clean_id, resource_type=resource_type)
+                    print(f"DEBUG: Delete attempt 3b (folder + without _FILE@LN): {result}")
+        
+        # Check result
         if result.get('result') == 'ok':
-            # Also try to delete any derived resources (transformations)
-            try:
-                cloudinary.uploader.destroy(public_id, resource_type=resource_type, invalidate=True)
-            except:
-                pass  # Ignore errors for derived resources
-            
             # Delete from database
             FileTag.query.filter_by(file_id=file.id).delete()
             db.session.delete(file)
@@ -410,17 +443,22 @@ def delete_file(file_id):
                 'message': 'File deleted successfully'
             })
         else:
-            print(f"Cloudinary delete failed. Result: {result}")
             return jsonify({
-                'error': 'Failed to delete file from Cloudinary',
-                'details': result.get('result', 'unknown error')
-            }), 500
+                'error': 'File not found in Cloudinary',
+                'details': result,
+                'tried_public_ids': [
+                    public_id,
+                    f"{file.folder or 'flask_uploads'}/{public_id}" if file.folder else None
+                ]
+            }), 404
             
     except Exception as e:
         db.session.rollback()
-        print(f"Error deleting file: {e}")
+        print(f"Error: {e}")
+        import traceback
+        traceback.print_exc()
         return jsonify({'error': str(e)}), 500
-    
+        
 @login_required
 @storage_bp.route('/api/files/search')
 def search_files():
