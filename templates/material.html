@@ -137,18 +137,90 @@
         padding: 20px;
         margin-bottom: 20px;
         transition: all 0.3s ease;
-        border-left: 4px solid transparent;
+        border: 2px dotted rgba(59, 130, 246, 0.3);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .material-card::before {
+        content: '';
+        position: absolute;
+        top: -2px;
+        left: -2px;
+        right: -2px;
+        bottom: -2px;
+        background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.1), transparent);
+        border-radius: 17px;
+        z-index: -1;
+        opacity: 0;
+        transition: opacity 0.3s ease;
     }
     
     .material-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(0, 31, 135, 0.3);
-        border-left-color: #3B82F6;
+        transform: translateY(-4px);
+        box-shadow: 0 12px 30px rgba(59, 130, 246, 0.2);
+        border-color: rgba(59, 130, 246, 0.5);
+    }
+    
+    .material-card:hover::before {
+        opacity: 1;
     }
     
     .material-card.dragging {
-        opacity: 0.5;
-        transform: rotate(5deg);
+        opacity: 0.7;
+        transform: rotate(5deg) scale(0.98);
+        border-color: rgba(139, 92, 246, 0.6);
+        background: rgba(30, 30, 40, 0.5);
+    }
+    
+    .material-card.drag-over {
+        border: 2px dashed rgba(16, 185, 129, 0.6);
+        background: rgba(16, 185, 129, 0.05);
+    }    
+
+    .material-card.gradient-border {
+        border: 2px dotted transparent;
+        background: 
+            linear-gradient(var(--bg-color), var(--bg-color)) padding-box,
+            linear-gradient(90deg, #3B82F6, #8B5CF6, #3B82F6) border-box;
+        background-size: 200% 100%;
+        animation: gradient-border 3s linear infinite;
+    }
+
+    @keyframes gradient-border {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+    }
+
+    @keyframes pulse-drag {
+        0% { border-color: rgba(59, 130, 246, 0.3); }
+        50% { border-color: rgba(139, 92, 246, 0.6); }
+        100% { border-color: rgba(59, 130, 246, 0.3); }
+    }
+
+    .material-card.dragging {
+        animation: pulse-drag 1.5s infinite;
+    }
+
+    .drag-handle {
+        cursor: grab;
+        color: #6B7280;
+        transition: all 0.3s ease;
+        padding: 8px;
+        border-radius: 8px;
+        background: rgba(59, 130, 246, 0.1);
+        border: 1px dotted rgba(59, 130, 246, 0.3);
+    }
+
+    .drag-handle:hover {
+        color: #3B82F6;
+        background: rgba(59, 130, 246, 0.2);
+        border-color: rgba(59, 130, 246, 0.5);
+    }
+
+    .drag-handle:active {
+        cursor: grabbing;
+        transform: scale(0.95);
     }
     
     .form-input {
@@ -570,8 +642,8 @@
         text-overflow: ellipsis !important;
         overflow-wrap: anywhere;
         display: block !important;
-        word-break: break-all;
         overflow-wrap: normal !important;
+        white-space: nowrap;
     }
 
     .break-all {
@@ -885,8 +957,13 @@
                     <div class="material-card" data-material-id="${material.id}" draggable="true">
                         <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center">
                             <div class="flex items-start mb-4 lg:mb-0 flex-1 min-w-0">
-                                <div class="file-icon ${fileIcon.class} flex-shrink-0">
-                                    <i class="fas ${fileIcon.icon}"></i>
+                                <div class="relative">
+                                    <div class="file-icon ${fileIcon.class} flex-shrink-0">
+                                        <i class="fas ${fileIcon.icon}"></i>
+                                    </div>
+                                    <div class="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-blue-500 border-2 border-gray-900 ${material.display_order === 1 ? 'block' : 'hidden'}">
+                                        <i class="fas fa-star text-xs text-white absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"></i>
+                                    </div>
                                 </div>
                                 <div class="flex-1 min-w-0 ml-3">
                                     <div class="flex items-start">
@@ -901,7 +978,7 @@
                                         </div>
                                         {% if current_user.is_admin %}
                                         <div class="drag-handle ml-4 flex-shrink-0" draggable="false">
-                                            <i class="fas fa-grip-vertical"></i>
+                                            <i class="fas fa-grip-vertical text-gray-500 hover:text-blue-400 transition-colors"></i>
                                         </div>
                                         {% endif %}
                                     </div>
@@ -923,7 +1000,7 @@
                                 </div>
                             </div>
                             <div class="action-buttons flex-shrink-0 mt-4 lg:mt-0 lg:ml-4">
-                                <button class="btn" onclick="downloadMaterial(${material.file_id})">
+                                <button class="btn bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700" onclick="downloadMaterial(${material.file_id})">
                                     <i class="fas fa-download mr-1"></i> Download
                                 </button>
                                 {% if current_user.is_admin %}
@@ -933,10 +1010,14 @@
                                 {% endif %}
                             </div>
                         </div>
+                        {% if material.display_order === 1 %}
+                        <div class="absolute top-0 right-0 bg-gradient-to-r from-blue-500 to-purple-600 text-white text-xs font-bold px-3 py-1 rounded-bl-lg rounded-tr-lg">
+                            <i class="fas fa-crown mr-1"></i> Featured
+                        </div>
+                        {% endif %}
                     </div>
                     `;
-                }).join('');
-                
+                }).join('');                
                 {% if current_user.is_admin %}
                 initializeDragAndDrop();
                 {% endif %}
