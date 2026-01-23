@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LyxNexus Operator | Control Hub</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4a90e2;
+            --primary-dark: #357ae8;
+            --secondary: #8b5cf6;
+            --secondary-dark: #7c3aed;
+            --accent: #00d4ff;
+            --accent-glow: rgba(0, 212, 255, 0.6);
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --dark: #0a0e17;
+            --darker: #05070f;
+            --light: #f8fafc;
+            --text-primary: #ffffff;
+            --text-secondary: #cbd5e1;
+            --glass-bg: rgba(16, 23, 41, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            --neon-glow: 0 0 20px rgba(74, 144, 226, 0.5);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--darker) 0%, var(--dark) 50%, #0f172a 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Animated Background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(circle, var(--primary) 0%, transparent 70%);
+            opacity: 0.3;
+            animation: float 15s infinite linear;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0) translateX(0) rotate(0deg); }
+            33% { transform: translateY(-30px) translateX(30px) rotate(120deg); }
+            66% { transform: translateY(20px) translateX(-20px) rotate(240deg); }
+            100% { transform: translateY(0) translateX(0) rotate(360deg); }
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            position: relative;
+        }
+
+        .logo {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 3.5rem;
+            font-weight: 900;
+            background: linear-gradient(90deg, var(--primary), var(--secondary), var(--accent));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 30px rgba(74, 144, 226, 0.5);
+            letter-spacing: 2px;
+            margin-bottom: 0.5rem;
+            animation: glow 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            0% { text-shadow: 0 0 20px rgba(74, 144, 226, 0.5), 0 0 40px rgba(139, 92, 246, 0.3); }
+            100% { text-shadow: 0 0 30px rgba(74, 144, 226, 0.8), 0 0 60px rgba(139, 92, 246, 0.5); }
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            font-weight: 300;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 2rem;
+        }
+
+        /* Terminal UI */
+        .terminal-header {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 12px 12px 0 0;
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 0.5rem;
+            margin-right: 1rem;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27ca3f; }
+
+        .terminal-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            letter-spacing: 1px;
+        }
+
+        /* Main Dashboard */
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        /* Glass Morphism Card */
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 20px;
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--glass-shadow);
+            padding: 2rem;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+            min-height: 300px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: 0.5s;
+        }
+
+        .glass-card:hover::before {
+            left: 100%;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Card Header */
+        .card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .card-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            font-size: 1.8rem;
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .glass-card:hover .card-icon {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .year-icon { background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(16, 185, 129, 0.1)); color: var(--success); }
+        .probe-icon { background: linear-gradient(135deg, rgba(74, 144, 226, 0.2), rgba(74, 144, 226, 0.1)); color: var(--primary); }
+        .lab-icon { background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(139, 92, 246, 0.1)); color: var(--secondary); }
+        .main-icon { background: linear-gradient(135deg, rgba(0, 212, 255, 0.2), rgba(0, 212, 255, 0.1)); color: var(--accent); }
+
+        .card-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: 1px;
+        }
+
+        .card-subtitle {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-top: 0.2rem;
+        }
+
+        /* Card Content */
+        .card-content {
+            flex: 1;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-description {
+            color: var(--text-secondary);
+            line-height: 1.6;
+            font-size: 0.95rem;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 0.8rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .stat-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-3px);
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            font-family: 'Orbitron', sans-serif;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 0.3rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Buttons */
+        .btn-container {
+            display: flex;
+            gap: 1rem;
+            margin-top: auto;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 1rem 1.5rem;
+            border: none;
+            border-radius: 12px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 600;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.7rem;
+            text-decoration: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            box-shadow: 0 5px 15px rgba(74, 144, 226, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(74, 144, 226, 0.5);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-3px);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Terminal Footer */
+        .terminal-footer {
+            margin-top: 3rem;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 0 0 12px 12px;
+            padding: 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .system-status {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            position: relative;
+        }
+
+        .status-indicator.active {
+            background: var(--success);
+            box-shadow: 0 0 10px var(--success);
+            animation: pulse 2s infinite;
+        }
+
+        .status-indicator.inactive {
+            background: var(--danger);
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+
+        .status-text {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        /* Floating Elements */
+        .floating-elements {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .floating-element {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(74, 144, 226, 0.1) 0%, transparent 70%);
+            filter: blur(20px);
+            animation: float-element 20s infinite linear;
+        }
+
+        .floating-element:nth-child(1) {
+            top: 10%;
+            left: 10%;
+            animation-delay: 0s;
+            width: 150px;
+            height: 150px;
+            background: radial-gradient(circle, rgba(139, 92, 246, 0.1) 0%, transparent 70%);
+        }
+
+        .floating-element:nth-child(2) {
+            top: 60%;
+            right: 15%;
+            animation-delay: -5s;
+            width: 120px;
+            height: 120px;
+            background: radial-gradient(circle, rgba(0, 212, 255, 0.1) 0%, transparent 70%);
+        }
+
+        .floating-element:nth-child(3) {
+            bottom: 20%;
+            left: 20%;
+            animation-delay: -10s;
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(circle, rgba(16, 185, 129, 0.1) 0%, transparent 70%);
+        }
+
+        @keyframes float-element {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            33% { transform: translate(30px, -50px) rotate(120deg); }
+            66% { transform: translate(-20px, 20px) rotate(240deg); }
+            100% { transform: translate(0, 0) rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .dashboard {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            
+            .logo {
+                font-size: 2.5rem;
+            }
+            
+            .stats {
+                grid-template-columns: 1fr;
+            }
+            
+            .system-status {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .btn-container {
+                flex-direction: column;
+            }
+        }
+
+        /* Loading Animation */
+        .loading-bar {
+            width: 100%;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 1rem;
+            position: relative;
+        }
+
+        .loading-progress {
+            position: absolute;
+            height: 100%;
+            width: 30%;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            border-radius: 3px;
+            animation: loading 2s infinite ease-in-out;
+        }
+
+        @keyframes loading {
+            0% { left: -30%; }
+            100% { left: 100%; }
+        }
+
+        /* Access Level Badge */
+        .access-badge {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            padding: 0.4rem 0.8rem;
+            background: rgba(16, 185, 129, 0.2);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            color: var(--success);
+            text-transform: uppercase;
+        }
+
+        /* Holographic Effect */
+        .holographic-line {
+            position: absolute;
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent-glow), transparent);
+            top: 50%;
+            left: 0;
+            opacity: 0.3;
+            filter: blur(1px);
+        }
+
+        /* Connection Lines */
+        .connection-lines {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .line {
+            position: absolute;
+            stroke: rgba(74, 144, 226, 0.2);
+            stroke-width: 1;
+            fill: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated Background -->
+    <div class="bg-animation" id="particleContainer"></div>
+    
+    <!-- Floating Elements -->
+    <div class="floating-elements">
+        <div class="floating-element"></div>
+        <div class="floating-element"></div>
+        <div class="floating-element"></div>
+    </div>
+    
+    <!-- Connection Lines -->
+    <svg class="connection-lines" width="100%" height="100%">
+        <line class="line" x1="20%" y1="30%" x2="40%" y2="50%" />
+        <line class="line" x1="60%" y1="40%" x2="80%" y2="60%" />
+        <line class="line" x1="30%" y1="70%" x2="50%" y2="40%" />
+    </svg>
+
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div class="terminal-title">LyxNexus Operator v3.0</div>
+            </div>
+            
+            <h1 class="logo">LyxNexus</h1>
+            <p class="subtitle">Advanced Administrative Control System</p>
+            
+            <div class="loading-bar">
+                <div class="loading-progress"></div>
+            </div>
+        </div>
+
+        <!-- Dashboard Grid -->
+        <div class="dashboard">
+            <!-- Year Management Card -->
+            <div class="glass-card">
+                <div class="access-badge">Admin</div>
+                <div class="card-header">
+                    <div class="card-icon year-icon">
+                        <i class="fas fa-calendar-alt"></i>
+                    </div>
+                    <div>
+                        <h2 class="card-title">Year Management</h2>
+                        <p class="card-subtitle">Academic Progression System</p>
+                    </div>
+                </div>
+                
+                <div class="card-content">
+                    <p class="card-description">
+                        Advanced control panel for managing academic year progression across the entire user base. 
+                        Perform bulk operations with precision control and safety protocols.
+                    </p>
+                    
+                    <div class="stats">
+                        <div class="stat-item">
+                            <div class="stat-value" id="totalUsers">0</div>
+                            <div class="stat-label">Total Users</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="avgYear">0.0</div>
+                            <div class="stat-label">Avg. Year</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="btn-container">
+                    <a href="/admin/year" class="btn btn-primary">
+                        <i class="fas fa-terminal"></i>
+                        Launch Console
+                    </a>
+                    <a href="/admin/year" class="btn btn-secondary">
+                        <i class="fas fa-chart-line"></i>
+                        View Analytics
+                    </a>
+                </div>
+                
+                <div class="holographic-line"></div>
+            </div>
+
+            <!-- LyxProbe Card -->
+            <div class="glass-card">
+                <div class="access-badge">Operator</div>
+                <div class="card-header">
+                    <div class="card-icon probe-icon">
+                        <i class="fas fa-satellite-dish"></i>
+                    </div>
+                    <div>
+                        <h2 class="card-title">LyxProbe</h2>
+                        <p class="card-subtitle">Security & Monitoring</p>
+                    </div>
+                </div>
+                
+                <div class="card-content">
+                    <p class="card-description">
+                        Command-line interface for system security, monitoring, and administration. 
+                        Real-time analytics, user management, and security enforcement tools.
+                    </p>
+                    
+                    <div class="stats">
+                        <div class="stat-item">
+                            <div class="stat-value" id="adminsCount">0</div>
+                            <div class="stat-label">Admins</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="securityLevel">5</div>
+                            <div class="stat-label">Security Level</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="btn-container">
+                    <a href="/probe" class="btn btn-primary">
+                        <i class="fas fa-terminal"></i>
+                        Launch Terminal
+                    </a>
+                    <a href="/probe" class="btn btn-secondary">
+                        <i class="fas fa-shield-alt"></i>
+                        Security Scan
+                    </a>
+                </div>
+                
+                <div class="holographic-line"></div>
+            </div>
+
+            <!-- Lyx Lab Card -->
+            <div class="glass-card">
+                <div class="access-badge">Developer</div>
+                <div class="card-header">
+                    <div class="card-icon lab-icon">
+                        <i class="fas fa-flask"></i>
+                    </div>
+                    <div>
+                        <h2 class="card-title">Lyx Lab</h2>
+                        <p class="card-subtitle">Experimental Tools</p>
+                    </div>
+                </div>
+                
+                <div class="card-content">
+                    <p class="card-description">
+                        Advanced development and testing environment. Access experimental features, 
+                        system diagnostics, and development tools for the Lyx ecosystem.
+                    </p>
+                    
+                    <div class="stats">
+                        <div class="stat-item">
+                            <div class="stat-value" id="toolsCount">12</div>
+                            <div class="stat-label">Tools</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="experiments">3</div>
+                            <div class="stat-label">Active</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="btn-container">
+                    <a href="/lyx-lab" class="btn btn-primary">
+                        <i class="fas fa-rocket"></i>
+                        Enter Lab
+                    </a>
+                    <a href="/lyx-lab" class="btn btn-secondary">
+                        <i class="fas fa-vial"></i>
+                        Experiments
+                    </a>
+                </div>
+                
+                <div class="holographic-line"></div>
+            </div>
+
+            <!-- Ops code Card -->
+            <div class="glass-card">
+                <div class="access-badge">Authorization</div>
+                <div class="card-header">
+                    <div class="card-icon lab-icon">
+                        <i class="fas fa-flask"></i>
+                    </div>
+                    <div>
+                        <h2 class="card-title">Ops Code</h2>
+                        <p class="card-subtitle">Authorization Code for Operators </p>
+                    </div>
+                </div>
+                
+                <div class="card-content">
+                    <p class="card-description">
+                        Authorization code required to access the Lyx Nexus Operator interface. 
+                        This code is used to verify the identity of operators and grant them 
+                        access to sensitive system operations.
+                    </p>
+                    
+                    <div class="stats">
+                        <div class="stat-item">
+                            <div class="stat-value" id="toolsCount">1</div>
+                            <div class="stat-label">Codes</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="experiments">3</div>
+                            <div class="stat-label">Active</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="btn-container">
+                    <a href="/admin/operator/secret-code" class="btn btn-primary">
+                        <i class="fas fa-rocket"></i>
+                        Authorized
+                    </a>
+                    <a href="/admin/operator/secret-code" class="btn btn-secondary">
+                        <i class="fas fa-shield-alt"></i>
+                        Ops Code
+                    </a>
+                </div>
+                
+                <div class="holographic-line"></div>
+            </div>
+
+            <!-- Main Page Card -->
+            <div class="glass-card">
+                <div class="access-badge">User</div>
+                <div class="card-header">
+                    <div class="card-icon main-icon">
+                        <i class="fas fa-home"></i>
+                    </div>
+                    <div>
+                        <h2 class="card-title">Main Portal</h2>
+                        <p class="card-subtitle">User Interface</p>
+                    </div>
+                </div>
+                
+                <div class="card-content">
+                    <p class="card-description">
+                        Return to the main user interface. Access regular features, user dashboard, 
+                        and standard system functionalities. Exit administrative mode.
+                    </p>
+                    
+                    <div class="stats">
+                        <div class="stat-item">
+                            <div class="stat-value" id="onlineUsers">0</div>
+                            <div class="stat-label">Online</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="systemLoad">42%</div>
+                            <div class="stat-label">Load</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="btn-container">
+                    <a href="/main-page" class="btn btn-primary">
+                        <i class="fas fa-sign-out-alt"></i>
+                        Exit Admin Mode
+                    </a>
+                    <a href="/main-page" class="btn btn-secondary">
+                        <i class="fas fa-user"></i>
+                        User Dashboard
+                    </a>
+                </div>
+                
+                <div class="holographic-line"></div>
+            </div>
+        </div>
+
+        <!-- System Status Footer -->
+        <div class="terminal-footer">
+            <div class="system-status">
+                <div class="status-item">
+                    <div class="status-indicator active"></div>
+                    <span class="status-text">System: ONLINE</span>
+                </div>
+                <div class="status-item">
+                    <div class="status-indicator active"></div>
+                    <span class="status-text">Database: CONNECTED</span>
+                </div>
+                <div class="status-item">
+                    <div class="status-indicator active"></div>
+                    <span class="status-text">Security: ACTIVE</span>
+                </div>
+                <div class="status-item">
+                    <div class="status-indicator active"></div>
+                    <span class="status-text">API: RESPONSIVE</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-text" id="currentTime">Loading...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize the dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            // Create animated particles
+            createParticles();
+            
+            // Initialize stats
+            initializeStats();
+            
+            // Start real-time updates
+            startRealTimeUpdates();
+            
+            // Update time
+            updateTime();
+            setInterval(updateTime, 1000);
+            
+            // Add interactive effects
+            addInteractivity();
+            
+            // Simulate system data loading
+            simulateDataLoading();
+        });
+
+        // Create animated particles
+        function createParticles() {
+            const container = document.getElementById('particleContainer');
+            const particleCount = 15;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                
+                // Random size and position
+                const size = Math.random() * 100 + 20;
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                particle.style.left = `${Math.random() * 100}%`;
+                particle.style.top = `${Math.random() * 100}%`;
+                
+                // Random animation duration
+                const duration = Math.random() * 30 + 20;
+                particle.style.animationDuration = `${duration}s`;
+                particle.style.animationDelay = `${Math.random() * 5}s`;
+                
+                // Random color
+                const colors = [
+                    'rgba(74, 144, 226, 0.3)',
+                    'rgba(139, 92, 246, 0.3)',
+                    'rgba(0, 212, 255, 0.3)',
+                    'rgba(16, 185, 129, 0.3)'
+                ];
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                particle.style.background = `radial-gradient(circle, ${color} 0%, transparent 70%)`;
+                
+                container.appendChild(particle);
+            }
+        }
+
+        // Initialize stats with dynamic values
+        function initializeStats() {
+            // Simulate API calls to get real data
+            setTimeout(() => {
+                document.getElementById('totalUsers').textContent = '1,247';
+                document.getElementById('avgYear').textContent = '2.8';
+                document.getElementById('adminsCount').textContent = '18';
+                document.getElementById('onlineUsers').textContent = '893';
+            }, 1000);
+        }
+
+        // Start real-time updates
+        function startRealTimeUpdates() {
+            // Update system load randomly
+            setInterval(() => {
+                const load = Math.floor(Math.random() * 30) + 30;
+                document.getElementById('systemLoad').textContent = `${load}%`;
+                
+                // Update online users with small fluctuations
+                const onlineEl = document.getElementById('onlineUsers');
+                let current = parseInt(onlineEl.textContent.replace(',', ''));
+                if (!isNaN(current)) {
+                    const change = Math.floor(Math.random() * 10) - 5;
+                    current = Math.max(800, Math.min(950, current + change));
+                    onlineEl.textContent = current.toLocaleString();
+                }
+            }, 5000);
+        }
+
+        // Update current time
+        function updateTime() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('en-US', {
+                hour12: false,
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            document.getElementById('currentTime').textContent = `Time: ${timeString}`;
+        }
+
+        // Add interactivity effects
+        function addInteractivity() {
+            // Add ripple effect to buttons
+            const buttons = document.querySelectorAll('.btn');
+            buttons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    // Create ripple
+                    const ripple = document.createElement('span');
+                    const rect = this.getBoundingClientRect();
+                    const size = Math.max(rect.width, rect.height);
+                    const x = e.clientX - rect.left - size / 2;
+                    const y = e.clientY - rect.top - size / 2;
+                    
+                    ripple.style.cssText = `
+                        position: absolute;
+                        border-radius: 50%;
+                        background: rgba(255, 255, 255, 0.7);
+                        transform: scale(0);
+                        animation: ripple 0.6s linear;
+                        width: ${size}px;
+                        height: ${size}px;
+                        top: ${y}px;
+                        left: ${x}px;
+                    `;
+                    
+                    this.appendChild(ripple);
+                    
+                    // Remove ripple after animation
+                    setTimeout(() => {
+                        ripple.remove();
+                    }, 600);
+                });
+            });
+            
+            // Add CSS for ripple animation
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes ripple {
+                    to {
+                        transform: scale(4);
+                        opacity: 0;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            // Add hover sound effect (optional)
+            buttons.forEach(button => {
+                button.addEventListener('mouseenter', () => {
+                    // You could add a subtle sound effect here
+                });
+            });
+        }
+
+        // Simulate data loading animation
+        function simulateDataLoading() {
+            const statValues = document.querySelectorAll('.stat-value');
+            statValues.forEach(stat => {
+                const originalText = stat.textContent;
+                stat.textContent = '0';
+                
+                let current = 0;
+                const target = parseInt(originalText.replace(',', '')) || 100;
+                const increment = target / 20;
+                
+                const timer = setInterval(() => {
+                    current += increment;
+                    if (current >= target) {
+                        current = target;
+                        clearInterval(timer);
+                        stat.textContent = originalText;
+                    } else {
+                        stat.textContent = Math.floor(current).toLocaleString();
+                    }
+                }, 50);
+            });
+        }
+
+        // Add keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Alt + 1 for Year Management
+            if (e.altKey && e.key === '1') {
+                window.location.href = '/admin/year';
+            }
+            // Alt + 2 for LyxProbe
+            else if (e.altKey && e.key === '2') {
+                window.location.href = '/probe';
+            }
+            // Alt + 3 for Lyx Lab
+            else if (e.altKey && e.key === '3') {
+                window.location.href = '/lyx-lab';
+            }
+            // Alt + 4 for Main Page
+            else if (e.altKey && e.key === '4') {
+                window.location.href = '/main-page';
+            }
+            // Escape for reload
+            else if (e.key === 'Escape') {
+                location.reload();
+            }
+        });
+
+        // Add connection line animations
+        function animateConnectionLines() {
+            const lines = document.querySelectorAll('.line');
+            lines.forEach(line => {
+                const length = line.getTotalLength();
+                line.style.strokeDasharray = length;
+                line.style.strokeDashoffset = length;
+                
+                // Animate drawing the line
+                setTimeout(() => {
+                    line.style.transition = 'stroke-dashoffset 2s ease-in-out';
+                    line.style.strokeDashoffset = '0';
+                }, Math.random() * 1000);
+                
+                // Pulsing effect
+                setInterval(() => {
+                    line.style.stroke = `rgba(74, 144, 226, ${0.1 + Math.random() * 0.2})`;
+                }, 2000);
+            });
+        }
+
+        // Initialize line animations
+        setTimeout(animateConnectionLines, 500);
+
+        // Add terminal-like typing effect for subtitle
+        function typeWriter() {
+            const subtitle = document.querySelector('.subtitle');
+            const originalText = subtitle.textContent;
+            subtitle.textContent = '';
+            
+            let i = 0;
+            const timer = setInterval(() => {
+                if (i < originalText.length) {
+                    subtitle.textContent += originalText.charAt(i);
+                    i++;
+                } else {
+                    clearInterval(timer);
+                }
+            }, 50);
+        }
+
+        // Start typing effect
+        setTimeout(typeWriter, 1000);
+    </script>
+</body>
+</html>

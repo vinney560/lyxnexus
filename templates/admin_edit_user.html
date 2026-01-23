@@ -320,6 +320,12 @@
                             </span>
                         </div>
                         <div class="flex items-center justify-between">
+                            <span class="text-gray-400">Is Verified</span>
+                            <span id="display-verified" class="status-badge status-{{ 'verified' if user.is_verified_admin else 'unverified' }}">
+                                {{ 'Verified if user.is_verified_admin else 'Unverified' }}
+                            </span>
+                        </div>
+                        <div class="flex items-center justify-between">
                             <span class="text-gray-400">Year</span>
                             <span id="display-year" class="year-badge year-{{ user.year }}">
                                 {% if user.year == 5 %}
@@ -406,7 +412,7 @@
                             </select>
                         </div>
 
-                        <!-- Status & Admin Toggles -->
+                        <!-- Status, is verified admin & Admin Toggles -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                             <div>
                                 <label class="block text-gray-400 mb-2">Account Status</label>
@@ -423,6 +429,14 @@
                                     <span class="slider"></span>
                                 </label>
                                 <div class="text-sm text-gray-500 mt-2">Admins have full system access</div>
+                            </div>
+                            <div>
+                                <label class="block text-gray-400 mb-2">Is Verified Admin</label>
+                                <label class="switch">
+                                    <input type="checkbox" id="is_verified_admin" {{ 'checked' if user.is_verified_admin }}>
+                                    <span class="slider"></span>
+                                </label>
+                                <div class="text-sm text-gray-500 mt-2">Verify Admin Privileges/div>
                             </div>
                         </div>
 
@@ -493,7 +507,8 @@
                     mobile: data.mobile,
                     year: data.year,
                     status: data.status,
-                    is_admin: data.is_admin
+                    is_admin: data.is_admin,
+                    is_verified_admin: data.is_verified_admin
                 };
 
                 // Update stats
@@ -523,7 +538,8 @@
                 mobile: document.getElementById('mobile').value.trim(),
                 year: parseInt(document.getElementById('year').value),
                 status: document.getElementById('status').checked,
-                is_admin: document.getElementById('is_admin').checked
+                is_admin: document.getElementById('is_admin').checked,
+                is_verified_admin: document.getElementById('is_verified_admin').checked
             };
 
             try {
@@ -560,13 +576,19 @@
                 adminBadge.textContent = data.user.is_admin ? 'Yes' : 'No';
                 adminBadge.className = `status-badge ${data.user.is_admin ? 'admin-badge' : 'status-inactive'}`;
 
+                // Update is verified admin badge
+                const isVerifiedAdminBadge = document.getElementById('display-verified');
+                isVerifiedAdminBadge.textContent = data.user.is_verified_admin ? 'Verified' : 'Unverified';
+                isVerifiedAdminBadge.className = `status-badge ${data.user.is_verified_admin ? 'admin-badge' : 'status-inactive'}`;
+
                 // Update original data
                 originalData = {
                     username: data.user.username,
                     mobile: data.user.mobile,
                     year: data.user.year,
                     status: data.user.status,
-                    is_admin: data.user.is_admin
+                    is_admin: data.user.is_admin,
+                    is_verified_admin: data.user.is_verified_admin
                 };
 
                 // Add to update log
@@ -603,6 +625,7 @@
             document.getElementById('year').value = originalData.year;
             document.getElementById('status').checked = originalData.status;
             document.getElementById('is_admin').checked = originalData.is_admin;
+            document.getElementById('is_verified_admin').checked = originalData.is_verified_admin;
             
             showToast('Form reset to original values', 'warning');
         }

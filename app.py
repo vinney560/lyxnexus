@@ -172,6 +172,7 @@ class User(db.Model, UserMixin):
     status = db.Column(db.Boolean, default=True, nullable=True)
     year = db.Column(db.Integer, default=1, nullable=True)
     paid = db.Column(db.Boolean, default=False, nullable=True)
+    is_verified_admin = db.Column(db.Boolean, default=False, nullable=True)
 
     # Relationships
     announcements = db.relationship('Announcement', 
@@ -678,6 +679,7 @@ with app.app_context():
     try:
         # Create tables if they don't exist
         db.create_all()
+        db.session.execute(text('ALTER TABLE "user" ADD COLUMN is_verified_admin BOOLEAN DEFAULT FALSE'))
         db.session.commit()
         print("✅ Database tables created successfully!")
 
@@ -2775,7 +2777,7 @@ from sqlalchemy.exc import IntegrityError
 def admin_edit_user(user_id):
     """Admin edit user details page"""
     if not current_user.year == 5:
-        flash('Admin access required', 'error')
+        flash('Operator access required', 'error')
         return redirect(url_for('admin_users'))
     
     user = User.query.get_or_404(user_id)
@@ -2849,6 +2851,12 @@ def api_update_user(user_id):
         updates['is_admin'] = is_admin
         user.is_admin = is_admin
     
+    # Update is verified admin
+    if 'is_verified_admin' in data:
+        is_verified_admin = bool(data['is_verified_admin'])
+        updates['is_verified_admin'] = is_verified_admin
+        user.is_verified_admin = is_verified_admin
+
     try:
         db.session.commit()
         
@@ -2861,7 +2869,9 @@ def api_update_user(user_id):
                 'username': user.username,
                 'mobile': user.mobile,
                 'year': user.year,
+                'is_verified_admin': user.is_verified_admin,
                 'status': user.status,
+                'paid': user.paid,
                 'is_admin': user.is_admin,
                 'created_at': user.created_at.strftime('%Y-%m-%d %H:%M')
             },
@@ -2892,6 +2902,8 @@ def api_get_user(user_id):
         'mobile': user.mobile,
         'year': user.year,
         'status': user.status,
+        'paid': user.paid,
+        'is_verified_admin': user.is_verified_admin,
         'is_admin': user.is_admin,
         'created_at': user.created_at.strftime('%Y-%m-%d %H:%M'),
         'announcements_count': len(user.announcements),
@@ -4578,6 +4590,8 @@ from lyxlab_bp import lyxlab_bp
 from url_ping_bp import url_ping_bp
 from test import test_routes
 from chloe import _chloe_ai
+from lyxprobe_bp import probe_bp
+from lyxmodify_year import modify_year_bp
 from file_storage import storage_bp
 
 import cloudinary
@@ -4601,6 +4615,8 @@ app.register_blueprint(storage_bp)
 app.register_blueprint(url_ping_bp)
 app.register_blueprint(test_routes)
 app.register_blueprint(_chloe_ai)
+app.register_blueprint(probe_bp)
+app.register_blueprint(modify_year_bp)
 #========================================================================
 @app.route('/lyx-ai')
 @login_required
@@ -4675,6 +4691,14 @@ def admin_page():
 @admin_required
 def admin_users():
     return render_template('admin_users.html')
+#-----------------------------------------------------------------
+@app.route('/admin/operator')
+@login_required
+@admin_required
+def operator_page():
+    if  not current_user.year == 5:
+        abort(403)
+    return render_template('operator_page.html')
 #-----------------------------------------------------------------
 @app.route('/profile')
 @not_banned

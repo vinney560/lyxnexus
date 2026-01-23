@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LyxProbe v2.0 | Command Interface</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0a0a0a;
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            line-height: 1.4;
+            height: 100vh;
+            overflow: hidden;
+            cursor: default;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            padding: 10px;
+        }
+
+        .header {
+            border-bottom: 2px solid #00ff00;
+            padding: 10px 0;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 1.2em;
+            text-shadow: 0 0 5px #00ff00;
+            letter-spacing: 2px;
+        }
+
+        .status-bar {
+            display: flex;
+            gap: 20px;
+            font-size: 0.9em;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #00ff00;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .terminal {
+            flex: 1;
+            background: #000;
+            border: 1px solid #00ff00;
+            border-radius: 5px;
+            padding: 15px;
+            overflow-y: auto;
+            font-size: 14px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .output {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 10px;
+            padding-right: 5px;
+        }
+
+        /* Scrollbar styling */
+        .output::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        .output::-webkit-scrollbar-track {
+            background: #111;
+        }
+
+        .output::-webkit-scrollbar-thumb {
+            background: #00ff00;
+            border-radius: 5px;
+        }
+
+        .output::-webkit-scrollbar-thumb:hover {
+            background: #00cc00;
+        }
+
+        .entry {
+            margin-bottom: 10px;
+            padding: 5px 0;
+            border-bottom: 1px solid #222;
+        }
+
+        .entry:last-child {
+            border-bottom: none;
+        }
+
+        .timestamp {
+            color: #888;
+            font-size: 0.9em;
+            margin-right: 10px;
+        }
+
+        .prompt {
+            color: #00ff00;
+            font-weight: bold;
+            margin-right: 5px;
+        }
+
+        .command {
+            color: #fff;
+            font-weight: bold;
+        }
+
+        .output-title {
+            color: #00ffff;
+            font-weight: bold;
+            margin: 5px 0;
+        }
+
+        .output-content {
+            color: #ccc;
+            white-space: pre-wrap;
+            font-family: 'Courier New', monospace;
+            margin-left: 20px;
+            padding: 5px;
+            background: #111;
+            border-left: 3px solid #00ff00;
+        }
+
+        .output-content.info { border-left-color: #00ffff; }
+        .output-content.success { border-left-color: #00ff00; }
+        .output-content.warning { border-left-color: #ffff00; }
+        .output-content.error { border-left-color: #ff0000; }
+
+        .input-area {
+            display: flex;
+            align-items: center;
+            padding: 10px 0;
+            border-top: 1px solid #333;
+        }
+
+        .input-prompt {
+            color: #00ff00;
+            font-weight: bold;
+            margin-right: 10px;
+            white-space: nowrap;
+        }
+
+        #command-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            padding: 5px;
+            outline: none;
+        }
+
+        #command-input:focus {
+            background: rgba(0, 255, 0, 0.1);
+        }
+
+        .shortcuts {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #333;
+            font-size: 0.8em;
+            color: #888;
+        }
+
+        .shortcut {
+            cursor: pointer;
+            padding: 2px 8px;
+            border: 1px solid #333;
+            border-radius: 3px;
+            transition: all 0.2s;
+        }
+
+        .shortcut:hover {
+            border-color: #00ff00;
+            color: #00ff00;
+        }
+
+        .help-text {
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 5px;
+            font-style: italic;
+        }
+
+        /* Animation for new entries */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .entry.new {
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        /* Blinking cursor */
+        .cursor {
+            display: inline-block;
+            width: 8px;
+            height: 16px;
+            background: #00ff00;
+            margin-left: 2px;
+            animation: blink 1s infinite;
+            vertical-align: middle;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>LYXPROBE v2.0 | COMMAND INTERFACE</h1>
+            <div class="status-bar">
+                <div class="status-item">
+                    <div class="status-dot"></div>
+                    <span>ONLINE</span>
+                </div>
+                <div class="status-item">
+                    <div class="status-dot" style="background: #00ffff;"></div>
+                    <span>SECURE</span>
+                </div>
+                <div class="status-item">
+                    <div class="status-dot" style="background: #ffff00;"></div>
+                    <span>OPERATOR MODE</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="terminal">
+            <div class="output" id="output">
+                <!-- Command output will be inserted here -->
+                <div class="entry new">
+                    <span class="timestamp">[{{ now.strftime('%H:%M:%S') if now else '00:00:00' }}]</span>
+                    <span class="prompt">LYXPROBE&gt;</span>
+                    <span class="command">system boot</span>
+                    <div class="output-title">SYSTEM INITIALIZED</div>
+                    <div class="output-content info">
+                        LyxProbe v2.0 Command Interface
+                        Connected to Database: ✓
+                        Operator Authentication: ✓
+                        Security Protocols: ACTIVE
+                        
+                        Type 'help' for available commands
+                    </div>
+                </div>
+            </div>
+
+            <div class="input-area">
+                <div class="input-prompt">LYXPROBE&gt;</div>
+                <input type="text" id="command-input" autocomplete="off" autofocus 
+                       placeholder="Type command and press Enter...">
+                <div class="cursor"></div>
+            </div>
+
+            <div class="shortcuts">
+                <div class="shortcut" onclick="executeCommand('help')">HELP</div>
+                <div class="shortcut" onclick="executeCommand('clear')">CLEAR</div>
+                <div class="shortcut" onclick="executeCommand('system-info')">SYSTEM</div>
+                <div class="shortcut" onclick="executeCommand('list-admins')">ADMINS</div>
+                <div class="shortcut" onclick="executeCommand('list-users')">USERS</div>
+                <div class="shortcut" onclick="clearTerminal()">RESET</div>
+            </div>
+
+            <div class="help-text">
+                Press ↑/↓ for command history • Tab for auto-complete • Ctrl+L to clear
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let commandHistory = [];
+        let historyIndex = -1;
+        const outputElement = document.getElementById('output');
+        const inputElement = document.getElementById('command-input');
+
+        // Focus input on page load
+        inputElement.focus();
+
+        // Handle Enter key
+        inputElement.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                const command = inputElement.value.trim();
+                if (command) {
+                    executeCommand(command);
+                    inputElement.value = '';
+                    historyIndex = -1;
+                }
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                navigateHistory(-1);
+            } else if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                navigateHistory(1);
+            } else if (e.key === 'Tab') {
+                e.preventDefault();
+                autoComplete();
+            }
+        });
+
+        // Clear terminal on Ctrl+L
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 'l') {
+                e.preventDefault();
+                clearTerminal();
+            }
+        });
+
+        // Click anywhere to focus input
+        document.addEventListener('click', function() {
+            inputElement.focus();
+        });
+
+        function navigateHistory(direction) {
+            if (commandHistory.length === 0) return;
+            
+            historyIndex += direction;
+            
+            if (historyIndex < 0) {
+                historyIndex = -1;
+                inputElement.value = '';
+                return;
+            }
+            
+            if (historyIndex >= commandHistory.length) {
+                historyIndex = commandHistory.length - 1;
+            }
+            
+            if (historyIndex >= 0) {
+                inputElement.value = commandHistory[historyIndex];
+                // Move cursor to end
+                inputElement.setSelectionRange(inputElement.value.length, inputElement.value.length);
+            }
+        }
+
+        function autoComplete() {
+            const commands = ['help', 'clear', 'date', 'whoami', 'list-users', 
+                             'list-admins', 'kill-rogue', 'ban', 'unban', 
+                             'promote', 'demote', 'user-info', 'system-info',
+                             'export', 'ping', 'echo'];
+            
+            const input = inputElement.value.toLowerCase();
+            const matches = commands.filter(cmd => cmd.startsWith(input));
+            
+            if (matches.length === 1) {
+                inputElement.value = matches[0];
+            } else if (matches.length > 1) {
+                // Show suggestions
+                const suggestion = matches[0];
+                for (let i = 0; i < suggestion.length; i++) {
+                    if (i >= input.length) {
+                        inputElement.value = suggestion;
+                        break;
+                    }
+                }
+            }
+        }
+
+        function clearTerminal() {
+            outputElement.innerHTML = '';
+            addOutputEntry('SYSTEM', 'Terminal cleared', 'info');
+            inputElement.value = '';
+            inputElement.focus();
+        }
+
+        function executeCommand(command) {
+            // Add command to output
+            const timestamp = new Date().toLocaleTimeString('en-US', { 
+                hour12: false,
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            
+            const commandEntry = document.createElement('div');
+            commandEntry.className = 'entry new';
+            commandEntry.innerHTML = `
+                <span class="timestamp">[${timestamp}]</span>
+                <span class="prompt">LYXPROBE&gt;</span>
+                <span class="command">${command}</span>
+            `;
+            outputElement.appendChild(commandEntry);
+            
+            // Add to history
+            if (command !== 'clear') {
+                commandHistory.unshift(command);
+                if (commandHistory.length > 50) commandHistory.pop();
+            }
+            
+            // Scroll to bottom
+            outputElement.scrollTop = outputElement.scrollHeight;
+            
+            // Send to server
+            fetch('/probe/execute', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ command: command })
+            })
+            .then(response => response.json())
+            .then(data => {
+                addOutputEntry(data.title, data.content, data.type);
+            })
+            .catch(error => {
+                addOutputEntry('ERROR', 'Connection failed: ' + error.message, 'error');
+            });
+            
+            // Clear input
+            inputElement.value = '';
+            inputElement.focus();
+        }
+
+        function addOutputEntry(title, content, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString('en-US', { 
+                hour12: false,
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            
+            const entry = document.createElement('div');
+            entry.className = 'entry new';
+            entry.innerHTML = `
+                <div class="output-title">${title}</div>
+                <div class="output-content ${type}">${content}</div>
+            `;
+            outputElement.appendChild(entry);
+            
+            // Scroll to bottom
+            outputElement.scrollTop = outputElement.scrollHeight;
+        }
+
+        // Initialize with welcome message
+        setTimeout(() => {
+            addOutputEntry('WELCOME', 
+                'LyxProbe Command Interface v2.0 initialized.\n' +
+                'Security Level: MAXIMUM\n' +
+                'Operator: Authenticated\n' +
+                'Ready for commands...\n\n' +
+                'Type "help" for command list.', 
+                'info');
+        }, 100);
+    </script>
+</body>
+</html>

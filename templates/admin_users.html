@@ -2042,11 +2042,9 @@
         }
 
         function exportUserData() {
-            showToast('User data export started. This may take a moment.', 'info');
-            
-            // Simulate export process
+            showToast('Preparing user data for export...', 'info', 3000);
             setTimeout(() => {
-                showToast('User data exported successfully!', 'success');
+                window.location.href = '/admin/users-manager';
             }, 2000);
         }
 
@@ -2058,7 +2056,10 @@
         }
 
         function logout() {
-            window.location.href = '/logout';
+            showToast("Logging out...", 'info', 2000);
+            setTimeout(() => {
+              window.location.href = '/logout';  
+            }, 1500);
         }
 
         function stopAllPolling() {
