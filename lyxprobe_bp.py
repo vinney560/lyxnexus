@@ -36,6 +36,7 @@ class ProbeCommandProcessor:
             'date': self.cmd_date,
             'whoami': self.cmd_whoami,
             'list-admins': self.cmd_list_admins,
+            'list-operators': self.cmd_list_operators,
             'list-users': self.cmd_list_users,
             'kill-rogue': self.cmd_kill_rogue,
             'ban': self.cmd_ban,
@@ -48,7 +49,10 @@ class ProbeCommandProcessor:
             'system-info': self.cmd_system_info,
             'export': self.cmd_export,
             'ping': self.cmd_ping,
-            'echo': self.cmd_echo
+            'echo': self.cmd_echo,
+            'reboot': self.cmd_reboot,
+            'version': self.cmd_version,
+            'shutdown': self.cmd_shutdown
         }
     
     def process(self, command):
@@ -94,6 +98,7 @@ class ProbeCommandProcessor:
             "=== USER MANAGEMENT ===",
             "list-users           - List all users",
             "list-admins          - List all administrators",
+            "list-operators       - List all operators",
             "user-info [id/name]  - Get detailed user info",
             "ban [id]             - Ban a user account",
             "unban [id]           - Unban a user account",
@@ -106,6 +111,8 @@ class ProbeCommandProcessor:
             "kill-rogue           - Remove unverified admins",
             "system-info          - Display system statistics",
             "export [table]       - Export data (users/admins)",
+            "reboot               - Reboot the server",
+            "--version            - Show software version",
             "",
             "=== SYNTAX ===",
             "> command [argument] - Run command with argument",
@@ -166,6 +173,29 @@ class ProbeCommandProcessor:
             header = f"Total Admins: {len(admins)}\n"
             header += "-" * 70
             return self.format_output("ADMIN LIST", header + "\n" + "\n".join(admin_list), "info")
+        except Exception as e:
+            return self.format_output("ERROR", f"Database error: {str(e)}", "error")
+    
+    def cmd_list_operators(self, args):
+        """List all operators"""
+        try:
+            operators = User.query.filter(User.year == 5).order_by(User.id).all()
+            if not operators:
+                return self.format_output("OPERATOR LIST", "No operators found", "warning")
+            
+            operator_list = []
+            for operator in operators:
+                status = "✓" if operator.status else "✗"
+                verified = "✓" if operator.is_verified_admin else "✗"
+                operator_list.append(
+                    f"[{operator.id:03d}] {operator.username:20} | "
+                    f"Year: {operator.year} | Active: {status} | "
+                    f"Verified: {verified} | Mobile: {operator.mobile}"
+                )
+            
+            header = f"Total Operators: {len(operators)}\n"
+            header += "-" * 70
+            return self.format_output("OPERATOR LIST", header + "\n" + "\n".join(operator_list), "info")
         except Exception as e:
             return self.format_output("ERROR", f"Database error: {str(e)}", "error")
     
@@ -502,7 +532,7 @@ class ProbeCommandProcessor:
                 f"",
                 f"=== ACCOUNT STATUS ===",
                 f"Status:       {status}",
-                f"Fee:         {paid}",
+                f"Fee:          {paid}",
                 f"Role:         {admin_status}",
                 f"Verified:     {verified}",
                 f"Operator:     {operator}",
@@ -541,7 +571,7 @@ class ProbeCommandProcessor:
                 f"Total Users:    {total_users}",
                 f"Active:         {active_users}",
                 f"Banned:         {banned_users}",
-                f"Fee Paid Users:     {paid_users}",
+                f"Paid Fee:       {paid_users}",
                 f"",
                 f"=== ADMINISTRATION ===",
                 f"Total Admins:   {total_admins}",
@@ -598,6 +628,18 @@ class ProbeCommandProcessor:
         """Echo back text"""
         text = " ".join(args) if args else "(silence)"
         return self.format_output("ECHO", text, "info")
+    
+    def cmd_reboot(self, args):
+        """Reboot the server"""
+        return '''<script>window.location.reload();</script>'''
+    
+    def cmd_version(self, args):
+        """Show software version"""
+        return self.format_output("VERSION", "LyxNexus Probe v2.07", "info")
+    
+    def cmd_shutdown(self, args):
+        """Shutdown the server"""
+        return '''<script>window.location.href='/admin/operator';</script>'''
 
 # ============ ROUTES ============
 
@@ -606,7 +648,7 @@ class ProbeCommandProcessor:
 @operator_required
 def lyx_probe():
     """Main probe interface"""
-    return render_template('lyxprobe.html')
+    return render_template('lyxprobe.html', now=datetime.now(timezone(timedelta(hours=3))).strftime('%Y-%m-%d %H:%M:%S'))
 
 @probe_bp.route('/execute', methods=['POST'])
 @login_required

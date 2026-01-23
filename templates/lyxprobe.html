@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LyxProbe v2.0 | Command Interface</title>
+    <title>LyxProbe v2.07 | Command Interface</title>
     <style>
         * {
             margin: 0;
@@ -212,7 +212,6 @@
             font-style: italic;
         }
 
-        /* Animation for new entries */
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(-10px); }
             to { opacity: 1; transform: translateY(0); }
@@ -222,7 +221,6 @@
             animation: fadeIn 0.3s ease-out;
         }
 
-        /* Blinking cursor */
         .cursor {
             display: inline-block;
             width: 8px;
@@ -242,7 +240,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>LYXPROBE v2.0 | COMMAND INTERFACE</h1>
+            <h1>LYXPROBE v2.07 | COMMAND INTERFACE</h1>
             <div class="status-bar">
                 <div class="status-item">
                     <div class="status-dot"></div>
@@ -261,14 +259,13 @@
 
         <div class="terminal">
             <div class="output" id="output">
-                <!-- Command output will be inserted here -->
                 <div class="entry new">
                     <span class="timestamp">[{{ now.strftime('%H:%M:%S') if now else '00:00:00' }}]</span>
                     <span class="prompt">LYXPROBE&gt;</span>
                     <span class="command">system boot</span>
                     <div class="output-title">SYSTEM INITIALIZED</div>
                     <div class="output-content info">
-                        LyxProbe v2.0 Command Interface
+                        LyxProbe v2.07 Command Interface
                         Connected to Database: ✓
                         Operator Authentication: ✓
                         Security Protocols: ACTIVE
@@ -473,6 +470,666 @@
                 'Type "help" for command list.', 
                 'info');
         }, 100);
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Create context menu element
+            const contextMenu = document.createElement('div');
+            contextMenu.id = 'lyxprobe-context-menu';
+            contextMenu.style.cssText = `
+                position: fixed;
+                background: rgba(16, 23, 41, 0.95);
+                backdrop-filter: blur(20px);
+                -webkit-backdrop-filter: blur(20px);
+                border: 1px solid rgba(74, 144, 226, 0.4);
+                border-radius: 12px;
+                box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+                padding: 8px 0;
+                min-width: 220px;
+                z-index: 10000;
+                display: none;
+                font-family: 'Segoe UI', 'Roboto', sans-serif;
+                font-size: 14px;
+                color: #ffffff;
+                overflow: hidden;
+                animation: contextMenuFadeIn 0.15s ease-out;
+            `;
+
+            // Add keyframes for animation
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes contextMenuFadeIn {
+                    from { opacity: 0; transform: scale(0.95) translateY(-10px); }
+                    to { opacity: 1; transform: scale(1) translateY(0); }
+                }
+
+                @keyframes contextMenuFadeOut {
+                    from { opacity: 1; transform: scale(1) translateY(0); }
+                    to { opacity: 0; transform: scale(0.95) translateY(-10px); }
+                }
+
+                .context-menu-item {
+                    padding: 10px 20px;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    transition: all 0.2s ease;
+                    position: relative;
+                    overflow: hidden;
+                }
+
+                .context-menu-item:hover {
+                    background: rgba(74, 144, 226, 0.2);
+                }
+
+                .context-menu-item:hover::before {
+                    content: '';
+                    position: absolute;
+                    left: 0;
+                    top: 0;
+                    height: 100%;
+                    width: 3px;
+                    background: linear-gradient(to bottom, var(--primary-color), var(--accent-color));
+                }
+
+                .context-menu-item.danger:hover {
+                    background: rgba(239, 68, 68, 0.2);
+                }
+
+                .context-menu-item.danger:hover::before {
+                    background: linear-gradient(to bottom, #ef4444, #f87171);
+                }
+
+                .context-menu-item.success:hover {
+                    background: rgba(16, 185, 129, 0.2);
+                }
+
+                .context-menu-item.success:hover::before {
+                    background: linear-gradient(to bottom, #10b981, #34d399);
+                }
+
+                .context-menu-item.warning:hover {
+                    background: rgba(245, 158, 11, 0.2);
+                }
+
+                .context-menu-item.warning:hover::before {
+                    background: linear-gradient(to bottom, #f59e0b, #fbbf24);
+                }
+
+                .context-menu-divider {
+                    height: 1px;
+                    background: rgba(255, 255, 255, 0.1);
+                    margin: 4px 0;
+                }
+
+                .context-menu-item-icon {
+                    width: 20px;
+                    height: 20px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 14px;
+                    color: var(--accent-color);
+                }
+
+                .context-menu-item.danger .context-menu-item-icon {
+                    color: #ef4444;
+                }
+
+                .context-menu-item.success .context-menu-item-icon {
+                    color: #10b981;
+                }
+
+                .context-menu-item.warning .context-menu-item-icon {
+                    color: #f59e0b;
+                }
+
+                .context-menu-item-text {
+                    flex: 1;
+                    user-select: none;
+                }
+
+                .context-menu-item-shortcut {
+                    color: rgba(255, 255, 255, 0.5);
+                    font-size: 12px;
+                    font-family: 'Monaco', 'Courier New', monospace;
+                }
+
+                .context-submenu {
+                    position: absolute;
+                    left: 100%;
+                    top: 0;
+                    display: none;
+                    min-width: 200px;
+                    background: rgba(16, 23, 41, 0.95);
+                    backdrop-filter: blur(20px);
+                    border: 1px solid rgba(74, 144, 226, 0.4);
+                    border-radius: 8px;
+                    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+                    padding: 8px 0;
+                    animation: contextMenuFadeIn 0.15s ease-out;
+                }
+
+                .context-menu-item:hover .context-submenu {
+                    display: block;
+                }
+            `;
+
+            document.head.appendChild(style);
+
+            // Define context menu items
+            const menuItems = [
+                {
+                    icon: '🔍',
+                    text: 'Quick Commands',
+                    shortcut: 'Ctrl+Q',
+                    items: [
+                        { icon: '📊', text: 'System Info', command: 'system-info' },
+                        { icon: '👥', text: 'List Users', command: 'list-users' },
+                        { icon: '🛡️', text: 'List Admins', command: 'list-admins' },
+                        { icon: '📈', text: 'View Stats', command: 'stats' }
+                    ]
+                },
+                { type: 'divider' },
+                {
+                    icon: '⚡',
+                    text: 'Quick Actions',
+                    shortcut: 'Ctrl+A',
+                    items: [
+                        { icon: '🚫', text: 'Kill Rogue Admins', command: 'kill-rogue', class: 'danger' },
+                        { icon: '🔄', text: 'Refresh Data', command: 'refresh' },
+                        { icon: '🧹', text: 'Clear Terminal', command: 'clear' }
+                    ]
+                },
+                { type: 'divider' },
+                {
+                    icon: '👤',
+                    text: 'User Management',
+                    items: [
+                        {
+                            icon: '🔨',
+                            text: 'Ban User',
+                            action: 'prompt',
+                            prompt: 'Enter User ID to ban:',
+                            command: 'ban'
+                        },
+                        {
+                            icon: '✅',
+                            text: 'Unban User',
+                            action: 'prompt',
+                            prompt: 'Enter User ID to unban:',
+                            command: 'unban'
+                        },
+                        {
+                            icon: '⬆️',
+                            text: 'Promote to Admin',
+                            action: 'prompt',
+                            prompt: 'Enter User ID to promote:',
+                            command: 'promote'
+                        },
+                        {
+                            icon: '⬇️',
+                            text: 'Demote Admin',
+                            action: 'prompt',
+                            prompt: 'Enter User ID to demote:',
+                            command: 'demote'
+                        },
+                        { type: 'divider' },
+                        {
+                            icon: '📋',
+                            text: 'User Info',
+                            action: 'prompt',
+                            prompt: 'Enter User ID or Username:',
+                            command: 'user-info'
+                        }
+                    ]
+                },
+                { type: 'divider' },
+                {
+                    icon: '💾',
+                    text: 'Export Data',
+                    items: [
+                        { icon: '👥', text: 'Export Users', command: 'export users' },
+                        { icon: '🛡️', text: 'Export Admins', command: 'export admins' }
+                    ]
+                },
+                { type: 'divider' },
+                {
+                    icon: '📋',
+                    text: 'Copy Selection',
+                    action: 'copy',
+                    shortcut: 'Ctrl+C'
+                },
+                {
+                    icon: '📤',
+                    text: 'Paste Command',
+                    action: 'paste',
+                    shortcut: 'Ctrl+V'
+                },
+                { type: 'divider' },
+                {
+                    icon: '🎨',
+                    text: 'Theme',
+                    items: [
+                        { icon: '🌙', text: 'Dark Theme', action: 'setTheme', value: 'dark' },
+                        { icon: '☀️', text: 'Light Theme', action: 'setTheme', value: 'light' },
+                        { icon: '🌈', text: 'Cyberpunk', action: 'setTheme', value: 'cyberpunk' }
+                    ]
+                },
+                { type: 'divider' },
+                {
+                    icon: '❓',
+                    text: 'Help & Docs',
+                    action: 'openHelp',
+                    shortcut: 'F1'
+                },
+                {
+                    icon: '⚙️',
+                    text: 'Settings',
+                    action: 'openSettings'
+                }
+            ];
+            
+            // Build the context menu
+            function buildContextMenu() {
+                contextMenu.innerHTML = '';
+
+                menuItems.forEach(item => {
+                    if (item.type === 'divider') {
+                        const divider = document.createElement('div');
+                        divider.className = 'context-menu-divider';
+                        contextMenu.appendChild(divider);
+                        return;
+                    }
+
+                    const menuItem = document.createElement('div');
+                    menuItem.className = `context-menu-item ${item.class || ''}`;
+
+                    // Create icon
+                    const icon = document.createElement('div');
+                    icon.className = 'context-menu-item-icon';
+                    icon.textContent = item.icon;
+
+                    // Create text
+                    const text = document.createElement('div');
+                    text.className = 'context-menu-item-text';
+                    text.textContent = item.text;
+
+                    // Create shortcut
+                    const shortcut = document.createElement('div');
+                    shortcut.className = 'context-menu-item-shortcut';
+                    shortcut.textContent = item.shortcut || '';
+
+                    menuItem.appendChild(icon);
+                    menuItem.appendChild(text);
+                    menuItem.appendChild(shortcut);
+
+                    // Handle click
+                    menuItem.addEventListener('click', function(e) {
+                        e.stopPropagation();
+
+                        if (item.action === 'prompt' && item.prompt) {
+                            showCommandPrompt(item.prompt, item.command);
+                        } else if (item.command) {
+                            executeCommand(item.command);
+                        } else if (item.action === 'copy') {
+                            copySelection();
+                        } else if (item.action === 'paste') {
+                            pasteCommand();
+                        } else if (item.action === 'setTheme') {
+                            setTheme(item.value);
+                        } else if (item.action === 'openHelp') {
+                            window.open('/probe/docs', '_blank');
+                        } else if (item.action === 'openSettings') {
+                            showSettings();
+                        }
+
+                        hideContextMenu();
+                    });
+
+                    // Handle submenu
+                    if (item.items && item.items.length > 0) {
+                        menuItem.style.position = 'relative';
+
+                        const submenu = document.createElement('div');
+                        submenu.className = 'context-submenu';
+
+                        item.items.forEach(subItem => {
+                            if (subItem.type === 'divider') {
+                                const divider = document.createElement('div');
+                                divider.className = 'context-menu-divider';
+                                submenu.appendChild(divider);
+                                return;
+                            }
+
+                            const subMenuItem = document.createElement('div');
+                            subMenuItem.className = `context-menu-item ${subItem.class || ''}`;
+
+                            const subIcon = document.createElement('div');
+                            subIcon.className = 'context-menu-item-icon';
+                            subIcon.textContent = subItem.icon;
+
+                            const subText = document.createElement('div');
+                            subText.className = 'context-menu-item-text';
+                            subText.textContent = subItem.text;
+
+                            subMenuItem.appendChild(subIcon);
+                            subMenuItem.appendChild(subText);
+
+                            subMenuItem.addEventListener('click', function(e) {
+                                e.stopPropagation();
+
+                                if (subItem.action === 'prompt' && subItem.prompt) {
+                                    showCommandPrompt(subItem.prompt, subItem.command);
+                                } else if (subItem.command) {
+                                    executeCommand(subItem.command);
+                                } else if (subItem.action === 'setTheme') {
+                                    setTheme(subItem.value);
+                                }
+
+                                hideContextMenu();
+                            });
+
+                            submenu.appendChild(subMenuItem);
+                        });
+
+                        menuItem.appendChild(submenu);
+
+                        // Show submenu on hover
+                        menuItem.addEventListener('mouseenter', function() {
+                            const rect = menuItem.getBoundingClientRect();
+                            submenu.style.top = '0';
+
+                            // Check if submenu would go off screen
+                            if (rect.right + submenu.offsetWidth > window.innerWidth) {
+                                submenu.style.left = 'auto';
+                                submenu.style.right = '100%';
+                            } else {
+                                submenu.style.left = '100%';
+                                submenu.style.right = 'auto';
+                            }
+                        });
+                    }
+
+                    contextMenu.appendChild(menuItem);
+                });
+            }
+
+            // Build initial menu
+            buildContextMenu();
+            document.body.appendChild(contextMenu);
+
+            // Store right-click position
+            let rightClickPosition = { x: 0, y: 0 };
+
+            // Show context menu
+            function showContextMenu(x, y) {
+                // Ensure menu stays within viewport
+                const menuWidth = contextMenu.offsetWidth;
+                const menuHeight = contextMenu.offsetHeight;
+
+                let finalX = x;
+                let finalY = y;
+
+                if (x + menuWidth > window.innerWidth) {
+                    finalX = window.innerWidth - menuWidth - 10;
+                }
+
+                if (y + menuHeight > window.innerHeight) {
+                    finalY = window.innerHeight - menuHeight - 10;
+                }
+
+                contextMenu.style.left = finalX + 'px';
+                contextMenu.style.top = finalY + 'px';
+                contextMenu.style.display = 'block';
+                contextMenu.style.animation = 'contextMenuFadeIn 0.15s ease-out';
+
+                // Add backdrop overlay
+                if (!document.getElementById('context-menu-backdrop')) {
+                    const backdrop = document.createElement('div');
+                    backdrop.id = 'context-menu-backdrop';
+                    backdrop.style.cssText = `
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 100%;
+                        z-index: 9999;
+                        background: transparent;
+                    `;
+                    backdrop.addEventListener('click', hideContextMenu);
+                    document.body.appendChild(backdrop);
+                }
+            }
+
+            // Hide context menu
+            function hideContextMenu() {
+                if (contextMenu.style.display === 'block') {
+                    contextMenu.style.animation = 'contextMenuFadeOut 0.15s ease-out';
+                    setTimeout(() => {
+                        contextMenu.style.display = 'none';
+                    }, 150);
+                }
+
+                // Remove backdrop
+                const backdrop = document.getElementById('context-menu-backdrop');
+                if (backdrop) {
+                    backdrop.remove();
+                }
+            }
+
+            function executeCommand(command) {
+                console.log('Executing command:', command);
+
+                // If there's a command input field, populate it
+                const commandInput = document.getElementById('command-input');
+                if (commandInput) {
+                    commandInput.value = command;
+                    commandInput.focus();
+
+                    // Trigger Enter key to execute if it's a simple command
+                    if (!command.includes('prompt:')) {
+                        setTimeout(() => {
+                            const event = new KeyboardEvent('keydown', {
+                                key: 'Enter',
+                                code: 'Enter',
+                                keyCode: 13,
+                                bubbles: true
+                            });
+                            commandInput.dispatchEvent(event);
+                        }, 100);
+                    }
+                } else {
+                    // Fallback: alert or console
+                    alert(`Command: ${command}\n\nThis would execute in the terminal.`);
+                }
+            }
+
+            // Show command prompt
+            function showCommandPrompt(promptText, commandPrefix) {
+                const prompt = promptText || 'Enter value:';
+                const userInput = window.prompt(prompt);
+
+                if (userInput !== null && userInput.trim() !== '') {
+                    const fullCommand = `${commandPrefix} ${userInput.trim()}`;
+                    executeCommand(fullCommand);
+                }
+            }
+
+            // Copy selected text
+            function copySelection() {
+                const selectedText = window.getSelection().toString();
+                if (selectedText) {
+                    navigator.clipboard.writeText(selectedText).then(() => {
+                        showToast('Selection copied to clipboard', 'success');
+                    }).catch(err => {
+                        console.error('Failed to copy:', err);
+                        showToast('Failed to copy selection', 'error');
+                    });
+                } else {
+                    showToast('No text selected', 'warning');
+                }
+            }
+
+            // Paste from clipboard
+            function pasteCommand() {
+                navigator.clipboard.readText().then(text => {
+                    const commandInput = document.getElementById('command-input');
+                    if (commandInput) {
+                        commandInput.value = text;
+                        commandInput.focus();
+                        showToast('Command pasted from clipboard', 'success');
+                    }
+                }).catch(err => {
+                    console.error('Failed to paste:', err);
+                    showToast('Failed to paste from clipboard', 'error');
+                });
+            }
+
+            // Set theme
+            function setTheme(themeName) {
+                document.body.setAttribute('data-theme', themeName);
+                localStorage.setItem('lyxprobe-theme', themeName);
+                showToast(`Theme changed to ${themeName}`, 'success');
+            }
+
+            // Show settings
+            function showSettings() {
+                alert('Settings dialog would open here.\n\nAvailable options:\n• Terminal font size\n• Color scheme\n• Auto-complete\n• Sound effects\n• Keyboard shortcuts');
+            }
+
+            // Toast notification
+            function showToast(message, type = 'info') {
+                // Create or use existing toast system
+                console.log(`${type.toUpperCase()}: ${message}`);
+
+                // Simple implementation
+                const toast = document.createElement('div');
+                toast.textContent = message;
+                toast.style.cssText = `
+                    position: fixed;
+                    bottom: 20px;
+                    right: 20px;
+                    background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : type === 'warning' ? '#f59e0b' : '#4a90e2'};
+                    color: white;
+                    padding: 12px 20px;
+                    border-radius: 8px;
+                    z-index: 10001;
+                    font-family: inherit;
+                    animation: fadeIn 0.3s, fadeOut 0.3s 2.7s;
+                `;
+
+                document.body.appendChild(toast);
+
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.remove();
+                    }
+                }, 3000);
+            }
+
+            // Add CSS for toast animation
+            const toastStyle = document.createElement('style');
+            toastStyle.textContent = `
+                @keyframes fadeIn {
+                    from { opacity: 0; transform: translateY(20px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+
+                @keyframes fadeOut {
+                    from { opacity: 1; transform: translateY(0); }
+                    to { opacity: 0; transform: translateY(20px); }
+                }
+            `;
+            document.head.appendChild(toastStyle);
+
+            // Event Listeners
+
+            // Right-click listener for the entire document
+            document.addEventListener('contextmenu', function(e) {
+                // Prevent default context menu
+                e.preventDefault();
+
+                // Store position
+                rightClickPosition.x = e.clientX;
+                rightClickPosition.y = e.clientY;
+
+                // Show custom context menu
+                showContextMenu(e.clientX, e.clientY);
+
+                return false;
+            });
+
+            // Click anywhere to hide context menu
+            document.addEventListener('click', function(e) {
+                if (!contextMenu.contains(e.target)) {
+                    hideContextMenu();
+                }
+            });
+
+            // Keyboard shortcuts
+            document.addEventListener('keydown', function(e) {
+                // Escape to close context menu
+                if (e.key === 'Escape' && contextMenu.style.display === 'block') {
+                    hideContextMenu();
+                }
+
+                // Ctrl+Q for quick commands
+                if (e.ctrlKey && e.key === 'q') {
+                    e.preventDefault();
+                    showContextMenu(rightClickPosition.x, rightClickPosition.y);
+                }
+
+                // F1 for help
+                if (e.key === 'F1') {
+                    e.preventDefault();
+                    window.open('/probe/docs', '_blank');
+                }
+            });
+
+            // Prevent context menu on the context menu itself
+            contextMenu.addEventListener('contextmenu', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            });
+
+            // Initialize theme from localStorage
+            const savedTheme = localStorage.getItem('lyxprobe-theme') || 'dark';
+            setTheme(savedTheme);
+        });
+
+        // Add CSS for theme support
+        const themeCSS = `
+            body[data-theme="dark"] {
+                --primary-color: #4a90e2;
+                --secondary-color: #8b5cf6;
+                --accent-color: #00d4ff;
+            }
+
+            body[data-theme="light"] {
+                --primary-color: #2563eb;
+                --secondary-color: #7c3aed;
+                --accent-color: #06b6d4;
+                background: #f8fafc;
+                color: #1e293b;
+            }
+
+            body[data-theme="cyberpunk"] {
+                --primary-color: #ff00ff;
+                --secondary-color: #00ffff;
+                --accent-color: #ffff00;
+                background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 100%);
+                color: #00ff00;
+            }
+        `;
+
+        // Add theme CSS to document
+        if (!document.getElementById('theme-css')) {
+            const style = document.createElement('style');
+            style.id = 'theme-css';
+            style.textContent = themeCSS;
+            document.head.appendChild(style);
+        }        
     </script>
 </body>
 </html>
