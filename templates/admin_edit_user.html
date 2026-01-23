@@ -322,7 +322,7 @@
                         <div class="flex items-center justify-between">
                             <span class="text-gray-400">Is Verified</span>
                             <span id="display-verified" class="status-badge status-{{ 'verified' if user.is_verified_admin else 'unverified' }}">
-                                {{ 'Verified if user.is_verified_admin else 'Unverified' }}
+                                {{ 'Verified' if user.is_verified_admin else 'Unverified' }}
                             </span>
                         </div>
                         <div class="flex items-center justify-between">

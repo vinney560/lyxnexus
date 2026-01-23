@@ -126,6 +126,7 @@ class ProbeCommandProcessor:
         status = "ACTIVE" if user.status else "BANNED"
         verified = "VERIFIED" if user.is_verified_admin else "UNVERIFIED"
         admin_status = "ADMIN" if user.is_admin else "USER"
+        paid = "PAID" if user.paid else "UNPAID"
         
         info = [
             f"Username:     {user.username}",
@@ -133,6 +134,7 @@ class ProbeCommandProcessor:
             f"Mobile:       {user.mobile}",
             f"Year:         {user.year}",
             f"Status:       {status}",
+            f"Fee:          {paid}",
             f"Admin:        {admin_status}",
             f"Verified:     {verified}",
             f"Last Login:   Recent",
@@ -407,6 +409,7 @@ class ProbeCommandProcessor:
             verified = "VERIFIED" if user.is_verified_admin else "UNVERIFIED"
             admin_status = "ADMINISTRATOR" if user.is_admin else "REGULAR USER"
             operator = "YES (Year 5)" if user.year == 5 else "NO"
+            paid = "PAID" if user.paid else "UNPAID"
             
             info = [
                 f"=== USER PROFILE ===",
@@ -417,6 +420,7 @@ class ProbeCommandProcessor:
                 f"",
                 f"=== ACCOUNT STATUS ===",
                 f"Status:       {status}",
+                f"Fee:         {paid}",
                 f"Role:         {admin_status}",
                 f"Verified:     {verified}",
                 f"Operator:     {operator}",
@@ -441,6 +445,7 @@ class ProbeCommandProcessor:
         try:
             total_users = User.query.count()
             active_users = User.query.filter_by(status=True).count()
+            paid_users = User.query.filter_by(paid=True).count()
             banned_users = User.query.filter_by(status=False).count()
             total_admins = User.query.filter_by(is_admin=True).count()
             verified_admins = User.query.filter_by(is_verified_admin=True).count()
@@ -454,6 +459,7 @@ class ProbeCommandProcessor:
                 f"Total Users:    {total_users}",
                 f"Active:         {active_users}",
                 f"Banned:         {banned_users}",
+                f"Fee Paid Users:     {paid_users}",
                 f"",
                 f"=== ADMINISTRATION ===",
                 f"Total Admins:   {total_admins}",
