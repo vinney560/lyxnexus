@@ -631,7 +631,8 @@ class ProbeCommandProcessor:
     
     def cmd_reboot(self, args):
         """Reboot the server"""
-        return '''<script>window.location.reload();</script>'''
+        reboot_serve()
+        return self.format_output("REBOOT", "Server will reboot in 5 seconds", "success")
     
     def cmd_version(self, args):
         """Show software version"""
@@ -639,8 +640,19 @@ class ProbeCommandProcessor:
     
     def cmd_shutdown(self, args):
         """Shutdown the server"""
-        return '''<script>window.location.href='/admin/operator';</script>'''
+        shutdown_serve()
+        return self.format_output("SHUTDOWN", "Server will shutdown in 5 seconds", "success")
 
+# ========= Helpers =========
+from flask import redirect, url_for
+import time
+def reboot_serve():
+    time.sleep(5)
+    return redirect(url_for('lyx_probe'))
+
+def shutdown_serve():
+    time.sleep(5)
+    return redirect('/admin/operator')
 # ============ ROUTES ============
 
 @probe_bp.route('/')
