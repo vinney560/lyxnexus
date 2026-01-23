@@ -648,7 +648,7 @@ class ProbeCommandProcessor:
 @operator_required
 def lyx_probe():
     """Main probe interface"""
-    return render_template('lyxprobe.html', now=datetime.now(timezone(timedelta(hours=3))).strftime('%Y-%m-%d %H:%M:%S'))
+    return render_template('lyxprobe.html', now=datetime.now(timezone(timedelta(hours=3))))
 
 @probe_bp.route('/execute', methods=['POST'])
 @login_required
