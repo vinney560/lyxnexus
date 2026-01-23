@@ -42,6 +42,8 @@ class ProbeCommandProcessor:
             'unban': self.cmd_unban,
             'promote': self.cmd_promote,
             'demote': self.cmd_demote,
+            'verify': self.cmd_verify,
+            'unverify': self.cmd_unverify,
             'user-info': self.cmd_user_info,
             'system-info': self.cmd_system_info,
             'export': self.cmd_export,
@@ -97,6 +99,8 @@ class ProbeCommandProcessor:
             "unban [id]           - Unban a user account",
             "promote [id]         - Promote user to admin",
             "demote [id]          - Demote admin to user",
+            "verify [id]          - Verify admin account",
+            "unverify [id]        - Unverify admin account",
             "",
             "=== SECURITY OPERATIONS ===",
             "kill-rogue           - Remove unverified admins",
@@ -386,6 +390,84 @@ class ProbeCommandProcessor:
         except Exception as e:
             db.session.rollback()
             return self.format_output("ERROR", f"Demotion failed: {str(e)}", "error")
+    
+    def cmd_verify(self, args):
+        """Verify admin account"""
+        if not args:
+            return self.format_output("ERROR", "Usage: verify [user_id]", "error")
+        
+        try:
+            user_id = int(args[0])
+            user = User.query.get(user_id)
+            
+            if not user:
+                return self.format_output("ERROR", f"User ID {user_id} not found", "error")
+            
+            if user.id == current_user.id:
+                return self.format_output("ERROR", "Cannot verify yourself", "error")
+            
+            if user.year == 5:
+                return self.format_output("ERROR", "Cannot verify operator accounts", "error")
+            
+            if not user.is_admin:
+                return self.format_output("INFO", f"User {user.username} is not an admin", "info")
+            
+            user.is_verified_admin = True
+            db.session.commit()
+            
+            result = [
+                f"User: {user.username} (ID: {user.id})",
+                f"Previous Role: Administrator",
+                f"New Role: Verified Administrator",
+                f"Action: Verified at {datetime.now(timezone(timedelta(hours=3))).strftime('%H:%M:%S')}",
+                f"Operator: {current_user.username}"
+            ]
+            
+            return self.format_output("ADMIN VERIFIED", "\n".join(result), "success")
+        except ValueError:
+            return self.format_output("ERROR", "Invalid user ID", "error")
+        except Exception as e:
+            db.session.rollback()
+            return self.format_output("ERROR", f"Verification failed: {str(e)}", "error")
+    
+    def cmd_unverify(self, args):
+        """Unverify admin account"""
+        if not args:
+            return self.format_output("ERROR", "Usage: unverify [user_id]", "error")
+        
+        try:
+            user_id = int(args[0])
+            user = User.query.get(user_id)
+            
+            if not user:
+                return self.format_output("ERROR", f"User ID {user_id} not found", "error")
+            
+            if user.id == current_user.id:
+                return self.format_output("ERROR", "Cannot unverify yourself", "error")
+            
+            if user.year == 5:
+                return self.format_output("ERROR", "Cannot unverify operator accounts", "error")
+            
+            if not user.is_admin:
+                return self.format_output("INFO", f"User {user.username} is not an admin", "info")
+            
+            user.is_verified_admin = False
+            db.session.commit()
+            
+            result = [
+                f"User: {user.username} (ID: {user.id})",
+                f"Previous Role: Administrator",
+                f"New Role: Regular Admin",
+                f"Action: Unverified at {datetime.now(timezone(timedelta(hours=3))).strftime('%H:%M:%S')}",
+                f"Operator: {current_user.username}"
+            ]
+            
+            return self.format_output("ADMIN UNVERIFIED", "\n".join(result), "success")
+        except ValueError:
+            return self.format_output("ERROR", "Invalid user ID", "error")
+        except Exception as e:
+            db.session.rollback()
+            return self.format_output("ERROR", f"Unerification failed: {str(e)}", "error")
     
     def cmd_user_info(self, args):
         """Get detailed user information"""
