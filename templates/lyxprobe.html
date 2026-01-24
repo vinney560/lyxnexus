@@ -429,7 +429,7 @@
             })
             .then(response => response.json())
             .then(data => {
-                if (data.command === 'reload') {
+                if (data.command === 'reboot') {
                     handleReload(data);
                 }
 

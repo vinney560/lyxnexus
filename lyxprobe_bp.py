@@ -686,7 +686,6 @@ class ProbeCommandProcessor:
         reboot_thread.start()
         
         return {
-                "delay": timeout,
                 "command": "reboot"
             }        
     
@@ -716,11 +715,7 @@ class ProbeCommandProcessor:
     
     def cmd_shutdown(self, args):
         """Shutdown the server"""
-        if args:
-            timeout = int(args[0]) if args[0].isdigit() else 5
-        
         return {
-            'delay': timeout,
             'command': 'shutdown'
         }
 
