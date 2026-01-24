@@ -407,7 +407,7 @@ class ProbeCommandProcessor:
             result = [
                 f"User: {user.username} (ID: {user.id})",
                 f"Previous Role: User",
-                f"New Role: Administrator (Unverified)",
+                f"New Role: Administrator (Verified)",
                 f"Action: Promoted at {datetime.now().strftime('%H:%M:%S')}",
                 f"Operator: {current_user.username}",
                 f"Note: User needs verification by senior operator"
@@ -686,14 +686,6 @@ class ProbeCommandProcessor:
         reboot_thread.start()
         
         return {
-                "title": "REBOOT INITIATED",
-                "content": f"System reboot sequence started.\n"
-                          f"Time until reboot: {timeout} seconds\n"
-                          f"Mode: {'FORCE' if force else 'Graceful'}\n\n"
-                          f"System will restart automatically.\n"
-                          f"Use 'cancel-reboot' to abort.\n\n"
-                          f"Warning: Actual reboot will occur after timeout.",
-                "type": "warning",
                 "delay": timeout,
                 "command": "reboot"
             }        
@@ -724,7 +716,11 @@ class ProbeCommandProcessor:
     
     def cmd_shutdown(self, args):
         """Shutdown the server"""
+        if args:
+            timeout = int(args[0]) if args[0].isdigit() else 5
+        
         return {
+            'delay': timeout,
             'command': 'shutdown'
         }
 
