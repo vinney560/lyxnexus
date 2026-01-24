@@ -139,6 +139,7 @@
         transition: all 0.3s ease;
         border: 2px dotted rgba(59, 130, 246, 0.3);
         position: relative;
+        overflow: hidden;
     }
     
     .material-card::before {
@@ -153,6 +154,7 @@
         z-index: -1;
         opacity: 0;
         transition: opacity 0.3s ease;
+        overflow: hidden;
     }
     
     .material-card:hover {
@@ -689,10 +691,13 @@
         justify-content: center;
     }
     
-    /* Material card text overflow handling */
     .material-card-content {
         flex: 1;
         min-width: 0;
+        max-width: calc(100% - 75px);
+        overflow-x: hidden;
+        text-overflow: ellipsis;
+        word-break: break-all;
     }
     
     .material-name {
@@ -717,7 +722,7 @@
     }
     
     .material-filename {
-        font-size: 7px;
+        font-size: 12px;
         color: #9CA3AF;
         line-height: 1.4;
         margin-bottom: 4px;
@@ -1336,10 +1341,10 @@
                                     </div>
                                 </div>
                                 <div class="material-card-content ml-3">
-                                    <h3 class="material-name truncate">${material.display_name}</h3>
-                                    <p class="material-description truncate">${material.description || 'No description'}</p>
+                                    <h3 class="material-name truncate break-all">${material.display_name}</h3>
+                                    <p class="material-description truncate break-all">${material.description || 'No description'}</p>
                                     <div class="material-meta">
-                                        <span class="material-filename truncate" title="${material.filename}">
+                                        <span class="material-filename truncate break-all" title="${material.filename}">
                                             <i class="fas fa-file mr-1 truncate"></i>
                                             ${material.filename}
                                         </span>

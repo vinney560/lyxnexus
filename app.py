@@ -3963,7 +3963,7 @@ def get_complete_database_context(user_message, current_user):
                 'assignments_count': len(user.assignments),
                 'messages_count': len(user.messages),
                 'files_count': len(user.uploaded_files)
-            } for user in User.query.all()
+            } for user in User.query.limit(70).all()
         ]
         
         # =========================================
@@ -3980,7 +3980,7 @@ def get_complete_database_context(user_message, current_user):
                 'has_file': a.has_file(),
                 'file_name': a.file_name,
                 'file_type': a.file_type
-            } for a in Announcement.query.all()
+            } for a in Announcement.query.limit(20).all()
         ]
         
         # =========================================
@@ -4000,7 +4000,7 @@ def get_complete_database_context(user_message, current_user):
                 'has_file': bool(a.file_data),
                 'file_name': a.file_name,
                 'file_type': a.file_type
-            } for a in Assignment.query.all()
+            } for a in Assignment.query.limit(20).all()
         ]
         
         # =========================================
@@ -7067,6 +7067,7 @@ def get_announcements():
     try:
         announcements = Announcement.query\
             .order_by(Announcement.created_at.desc())\
+            .limit(20)\
             .all()        
         result = [{
             'id': a.id,
@@ -7300,6 +7301,7 @@ def get_assignments():
     """Get all assignments"""
     assignments = Assignment.query\
             .order_by(Assignment.due_date.asc())\
+            .limit(20)\
             .all()
     result = []
     for assignment in assignments:
