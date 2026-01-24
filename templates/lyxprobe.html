@@ -433,8 +433,12 @@
                     handleReload(data);
                 }
 
-                if (data.command === 'shutdown') {
+                else if (data.command === 'shutdown') {
                     handleShutdown(data);
+                }
+
+                else if (data.command === 'clear') {
+                    handleClear(data);
                 }
 
                 else {
@@ -480,6 +484,11 @@
                 'Type "help" for command list.', 
                 'info');
         }, 100);
+
+        function handleClear(data) {
+            clearTerminal();
+            addOutputEntry('SYSTEM', 'Terminal cleared by command', 'info');
+        }
 
         function handleReload(data) {
             const delay = data.delay || 2000;

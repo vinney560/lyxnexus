@@ -116,7 +116,7 @@ class ProbeCommandProcessor:
             "system-info          - Display system statistics",
             "export [table]       - Export data (users/admins)",
             "reboot               - Reboot the server",
-            "--version            - Show software version",
+            "version            - Show software version",
             "",
             "=== SYNTAX ===",
             "> command [argument] - Run command with argument",
@@ -126,7 +126,9 @@ class ProbeCommandProcessor:
     
     def cmd_clear(self, args):
         """Clear terminal (client-side)"""
-        return self.format_output("SYSTEM", "Terminal cleared", "info")
+        return {
+            "command": "clear"
+        }
     
     def cmd_date(self, args):
         """Display current date and time"""
@@ -690,7 +692,7 @@ class ProbeCommandProcessor:
                           f"Mode: {'FORCE' if force else 'Graceful'}\n\n"
                           f"System will restart automatically.\n"
                           f"Use 'cancel-reboot' to abort.\n\n"
-                          f"Warning: This is a simulation. Actual reboot will occur after timeout.",
+                          f"Warning: Actual reboot will occur after timeout.",
                 "type": "warning",
                 "delay": timeout,
                 "command": "reboot"
@@ -722,8 +724,9 @@ class ProbeCommandProcessor:
     
     def cmd_shutdown(self, args):
         """Shutdown the server"""
-        shutdown_serve()
-        return self.format_output("SHUTDOWN", "Server will shutdown in 5 seconds", "success")
+        return {
+            'command': 'shutdown'
+        }
 
 # ============ ROUTES ============
 
