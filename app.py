@@ -1295,7 +1295,7 @@ with app.app_context():
         atexit.register(lambda: scheduler.shutdown(wait=False))
 
         now = (datetime.utcnow() + timedelta(hours=3)).strftime('%Y-%m-%d %H:%M:%S UTC')
-        print(f"[{now}] Upcoming class notifier started (runs every 5 minutes).")
+        print(f"[{now}] Upcoming class notifier started (runs every 10 minutes).")
 
     except Exception as e:
         print('X' * 70)

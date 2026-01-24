@@ -297,6 +297,7 @@
         font-size: 20px;
         margin-right: 15px;
         flex-shrink: 0;
+        cursor: pointer;
     }
     
     .file-icon-pdf {
@@ -309,6 +310,14 @@
     
     .file-icon-image {
         background: linear-gradient(135deg, #8B5CF6, #7C3AED);
+    }
+    
+    .file-icon-video {
+        background: linear-gradient(135deg, #10B981, #059669);
+    }
+    
+    .file-icon-audio {
+        background: linear-gradient(135deg, #F59E0B, #D97706);
     }
     
     .file-icon-archive {
@@ -550,6 +559,195 @@
         opacity: 1;
     }
     
+    /* Media player styles */
+    .media-player-modal {
+        background: rgba(0, 0, 0, 0.95);
+    }
+    
+    .media-player-content {
+        width: 90%;
+        max-width: 900px;
+        padding: 0;
+        background: transparent;
+        border: none;
+    }
+    
+    .media-player {
+        width: 100%;
+        background: rgba(30, 30, 40, 0.95);
+        border-radius: 15px;
+        overflow: hidden;
+    }
+    
+    .media-player video, .media-player audio {
+        width: 100%;
+        outline: none;
+    }
+    
+    .media-controls {
+        padding: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: rgba(0, 0, 0, 0.7);
+    }
+    
+    .media-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: white;
+        margin-bottom: 5px;
+    }
+    
+    .media-info {
+        font-size: 14px;
+        color: #9CA3AF;
+    }
+    
+    .media-actions {
+        display: flex;
+        gap: 10px;
+    }
+    
+    .media-btn {
+        background: rgba(255, 255, 255, 0.1);
+        border: none;
+        color: white;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .media-btn:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: scale(1.1);
+    }
+    
+    /* Document viewer styles */
+    .document-viewer-modal {
+        background: rgba(0, 0, 0, 0.95);
+    }
+    
+    .document-viewer-content {
+        width: 95%;
+        max-width: 1200px;
+        height: 90vh;
+        padding: 0;
+        background: transparent;
+        border: none;
+    }
+    
+    .document-viewer {
+        width: 100%;
+        height: 100%;
+        background: white;
+        border-radius: 10px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .document-toolbar {
+        padding: 15px;
+        background: #2D3748;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #4A5568;
+    }
+    
+    .document-frame {
+        flex: 1;
+        border: none;
+        width: 100%;
+        height: calc(100% - 70px);
+    }
+    
+    .document-actions {
+        display: flex;
+        gap: 10px;
+    }
+    
+    /* Grid layout for buttons */
+    .nav-buttons-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 10px;
+        width: 100%;
+        max-width: 300px;
+    }
+    
+    .nav-buttons-grid .btn {
+        width: 100%;
+        padding: 10px 15px;
+        font-size: 14px;
+        justify-content: center;
+    }
+    
+    /* Material card text overflow handling */
+    .material-card-content {
+        flex: 1;
+        min-width: 0;
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+        word-break: break-word;
+        hyphens: auto;
+    }
+    
+    .material-name {
+        font-size: 18px;
+        font-weight: 700;
+        line-height: 1.4;
+        color: white;
+        margin-bottom: 8px;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    .material-description {
+        font-size: 14px;
+        line-height: 1.5;
+        color: #D1D5DB;
+        margin-bottom: 12px;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    .material-filename {
+        font-size: 13px;
+        color: #9CA3AF;
+        line-height: 1.4;
+        word-break: break-all;
+        margin-bottom: 4px;
+    }
+    
+    .material-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        font-size: 12px;
+        color: #6B7280;
+        margin-top: 8px;
+    }
+    
+    .material-meta span {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        white-space: nowrap;
+    }
+    
     @media (max-width: 768px) {
         nav.glass-morph {
             position: static !important;
@@ -596,79 +794,106 @@
             width: 100%;
             justify-content: space-between;
         }
+        
+        .nav-buttons-grid {
+            grid-template-columns: 1fr;
+            max-width: 100%;
+        }
+        
+        .material-card {
+            flex-direction: column;
+        }
+        
+        .material-meta {
+            flex-direction: column;
+            gap: 6px;
+        }
+        
+        .media-player-content {
+            width: 95%;
+        }
+        
+        .document-viewer-content {
+            width: 98%;
+            height: 85vh;
+        }
     }
     
-    .file-card {
-        word-wrap: break-word;
-        overflow-wrap: break-word;
+    @media (max-width: 480px) {
+        .material-card {
+            padding: 12px;
+        }
+        
+        .material-name {
+            font-size: 16px;
+            -webkit-line-clamp: 2;
+        }
+        
+        .material-description {
+            font-size: 13px;
+            -webkit-line-clamp: 2;
+        }
+        
+        .file-icon {
+            width: 40px;
+            height: 40px;
+            font-size: 16px;
+            margin-right: 12px;
+        }
     }
-
-    .file-card h4 {
-        word-break: break-word;
-        overflow: hidden;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        line-height: 1.4;
+    
+    .spinner {
+        border: 3px solid rgba(59, 130, 246, 0.3);
+        border-radius: 50%;
+        border-top: 3px solid #3B82F6;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto;
     }
-
-    .file-card .text-sm {
-        word-break: break-all;
-        overflow-wrap: anywhere;
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
     }
-
-    .modal-content {
-        max-width: 95vw;
-        box-sizing: border-box;
-    }
-
-    #available-files {
-        max-width: 100%;
-    }
-
-    .file-card .flex-1 {
-        min-width: 0; 
-        overflow: hidden;
-    }
-
-    .file-card .filename {
-        word-break: break-all;
-        overflow-wrap: anywhere;
-    }    
-
-    .truncate-text {
-        overflow: hidden !important;
-        text-overflow: ellipsis !important;
-        overflow-wrap: anywhere;
-        display: block !important;
-        overflow-wrap: normal !important;
-        white-space: nowrap;
-    }
-
-    .break-all {
-        word-break: break-all;
-    }
-
-    [class*="truncate-text"] {
-        position: relative;
-    }
-
-    [class*="truncate-text"]:hover::after {
-        content: attr(data-full-text);
+    
+    .preview-overlay {
         position: absolute;
-        bottom: 100%;
+        top: 0;
         left: 0;
-        background: rgba(0, 0, 0, 0.8);
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.7);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        border-radius: 10px;
+    }
+    
+    .file-icon:hover .preview-overlay {
+        opacity: 1;
+    }
+    
+    .preview-btn {
+        background: rgba(255, 255, 255, 0.2);
+        border: none;
         color: white;
-        padding: 4px 8px;
-        border-radius: 4px;
-        white-space: normal;
-        width: max-content;
-        max-width: 300px;
-        z-index: 10;
-        font-size: 12px;
-        margin-bottom: 4px;
-    }    
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .preview-btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: scale(1.1);
+    }
 </style>
 <body>
     <nav class="glass-morph sticky top-0 z-50">
@@ -687,19 +912,17 @@
                     </div>
                     <span class="text-xl sm:text-2xl font-bold gradient-text">Unit Notes</span>
                 </div>
-                <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4 w-full sm:w-auto">
+                <div class="nav-buttons-grid">
                     {% if current_user.is_admin %}
-                    <button class="btn bg-red-600 hover:bg-gray-700 text-sm sm:text-base" onclick="window.location.href='/admin'">
+                    <button class="btn bg-red-600 hover:bg-gray-700" onclick="window.location.href='/admin'">
                         <i class="fas fa-arrow-left mr-2"></i> Back 
+                    </button>
+                    <button class="btn btn-success" onclick="openModal('add-material-modal')">
+                        <i class="fas fa-plus mr-2"></i> Add Material
                     </button>
                     {% else %}
-                    <button class="btn bg-gray-600 hover:bg-gray-700 text-sm sm:text-base" id="backMain">
+                    <button class="btn bg-gray-600 hover:bg-gray-700" id="backMain">
                         <i class="fas fa-arrow-left mr-2"></i> Back 
-                    </button>
-                    {% endif %}
-                    {% if current_user.is_admin %}
-                    <button class="btn btn-success text-sm sm:text-base" onclick="openModal('add-material-modal')">
-                        <i class="fas fa-plus mr-2"></i> Add Material
                     </button>
                     {% endif %}
                 </div>
@@ -708,6 +931,50 @@
     </nav>
 
     <div class="toast-container" id="toast-container"></div>
+
+    <!-- Media Player Modal -->
+    <div id="media-player-modal" class="modal media-player-modal">
+        <div class="modal-content media-player-content">
+            <div class="media-player">
+                <div id="media-container"></div>
+                <div class="media-controls">
+                    <div>
+                        <div class="media-title" id="media-title"></div>
+                        <div class="media-info" id="media-info"></div>
+                    </div>
+                    <div class="media-actions">
+                        <button class="media-btn" onclick="closeMediaPlayer()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Document Viewer Modal -->
+    <div id="document-viewer-modal" class="modal document-viewer-modal">
+        <div class="modal-content document-viewer-content">
+            <div class="document-viewer">
+                <div class="document-toolbar">
+                    <div class="flex items-center space-x-3">
+                        <button class="btn btn-secondary btn-sm" onclick="closeDocumentViewer()">
+                            <i class="fas fa-times mr-2"></i> Close
+                        </button>
+                        <button class="btn btn-success btn-sm" onclick="printDocument()">
+                            <i class="fas fa-print mr-2"></i> Print
+                        </button>
+                    </div>
+                    <div class="document-actions">
+                        <button class="media-btn" onclick="downloadCurrentDocument()">
+                            <i class="fas fa-download"></i>
+                        </button>
+                    </div>
+                </div>
+                <iframe id="document-frame" class="document-frame" sandbox="allow-scripts allow-same-origin"></iframe>
+            </div>
+        </div>
+    </div>
 
     <main class="max-w-7xl mx-auto px-4 py-8">
         <div class="glass-morph rounded-xl p-6 mb-6">
@@ -810,6 +1077,8 @@
         // Global variables
         let selectedFiles = new Set();
         let currentDragItem = null;
+        let currentMediaFile = null;
+        let currentDocumentFile = null;
 
         class ToastManager {
             constructor() {
@@ -904,25 +1173,128 @@
 
         function getFileIcon(fileType, filename) {
             if (filename.match(/\.(pdf)$/i)) {
-                return { icon: 'fa-file-pdf', class: 'file-icon-pdf' };
-            } else if (fileType.includes('image')) {
-                return { icon: 'fa-file-image', class: 'file-icon-image' };
-            } else if (fileType.includes('video') || filename.match(/\.(mp4|mov|avi|mkv|wmv|flv|webm)$/i)) {
-                return { icon: 'fa-file-video', class: 'file-icon-video' };
+                return { icon: 'fa-file-pdf', class: 'file-icon-pdf', type: 'document' };
+            } else if (filename.match(/\.(mp4|mov|avi|mkv|wmv|flv|webm|mpg|mpeg)$/i)) {
+                return { icon: 'fa-file-video', class: 'file-icon-video', type: 'video' };
+            } else if (filename.match(/\.(mp3|wav|ogg|flac|aac|m4a)$/i)) {
+                return { icon: 'fa-file-audio', class: 'file-icon-audio', type: 'audio' };
+            } else if (fileType.includes('image') || filename.match(/\.(jpg|jpeg|png|gif|bmp|webp|svg)$/i)) {
+                return { icon: 'fa-file-image', class: 'file-icon-image', type: 'image' };
             } else if (fileType.includes('archive') || filename.match(/\.(zip|rar|7z|tar|gz)$/i)) {
-                return { icon: 'fa-file-archive', class: 'file-icon-archive' };
+                return { icon: 'fa-file-archive', class: 'file-icon-archive', type: 'archive' };
             } else if (filename.match(/\.(doc|docx)$/i)) {
-                return { icon: 'fa-file-word', class: 'file-icon-doc' };
+                return { icon: 'fa-file-word', class: 'file-icon-doc', type: 'document' };
             } else if (filename.match(/\.(xls|xlsx)$/i)) {
-                return { icon: 'fa-file-excel', class: 'file-icon-doc' };
+                return { icon: 'fa-file-excel', class: 'file-icon-doc', type: 'document' };
             } else if (filename.match(/\.(ppt|pptx)$/i)) {
-                return { icon: 'fa-file-powerpoint', class: 'file-icon-doc' };
+                return { icon: 'fa-file-powerpoint', class: 'file-icon-doc', type: 'document' };
             } else if (filename.match(/\.(txt|rtf)$/i)) {
-                return { icon: 'fa-file-text', class: 'file-icon-doc' };
+                return { icon: 'fa-file-text', class: 'file-icon-doc', type: 'document' };
             } else {
-                return { icon: 'fa-file', class: 'file-icon-generic' };
+                return { icon: 'fa-file', class: 'file-icon-generic', type: 'generic' };
             }
-        }        
+        }
+
+        function openMediaPlayer(fileId, filename, fileType) {
+            const fileInfo = getFileIcon(fileType, filename);
+            const mediaContainer = document.getElementById('media-container');
+            const mediaTitle = document.getElementById('media-title');
+            const mediaInfo = document.getElementById('media-info');
+            
+            mediaTitle.textContent = filename;
+            mediaInfo.textContent = `${formatFileSize(currentMediaFile?.file_size || 0)} • ${fileType}`;
+            
+            mediaContainer.innerHTML = '';
+            
+            if (fileInfo.type === 'video') {
+                const video = document.createElement('video');
+                video.controls = true;
+                video.autoplay = true;
+                video.style.width = '100%';
+                video.style.height = 'auto';
+                video.style.maxHeight = '70vh';
+                video.style.objectFit = 'contain';
+                
+                const source = document.createElement('source');
+                source.src = `/store/api/files/${fileId}/download`;
+                source.type = fileType;
+                
+                video.appendChild(source);
+                mediaContainer.appendChild(video);
+            } else if (fileInfo.type === 'audio') {
+                const audio = document.createElement('audio');
+                audio.controls = true;
+                audio.autoplay = true;
+                audio.style.width = '100%';
+                
+                const source = document.createElement('source');
+                source.src = `/store/api/files/${fileId}/download`;
+                source.type = fileType;
+                
+                audio.appendChild(source);
+                mediaContainer.appendChild(audio);
+            } else if (fileInfo.type === 'image') {
+                const img = document.createElement('img');
+                img.src = `/store/api/files/${fileId}/download`;
+                img.alt = filename;
+                img.style.width = '100%';
+                img.style.height = 'auto';
+                img.style.maxHeight = '70vh';
+                img.style.objectFit = 'contain';
+                mediaContainer.appendChild(img);
+            }
+            
+            document.getElementById('media-player-modal').style.display = 'flex';
+        }
+
+        function closeMediaPlayer() {
+            document.getElementById('media-player-modal').style.display = 'none';
+            const mediaContainer = document.getElementById('media-container');
+            mediaContainer.innerHTML = '';
+            currentMediaFile = null;
+        }
+
+        function openDocumentViewer(fileId, filename) {
+            currentDocumentFile = { id: fileId, name: filename };
+            const iframe = document.getElementById('document-frame');
+            iframe.src = `/store/api/files/${fileId}/download`;
+            document.getElementById('document-viewer-modal').style.display = 'flex';
+        }
+
+        function closeDocumentViewer() {
+            document.getElementById('document-viewer-modal').style.display = 'none';
+            const iframe = document.getElementById('document-frame');
+            iframe.src = '';
+            currentDocumentFile = null;
+        }
+
+        function downloadCurrentDocument() {
+            if (currentDocumentFile) {
+                window.open(`/store/api/files/${currentDocumentFile.id}/download`, '_blank');
+            }
+        }
+
+        function printDocument() {
+            const iframe = document.getElementById('document-frame');
+            if (iframe.contentWindow) {
+                iframe.contentWindow.focus();
+                iframe.contentWindow.print();
+            }
+        }
+
+        function previewFile(fileId, filename, fileType, fileSize) {
+            const fileInfo = getFileIcon(fileType, filename);
+            
+            if (fileInfo.type === 'video' || fileInfo.type === 'audio' || fileInfo.type === 'image') {
+                currentMediaFile = { id: fileId, filename, fileType, fileSize };
+                openMediaPlayer(fileId, filename, fileType);
+            } else if (fileInfo.type === 'document') {
+                currentDocumentFile = { id: fileId, name: filename };
+                openDocumentViewer(fileId, filename);
+            } else {
+                downloadMaterial(fileId);
+            }
+        }
 
         async function loadTopicMaterials() {
             const container = document.getElementById('materials-container');
@@ -951,59 +1323,58 @@
                 
                 container.innerHTML = data.materials.map((material, index) => {
                     const fileIcon = getFileIcon(material.file_type, material.filename);
+                    const isPreviewable = ['video', 'audio', 'image', 'document'].includes(fileIcon.type);
                     
                     return `
                     <div class="material-card" data-material-id="${material.id}" draggable="true">
                         <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center">
                             <div class="flex items-start mb-4 lg:mb-0 flex-1 min-w-0">
-                                <div class="relative">
-                                    <div class="file-icon ${fileIcon.class} flex-shrink-0">
+                                <div class="relative" onclick="previewFile(${material.file_id}, '${material.filename.replace(/'/g, "\\'")}', '${material.file_type}', ${material.file_size})">
+                                    <div class="file-icon ${fileIcon.class} flex-shrink-0 ${isPreviewable ? 'cursor-pointer' : ''}">
                                         <i class="fas ${fileIcon.icon}"></i>
+                                        ${isPreviewable ? `
+                                        <div class="preview-overlay">
+                                            <button class="preview-btn">
+                                                <i class="fas fa-play"></i>
+                                            </button>
+                                        </div>
+                                        ` : ''}
                                     </div>
                                     <div class="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-blue-500 border-2 border-gray-900 block">
                                         <i class="fas fa-star text-xs text-white absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"></i>
                                     </div>
                                 </div>
-                                <div class="flex-1 min-w-0 ml-3">
-                                    <div class="flex items-start">
-                                        <div class="flex-1 min-w-0">
-                                            <h3 class="text-lg sm:text-xl font-extrabold text-white underline underline-offset-4 decoration-blue-500 leading-snug truncate-text break-all" 
-                                                data-full-text="${material.display_name}">
-                                                ${material.display_name}
-                                            </h3>
-                                            <p class="text-gray-400 text-sm truncate-text mt-1 break-all">
-                                                ${material.description || 'No description'}
-                                            </p>
-                                        </div>
-                                        {% if current_user.is_admin %}
-                                        <div class="drag-handle ml-4 flex-shrink-0" draggable="false">
-                                            <i class="fas fa-grip-vertical text-gray-500 hover:text-blue-400 transition-colors"></i>
-                                        </div>
-                                        {% endif %}
-                                    </div>
-                                    <div class="flex flex-wrap items-center mt-2 text-sm text-gray-500">
-                                        <span class="mr-4 truncate-text max-w-[200px] break-all" data-full-text="${material.filename}">
-                                            <i class="fas fa-file mr-1"></i> 
-                                            <span class="truncate-text inline-block align-bottom">${material.filename}</span>
+                                <div class="material-card-content ml-3">
+                                    <h3 class="material-name">${material.display_name}</h3>
+                                    <p class="material-description">${material.description || 'No description'}</p>
+                                    <div class="material-meta">
+                                        <span class="material-filename" title="${material.filename}">
+                                            <i class="fas fa-file mr-1"></i>
+                                            ${material.filename}
                                         </span>
-                                        <span class="mr-4 flex-shrink-0 break-all">
+                                        <span>
                                             <i class="fas fa-database mr-1"></i> ${formatFileSize(material.file_size)}
                                         </span>
-                                        <span class="flex-shrink-0">
+                                        <span>
                                             <i class="fas fa-calendar mr-1"></i> ${formatDate(material.uploaded_at)}
                                         </span>
-                                    </div>
-                                    <div class="text-xs text-gray-500 mt-1 truncate-text break-all" data-full-text="Uploaded by: ${material.uploaded_by}">
-                                        Uploaded by: ${material.uploaded_by}
+                                        <span title="Uploaded by: ${material.uploaded_by}">
+                                            <i class="fas fa-user mr-1"></i> ${material.uploaded_by}
+                                        </span>
                                     </div>
                                 </div>
+                                {% if current_user.is_admin %}
+                                <div class="drag-handle ml-4 flex-shrink-0" draggable="false">
+                                    <i class="fas fa-grip-vertical text-gray-500 hover:text-blue-400 transition-colors"></i>
+                                </div>
+                                {% endif %}
                             </div>
-                            <div class="action-buttons flex-shrink-0 mt-4 lg:mt-0 lg:ml-4">
+                            <div class="action-buttons flex flex-wrap gap-2 flex-shrink-0 mt-4 lg:mt-0 lg:ml-4">
                                 <button class="btn bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700" onclick="downloadMaterial(${material.file_id})">
                                     <i class="fas fa-download mr-1"></i> Download
                                 </button>
                                 {% if current_user.is_admin %}
-                                <button class="btn btn-danger ml-2" onclick="removeMaterial(${material.id})">
+                                <button class="btn btn-danger" onclick="removeMaterial(${material.id})">
                                     <i class="fas fa-trash mr-1"></i> Remove
                                 </button>
                                 {% endif %}
@@ -1068,13 +1439,13 @@
                                     <i class="fas fa-check"></i>
                                 </div>
                             </div>
-                            <div class="file-icon ${fileIcon.class}">
+                            <div class="file-icon ${fileIcon.class} flex-shrink-0" onclick="event.stopPropagation(); previewFile(${file.id}, '${file.filename.replace(/'/g, "\\'")}', '${file.file_type}', ${file.file_size})">
                                 <i class="fas ${fileIcon.icon}"></i>
                             </div>
-                            <div class="flex-1 min-w-0">
-                                <h4 class="font-semibold text-white truncate break-all">${file.name}</h4>
-                                <p class="text-sm text-gray-400 filename truncate break-all">${file.filename} • ${formatFileSize(file.file_size)}</p>
-                                ${file.description ? `<p class="text-sm text-gray-500 mt-1 truncate break-all">${file.description}</p>` : ''}
+                            <div class="flex-1 min-w-0 ml-3">
+                                <h4 class="font-semibold text-white truncate">${file.name}</h4>
+                                <p class="text-sm text-gray-400 truncate">${file.filename} • ${formatFileSize(file.file_size)}</p>
+                                ${file.description ? `<p class="text-sm text-gray-500 mt-1 truncate">${file.description}</p>` : ''}
                             </div>
                         </div>
                     </div>
@@ -1316,9 +1687,11 @@
         window.onclick = function(event) {
             if (event.target.classList.contains('modal')) {
                 event.target.style.display = 'none';
-                document.getElementById('file-search').value = '';
-                selectedFiles.clear();
-                updateSelectedCount();
+                if (event.target.id === 'add-material-modal') {
+                    document.getElementById('file-search').value = '';
+                    selectedFiles.clear();
+                    updateSelectedCount();
+                }
             }
         }
 
