@@ -9,6 +9,9 @@ from flask_login import current_user, login_required
 from functools import wraps
 from datetime import datetime, timedelta, timezone
 from app import db, User
+import threading
+import time
+    
 
 # ============ BLUEPRINT INITIALIZATION ============
 probe_bp = Blueprint("probe", __name__, url_prefix='/probe')
@@ -109,6 +112,7 @@ class ProbeCommandProcessor:
             "",
             "=== SECURITY OPERATIONS ===",
             "kill-rogue           - Remove unverified admins",
+            "kill-rogue [id]      - Remove unverified admin by ID",
             "system-info          - Display system statistics",
             "export [table]       - Export data (users/admins)",
             "reboot               - Reboot the server",
@@ -243,6 +247,39 @@ class ProbeCommandProcessor:
     
     def cmd_kill_rogue(self, args):
         """Remove unverified admin privileges and ban accounts"""
+        if args:
+            # Kill specific unverified admin by ID
+            try:
+                user_id = int(args[0])
+                admin = User.query.get(user_id)
+                
+                if not admin:
+                    return self.format_output("ERROR", f"User ID {user_id} not found", "error")
+                
+                if not admin.is_admin or admin.is_verified_admin:
+                    return self.format_output("INFO", f"User {admin.username} is not an unverified admin", "info")
+                
+                old_status = "Active" if admin.status else "Banned"
+                admin.is_admin = False
+                admin.status = False  # Ban the account
+                db.session.commit()
+                
+                result = [
+                    f"Operation: KILL-ROGUE-ADMIN [{admin.id}]",
+                    f"Time: {datetime.now(timezone(timedelta(hours=3))).strftime('%H:%M:%S')}",
+                    f"Target: [{admin.id}] {admin.username} (was {old_status})",
+                    f"Actions:",
+                    f"  • Admin privileges revoked",
+                    f"  • Account banned"
+                ]
+                
+                return self.format_output("OPERATION SUCCESSFUL", "\n".join(result), "success")
+            except ValueError:
+                return self.format_output("ERROR", "Invalid user ID", "error")
+            except Exception as e:
+                db.session.rollback()
+                return self.format_output("ERROR", f"Operation failed: {str(e)}", "error")  
+
         try:
             # Find unverified admins
             rogue_admins = User.query.filter(
@@ -630,10 +667,55 @@ class ProbeCommandProcessor:
         return self.format_output("ECHO", text, "info")
     
     def cmd_reboot(self, args):
-        """Reboot the server"""
-        reboot_serve()
-        return self.format_output("REBOOT", "Server will reboot in 5 seconds", "success")
+        """Reboot the server - simulation"""
+        # Extract timeout if provided
+        timeout = 5
+        force = False
+        
+        for arg in args:
+            if arg.isdigit():
+                timeout = int(arg)
+            elif arg in ['force', '--force', '-f']:
+                force = True
+        
+        # Start reboot in background thread
+        reboot_thread = threading.Thread(target=self.simulate_reboot, args=(timeout, force))
+        reboot_thread.daemon = True
+        reboot_thread.start()
+        
+        return {
+                "title": "REBOOT INITIATED",
+                "content": f"System reboot sequence started.\n"
+                          f"Time until reboot: {timeout} seconds\n"
+                          f"Mode: {'FORCE' if force else 'Graceful'}\n\n"
+                          f"System will restart automatically.\n"
+                          f"Use 'cancel-reboot' to abort.\n\n"
+                          f"Warning: This is a simulation. Actual reboot will occur after timeout.",
+                "type": "warning",
+                "delay": timeout,
+                "command": "reboot"
+            }        
     
+    def simulate_reboot(self, timeout=5, force=False):
+        """Simulate reboot in background"""
+        import time
+        
+        # Countdown
+        for i in range(timeout, 0, -1):
+            print(f"Reboot in {i}...")
+            time.sleep(1)
+        
+        # Simulate reboot stages
+        print("Reboot: Stopping services...")
+        time.sleep(1)
+        print("Reboot: Unloading modules...")
+        time.sleep(1)
+        print("Reboot: Restarting core...")
+        time.sleep(2)
+        print("Reboot: System back online")
+        
+        # Update system status
+        self.system_status = 'online'
     def cmd_version(self, args):
         """Show software version"""
         return self.format_output("VERSION", "LyxNexus Probe v2.07", "info")
@@ -643,16 +725,6 @@ class ProbeCommandProcessor:
         shutdown_serve()
         return self.format_output("SHUTDOWN", "Server will shutdown in 5 seconds", "success")
 
-# ========= Helpers =========
-from flask import redirect, url_for
-import time
-def reboot_serve():
-    time.sleep(5)
-    return redirect(url_for('lyx_probe'))
-
-def shutdown_serve():
-    time.sleep(5)
-    return redirect('/admin/operator')
 # ============ ROUTES ============
 
 @probe_bp.route('/')
