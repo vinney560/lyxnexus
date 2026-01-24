@@ -542,7 +542,7 @@
 
                 if (remaining <= 0) {
                     clearInterval(timer);
-                    countdownEl.textContent = 'Rebooting down...';
+                    countdownEl.textContent = 'Rebooting...';
                     setTimeout(() => {
                         window.location.reload();
                     }, 1000);

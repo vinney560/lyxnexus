@@ -13,6 +13,7 @@ from io import BytesIO # For file handling & Download
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import create_engine, or_
 from sqlalchemy.exc import OperationalError, ArgumentError
+from sqlalchemy.pool import QueuePool
 from sqlalchemy.orm import sessionmaker
 from flask_cors import CORS
 from datetime import timedelta, datetime, date
@@ -74,10 +75,12 @@ def database_url():
 app.config['SQLALCHEMY_DATABASE_URI'] = database_url()
 # Read from Aiven connection max pooling for reuse pool
 app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
-    'pool_recycle': 40,  
+    'pool_size': 10,
+    'max_overflow': 20,
+    'pool_recycle': 3600,
     'pool_pre_ping': True,
-    'pool_size': 6,
-    'max_overflow': 5,
+    'pool_timeout': 30,
+    'poolclass': QueuePool
 }
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -164,6 +167,23 @@ def nairobi_time():
 # USER MODEL
 # =========================================
 class User(db.Model, UserMixin):
+    __table_args__ = (
+        # Index for login/authentication
+        db.Index('idx_user_mobile', 'mobile'),
+        
+        # Index for admin queries
+        db.Index('idx_user_admin', 'is_admin'),
+        
+        # Index for user listing and filtering
+        db.Index('idx_user_created', 'created_at'),
+        
+        # Index for status filtering
+        db.Index('idx_user_status', 'status'),
+        
+        # Composite index for common queries
+        db.Index('idx_user_admin_status', 'is_admin', 'status'),
+        db.Index('idx_user_year_status', 'year', 'status'),
+    )
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(200), default='User V', nullable=True)
     mobile = db.Column(db.String(20), unique=True, nullable=True)
@@ -204,6 +224,19 @@ class User(db.Model, UserMixin):
 # ANNOUNCEMENT MODEL
 # ========================================
 class Announcement(db.Model):
+    __table_args__ = (
+        # For latest announcements
+        db.Index('idx_announcement_created', 'created_at'),
+        
+        # For highlighted/pinned announcements
+        db.Index('idx_announcement_highlighted', 'highlighted'),
+        
+        # For author-based queries
+        db.Index('idx_announcement_author', 'user_id', 'created_at'),
+        
+        # Composite for filtered listings
+        db.Index('idx_announcement_highlighted_created', 'highlighted', 'created_at'),
+    )    
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(200), nullable=True)
     content = db.Column(db.Text, nullable=True)
@@ -230,6 +263,19 @@ class Announcement(db.Model):
 # TOPIC / UNIT MODEL
 # =========================================
 class Topic(db.Model):
+    __table_args__ = (
+        # For name-based searches
+        db.Index('idx_topic_name', 'name'),
+        
+        # For year-based filtering
+        db.Index('idx_topic_year', 'year'),
+        
+        # For lecturer queries
+        db.Index('idx_topic_lecturer', 'lecturer'),
+        
+        # Composite for organized listing
+        db.Index('idx_topic_year_created', 'year', 'created_at'),
+    )    
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(200), unique=True, nullable=True)
     description = db.Column(db.Text, nullable=True)
@@ -247,6 +293,19 @@ class Topic(db.Model):
 # ASSIGNMENT MODEL
 # =========================================
 class Assignment(db.Model):
+    __table_args__ = (
+        # For due date queries
+        db.Index('idx_assignment_due_date', 'due_date'),
+        
+        # For topic-based assignments
+        db.Index('idx_assignment_topic', 'topic_id', 'due_date'),
+        
+        # For creator-based queries
+        db.Index('idx_assignment_creator', 'user_id', 'due_date'),
+        
+        # Composite for active assignments
+        db.Index('idx_assignment_active', 'topic_id', 'due_date', 'created_at'),
+    )    
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(200), nullable=True)
     description = db.Column(db.Text, nullable=True)
@@ -265,6 +324,23 @@ class Assignment(db.Model):
 # TIMETABLE MODEL
 # =========================================
 class Timetable(db.Model):
+    __table_args__ = (
+        # For day-based queries
+        db.Index('idx_timetable_day', 'day_of_week'),
+        
+        # For time-based queries
+        db.Index('idx_timetable_time', 'start_time', 'end_time'),
+        
+        # For subject/room queries
+        db.Index('idx_timetable_subject', 'subject'),
+        db.Index('idx_timetable_room', 'room'),
+        
+        # Composite for daily schedules
+        db.Index('idx_timetable_day_time', 'day_of_week', 'start_time'),
+        
+        # For year-based timetables
+        db.Index('idx_timetable_year', 'year', 'day_of_week'),
+    )    
     id = db.Column(db.Integer, primary_key=True)
     day_of_week = db.Column(db.String(20), nullable=False)
     start_time = db.Column(db.Time, nullable=False)
@@ -286,6 +362,25 @@ class Timetable(db.Model):
 # MESSAGE MODELS
 # ========================================
 class Message(db.Model):
+    __table_args__ = (
+        # CRITICAL: For room-based queries (most frequent)
+        db.Index('idx_message_room_created', 'room', 'created_at'),
+        
+        # For user-specific message queries
+        db.Index('idx_message_user_created', 'user_id', 'created_at'),
+        
+        # For unread messages and read receipts
+        db.Index('idx_message_read', 'user_id', 'is_deleted'),
+        
+        # For reply chains
+        db.Index('idx_message_parent', 'parent_id'),
+        
+        # For admin message filtering
+        db.Index('idx_message_admin', 'is_admin_message'),
+        
+        # Composite for room + user + time
+        db.Index('idx_message_room_user_time', 'room', 'user_id', 'created_at'),
+    )    
     id = db.Column(db.Integer, primary_key=True)
     content = db.Column(db.Text, nullable=False)
     user_id = db.Column(
@@ -990,7 +1085,7 @@ with app.app_context():
         scheduler = BackgroundScheduler()
         scheduler.add_job(
             func=auto_close_sessions,
-            trigger=IntervalTrigger(minutes=1),
+            trigger=IntervalTrigger(minutes=45),
             id="Close_Idle_Connections",
             replace_existing=True
         )
@@ -1029,26 +1124,100 @@ def delete_old_announcements():
         db.session.commit()
         print(f"✅ Deleted {len(old_announcements)} old announcements.")
 
-from apscheduler.schedulers.background import BackgroundScheduler
-from apscheduler.triggers.interval import IntervalTrigger
-import atexit
+#==============================================================
+#      MASTER CLEANUP --> ALL IN ONE PLACE
+#==============================================================
+def master_cleanup():
+    """Single function that handles ALL cleanup tasks"""
+    with app.app_context():
+        try:
+            current_time = datetime.now(timezone(timedelta(hours=3)))
+            print(f"\n{'='*70}")
+            print(f"[{current_time.strftime('%Y-%m-%d %H:%M:%S')}] STARTING MASTER CLEANUP")
+            
+            # 1. Clean online_users
+            online_users_cleaned = cleanup_online_users(current_time)
+            
+            # 2. Clean old announcements
+            announcements_cleaned = delete_old_announcements()
+            
+            # 3. Clean download counts
+            download_count = len(users_downloads)
+            users_downloads.clear()
+            
+            # 4. Clean old visits (optional)
+            visits_cleaned = cleanup_old_visits()
+            
+            # 5. Reset notification tracking
+            sent_notifications.clear()
+            
+            print(f"[{current_time.strftime('%Y-%m-%d %H:%M:%S')}] MASTER CLEANUP COMPLETE")
+            print(f"  • Online users cleaned: {online_users_cleaned}")
+            print(f"  • Old announcements deleted: {announcements_cleaned}")
+            print(f"  • Download counts reset: {download_count}")
+            print(f"  • Old visits deleted: {visits_cleaned[0] if visits_cleaned else 0}")
+            print(f"{'='*70}\n")
+            
+        except Exception as e:
+            print(f"[ERROR] Master cleanup failed: {e}")
+            import traceback
+            traceback.print_exc()
 
-scheduler = BackgroundScheduler()
+def cleanup_online_users(current_time):
+    """Clean online_users dictionary"""
+    if not online_users:
+        return 0
+    
+    expired = []
+    for user_id, data in online_users.items():
+        if isinstance(data, dict) and 'last_seen' in data:
+            try:
+                last_seen = data['last_seen']
+                if isinstance(last_seen, str):
+                    last_seen = datetime.fromisoformat(last_seen.replace('Z', '+00:00'))
+                if (current_time - last_seen).total_seconds() > 300:  # 5 minutes
+                    expired.append(user_id)
+            except:
+                expired.append(user_id)
+    
+    for user_id in expired:
+        online_users.pop(user_id, None)
+    
+    return len(expired)
 
-# Add the cleanup job (runs every 24 hours) --> Background Cleaning
-scheduler.add_job(
-    func=delete_old_announcements,
-    trigger=IntervalTrigger(days=1),
-    id="delete_old_announcements_task",
-    replace_existing=True,
-)
-
-if not scheduler.running:
-    scheduler.start()
-    print("🕒 APScheduler started: deleting announcements older than 30 days daily")
-
-atexit.register(lambda: scheduler.shutdown(wait=False))
-
+#==============================================================
+#      SINGLE SCHEDULER SETUP
+#==============================================================
+with app.app_context():
+    try:
+        # Create single scheduler
+        master_scheduler = BackgroundScheduler(
+            job_defaults={
+                'coalesce': True,
+                'max_instances': 1,
+                'misfire_grace_time': 3600
+            }
+        )
+        
+        # Schedule all jobs on ONE scheduler
+        master_scheduler.add_job(
+            func=master_cleanup,
+            trigger='interval',
+            hours=6,  # Run every 6 hours
+            id='master_cleanup',
+            name='Master cleanup every 6 hours'
+        )
+        
+        master_scheduler.start()
+        
+        atexit.register(lambda: master_scheduler.shutdown(wait=False))
+        
+        now = (datetime.utcnow() + timedelta(hours=3)).strftime('%Y-%m-%d %H:%M:%S')
+        print(f"[{now}] Single master scheduler started with all jobs")
+        
+    except Exception as e:
+        print('X' * 70)
+        print(f'Error initializing master scheduler: {e}')
 #==============================================================
 #            SCHEDULAR FOR NOTIFICATION ON UPCOMING CLASSES
 #==============================================================
@@ -1100,9 +1269,10 @@ def get_timetable_and_notify():
 
                     print(f"[NOTIFY] Sent reminder for class '{timetable.subject}' at {timetable.start_time}.")
 
-                # Reset sent notifications after midnight (fresh day)
-                elif now.hour >= 23 and timetable.id in sent_notifications:
-                    sent_notifications.remove(timetable.id)
+                # Reset sent notifications after midnight to 6 AM (fresh day)
+                elif (now.hour >= 23 or now.hour < 6) and timetable.id in sent_notifications:
+                    # Clear between 11 PM and 6 AM
+                    sent_notifications.remove(timetable.id)                
 
         except Exception as e:
             print(f"[ERROR] Failed to process timetable notifications: {e}")
@@ -1115,7 +1285,7 @@ with app.app_context():
         scheduler = BackgroundScheduler()
         scheduler.add_job(
             func=get_timetable_and_notify,
-            trigger=IntervalTrigger(minutes=5),
+            trigger=IntervalTrigger(minutes=10),
             id="Upcoming_Class_Notifier",
             replace_existing=True
         )

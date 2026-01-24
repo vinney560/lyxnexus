@@ -42,50 +42,79 @@ def modify_year():
 @login_required
 @admin_required
 def increment_year():
-    ''' 
-    Let's make script to add +1 year to all users except those with operator and creator year(5)
     '''
-
+    Increment year logic:
+    - Years 1-3: Add +1
+    - Year 4: Change to 7 (mutable)
+    - Year 5: Immutable (no change)
+    - Year 7: Terciary acc
+    '''
+    
     users = User.query.all()
     all_users = len(users)
-    passed = 0
+    incremented = 0
+    skipped = 0
     
-    # Let's try increment by +1 watching out for any errors
     for user in users:
-        if user.year == 5:  # Operator/creator accounts
-            passed += 1
-            print("Passing Operator account...")
+        print(f"Processing {user.username}: Year {user.year}")
+        
+        # Year 5: Immutable (no change)
+        if user.year == 5:
+            skipped += 1
+            print(f"  Skipping year 5 (immutable): {user.username}")
             continue
-        try:
+            
+        # Year 7: Immutable (no change)
+        if user.year == 7:
+            skipped += 1
+            print(f"  Skipping year 7 (already immutable): {user.username}")
+            continue
+            
+        # Year 4: Change to 7
+        if user.year == 4:
+            old_year = user.year
+            user.year = 7
+            db.session.add(user)
+            incremented += 1
+            print(f"  Changed {user.username} from year {old_year} to 7 (now immutable)")
+            continue
+            
+        # Years 1-3: Add +1
+        if user.year in [1, 2, 3]:
+            old_year = user.year
             user.year += 1
             db.session.add(user)
-        except Exception as e:
-            db.session.rollback()
-            print(f"Incrementation Failed: {e}")
-            return jsonify({
-                'status': 'error',
-                'message': 'Failed to increment user(s)'
-            }), 500
+            incremented += 1
+            print(f"  Incremented {user.username} from year {old_year} to {user.year}")
+            continue
+            
+        # Year 0 or any other unexpected year - skip or handle as needed
+        skipped += 1
+        print(f"  Skipping unexpected year {user.year}: {user.username}")
     
     try:
         db.session.commit()
+        print(f"Successfully committed changes. Incremented: {incremented}, Skipped: {skipped}")
+        
     except Exception as e:
         db.session.rollback()
         print(f"Commit Failed: {e}")
         return jsonify({
             'status': 'error',
-            'message': 'Failed to save changes'
+            'message': 'Failed to save changes to database',
+            'error': str(e)
         }), 500
-        
-    if passed >= all_users: 
-        return jsonify({"status": "success", "message": "No user(s) incremented"})
     
-    return jsonify(
-        {
-            "status": "success",
-            "message": f"All {all_users - passed} user(s) year incremented successfully. | Passed: {passed}"
-        }
-    )
+    if incremented == 0:
+        return jsonify({
+            "status": "success", 
+            "message": f"No users were incremented. {skipped} users were skipped."
+        })
+    
+    return jsonify({
+        "status": "success",
+        "message": f"Year increment completed successfully{'. Incremented: {incremented}, Skipped: {skipped}'}",
+    })
 
 @modify_year_bp.route('/api/decrement-year')
 @login_required
@@ -98,6 +127,7 @@ def decrement_year():
     users = User.query.all()
     all_users = len(users)
     passed = 0
+    decremented = 0
     
     # Let's try decrement by 1 to non operators and year 1(s) watching out for any errors
     for user in users:
@@ -105,9 +135,23 @@ def decrement_year():
             passed += 1
             print("Passing Operator and year 1...")
             continue
+
+        # Year 7: Change to 4
+        if user.year == 7:
+            old_year = user.year
+            user.year = 4
+            db.session.add(user)
+            decremented += 1
+            print(f"  Changed {user.username} from year {old_year} to 7 (now immutable)")
+            continue
+
         try:
+            old_year = user.year
             user.year -= 1
             db.session.add(user)
+            decremented += 1
+            print(f"  Decremented {user.username} from year {old_year} to {user.year}")
+            continue
         except Exception as e:
             db.session.rollback()
             print(f"Decrementation Failed: {e}")
@@ -132,12 +176,10 @@ def decrement_year():
     return jsonify(
         {
             "status": "success",
-            "message": f"All {all_users - passed} user(s) year decremented successfully. | Passed: {passed}"
+            "message": f"All {decremented} user(s) year decremented successfully. | Passed: {passed}"
         }
     )
-
-# Add these routes to your modify_year_bp blueprint
-
+# ========================================
 @modify_year_bp.route('/api/statistics')
 @login_required
 @admin_required
@@ -159,7 +201,7 @@ def get_statistics():
         avg_year = total_years / total_users if total_users > 0 else 0
         
         # Get year distribution
-        year_distribution = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0}
+        year_distribution = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 7: 0}
         for user in users:
             if user.year in year_distribution:
                 year_distribution[user.year] += 1
