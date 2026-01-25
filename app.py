@@ -8468,7 +8468,7 @@ def get_topic_materials(topic_id):
         for material in materials:
             materials_data.append({
                 'id': material.id,
-                'display_name': material.display_name or material.file.name,
+                'display_name': remove_ext(material.display_name) if material.display_name or remove_ext(material.file.name) if material.file.name,
                 'description': material.description or material.file.description,
                 'file_id': material.file_id,
                 'filename': material.file.filename,
@@ -8544,7 +8544,7 @@ def add_topic_material(topic_id):
                 id=gen_unique_id(TopicMaterial),
                 topic_id=topic_id,
                 file_id=file_id,
-                display_name=display_names.get(str(file_id)) or file.filename,
+                display_name=display_names.get(str(file_id)) or remove_ext(file.filename) if file.filename,
                 description=descriptions.get(str(file_id)) or f"Uploaded at {file.created_at.strftime('%Y-%m-%d')}",
                 order_index=max_order + i + 1
             )
