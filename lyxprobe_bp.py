@@ -55,7 +55,8 @@ class ProbeCommandProcessor:
             'echo': self.cmd_echo,
             'reboot': self.cmd_reboot,
             'version': self.cmd_version,
-            'shutdown': self.cmd_shutdown
+            'shutdown': self.cmd_shutdown,
+            'modify': self.cmd_modify
         }
     
     def process(self, command):
@@ -109,6 +110,7 @@ class ProbeCommandProcessor:
             "demote [id]          - Demote admin to user",
             "verify [id]          - Verify admin account",
             "unverify [id]        - Unverify admin account",
+            "modify  [id]         - Modify user info"
             "",
             "=== SECURITY OPERATIONS ===",
             "kill-rogue           - Remove unverified admins",
@@ -317,6 +319,35 @@ class ProbeCommandProcessor:
             db.session.rollback()
             return self.format_output("ERROR", f"Operation failed: {str(e)}", "error")
     
+    def cmd_modify(self, args):
+        """Return user to modify"""
+        if not args:
+            return self.format_output("ERROR", "Usage: modify [user_id]", "error")
+
+        try:
+            user_id = int(args[0])
+            user = User.query.get(user_id)
+
+            if not user:
+                return self.format_output("ERROR", f"User ID {user_id} not found", "error")
+
+            if user.id == current_user.id:
+                return self.format_output("ERROR", "Cannot ban yourself", "error")
+            
+            if user.year == 5:
+                return self.format_output("ERROR", "Cannot ban operator accounts", "error")
+
+            return {
+                'command': 'modify',
+                'user_id': user_id
+            }
+        
+        except ValueError:
+            return self.format_output("ERROR", "Invalid user ID", "error")
+        except Exception as e:
+            db.session.rollback()
+            return self.format_output("ERROR", f"Modify failed: {str(e)}", "error")
+            
     def cmd_ban(self, args):
         """Ban a user account"""
         if not args:

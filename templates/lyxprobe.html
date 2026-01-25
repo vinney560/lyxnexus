@@ -441,6 +441,10 @@
                     handleClear(data);
                 }
 
+                else if (data.command === 'modify') {
+                    handleModify(data);
+                }
+
                 else {
                     addOutputEntry(data.title, data.content, data.type);
                 }
@@ -488,6 +492,14 @@
         function handleClear(data) {
             clearTerminal();
             addOutputEntry('SYSTEM', 'Terminal cleared by command', 'info');
+        }
+
+        function handleModify(data) {
+            const user_id = data.user_id;
+            addOutputEntry('USER MODIFY', `Redirecting to user modification page for User ID: ${user_id}`, 'info');
+            setTimeout(() => {    
+                window.location.href = `/admin/${user_id}/modify`;
+            }, 2000);
         }
 
         function handleReload(data) {
