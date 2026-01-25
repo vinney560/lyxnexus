@@ -69,6 +69,12 @@ projects = {
         'status': 'development',
         'description': 'Local WiFi management system - Currently in development & Private'
     },
+    'https://v6.www-y2mate.com/': {  
+        'name': 'Y2Mate',
+        'credentials': None,
+        'status': 'active',
+        'description': 'Download videos from YouTube by using only the name of the content. Currently being integrated with LyxLab - Y2Mate'
+    },
     'https://lyxnexus.onrender.com/lyxpinger/': {  
         'name': 'LyxPinger',
         'credentials': None,
