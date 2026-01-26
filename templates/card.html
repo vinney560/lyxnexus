@@ -164,7 +164,9 @@
             color: #667eea;
             font-weight: 500;
             letter-spacing: 0.5px;
-        }
+            margin-top: 5px;
+            text-align: center;
+        }        
         
         .info-section {
             flex: 1;
@@ -212,7 +214,6 @@
             line-height: 1.3;
         }
         
-        /* Footer */
         .card-footer {
             position: absolute;
             bottom: 0;
@@ -252,8 +253,7 @@
             font-size: 12px;
             margin-left: 5px;
         }
-        
-        /* Responsive */
+                
         @media (max-width: 480px) {
             :root {
                 --card-width: 350px;
@@ -326,8 +326,8 @@
                     </div>
                     <div class="logo-text">LYXNEXUS</div>
                 </div>
-                <div class="status-badge {% if user_data.status == 'True' %}status-active{% else %}status-banned{% endif %}">
-                    {% if user_data.status == 'True' %}
+                <div class="status-badge {% if user_data.status %}status-active{% else %}status-banned{% endif %}">
+                    {% if user_data.status %}
                         <i class="fas fa-check-circle"></i>
                         <span>ACTIVE</span>
                     {% else %}
@@ -342,16 +342,12 @@
                 <!-- Avatar Section -->
                 <div class="avatar-section">
                     <div class="avatar-container">
-                        {% if user_data.avatar %}
-                            <img src="{{ user_data.avatar }}" alt="Avatar" class="avatar">
-                        {% else %}
-                            <div class="avatar-placeholder">
-                                {{ user_data.username[0].upper() if user_data.username else 'U' }}
-                            </div>
-                        {% endif %}
+                        <div class="avatar-placeholder">
+                            {{ user_data.username[0] if user_data.username else 'U' }}
+                        </div>
                     </div>
                     <div class="user-id">{{ user_data.id }}</div>
-                </div>
+                </div>                
                 
                 <!-- Info Section -->
                 <div class="info-section">
@@ -370,7 +366,7 @@
                                 <i class="fas fa-user-tag"></i>
                             </div>
                             <div class="detail-text">
-                                Status: <strong>{{ user_data.status }}</strong>
+                                Status: <strong>{{ 'Active' if user_data.status else 'Banned' }}</strong>
                             </div>
                         </div>
                         
