@@ -1271,7 +1271,6 @@
             document.getElementById('welcome-message').textContent = `Welcome back, ${username}`;
             
             // Update user details with animations
-            animateCounter('total-visits', user.visits || 0);
             document.getElementById('user-status').textContent = user.status ? 'Active' : 'Inactive';
             document.getElementById('status-trend').textContent = user.status ? 'All systems operational' : 'Account requires attention';
             
@@ -1347,6 +1346,7 @@
             
             const activities = activityData.visited_page;
             activityCount.textContent = `${activities.length} recent activities`;
+            animateCounter('total-visits', activities.length || 0);
             
             if (activities.length === 0) {
                 feed.innerHTML = `
