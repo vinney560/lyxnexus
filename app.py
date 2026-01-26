@@ -4861,6 +4861,10 @@ def admin_page():
 def admin_users():
     return render_template('admin_users.html')
 #-----------------------------------------------------------------
+@app.route('/portfolio')
+def portfolio():
+    return render_template('portfolio.html', year=_year())
+#-----------------------------------------------------------------
 @app.route('/ln-ads')
 def ln_ads():
     return render_template('lyxnexus_ads.html', year=_year())

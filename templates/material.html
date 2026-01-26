@@ -1325,7 +1325,7 @@
                     <div class="material-card" data-material-id="${material.id}" draggable="true">
                         <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center">
                             <div class="flex items-start mb-4 lg:mb-0 flex-1 min-w-0">
-                                <div class="relative" onclick="previewFile(${material.file_id}, \'${material.filename.replace(/['"`]/g, '\\$&')}\`, \`${material.file_type}\`, ${material.file_size}, \`${material.url}\`)">
+                                <div class="relative" onclick="previewFile(${material.file_id}, \`${material.filename.replace(/['"`]/g, '\\$&')}\`, \`${material.file_type}\`, ${material.file_size}, \`${material.url}\`)">
                                     <div class="file-icon ${fileIcon.class} flex-shrink-0 ${isPreviewable ? 'cursor-pointer' : ''}">
                                         <i class="fas ${fileIcon.icon}"></i>
                                         ${isPreviewable ? `
