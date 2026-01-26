@@ -4865,6 +4865,11 @@ def admin_users():
 def portfolio():
     return render_template('portfolio.html', year=_year())
 #-----------------------------------------------------------------
+@app.route('/card')
+def card():
+    user = current_user if current_user.is_authenticated else None
+    return render_template('card.html', year=_year(), user_data=user)
+#-----------------------------------------------------------------
 @app.route('/ln-ads')
 def ln_ads():
     return render_template('lyxnexus_ads.html', year=_year())
