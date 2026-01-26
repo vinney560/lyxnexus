@@ -4861,6 +4861,10 @@ def admin_page():
 def admin_users():
     return render_template('admin_users.html')
 #-----------------------------------------------------------------
+@app.route('/fee-info')
+def fee_info():
+    return render_template('fee_info.html', year=_year())
+#-----------------------------------------------------------------
 @app.route('/admin/operator')
 @login_required
 @admin_required

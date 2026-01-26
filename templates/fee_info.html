@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fee Information | LyxNexus</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <meta name="keywords" content="Lyx Nexus, Kisii LyxNexus, kisii lyxnexus, kisii university lyxnexus, kisii university lyx nexus, lyx nexus, lyxnexus" />
+    <meta name="author" content="Vincent Kipngetich" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://lyxnexus.onrender.com/" />
+    <link rel="icon" href="https://lyxnexus.onrender.com/uploads/favicon-1.png"/>
+        
+    <meta property="og:title" content="Fee Information | LyxNexus" />
+    <meta property="og:description" content="Learn about LyxNexus activation fee and platform sustainability" />
+    <meta property="og:image" content="https://lyxnexus.onrender.com/favicon.ico" />
+    <meta property="og:url" content="https://lyxnexus.onrender.com/" />
+        
+    <meta name="twitter:card" content="summary" />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<style>
+    :root {
+        --bg-color: #111827;
+        --text-color: #F9FAFB;
+        --accent-color: #4A90E2;
+        --secondary-color: #8B5CF6;
+        --success-color: #10B981;
+        --warning-color: #F59E0B;
+        --error-color: #EF4444;
+    }
+    
+    body {
+        font-family: 'Poppins', sans-serif;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow-x: hidden;
+        background-image: url('/uploads/OIP10.jpg');
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        padding: 20px;
+    }
+    
+    .gradient-text {
+        background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        color: transparent;
+    }
+    
+    .glass-morph {
+        background: rgba(30, 30, 40, 0.6);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        box-shadow: 0 8px 32px rgba(0, 31, 135, 0.2);
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        border-radius: 20px;
+        transition: all 0.3s ease;
+    }
+    
+    .glass-morph:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 40px rgba(0, 31, 135, 0.3);
+    }
+
+    .header-back {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 25px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .back-btn {
+        background: rgba(59, 130, 246, 0.1);
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        color: #3B82F6;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .back-btn:hover {
+        background: rgba(59, 130, 246, 0.2);
+        transform: translateX(-3px);
+    }
+    
+    .page-title {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    
+    .fee-badge {
+        display: inline-block;
+        background: linear-gradient(90deg, #10B981, #3B82F6);
+        color: white;
+        padding: 8px 20px;
+        border-radius: 25px;
+        font-weight: 600;
+        font-size: 1.1rem;
+        margin: 10px 0 20px 0;
+        box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+    }
+    
+    .activation-explanation {
+        background: rgba(30, 30, 40, 0.7);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        border-radius: 15px;
+        padding: 25px;
+        margin: 20px 0;
+        transition: all 0.3s ease;
+    }
+
+    .activation-explanation:hover {
+        border-color: rgba(59, 130, 246, 0.4);
+        box-shadow: 0 8px 25px rgba(0, 31, 135, 0.2);
+    }
+
+    .explanation-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 15px;
+        color: #E5E7EB;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .explanation-title i {
+        color: #3B82F6;
+    }
+
+    .benefit-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        margin-bottom: 15px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        opacity: 0;
+        transform: translateY(20px);
+        animation: slideUp 0.5s ease forwards;
+    }
+
+    .benefit-item:nth-child(1) { animation-delay: 0.1s; }
+    .benefit-item:nth-child(2) { animation-delay: 0.2s; }
+    .benefit-item:nth-child(3) { animation-delay: 0.3s; }
+    .benefit-item:nth-child(4) { animation-delay: 0.4s; }
+
+    @keyframes slideUp {
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .benefit-item:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+
+    .benefit-icon {
+        color: #10B981;
+        font-size: 1.1rem;
+        margin-top: 3px;
+        flex-shrink: 0;
+    }
+
+    .benefit-content h4 {
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 4px;
+        color: #D1D5DB;
+    }
+
+    .benefit-content p {
+        font-size: 0.9rem;
+        color: #9CA3AF;
+        line-height: 1.5;
+    }
+
+    .platform-note {
+        background: rgba(16, 185, 129, 0.1);
+        border: 1px solid rgba(16, 185, 129, 0.2);
+        border-radius: 12px;
+        padding: 20px;
+        margin: 25px 0;
+        text-align: center;
+        animation: fadeIn 0.8s ease 0.5s both;
+    }
+
+    .platform-note h4 {
+        color: #10B981;
+        font-weight: 600;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .platform-note p {
+        color: #9CA3AF;
+        font-size: 0.9rem;
+        line-height: 1.5;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .important-note {
+        background: rgba(59, 130, 246, 0.1);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        border-radius: 12px;
+        padding: 15px;
+        margin-top: 20px;
+        font-size: 0.85rem;
+        color: #9CA3AF;
+        text-align: center;
+        line-height: 1.4;
+        animation: fadeIn 0.8s ease 0.7s both;
+    }
+
+    .fee-highlight {
+        text-align: center;
+        margin: 25px 0;
+        padding: 20px;
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(59, 130, 246, 0.1));
+        border-radius: 15px;
+        border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .fee-amount {
+        font-size: 2rem;
+        font-weight: 700;
+        background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin: 10px 0;
+    }
+
+    .fee-duration {
+        color: #9CA3AF;
+        font-size: 0.9rem;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 15px;
+        margin-top: 30px;
+    }
+
+    .primary-btn {
+        background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 50px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+        cursor: pointer;
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .primary-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+    }
+
+    .secondary-btn {
+        background: transparent;
+        border: 2px solid #3B82F6;
+        color: #3B82F6;
+        padding: 12px 30px;
+        border-radius: 50px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .secondary-btn:hover {
+        background: rgba(59, 130, 246, 0.1);
+        transform: translateY(-3px);
+    }
+
+    .faq-section {
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .faq-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 15px;
+        color: #D1D5DB;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .faq-item {
+        margin-bottom: 15px;
+        padding: 15px;
+        background: rgba(20, 20, 30, 0.5);
+        border-radius: 10px;
+        border-left: 3px solid #3B82F6;
+    }
+
+    .faq-question {
+        font-weight: 600;
+        color: #E5E7EB;
+        margin-bottom: 5px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .faq-answer {
+        color: #9CA3AF;
+        font-size: 0.9rem;
+        line-height: 1.5;
+        padding-left: 26px;
+    }
+
+    @media (max-width: 768px) {
+        body {
+            padding: 15px;
+        }
+        
+        .glass-morph {
+            padding: 20px;
+        }
+        
+        .activation-explanation {
+            padding: 20px;
+            margin: 15px 0;
+        }
+        
+        .action-buttons {
+            flex-direction: column;
+        }
+        
+        .fee-amount {
+            font-size: 1.8rem;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .benefit-item {
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .benefit-icon {
+            align-self: flex-start;
+        }
+        
+        .page-title h1 {
+            font-size: 1.8rem;
+        }
+        
+        .primary-btn, .secondary-btn {
+            padding: 12px 20px;
+            font-size: 0.9rem;
+        }
+    }
+</style>
+<body>
+    <div class="w-full max-w-4xl mx-2">
+        <div class="glass-morph p-4">
+            <!-- Header with Back Button -->
+            <div class="header-back">
+                <button class="back-btn" onclick="ProceedToPayment()">
+                    <i class="fas fa-arrow-left"></i>
+                    Back to Payment
+                </button>
+                <div class="flex-1"></div>
+            </div>
+
+            <!-- Page Title -->
+            <div class="page-title">
+                <h1 class="text-3xl font-bold gradient-text">Activation Fee Information</h1>
+                <p class="text-gray-400 mt-2">Understanding our one-time fee and platform sustainability</p>
+                <div class="fee-badge">One-Time Activation Fee</div>
+            </div>
+
+            <!-- Fee Highlight -->
+            <div class="fee-highlight">
+                <div class="text-lg font-semibold text-white">Total Amount</div>
+                <div class="fee-amount">Ksh. 19 ONLY</div>
+                <div class="fee-duration">One-time payment • Lifetime access</div>
+            </div>
+
+            <!-- Activation Fee Explanation -->
+            <div class="activation-explanation">
+                <h3 class="explanation-title">
+                    <i class="fas fa-hand-holding-usd"></i>
+                    Why We Have an Activation Fee
+                </h3>
+                
+                <div class="benefit-item">
+                    <div class="benefit-icon">
+                        <i class="fas fa-heart"></i>
+                    </div>
+                    <div class="benefit-content">
+                        <h4>Support Our Developers & Team</h4>
+                        <p>Your contribution directly supports the dedicated developers and team members who work tirelessly to build, maintain, and improve LyxNexus. This ensures continued passion and commitment to delivering quality educational tools.</p>
+                    </div>
+                </div>
+
+                <div class="benefit-item">
+                    <div class="benefit-icon">
+                        <i class="fas fa-server"></i>
+                    </div>
+                    <div class="benefit-content">
+                        <h4>Server & Infrastructure Costs</h4>
+                        <p>Maintaining reliable servers, ensuring 24/7 platform availability, and providing secure data storage requires significant ongoing investment. Your fee helps cover these essential infrastructure expenses.</p>
+                    </div>
+                </div>
+
+                <div class="benefit-item">
+                    <div class="benefit-icon">
+                        <i class="fas fa-sync-alt"></i>
+                    </div>
+                    <div class="benefit-content">
+                        <h4>Continuous Platform Improvements</h4>
+                        <p>We regularly release new features, security updates, bug fixes, and platform enhancements. The activation fee funds this continuous development cycle, keeping LyxNexus modern, efficient, and secure.</p>
+                    </div>
+                </div>
+
+                <div class="benefit-item">
+                    <div class="benefit-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="benefit-content">
+                        <h4>Platform Integrity & User Verification</h4>
+                        <p>A nominal fee helps us maintain platform integrity, prevent abuse, ensure resources are allocated to genuine users, and build a sustainable community of learners who value quality education.</p>
+                    </div>
+                </div>
+
+                <div class="platform-note">
+                    <h4><i class="fas fa-unlock"></i> Important Clarification</h4>
+                    <p>
+                        <strong>LyxNexus is and will always be a completely free platform.</strong> We do not charge for any services, features, or content access. 
+                        All our educational resources, tools, and materials are sourced from open-access and freely available sources. 
+                        This one-time activation fee <strong>is strictly for platform sustainability</strong> and not for service charges.
+                    </p>
+                </div>
+
+                <div class="important-note">
+                    <i class="fas fa-exclamation-circle mr-1"></i>
+                    This is a <strong>one-time only</strong> fee. After activation, you'll have <strong>lifetime access</strong> to all LyxNexus features with no recurring charges or hidden fees.
+                </div>
+            </div>
+
+            <!-- FAQ Section -->
+            <div class="faq-section">
+                <h3 class="faq-title">
+                    <i class="fas fa-question-circle"></i>
+                    Frequently Asked Questions
+                </h3>
+                
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <i class="fas fa-question text-blue-400"></i>
+                        Is this a subscription fee?
+                    </div>
+                    <div class="faq-answer">
+                        No, this is a one-time activation fee only. There are no recurring charges or subscription fees.
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <i class="fas fa-question text-blue-400"></i>
+                        What do I get after paying?
+                    </div>
+                    <div class="faq-answer">
+                        Full, unrestricted access to all LyxNexus features, tools, and resources for life, with no additional payments ever required.
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <i class="fas fa-question text-blue-400"></i>
+                        Can I get a refund?
+                    </div>
+                    <div class="faq-answer">
+                        Activation fees are generally non-refundable as they immediately grant lifetime access. However, exceptional cases can be reviewed by contacting our support team.
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <i class="fas fa-question text-blue-400"></i>
+                        Is my payment secure?
+                    </div>
+                    <div class="faq-answer">
+                        Yes, all payments are processed through secure, encrypted payment gateways with industry-standard security measures.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <button class="primary-btn" onclick="proceedToPayment()">
+                    <i class="fas fa-credit-card"></i>
+                    Proceed to Payment
+                </button>
+                <button class="secondary-btn" onclick="goToLogin()">
+                    <i class="fas fa-arrow-left"></i>
+                    Go To Login
+                </button>
+            </div>
+
+            <!-- Additional Information -->
+            <div class="text-center mt-8 text-gray-500 text-sm">
+                <p><i class="fas fa-shield-alt mr-1"></i> All payments are secured and encrypted</p>
+                <p class="mt-1"><i class="fas fa-lock mr-1"></i> No credit card information is stored on our servers</p>
+                <p class="mt-2 text-gray-600 text-xs">By proceeding, you agree to our Terms of Service and Privacy Policy</p>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="text-center mt-6 text-gray-500 text-sm">
+            <p>&copy; {{ year }} LyxNexus. All rights reserved.</p>
+            <p class="mt-1 text-gray-600">Flexibility and Innovation is the key to our success</p>
+        </div>
+    </div>
+
+    <script>
+        // Navigation functions
+        function goToLogin() {
+            window.location.href = '/payment';
+        }
+
+        function proceedToPayment() {
+            // Show loading state
+            const btn = document.querySelector('.primary-btn');
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Redirecting...';
+            btn.disabled = true;
+            
+            // Simulate delay for better UX
+            setTimeout(() => {
+                window.location.href = '/payment';
+            }, 1000);
+        }
+
+        // Initialize animations
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add fade-in animation to main content
+            const mainContent = document.querySelector('.glass-morph');
+            mainContent.style.opacity = '0';
+            mainContent.style.transform = 'translateY(20px)';
+            
+            setTimeout(() => {
+                mainContent.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                mainContent.style.opacity = '1';
+                mainContent.style.transform = 'translateY(0)';
+            }, 100);
+
+            // Add interaction to FAQ items
+            const faqItems = document.querySelectorAll('.faq-item');
+            faqItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    const answer = this.querySelector('.faq-answer');
+                    const icon = this.querySelector('.fa-question');
+                    
+                    if (answer.style.maxHeight) {
+                        answer.style.maxHeight = null;
+                        icon.style.transform = 'rotate(0deg)';
+                    } else {
+                        answer.style.maxHeight = answer.scrollHeight + 'px';
+                        icon.style.transform = 'rotate(45deg)';
+                    }
+                    
+                    // Add transition for smooth expansion
+                    answer.style.transition = 'max-height 0.3s ease';
+                    icon.style.transition = 'transform 0.3s ease';
+                });
+            });
+
+            // Initialize FAQ answers with maxHeight for animation
+            document.querySelectorAll('.faq-answer').forEach(answer => {
+                answer.style.maxHeight = '0';
+                answer.style.overflow = 'hidden';
+            });
+
+            // Keyboard shortcuts
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    goToLogin();
+                }
+                if (e.key === 'Enter' && e.ctrlKey) {
+                    proceedToPayment();
+                }
+            });
+
+            // Scroll to top on load
+            window.scrollTo(0, 0);
+        });
+    </script>
+</body>
+</html>

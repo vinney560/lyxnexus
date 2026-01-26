@@ -837,6 +837,96 @@
         display: block;
         animation: fadeIn 0.5s ease;
     }
+
+    /* New Styles for Activation Fee Explanation */
+    .activation-explanation {
+        background: rgba(30, 30, 40, 0.7);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        border-radius: 15px;
+        padding: 25px;
+        margin: 20px 0;
+        transition: all 0.3s ease;
+    }
+
+    .activation-explanation:hover {
+        border-color: rgba(59, 130, 246, 0.4);
+        box-shadow: 0 8px 25px rgba(0, 31, 135, 0.2);
+    }
+
+    .explanation-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 15px;
+        color: #E5E7EB;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .explanation-title i {
+        color: #3B82F6;
+    }
+
+    .benefit-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        margin-bottom: 15px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .benefit-item:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+
+    .benefit-icon {
+        color: #10B981;
+        font-size: 1.1rem;
+        margin-top: 3px;
+        flex-shrink: 0;
+    }
+
+    .benefit-content h4 {
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 4px;
+        color: #D1D5DB;
+    }
+
+    .benefit-content p {
+        font-size: 0.9rem;
+        color: #9CA3AF;
+        line-height: 1.5;
+    }
+
+    .platform-note {
+        background: rgba(16, 185, 129, 0.1);
+        border: 1px solid rgba(16, 185, 129, 0.2);
+        border-radius: 12px;
+        padding: 20px;
+        margin-top: 20px;
+        text-align: center;
+    }
+
+    .platform-note h4 {
+        color: #10B981;
+        font-weight: 600;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .platform-note p {
+        color: #9CA3AF;
+        font-size: 0.9rem;
+        line-height: 1.5;
+    }
+
 </style>
 <body>
     <header class="nav-header">
@@ -857,13 +947,13 @@
 
     <div class="toast-container" id="toast-container"></div>
 
-    <div class="w-full max-w-4xl">
+    <div class="w-full max-w-3xl">
         <div class="glass-morph rounded-2xl p-2 shadow-lg">
             <div class="text-center mb-8">
                 <div class="success-icon">
                     <i class="fas fa-lock"></i>
                 </div>
-                <h1 class="text-3xl font-bold gradient-text">Secure Account Activation</h1>
+                <h1 class="text-3xl font-bold gradient-text">Account Activation</h1>
                 <p class="text-gray-400 mt-2">Complete your registration to access LyxNexus features</p>
             </div>
 
@@ -913,7 +1003,7 @@
                         <i class="fas fa-shield-alt"></i>
                     </div>
                     <div>
-                        <h2 class="payment-title">Activation Payment Required</h2>
+                        <h2 class="payment-title">Activation Required</h2>
                         <p class="payment-subtitle">Follow these steps to complete your account activation</p>
                     </div>
                 </div>
@@ -922,7 +1012,7 @@
                     <div class="status-indicator active"></div>
                     <span class="text-green-400 font-medium">Payment Pending</span>
                     <div class="status-indicator"></div>
-                    <span class="text-gray-400">Account Activation</span>
+                    <span class="text-gray-400">Activation</span>
                 </div>
                 
                 <div class="highlight-box">
@@ -1076,11 +1166,77 @@
                                 <span>Real-time verification ensures instant activation</span>
                             </li>
                             <li class="flex items-start gap-2">
+                                <i class="fas fa-info-circle text-green-400 mt-1"></i>
+                                <span>Info about the Fee <a href="/fee-info" class="text-blue-400 font-bold underline">Click here</a></span>
+                            </li>
+                            <li class="flex items-start gap-2">
                                 <i class="fas fa-check-circle text-green-400 mt-1"></i>
                                 <span>For any issues, <a href="https://wa.me/254740694312" class="text-blue-400 font-bold underline">WhatsApp Support.</a> with your MPESA transaction code</span>
                             </li>
                         </ul>
                     </div>
+                </div>
+            </div>
+
+            <!-- Activation Fee Explanation -->
+            <div class="activation-explanation">
+                <h3 class="explanation-title">
+                    <i class="fas fa-hand-holding-usd"></i>
+                    Why a One-Time Activation Fee?
+                </h3>
+                
+                <div class="benefit-item">
+                    <div class="benefit-icon">
+                        <i class="fas fa-heart"></i>
+                    </div>
+                    <div class="benefit-content">
+                        <h4>Support Development & Founders</h4>
+                        <p>Your contribution directly supports our developers and founders who dedicate time and resources to build and improve LyxNexus. This ensures continued passion and commitment to the platform.</p>
+                    </div>
+                </div>
+
+                <div class="benefit-item">
+                    <div class="benefit-icon">
+                        <i class="fas fa-server"></i>
+                    </div>
+                    <div class="benefit-content">
+                        <h4>Server Maintenance & Uptime</h4>
+                        <p>Maintaining reliable servers, ensuring 24/7 uptime, and providing secure data storage requires ongoing investment. Your fee helps cover these essential infrastructure costs.</p>
+                    </div>
+                </div>
+
+                <div class="benefit-item">
+                    <div class="benefit-icon">
+                        <i class="fas fa-sync-alt"></i>
+                    </div>
+                    <div class="benefit-content">
+                        <h4>Continuous Updates & Improvements</h4>
+                        <p>We regularly release new features, security updates, and platform enhancements. The activation fee funds this continuous development cycle, keeping LyxNexus modern and efficient.</p>
+                    </div>
+                </div>
+
+                <div class="benefit-item">
+                    <div class="benefit-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="benefit-content">
+                        <h4>Platform Integrity & User Management</h4>
+                        <p>A small fee helps us maintain platform integrity, prevent abuse, and ensure resources are allocated to genuine users who value the service.</p>
+                    </div>
+                </div>
+
+                <div class="platform-note">
+                    <h4><i class="fas fa-unlock"></i> Important Clarification</h4>
+                    <p>
+                        <strong>LyxNexus is a completely free platform.</strong> We do not charge for any services, features, or content access. 
+                        All our educational resources and tools are sourced from open-access materials. 
+                        This one-time activation fee <strong>is strictly for the reasons mentioned above</strong> and not for service charges.
+                    </p>
+                </div>
+
+                <div class="important-note">
+                    <i class="fas fa-exclamation-circle mr-1"></i>
+                    This is a <strong>one-time only</strong> fee. After activation, you'll have <strong>lifetime access</strong> to all LyxNexus features with no recurring charges.
                 </div>
             </div>
 

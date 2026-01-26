@@ -550,7 +550,120 @@
         transform: none !important;
         box-shadow: none !important;
     }
-    
+
+    /* New Styles for Activation Fee Explanation */
+    .activation-explanation {
+        background: rgba(30, 30, 40, 0.7);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        border-radius: 15px;
+        padding: 25px;
+        margin: 20px 0;
+        transition: all 0.3s ease;
+    }
+
+    .activation-explanation:hover {
+        border-color: rgba(59, 130, 246, 0.4);
+        box-shadow: 0 8px 25px rgba(0, 31, 135, 0.2);
+    }
+
+    .explanation-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 15px;
+        color: #E5E7EB;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .explanation-title i {
+        color: #3B82F6;
+    }
+
+    .benefit-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        margin-bottom: 15px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .benefit-item:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+
+    .benefit-icon {
+        color: #10B981;
+        font-size: 1.1rem;
+        margin-top: 3px;
+        flex-shrink: 0;
+    }
+
+    .benefit-content h4 {
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 4px;
+        color: #D1D5DB;
+    }
+
+    .benefit-content p {
+        font-size: 0.9rem;
+        color: #9CA3AF;
+        line-height: 1.5;
+    }
+
+    .platform-note {
+        background: rgba(16, 185, 129, 0.1);
+        border: 1px solid rgba(16, 185, 129, 0.2);
+        border-radius: 12px;
+        padding: 20px;
+        margin-top: 20px;
+        text-align: center;
+    }
+
+    .platform-note h4 {
+        color: #10B981;
+        font-weight: 600;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .platform-note p {
+        color: #9CA3AF;
+        font-size: 0.9rem;
+        line-height: 1.5;
+    }
+
+    .important-note {
+        background: rgba(59, 130, 246, 0.1);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        border-radius: 12px;
+        padding: 15px;
+        margin-top: 15px;
+        font-size: 0.85rem;
+        color: #9CA3AF;
+        text-align: center;
+        line-height: 1.4;
+    }
+
+    .fee-amount {
+        display: inline-block;
+        background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+        color: white;
+        padding: 6px 15px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        margin: 5px;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
     @media (max-width: 768px) {
         .toast-container {
             right: 10px;
@@ -590,6 +703,11 @@
             line-height: 80px;
             font-size: 3rem;
         }
+
+        .activation-explanation {
+            padding: 20px;
+            margin: 15px 10px;
+        }
     }
     
     @media (max-width: 480px) {
@@ -605,6 +723,15 @@
         
         .btn, .next-btn {
             padding: 12px 20px;
+        }
+
+        .benefit-item {
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .benefit-icon {
+            align-self: flex-start;
         }
     }
 </style>
@@ -630,7 +757,7 @@
     <div class="toast-container" id="toast-container"></div>
 
     <!-- Main Content -->
-    <div class="w-full max-w-md mx-4">
+    <div class="w-full max-w-2xl mx-4">
         <div class="glass-morph rounded-2xl p-8">
             <div class="text-center mb-8">
                 <!-- Success/Error Icon based on phone_valid -->
@@ -697,6 +824,68 @@
             </div>
 
             {% if verification_data.phone_valid %}
+            <!-- Activation Fee Explanation -->
+            <div class="activation-explanation">
+                <h3 class="explanation-title">
+                    <i class="fas fa-hand-holding-usd"></i>
+                    Why a One-Time Activation Fee?
+                </h3>
+                
+                <div class="benefit-item">
+                    <div class="benefit-icon">
+                        <i class="fas fa-heart"></i>
+                    </div>
+                    <div class="benefit-content">
+                        <h4>Support Development & Founders</h4>
+                        <p>Your contribution directly supports our developers and founders who dedicate time and resources to build and improve LyxNexus. This ensures continued passion and commitment to the platform.</p>
+                    </div>
+                </div>
+
+                <div class="benefit-item">
+                    <div class="benefit-icon">
+                        <i class="fas fa-server"></i>
+                    </div>
+                    <div class="benefit-content">
+                        <h4>Server Maintenance & Uptime</h4>
+                        <p>Maintaining reliable servers, ensuring 24/7 uptime, and providing secure data storage requires ongoing investment. Your fee helps cover these essential infrastructure costs.</p>
+                    </div>
+                </div>
+
+                <div class="benefit-item">
+                    <div class="benefit-icon">
+                        <i class="fas fa-sync-alt"></i>
+                    </div>
+                    <div class="benefit-content">
+                        <h4>Continuous Updates & Improvements</h4>
+                        <p>We regularly release new features, security updates, and platform enhancements. The activation fee funds this continuous development cycle, keeping LyxNexus modern and efficient.</p>
+                    </div>
+                </div>
+
+                <div class="benefit-item">
+                    <div class="benefit-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="benefit-content">
+                        <h4>Platform Integrity & User Management</h4>
+                        <p>A small fee helps us maintain platform integrity, prevent abuse, and ensure resources are allocated to genuine users who value the service.</p>
+                    </div>
+                </div>
+
+                <div class="platform-note">
+                    <h4><i class="fas fa-unlock"></i> Important Clarification</h4>
+                    <p>
+                        <strong>LyxNexus is a completely free platform.</strong> We do not charge for any services, features, or content access. 
+                        All our educational resources and tools are sourced from open-access materials. 
+                        This one-time activation fee <strong>is strictly for the reasons mentioned above</strong> and not for service charges.
+                    </p>
+                </div>
+
+                <div class="important-note">
+                    <i class="fas fa-exclamation-circle mr-1"></i>
+                    This is a <strong>one-time only</strong> fee. After activation, you'll have <strong>lifetime access</strong> to all LyxNexus features with no recurring charges.
+                </div>
+            </div>
+
             <!-- Simple Payment Button Section -->
             <div class="payment-button-container" id="paymentProcedure">
                 <div class="payment-icon-large">
@@ -704,10 +893,13 @@
                 </div>
                 <h2 class="payment-title text-center text-xl font-bold mb-4">Account Activation Required</h2>
                 <p class="payment-message">
-                    Click the button below to proceed to the secure payment page where you can complete your account activation.
+                    Click the button below to proceed to the secure payment page and complete your one-time account activation.
                 </p>
+                <div class="mt-4">
+                    <span class="fee-amount">One-Time Fee: $5</span>
+                </div>
                 <p class="payment-message text-sm text-gray-400 mt-4">
-                    A small one-time fee is required to activate your account and gain full access to LyxNexus features.
+                    Secure payment processed through trusted payment gateways. All transactions are encrypted and protected.
                 </p>
             </div>
             {% endif %}
@@ -716,12 +908,12 @@
             {% if verification_data.phone_valid %}
             <button class="next-btn" id="nextBtn" onclick="proceedToPaymentPage()">
                 <i class="fas fa-arrow-right mr-2"></i>
-                Proceed to Payment Page
+                Proceed to Secure Payment
             </button>
             {% else %}
             <button class="next-btn" id="nextBtn" disabled style="background: linear-gradient(90deg, #6B7280, #4B5563);">
                 <i class="fas fa-times mr-2"></i>
-                Cannot Proceed
+                Cannot Proceed - Invalid Phone Number
             </button>
             {% endif %}
 
@@ -729,7 +921,7 @@
             <div class="text-center mt-6">
                 <button class="text-gray-400 hover:text-white transition-colors" onclick="goToLogin()">
                     <i class="fas fa-arrow-left mr-2"></i>
-                    Back
+                    Back to Login
                 </button>
             </div>
         </div>
@@ -839,7 +1031,7 @@
             nextBtn.disabled = true;
             
             // Show redirecting toast
-            showToast('Redirecting to secure payment page...', 'info', 'Payment');
+            showToast('Redirecting to secure payment gateway...', 'info', 'Payment Processing');
             
             setTimeout(() => {
                 // Redirect to payment page
@@ -860,7 +1052,7 @@
             // Show appropriate toast based on verification status
             setTimeout(() => {
                 {% if verification_data.phone_valid %}
-                showToast('Phone number verified successfully! Click the button below to proceed to payment.', 'success', 'Verification Complete');
+                showToast('Phone number verified successfully! Your one-time activation supports platform sustainability.', 'success', 'Verification Complete');
                 {% else %}
                 showToast('Phone number verification failed. Please try again with a valid number.', 'error', 'Verification Failed');
                 {% endif %}
@@ -879,6 +1071,19 @@
                     toastManager.close(toast);
                 }, 8000);
             });
+
+            // Add slight animation to benefit items
+            const benefitItems = document.querySelectorAll('.benefit-item');
+            benefitItems.forEach((item, index) => {
+                item.style.opacity = '0';
+                item.style.transform = 'translateY(20px)';
+                
+                setTimeout(() => {
+                    item.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                    item.style.opacity = '1';
+                    item.style.transform = 'translateY(0)';
+                }, 300 + (index * 100));
+            });
         });
 
         // Keyboard shortcuts
@@ -896,14 +1101,6 @@
             if (e.key === 'Backspace' && e.altKey) {
                 verifyAnother();
             }
-        });
-
-        console.log("Phone valid from Flask:", {{ 'true' if verification_data.phone_valid else 'false' }});
-        console.log("Verification data:", {
-            phone: "{{ formatted_phone }}",
-            country: "{{ verification_data.country }}",
-            carrier: "{{ verification_data.carrier }}",
-            valid: {{ 'true' if verification_data.phone_valid else 'false' }}
         });
     </script>
 </body>
