@@ -1191,7 +1191,7 @@
             }
         }
 
-        function openMediaPlayer(fileId, filename, fileType) {
+        function openMediaPlayer(fileId, filename, fileType, url) {
             const fileInfo = getFileIcon(fileType, filename);
             const mediaContainer = document.getElementById('media-container');
             const mediaTitle = document.getElementById('media-title');
@@ -1212,7 +1212,7 @@
                 video.style.objectFit = 'contain';
                 
                 const source = document.createElement('source');
-                source.src = `/store/api/files/${fileId}/download`;
+                source.src = url;
                 source.type = fileType;
                 
                 video.appendChild(source);
@@ -1224,14 +1224,14 @@
                 audio.style.width = '100%';
                 
                 const source = document.createElement('source');
-                source.src = `/store/api/files/${fileId}/download`;
+                source.src = url;
                 source.type = fileType;
                 
                 audio.appendChild(source);
                 mediaContainer.appendChild(audio);
             } else if (fileInfo.type === 'image') {
                 const img = document.createElement('img');
-                img.src = `/store/api/files/${fileId}/download`;
+                img.src = url;
                 img.alt = filename;
                 img.style.width = '100%';
                 img.style.height = 'auto';
@@ -1250,10 +1250,10 @@
             currentMediaFile = null;
         }
 
-        function openDocumentViewer(fileId, filename) {
+        function openDocumentViewer(fileId, filename, url) {
             currentDocumentFile = { id: fileId, name: filename };
             const iframe = document.getElementById('document-frame');
-            iframe.src = `/store/api/files/${fileId}/download`;
+            iframe.src = url;
             document.getElementById('document-viewer-modal').style.display = 'flex';
         }
 
@@ -1278,15 +1278,15 @@
             }
         }
 
-        function previewFile(fileId, filename, fileType, fileSize) {
+        function previewFile(fileId, filename, fileType, fileSize, url) {
             const fileInfo = getFileIcon(fileType, filename);
             
             if (fileInfo.type === 'video' || fileInfo.type === 'audio' || fileInfo.type === 'image') {
                 currentMediaFile = { id: fileId, filename, fileType, fileSize };
-                openMediaPlayer(fileId, filename, fileType);
+                openMediaPlayer(fileId, filename, fileType, url);
             } else if (fileInfo.type === 'document') {
                 currentDocumentFile = { id: fileId, name: filename };
-                openDocumentViewer(fileId, filename);
+                openDocumentViewer(fileId, filename, url);
             } else {
                 downloadMaterial(fileId);
             }
@@ -1325,7 +1325,7 @@
                     <div class="material-card" data-material-id="${material.id}" draggable="true">
                         <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center">
                             <div class="flex items-start mb-4 lg:mb-0 flex-1 min-w-0">
-                                <div class="relative" onclick="previewFile(${material.file_id}, '${material.filename.replace(/'/g, "\\'")}', '${material.file_type}', ${material.file_size})">
+                                <div class="relative" onclick="previewFile(${material.file_id}, '${material.filename.replace(/'/g, "\\'")}', '${material.file_type}', ${material.file_size}, '${material.url}')">
                                     <div class="file-icon ${fileIcon.class} flex-shrink-0 ${isPreviewable ? 'cursor-pointer' : ''}">
                                         <i class="fas ${fileIcon.icon}"></i>
                                         ${isPreviewable ? `

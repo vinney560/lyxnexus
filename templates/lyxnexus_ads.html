@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LyxNexus Platform Introduction</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --text-color: #f8fafc;
+            --accent-color: #3b82f6;
+            --secondary-color: #8b5cf6;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            overflow-x: hidden;
+            background-image: linear-gradient(to bottom right, #0f172a, #1e293b);
+        }
+        
+        .gradient-text {
+            background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent;
+        }
+        
+        .glass-morph {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 31, 135, 0.1);
+        }
+        
+        .video-container {
+            position: relative;
+            overflow: hidden;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+        
+        .video-container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 25px 80px rgba(59, 130, 246, 0.2);
+        }
+        
+        .video-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to bottom, rgba(15, 23, 42, 0.4), rgba(15, 23, 42, 0.8));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 1;
+            transition: opacity 0.3s ease;
+            z-index: 10;
+        }
+        
+        .video-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .play-btn {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.4);
+        }
+        
+        @media (min-width: 768px) {
+            .play-btn {
+                width: 80px;
+                height: 80px;
+            }
+        }
+        
+        .play-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 15px 40px rgba(59, 130, 246, 0.6);
+        }
+        
+        .play-btn i {
+            font-size: 24px;
+            color: white;
+            margin-left: 5px;
+        }
+        
+        @media (min-width: 768px) {
+            .play-btn i {
+                font-size: 32px;
+            }
+        }
+        
+        .progress-bar {
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+            cursor: pointer;
+            width: 100%;
+            flex-shrink: 0;
+        }
+        
+        .progress-filled {
+            height: 100%;
+            background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+            width: 0%;
+            border-radius: 3px;
+            transition: width 0.1s linear;
+        }
+        
+        .control-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+        
+        @media (min-width: 640px) {
+            .control-btn {
+                width: 40px;
+                height: 40px;
+            }
+        }
+        
+        .control-btn:hover {
+            background: rgba(59, 130, 246, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        .control-btn.active {
+            background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+        }
+        
+        .volume-slider {
+            width: 0;
+            opacity: 0;
+            transition: all 0.3s ease;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        
+        .volume-slider.show {
+            width: 80px;
+            opacity: 1;
+            margin-left: 8px;
+        }
+        
+        @media (min-width: 768px) {
+            .volume-slider.show {
+                width: 100px;
+                margin-left: 10px;
+            }
+        }
+        
+        .time-display {
+            font-family: 'Courier New', monospace;
+            font-weight: 500;
+            font-size: 0.875rem;
+            white-space: nowrap;
+        }
+        
+        @media (min-width: 768px) {
+            .time-display {
+                font-size: 1rem;
+            }
+        }
+        
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(59, 130, 246, 0.2);
+            border-top: 3px solid #3B82F6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 5;
+        }
+        
+        @media (min-width: 768px) {
+            .loading-spinner {
+                width: 50px;
+                height: 50px;
+            }
+        }
+        
+        @keyframes spin {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+        
+        .feature-card {
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid rgba(59, 130, 246, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+        
+        @media (min-width: 768px) {
+            .feature-card {
+                padding: 25px;
+            }
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(59, 130, 246, 0.3);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .feature-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+        
+        @media (min-width: 768px) {
+            .feature-icon {
+                width: 60px;
+                height: 60px;
+                border-radius: 15px;
+                margin-bottom: 20px;
+            }
+        }
+        
+        .feature-icon i {
+            font-size: 20px;
+            color: white;
+        }
+        
+        @media (min-width: 768px) {
+            .feature-icon i {
+                font-size: 24px;
+            }
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(30, 41, 59, 0.5);
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(to bottom, #3B82F6, #8B5CF6);
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(to bottom, #2563eb, #7c3aed);
+        }
+        
+        /* Mobile menu */
+        .mobile-menu-btn {
+            display: none;
+        }
+        
+        @media (max-width: 768px) {
+            .mobile-menu-btn {
+                display: block;
+            }
+            
+            .mobile-menu {
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: rgba(30, 41, 59, 0.95);
+                backdrop-filter: blur(12px);
+                padding: 20px;
+                border-radius: 0 0 20px 20px;
+                border: 1px solid rgba(59, 130, 246, 0.2);
+                z-index: 1000;
+                display: none;
+            }
+            
+            .mobile-menu.active {
+                display: block;
+            }
+        }
+        
+        /* Video Selector */
+        .video-selector {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding: 10px 0;
+            scrollbar-width: thin;
+            scrollbar-color: #3B82F6 rgba(30, 41, 59, 0.5);
+        }
+        
+        .video-selector::-webkit-scrollbar {
+            height: 6px;
+        }
+        
+        .video-selector-btn {
+            background: rgba(30, 41, 59, 0.7);
+            border: 2px solid rgba(59, 130, 246, 0.3);
+            border-radius: 10px;
+            padding: 10px 20px;
+            color: white;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        
+        .video-selector-btn:hover {
+            background: rgba(59, 130, 246, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .video-selector-btn.active {
+            background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+            border-color: transparent;
+        }
+        
+        /* Responsive text sizes */
+        .responsive-text {
+            font-size: 1.875rem;
+        }
+        
+        @media (min-width: 640px) {
+            .responsive-text {
+                font-size: 2.25rem;
+            }
+        }
+        
+        @media (min-width: 768px) {
+            .responsive-text {
+                font-size: 3rem;
+            }
+            .mobile-menu {
+                display: none !important;
+            }
+        }
+        
+        @media (min-width: 1024px) {
+            .responsive-text {
+                font-size: 3.75rem;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+    <!-- Navigation -->
+    <nav class="glass-morph w-full py-4 px-4 sm:px-6 relative">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-2 cursor-pointer" onclick="window.location.href='/'">
+                <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                    <i class="fas fa-graduation-cap text-white text-sm sm:text-base"></i>
+                </div>
+                <span class="text-xl sm:text-2xl font-bold gradient-text">LyxNexus</span>
+            </div>
+            
+            <!-- Desktop Navigation -->
+            <div class="flex items-center space-x-4 lg:space-x-6 hidden lg:flex">
+                <a href="/" class="text-gray-300 hover:text-white transition-colors text-sm sm:text-base">
+                    <i class="fas fa-home mr-2"></i>Home
+                </a>
+                <a href="/#announcements" class="text-gray-300 hover:text-white transition-colors text-sm sm:text-base">
+                    <i class="fas fa-star mr-2"></i>Features
+                </a>
+                <a href="/about" class="text-gray-300 hover:text-white transition-colors text-sm sm:text-base">
+                    <i class="fas fa-info-circle mr-2"></i>About
+                </a>
+                <button onclick="window.location.href='/login'" class="px-4 py-2 sm:px-6 sm:py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-full font-semibold hover:from-blue-600 hover:to-purple-700 transition-all transform hover:-translate-y-1 text-sm sm:text-base">
+                    Get Started
+                </button>
+            </div>
+            
+            <!-- Mobile Menu Button -->
+            <button id="mobileMenuBtn" class="mobile-menu-btn control-btn">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+        
+        <!-- Mobile Menu -->
+        <div id="mobileMenu" class="mobile-menu">
+            <div class="flex flex-col space-y-4">
+                <a href="/" class="text-gray-300 hover:text-white transition-colors text-lg py-2 border-b border-gray-700">
+                    <i class="fas fa-home mr-3"></i>Home
+                </a>
+                <a href="/features" class="text-gray-300 hover:text-white transition-colors text-lg py-2 border-b border-gray-700">
+                    <i class="fas fa-star mr-3"></i>Features
+                </a>
+                <a href="/about" class="text-gray-300 hover:text-white transition-colors text-lg py-2 border-b border-gray-700">
+                    <i class="fas fa-info-circle mr-3"></i>About
+                </a>
+                <button onclick="window.location.href='/login'" class="w-full py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-full font-semibold hover:from-blue-600 hover:to-purple-700 transition-all">
+                    Get Started
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-grow container mx-auto px-3 sm:px-4 py-6 sm:py-8">
+        <div class="max-w-7xl mx-auto">
+            <!-- Header -->
+            <div class="text-center mb-8 sm:mb-12 px-2">
+                <h1 class="responsive-text font-bold mb-3 sm:mb-4">
+                    Welcome to <span class="gradient-text">LyxNexus</span>
+                </h1>
+                <p class="text-base sm:text-xl text-gray-300 max-w-3xl mx-auto px-2">
+                    Watch our introduction videos to discover how LyxNexus transforms your educational experience with cutting-edge tools and resources.
+                </p>
+            </div>
+
+            <!-- Video Selector -->
+            <div class="mb-6 sm:mb-8">
+                <h3 class="text-lg sm:text-xl font-bold mb-3 sm:mb-4 flex items-center">
+                    <i class="fas fa-film mr-2 sm:mr-3 text-blue-400"></i>
+                    Select Video
+                </h3>
+                <div class="video-selector">
+                    <button class="video-selector-btn active" data-video="1">
+                        <i class="fas fa-play-circle mr-2"></i>
+                        Introduction Video 1
+                    </button>
+                    <button class="video-selector-btn" data-video="2">
+                        <i class="fas fa-play-circle mr-2"></i>
+                        Introduction Video 2
+                    </button>
+                </div>
+            </div>
+
+            <!-- Video Player Section -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 mb-8 sm:mb-12">
+                <div class="lg:col-span-2">
+                    <div class="video-container aspect-video sm:aspect-video">
+                        <video 
+                            id="mainVideo" 
+                            class="w-full h-full object-cover"
+                            preload="metadata"
+                            poster="https://images.unsplash.com/photo-1635070041078-e363dbe005cb?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80">
+                            Your browser does not support the video tag.
+                        </video>
+                        
+                        <div id="videoOverlay" class="video-overlay">
+                            <div id="playButton" class="play-btn pulse">
+                                <i class="fas fa-play"></i>
+                            </div>
+                        </div>
+                        
+                        <!-- Loading Spinner -->
+                        <div id="loadingSpinner" class="loading-spinner hidden"></div>
+                    </div>
+
+                    <!-- Video Controls -->
+                    <div class="glass-morph mt-4 p-3 sm:p-4 rounded-2xl">
+                        <div class="flex flex-col space-y-3 sm:space-y-4">
+                            <!-- Progress Bar -->
+                            <div class="progress-bar" id="progressBar">
+                                <div class="progress-filled" id="progressFilled"></div>
+                            </div>
+                            
+                            <!-- Control Buttons -->
+                            <div class="flex items-center justify-between flex-wrap gap-2">
+                                <div class="flex items-center space-x-2 sm:space-x-4 flex-wrap">
+                                    <!-- Play/Pause Button -->
+                                    <button id="playPauseBtn" class="control-btn active">
+                                        <i class="fas fa-play" id="playIcon"></i>
+                                    </button>
+                                    
+                                    <!-- Skip Backward -->
+                                    <button id="skipBackBtn" class="control-btn">
+                                        <i class="fas fa-backward"></i>
+                                    </button>
+                                    
+                                    <!-- Skip Forward -->
+                                    <button id="skipForwardBtn" class="control-btn">
+                                        <i class="fas fa-forward"></i>
+                                    </button>
+                                    
+                                    <!-- Volume Control -->
+                                    <div class="flex items-center">
+                                        <button id="volumeBtn" class="control-btn">
+                                            <i class="fas fa-volume-up" id="volumeIcon"></i>
+                                        </button>
+                                        <div class="volume-slider" id="volumeSlider">
+                                            <input type="range" min="0" max="100" value="100" 
+                                                   class="w-full accent-blue-500 cursor-pointer" 
+                                                   id="volumeControl">
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-center space-x-4 sm:space-x-6 flex-wrap">
+                                    <!-- Time Display -->
+                                    <div class="flex items-center space-x-1 sm:space-x-2">
+                                        <span id="currentTime" class="time-display">0:00</span>
+                                        <span class="text-gray-400">/</span>
+                                        <span id="duration" class="time-display">0:00</span>
+                                    </div>
+                                    
+                                    <!-- Playback Speed -->
+                                    <div class="relative">
+                                        <button id="speedBtn" class="control-btn">
+                                            <span id="speedDisplay">1x</span>
+                                        </button>
+                                        <div id="speedMenu" class="absolute bottom-full mb-2 left-0 bg-slate-800 rounded-lg shadow-lg py-2 hidden z-10 min-w-[80px]">
+                                            <button class="speed-option w-full text-left px-3 py-2 hover:bg-slate-700 text-sm" data-speed="0.5">0.5x</button>
+                                            <button class="speed-option w-full text-left px-3 py-2 hover:bg-slate-700 text-sm" data-speed="0.75">0.75x</button>
+                                            <button class="speed-option w-full text-left px-3 py-2 hover:bg-slate-700 text-sm" data-speed="1" data-selected="true">1x</button>
+                                            <button class="speed-option w-full text-left px-3 py-2 hover:bg-slate-700 text-sm" data-speed="1.25">1.25x</button>
+                                            <button class="speed-option w-full text-left px-3 py-2 hover:bg-slate-700 text-sm" data-speed="1.5">1.5x</button>
+                                            <button class="speed-option w-full text-left px-3 py-2 hover:bg-slate-700 text-sm" data-speed="2">2x</button>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Fullscreen -->
+                                    <button id="fullscreenBtn" class="control-btn">
+                                        <i class="fas fa-expand"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Features Sidebar -->
+                <div class="space-y-4 sm:space-y-6">
+                    <div class="glass-morph p-4 sm:p-6 rounded-2xl">
+                        <h3 class="text-lg sm:text-xl font-bold mb-3 sm:mb-4 flex items-center">
+                            <i class="fas fa-video mr-2 sm:mr-3 text-blue-400"></i>
+                            Video Details
+                        </h3>
+                        <div class="space-y-2 sm:space-y-3">
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-400 text-sm sm:text-base">Title:</span>
+                                <span class="font-medium text-sm sm:text-base text-right" id="videoTitle">Introduction Video 1</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-400 text-sm sm:text-base">Duration:</span>
+                                <span id="videoDuration" class="font-medium text-sm sm:text-base">Loading...</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-400 text-sm sm:text-base">Quality:</span>
+                                <span class="font-medium text-sm sm:text-base">HD 1080p</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-400 text-sm sm:text-base">Size:</span>
+                                <span id="videoSize" class="font-medium text-sm sm:text-base">-</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="glass-morph p-4 sm:p-6 rounded-2xl">
+                        <h3 class="text-lg sm:text-xl font-bold mb-3 sm:mb-4 flex items-center">
+                            <i class="fas fa-bolt mr-2 sm:mr-3 text-purple-400"></i>
+                            Key Features
+                        </h3>
+                        <div class="space-y-3 sm:space-y-4">
+                            <div class="feature-card">
+                                <div class="feature-icon">
+                                    <i class="fas fa-book-open"></i>
+                                </div>
+                                <h4 class="text-base sm:text-lg font-semibold mb-1 sm:mb-2">Comprehensive Resources</h4>
+                                <p class="text-gray-300 text-xs sm:text-sm">Access thousands of educational materials from multiple disciplines.</p>
+                            </div>
+                            
+                            <div class="feature-card">
+                                <div class="feature-icon">
+                                    <i class="fas fa-users"></i>
+                                </div>
+                                <h4 class="text-base sm:text-lg font-semibold mb-1 sm:mb-2">Collaborative Learning</h4>
+                                <p class="text-gray-300 text-xs sm:text-sm">Connect with peers and educators in interactive learning environments.</p>
+                            </div>
+                            
+                            <div class="feature-card">
+                                <div class="feature-icon">
+                                    <i class="fas fa-chart-line"></i>
+                                </div>
+                                <h4 class="text-base sm:text-lg font-bold mb-1 sm:mb-2">Progress Tracking</h4>
+                                <p class="text-gray-300 text-xs sm:text-sm">Monitor your learning journey with detailed analytics and insights.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Call to Action -->
+            <div class="text-center mt-8 sm:mt-12 p-6 sm:p-8 rounded-2xl sm:rounded-3xl bg-gradient-to-r from-blue-900/30 to-purple-900/30 border border-blue-500/20">
+                <h2 class="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4">Ready to Transform Your Learning?</h2>
+                <p class="text-base sm:text-xl text-gray-300 mb-6 sm:mb-8 max-w-2xl mx-auto px-2">
+                    Join thousands of students already experiencing the future of education with LyxNexus.
+                </p>
+                <div class="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 px-2">
+                    <button onclick="window.location.href='/login'" class="px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-full font-bold text-base sm:text-lg hover:from-blue-600 hover:to-purple-700 transition-all transform hover:-translate-y-1 hover:shadow-xl sm:hover:shadow-2xl flex items-center justify-center">
+                        <i class="fas fa-user-plus mr-2 sm:mr-3"></i>
+                        Create Free Account
+                    </button>
+                    <button onclick="window.location.href='/#announcements'" class="px-6 sm:px-8 py-3 sm:py-4 bg-transparent border-2 border-blue-500 text-blue-400 rounded-full font-bold text-base sm:text-lg hover:bg-blue-500/10 transition-all transform hover:-translate-y-1 flex items-center justify-center">
+                        <i class="fas fa-list-alt mr-2 sm:mr-3"></i>
+                        Explore All Features
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="glass-morph mt-6 sm:mt-12 py-6 sm:py-8 px-4 sm:px-6">
+        <div class="container mx-auto">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-6 md:mb-0 text-center md:text-left">
+                    <div class="flex items-center space-x-2 mb-3 sm:mb-4 justify-center md:justify-start">
+                        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                            <i class="fas fa-graduation-cap text-white text-sm"></i>
+                        </div>
+                        <span class="text-xl font-bold gradient-text">LyxNexus</span>
+                    </div>
+                    <p class="text-gray-400 text-sm">© {{ year }} LyxNexus. All rights reserved.</p>
+                </div>
+                <div class="flex flex-wrap justify-center gap-4 sm:gap-6">
+                    <a href="/privacy" class="text-gray-400 hover:text-white transition-colors text-sm sm:text-base">Privacy Policy</a>
+                    <a href="/terms" class="text-gray-400 hover:text-white transition-colors text-sm sm:text-base">Terms of Service</a>
+                    <a href="https://wa.me/254112167195" class="text-gray-400 hover:text-white transition-colors text-sm sm:text-base">Contact Us</a>
+                    <a href="/nav-guide" class="text-gray-400 hover:text-white transition-colors text-sm sm:text-base">Help Center</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Video URLs
+        const videos = {
+            1: {
+                url: "https://res.cloudinary.com/dmkfmr8ry/video/upload/v1769432950/LN_Ad_1_utnghk.mp4",
+                title: "Introduction Video 1",
+                poster: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80"
+            },
+            2: {
+                url: "https://res.cloudinary.com/dmkfmr8ry/video/upload/v1769433368/LN_Ad_3_dtq3q8.mp4",
+                title: "Introduction Video 2",
+                poster: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80"
+            }
+        };
+
+        // Video Player Elements
+        const video = document.getElementById('mainVideo');
+        const videoOverlay = document.getElementById('videoOverlay');
+        const playButton = document.getElementById('playButton');
+        const playPauseBtn = document.getElementById('playPauseBtn');
+        const playIcon = document.getElementById('playIcon');
+        const progressBar = document.getElementById('progressBar');
+        const progressFilled = document.getElementById('progressFilled');
+        const currentTimeEl = document.getElementById('currentTime');
+        const durationEl = document.getElementById('duration');
+        const videoDuration = document.getElementById('videoDuration');
+        const videoTitle = document.getElementById('videoTitle');
+        const videoSize = document.getElementById('videoSize');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const volumeBtn = document.getElementById('volumeBtn');
+        const volumeIcon = document.getElementById('volumeIcon');
+        const volumeSlider = document.getElementById('volumeSlider');
+        const volumeControl = document.getElementById('volumeControl');
+        const skipBackBtn = document.getElementById('skipBackBtn');
+        const skipForwardBtn = document.getElementById('skipForwardBtn');
+        const speedBtn = document.getElementById('speedBtn');
+        const speedDisplay = document.getElementById('speedDisplay');
+        const speedMenu = document.getElementById('speedMenu');
+        const fullscreenBtn = document.getElementById('fullscreenBtn');
+        const videoContainer = document.querySelector('.video-container');
+        const videoSelectorBtns = document.querySelectorAll('.video-selector-btn');
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+
+        // Current video
+        let currentVideo = 1;
+
+        // Format time (seconds to mm:ss)
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+        }
+
+        // Update progress bar
+        function updateProgress() {
+            if (video.duration) {
+                const percent = (video.currentTime / video.duration) * 100;
+                progressFilled.style.width = `${percent}%`;
+                currentTimeEl.textContent = formatTime(video.currentTime);
+            }
+        }
+
+        // Set video duration
+        function setDuration() {
+            if (!isNaN(video.duration)) {
+                durationEl.textContent = formatTime(video.duration);
+                videoDuration.textContent = formatTime(video.duration);
+            }
+        }
+
+        // Toggle play/pause
+        function togglePlay() {
+            if (video.paused) {
+                video.play();
+                playIcon.className = 'fas fa-pause';
+                videoOverlay.classList.add('hidden');
+                playPauseBtn.classList.add('active');
+            } else {
+                video.pause();
+                playIcon.className = 'fas fa-play';
+                playPauseBtn.classList.remove('active');
+            }
+        }
+
+        // Skip forward/backward
+        function skip(seconds) {
+            video.currentTime += seconds;
+        }
+
+        // Set volume
+        function setVolume(value) {
+            video.volume = value / 100;
+            if (value === 0) {
+                volumeIcon.className = 'fas fa-volume-mute';
+            } else if (value < 50) {
+                volumeIcon.className = 'fas fa-volume-down';
+            } else {
+                volumeIcon.className = 'fas fa-volume-up';
+            }
+        }
+
+        // Toggle volume slider
+        function toggleVolumeSlider() {
+            volumeSlider.classList.toggle('show');
+        }
+
+        // Set playback speed
+        function setSpeed(speed) {
+            video.playbackRate = speed;
+            speedDisplay.textContent = `${speed}x`;
+            
+            // Update selected option
+            document.querySelectorAll('.speed-option').forEach(option => {
+                option.removeAttribute('data-selected');
+                if (parseFloat(option.getAttribute('data-speed')) === speed) {
+                    option.setAttribute('data-selected', 'true');
+                }
+            });
+            
+            // Close menu
+            speedMenu.classList.add('hidden');
+        }
+
+        // Toggle fullscreen
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                videoContainer.requestFullscreen().catch(err => {
+                    console.log(`Error attempting to enable fullscreen: ${err.message}`);
+                });
+                fullscreenBtn.innerHTML = '<i class="fas fa-compress"></i>';
+            } else {
+                document.exitFullscreen();
+                fullscreenBtn.innerHTML = '<i class="fas fa-expand"></i>';
+            }
+        }
+
+        // Seek video when clicking progress bar
+        function seek(e) {
+            const clickX = e.offsetX;
+            const width = progressBar.clientWidth;
+            const percent = clickX / width;
+            video.currentTime = percent * video.duration;
+        }
+
+        // Switch video
+        function switchVideo(videoNumber) {
+            // Update UI
+            videoSelectorBtns.forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.getAttribute('data-video') === videoNumber.toString()) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            // Show loading
+            loadingSpinner.classList.remove('hidden');
+            videoOverlay.classList.remove('hidden');
+            playIcon.className = 'fas fa-play';
+            playPauseBtn.classList.remove('active');
+            
+            // Update current video
+            currentVideo = videoNumber;
+            
+            // Get video data
+            const videoData = videos[videoNumber];
+            
+            // Update video source
+            video.pause();
+            video.src = videoData.url;
+            video.poster = videoData.poster;
+            videoTitle.textContent = videoData.title;
+            videoSize.textContent = "-";
+            
+            // Reset progress
+            progressFilled.style.width = '0%';
+            currentTimeEl.textContent = '0:00';
+            durationEl.textContent = '0:00';
+            videoDuration.textContent = 'Loading...';
+            
+            // Load new video
+            video.load();
+            
+            // Try to get video size
+            fetch(videoData.url, { method: 'HEAD' })
+                .then(response => {
+                    const size = response.headers.get('content-length');
+                    if (size) {
+                        const mb = (size / (1024 * 1024)).toFixed(1);
+                        videoSize.textContent = `${mb} MB`;
+                    }
+                })
+                .catch(() => {
+                    videoSize.textContent = "-";
+                });
+        }
+
+        // Event Listeners
+        video.addEventListener('loadedmetadata', setDuration);
+        video.addEventListener('timeupdate', updateProgress);
+        video.addEventListener('ended', () => {
+            playIcon.className = 'fas fa-play';
+            playPauseBtn.classList.remove('active');
+            videoOverlay.classList.remove('hidden');
+        });
+
+        video.addEventListener('waiting', () => {
+            loadingSpinner.classList.remove('hidden');
+        });
+
+        video.addEventListener('playing', () => {
+            loadingSpinner.classList.add('hidden');
+        });
+
+        video.addEventListener('canplay', () => {
+            loadingSpinner.classList.add('hidden');
+            setDuration();
+        });
+
+        playButton.addEventListener('click', togglePlay);
+        playPauseBtn.addEventListener('click', togglePlay);
+        
+        skipBackBtn.addEventListener('click', () => skip(-10));
+        skipForwardBtn.addEventListener('click', () => skip(10));
+        
+        progressBar.addEventListener('click', seek);
+        
+        volumeBtn.addEventListener('click', toggleVolumeSlider);
+        volumeControl.addEventListener('input', (e) => setVolume(e.target.value));
+        
+        speedBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            speedMenu.classList.toggle('hidden');
+        });
+        
+        document.querySelectorAll('.speed-option').forEach(option => {
+            option.addEventListener('click', () => {
+                setSpeed(parseFloat(option.getAttribute('data-speed')));
+            });
+        });
+        
+        fullscreenBtn.addEventListener('click', toggleFullscreen);
+        
+        // Video selector buttons
+        videoSelectorBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const videoNumber = btn.getAttribute('data-video');
+                switchVideo(videoNumber);
+            });
+        });
+
+        // Mobile menu
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('active');
+        });
+
+        // Close menus when clicking outside
+        document.addEventListener('click', (e) => {
+            // Close speed menu
+            if (!speedBtn.contains(e.target) && !speedMenu.contains(e.target)) {
+                speedMenu.classList.add('hidden');
+            }
+            
+            // Close volume slider
+            if (!volumeBtn.contains(e.target) && !volumeSlider.contains(e.target)) {
+                volumeSlider.classList.remove('show');
+            }
+            
+            // Close mobile menu
+            if (!mobileMenuBtn.contains(e.target) && !mobileMenu.contains(e.target)) {
+                mobileMenu.classList.remove('active');
+            }
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+            
+            switch(e.key.toLowerCase()) {
+                case ' ':
+                case 'k':
+                    e.preventDefault();
+                    togglePlay();
+                    break;
+                case 'f':
+                    toggleFullscreen();
+                    break;
+                case 'm':
+                    video.muted = !video.muted;
+                    volumeIcon.className = video.muted ? 'fas fa-volume-mute' : 'fas fa-volume-up';
+                    break;
+                case 'arrowleft':
+                    e.preventDefault();
+                    skip(-5);
+                    break;
+                case 'arrowright':
+                    e.preventDefault();
+                    skip(5);
+                    break;
+                case 'arrowup':
+                    e.preventDefault();
+                    video.volume = Math.min(video.volume + 0.1, 1);
+                    volumeControl.value = video.volume * 100;
+                    setVolume(volumeControl.value);
+                    break;
+                case 'arrowdown':
+                    e.preventDefault();
+                    video.volume = Math.max(video.volume - 0.1, 0);
+                    volumeControl.value = video.volume * 100;
+                    setVolume(volumeControl.value);
+                    break;
+                case '1':
+                    switchVideo(1);
+                    break;
+                case '2':
+                    switchVideo(2);
+                    break;
+            }
+        });
+
+        // Handle fullscreen change
+        document.addEventListener('fullscreenchange', () => {
+            if (!document.fullscreenElement) {
+                fullscreenBtn.innerHTML = '<i class="fas fa-expand"></i>';
+            }
+        });
+
+        // Initialize volume
+        setVolume(100);
+
+        // Load first video
+        switchVideo(1);
+    </script>
+</body>
+</html>

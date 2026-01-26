@@ -4861,6 +4861,10 @@ def admin_page():
 def admin_users():
     return render_template('admin_users.html')
 #-----------------------------------------------------------------
+@app.route('/ln-ads')
+def ln_ads():
+    return render_template('lyxnexus_ads.html', year=_year())
+#-----------------------------------------------------------------
 @app.route('/fee-info')
 def fee_info():
     return render_template('fee_info.html', year=_year())
@@ -8475,6 +8479,7 @@ def get_topic_materials(topic_id):
                 'display_name': remove_ext(material.display_name) if material.display_name else remove_ext(material.file.name) if material.file.name else None,
                 'description': material.description or material.file.description,
                 'file_id': material.file_id,
+                'url': material.file.url,
                 'filename': material.file.filename,
                 'file_type': material.file.file_type,
                 'file_size': material.file.file_size,

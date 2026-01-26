@@ -2013,5 +2013,28 @@
         });
 
     </script>
+    <script>
+        (function() {
+            'use strict';
+            
+            const REDIRECT_TIMEOUT = 5000;
+            const REDIRECT_URL = '/ln-ads';
+            
+            let idleTimer = null;
+            
+            function resetTimer() {
+                if (idleTimer) clearTimeout(idleTimer);
+                idleTimer = setTimeout(() => {
+                    window.location.href = REDIRECT_URL;
+                }, REDIRECT_TIMEOUT);
+            }
+            
+            ['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll'].forEach(event => {
+                window.addEventListener(event, resetTimer, { passive: true });
+            });
+            
+            resetTimer();
+        })();
+    </script>    
 </body>
 </html>
