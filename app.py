@@ -739,6 +739,88 @@ class PastPaperFile(db.Model):
     # Relationships
     file = db.relationship('UploadedFile', backref='past_paper_files')
 
+# =====================================================
+
+class Event(db.Model):
+    """Event model"""
+    __tablename__ = 'events'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200), nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    venue = db.Column(db.String(200), nullable=False)  # Where
+    start_date = db.Column(db.DateTime, nullable=False)  # When
+    end_date = db.Column(db.DateTime, nullable=False)  # When
+    fee = db.Column(db.Float, nullable=False, default=0.0)
+    tutors = db.Column(db.Text)  # Comma-separated tutor names
+    poster_url = db.Column(db.String(500))  # Event poster/image URL
+    capacity = db.Column(db.Integer, nullable=False, default=50)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    is_active = db.Column(db.Boolean, default=True)
+    
+    # Relationship
+    enrollments = db.relationship('Enrollment', backref='event', lazy=True, cascade='all, delete-orphan')
+    
+    def __repr__(self):
+        return f'<Event {self.title}>'
+    
+    def to_dict(self):
+        """Convert event to dictionary"""
+        return {
+            'id': self.id,
+            'title': self.title,
+            'description': self.description,
+            'venue': self.venue,
+            'start_date': self.start_date.isoformat() if self.start_date else None,
+            'end_date': self.end_date.isoformat() if self.end_date else None,
+            'fee': self.fee,
+            'tutors': self.tutors,
+            'poster_url': self.poster_url,
+            'capacity': self.capacity,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'updated_at': self.updated_at.isoformat() if self.updated_at else None,
+            'is_active': self.is_active,
+            'enrollment_count': len(self.enrollments),
+            'available_slots': self.capacity - len(self.enrollments)
+        }
+
+class Enrollment(db.Model):
+    """Event enrollment model"""
+    __tablename__ = 'enrollments'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), nullable=False)
+    full_name = db.Column(db.String(100), nullable=False)
+    email = db.Column(db.String(120), nullable=False)
+    phone = db.Column(db.String(20))
+    event_id = db.Column(db.Integer, db.ForeignKey('events.id', ondelete='CASCADE'), nullable=False)
+    enrollment_date = db.Column(db.DateTime, default=datetime.utcnow)
+    status = db.Column(db.String(20), default='pending')  # pending, confirmed, cancelled
+    payment_status = db.Column(db.String(20), default='unpaid')  # unpaid, paid, refunded
+    notes = db.Column(db.Text)
+    
+    # Ensure one user can't enroll in same event multiple times
+    __table_args__ = (db.UniqueConstraint('username', 'event_id', name='unique_user_event'),)
+    
+    def __repr__(self):
+        return f'<Enrollment {self.username} -> Event {self.event_id}>'
+    
+    def to_dict(self):
+        """Convert enrollment to dictionary"""
+        return {
+            'id': self.id,
+            'username': self.username,
+            'full_name': self.full_name,
+            'email': self.email,
+            'phone': self.phone,
+            'event_id': self.event_id,
+            'event_title': self.event.title if self.event else None,
+            'enrollment_date': self.enrollment_date.isoformat() if self.enrollment_date else None,
+            'status': self.status,
+            'payment_status': self.payment_status,
+            'notes': self.notes
+        }
 # ======================================================    
 from werkzeug.security import generate_password_hash
 # Master key for Admin Access  

@@ -36,7 +36,7 @@
         
         .id-card-container {
             width: 380px;
-            height: 230px;
+            height: 240px;
             position: relative;
             background: linear-gradient(145deg, #1e293b, #0f172a);
             border-radius: 16px;
@@ -145,7 +145,7 @@
         .certified-badge {
             position: absolute;
             top: -5px;
-            left: 18px;
+            left: 12px;
             background: linear-gradient(135deg, #f59e0b, #d97706);
             color: white;
             font-size: 9px;
@@ -260,7 +260,7 @@
         @media (max-width: 420px) {
             .id-card-container {
                 width: 340px;
-                height: 210px;
+                height: 240px;
                 padding: 10px;
             }
             
@@ -281,7 +281,7 @@
         @media (max-width: 360px) {
             .id-card-container {
                 width: 300px;
-                height: 200px;
+                height: 220px;
             }
             
             .card-content {
@@ -335,7 +335,7 @@
             <div class="avatar-section">
                 <div class="avatar-container">
                     <div class="avatar-placeholder">
-                        {{ user_data.username[0] if user_data.username else 'U' }}
+                        {{ user_data.username[0]|upper if user_data.username else 'U' }}
                     </div>
                     <div class="certified-badge">
                         <i class="fas fa-certificate"></i>
@@ -370,7 +370,28 @@
                                 </strong>
                             </div>
                         </div>
+
+                        <div class="detail-item">
+                            <div class="detail-icon">
+                                <i class="fas fa-user-tie"></i>
+                            </div>
+                            <div class="detail-text">
+                                Role: <strong style="color: {% if user_data.is_admin %}#10b981{% else %}#FFC0CB{% endif %}"></strong>
+                                    {{ 'Class Rep' if user_data.is_admin else 'Student'}}
+                            </div>
+                        </div>
                         
+                        <div class="detail-item">
+                            <div class="detail-icon">
+                                <i class="fas fa-tasks"></i>
+                            </div>
+                            <div class="detail-text">
+                                Fee: <strong style="color: {% if user_data.paid %}#10b981{% else %}#ef4444{% endif %}">
+                                    {{ 'Paid' if user_data.paid else 'Not Paid' }}
+                                </strong>
+                            </div>
+                        </div>
+
                         <div class="detail-item">
                             <div class="detail-icon">
                                 <i class="fas fa-calendar"></i>

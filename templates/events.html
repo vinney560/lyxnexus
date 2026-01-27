@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Events</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --text-color: #f8fafc;
+            --accent-color: #3b82f6;
+            --secondary-color: #8b5cf6;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            background-image: linear-gradient(to bottom right, #0f172a, #1e293b);
+        }
+        
+        .glass-morph {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 31, 135, 0.1);
+        }
+        
+        .event-card {
+            transition: all 0.3s ease;
+            border: 1px solid rgba(59, 130, 246, 0.1);
+        }
+        
+        .event-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(59, 130, 246, 0.4);
+            box-shadow: 0 10px 40px rgba(59, 130, 246, 0.15);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 10px 20px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.4);
+        }
+        
+        .badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .badge-success {
+            background: rgba(34, 197, 94, 0.2);
+            color: #4ade80;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+        
+        .badge-warning {
+            background: rgba(245, 158, 11, 0.2);
+            color: #fbbf24;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+        
+        .alert {
+            padding: 12px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 1px solid;
+        }
+        
+        .alert-success {
+            background: rgba(34, 197, 94, 0.2);
+            color: #4ade80;
+            border-color: rgba(34, 197, 94, 0.3);
+        }
+        
+        .alert-danger {
+            background: rgba(239, 68, 68, 0.2);
+            color: #f87171;
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+    </style>
+    <script>
+        // Fetch user profile to check if admin
+        let isAdmin = false;
+        
+        async function fetchUserProfile() {
+            try {
+                const response = await fetch('/api/user/profile');
+                if (response.ok) {
+                    const userData = await response.json();
+                    isAdmin = userData.is_admin;
+                    
+                    // Show admin link if user is admin
+                    if (isAdmin) {
+                        const adminLink = document.getElementById('adminLink');
+                        if (adminLink) {
+                            adminLink.style.display = 'flex';
+                        }
+                    }
+                }
+            } catch (error) {
+                console.log('User not logged in or error fetching profile');
+            }
+        }
+        
+        // Load user profile on page load
+        document.addEventListener('DOMContentLoaded', fetchUserProfile);
+    </script>
+</head>
+<body class="min-h-screen">
+    <!-- Navigation -->
+    <nav class="glass-morph py-4 px-6 mb-6">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <a href="/events" class="text-2xl font-bold text-blue-400">
+                <i class="fas fa-calendar-alt mr-2"></i>
+                Events
+            </a>
+            
+            <div class="flex items-center space-x-4">
+                <a href="/events" class="hover:text-blue-400 transition-colors">
+                    <i class="fas fa-home mr-1"></i> Events
+                </a>
+                
+                <a id="adminLink" href="/events/admin/events" class="hover:text-blue-400 transition-colors hidden">
+                    <i class="fas fa-cog mr-1"></i> Admin
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="py-6 px-4">
+        <div class="max-w-7xl mx-auto">
+            <!-- Header -->
+            <div class="mb-8">
+                <h1 class="text-3xl font-bold mb-2">
+                    <i class="fas fa-calendar-star text-blue-400 mr-3"></i>
+                    Upcoming Events
+                </h1>
+                <p class="text-gray-400">Discover and enroll in exciting events</p>
+            </div>
+
+            <!-- Flash Messages -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category if category in ['success', 'danger'] else 'info' }} mb-6">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <!-- Events Grid -->
+            {% if events %}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for event in events %}
+                <div class="glass-morph event-card rounded-2xl overflow-hidden">
+                    {% if event.poster_url %}
+                    <div class="h-48 overflow-hidden">
+                        <img src="{{ event.poster_url }}" alt="{{ event.title }}" class="w-full h-full object-cover">
+                    </div>
+                    {% else %}
+                    <div class="h-48 bg-gradient-to-br from-blue-900/30 to-purple-900/30 flex items-center justify-center">
+                        <i class="fas fa-calendar-alt text-5xl text-blue-400"></i>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="p-6">
+                        <div class="flex justify-between items-start mb-3">
+                            <h3 class="text-xl font-bold truncate" title="{{ event.title }}">
+                                {{ event.title }}
+                            </h3>
+                            <span class="text-lg font-bold text-blue-400">
+                                ${{ "%.2f"|format(event.fee) }}
+                            </span>
+                        </div>
+                        
+                        <p class="text-gray-400 text-sm mb-4 line-clamp-2">
+                            {{ event.description[:150] }}{% if event.description|length > 150 %}...{% endif %}
+                        </p>
+                        
+                        <div class="space-y-2 mb-4">
+                            <div class="flex items-center text-sm">
+                                <i class="fas fa-map-marker-alt text-blue-400 mr-2 w-5"></i>
+                                <span class="truncate">{{ event.venue }}</span>
+                            </div>
+                            <div class="flex items-center text-sm">
+                                <i class="fas fa-clock text-purple-400 mr-2 w-5"></i>
+                                <span>{{ event.start_date.strftime('%b %d, %Y %I:%M %p') }}</span>
+                            </div>
+                            {% if event.tutors %}
+                            <div class="flex items-center text-sm">
+                                <i class="fas fa-chalkboard-teacher text-green-400 mr-2 w-5"></i>
+                                <span class="truncate">{{ event.tutors }}</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="flex justify-between items-center">
+                            <div class="text-sm">
+                                <span class="text-gray-400">Available:</span>
+                                <span class="ml-2 font-bold {% if event.capacity - event.enrollments|length <= 10 %}text-red-400{% else %}text-green-400{% endif %}">
+                                    {{ event.capacity - event.enrollments|length }} / {{ event.capacity }}
+                                </span>
+                            </div>
+                            <a href="/events/{{ event.id }}" 
+                               class="btn-primary text-sm px-4 py-2">
+                                View Details
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="glass-morph rounded-2xl p-12 text-center">
+                <i class="fas fa-calendar-times text-5xl text-gray-500 mb-4"></i>
+                <h3 class="text-xl font-bold mb-2">No Events Available</h3>
+                <p class="text-gray-400">Check back soon for upcoming events!</p>
+            </div>
+            {% endif %}
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="glass-morph mt-8 py-6 px-4">
+        <div class="max-w-7xl mx-auto text-center text-gray-400 text-sm">
+            <p>&copy; 2024 Events. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Auto-hide flash messages
+        setTimeout(() => {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                alert.style.transition = 'opacity 0.5s ease';
+                alert.style.opacity = '0';
+                setTimeout(() => alert.remove(), 500);
+            });
+        }, 5000);
+    </script>
+</body>
+</html>

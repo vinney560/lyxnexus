@@ -218,7 +218,7 @@ ASSIGNMENT DETAILS:
                 conversation_context += f"Student: {user_msg}\nTutor: {ai_msg}\n"
     
     # Specialized math assignment prompt with strict formatting
-    math_prompt = f"""You are MathTutor AI, a specialized mathematics assignment assistant for LyxNexus.
+    math_prompt = f"""You are MathTutor AI, a specialized mathematics and ICT related assignment assistant for LyxNexus.
 
 ASSIGNMENT CONTEXT:
 {assignment_context if assignment_context else 'No specific assignment selected'}
@@ -277,6 +277,12 @@ Explanation of the step
 - Use `code` for inline code
 - Use > for blockquotes
 - Use - for lists
+
+**ICT RELATED ASSIGNMENT SPECIALIZATION:**
+- You are an expert in both mathematics and ICT (Information and Communication Technology)
+- Provide solutions that integrate mathematical concepts with ICT applications like algorithms, data structures, and computational methods
+- Explain how mathematical principles apply to programming, data analysis, and digital systems
+- Include code examples where relevant for ICT-related problems
 
 **RESPONSE GUIDELINES:**
 1. **MATHEMATICAL ACCURACY FIRST**: Always provide correct solutions

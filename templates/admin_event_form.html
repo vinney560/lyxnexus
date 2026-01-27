@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if event %}Edit Event{% else %}Create Event{% endif %} - Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --text-color: #f8fafc;
+            --accent-color: #3b82f6;
+            --secondary-color: #8b5cf6;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            background-image: linear-gradient(to bottom right, #0f172a, #1e293b);
+        }
+        
+        .glass-morph {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 31, 135, 0.1);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 12px 24px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.4);
+        }
+        
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 10px;
+            padding: 12px 24px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(59, 130, 246, 0.2);
+        }
+        
+        .form-input {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 10px;
+            padding: 12px 16px;
+            color: white;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3B82F6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+        
+        .form-textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        
+        .alert {
+            padding: 12px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 1px solid;
+        }
+        
+        .alert-danger {
+            background: rgba(239, 68, 68, 0.2);
+            color: #f87171;
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+        
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 30px;
+        }
+        
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #374151;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .toggle-slider {
+            background-color: #3B82F6;
+        }
+        
+        input:checked + .toggle-slider:before {
+            transform: translateX(30px);
+        }
+    </style>
+    <script>
+        // Check if user is admin
+        async function checkAdminAccess() {
+            try {
+                const response = await fetch('/api/user/profile');
+                if (response.ok) {
+                    const userData = await response.json();
+                    if (!userData.is_admin) {
+                        window.location.href = '/events';
+                    }
+                } else {
+                    window.location.href = '/events';
+                }
+            } catch (error) {
+                window.location.href = '/events';
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', checkAdminAccess);
+        
+        // Format date for datetime-local input
+        function formatDateForInput(dateString) {
+            if (!dateString) return '';
+            const date = new Date(dateString);
+            return date.toISOString().slice(0, 16);
+        }
+        
+        // Auto-hide flash messages
+        setTimeout(() => {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                alert.style.transition = 'opacity 0.5s ease';
+                alert.style.opacity = '0';
+                setTimeout(() => alert.remove(), 500);
+            });
+        }, 5000);
+    </script>
+</head>
+<body class="min-h-screen">
+    <!-- Navigation -->
+    <nav class="glass-morph py-4 px-6 mb-6">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-6">
+                <a href="/events/admin/events" class="text-2xl font-bold text-blue-400">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    Admin Panel
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="py-6 px-4">
+        <div class="max-w-4xl mx-auto">
+            <!-- Header -->
+            <div class="mb-8">
+                <h1 class="text-3xl font-bold mb-2">
+                    <i class="fas fa-calendar-plus text-blue-400 mr-3"></i>
+                    {% if event %}Edit Event{% else %}Create New Event{% endif %}
+                </h1>
+                <p class="text-gray-400">
+                    {% if event %}
+                    Update event details
+                    {% else %}
+                    Fill in the details to create a new event
+                    {% endif %}
+                </p>
+            </div>
+
+            <!-- Flash Messages -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        {% if category == 'danger' %}
+                        <div class="alert alert-danger mb-6">
+                            {{ message }}
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <!-- Event Form -->
+            <div class="glass-morph rounded-2xl p-8">
+                <form method="POST" class="space-y-6">
+                    <!-- Title -->
+                    <div>
+                        <label class="block text-sm font-medium mb-2">
+                            <i class="fas fa-heading text-blue-400 mr-2"></i>
+                            Event Title *
+                        </label>
+                        <input type="text" 
+                               name="title" 
+                               class="form-input"
+                               placeholder="Enter event title"
+                               value="{{ event.title if event else '' }}"
+                               required>
+                    </div>
+
+                    <!-- Description -->
+                    <div>
+                        <label class="block text-sm font-medium mb-2">
+                            <i class="fas fa-align-left text-blue-400 mr-2"></i>
+                            Description *
+                        </label>
+                        <textarea name="description" 
+                                  class="form-input form-textarea"
+                                  placeholder="Enter event description"
+                                  required>{{ event.description if event else '' }}</textarea>
+                    </div>
+
+                    <!-- Venue -->
+                    <div>
+                        <label class="block text-sm font-medium mb-2">
+                            <i class="fas fa-map-marker-alt text-blue-400 mr-2"></i>
+                            Venue *
+                        </label>
+                        <input type="text" 
+                               name="venue" 
+                               class="form-input"
+                               placeholder="Enter event venue"
+                               value="{{ event.venue if event else '' }}"
+                               required>
+                    </div>
+
+                    <!-- Date & Time -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium mb-2">
+                                <i class="fas fa-calendar-day text-purple-400 mr-2"></i>
+                                Start Date & Time *
+                            </label>
+                            <input type="datetime-local" 
+                                   name="start_date" 
+                                   class="form-input"
+                                   value="{{ event.start_date.strftime('%Y-%m-%dT%H:%M') if event else '' }}"
+                                   required>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium mb-2">
+                                <i class="fas fa-calendar-day text-purple-400 mr-2"></i>
+                                End Date & Time *
+                            </label>
+                            <input type="datetime-local" 
+                                   name="end_date" 
+                                   class="form-input"
+                                   value="{{ event.end_date.strftime('%Y-%m-%dT%H:%M') if event else '' }}"
+                                   required>
+                        </div>
+                    </div>
+
+                    <!-- Fee & Capacity -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium mb-2">
+                                <i class="fas fa-dollar-sign text-green-400 mr-2"></i>
+                                Fee *
+                            </label>
+                            <input type="number" 
+                                   name="fee" 
+                                   class="form-input"
+                                   placeholder="0.00"
+                                   step="0.01"
+                                   min="0"
+                                   value="{{ event.fee if event else '0.00' }}"
+                                   required>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium mb-2">
+                                <i class="fas fa-users text-yellow-400 mr-2"></i>
+                                Capacity *
+                            </label>
+                            <input type="number" 
+                                   name="capacity" 
+                                   class="form-input"
+                                   placeholder="50"
+                                   min="1"
+                                   value="{{ event.capacity if event else '50' }}"
+                                   required>
+                        </div>
+                    </div>
+
+                    <!-- Tutors -->
+                    <div>
+                        <label class="block text-sm font-medium mb-2">
+                            <i class="fas fa-chalkboard-teacher text-green-400 mr-2"></i>
+                            Tutors/Instructors
+                        </label>
+                        <input type="text" 
+                               name="tutors" 
+                               class="form-input"
+                               placeholder="Enter tutor names (comma-separated)"
+                               value="{{ event.tutors if event else '' }}">
+                        <p class="text-xs text-gray-400 mt-1">Separate multiple tutors with commas</p>
+                    </div>
+
+                    <!-- Poster URL -->
+                    <div>
+                        <label class="block text-sm font-medium mb-2">
+                            <i class="fas fa-image text-pink-400 mr-2"></i>
+                            Poster URL
+                        </label>
+                        <input type="url" 
+                               name="poster_url" 
+                               class="form-input"
+                               placeholder="https://example.com/poster.jpg"
+                               value="{{ event.poster_url if event else '' }}">
+                        <p class="text-xs text-gray-400 mt-1">Enter a direct link to the event poster image</p>
+                    </div>
+
+                    <!-- Active Status -->
+                    <div class="flex items-center justify-between p-4 border border-gray-700 rounded-xl">
+                        <div>
+                            <div class="font-medium">Active Status</div>
+                            <div class="text-sm text-gray-400">Is this event currently active?</div>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" 
+                                   name="is_active" 
+                                   value="true"
+                                   {% if event and event.is_active %}checked{% endif %}
+                                   {% if not event %}checked{% endif %}>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div class="flex justify-end space-x-3 pt-6 border-t border-gray-700">
+                        <a href="/events/admin/events" class="btn-secondary">
+                            Cancel
+                        </a>
+                        <button type="submit" class="btn-primary">
+                            <i class="fas fa-save mr-2"></i>
+                            {% if event %}Update Event{% else %}Create Event{% endif %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="glass-morph mt-8 py-6 px-4">
+        <div class="max-w-7xl mx-auto text-center text-gray-400 text-sm">
+            <p>&copy; 2024 Events Admin. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>

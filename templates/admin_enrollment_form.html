@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if enrollment %}Edit Enrollment{% else %}Create Enrollment{% endif %} - Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --text-color: #f8fafc;
+            --accent-color: #3b82f6;
+            --secondary-color: #8b5cf6;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            background-image: linear-gradient(to bottom right, #0f172a, #1e293b);
+        }
+        
+        .glass-morph {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 31, 135, 0.1);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 12px 24px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.4);
+        }
+        
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 10px;
+            padding: 12px 24px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(59, 130, 246, 0.2);
+        }
+        
+        .form-input {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 10px;
+            padding: 12px 16px;
+            color: white;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3B82F6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+        
+        .form-select {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 10px;
+            padding: 12px 16px;
+            color: white;
+            width: 100%;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+        }
+        
+        .alert {
+            padding: 12px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 1px solid;
+        }
+        
+        .alert-danger {
+            background: rgba(239, 68, 68, 0.2);
+            color: #f87171;
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+    </style>
+    <script>
+        // Check if user is admin
+        async function checkAdminAccess() {
+            try {
+                const response = await fetch('/api/user/profile');
+                if (response.ok) {
+                    const userData = await response.json();
+                    if (!userData.is_admin) {
+                        window.location.href = '/events';
+                    }
+                } else {
+                    window.location.href = '/events';
+                }
+            } catch (error) {
+                window.location.href = '/events';
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', checkAdminAccess);
+        
+        // Auto-hide flash messages
+        setTimeout(() => {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                alert.style.transition = 'opacity 0.5s ease';
+                alert.style.opacity = '0';
+                setTimeout(() => alert.remove(), 500);
+            });
+        }, 5000);
+        
+        // Check event capacity when event is selected
+        function checkEventCapacity() {
+            const eventSelect = document.getElementById('eventSelect');
+            if (!eventSelect) return;
+            
+            const selectedEvent = eventSelect.options[eventSelect.selectedIndex];
+            const capacity = selectedEvent.getAttribute('data-capacity');
+            const enrolled = selectedEvent.getAttribute('data-enrolled');
+            const remaining = parseInt(capacity) - parseInt(enrolled);
+            
+            const capacityInfo = document.getElementById('capacityInfo');
+            if (capacityInfo) {
+                if (remaining <= 0) {
+                    capacityInfo.innerHTML = `
+                        <div class="text-red-400 font-medium">
+                            <i class="fas fa-exclamation-triangle mr-2"></i>
+                            Event is full! (${enrolled}/${capacity})
+                        </div>
+                    `;
+                } else {
+                    capacityInfo.innerHTML = `
+                        <div class="text-green-400">
+                            <i class="fas fa-check-circle mr-2"></i>
+                            ${remaining} slots available (${enrolled}/${capacity})
+                        </div>
+                    `;
+                }
+            }
+        }
+    </script>
+</head>
+<body class="min-h-screen">
+    <!-- Navigation -->
+    <nav class="glass-morph py-4 px-6 mb-6">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-6">
+                <a href="/events/admin/enrollments" class="text-2xl font-bold text-blue-400">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    Admin Panel
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="py-6 px-4">
+        <div class="max-w-4xl mx-auto">
+            <!-- Header -->
+            <div class="mb-8">
+                <h1 class="text-3xl font-bold mb-2">
+                    <i class="fas fa-user-plus text-blue-400 mr-3"></i>
+                    {% if enrollment %}Edit Enrollment{% else %}Create New Enrollment{% endif %}
+                </h1>
+                <p class="text-gray-400">
+                    {% if enrollment %}
+                    Update enrollment details for {{ enrollment.full_name }}
+                    {% else %}
+                    Enroll a user in an event
+                    {% endif %}
+                </p>
+            </div>
+
+            <!-- Flash Messages -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        {% if category == 'danger' %}
+                        <div class="alert alert-danger mb-6">
+                            {{ message }}
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <!-- Enrollment Form -->
+            <div class="glass-morph rounded-2xl p-8">
+                <form method="POST" class="space-y-6">
+                    <!-- User Information -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium mb-2">
+                                <i class="fas fa-user text-blue-400 mr-2"></i>
+                                Username *
+                            </label>
+                            <input type="text" 
+                                   name="username" 
+                                   class="form-input"
+                                   placeholder="Enter username"
+                                   value="{{ enrollment.username if enrollment else '' }}"
+                                   required>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium mb-2">
+                                <i class="fas fa-id-card text-blue-400 mr-2"></i>
+                                Full Name *
+                            </label>
+                            <input type="text" 
+                                   name="full_name" 
+                                   class="form-input"
+                                   placeholder="Enter full name"
+                                   value="{{ enrollment.full_name if enrollment else '' }}"
+                                   required>
+                        </div>
+                    </div>
+
+                    <!-- Contact Information -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium mb-2">
+                                <i class="fas fa-envelope text-blue-400 mr-2"></i>
+                                Email *
+                            </label>
+                            <input type="email" 
+                                   name="email" 
+                                   class="form-input"
+                                   placeholder="user@example.com"
+                                   value="{{ enrollment.email if enrollment else '' }}"
+                                   required>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium mb-2">
+                                <i class="fas fa-phone text-blue-400 mr-2"></i>
+                                Phone Number
+                            </label>
+                            <input type="tel" 
+                                   name="phone" 
+                                   class="form-input"
+                                   placeholder="(123) 456-7890"
+                                   value="{{ enrollment.phone if enrollment else '' }}">
+                        </div>
+                    </div>
+
+                    <!-- Event Selection -->
+                    <div>
+                        <label class="block text-sm font-medium mb-2">
+                            <i class="fas fa-calendar-alt text-purple-400 mr-2"></i>
+                            Event *
+                        </label>
+                        <select name="event_id" 
+                                id="eventSelect" 
+                                class="form-select"
+                                onchange="checkEventCapacity()"
+                                required>
+                            <option value="">Select an event</option>
+                            {% for event in events %}
+                            <option value="{{ event.id }}"
+                                    data-capacity="{{ event.capacity }}"
+                                    data-enrolled="{{ event.enrollments|length }}"
+                                    {% if enrollment and enrollment.event_id == event.id %}selected{% endif %}>
+                                {{ event.title }} - {{ event.start_date.strftime('%b %d, %Y') }} ({{ event.venue }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                        <div id="capacityInfo" class="text-sm mt-2">
+                            {% if enrollment and enrollment.event %}
+                            <div class="text-green-400">
+                                <i class="fas fa-check-circle mr-2"></i>
+                                {{ enrollment.event.capacity - enrollment.event.enrollments|length }} slots available
+                                ({{ enrollment.event.enrollments|length }}/{{ enrollment.event.capacity }})
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Status -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium mb-2">
+                                <i class="fas fa-circle text-blue-400 mr-2"></i>
+                                Enrollment Status
+                            </label>
+                            <select name="status" class="form-select">
+                                <option value="pending" {% if enrollment and enrollment.status == 'pending' %}selected{% endif %}>
+                                    Pending
+                                </option>
+                                <option value="confirmed" {% if enrollment and enrollment.status == 'confirmed' %}selected{% endif %}>
+                                    Confirmed
+                                </option>
+                                <option value="cancelled" {% if enrollment and enrollment.status == 'cancelled' %}selected{% endif %}>
+                                    Cancelled
+                                </option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium mb-2">
+                                <i class="fas fa-credit-card text-green-400 mr-2"></i>
+                                Payment Status
+                            </label>
+                            <select name="payment_status" class="form-select">
+                                <option value="unpaid" {% if enrollment and enrollment.payment_status == 'unpaid' %}selected{% endif %}>
+                                    Unpaid
+                                </option>
+                                <option value="paid" {% if enrollment and enrollment.payment_status == 'paid' %}selected{% endif %}>
+                                    Paid
+                                </option>
+                                <option value="refunded" {% if enrollment and enrollment.payment_status == 'refunded' %}selected{% endif %}>
+                                    Refunded
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Notes -->
+                    <div>
+                        <label class="block text-sm font-medium mb-2">
+                            <i class="fas fa-sticky-note text-yellow-400 mr-2"></i>
+                            Notes
+                        </label>
+                        <textarea name="notes" 
+                                  class="form-input"
+                                  rows="4"
+                                  placeholder="Any additional notes...">{{ enrollment.notes if enrollment else '' }}</textarea>
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div class="flex justify-end space-x-3 pt-6 border-t border-gray-700">
+                        <a href="/events/admin/enrollments" class="btn-secondary">
+                            Cancel
+                        </a>
+                        <button type="submit" class="btn-primary">
+                            <i class="fas fa-save mr-2"></i>
+                            {% if enrollment %}Update Enrollment{% else %}Create Enrollment{% endif %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="glass-morph mt-8 py-6 px-4">
+        <div class="max-w-7xl mx-auto text-center text-gray-400 text-sm">
+            <p>&copy; 2024 Events Admin. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Check capacity on page load
+        window.onload = function() {
+            checkEventCapacity();
+        };
+    </script>
+</body>
+</html>
