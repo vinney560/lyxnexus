@@ -4844,6 +4844,7 @@ from chloe import _chloe_ai
 from lyxprobe_bp import probe_bp
 from lyxmodify_year import modify_year_bp
 from file_storage import storage_bp
+from events_bp import events_bp
 
 import cloudinary
 # Cloudinary Configuration
@@ -4868,6 +4869,7 @@ app.register_blueprint(test_routes)
 app.register_blueprint(_chloe_ai)
 app.register_blueprint(probe_bp)
 app.register_blueprint(modify_year_bp)
+app.register_blueprint(events_bp)
 #========================================================================
 @app.route('/lyx-ai')
 @login_required

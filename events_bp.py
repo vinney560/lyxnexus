@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, jsonify, request, flash, redirect, url_for
 from datetime import datetime
-from models import db, Event, Enrollment
+from app import db, Event, Enrollment
 import json
 
 events_bp = Blueprint('events', __name__, url_prefix='/events')
