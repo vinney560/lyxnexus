@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LyxNexus ID Card</title>
-    <!-- Fonts & Icons -->
+    <title>LyxNexus ID Card</title>    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -12,11 +11,11 @@
     
     <style>
         :root {
-            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --active-gradient: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
-            --banned-gradient: linear-gradient(135deg, #f5576c 0%, #f093fb 100%);
-            --card-width: 400px;
-            --card-height: 240px;
+            --primary: #6366f1;
+            --secondary: #8b5cf6;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
         }
         
         * {
@@ -27,8 +26,7 @@
         
         body {
             font-family: 'Poppins', sans-serif;
-            background: #0a0a1a;
-            color: #fff;
+            background: #0f172a;
             min-height: 100vh;
             display: flex;
             justify-content: center;
@@ -37,180 +35,198 @@
         }
         
         .id-card-container {
-            width: var(--card-width);
-            height: var(--card-height);
+            width: 380px;
+            height: 230px;
             position: relative;
-        }
-        
-        .id-card {
-            width: 100%;
-            height: 100%;
-            position: relative;
-            border-radius: 20px;
+            background: linear-gradient(145deg, #1e293b, #0f172a);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
             overflow: hidden;
-            background: linear-gradient(145deg, #111126, #0a0a1a);
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            padding: 12px;
         }
         
         .card-header {
-            padding: 12px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: rgba(0, 0, 0, 0.3);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            height: 30px;
         }
         
         .logo-container {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
         }
         
         .logo-icon {
-            width: 35px;
-            height: 35px;
+            width: 30px;
+            height: 30px;
             border-radius: 8px;
-            background: var(--primary-gradient);
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 18px;
+            font-size: 14px;
             color: white;
         }
         
         .logo-text {
             font-family: 'Orbitron', sans-serif;
             font-weight: 600;
-            font-size: 20px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
+            font-size: 16px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
-            letter-spacing: 1px;
         }
         
         .status-badge {
-            padding: 6px 12px;
-            border-radius: 15px;
-            font-size: 11px;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 10px;
             font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            box-shadow: 0 4px 15px rgba(67, 233, 123, 0.3);
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
         }
         
         .status-active {
-            background: var(--active-gradient);
+            background: rgba(16, 185, 129, 0.15);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.3);
         }
         
         .status-banned {
-            background: var(--banned-gradient);
+            background: rgba(239, 68, 68, 0.15);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.3);
         }
         
-        .card-body {
-            padding: 20px;
+        .card-content {
             display: flex;
-            gap: 20px;
-            height: calc(100% - 110px);
+            gap: 15px;
+            height: calc(100% - 50px);
         }
         
         .avatar-section {
             flex-shrink: 0;
-            width: 100px;
+            width: 80px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
         }
         
         .avatar-container {
-            width: 80px;
-            height: 80px;
-            border-radius: 15px;
-            overflow: hidden;
-            border: 3px solid transparent;
-            background: linear-gradient(45deg, #667eea, #764ba2) border-box;
-            -webkit-mask: 
-                linear-gradient(#fff 0 0) padding-box, 
-                linear-gradient(#fff 0 0);
-            -webkit-mask-composite: xor;
-            mask-composite: exclude;
-            margin-bottom: 8px;
-        }
-        
-        .avatar {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            border: 3px solid var(--primary);
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            margin-bottom: 6px;
+            position: relative;
         }
         
         .avatar-placeholder {
             width: 100%;
             height: 100%;
-            background: var(--primary-gradient);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 28px;
+            font-size: 24px;
             font-weight: bold;
             color: white;
         }
         
+        .certified-badge {
+            position: absolute;
+            top: -5px;
+            left: 20px;
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+            font-size: 9px;
+            padding: 3px 6px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            font-weight: 600;
+        }
+        
         .user-id {
             font-family: 'Orbitron', sans-serif;
-            font-size: 11px;
-            color: #667eea;
-            font-weight: 500;
-            letter-spacing: 0.5px;
-            margin-top: 5px;
+            font-size: 10px;
+            color: #94a3b8;
             text-align: center;
-        }        
+            background: rgba(255, 255, 255, 0.03);
+            padding: 3px 8px;
+            border-radius: 8px;
+            width: 100%;
+        }
         
         .info-section {
             flex: 1;
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            justify-content: space-between;
+        }
+        
+        .user-info {
+            margin-bottom: 8px;
         }
         
         .user-name {
-            font-size: 22px;
+            font-size: 18px;
             font-weight: 600;
-            margin-bottom: 4px;
-            color: #fff;
+            color: white;
+            margin-bottom: 2px;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        .year-badge {
+            font-size: 10px;
+            background: rgba(99, 102, 241, 0.15);
+            color: var(--primary);
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-weight: 600;
         }
         
         .user-details {
             display: flex;
             flex-direction: column;
-            gap: 8px;
-            margin-top: 10px;
+            gap: 6px;
         }
         
         .detail-item {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
         }
         
         .detail-icon {
-            width: 22px;
-            height: 22px;
-            border-radius: 6px;
-            background: rgba(102, 126, 234, 0.1);
+            width: 20px;
+            height: 20px;
+            border-radius: 5px;
+            background: rgba(99, 102, 241, 0.1);
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #667eea;
+            color: var(--primary);
             flex-shrink: 0;
+            font-size: 10px;
         }
         
         .detail-text {
-            font-size: 13px;
-            color: #a0aec0;
-            word-break: break-word;
+            font-size: 12px;
+            color: #cbd5e1;
             line-height: 1.3;
         }
         
@@ -219,179 +235,163 @@
             bottom: 0;
             left: 0;
             right: 0;
-            padding: 10px 20px;
+            padding: 10px;
             background: rgba(0, 0, 0, 0.3);
             border-top: 1px solid rgba(255, 255, 255, 0.1);
             display: flex;
             justify-content: space-between;
             align-items: center;
+            height: 40px;
         }
         
-        .expiry-date {
-            font-size: 11px;
-            color: #a0aec0;
+        .footer-item {
+            font-size: 10px;
+            color: #94a3b8;
         }
         
-        .expiry-value {
+        .footer-value {
             font-family: 'Orbitron', sans-serif;
-            color: #fff;
-            font-weight: 500;
-            font-size: 12px;
-            margin-left: 5px;
-        }
-        
-        .member-since {
+            color: white;
+            font-weight: 600;
             font-size: 11px;
-            color: #a0aec0;
-            text-align: right;
+            margin-left: 3px;
         }
         
-        .member-value {
-            font-family: 'Orbitron', sans-serif;
-            color: #fff;
-            font-weight: 500;
-            font-size: 12px;
-            margin-left: 5px;
-        }
-                
-        @media (max-width: 480px) {
-            :root {
-                --card-width: 350px;
-                --card-height: 220px;
-            }
-            
-            .card-body {
-                padding: 15px;
-                gap: 15px;
-            }
-            
-            .avatar-section {
-                width: 90px;
+        @media (max-width: 420px) {
+            .id-card-container {
+                width: 340px;
+                height: 210px;
+                padding: 10px;
             }
             
             .avatar-container {
-                width: 70px;
-                height: 70px;
+                width: 65px;
+                height: 65px;
             }
             
             .user-name {
-                font-size: 20px;
+                font-size: 16px;
             }
             
             .detail-text {
-                font-size: 12px;
+                font-size: 11px;
             }
         }
         
         @media (max-width: 360px) {
-            :root {
-                --card-width: 320px;
-                --card-height: 200px;
+            .id-card-container {
+                width: 300px;
+                height: 200px;
             }
             
-            .card-body {
-                flex-direction: column;
+            .card-content {
                 gap: 12px;
             }
             
             .avatar-section {
-                width: 100%;
-                flex-direction: row;
-                justify-content: flex-start;
-                gap: 15px;
+                width: 70px;
             }
             
             .avatar-container {
                 width: 60px;
                 height: 60px;
-                margin-bottom: 0;
+            }
+            
+            .avatar-placeholder {
+                font-size: 20px;
             }
             
             .user-name {
-                font-size: 18px;
+                font-size: 15px;
+            }
+            
+            .detail-item {
+                gap: 6px;
             }
         }
     </style>
 </head>
 <body>
-    <!-- ID Card Container -->
     <div class="id-card-container">
-        <!-- ID Card -->
-        <div class="id-card">
-            <!-- Header -->
-            <div class="card-header">
-                <div class="logo-container">
-                    <div class="logo-icon">
-                        <i class="fas fa-graduation-cap"></i>
+        <div class="card-header">
+            <div class="logo-container">
+                <div class="logo-icon">
+                    <i class="fas fa-id-card"></i>
+                </div>
+                <div class="logo-text">LYXNEXUS</div>
+            </div>
+            <div class="status-badge {% if user_data.status %}status-active{% else %}status-banned{% endif %}">
+                {% if user_data.status %}
+                    <i class="fas fa-check-circle"></i>
+                    <span>ACTIVE</span>
+                {% else %}
+                    <i class="fas fa-ban"></i>
+                    <span>BANNED</span>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="card-content mb-6">
+            <div class="avatar-section">
+                <div class="avatar-container">
+                    <div class="avatar-placeholder">
+                        {{ user_data.username[0] if user_data.username else 'U' }}
                     </div>
-                    <div class="logo-text">LYXNEXUS</div>
+                    <div class="certified-badge">
+                        <i class="fas fa-certificate"></i>
+                        <span>CERTIFIED</span>
+                    </div>
                 </div>
-                <div class="status-badge {% if user_data.status %}status-active{% else %}status-banned{% endif %}">
-                    {% if user_data.status %}
-                        <i class="fas fa-check-circle"></i>
-                        <span>ACTIVE</span>
-                    {% else %}
-                        <i class="fas fa-ban"></i>
-                        <span>BANNED</span>
-                    {% endif %}
-                </div>
+                <div class="user-id">ID: {{ user_data.id }}</div>
             </div>
             
-            <!-- Body -->
-            <div class="card-body">
-                <!-- Avatar Section -->
-                <div class="avatar-section">
-                    <div class="avatar-container">
-                        <div class="avatar-placeholder">
-                            {{ user_data.username[0] if user_data.username else 'U' }}
-                        </div>
+            <div class="info-section">
+                <div class="user-info">
+                    <div class="user-name">
+                        {{ user_data.username }}
+                        <span class="year-badge">Y{{ user_data.year }}</span>
                     </div>
-                    <div class="user-id">{{ user_data.id }}</div>
-                </div>                
-                
-                <!-- Info Section -->
-                <div class="info-section">
-                    <div class="user-name">{{ user_data.username }}</div>
                     
                     <div class="user-details">
                         <div class="detail-item">
                             <div class="detail-icon">
-                                <i class="fas fa-mobile-alt"></i>
+                                <i class="fas fa-phone"></i>
                             </div>
-                            <div class="detail-text">{{ user_data.mobile or 'No mobile provided' }}</div>
+                            <div class="detail-text">{{ user_data.mobile or 'N/A' }}</div>
                         </div>
                         
                         <div class="detail-item">
                             <div class="detail-icon">
-                                <i class="fas fa-user-tag"></i>
+                                <i class="fas fa-user"></i>
                             </div>
                             <div class="detail-text">
-                                Status: <strong>{{ 'Active' if user_data.status else 'Banned' }}</strong>
+                                Status: <strong style="color: {% if user_data.status %}#10b981{% else %}#ef4444{% endif %}">
+                                    {{ 'Active' if user_data.status else 'Banned' }}
+                                </strong>
                             </div>
                         </div>
                         
                         <div class="detail-item">
                             <div class="detail-icon">
-                                <i class="fas fa-calendar-alt"></i>
+                                <i class="fas fa-calendar"></i>
                             </div>
                             <div class="detail-text">
-                                Created: {{ user_data.created_at.strftime('%d %b %Y') if user_data.created_at else 'N/A' }}
+                                Joined: {{ user_data.created_at.strftime('%b %Y') if user_data.created_at else 'N/A' }}
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            
-            <!-- Footer -->
-            <div class="card-footer">
-                <div class="expiry-date">
-                    VALID TILL: <span class="expiry-value">DEC 2027</span>
-                </div>
-                
-                <div class="member-since">
-                    MEMBER SINCE: <span class="member-value">
-                        {{ user_data.created_at.strftime('%Y') if user_data.created_at else '2025' }}
-                    </span>
+                                
+                <div class="card-footer">
+                    <div class="footer-item">
+                        Valid: <span class="footer-value">DEC 2027</span>
+                    </div>
+                    
+                    <div class="footer-item">
+                        Since: <span class="footer-value">
+                            {{ user_data.created_at.strftime('%Y') if user_data.created_at else '2025' }}
+                        </span>
+                    </div>
                 </div>
             </div>
         </div>
