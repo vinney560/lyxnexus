@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Playing: {{ file.filename }}</title>
+    <title>Video Player</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -20,6 +20,7 @@
             background-color: var(--bg-color);
             color: var(--text-color);
             min-height: 100vh;
+            overflow-x: hidden;
             background-image: linear-gradient(to bottom right, #0f172a, #1e293b);
         }
         
@@ -109,6 +110,7 @@
             overflow: hidden;
             cursor: pointer;
             width: 100%;
+            flex-shrink: 0;
         }
         
         .progress-filled {
@@ -131,6 +133,7 @@
             justify-content: center;
             cursor: pointer;
             transition: all 0.2s ease;
+            flex-shrink: 0;
         }
         
         @media (min-width: 640px) {
@@ -154,6 +157,7 @@
             opacity: 0;
             transition: all 0.3s ease;
             overflow: hidden;
+            flex-shrink: 0;
         }
         
         .volume-slider.show {
@@ -208,11 +212,40 @@
             100% { transform: translate(-50%, -50%) rotate(360deg); }
         }
         
-        .file-info-card {
+        .video-selector {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding: 10px 0;
+            scrollbar-width: thin;
+            scrollbar-color: #3B82F6 rgba(30, 41, 59, 0.5);
+        }
+        
+        .video-selector::-webkit-scrollbar {
+            height: 6px;
+        }
+        
+        .video-selector-btn {
             background: rgba(30, 41, 59, 0.7);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(59, 130, 246, 0.2);
-            border-radius: 16px;
+            border: 2px solid rgba(59, 130, 246, 0.3);
+            border-radius: 10px;
+            padding: 10px 20px;
+            color: white;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        
+        .video-selector-btn:hover {
+            background: rgba(59, 130, 246, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .video-selector-btn.active {
+            background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+            border-color: transparent;
         }
         
         .pulse {
@@ -224,243 +257,112 @@
             70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
             100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
         }
-        
-        .dropdown-menu {
-            background: rgba(30, 41, 59, 0.95);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(59, 130, 246, 0.2);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-        }
-        
-        .file-type-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-        }
     </style>
 </head>
-<body class="min-h-screen p-4">
-    <div class="max-w-4xl mx-auto">
-        <!-- Header -->
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-            <div>
-                <h1 class="text-2xl sm:text-3xl font-bold mb-2">
-                    <i class="fas fa-play-circle text-blue-400 mr-2"></i>
-                    {{ file.filename }}
-                </h1>
-                <div class="flex items-center space-x-4 text-sm text-gray-400">
-                    <span>
-                        <i class="fas fa-hdd mr-1"></i>
-                        {{ "%.2f"|format(file.file_size / 1024 / 1024) if file.file_size else 'Unknown' }} MB
-                    </span>
-                    <span>
-                        <i class="fas fa-file mr-1"></i>
-                        {{ file.file_type.split('/')[-1].upper() if file.file_type else 'Unknown' }}
-                    </span>
-                    <span>
-                        <i class="fas fa-calendar mr-1"></i>
-                        {{ file.created_at.strftime('%Y-%m-%d') if file.created_at else 'Unknown' }}
-                    </span>
-                </div>
-            </div>
-            <div class="flex items-center space-x-3">
-                <a href="javascript:history.back()" class="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 transition-colors flex items-center">
-                    <i class="fas fa-arrow-left mr-2"></i>
-                    Back
-                </a>
-                <a href="/store/api/files/{{ file.id }}/download" download="{{ file.filename }}" 
-                   class="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 transition-colors flex items-center">
-                    <i class="fas fa-download mr-2"></i>
-                    Download
-                </a>
+<body class="min-h-screen flex flex-col p-4">
+    <!-- Video Selector -->
+    <div class="mb-6">
+        <h3 class="text-lg sm:text-xl font-bold mb-3 sm:mb-4 flex items-center">
+            <i class="fas fa-film mr-2 sm:mr-3 text-blue-400"></i>
+            Select Video
+        </h3>
+        <div class="video-selector">
+            <button class="video-selector-btn active" data-video="1">
+                <i class="fas fa-play-circle mr-2"></i>
+                Introduction Video 1
+            </button>
+            <button class="video-selector-btn" data-video="2">
+                <i class="fas fa-play-circle mr-2"></i>
+                Introduction Video 2
+            </button>
+        </div>
+    </div>
+
+    <!-- Video Player -->
+    <div class="video-container aspect-video">
+        <video 
+            id="mainVideo" 
+            class="w-full h-full object-cover"
+            preload="metadata"
+            poster="https://images.unsplash.com/photo-1635070041078-e363dbe005cb?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80">
+            Your browser does not support the video tag.
+        </video>
+        
+        <div id="videoOverlay" class="video-overlay">
+            <div id="playButton" class="play-btn pulse">
+                <i class="fas fa-play"></i>
             </div>
         </div>
+        
+        <!-- Loading Spinner -->
+        <div id="loadingSpinner" class="loading-spinner hidden"></div>
+    </div>
 
-        <!-- Main Player -->
-        <div class="video-container aspect-video">
-            {% if file.file_type and file.file_type.startswith('video') %}
-            <video 
-                id="mainVideo" 
-                class="w-full h-full object-contain bg-black"
-                preload="metadata"
-                controlsList="nodownload"
-                poster="https://images.unsplash.com/photo-1635070041078-e363dbe005cb?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80">
-                <source src="{{ file.url }}">
-                Your browser does not support the video tag.
-            </video>
-            {% elif file.file_type and file.file_type.startswith('audio') %}
-            <div class="w-full h-full bg-gradient-to-br from-blue-900/50 to-purple-900/50 flex items-center justify-center">
-                <div class="text-center p-8">
-                    <div class="file-type-icon bg-blue-900/50 text-blue-400 text-4xl mb-4 mx-auto">
-                        <i class="fas fa-music"></i>
-                    </div>
-                    <h3 class="text-xl font-bold mb-2">{{ file.filename }}</h3>
-                    <p class="text-gray-400 mb-6">Audio playback</p>
-                    <audio id="mainVideo" class="w-full max-w-md">
-                        <source src="{{ file.url }}">
-                        Your browser does not support the audio tag.
-                    </audio>
-                </div>
-            </div>
-            {% else %}
-            <div class="w-full h-full bg-gradient-to-br from-slate-900/50 to-gray-900/50 flex items-center justify-center">
-                <div class="text-center p-8">
-                    <div class="file-type-icon bg-gray-900/50 text-gray-400 text-4xl mb-4 mx-auto">
-                        <i class="fas fa-file"></i>
-                    </div>
-                    <h3 class="text-xl font-bold mb-2">{{ file.filename }}</h3>
-                    <p class="text-gray-400 mb-6">This file type cannot be played in browser</p>
-                    <a href="/store/api/files/{{ file.id }}/" download="{{ file.filename }}" 
-                       class="px-6 py-3 rounded-lg bg-blue-600 hover:bg-blue-700 transition-colors inline-flex items-center">
-                        <i class="fas fa-download mr-2"></i>
-                        Download File
-                    </a>
-                </div>
-            </div>
-            {% endif %}
-            
-            {% if file.file_type and (file.file_type.startswith('video') or file.file_type.startswith('audio')) %}
-            <div id="videoOverlay" class="video-overlay">
-                <div id="playButton" class="play-btn pulse">
-                    <i class="fas fa-play"></i>
-                </div>
+    <!-- Video Controls -->
+    <div class="glass-morph mt-4 p-3 sm:p-4 rounded-2xl">
+        <div class="flex flex-col space-y-3 sm:space-y-4">
+            <!-- Progress Bar -->
+            <div class="progress-bar" id="progressBar">
+                <div class="progress-filled" id="progressFilled"></div>
             </div>
             
-            <!-- Loading Spinner -->
-            <div id="loadingSpinner" class="loading-spinner hidden"></div>
-            {% endif %}
-        </div>
-
-        <!-- Video/Audio Controls -->
-        {% if file.file_type and (file.file_type.startswith('video') or file.file_type.startswith('audio')) %}
-        <div class="glass-morph mt-4 p-3 sm:p-4 rounded-2xl">
-            <div class="flex flex-col space-y-3 sm:space-y-4">
-                <!-- Progress Bar -->
-                <div class="progress-bar" id="progressBar">
-                    <div class="progress-filled" id="progressFilled"></div>
+            <!-- Control Buttons -->
+            <div class="flex items-center justify-between flex-wrap gap-2">
+                <div class="flex items-center space-x-2 sm:space-x-4 flex-wrap">
+                    <!-- Play/Pause Button -->
+                    <button id="playPauseBtn" class="control-btn active">
+                        <i class="fas fa-play" id="playIcon"></i>
+                    </button>
+                    
+                    <!-- Skip Backward -->
+                    <button id="skipBackBtn" class="control-btn">
+                        <i class="fas fa-backward"></i>
+                    </button>
+                    
+                    <!-- Skip Forward -->
+                    <button id="skipForwardBtn" class="control-btn">
+                        <i class="fas fa-forward"></i>
+                    </button>
+                    
+                    <!-- Volume Control -->
+                    <div class="flex items-center">
+                        <button id="volumeBtn" class="control-btn">
+                            <i class="fas fa-volume-up" id="volumeIcon"></i>
+                        </button>
+                        <div class="volume-slider" id="volumeSlider">
+                            <input type="range" min="0" max="100" value="100" 
+                                   class="w-full accent-blue-500 cursor-pointer" 
+                                   id="volumeControl">
+                        </div>
+                    </div>
                 </div>
                 
-                <!-- Control Buttons -->
-                <div class="flex items-center justify-between flex-wrap gap-2">
-                    <div class="flex items-center space-x-2 sm:space-x-4 flex-wrap">
-                        <!-- Play/Pause Button -->
-                        <button id="playPauseBtn" class="control-btn">
-                            <i class="fas fa-play" id="playIcon"></i>
+                <div class="flex items-center space-x-4 sm:space-x-6 flex-wrap">
+                    <!-- Time Display -->
+                    <div class="flex items-center space-x-1 sm:space-x-2">
+                        <span id="currentTime" class="time-display">0:00</span>
+                        <span class="text-gray-400">/</span>
+                        <span id="duration" class="time-display">0:00</span>
+                    </div>
+                    
+                    <!-- Playback Speed -->
+                    <div class="relative">
+                        <button id="speedBtn" class="control-btn">
+                            <span id="speedDisplay">1x</span>
                         </button>
-                        
-                        <!-- Skip Backward -->
-                        <button id="skipBackBtn" class="control-btn">
-                            <i class="fas fa-backward"></i>
-                        </button>
-                        
-                        <!-- Skip Forward -->
-                        <button id="skipForwardBtn" class="control-btn">
-                            <i class="fas fa-forward"></i>
-                        </button>
-                        
-                        <!-- Volume Control -->
-                        <div class="flex items-center">
-                            <button id="volumeBtn" class="control-btn">
-                                <i class="fas fa-volume-up" id="volumeIcon"></i>
-                            </button>
-                            <div class="volume-slider" id="volumeSlider">
-                                <input type="range" min="0" max="100" value="100" 
-                                       class="w-full accent-blue-500 cursor-pointer" 
-                                       id="volumeControl">
-                            </div>
+                        <div id="speedMenu" class="absolute bottom-full mb-2 left-0 bg-slate-800 rounded-lg shadow-lg py-2 hidden z-10 min-w-[80px]">
+                            <button class="speed-option w-full text-left px-3 py-2 hover:bg-slate-700 text-sm" data-speed="0.5">0.5x</button>
+                            <button class="speed-option w-full text-left px-3 py-2 hover:bg-slate-700 text-sm" data-speed="0.75">0.75x</button>
+                            <button class="speed-option w-full text-left px-3 py-2 hover:bg-slate-700 text-sm" data-speed="1" data-selected="true">1x</button>
+                            <button class="speed-option w-full text-left px-3 py-2 hover:bg-slate-700 text-sm" data-speed="1.25">1.25x</button>
+                            <button class="speed-option w-full text-left px-3 py-2 hover:bg-slate-700 text-sm" data-speed="1.5">1.5x</button>
+                            <button class="speed-option w-full text-left px-3 py-2 hover:bg-slate-700 text-sm" data-speed="2">2x</button>
                         </div>
                     </div>
                     
-                    <div class="flex items-center space-x-4 sm:space-x-6 flex-wrap">
-                        <!-- Time Display -->
-                        <div class="flex items-center space-x-1 sm:space-x-2">
-                            <span id="currentTime" class="time-display">0:00</span>
-                            <span class="text-gray-400">/</span>
-                            <span id="duration" class="time-display">0:00</span>
-                        </div>
-                        
-                        <!-- Playback Speed -->
-                        <div class="relative">
-                            <button id="speedBtn" class="control-btn">
-                                <span id="speedDisplay">1x</span>
-                            </button>
-                            <div id="speedMenu" class="dropdown-menu absolute bottom-full mb-2 left-0 rounded-lg py-2 hidden z-10 min-w-[80px]">
-                                <button class="speed-option w-full text-left px-3 py-2 hover:bg-slate-700 text-sm" data-speed="0.5">0.5x</button>
-                                <button class="speed-option w-full text-left px-3 py-2 hover:bg-slate-700 text-sm" data-speed="0.75">0.75x</button>
-                                <button class="speed-option w-full text-left px-3 py-2 hover:bg-slate-700 text-sm" data-speed="1" data-selected="true">1x</button>
-                                <button class="speed-option w-full text-left px-3 py-2 hover:bg-slate-700 text-sm" data-speed="1.25">1.25x</button>
-                                <button class="speed-option w-full text-left px-3 py-2 hover:bg-slate-700 text-sm" data-speed="1.5">1.5x</button>
-                                <button class="speed-option w-full text-left px-3 py-2 hover:bg-slate-700 text-sm" data-speed="2">2x</button>
-                            </div>
-                        </div>
-                        
-                        <!-- Fullscreen (only for video) -->
-                        {% if file.file_type.startswith('video') %}
-                        <button id="fullscreenBtn" class="control-btn">
-                            <i class="fas fa-expand"></i>
-                        </button>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-        </div>
-        {% endif %}
-
-        <!-- File Info -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-            <div class="file-info-card p-4">
-                <h3 class="text-lg font-bold mb-3 flex items-center">
-                    <i class="fas fa-info-circle text-blue-400 mr-2"></i>
-                    File Information
-                </h3>
-                <div class="space-y-2">
-                    <div class="flex justify-between">
-                        <span class="text-gray-400">Filename:</span>
-                        <span class="font-medium truncate ml-4" title="{{ file.filename }}">{{ file.filename }}</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-gray-400">Type:</span>
-                        <span>{{ file.file_type if file.file_type else 'Unknown' }}</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-gray-400">Size:</span>
-                        <span>{{ "%.2f"|format(file.file_size / 1024 / 1024) if file.file_size else 'Unknown' }} MB</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-gray-400">Uploaded:</span>
-                        <span>{{ file.created_at.strftime('%Y-%m-%d %H:%M') if file.created_at else 'Unknown' }}</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-gray-400">ID:</span>
-                        <span class="font-mono">{{ file.id }}</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="file-info-card p-4">
-                <h3 class="text-lg font-bold mb-3 flex items-center">
-                    <i class="fas fa-link text-green-400 mr-2"></i>
-                    Quick Actions
-                </h3>
-                <div class="space-y-3">
-                    <a href="/store/api/files/{{ file.id }}/download" download="{{ file.filename }}" 
-                       class="w-full py-2 bg-blue-600 hover:bg-blue-700 rounded-lg flex items-center justify-center transition-colors">
-                        <i class="fas fa-download mr-2"></i>
-                        Download File
-                    </a>
-                    <button onclick="copyToClipboard('{{ file.url }}')" 
-                            class="w-full py-2 bg-slate-800 hover:bg-slate-700 rounded-lg flex items-center justify-center transition-colors">
-                        <i class="fas fa-copy mr-2"></i>
-                        Copy Direct Link
-                    </button>
-                    <button onclick="shareFile()" 
-                            class="w-full py-2 bg-slate-800 hover:bg-slate-700 rounded-lg flex items-center justify-center transition-colors">
-                        <i class="fas fa-share mr-2"></i>
-                        Share File
+                    <!-- Fullscreen -->
+                    <button id="fullscreenBtn" class="control-btn">
+                        <i class="fas fa-expand"></i>
                     </button>
                 </div>
             </div>
@@ -468,7 +370,21 @@
     </div>
 
     <script>
-        // Element References
+        // Video URLs
+        const videos = {
+            1: {
+                url: "https://res.cloudinary.com/dmkfmr8ry/video/upload/v1768712489/flask_uploads/LyxNexus%20Ads_0_1768712488_LN.mp4?format=jpg&width=800",
+                title: "Introduction Video 1",
+                poster: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80"
+            },
+            2: {
+                url: "https://res.cloudinary.com/dmkfmr8ry/video/upload/v1769433368/LN_Ad_3_dtq3q8.mp4",
+                title: "Introduction Video 2",
+                poster: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80"
+            }
+        };
+
+        // Video Player Elements
         const video = document.getElementById('mainVideo');
         const videoOverlay = document.getElementById('videoOverlay');
         const playButton = document.getElementById('playButton');
@@ -490,6 +406,10 @@
         const speedMenu = document.getElementById('speedMenu');
         const fullscreenBtn = document.getElementById('fullscreenBtn');
         const videoContainer = document.querySelector('.video-container');
+        const videoSelectorBtns = document.querySelectorAll('.video-selector-btn');
+
+        // Current video
+        let currentVideo = 1;
 
         // Format time (seconds to mm:ss)
         function formatTime(seconds) {
@@ -567,7 +487,7 @@
             speedMenu.classList.add('hidden');
         }
 
-        // Toggle fullscreen (only for video)
+        // Toggle fullscreen
         function toggleFullscreen() {
             if (!document.fullscreenElement) {
                 videoContainer.requestFullscreen().catch(err => {
@@ -580,12 +500,48 @@
             }
         }
 
-        // Seek when clicking progress bar
+        // Seek video when clicking progress bar
         function seek(e) {
             const clickX = e.offsetX;
             const width = progressBar.clientWidth;
             const percent = clickX / width;
             video.currentTime = percent * video.duration;
+        }
+
+        // Switch video
+        function switchVideo(videoNumber) {
+            // Update UI
+            videoSelectorBtns.forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.getAttribute('data-video') === videoNumber.toString()) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            // Show loading
+            loadingSpinner.classList.remove('hidden');
+            videoOverlay.classList.remove('hidden');
+            playIcon.className = 'fas fa-play';
+            playPauseBtn.classList.remove('active');
+            
+            // Update current video
+            currentVideo = videoNumber;
+            
+            // Get video data
+            const videoData = videos[videoNumber];
+            
+            // Update video source
+            video.pause();
+            video.src = videoData.url;
+            video.poster = videoData.poster;
+            
+            // Reset progress
+            progressFilled.style.width = '0%';
+            currentTimeEl.textContent = '0:00';
+            durationEl.textContent = '0:00';
+            
+            // Load new video
+            video.load();
         }
 
         // Event Listeners
@@ -633,6 +589,14 @@
         });
         
         fullscreenBtn.addEventListener('click', toggleFullscreen);
+        
+        // Video selector buttons
+        videoSelectorBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const videoNumber = btn.getAttribute('data-video');
+                switchVideo(videoNumber);
+            });
+        });
 
         // Close menus when clicking outside
         document.addEventListener('click', (e) => {
@@ -684,6 +648,12 @@
                     volumeControl.value = video.volume * 100;
                     setVolume(volumeControl.value);
                     break;
+                case '1':
+                    switchVideo(1);
+                    break;
+                case '2':
+                    switchVideo(2);
+                    break;
             }
         });
 
@@ -697,27 +667,8 @@
         // Initialize volume
         setVolume(100);
 
-        // Utility functions for all file types
-        function copyToClipboard(text) {
-            navigator.clipboard.writeText(text).then(() => {
-                alert('Link copied to clipboard!');
-            });
-        }
-
-        function shareFile() {
-            const shareUrl = window.location.href;
-            const title = '{{ file.filename }}';
-            
-            if (navigator.share) {
-                navigator.share({
-                    title: title,
-                    text: 'Check out this file',
-                    url: shareUrl,
-                });
-            } else {
-                copyToClipboard(shareUrl);
-            }
-        }
+        // Load first video
+        switchVideo(1);
     </script>
 </body>
 </html>

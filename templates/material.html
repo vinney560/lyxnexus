@@ -1203,9 +1203,9 @@
             mediaContainer.innerHTML = '';
             
             if (fileInfo.type === 'video') {
-                window.location.href = `/play/${fileId}`;
+                window.location.href = `/store/play/${fileId}`;
             } else if (fileInfo.type === 'audio') {
-                window.location.href = `/play/${fileId}`;
+                window.location.href = `/store/play/${fileId}`;
             } else if (fileInfo.type === 'image') {
                 const img = document.createElement('img');
                 img.src = url;
