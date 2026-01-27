@@ -1741,6 +1741,9 @@
                 </div>
                 
                 <div class="nav-buttons flex flex-wrap justify-center gap-2">
+                    <button class="nav-btn active" id="nav-events" onclick="location.href='/events'">
+                        <i class="fas fa-calendar-alt mr-2"></i>Events
+                    </button>
                     <button class="nav-btn active" data-section="announcements" id="nav-announcements">
                         <i class="fas fa-bullhorn mr-2"></i>Announcements
                     </button>
@@ -2037,6 +2040,10 @@
     <!-- Mobile Navigation -->
     <div class="mobile-menu">
         <div class="mobile-nav">
+            <button class="mobile-nav-btn active" id="mobile-events" onclick="location.href='/events'">
+                <i class="fas fa-calendar-alt"></i>
+                <span>Events</span>
+            </button>
             <button class="mobile-nav-btn active" data-section="announcements" id="mobile-announcements">
                 <i class="fas fa-bullhorn"></i>
                 <span>Announce</span>
@@ -2660,6 +2667,7 @@
                     'nav-topics': 'topics_section',
                     'nav-timetable': 'timetable_section',
                     'nav-profile': 'profile_section',
+                    'nav-events': 'events_section',
 
                     'nav-files': 'files_section',
                     'nav-archieve': 'archieve_section',
@@ -2679,7 +2687,8 @@
                     'mobile-ppapers': 'Past_Papers',
                     'mobile-messages': 'messages_section',
                     'mobile-terms': 'terms_section',
-                    'mobile-lyxlab': 'lyxlab_section'
+                    'mobile-lyxlab': 'lyxlab_section',
+                    'mobile-events': 'events_section'
                 };
             
                 Object.keys(navigationMap).forEach(id => {

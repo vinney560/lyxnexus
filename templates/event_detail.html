@@ -317,7 +317,7 @@
                             
                             {% if event.is_active %}
                                 {% if event.capacity - event.enrollments|length > 0 %}
-                                <a href="/events/admin/enrollments/new?event_id={{ event.id }}" 
+                                <a href="https://wa.me/254740694312?text=I%20would%20like%20to%20enroll%20in%20the%20event:%20{{ event.title | url_encode }}" 
                                    class="btn-primary w-full text-center">
                                     <i class="fas fa-user-plus mr-2"></i>
                                     Enroll Now
@@ -334,11 +334,6 @@
                                 Event Inactive
                             </button>
                             {% endif %}
-                            
-                            <a href="/events/admin/enrollments" class="btn-secondary w-full text-center">
-                                <i class="fas fa-users mr-2"></i>
-                                View All Enrollments
-                            </a>
                         </div>
                     </div>
                 </div>
@@ -349,7 +344,7 @@
     <!-- Footer -->
     <footer class="glass-morph mt-8 py-6 px-4">
         <div class="max-w-7xl mx-auto text-center text-gray-400 text-sm">
-            <p>&copy; 2024 Events. All rights reserved.</p>
+            <p>&copy; 2026 LyxNexus. All rights reserved.</p>
         </div>
     </footer>
 </body>
