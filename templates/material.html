@@ -1203,32 +1203,9 @@
             mediaContainer.innerHTML = '';
             
             if (fileInfo.type === 'video') {
-                const video = document.createElement('video');
-                video.controls = true;
-                video.autoplay = true;
-                video.style.width = '100%';
-                video.style.height = 'auto';
-                video.style.maxHeight = '70vh';
-                video.style.objectFit = 'contain';
-                
-                const source = document.createElement('source');
-                source.src = url;
-                source.type = fileType;
-                
-                video.appendChild(source);
-                mediaContainer.appendChild(video);
+                window.location.href = `/play/${fileId}`;
             } else if (fileInfo.type === 'audio') {
-                const audio = document.createElement('audio');
-                audio.controls = true;
-                audio.autoplay = true;
-                audio.style.width = '100%';
-                
-                const source = document.createElement('source');
-                source.src = url;
-                source.type = fileType;
-                
-                audio.appendChild(source);
-                mediaContainer.appendChild(audio);
+                window.location.href = `/play/${fileId}`;
             } else if (fileInfo.type === 'image') {
                 const img = document.createElement('img');
                 img.src = url;

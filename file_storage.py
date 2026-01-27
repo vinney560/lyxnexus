@@ -350,6 +350,13 @@ def get_file(file_id):
     }})
 
 @login_required
+@storage_bp.route('/play/<int:file_id>')
+def play_file(file_id):
+    """Play file in browser"""
+    file = UploadedFile.query.get_or_404(file_id)
+    return render_template('player.html', file=file)
+
+@login_required
 @storage_bp.route('/api/files/<int:file_id>/download')
 def download_file(file_id):
     """Download file through Flask"""
