@@ -755,8 +755,8 @@ class Event(db.Model):
     tutors = db.Column(db.Text)  # Comma-separated tutor names
     poster_url = db.Column(db.String(500))  # Event poster/image URL
     capacity = db.Column(db.Integer, nullable=False, default=50)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=nairobi_time)
+    updated_at = db.Column(db.DateTime, default=nairobi_time, onupdate=nairobi_time)
     is_active = db.Column(db.Boolean, default=True)
     
     # Relationship
@@ -795,7 +795,7 @@ class Enrollment(db.Model):
     email = db.Column(db.String(120), nullable=False)
     phone = db.Column(db.String(20))
     event_id = db.Column(db.Integer, db.ForeignKey('events.id', ondelete='CASCADE'), nullable=False)
-    enrollment_date = db.Column(db.DateTime, default=datetime.utcnow)
+    enrollment_date = db.Column(db.DateTime, default=nairobi_time)
     status = db.Column(db.String(20), default='pending')  # pending, confirmed, cancelled
     payment_status = db.Column(db.String(20), default='unpaid')  # unpaid, paid, refunded
     notes = db.Column(db.Text)
