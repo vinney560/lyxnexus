@@ -317,7 +317,7 @@
                             
                             {% if event.is_active %}
                                 {% if event.capacity - event.enrollments|length > 0 %}
-                                <a href="https://wa.me/254740694312?text=I%20would%20like%20to%20enroll%20in%20the%20event:%20{{ event.title | url_encode }}" 
+                                <a href="https://wa.me/254740694312?text=I%20would%20like%20to%20enroll%20in%20the%20event:%20{{ event.title }}" 
                                    class="btn-primary w-full text-center">
                                     <i class="fas fa-user-plus mr-2"></i>
                                     Enroll Now

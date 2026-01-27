@@ -753,7 +753,7 @@ class Event(db.Model):
     end_date = db.Column(db.DateTime, nullable=False)  # When
     fee = db.Column(db.Float, nullable=False, default=0.0)
     tutors = db.Column(db.Text)  # Comma-separated tutor names
-    poster_url = db.Column(db.String(500))  # Event poster/image URL
+    poster_url = db.Column(db.String(500), default='https://res.cloudinary.com/dmkfmr8ry/image/upload/v1769555698/OIP_qnnj4i.jpg')  # Event poster/image URL
     capacity = db.Column(db.Integer, nullable=False, default=50)
     created_at = db.Column(db.DateTime, default=nairobi_time)
     updated_at = db.Column(db.DateTime, default=nairobi_time, onupdate=nairobi_time)

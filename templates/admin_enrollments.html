@@ -330,15 +330,12 @@
     <nav class="glass-morph py-4 px-6 mb-6">
         <div class="max-w-7xl mx-auto flex justify-between items-center">
             <div class="flex items-center space-x-6">
-                <a href="/events/admin/events" class="text-2xl font-bold text-blue-400">
+                <a href="/admin/users" class="text-2xl font-bold text-blue-400">
                     <i class="fas fa-arrow-left mr-2"></i>
-                    Admin Panel
+                    Back to admin
                 </a>
                 <a href="/events/admin/events" class="hover:text-blue-400 transition-colors">
                     <i class="fas fa-calendar-alt mr-1"></i> Events
-                </a>
-                <a href="/events/admin/enrollments" class="text-blue-400 font-medium">
-                    <i class="fas fa-users mr-1"></i> Enrollments
                 </a>
             </div>
         </div>
@@ -533,11 +530,6 @@
                                         <a href="/events/admin/enrollments/{{ enrollment.id }}/edit" 
                                            class="btn-secondary text-center">
                                             <i class="fas fa-edit mr-1"></i> Edit
-                                        </a>
-                                        
-                                        <a href="/events/{{ enrollment.event_id }}" 
-                                           class="btn-secondary text-center">
-                                            <i class="fas fa-eye mr-1"></i> View Event
                                         </a>
                                         
                                         <button onclick="confirmDelete({{ enrollment.id }})" 
