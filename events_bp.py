@@ -1,19 +1,33 @@
 from flask import Blueprint, render_template, jsonify, request, flash, redirect, url_for
+from flask_login import login_required, current_user
 from datetime import datetime
 from app import db, Event, Enrollment
+from functools import wraps
 import json
 
 events_bp = Blueprint('events', __name__, url_prefix='/events')
 
+# =========== Decorator ============
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_authenticated or not current_user.is_admin:
+            flash('Admin access required', 'danger')
+            return redirect(url_for('events.index'))
+        return f(*args, **kwargs)
+    return decorated_function
+
 # ============ PUBLIC ROUTES ============
 
 @events_bp.route('/')
+@login_required
 def index():
     """Public event listing page"""
     events = Event.query.filter_by(is_active=True).order_by(Event.start_date.asc()).all()
     return render_template('events.html', events=events)
 
 @events_bp.route('/<int:event_id>')
+@login_required
 def event_detail(event_id):
     """Event detail page"""
     event = Event.query.get_or_404(event_id)
@@ -25,12 +39,14 @@ def event_detail(event_id):
 # ============ EVENT CRUD (Admin) ============
 
 @events_bp.route('/admin/events')
+@admin_required
 def admin_events():
     """Admin: List all events"""
     events = Event.query.order_by(Event.created_at.desc()).all()
     return render_template('admin_events.html', events=events)
 
 @events_bp.route('/admin/events/new', methods=['GET', 'POST'])
+@admin_required
 def admin_new_event():
     """Admin: Create new event"""
     if request.method == 'POST':
@@ -88,6 +104,7 @@ def admin_new_event():
     return render_template('admin_event_form.html')
 
 @events_bp.route('/admin/events/<int:event_id>/edit', methods=['GET', 'POST'])
+@admin_required
 def admin_edit_event(event_id):
     """Admin: Edit event"""
     event = Event.query.get_or_404(event_id)
@@ -134,6 +151,7 @@ def admin_edit_event(event_id):
     return render_template('admin_event_form.html', event=event)
 
 @events_bp.route('/admin/events/<int:event_id>/delete', methods=['POST'])
+@admin_required
 def admin_delete_event(event_id):
     """Admin: Delete event"""
     try:
@@ -150,12 +168,14 @@ def admin_delete_event(event_id):
 # ============ ENROLLMENT CRUD (Admin) ============
 
 @events_bp.route('/admin/enrollments')
+@admin_required
 def admin_enrollments():
     """Admin: List all enrollments"""
     enrollments = Enrollment.query.order_by(Enrollment.enrollment_date.desc()).all()
     return render_template('admin_enrollments.html', enrollments=enrollments)
 
 @events_bp.route('/admin/enrollments/new', methods=['GET', 'POST'])
+@admin_required
 def admin_new_enrollment():
     """Admin: Create new enrollment"""
     events = Event.query.filter_by(is_active=True).all()
@@ -219,6 +239,7 @@ def admin_new_enrollment():
     return render_template('admin_enrollment_form.html', events=events)
 
 @events_bp.route('/admin/enrollments/<int:enrollment_id>/edit', methods=['GET', 'POST'])
+@admin_required
 def admin_edit_enrollment(enrollment_id):
     """Admin: Edit enrollment"""
     enrollment = Enrollment.query.get_or_404(enrollment_id)
@@ -259,6 +280,7 @@ def admin_edit_enrollment(enrollment_id):
                          events=events)
 
 @events_bp.route('/admin/enrollments/<int:enrollment_id>/delete', methods=['POST'])
+@admin_required
 def admin_delete_enrollment(enrollment_id):
     """Admin: Delete enrollment"""
     try:
@@ -311,6 +333,7 @@ def api_all_enrollments():
     })
 
 @events_bp.route('/api/events', methods=['POST'])
+@admin_required
 def api_create_event():
     """Create event (API)"""
     data = request.get_json()
@@ -353,6 +376,7 @@ def api_create_event():
         return jsonify({'success': False, 'error': str(e)}), 500
 
 @events_bp.route('/api/enroll', methods=['POST'])
+@admin_required
 def api_enroll():
     """Enroll in event (API)"""
     data = request.get_json()
