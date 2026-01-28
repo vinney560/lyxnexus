@@ -190,10 +190,10 @@
     <nav class="glass-morph py-4 px-6 mb-6">
         <div class="max-w-7xl mx-auto flex justify-between items-center">
             <div class="flex items-center space-x-6">
-                <a href="/events" class="text-2xl font-bold text-blue-400 hover:text-blue-300 flex items-center scale-95 transition-transform">
+                <button id="backButton" class="text-2xl font-bold text-blue-400 hover:text-blue-300 flex items-center scale-95 transition-transform">
                     <i class="fas fa-arrow-left mr-2"></i>
                     Back to Events
-                </a>
+                </button>
             </div>
         </div>
     </nav>
@@ -326,12 +326,12 @@
                         <div>
                             <label class="block text-sm font-medium mb-2">
                                 <i class="fas fa-phone text-blue-400 mr-2"></i>
-                                Phone Number
+                                Phone Number *
                             </label>
                             <input type="tel" 
                                    name="phone" 
                                    class="form-input"
-                                   placeholder="(07|01) 456-7890"
+                                   placeholder="(07|01) 3456-7890"
                                    value="{{ current_user.phone if current_user and current_user.phone else '' }}">
                             <p class="text-xs text-gray-500 mt-1">Optional - for event notifications</p>
                         </div>
@@ -416,7 +416,7 @@
                 </form>
             </div>
             
-            <!-- Event Details (if specific event) -->
+            <!-- Event Details -->
             {% if event %}
             <div class="glass-morph rounded-2xl p-6 mt-6">
                 <h3 class="text-xl font-semibold mb-4">
@@ -462,6 +462,14 @@
         window.onload = function() {
             updateCapacityInfo();
         };
+        const backButton = document.getElementById('backButton');
+        backButton.addEventListener('click', () => {
+            backButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Back to Events';
+            window.history.back();
+            setTimeout(() => {
+                backButton.innerHTML = '<i class="fas fa-arrow-left mr-2"></i> Back to Events';
+            }, 500);
+        });
     </script>
 </body>
 </html>
