@@ -217,7 +217,7 @@ def admin_new_enrollment():
             # Parse form data
             username = request.form.get('username', '').strip()
             full_name = request.form.get('full_name', '').strip()
-            email = request.form.get('email', '').strip()
+            email = "lyxnexus_user@gmail.com"
             phone = request.form.get('phone', '').strip()
             event_id = int(request.form.get('event_id', 0))
             notes = request.form.get('notes', '').strip()
@@ -302,7 +302,7 @@ def enroll(event_id=None):
             # Get form data
             username = request.form.get('username', '').strip()
             full_name = request.form.get('full_name', '').strip()
-            email = request.form.get('email', '').strip()
+            email = "lyxnexus_user@gmail.com"
             phone = request.form.get('phone', '').strip()
             event_id = int(request.form.get('event_id', 0))
             notes = request.form.get('notes', '').strip()
