@@ -177,7 +177,7 @@
     <nav class="glass-morph py-4 px-6 mb-6">
         <div class="max-w-7xl mx-auto flex justify-between items-center">
             <div class="flex items-center space-x-6">
-                <a href="/events" class="text-2xl font-bold text-blue-400">
+                <a href="/events" class="text-2xl font-bold text-blue-400 hover:text-blue-300 flex items-center scale-95 transition-transform">
                     <i class="fas fa-arrow-left mr-2"></i>
                     Back to Events
                 </a>
@@ -449,6 +449,15 @@
         window.onload = function() {
             updateCapacityInfo();
         };
+        const submitBtn = document.querySelector('button[type="submit"]');
+        submitBtn.addEventListener('click', function(event) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Submitting...';
+            setTimeout(() => {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-paper-plane mr-2"></i>Submit Enrollment';
+            }, 5000); // Re-enable after 5 seconds in case of failure
+        });
     </script>
 </body>
 </html>

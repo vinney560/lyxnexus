@@ -305,6 +305,7 @@ def enroll(event_id=None):
             email = request.form.get('email', '').strip()
             phone = request.form.get('phone', '').strip()
             event_id = int(request.form.get('event_id', 0))
+            notes = request.form.get('notes', '').strip()
             
             # Validate required fields
             if not all([username, full_name, event_id]):
@@ -346,6 +347,7 @@ def enroll(event_id=None):
                 email=email,
                 phone=phone,
                 event_id=event_id,
+                notes=notes,
                 status='pending',  # Default status for user enrollments
                 payment_status='unpaid'  # Default payment status
             )
