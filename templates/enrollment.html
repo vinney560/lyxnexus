@@ -299,12 +299,12 @@
                         <div>
                             <label class="block text-sm font-medium mb-2">
                                 <i class="fas fa-envelope text-blue-400 mr-2"></i>
-                                Email *
+                                Email (Optional)
                             </label>
                             <input type="email" 
                                    name="email" 
                                    class="form-input"
-                                   placeholder="you@example.com"
+                                   placeholder="you@example.com "
                                    value="{{ current_user.email if current_user else '' }}"
                                    {% if current_user %}readonly{% endif %}
                                    >
@@ -449,15 +449,6 @@
         window.onload = function() {
             updateCapacityInfo();
         };
-        const submitBtn = document.querySelector('button[type="submit"]');
-        submitBtn.addEventListener('click', function(event) {
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Submitting...';
-            setTimeout(() => {
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = '<i class="fas fa-paper-plane mr-2"></i>Submit Enrollment';
-            }, 5000); // Re-enable after 5 seconds in case of failure
-        });
     </script>
 </body>
 </html>
