@@ -312,12 +312,12 @@
                         
                         <div class="space-y-4">
                             <p class="text-gray-400 text-sm">
-                                Interested in attending this event? Fill out the enrollment form to secure your spot.
+                                Interested in attending this event?
                             </p>
                             
                             {% if event.is_active %}
                                 {% if event.capacity - event.enrollments|length > 0 %}
-                                <a href="https://wa.me/254740694312?text=I%20would%20like%20to%20enroll%20in%20the%20event:%20{{ event.title }}" 
+                                <a href="/events/enroll/{{ event.id }}" 
                                    class="btn-primary w-full text-center">
                                     <i class="fas fa-user-plus mr-2"></i>
                                     Enroll Now

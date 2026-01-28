@@ -103,6 +103,37 @@ def admin_new_event():
     
     return render_template('admin_event_form.html')
 
+@events_bp.route('/enrollment/confirmation/<int:enrollment_id>')
+@login_required
+def enrollment_confirmation(enrollment_id):
+    """Show enrollment confirmation page"""
+    enrollment = Enrollment.query.get_or_404(enrollment_id)
+    
+    # Verify the enrollment belongs to the current user
+    if enrollment.username != current_user.username and not current_user.is_admin:
+        flash('Access denied', 'danger')
+        return redirect(url_for('events.index'))
+    
+    return render_template('enrollment_confirmation.html', enrollment=enrollment)
+
+
+@events_bp.route('/api/events/<int:event_id>/enrollment-status')
+@login_required
+def check_enrollment_status(event_id):
+    """API endpoint to check if user is enrolled in an event"""
+    event = Event.query.get_or_404(event_id)
+    
+    enrollment = Enrollment.query.filter_by(
+        username=current_user.username,
+        event_id=event_id
+    ).first()
+    
+    return jsonify({
+        'enrolled': enrollment is not None,
+        'enrollment_id': enrollment.id if enrollment else None,
+        'status': enrollment.status if enrollment else None
+    })
+
 @events_bp.route('/admin/events/<int:event_id>/edit', methods=['GET', 'POST'])
 @admin_required
 def admin_edit_event(event_id):
@@ -150,6 +181,7 @@ def admin_edit_event(event_id):
     
     return render_template('admin_event_form.html', event=event)
 
+
 @events_bp.route('/admin/events/<int:event_id>/delete', methods=['POST'])
 @admin_required
 def admin_delete_event(event_id):
@@ -191,7 +223,7 @@ def admin_new_enrollment():
             notes = request.form.get('notes', '').strip()
             
             # Validate required fields
-            if not all([username, full_name, email, event_id]):
+            if not all([username, full_name, event_id]):
                 flash('Please fill in all required fields', 'danger')
                 return render_template('admin_enrollment_form.html', events=events)
             
@@ -237,6 +269,102 @@ def admin_new_enrollment():
             return render_template('admin_enrollment_form.html', events=events)
     
     return render_template('admin_enrollment_form.html', events=events)
+
+@events_bp.route('/enroll/<int:event_id>', methods=['GET', 'POST'])
+@login_required
+def enroll(event_id=None):
+    """User enrollment for events"""
+    
+    # Get the event if specific ID is provided
+    event = None
+    if event_id:
+        event = Event.query.get_or_404(event_id)
+        if not event.is_active:
+            flash('This event is no longer available for enrollment', 'danger')
+            return redirect(url_for('events.index'))
+    
+    # Get all active events if no specific event
+    events = Event.query.filter_by(is_active=True).all() if not event else None
+    
+    # Check if user is already enrolled in this event
+    if event:
+        existing_enrollment = Enrollment.query.filter_by(
+            username=current_user.username,
+            event_id=event.id
+        ).first()
+        
+        if existing_enrollment:
+            flash('You are already enrolled in this event!', 'info')
+            return redirect(url_for('events.index'))
+    
+    if request.method == 'POST':
+        try:
+            # Get form data
+            username = request.form.get('username', '').strip()
+            full_name = request.form.get('full_name', '').strip()
+            email = request.form.get('email', '').strip()
+            phone = request.form.get('phone', '').strip()
+            event_id = int(request.form.get('event_id', 0))
+            
+            # Validate required fields
+            if not all([username, full_name, event_id]):
+                flash('Please fill in all required fields', 'danger')
+                return render_template('enrollment.html', event=event, events=events)
+            
+            # Verify username matches current user (prevent enrollment for others)
+            if username != current_user.username:
+                flash('You can only enroll with your own username', 'danger')
+                return render_template('enrollment.html', event=event, events=events)
+            
+            # Get the event
+            if not event:  # If event wasn't passed in URL, get it from form
+                event = Event.query.get(event_id)
+            
+            if not event or not event.is_active:
+                flash('Event not found or no longer active', 'danger')
+                return render_template('enrollment.html', event=event, events=events)
+            
+            # Check event capacity
+            if len(event.enrollments) >= event.capacity:
+                flash('This event is full. Please try another event.', 'danger')
+                return render_template('enrollment.html', event=event, events=events)
+            
+            # Check if already enrolled (double-check)
+            existing = Enrollment.query.filter_by(
+                username=username,
+                event_id=event_id
+            ).first()
+            
+            if existing:
+                flash('You are already enrolled in this event', 'info')
+                return redirect(url_for('events.index'))
+            
+            # Create enrollment with default status
+            enrollment = Enrollment(
+                username=username,
+                full_name=full_name,
+                email=email,
+                phone=phone,
+                event_id=event_id,
+                status='pending',  # Default status for user enrollments
+                payment_status='unpaid'  # Default payment status
+            )
+            
+            db.session.add(enrollment)
+            db.session.commit()
+            
+            flash('Successfully enrolled! Your enrollment is pending approval.', 'success')
+            return redirect(url_for('events.enrollment_confirmation', enrollment_id=enrollment.id))
+            
+        except ValueError:
+            flash('Invalid event selection', 'danger')
+            return render_template('enrollment.html', event=event, events=events)
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error creating enrollment: {str(e)}', 'danger')
+            return render_template('enrollment.html', event=event, events=events)
+    
+    return render_template('enrollment.html', event=event, events=events)
 
 @events_bp.route('/admin/enrollments/<int:enrollment_id>/edit', methods=['GET', 'POST'])
 @admin_required
