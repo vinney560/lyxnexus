@@ -118,7 +118,7 @@ class ProbeCommandProcessor:
             "system-info          - Display system statistics",
             "export [table]       - Export data (users/admins)",
             "reboot               - Reboot the server",
-            "version            - Show software version",
+            "version              - Show software version",
             "",
             "=== SYNTAX ===",
             "> command [argument] - Run command with argument",
