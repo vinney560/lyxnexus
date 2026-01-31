@@ -30,6 +30,7 @@ from flask_session import Session # Short term In-SYstem Memory keeping
 from flask_limiter import Limiter # Prevent Brute Force Attack
 from flask_limiter.util import get_remote_address # Efficient Block of Specific IP 
 from pywebpush import webpush, WebPushException # CHrome Notification Push Module
+from colorama import Fore # Coloring logs
 #==========================================
 
 app = Flask(__name__)
@@ -43,33 +44,32 @@ def database_url():
     db_2 = os.getenv('DATABASE_URL_2')
     db_3 = os.getenv('DATABASE_FALLBACK_URL')
 
-    print(f"DB_1: {db_1}")
-    print(f"DB_2: {db_2}")
-    print(f"DB_3: {db_3}")
+    print(Fore.BLACK + f"DB_1: {db_1}")
+    print(Fore.BLACK + f"DB_2: {db_2}")
+    print(Fore.BLACK + f"DB_3: {db_3}")
 
     for name, db_url in [("Render DB", db_1), ("Aiven DB", db_2)]:
         if db_url:
             try:
                 engine = create_engine(db_url)
                 engine.connect().close()
-                print("=" * 70)
-                print(f"✅ Connected to {name}")
+                print(Fore.RESET + "=" * 70)
+                print(Fore.GREEN + f"✅ Connected to {name}")
                 return db_url
             except OperationalError as e:
-                print(f"❌ Failed to connect to {name}: {e}")
+                print(Fore.RED + f"❌ Failed to connect to {name}: {e}")
             except ArgumentError as e:
-                print(f"⚠️ Invalid {name} URL: {e}")
+                print(Fore.YELLOW + f"⚠️ Invalid {name} URL: {e}")
 
     # Fallback to SQLite to prevent Runtime errors
     if db_3:
         if db_3.startswith("sqlite:///"):
-            print("=" * 70)
-            print("✅ Using local SQLite fallback database.")
+            print(Fore.RESET + "=" * 70)
+            print(Fore.GREEN + "✅ Using local SQLite fallback database.")
             return db_3
         else:
-            print("⚠️ Fallback DB URL invalid (should start with sqlite:///).")
-
-    print("❌ All database connections failed!")
+            print(Fore.MAGENTA + "⚠️ Fallback DB URL invalid (should start with sqlite:///).")
+    print(Fore.RED + "❌ All database connections failed!")
     return None
 
 app.config['SQLALCHEMY_DATABASE_URI'] = database_url()
@@ -835,7 +835,7 @@ def initialize_operator_and_admin_code():
         )
         db.session.add(new_operator_code)
         db.session.commit()
-        print("Default operator code initialized")
+        print(Fore.GREEN + "Default operator code initialized")
     if not admin_code_record:
         default_code = generate_password_hash('super_admin_2025')
         new_admin_code = AdminCode(
@@ -844,7 +844,7 @@ def initialize_operator_and_admin_code():
         )
         db.session.add(new_admin_code)
         db.session.commit()
-        print("Default admin code initialized")
+        print(Fore.GREEN + "Default admin code initialized")
 #==========================================
 # Execute raw SQL if needed
 #db.session.execute(text('ALTER TABLE "user" ADD COLUMN status BOOLEAN DEFAULT TRUE'))
@@ -857,17 +857,16 @@ with app.app_context():
         # Create tables if they don't exist
         db.create_all()
         db.session.commit()
-        print("✅ Database tables created successfully!")
+        print(Fore.GREEN + "✅ Database tables created successfully!")
 
         # initialize admin or other setup code
         initialize_operator_and_admin_code()
 
-        print("✅ Initialization Done!")
+        print(Fore.GREEN + "✅ Initialization Done!")
 
     except Exception as e:
         db.session.rollback()
-        print(f"⚠️ Database initialization error: {e}")
-
+        print(Fore.RED + f"⚠️ Database initialization error: {e}")
 #========================================
 #          HELPERS && BACKGROUND WORKERS
 #==========================================
@@ -879,7 +878,7 @@ def load_user(user_id):
             return None
         return User.query.get(int(user_id))
     except Exception as e:
-        print(f'⚠️ Error loading user {user_id}: {e}')
+        print(Fore.RED + f'⚠️ Error loading user {user_id}: {e}')
         db.session.rollback()
         return None
 
@@ -990,7 +989,7 @@ def clone_database_robust():
 
     with src_engine.connect() as src_conn, tgt_engine.begin() as tgt_conn:
         for table in src_meta.sorted_tables:
-            print(f"🔹 Cloning table: {table.name}")
+            print(Fore.RESET + f"🔹 Cloning table: {table.name}")
             offset = 0
             while True:
                 rows = src_conn.execute(
@@ -2625,7 +2624,7 @@ def payment_activation():
             }), 400
             
         except Exception as e:
-            print(f"Activation error: {str(e)}")
+            print(Fore.RED + f"Activation error: {str(e)}")
             return jsonify({
                 'success': False,
                 'message': 'Server error during verification'
@@ -2676,7 +2675,7 @@ def get_notifications():
                 is_future = notification.expires_at > current_time
                 time_diff = notification.expires_at - current_time
             else:
-                print(f"  - No expiration (always active)")
+                print(Fore.RESET + f"  - No expiration (always active)")
             
             # Check if passes active filter
             passes_active = notification.is_active == True
@@ -2748,7 +2747,7 @@ def get_notifications():
         })
         
     except Exception as e:
-        print(f"[ERROR] in /api/notify: {str(e)}")
+        print(Fore.RED + f"[ERROR] in /api/notify: {str(e)}")
         import traceback
         traceback.print_exc()
         return jsonify({'error': str(e)}), 500
@@ -3224,7 +3223,7 @@ def ai_chat_send():
 
         # Call Gemini API
         ai_response_text = call_gemini_api(prompt)
-        print("\n[DEBUG] AI Raw Response:\n", ai_response_text, "\n")
+        print(Fore.RESET + "\n[DEBUG] AI Raw Response:\n", ai_response_text, "\n")
 
         operations_executed = []
 
@@ -5510,7 +5509,7 @@ def upload_file():
         
     except Exception as e:
         db.session.rollback()
-        print(f'Error Saving Files: {e}')
+        print(Fore.RED + f'Error Saving Files: {e}')
         return jsonify({'error': 'Failed to upload file'}), 500
 
 @app.route('/api/files/upload-multiple', methods=['POST'])
@@ -5825,6 +5824,9 @@ def update_user_profile():
     if not username or len(username) > 200:
         return jsonify({'error': 'Username must be between 1 and 200 characters'}), 400
     
+    # Validate username
+    if not re.match(r'^[a-zA-Z0-9_.\/ -]+$', username):
+        return jsonify({'error': 'Username contains invalid characters'}), 400
     # Validate mobile format - For those enetering 08 ....
     mobile_regex = r'^(07|01)[0-9]{8}$'
     if not re.match(mobile_regex, mobile):
@@ -6382,7 +6384,7 @@ def handle_connect():
             'is_admin': current_user.is_admin
         })
         
-        print(f"User {current_user.username} connected. Online users: {len(online_users)}")
+        print(Fore.BLUE + f"User {current_user.username} connected. Online users: {len(online_users)}")
 
 @socketio.on('disconnect')
 def handle_disconnect():
@@ -6392,7 +6394,7 @@ def handle_disconnect():
         user_id = getattr(current_user, "id", None)
 
         if not user_id:
-            print("Anonymous socket disconnected.")
+            print(Fore.RESET + "Anonymous socket disconnected.")
             return
 
         user_data = online_users.pop(user_id, None)
@@ -6417,14 +6419,14 @@ def handle_disconnect():
         except OSError as e:
             if e.errno != 9:  # ignore 'Bad file descriptor'
                 raise
-            print(f"Ignored closed socket emit for {user}")
+            print(Fore.RESET + f"Ignored closed socket emit for {user}")
 
         broadcast_online_users()
 
-        print(f"User {user} disconnected. Online users: {len(online_users)}")
+        print(Fore.MAGENTA + f"User {user} disconnected. Online users: {len(online_users)}")
 
     except Exception as e:
-        print(f"⚠️ Disconnect error: {e}")
+        print(Fore.RED + f"⚠️ Disconnect error: {e}")
 
 # I'm not that good at this part
 @socketio.on('join_room')
@@ -6751,7 +6753,7 @@ def handle_mark_read(data):
         
     except Exception as e:
         db.session.rollback()
-        print(f"Error marking messages as read: {e}")
+        print(Fore.RED + f"Error marking messages as read: {e}")
 
 #===========================================
 @app.route('/api/users')
@@ -7105,7 +7107,7 @@ def toggle_status(user_id):
         return jsonify({'error': 'cannot modify self status'}), 400
     
     user.status = not user.status
-    print(f"User {user.username} status changed to {user.status}")
+    print(Fore.MAGENTA + f"User {user.username} status changed to {user.status}")
     db.session.commit()
 
     return jsonify({
@@ -7644,7 +7646,7 @@ def preview():
         })
 
     except requests.exceptions.RequestException as e:
-        print("OG fetch error:", e)
+        print(Fore.RED + f"OG fetch error: {e}")
         return jsonify({"title": "", "description": "", "image": ""})
 
 # =========================================
@@ -7753,12 +7755,12 @@ def delete_topic(id):
         db.session.delete(topic)
         db.session.commit()
         
-        print(f"Topic {id} and its materials deleted successfully!")
+        print(Fore.MAGENTA + f"Topic {id} and its materials deleted successfully!")
         return jsonify({'message': 'Topic deleted successfully'})
         
     except Exception as e:
         db.session.rollback()
-        print(f"Failed to delete topic {id}!!!: {e}")
+        print(Fore.RED + f"Failed to delete topic {id}!!!: {e}")
         return jsonify({'message': 'Failed to delete topic', 'error': str(e)}), 500
     
 #==========================================
@@ -7879,7 +7881,7 @@ def handle_timetable():
 
     if request.method == 'POST':
         # Debug: Print what we receive
-        print(f"=== TIMETABLE POST REQUEST ===")
+        print(Fore.RESET + f"=== TIMETABLE POST REQUEST ===")
         print(f"Current User: {current_user.username} (Admin: {current_user.is_admin})")
         
         if not current_user.is_admin:
@@ -7916,11 +7918,11 @@ def handle_timetable():
                 end_time = datetime.strptime(end_time_str, '%H:%M').time()
 
                 if start_time >= end_time:
-                    print(f"ERROR: Time validation failed: {start_time} >= {end_time}")
+                    print(Fore.MAGENTA + f"ERROR: Time validation failed: {start_time} >= {end_time}")
                     return jsonify({'error': 'End time must be after start time'}), 400
                     
             except ValueError as ve:
-                print(f"ERROR: Time parsing error: {ve}")
+                print(Fore.RESET + f"ERROR: Time parsing error: {ve}")
                 return jsonify({'error': 'Invalid time format. Use HH:MM format (e.g., 09:00, 14:30)'}), 400
             
             # Validate day_of_week
@@ -7961,7 +7963,7 @@ def handle_timetable():
 
         except Exception as e:
             db.session.rollback()
-            print(f"EXCEPTION: {str(e)}")
+            print(Fore.RED + f"EXCEPTION: {str(e)}")
             import traceback
             traceback.print_exc()
             return jsonify({'error': f'Internal server error: {str(e)}'}), 500
@@ -8187,12 +8189,12 @@ def download_past_paper(paper_id):
         if paper:
             paper.download_count += 1
             db.session.commit()
-            print(f"Download count incremented for paper {paper_id}: {paper.download_count}")
+            print(Fore.RESET + f"Download count incremented for paper {paper_id}: {paper.download_count}")
         else:
-            print(f"Paper with ID {paper_id} not found")
+            print(Fore.MAGENTA + f"Paper with ID {paper_id} not found")
     except Exception as e:
         db.session.rollback()
-        print(f"Error incrementing download count for paper {paper_id}: {str(e)}")
+        print(Fore.RED + f"Error incrementing download count for paper {paper_id}: {str(e)}")
             
 @app.route('/api/past-papers/<int:paper_id>', methods=['DELETE'])
 @login_required
@@ -9156,7 +9158,7 @@ class FacebookVideoDownloader:
             return final_url, response.text
             
         except Exception as e:
-            print(f"Error getting actual URL: {e}")
+            print(Fore.RESET + f"Error getting actual URL: {e}")
             return url, ""
     
     def extract_metadata(self, url):
@@ -10148,7 +10150,7 @@ def ratelimit_handler(e):
             message="You’ve made too many requests. Please wait a moment and try again."
         ), 429
     except Exception as e:
-        print(f'Error on 429: {e}')
+        print(Fore.YELLOW + f'Error on 429: {e}')
         return redirect(url_for('home'))
 
 @app.errorhandler(500)
