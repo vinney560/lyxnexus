@@ -56,7 +56,9 @@ class ProbeCommandProcessor:
             'reboot': self.cmd_reboot,
             'version': self.cmd_version,
             'shutdown': self.cmd_shutdown,
-            'modify': self.cmd_modify
+            'modify': self.cmd_modify,
+            'free_trial': self.cmd_free_trial,
+            'kill': self.cmd_killed
         }
     
     def process(self, command):
@@ -110,7 +112,10 @@ class ProbeCommandProcessor:
             "demote [id]          - Demote admin to user",
             "verify [id]          - Verify admin account",
             "unverify [id]        - Unverify admin account",
-            "modify  [id]         - Modify user info"
+            "modify  [id]         - Modify user info",
+            "free_trial           - Set free trial for all users",
+            "free_trial [id]      - Set free trial for user",
+            "kill [id]            - Set killed status for user",
             "",
             "=== SECURITY OPERATIONS ===",
             "kill-rogue           - Remove unverified admins",
@@ -318,7 +323,109 @@ class ProbeCommandProcessor:
         except Exception as e:
             db.session.rollback()
             return self.format_output("ERROR", f"Operation failed: {str(e)}", "error")
-    
+        
+    def cmd_killed(self, args):
+        """Deactivate account permanently"""
+        if args:
+            # Kill specific user by ID
+            try:
+                user_id = int(args[0])
+                user = User.query.get(user_id)
+                
+                if not user:
+                    return self.format_output("ERROR", f"User ID {user_id} not found", "error")
+                
+                if user.id == current_user.id:
+                    return self.format_output("ERROR", "Cannot kill self", "error")
+                
+                if user.year == 5:
+                    return self.format_output("ERROR", "Cannot kill operator accounts", "error")
+                
+                old_status = "Active" if user.status else "Banned"
+                user.is_admin = False
+                user.killed = True
+                user.status = False  # Ban the account
+                db.session.commit()
+                
+                result = [
+                    f"Operation: KILL-USER [{user.id}]",
+                    f"Time: {datetime.now(timezone(timedelta(hours=3))).strftime('%H:%M:%S')}",
+                    f"Target: [{user.id}] {user.username} (was {old_status})",
+                    f"Actions:",
+                    f"  • Admin privileges revoked",
+                    f"  • Account banned",
+                    f"  • Account permanently deactivated"
+                ]
+                
+                return self.format_output("OPERATION SUCCESSFUL", "\n".join(result), "success")
+            except ValueError:
+                return self.format_output("ERROR", "Invalid user ID", "error")
+            except Exception as e:
+                db.session.rollback()
+                return self.format_output("ERROR", f"Operation failed: {str(e)}", "error")  
+
+    def cmd_free_trial(self, args):
+        """\Grant Free trial to specific user or all users"""
+        if args:
+            # Grant free trial to specific user by ID
+            try:
+                user_id = int(args[0])
+                user = User.query.get(user_id)
+                
+                if not user:
+                    return self.format_output("ERROR", f"User ID {user_id} not found", "error")
+                
+                old_status = "Active" if user.status else "Banned"
+                user.free_trial = True
+                db.session.commit()
+                
+                result = [
+                    f"Operation: FREE-TRIAL-USER [{user.id}]",
+                    f"Time: {datetime.now(timezone(timedelta(hours=3))).strftime('%H:%M:%S')}",
+                    f"Target: [{user.id}] {user.username} (was {old_status})",
+                    f"Actions:",
+                    f"  • Free trial granted"
+                ]
+                
+                return self.format_output("OPERATION SUCCESSFUL", "\n".join(result), "success")
+            except ValueError:
+                return self.format_output("ERROR", "Invalid user ID", "error")
+            except Exception as e:
+                db.session.rollback()
+                return self.format_output("ERROR", f"Operation failed: {str(e)}", "error")  
+
+        try:
+            # Find all users without free trial
+            users = User.query.filter(
+                User.free_trial == False
+            ).all()
+            
+            if not users:
+                return self.format_output("FREE TRIAL", "No users found with no free trial", "warning")
+            
+            killed = []
+            for user in users:
+                old_status = "Active" if user.status else "Banned"
+                user.free_trial = True
+                killed.append(f"[{user.id}] {user.username} (was {old_status})")
+            
+            db.session.commit()
+            
+            result = [
+                f"Operation: GRANT-FREE-TRIAL",
+                f"Time: {datetime.now(timezone(timedelta(hours=3))).strftime('%H:%M:%S')}",
+                f"Targets: {len(users)} granted free trial user(s)",
+                f"Actions:",
+                f"  • Free trial granted to all applicable accounts",
+                f"",
+                f"AFFECTED ACCOUNTS:"
+            ] + killed
+            
+            return self.format_output("OPERATION SUCCESSFUL", "\n".join(result), "success")
+        except Exception as e:
+            db.session.rollback()
+            return self.format_output("ERROR", f"Operation failed: {str(e)}", "error")
+
     def cmd_modify(self, args):
         """Return user to modify"""
         if not args:
@@ -606,6 +713,8 @@ class ProbeCommandProcessor:
                 f"Role:         {admin_status}",
                 f"Verified:     {verified}",
                 f"Operator:     {operator}",
+                f"Killed:       {'YES' if user.killed else 'NO'}",
+                f"Free Trial:   {'YES' if user.free_trial else 'NO'}",
                 f"",
                 f"=== METADATA ===",
                 f"Account ID:   #{user.id:06d}",
@@ -632,6 +741,7 @@ class ProbeCommandProcessor:
             total_admins = User.query.filter_by(is_admin=True).count()
             verified_admins = User.query.filter_by(is_verified_admin=True).count()
             operators = User.query.filter_by(year=5).count()
+            killed_users = User.query.filter_by(killed=True).count()
             
             info = [
                 f"=== SYSTEM STATISTICS ===",
@@ -642,6 +752,7 @@ class ProbeCommandProcessor:
                 f"Active:         {active_users}",
                 f"Banned:         {banned_users}",
                 f"Paid Fee:       {paid_users}",
+                f"Killed:         {killed_users}",
                 f"",
                 f"=== ADMINISTRATION ===",
                 f"Total Admins:   {total_admins}",

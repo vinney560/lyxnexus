@@ -179,6 +179,12 @@ class User(db.Model, UserMixin):
         
         # Index for status filtering
         db.Index('idx_user_status', 'status'),
+
+        # Index for killed filtering
+        db.Index('idx_user_killed', 'killed'),
+        
+        # Index for free_trial filtering
+        db.Index('idx_user_free_trial', 'free_trial'),
         
         # Composite index for common queries
         db.Index('idx_user_admin_status', 'is_admin', 'status'),
@@ -193,6 +199,8 @@ class User(db.Model, UserMixin):
     year = db.Column(db.Integer, default=1, nullable=True)
     paid = db.Column(db.Boolean, default=False, nullable=True)
     is_verified_admin = db.Column(db.Boolean, default=False, nullable=True)
+    killed = db.Column(db.Boolean, default=False, nullable=True)
+    free_trial = db.Column(db.Boolean, default=False, nullable=True)
 
     # Relationships
     announcements = db.relationship('Announcement', 
@@ -856,6 +864,8 @@ with app.app_context():
     try:
         # Create tables if they don't exist
         db.create_all()
+        db.session.execute(text('ALTER TABLE "user" ADD COLUMN killed BOOLEAN DEFAULT FALSE'))
+        db.session.execute(text('ALTER TABLE "user" ADD COLUMN free_trial BOOLEAN DEFAULT FALSE'))
         db.session.commit()
         print(Fore.GREEN + "✅ Database tables created successfully!")
 
@@ -2545,11 +2555,21 @@ def handle_student_login(user, username, mobile, login_subtype, next_page, year)
                                  mobile=format_mobile_display(mobile),
                                  login_type='student',  # Stay on student tab
                                  year=_year())
-        if user.paid is False:
-            login_user(user)
-            flash('Your account is inactive. Pay you registration Fee or contact Admin for assistance.', 'error')
-            return redirect(url_for('activation_payment'))
+        if user.killed:
+            flash("Account Permanently deactivated!")
+            return redirect(url_for("login"))
         
+        if user.free_trial is False:
+            if user.paid is False:
+                login_user(user)
+                flash('Your account is inactive. Pay you registration Fee or contact Admin for assistance.', 'error')
+                return redirect(url_for('activation_payment'))
+            
+        if user.free_trial is True:
+            if user.paid is False:
+                flash('Welcome to LyxNexus Free Trial! Enjoy unlimited features.', 'info')
+                return redirect(next_page or url_for('main_page'))
+
         login_user(user)
         return redirect(next_page or url_for('main_page'))
 
