@@ -796,6 +796,12 @@
                 }
             });
         }
+
+        function hideId(konamiId) {
+            if (!konamiId || konamiId.length < 4) return '******';
+            const visiblePart = konamiId.slice(-4);
+            return '******' + visiblePart;
+        }
         
         function renderPlayers() {
             const container = document.getElementById('playersContainer');
@@ -828,7 +834,7 @@
                             <div class="player-header">
                                 <div>
                                     <div class="player-name">${player.display_name}</div>
-                                    <div class="player-konami">${player.player_name} (${player.konami_id})</div>
+                                    <div class="player-konami">${player.player_name} (${hideId(player.konami_id)})</div>
                                 </div>
                                 <div class="player-status ${hasActiveCode ? 'status-active' : 'status-inactive'}">
                                     ${hasActiveCode ? 'Active' : 'Inactive'}
