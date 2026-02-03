@@ -10303,7 +10303,7 @@ def api_players():
     players_data = []
     
     for p in players:
-        has_active_code = p.challenge_code and p.code_expires_at and p.code_expires_at > datetime.now(timezone(timedelta(hours=3)))
+        has_active_code = p.challenge_code and p.code_expires_at and p.code_expires_at > datetime.utcnow() + timedelta(hours=3)
         players_data.append({
             'id': p.id,
             'konami_id': p.konami_id,
