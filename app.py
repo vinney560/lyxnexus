@@ -16,7 +16,7 @@ from sqlalchemy.exc import OperationalError, ArgumentError
 from sqlalchemy.pool import QueuePool
 from sqlalchemy.orm import sessionmaker
 from flask_cors import CORS
-from datetime import timedelta, datetime, date
+from datetime import timedelta, datetime, date, timezone
 from flask_compress import Compress # I think for more speed
 from dotenv import load_dotenv # Loads environments where keys are safly stored 
 import traceback
@@ -842,8 +842,8 @@ class Player(db.Model):
     challenge_code = db.Column(db.String(10))
     code_expires_at = db.Column(db.DateTime)
     is_admin = db.Column(db.Boolean, default=False)
-    created_at = db.Column(db.DateTime, default=lambda: nairobi_time())
-    last_active = db.Column(db.DateTime, default=lambda: nairobi_time())
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone(timedelta(hours=3))))
+    last_active = db.Column(db.DateTime, default=lambda: datetime.now(timezone(timedelta(hours=3))))
     
     def set_password(self, password):
         self.password_hash = password
@@ -857,7 +857,7 @@ class Challenge(db.Model):
     target_id = db.Column(db.Integer, db.ForeignKey('player.id'), nullable=False)
     code = db.Column(db.String(10))
     status = db.Column(db.String(20), default='pending')
-    created_at = db.Column(db.DateTime, default=lambda: nairobi_time())
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone(timedelta(hours=3))))
     
     challenger = db.relationship('Player', foreign_keys=[challenger_id])
     target = db.relationship('Player', foreign_keys=[target_id])
@@ -10241,7 +10241,7 @@ def api_login():
         session['player_name'] = player.display_name or player.player_name
         session['is_admin'] = player.is_admin
         
-        player.last_active = nairobi_time()
+        player.last_active = datetime.now(timezone(timedelta(hours=3)))
         db.session.commit()
         
         return jsonify({'success': True, 'player': {
@@ -10303,7 +10303,7 @@ def api_players():
     players_data = []
     
     for p in players:
-        has_active_code = p.challenge_code and p.code_expires_at and p.code_expires_at > nairobi_time()
+        has_active_code = p.challenge_code and p.code_expires_at and p.code_expires_at > datetime.now(timezone(timedelta(hours=3)))
         players_data.append({
             'id': p.id,
             'konami_id': p.konami_id,
@@ -10362,7 +10362,7 @@ def api_set_custom_code():
     
     # Set custom code
     player.challenge_code = code
-    player.code_expires_at = nairobi_time() + timedelta(minutes=duration)
+    player.code_expires_at = datetime.now(timezone(timedelta(hours=3))) + timedelta(minutes=duration)
     
     db.session.commit()
     
@@ -10376,7 +10376,7 @@ def api_set_custom_code():
 @app.route('/api/mark_code_expired', methods=['POST'])
 def api_mark_code_expired():
     player = Player.query.get(session['player_id'])
-    player.code_expires_at = nairobi_time()  # Expire immediately
+    player.code_expires_at = datetime.now(timezone(timedelta(hours=3)))  # Expire immediately
     db.session.commit()
     
     return jsonify({'success': True, 'message': 'Code expired'})
@@ -10389,7 +10389,7 @@ def api_use_code():
     # Find player with active code
     target = Player.query.filter(
         Player.challenge_code == code,
-        Player.code_expires_at > nairobi_time()
+        Player.code_expires_at > datetime.now(timezone(timedelta(hours=3)))
     ).first()
     
     if not target:
@@ -10406,7 +10406,7 @@ def api_use_code():
     )
     
     # Mark code as expired after use
-    target.code_expires_at = nairobi_time()
+    target.code_expires_at = datetime.now(timezone(timedelta(hours=3)))
     
     db.session.add(challenge)
     db.session.commit()
