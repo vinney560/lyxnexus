@@ -755,55 +755,144 @@
         let currentExpiry = null;
         let codeExpiryTimer = null;
         let playerData = null;
-        let selectedDuration = 20;
-
+        let selectedDuration = 20; // Default 20 minutes
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if user is logged in
+            checkAuth();
+            
+            // Load player data
+            loadPlayerData();
+            
+            // Setup event listeners
+            setupEventListeners();
+            
+            // Auto-refresh every 30 seconds
+            setInterval(loadPlayerData, 30000);
+        });
+        
         async function checkAuth() {
             try {
                 const response = await fetch('/api/player/me');
                 const data = await response.json();
-                console.log('Auth check:', data);
                 
                 if (!data.success) {
                     window.location.href = '/konami/';
                     return;
                 }
                 
+                // Show admin link if user is admin
                 if (data.player.is_admin) {
                     document.getElementById('adminLink').style.display = 'flex';
                 }
             } catch (error) {
-                console.error('Auth error:', error);
                 window.location.href = '/konami/';
             }
         }
-
+        
+        function setupEventListeners() {
+            // Set code button
+            document.getElementById('setCodeBtn').addEventListener('click', setChallengeCode);
+            
+            // Code input - allow only alphanumeric
+            document.getElementById('codeInput').addEventListener('input', function(e) {
+                this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+            });
+            
+            // Copy code button
+            document.getElementById('copyCodeBtn').addEventListener('click', copyCodeToClipboard);
+            
+            // Expire code button
+            document.getElementById('expireCodeBtn').addEventListener('click', expireCodeNow);
+            
+            // Clear code button
+            document.getElementById('clearCodeBtn').addEventListener('click', clearCode);
+            
+            // Edit profile form
+            document.getElementById('editProfileForm').addEventListener('submit', updateProfile);
+            
+            // Logout
+            document.getElementById('logoutBtn').addEventListener('click', handleLogout);
+            
+            // Duration selector
+            setupDurationSelector();
+        }
+        
+        function setupDurationSelector() {
+            const durationOptions = document.querySelectorAll('.duration-option:not(.custom-option)');
+            const customOption = document.getElementById('customOption');
+            const customDuration = document.getElementById('customDuration');
+            const customMinutes = document.getElementById('customMinutes');
+            const customUnit = document.getElementById('customUnit');
+            
+            // Handle predefined duration clicks
+            durationOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    // Remove selected class from all options
+                    document.querySelectorAll('.duration-option').forEach(opt => {
+                        opt.classList.remove('selected');
+                    });
+                    
+                    // Add selected class to clicked option
+                    this.classList.add('selected');
+                    
+                    // Hide custom duration input
+                    customDuration.style.display = 'none';
+                    
+                    // Set selected duration
+                    selectedDuration = parseInt(this.dataset.minutes);
+                });
+            });
+            
+            // Handle custom option click
+            customOption.addEventListener('click', function() {
+                // Remove selected class from all options
+                document.querySelectorAll('.duration-option').forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+                
+                // Add selected class to custom option
+                this.classList.add('selected');
+                
+                // Show custom duration input
+                customDuration.style.display = 'block';
+                
+                // Set selected duration based on custom input
+                updateCustomDuration();
+            });
+            
+            // Handle custom input changes
+            customMinutes.addEventListener('input', updateCustomDuration);
+            customUnit.addEventListener('change', updateCustomDuration);
+        }
+        
+        function updateCustomDuration() {
+            const minutes = parseInt(document.getElementById('customMinutes').value) || 20;
+            const unit = document.getElementById('customUnit').value;
+            
+            if (unit === 'hours') {
+                selectedDuration = minutes * 60;
+            } else {
+                selectedDuration = minutes;
+            }
+        }
+        
         async function loadPlayerData() {
-            console.log('Loading player data...');
             try {
                 const response = await fetch('/api/player/me');
                 const data = await response.json();
-                console.log('Player data response:', data);
                 
                 if (data.success) {
                     playerData = data.player;
-                    console.log('Player data loaded:', playerData);
                     updateUI();
-                } else {
-                    console.error('Failed to load player data:', data);
                 }
             } catch (error) {
-                console.error('Load player data error:', error);
                 showMessage('Failed to load player data', 'error');
             }
         }
-
+        
         function updateUI() {
-            if (!playerData) {
-                console.log('No player data to update UI');
-                return;
-            }
-            
-            console.log('Updating UI with player data:', playerData);
+            if (!playerData) return;
             
             // Update user info
             document.getElementById('userName').textContent = playerData.display_name || playerData.player_name;
@@ -818,14 +907,11 @@
             // Update code display
             updateCodeDisplay();
             
+            // Load additional stats
             loadStats();
         }
-
+        
         function updateCodeDisplay() {
-            console.log('Updating code display...');
-            console.log('Player challenge_code:', playerData.challenge_code);
-            console.log('Player code_expires:', playerData.code_expires);
-            
             const codeElement = document.getElementById('currentCode');
             const statusElement = document.getElementById('codeStatus');
             const expiryElement = document.getElementById('codeExpiry');
@@ -835,16 +921,11 @@
             const codeInput = document.getElementById('codeInput');
             
             if (playerData.challenge_code && playerData.code_expires) {
-                console.log('Has code and expiry date');
                 const expiryTime = new Date(playerData.code_expires);
                 const now = new Date();
                 
-                console.log('Expiry time:', expiryTime);
-                console.log('Current time:', now);
-                console.log('Is expiry > now?', expiryTime > now);
-                
                 if (expiryTime > now) {
-                    console.log('Code is ACTIVE');
+                    // Code is active
                     currentCode = playerData.challenge_code;
                     currentExpiry = expiryTime;
                     
@@ -864,22 +945,23 @@
                     
                     expiryElement.textContent = `Expires in ${minutes}m ${seconds}s`;
                     
+                    // Update stat
                     document.getElementById('statActive').textContent = 'Yes';
                     document.getElementById('statActive').style.color = 'var(--accent-green)';
                     
+                    // Start countdown timer
                     startCountdownTimer(expiryTime);
                 } else {
-                    console.log('Code is EXPIRED');
+                    // Code expired
                     showExpiredCode();
                 }
             } else {
-                console.log('No code or no expiry date');
+                // No code
                 showExpiredCode();
             }
         }
-
+        
         function showExpiredCode() {
-            console.log('Showing expired code state');
             document.getElementById('currentCode').textContent = '---';
             document.getElementById('codeStatus').textContent = 'No active code';
             document.getElementById('codeStatus').style.color = 'var(--text-secondary)';
@@ -897,13 +979,40 @@
                 clearInterval(codeExpiryTimer);
             }
         }
-
+        
+        function startCountdownTimer(expiryTime) {
+            if (codeExpiryTimer) {
+                clearInterval(codeExpiryTimer);
+            }
+            
+            codeExpiryTimer = setInterval(() => {
+                const now = new Date();
+                const timeRemaining = expiryTime - now;
+                
+                if (timeRemaining <= 0) {
+                    clearInterval(codeExpiryTimer);
+                    showExpiredCode();
+                    showMessage('Your challenge code has expired', 'info');
+                    return;
+                }
+                
+                const minutes = Math.floor(timeRemaining / (1000 * 60));
+                const seconds = Math.floor((timeRemaining % (1000 * 60)) / 1000);
+                
+                document.getElementById('codeExpiry').textContent = `Expires in ${minutes}m ${seconds}s`;
+                
+                // Update color based on time remaining
+                if (minutes < 5) {
+                    document.getElementById('codeExpiry').style.color = 'var(--accent-red)';
+                } else if (minutes < 10) {
+                    document.getElementById('codeExpiry').style.color = 'var(--accent-yellow)';
+                }
+            }, 1000);
+        }
+        
         async function setChallengeCode() {
             const codeInput = document.getElementById('codeInput');
             const code = codeInput.value.trim().toUpperCase();
-            
-            console.log('Setting challenge code:', code);
-            console.log('Selected duration:', selectedDuration);
             
             if (!code) {
                 showMessage('Please enter a challenge code', 'error');
@@ -923,10 +1032,32 @@
                 return;
             }
             
+            // Calculate expiry time
+            const now = new Date();
+            const expiryTime = new Date(now.getTime() + (selectedDuration * 60 * 1000));
+            
             showMessage('Setting challenge code...', 'info');
             
             try {
-                console.log('Sending API request...');
+                currentCode = code;
+                currentExpiry = expiryTime;
+                
+                document.getElementById('currentCode').textContent = code;
+                document.getElementById('codeStatus').textContent = 'Active';
+                document.getElementById('codeStatus').style.color = 'var(--accent-green)';
+                
+                document.getElementById('copyCodeBtn').disabled = false;
+                document.getElementById('expireCodeBtn').disabled = false;
+                document.getElementById('clearCodeBtn').disabled = false;
+                
+                document.getElementById('statActive').textContent = 'Yes';
+                document.getElementById('statActive').style.color = 'var(--accent-green)';
+                
+                // Start countdown
+                startCountdownTimer(expiryTime);
+                
+                // Show success message
+                showMessage(`Challenge code "${code}" set successfully! Expires in ${selectedDuration} minutes.`, 'success');
                 const response = await fetch('/api/generate_code', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -937,71 +1068,17 @@
                 });
                 
                 const data = await response.json();
-                console.log('API response:', data);
                 
                 if (data.success) {
-                    showMessage(data.message, 'success');
-                    console.log('Code set successfully, reloading player data...');
-                    
-                    // Wait a moment then reload data
-                    setTimeout(() => {
-                        loadPlayerData();
-                    }, 500);
-                    
+                    showMessage('Challenge code set successfully!', 'success');
+                    loadPlayerData(); // Refresh data
                 } else {
                     showMessage(data.message, 'error');
-                    console.error('API error:', data);
                 }
                 
             } catch (error) {
-                console.error('Set code error:', error);
                 showMessage('Failed to set challenge code', 'error');
             }
-        }
-
-        // ... rest of your functions stay the same
-        function setupDurationSelector() {
-            const durationOptions = document.querySelectorAll('.duration-option:not(.custom-option)');
-            const customOption = document.getElementById('customOption');
-            const customDuration = document.getElementById('customDuration');
-            const customMinutes = document.getElementById('customMinutes');
-            const customUnit = document.getElementById('customUnit');
-            
-            durationOptions.forEach(option => {
-                option.addEventListener('click', function() {
-                    document.querySelectorAll('.duration-option').forEach(opt => {
-                        opt.classList.remove('selected');
-                    });
-                    this.classList.add('selected');
-                    customDuration.style.display = 'none';
-                    selectedDuration = parseInt(this.dataset.minutes);
-                    console.log('Selected duration:', selectedDuration);
-                });
-            });
-            
-            customOption.addEventListener('click', function() {
-                document.querySelectorAll('.duration-option').forEach(opt => {
-                    opt.classList.remove('selected');
-                });
-                this.classList.add('selected');
-                customDuration.style.display = 'block';
-                updateCustomDuration();
-            });
-            
-            customMinutes.addEventListener('input', updateCustomDuration);
-            customUnit.addEventListener('change', updateCustomDuration);
-        }
-        
-        function updateCustomDuration() {
-            const minutes = parseInt(document.getElementById('customMinutes').value) || 20;
-            const unit = document.getElementById('customUnit').value;
-            
-            if (unit === 'hours') {
-                selectedDuration = minutes * 60;
-            } else {
-                selectedDuration = minutes;
-            }
-            console.log('Custom duration set to:', selectedDuration);
         }
         
         async function copyCodeToClipboard() {
@@ -1014,7 +1091,6 @@
                 await expireCodeNow();
                 
             } catch (error) {
-                console.error('Copy error:', error);
                 showMessage('Failed to copy code', 'error');
             }
         }
@@ -1023,24 +1099,26 @@
             if (!currentCode) return;
             
             try {
-                console.log('Expiring code...');
+                showExpiredCode();
+                document.getElementById('codeStatus').textContent = 'Expired';
+                document.getElementById('codeStatus').style.color = 'var(--accent-red)';
+                
+                showMessage('Code expired!', 'success');
                 const response = await fetch('/api/mark_code_expired', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' }
                 });
                 
                 const data = await response.json();
-                console.log('Expire response:', data);
                 
                 if (data.success) {
                     showMessage('Code expired!', 'success');
-                    loadPlayerData();
+                    loadPlayerData(); // Refresh data
                 } else {
                     showMessage(data.message, 'error');
                 }
                 
             } catch (error) {
-                console.error('Expire error:', error);
                 showMessage('Failed to expire code', 'error');
             }
         }
@@ -1053,10 +1131,10 @@
             try {
                 document.getElementById('codeInput').value = '';
                 showExpiredCode();
+                
                 showMessage('Code cleared!', 'success');
                 
             } catch (error) {
-                console.error('Clear error:', error);
                 showMessage('Failed to clear code', 'error');
             }
         }
@@ -1085,18 +1163,18 @@
                 
                 if (data.success) {
                     showMessage('Profile updated successfully!', 'success');
-                    loadPlayerData();
+                    loadPlayerData(); // Refresh data
                 } else {
                     showMessage(data.message, 'error');
                 }
             } catch (error) {
-                console.error('Update profile error:', error);
                 showMessage('Failed to update profile', 'error');
             }
         }
         
         async function loadStats() {
             try {
+                // Load all players for stats
                 const response = await fetch('/api/players');
                 const data = await response.json();
                 
@@ -1109,7 +1187,7 @@
                     document.getElementById('statReceived').textContent = receivedChallenges;
                 }
             } catch (error) {
-                console.error('Load stats error:', error);
+                console.error('Failed to load stats:', error);
             }
         }
         
@@ -1139,42 +1217,6 @@
                 message.style.display = 'none';
             }, 3000);
         }
-        
-        function startCountdownTimer(expiryTime) {
-            if (codeExpiryTimer) {
-                clearInterval(codeExpiryTimer);
-            }
-            
-            codeExpiryTimer = setInterval(() => {
-                const now = new Date();
-                const timeRemaining = expiryTime - now;
-                
-                if (timeRemaining <= 0) {
-                    clearInterval(codeExpiryTimer);
-                    showExpiredCode();
-                    showMessage('Your challenge code has expired', 'info');
-                    return;
-                }
-                
-                const minutes = Math.floor(timeRemaining / (1000 * 60));
-                const seconds = Math.floor((timeRemaining % (1000 * 60)) / 1000);
-                
-                document.getElementById('codeExpiry').textContent = `Expires in ${minutes}m ${seconds}s`;
-                
-                if (minutes < 5) {
-                    document.getElementById('codeExpiry').style.color = 'var(--accent-red)';
-                } else if (minutes < 10) {
-                    document.getElementById('codeExpiry').style.color = 'var(--accent-yellow)';
-                }
-            }, 1000);
-        }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('Dashboard loaded');
-            checkAuth();
-            loadPlayerData();
-            setInterval(loadPlayerData, 30000);
-        });
     </script>
 </body>
 </html>
