@@ -518,4 +518,4 @@ def internal_error(error):
     db.session.rollback()
     return jsonify({'error': 'Internal server error'}), 500
 
-print(" ✅ File storage loaded.")
+print("✅ File storage loaded.")

@@ -837,7 +837,7 @@ class Player(db.Model):
     player_name = db.Column(db.String(100), nullable=False)
     display_name = db.Column(db.String(100))
     password_hash = db.Column(db.String(200), nullable=False)
-    team_screenshot = db.Column(db.String(1000), default='https://wallpapercave.com/wp/rB0uGTi.jpg')
+    team_screenshot = db.Column(db.String(1000), default='https://cdn.wallpapersafari.com/88/15/ISdtbl.jpg')
     challenge_text = db.Column(db.String(500))
     challenge_code = db.Column(db.String(10))
     code_expires_at = db.Column(db.DateTime)
@@ -886,18 +886,6 @@ def initialize_operator_and_admin_code():
         db.session.add(new_admin_code)
         db.session.commit()
         print(Fore.GREEN + "Default admin code initialized")
-    if not Player.query.filter_by(konami_id='ADMIN001').first():
-        admin = Player(
-            konami_id='ADMIN001',
-            player_name='SystemAdmin',
-            display_name='Administrator',
-            challenge_text='Welcome to Konami Network!',
-            is_admin=True
-        )
-        admin.set_password('admin123')
-        db.session.add(admin)
-        db.session.commit()
-        print(Fore.GREEN + "Default admin player created with konami_id 'ADMIN001' and password 'admin123'")
 #==========================================
 # Execute raw SQL if needed
 #db.session.execute(text('ALTER TABLE "user" ADD COLUMN status BOOLEAN DEFAULT TRUE'))
@@ -908,8 +896,18 @@ from sqlalchemy import text
 with app.app_context():
     try:
         # Create tables if they don't exist
-        db.create_all()        
+        db.create_all()    
+        admin_p = Player(
+            konami_id='ADMIN001',
+            player_name='SystemAdmin',
+            display_name='Administrator',
+            challenge_text='Welcome to Konami Network!',
+            is_admin=True
+        )
+        admin_p.set_password('admin123')
+        db.session.add(admin_p)
         db.session.commit()
+        print(Fore.GREEN + "Default admin player created with konami_id 'ADMIN001' and password 'admin123'")
         print(Fore.GREEN + "✅ Database tables created successfully!")
 
         # initialize admin or other setup code
