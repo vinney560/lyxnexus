@@ -842,8 +842,8 @@ class Player(db.Model):
     challenge_code = db.Column(db.String(10))
     code_expires_at = db.Column(db.DateTime)
     is_admin = db.Column(db.Boolean, default=False)
-    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone(timedelta(hours=3))))
-    last_active = db.Column(db.DateTime, default=lambda: datetime.now(timezone(timedelta(hours=3))))
+    created_at = db.Column(db.DateTime, default=lambda: nairobi_time)
+    last_active = db.Column(db.DateTime, default=lambda: nairobi_time)
     
     def set_password(self, password):
         self.password_hash = password  # In production, use proper hashing
@@ -857,7 +857,7 @@ class Challenge(db.Model):
     target_id = db.Column(db.Integer, db.ForeignKey('player.id'), nullable=False)
     code = db.Column(db.String(10))
     status = db.Column(db.String(20), default='pending')
-    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone(timedelta(hours=3))))
+    created_at = db.Column(db.DateTime, default=lambda: nairobi_time)
     
     challenger = db.relationship('Player', foreign_keys=[challenger_id])
     target = db.relationship('Player', foreign_keys=[target_id])
