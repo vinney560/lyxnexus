@@ -10241,7 +10241,7 @@ def api_login():
         session['player_name'] = player.display_name or player.player_name
         session['is_admin'] = player.is_admin
         
-        player.last_active = nairobi_time.now()
+        player.last_active = nairobi_time()
         db.session.commit()
         
         return jsonify({'success': True, 'player': {
@@ -10303,7 +10303,7 @@ def api_players():
     players_data = []
     
     for p in players:
-        has_active_code = p.challenge_code and p.code_expires_at and p.code_expires_at > nairobi_time.now()
+        has_active_code = p.challenge_code and p.code_expires_at and p.code_expires_at > nairobi_time()
         players_data.append({
             'id': p.id,
             'konami_id': p.konami_id,
@@ -10362,7 +10362,7 @@ def api_set_custom_code():
     
     # Set custom code
     player.challenge_code = code
-    player.code_expires_at = nairobi_time.now() + timedelta(minutes=duration)
+    player.code_expires_at = nairobi_time() + timedelta(minutes=duration)
     
     db.session.commit()
     
@@ -10376,7 +10376,7 @@ def api_set_custom_code():
 @app.route('/api/mark_code_expired', methods=['POST'])
 def api_mark_code_expired():
     player = Player.query.get(session['player_id'])
-    player.code_expires_at = nairobi_time.now()  # Expire immediately
+    player.code_expires_at = nairobi_time()  # Expire immediately
     db.session.commit()
     
     return jsonify({'success': True, 'message': 'Code expired'})
@@ -10389,7 +10389,7 @@ def api_use_code():
     # Find player with active code
     target = Player.query.filter(
         Player.challenge_code == code,
-        Player.code_expires_at > nairobi_time.now()
+        Player.code_expires_at > nairobi_time()
     ).first()
     
     if not target:
@@ -10406,7 +10406,7 @@ def api_use_code():
     )
     
     # Mark code as expired after use
-    target.code_expires_at = nairobi_time.now()
+    target.code_expires_at = nairobi_time()
     
     db.session.add(challenge)
     db.session.commit()
