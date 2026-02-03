@@ -757,14 +757,6 @@
         let playerData = null;
         let selectedDuration = 20;
 
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('Dashboard loaded');
-            checkAuth();
-            loadPlayerData();
-            setupEventListeners();
-            setInterval(loadPlayerData, 30000);
-        });
-
         async function checkAuth() {
             try {
                 const response = await fetch('/api/player/me');
@@ -1176,6 +1168,13 @@
                 }
             }, 1000);
         }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Dashboard loaded');
+            checkAuth();
+            loadPlayerData();
+            setInterval(loadPlayerData, 30000);
+        });
     </script>
 </body>
 </html>
