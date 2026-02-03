@@ -26,15 +26,28 @@ def not_banned(f): # @not_banned
         return f(*args, **kwargs)
     return decor
 
+def payment_required(f):
+    @wraps(f)
+    def pay_decor(*args, **kwargs):
+        if not current_user.free_trial and not current_user.paid:
+            if request.path.startswith('/api/') or request.is_json:
+                return jsonify({'error': 'Payment required to access this feature.'}), 402
+            flash('Payment required to access this feature.', 'warning')
+            return redirect(url_for('activation_payment'))
+        return f(*args, **kwargs)
+    return pay_decor
+
 @dashboard_bp.route('/')
 @login_required
 @not_banned
+@payment_required
 def dashboard():
     return render_template('dashboard.html')
 
 @dashboard_bp.route('/api/data')
 @login_required
 @not_banned
+@payment_required
 def user_data():
     # Auxiliary features for moer data tod dahboard
     available_files = UploadedFile.query.count() # Never use .all().count()
@@ -62,6 +75,7 @@ def user_data():
 @dashboard_bp.route('/api/activity')
 @login_required
 @not_banned
+@payment_required
 def activities():
     try:
         # Retrieve user activity count
@@ -103,6 +117,7 @@ def activities():
 @dashboard_bp.route('/api/stats')
 @login_required
 @not_banned
+@payment_required
 def user_stats():
     """Additional stats endpoint for charts and analytics"""
     try:
@@ -154,6 +169,7 @@ def user_stats():
 @dashboard_bp.route('/api/log_activity', methods=['POST'])
 @login_required
 @not_banned
+@payment_required
 def log_activity():
     """Endpoint to log user activity from frontend"""
     try:

@@ -5,6 +5,7 @@ from flask import Blueprint, render_template, jsonify, request
 import datetime
 import json
 import time
+from colorama import Fore
 
 url_ping_bp = Blueprint('url_ping', __name__, url_prefix='/lyxpinger')
 
@@ -20,7 +21,7 @@ target_urls = [
     't-give-3.onrender.com/home',
     'lyxnexus.xo.je',
     'lyxnexus.lyxnexus.xo.je',
-    'viewtv.viewtv.gt.tc/home_2'
+    'viewstream-1.onrender.com'
 ]
 
 def ping_urls():
@@ -208,4 +209,4 @@ atexit.register(lambda: scheduler.shutdown())
 # Perform initial ping
 print("Starting initial ping...")
 ping_urls()
-print("✅ Initial ping completed.")
+print(Fore.GREEN + "✅ Ping URL Initialization success!.")

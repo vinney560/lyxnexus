@@ -32,6 +32,17 @@ def admin_required(f):
         return f(*args, **kwargs)
     return decorator
 
+def payment_required(f):
+    @wraps(f)
+    def pay_decor(*args, **kwargs):
+        if not current_user.free_trial and not current_user.paid:
+            if request.path.startswith('/api/') or request.is_json:
+                return jsonify({'error': 'Payment required to access this feature.'}), 402
+            flash('Payment required to access this feature.', 'warning')
+            return redirect(url_for('activation_payment'))
+        return f(*args, **kwargs)
+    return pay_decor
+
 # File upload settings
 ALLOWED_EXTENSIONS = {
     'png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp', 'svg',
@@ -97,14 +108,15 @@ def gen_unique_id(_tablename, max_attempts=100):
     
     raise ValueError("Failed to generate unique ID")
 
-@login_required
 @storage_bp.route('/')
+@login_required
+@payment_required
 def file_store():
     """Render the main files page"""
     return render_template('file_store.html')
 
-@admin_required
 @storage_bp.route('/api/upload-multiple', methods=['POST'])
+@admin_required
 def upload_multiple_files():
     """Handle single or multiple file uploads to Cloudinary"""
     if 'files' not in request.files:
@@ -268,8 +280,9 @@ def upload_multiple_files():
         'files': uploaded_files
     })
 
-@login_required
 @storage_bp.route('/api/files')
+@login_required
+@payment_required
 def get_files():
     """Get all uploaded files (API endpoint)"""
     page = request.args.get('page', 1, type=int)
@@ -320,23 +333,26 @@ def get_files():
         'has_prev': files.has_prev
     })
 
-@login_required
 @storage_bp.route('/api/files/count')
+@login_required
+@payment_required
 def get_file_count():
     """Get total file count"""
     count = UploadedFile.query.count()
     return jsonify({'count': count})
 
-@login_required
 @storage_bp.route('/api/files/categories')
+@login_required
+@payment_required
 def get_categories():
     """Get unique file categories"""
     categories = db.session.query(UploadedFile.file_type).distinct().all()
     category_list = [cat[0] for cat in categories if cat[0]]
     return jsonify({'categories': category_list})
 
-@login_required
 @storage_bp.route('/api/files/<int:file_id>')
+@login_required
+@payment_required
 def get_file(file_id):
     """Get single file details"""
     file = UploadedFile.query.get_or_404(file_id)
@@ -349,15 +365,17 @@ def get_file(file_id):
         'created_at': file.created_at.isoformat() if file.created_at else None
     }})
 
-@login_required
 @storage_bp.route('/play/<int:file_id>')
+@login_required
+@payment_required
 def play_file(file_id):
     """Play file in browser"""
     file = UploadedFile.query.get_or_404(file_id)
     return render_template('player.html', file=file)
 
-@login_required
 @storage_bp.route('/api/files/<int:file_id>/download')
+@login_required
+@payment_required
 def download_file(file_id):
     """Download file through Flask"""
     try:
@@ -388,8 +406,8 @@ def download_file(file_id):
         current_app.logger.error(f'Download error: {str(e)}')
         return jsonify({'error': f'Download failed: {str(e)}'}), 500
 
-@login_required
 @storage_bp.route('/api/files/<int:file_id>', methods=['DELETE'])
+@admin_required
 def delete_file(file_id):
     """Delete file record from database only"""
     try:
@@ -415,9 +433,9 @@ def delete_file(file_id):
         db.session.rollback()
         print(f"Database deletion error: {e}")
         return jsonify({'error': str(e)}), 500
-
-@login_required
 @storage_bp.route('/api/files/search')
+@login_required
+@payment_required
 def search_files():
     """Search files by filename or tags"""
     query = request.args.get('q', '').strip()
@@ -439,8 +457,9 @@ def search_files():
         'count': len(all_files)
     })
 
-@login_required
 @storage_bp.route('/api/stats')
+@login_required
+@payment_required
 def get_stats():
     """Get file statistics"""
     total_files = UploadedFile.query.count()
@@ -499,4 +518,4 @@ def internal_error(error):
     db.session.rollback()
     return jsonify({'error': 'Internal server error'}), 500
 
-print("File storage blueprint loaded. ✅")
+print(" ✅ File storage loaded.")

@@ -58,7 +58,8 @@ class ProbeCommandProcessor:
             'shutdown': self.cmd_shutdown,
             'modify': self.cmd_modify,
             'free_trial': self.cmd_free_trial,
-            'kill': self.cmd_killed
+            'kill': self.cmd_killed,
+            'unkill': self.cmd_unkilled
         }
     
     def process(self, command):
@@ -116,6 +117,7 @@ class ProbeCommandProcessor:
             "free_trial           - Set free trial for all users",
             "free_trial [id]      - Set free trial for user",
             "kill [id]            - Set killed status for user",
+            "unkill [id]           - Remove killed status for user",
             "",
             "=== SECURITY OPERATIONS ===",
             "kill-rogue           - Remove unverified admins",
@@ -363,6 +365,41 @@ class ProbeCommandProcessor:
             except Exception as e:
                 db.session.rollback()
                 return self.format_output("ERROR", f"Operation failed: {str(e)}", "error")  
+
+    def cmd_unkilled(self, args):
+        """Re-enable a previously killed account"""
+        if args:
+            # Unkill specific user by ID
+            try:
+                user_id = int(args[0])
+                user = User.query.get(user_id)
+                
+                if not user:
+                    return self.format_output("ERROR", f"User ID {user_id} not found", "error")
+                
+                if not user.killed:
+                    return self.format_output("ERROR", f"User ID {user_id} is not killed", "error")
+                
+                old_status = "Banned" if not user.status else "Active"
+                user.killed = False
+                user.status = True  # Re-enable the account
+                db.session.commit()
+                
+                result = [
+                    f"Operation: UNKILL-USER [{user.id}]",
+                    f"Time: {datetime.now(timezone(timedelta(hours=3))).strftime('%H:%M:%S')}",
+                    f"Target: [{user.id}] {user.username} (was {old_status})",
+                    f"Actions:",
+                    f"  • Account re-enabled",
+                    f"  • Account status restored"
+                ]
+                
+                return self.format_output("OPERATION SUCCESSFUL", "\n".join(result), "success")
+            except ValueError:
+                return self.format_output("ERROR", "Invalid user ID", "error")
+            except Exception as e:
+                db.session.rollback()
+                return self.format_output("ERROR", f"Operation failed: {str(e)}", "error")
 
     def cmd_free_trial(self, args):
         """\Grant Free trial to specific user or all users"""

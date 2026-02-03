@@ -479,15 +479,29 @@ def generate_math_stream(prompt, assignment_id, history, user_context):
         print(f"Math streaming error: {e}")
         yield "data: ❌ An error occurred while generating the math response.\n\n"
 
-from flask import render_template
+from flask import render_template, flash, redirect, url_for
+from functools import wraps
+def payment_required(f):
+    @wraps(f)
+    def pay_decor(*args, **kwargs):
+        if not current_user.free_trial and not current_user.paid:
+            if request.path.startswith('/api/') or request.is_json:
+                return jsonify({'error': 'Payment required to access this feature.'}), 402
+            flash('Payment required to access this feature.', 'warning')
+            return redirect(url_for('activation_payment'))
+        return f(*args, **kwargs)
+    return pay_decor
+
 @math_bp.route('/')
 @login_required
+@payment_required
 def math_assistant():
     """Main math assistant page"""
     return render_template('math.html')
 
 @math_bp.route('/data')
 @login_required
+@payment_required
 def math_data():
     """Get math assistant data"""
     from app import db
@@ -525,6 +539,7 @@ def math_data():
 
 @math_bp.route('/assignment/<int:assignment_id>')
 @login_required
+@payment_required
 def get_assignment_data(assignment_id):
     """Get specific assignment data"""
     from app import db
@@ -545,6 +560,7 @@ def get_assignment_data(assignment_id):
 
 @math_bp.route('/stream')
 @login_required
+@payment_required
 def math_stream():
     """Streaming endpoint for math responses"""
     prompt = request.args.get('prompt', '').strip()
@@ -577,6 +593,7 @@ def math_stream():
 
 @math_bp.route('/chat', methods=['POST'])
 @login_required
+@payment_required
 def math_chat_api():
     """Non-streaming math chat endpoint"""
     try:
@@ -664,6 +681,7 @@ def math_chat_api():
 
 @math_bp.route('/clear-history')
 @login_required
+@payment_required
 def clear_math_history():
     """Clear math conversation history"""
     try:
@@ -690,6 +708,7 @@ def clear_math_history():
 
 @math_bp.route('/assignments')
 @login_required
+@payment_required
 def get_assignments():
     """Get user's assignments"""
     try:

@@ -209,7 +209,22 @@ class QuizGenerator:
 
 quiz_gen = QuizGenerator()
 
+from flask import render_template, flash, redirect, url_for
+from flask_login import current_user
+from functools import wraps
+def payment_required(f):
+    @wraps(f)
+    def pay_decor(*args, **kwargs):
+        if not current_user.free_trial and not current_user.paid:
+            if request.path.startswith('/api/') or request.is_json:
+                return jsonify({'error': 'Payment required to access this feature.'}), 402
+            flash('Payment required to access this feature.', 'warning')
+            return redirect(url_for('activation_payment'))
+        return f(*args, **kwargs)
+    return pay_decor
+
 @_quiz_AI.route('/generate-quiz', methods=['POST'])
+@payment_required
 def generate_quiz():
     """Endpoint to generate quiz"""
     try:
@@ -233,11 +248,13 @@ def generate_quiz():
 
 # Rendering the interface
 @_quiz_AI.route('/')
+@payment_required
 def quiz():
     return render_template('quizAI.html')
 
 # Test connection btwn frontend and backend
 @_quiz_AI.route('/health', methods=['GET'])
+@payment_required
 def health_check():
     """Health check endpoint"""
     return jsonify({'status': 'healthy', 'service': 'Quiz Generator API'})

@@ -864,8 +864,6 @@ with app.app_context():
     try:
         # Create tables if they don't exist
         db.create_all()
-        db.session.execute(text('ALTER TABLE "user" ADD COLUMN killed BOOLEAN DEFAULT FALSE'))
-        db.session.execute(text('ALTER TABLE "user" ADD COLUMN free_trial BOOLEAN DEFAULT FALSE'))
         db.session.commit()
         print(Fore.GREEN + "✅ Database tables created successfully!")
 
@@ -966,6 +964,18 @@ def not_banned(f): # @not_banned
                 return redirect(url_for('main_page')), 302
         return f(*args, **kwargs)
     return decor
+
+""" At payment required decorator"""
+def payment_required(f):
+    @wraps(f)
+    def pay_decor(*args, **kwargs):
+        if not current_user.free_trial and not current_user.paid:
+            if request.path.startswith('/api/') or request.is_json:
+                return jsonify({'error': 'Payment required to access this feature.'}), 402
+            flash('Payment required to access this feature.', 'warning')
+            return redirect(url_for('activation_payment'))
+        return f(*args, **kwargs)
+    return pay_decor
 #------------------------------------------------------------------------------
                                  # BACKGROUND WORKERS
 
@@ -2556,14 +2566,14 @@ def handle_student_login(user, username, mobile, login_subtype, next_page, year)
                                  login_type='student',  # Stay on student tab
                                  year=_year())
         if user.killed:
-            flash("Account Permanently deactivated!")
+            flash("Account Permanently deactivated!", 'error')
             return redirect(url_for("login"))
         
         if user.free_trial is False:
             if user.paid is False:
                 login_user(user)
                 flash('Your account is inactive. Pay you registration Fee or contact Admin for assistance.', 'error')
-                return redirect(url_for('activation_payment'))
+                return redirect(url_for('main_page'))
             
         if user.free_trial is True:
             if user.paid is False:
@@ -4892,6 +4902,7 @@ app.register_blueprint(events_bp)
 #========================================================================
 @app.route('/lyx-ai')
 @login_required
+@payment_required
 def ai_assistant():
     """Redirect to the Gemini chat interface"""
     return redirect(url_for('gemini.gemini_chat'))
@@ -4965,6 +4976,7 @@ def admin_users():
     return render_template('admin_users.html')
 #-----------------------------------------------------------------
 @app.route('/portfolio')
+@payment_required
 def portfolio():
     return render_template('portfolio.html', year=_year())
 #-----------------------------------------------------------------
@@ -4993,6 +5005,7 @@ def operator_page():
 @app.route('/profile')
 @not_banned
 @login_required
+@payment_required
 def profile():
     """Render the profile edit page"""
     return render_template('edit_profile.html')
@@ -5001,12 +5014,14 @@ def profile():
 @limiter.limit("10 per minute")
 @login_required
 @not_banned
+@payment_required
 def files():
     """Render the file management page"""
     return render_template('files.html')
 #--------------------------------------------------------------------
 @app.route('/material/<int:topic_id>')
 @login_required
+@payment_required
 def topic_materials(topic_id):
     """Render the topic materials page"""
     topic = Topic.query.get_or_404(topic_id)
@@ -5292,6 +5307,7 @@ app.jinja_env.filters['message_time'] = format_message_time
 @limiter.limit("10 per minute")
 @login_required
 @not_banned
+@payment_required
 def messages():
     """Render the messages page with initial data"""
 
@@ -5406,6 +5422,7 @@ def get_unread_count(user_id):
 @app.route('/api/files')
 @login_required
 @not_banned
+@payment_required
 def get_files():
     """Get all files with pagination and filtering"""
     page = request.args.get('page', 1, type=int)
@@ -5645,6 +5662,7 @@ users_downloads = {}  # user_id -> count of downloads
 @app.route('/api/files/<int:id>/download')
 @login_required
 @not_banned
+@payment_required
 def download_file(id):
     """Download a file with limiter and share system."""
     user_id = current_user.id
@@ -5813,6 +5831,7 @@ def get_file_categories():
 @app.route('/api/user/profile', methods=['GET'])
 @login_required
 @not_banned
+@payment_required
 def get_user_profile():
     """Get current user's profile data"""
     user_data = {
@@ -5831,6 +5850,7 @@ def get_user_profile():
 @app.route('/api/user/profile', methods=['PUT'])
 @login_required
 @not_banned
+@payment_required
 def update_user_profile():
     """Update current user's profile"""
     data = request.get_json()
@@ -5906,6 +5926,7 @@ def get_online_users():
 @app.route('/api/messages')
 @login_required
 @not_banned
+@payment_required
 def get_messages():
     """Get messages for a room with optional filtering"""
     room = request.args.get('room', 'general')
@@ -6008,6 +6029,7 @@ def mark_messages_read():
 @app.route('/api/messages/send', methods=['POST'])
 @login_required
 @not_banned
+@payment_required
 def send_message():
     """Send a message via HTTP API (fallback)"""
     try:
@@ -6078,6 +6100,7 @@ def send_message():
 @app.route('/api/messages/<int:message_id>/reply', methods=['POST'])
 @login_required
 @not_banned
+@payment_required
 def reply_to_message(message_id):
     """Reply to a specific message"""
     try:
@@ -6141,6 +6164,7 @@ def reply_to_message(message_id):
 @app.route('/api/messages/<int:message_id>', methods=['DELETE'])
 @login_required
 @not_banned
+@payment_required
 def delete_message(message_id):
     """Delete a message (soft delete)"""
     try:
@@ -6178,6 +6202,7 @@ def delete_message(message_id):
 @app.route('/api/messages/<int:message_id>/replies')
 @login_required
 @not_banned
+@payment_required
 def get_message_replies(message_id):
     """Get replies for a specific message"""
     try:
@@ -6236,6 +6261,7 @@ private_rooms = {}
 @app.route('/api/private-rooms/create', methods=['POST'])
 @login_required
 @not_banned
+@payment_required
 def create_private_room():
     try:
         data = request.get_json()
@@ -6270,6 +6296,7 @@ def create_private_room():
 @app.route('/api/private-rooms/join', methods=['POST'])
 @login_required
 @not_banned
+@payment_required
 def join_private_room():
     try:
         data = request.get_json()
@@ -7617,6 +7644,7 @@ def upload_assignment_file(id):
         return jsonify({'error': 'Failed to save file'}), 500
     
 @app.route('/api/assignments/<int:id>/download')
+@payment_required
 def download_assignment_file(id):
     """Download assignment file"""
     assignment = Assignment.query.get_or_404(id)
@@ -8058,12 +8086,14 @@ def get_timetable_by_day(day):
 # =======================================================
 @app.route('/past-papers')
 @login_required
+@payment_required
 def past_papers():
     """Past papers main page"""
     return render_template('past_papers.html')
 
 @app.route('/past-papers/<int:paper_id>')
 @login_required
+@payment_required
 def view_past_paper(paper_id):
     """View a specific past paper"""
     return render_template('past_paper_detail.html', paper_id=paper_id)
@@ -8111,6 +8141,7 @@ def upload_past_paper():
 
 @app.route('/api/past-papers')
 @login_required
+@payment_required
 def get_past_papers():
     """Get all past papers with pagination"""
     page = request.args.get('page', 1, type=int)
@@ -8167,6 +8198,7 @@ def get_past_papers():
 
 @app.route('/api/past-papers/<int:paper_id>')
 @login_required
+@payment_required
 def get_past_paper_detail(paper_id):
     """Get detailed information about a specific past paper"""
     paper = PastPaper.query.get_or_404(paper_id)
@@ -8202,6 +8234,7 @@ def get_past_paper_detail(paper_id):
 
 @app.route('/api/past-papers/<int:paper_id>/download', methods=['GET'])
 @login_required
+@payment_required
 def download_past_paper(paper_id):
     """Increment download count for a past paper"""
     try:
@@ -8582,6 +8615,7 @@ def current_user_info():
 # =========================================
 
 @app.route('/api/topics/<int:topic_id>/materials')
+@payment_required
 def get_topic_materials(topic_id):
     """Get all materials for a specific topic"""
     try:
@@ -8804,6 +8838,7 @@ def get_available_files():
 
 @app.route('/api/archieves/available')
 @login_required
+@payment_required
 def get_available_archieves():
     """Get files that can be added to topics"""
     try:

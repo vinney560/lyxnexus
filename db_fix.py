@@ -66,5 +66,4 @@ def fix_sequences():
         print("Traceback:", traceback.format_exc())
         return jsonify({"status": "error", "message": str(e)}), 500
 
-print("Database Fix Script Loaded")
 print("✅ Fixing DB Script Initialized!!!")
