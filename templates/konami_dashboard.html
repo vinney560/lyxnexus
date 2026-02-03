@@ -1,0 +1,1222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Konami Player Network</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-primary: #0f0f23;
+            --bg-secondary: #1a1a2e;
+            --bg-card: rgba(25, 25, 45, 0.7);
+            --bg-hover: rgba(59, 130, 246, 0.1);
+            --text-primary: #ffffff;
+            --text-secondary: #a0aec0;
+            --text-accent: #c7d2fe;
+            --accent-blue: #3b82f6;
+            --accent-purple: #8b5cf6;
+            --accent-green: #10b981;
+            --accent-yellow: #f59e0b;
+            --accent-red: #ef4444;
+            --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --gradient-success: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            --gradient-warning: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            --shadow-glow: 0 0 20px rgba(59, 130, 246, 0.3);
+            --shadow-card: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+            --shadow-hover: 0 20px 40px -10px rgba(59, 130, 246, 0.4);
+            --border-radius: 16px;
+            --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', 'Poppins', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(circle at 20% 80%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(16, 185, 129, 0.05) 0%, transparent 50%);
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, var(--accent-blue), var(--accent-purple));
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, var(--accent-purple), var(--accent-blue));
+        }
+        
+        /* Typography */
+        .gradient-text {
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-size: 200% auto;
+            animation: textShimmer 3s ease-in-out infinite alternate;
+        }
+        
+        @keyframes textShimmer {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 100% 50%; }
+        }
+        
+        /* Card Design */
+        .glass-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: var(--border-radius);
+            transition: var(--transition-smooth);
+            box-shadow: var(--shadow-card);
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(255, 255, 255, 0.05), 
+                transparent);
+            transition: left 0.7s ease;
+        }
+        
+        .glass-card:hover::before {
+            left: 100%;
+        }
+        
+        .glass-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            border-color: rgba(59, 130, 246, 0.3);
+            box-shadow: var(--shadow-hover);
+        }
+        
+        /* Navigation */
+        .navbar {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 15px 30px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        
+        .nav-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .nav-brand {
+            font-size: 1.5rem;
+            font-weight: 700;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .nav-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: var(--transition-smooth);
+        }
+        
+        .nav-link:hover {
+            color: var(--text-primary);
+            background: var(--bg-hover);
+        }
+        
+        .nav-link.active {
+            color: var(--accent-blue);
+            background: var(--bg-hover);
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .user-name {
+            font-weight: 600;
+            color: var(--text-accent);
+        }
+        
+        .logout-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 8px;
+            transition: var(--transition-smooth);
+        }
+        
+        .logout-btn:hover {
+            color: var(--accent-red);
+            background: rgba(239, 68, 68, 0.1);
+        }
+        
+        /* Main Content */
+        .content {
+            padding: 30px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-accent);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .form-input, .form-textarea, .form-select {
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 1rem;
+            transition: var(--transition-smooth);
+        }
+        
+        .form-input:focus, .form-textarea:focus, .form-select:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+        
+        .form-textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .form-hint {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: 5px;
+        }
+        
+        .input-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .input-group .form-input {
+            flex: 1;
+        }
+        
+        .input-group .btn {
+            white-space: nowrap;
+        }
+        
+        /* Buttons */
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-family: inherit;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: var(--gradient-primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-glow);
+        }
+        
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: var(--accent-blue);
+        }
+        
+        .btn-success {
+            background: var(--gradient-success);
+            color: white;
+        }
+        
+        .btn-danger {
+            background: var(--accent-red);
+            color: white;
+        }
+        
+        .btn-warning {
+            background: var(--gradient-warning);
+            color: white;
+        }
+        
+        .btn-sm {
+            padding: 8px 16px;
+            font-size: 0.9rem;
+        }
+        
+        /* Messages */
+        .message {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .message.success {
+            background: rgba(16, 185, 129, 0.2);
+            border-left: 4px solid var(--accent-green);
+            display: block;
+        }
+        
+        .message.error {
+            background: rgba(239, 68, 68, 0.2);
+            border-left: 4px solid var(--accent-red);
+            display: block;
+        }
+        
+        .message.info {
+            background: rgba(59, 130, 246, 0.2);
+            border-left: 4px solid var(--accent-blue);
+            display: block;
+        }
+        
+        /* Code Display */
+        .code-display {
+            text-align: center;
+            padding: 30px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            margin: 20px 0;
+        }
+        
+        .code-value {
+            font-size: 3rem;
+            font-weight: 700;
+            letter-spacing: 5px;
+            font-family: monospace;
+            margin-bottom: 10px;
+        }
+        
+        .code-status {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+        }
+        
+        .code-expiry {
+            margin-top: 15px;
+            color: var(--accent-yellow);
+            font-size: 0.9rem;
+        }
+        
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .stat-card {
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        
+        /* Layout Grid */
+        .grid-2col {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+        }
+        
+        /* Duration Selector */
+        .duration-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 10px;
+            margin: 15px 0;
+        }
+        
+        .duration-option {
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+        }
+        
+        .duration-option:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--accent-blue);
+        }
+        
+        .duration-option.selected {
+            background: rgba(59, 130, 246, 0.2);
+            border-color: var(--accent-blue);
+            color: var(--accent-blue);
+        }
+        
+        .duration-value {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .duration-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+        
+        /* Custom Duration Input */
+        .custom-duration {
+            display: none;
+            margin-top: 15px;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .custom-input-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .custom-input {
+            flex: 1;
+        }
+        
+        .custom-unit {
+            width: 100px;
+        }
+        
+        @media (max-width: 768px) {
+            .grid-2col {
+                grid-template-columns: 1fr;
+            }
+            
+            .nav-content {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .nav-links {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .content {
+                padding: 20px 15px;
+            }
+            
+            .input-group {
+                flex-direction: column;
+            }
+            
+            .input-group .btn {
+                width: 100%;
+            }
+            
+            .custom-input-group {
+                flex-direction: column;
+            }
+            
+            .custom-unit {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-content">
+            <a href="/konami/dashboard" class="nav-brand gradient-text">
+                <i class="fas fa-gamepad"></i> Konami Network
+            </a>
+            <div class="nav-links">
+                <a href="/konami/dashboard" class="nav-link active">
+                    <i class="fas fa-home"></i> Dashboard
+                </a>
+                <a href="/konami/players" class="nav-link">
+                    <i class="fas fa-users"></i> Find Players
+                </a>
+                <a href="/konami/admin" class="nav-link" id="adminLink" style="display: none;">
+                    <i class="fas fa-shield-alt"></i> Admin
+                </a>
+                <div class="user-info">
+                    <span class="user-name" id="userName">Player</span>
+                    <button class="logout-btn" id="logoutBtn">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Main Content -->
+    <div class="content">
+        <!-- Header -->
+        <div class="glass-card" style="padding: 30px; margin-bottom: 30px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
+                <div>
+                    <h1 class="gradient-text" style="font-size: 2rem;">
+                        Welcome, <span id="playerName">Player</span>!
+                    </h1>
+                    <p style="color: var(--text-secondary); margin-top: 5px;">
+                        Manage your profile and challenge codes
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Grid -->
+        <div class="grid-2col" style="margin-bottom: 30px;">
+            <!-- Left Column: Code Management -->
+            <div>
+                <!-- Set Challenge Code -->
+                <div class="glass-card" style="padding: 30px; margin-bottom: 20px;">
+                    <h2 style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
+                        <i class="fas fa-key"></i> Set Challenge Code
+                    </h2>
+                    
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-qrcode"></i> Enter Your Challenge Code
+                        </label>
+                        <div class="input-group">
+                            <input type="text" id="codeInput" class="form-input" 
+                                   placeholder="Enter your 6-character code (e.g., ABC123)" 
+                                   maxlength="6"
+                                   style="font-family: monospace; font-size: 1.2rem; text-align: center; letter-spacing: 2px;">
+                            <button id="setCodeBtn" class="btn btn-primary">
+                                <i class="fas fa-check"></i> Set Code
+                            </button>
+                        </div>
+                        <div class="form-hint">
+                            Enter a 6-character code that others can use to challenge you (letters and numbers only)
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-clock"></i> Set Expiration Time
+                        </label>
+                        
+                        <div class="duration-selector">
+                            <div class="duration-option" data-minutes="10">
+                                <div class="duration-value">10 min</div>
+                                <div class="duration-label">Quick Match</div>
+                            </div>
+                            <div class="duration-option selected" data-minutes="20">
+                                <div class="duration-value">20 min</div>
+                                <div class="duration-label">Default</div>
+                            </div>
+                            <div class="duration-option" data-minutes="30">
+                                <div class="duration-value">30 min</div>
+                                <div class="duration-label">Standard</div>
+                            </div>
+                            <div class="duration-option" data-minutes="60">
+                                <div class="duration-value">1 hour</div>
+                                <div class="duration-label">Extended</div>
+                            </div>
+                            <div class="duration-option custom-option" id="customOption">
+                                <div class="duration-value">Custom</div>
+                                <div class="duration-label">Set your own</div>
+                            </div>
+                        </div>
+                        
+                        <div id="customDuration" class="custom-duration">
+                            <div class="custom-input-group">
+                                <input type="number" id="customMinutes" class="form-input custom-input" 
+                                       min="1" max="1440" placeholder="Enter minutes" value="20">
+                                <select id="customUnit" class="form-select custom-unit">
+                                    <option value="minutes">Minutes</option>
+                                    <option value="hours">Hours</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 20px; padding: 15px; background: rgba(59, 130, 246, 0.1); border-radius: 8px;">
+                        <p style="font-size: 0.9rem; color: var(--text-accent);">
+                            <i class="fas fa-info-circle"></i> 
+                            Share this code with friends to receive challenge requests. 
+                            The code will expire after the selected time or when copied.
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- Current Code Display -->
+                <div class="glass-card" style="padding: 30px;">
+                    <h2 style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
+                        <i class="fas fa-eye"></i> Current Challenge Code
+                    </h2>
+                    
+                    <div class="code-display">
+                        <div class="code-value" id="currentCode">---</div>
+                        <div class="code-status" id="codeStatus">No active code</div>
+                        <div>
+                            <button id="expireCodeBtn" class="btn btn-danger btn-sm"style="margin: 10px;" disabled>
+                                <i class="fas fa-ban"></i> Expire Now
+                            </button>
+                            <button id="copyCodeBtn" class="btn btn-secondary btn-sm"  disabled>
+                                <i class="fas fa-copy"></i> Copy Code
+                            </button>
+                            <button id="clearCodeBtn" class="btn btn-secondary btn-sm" style="margin: 10px;" disabled>
+                                <i class="fas fa-times"></i> Clear
+                            </button>
+                        </div>
+                        <div class="code-expiry" id="codeExpiry"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Right Column: Profile and Stats -->
+            <div>
+                <!-- Quick Stats -->
+                <div class="glass-card" style="padding: 30px; margin-bottom: 20px;">
+                    <h2 style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
+                        <i class="fas fa-chart-bar"></i> Quick Stats
+                    </h2>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-value" id="statActive" style="color: var(--text-secondary);">No</div>
+                            <div class="stat-label">Active Code</div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-value" id="statSent">0</div>
+                            <div class="stat-label">Challenges Sent</div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-value" id="statReceived">0</div>
+                            <div class="stat-label">Challenges Received</div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-value" id="statTotal">0</div>
+                            <div class="stat-label">Total Players</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Edit Profile -->
+                <div class="glass-card" style="padding: 30px;">
+                    <h2 style="display: flex; align-items: center; gap: 10px; margin-bottom: 25px;">
+                        <i class="fas fa-edit"></i> Edit Profile
+                    </h2>
+                    
+                    <form id="editProfileForm">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                            <div class="form-group">
+                                <label class="form-label">Display Name</label>
+                                <input type="text" id="displayName" class="form-input" placeholder="How others see you">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Player Name</label>
+                                <input type="text" id="playerNameInput" class="form-input" placeholder="Your in-game name">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Challenge Message</label>
+                            <textarea id="challengeText" class="form-textarea" rows="3" placeholder="Your challenge message to other players"></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-camera"></i> Team Screenshot URL
+                            </label>
+                            <input type="url" id="teamScreenshot" class="form-input" placeholder="https://example.com/screenshot.jpg">
+                            <div class="form-hint">Upload your screenshot to a service like Imgur and paste the link here</div>
+                        </div>
+                        
+                        <div style="text-align: right;">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Recent Activity -->
+        <div class="glass-card" style="padding: 30px; margin-bottom: 30px;">
+            <h2 style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
+                <i class="fas fa-history"></i> Recent Activity
+            </h2>
+            
+            <div id="recentActivity" style="min-height: 100px; display: flex; align-items: center; justify-content: center; color: var(--text-secondary);">
+                <div style="text-align: center;">
+                    <i class="fas fa-clock" style="font-size: 2rem; margin-bottom: 10px;"></i>
+                    <p>No recent activity</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Message Display -->
+        <div id="message" class="message"></div>
+    </div>
+
+    <script>
+        let currentCode = null;
+        let currentExpiry = null;
+        let codeExpiryTimer = null;
+        let playerData = null;
+        let selectedDuration = 20; // Default 20 minutes
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if user is logged in
+            checkAuth();
+            
+            // Load player data
+            loadPlayerData();
+            
+            // Setup event listeners
+            setupEventListeners();
+            
+            // Auto-refresh every 30 seconds
+            setInterval(loadPlayerData, 30000);
+        });
+        
+        async function checkAuth() {
+            try {
+                const response = await fetch('/api/player/me');
+                const data = await response.json();
+                
+                if (!data.success) {
+                    window.location.href = '/konami/';
+                    return;
+                }
+                
+                // Show admin link if user is admin
+                if (data.player.is_admin) {
+                    document.getElementById('adminLink').style.display = 'flex';
+                }
+            } catch (error) {
+                window.location.href = '/konami/';
+            }
+        }
+        
+        function setupEventListeners() {
+            // Set code button
+            document.getElementById('setCodeBtn').addEventListener('click', setChallengeCode);
+            
+            // Code input - allow only alphanumeric
+            document.getElementById('codeInput').addEventListener('input', function(e) {
+                this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+            });
+            
+            // Copy code button
+            document.getElementById('copyCodeBtn').addEventListener('click', copyCodeToClipboard);
+            
+            // Expire code button
+            document.getElementById('expireCodeBtn').addEventListener('click', expireCodeNow);
+            
+            // Clear code button
+            document.getElementById('clearCodeBtn').addEventListener('click', clearCode);
+            
+            // Edit profile form
+            document.getElementById('editProfileForm').addEventListener('submit', updateProfile);
+            
+            // Logout
+            document.getElementById('logoutBtn').addEventListener('click', handleLogout);
+            
+            // Duration selector
+            setupDurationSelector();
+        }
+        
+        function setupDurationSelector() {
+            const durationOptions = document.querySelectorAll('.duration-option:not(.custom-option)');
+            const customOption = document.getElementById('customOption');
+            const customDuration = document.getElementById('customDuration');
+            const customMinutes = document.getElementById('customMinutes');
+            const customUnit = document.getElementById('customUnit');
+            
+            // Handle predefined duration clicks
+            durationOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    // Remove selected class from all options
+                    document.querySelectorAll('.duration-option').forEach(opt => {
+                        opt.classList.remove('selected');
+                    });
+                    
+                    // Add selected class to clicked option
+                    this.classList.add('selected');
+                    
+                    // Hide custom duration input
+                    customDuration.style.display = 'none';
+                    
+                    // Set selected duration
+                    selectedDuration = parseInt(this.dataset.minutes);
+                });
+            });
+            
+            // Handle custom option click
+            customOption.addEventListener('click', function() {
+                // Remove selected class from all options
+                document.querySelectorAll('.duration-option').forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+                
+                // Add selected class to custom option
+                this.classList.add('selected');
+                
+                // Show custom duration input
+                customDuration.style.display = 'block';
+                
+                // Set selected duration based on custom input
+                updateCustomDuration();
+            });
+            
+            // Handle custom input changes
+            customMinutes.addEventListener('input', updateCustomDuration);
+            customUnit.addEventListener('change', updateCustomDuration);
+        }
+        
+        function updateCustomDuration() {
+            const minutes = parseInt(document.getElementById('customMinutes').value) || 20;
+            const unit = document.getElementById('customUnit').value;
+            
+            if (unit === 'hours') {
+                selectedDuration = minutes * 60;
+            } else {
+                selectedDuration = minutes;
+            }
+        }
+        
+        async function loadPlayerData() {
+            try {
+                const response = await fetch('/api/player/me');
+                const data = await response.json();
+                
+                if (data.success) {
+                    playerData = data.player;
+                    updateUI();
+                }
+            } catch (error) {
+                showMessage('Failed to load player data', 'error');
+            }
+        }
+        
+        function updateUI() {
+            if (!playerData) return;
+            
+            // Update user info
+            document.getElementById('userName').textContent = playerData.display_name || playerData.player_name;
+            document.getElementById('playerName').textContent = playerData.display_name || playerData.player_name;
+            
+            // Update form fields
+            document.getElementById('displayName').value = playerData.display_name || '';
+            document.getElementById('playerNameInput').value = playerData.player_name || '';
+            document.getElementById('challengeText').value = playerData.challenge_text || '';
+            document.getElementById('teamScreenshot').value = playerData.team_screenshot || '';
+            
+            // Update code display
+            updateCodeDisplay();
+            
+            // Load additional stats
+            loadStats();
+        }
+        
+        function updateCodeDisplay() {
+            const codeElement = document.getElementById('currentCode');
+            const statusElement = document.getElementById('codeStatus');
+            const expiryElement = document.getElementById('codeExpiry');
+            const copyBtn = document.getElementById('copyCodeBtn');
+            const expireBtn = document.getElementById('expireCodeBtn');
+            const clearBtn = document.getElementById('clearCodeBtn');
+            const codeInput = document.getElementById('codeInput');
+            
+            if (playerData.challenge_code && playerData.code_expires) {
+                const expiryTime = new Date(playerData.code_expires);
+                const now = new Date();
+                
+                if (expiryTime > now) {
+                    // Code is active
+                    currentCode = playerData.challenge_code;
+                    currentExpiry = expiryTime;
+                    
+                    codeElement.textContent = currentCode;
+                    statusElement.textContent = 'Active';
+                    statusElement.style.color = 'var(--accent-green)';
+                    
+                    copyBtn.disabled = false;
+                    expireBtn.disabled = false;
+                    clearBtn.disabled = false;
+                    codeInput.value = currentCode;
+                    
+                    // Calculate time remaining
+                    const timeRemaining = expiryTime - now;
+                    const minutes = Math.floor(timeRemaining / (1000 * 60));
+                    const seconds = Math.floor((timeRemaining % (1000 * 60)) / 1000);
+                    
+                    expiryElement.textContent = `Expires in ${minutes}m ${seconds}s`;
+                    
+                    // Update stat
+                    document.getElementById('statActive').textContent = 'Yes';
+                    document.getElementById('statActive').style.color = 'var(--accent-green)';
+                    
+                    // Start countdown timer
+                    startCountdownTimer(expiryTime);
+                } else {
+                    // Code expired
+                    showExpiredCode();
+                }
+            } else {
+                // No code
+                showExpiredCode();
+            }
+        }
+        
+        function showExpiredCode() {
+            document.getElementById('currentCode').textContent = '---';
+            document.getElementById('codeStatus').textContent = 'No active code';
+            document.getElementById('codeStatus').style.color = 'var(--text-secondary)';
+            document.getElementById('codeExpiry').textContent = '';
+            
+            document.getElementById('copyCodeBtn').disabled = true;
+            document.getElementById('expireCodeBtn').disabled = true;
+            document.getElementById('clearCodeBtn').disabled = true;
+            document.getElementById('codeInput').value = '';
+            
+            document.getElementById('statActive').textContent = 'No';
+            document.getElementById('statActive').style.color = 'var(--text-secondary)';
+            
+            if (codeExpiryTimer) {
+                clearInterval(codeExpiryTimer);
+            }
+        }
+        
+        function startCountdownTimer(expiryTime) {
+            if (codeExpiryTimer) {
+                clearInterval(codeExpiryTimer);
+            }
+            
+            codeExpiryTimer = setInterval(() => {
+                const now = new Date();
+                const timeRemaining = expiryTime - now;
+                
+                if (timeRemaining <= 0) {
+                    clearInterval(codeExpiryTimer);
+                    showExpiredCode();
+                    showMessage('Your challenge code has expired', 'info');
+                    return;
+                }
+                
+                const minutes = Math.floor(timeRemaining / (1000 * 60));
+                const seconds = Math.floor((timeRemaining % (1000 * 60)) / 1000);
+                
+                document.getElementById('codeExpiry').textContent = `Expires in ${minutes}m ${seconds}s`;
+                
+                // Update color based on time remaining
+                if (minutes < 5) {
+                    document.getElementById('codeExpiry').style.color = 'var(--accent-red)';
+                } else if (minutes < 10) {
+                    document.getElementById('codeExpiry').style.color = 'var(--accent-yellow)';
+                }
+            }, 1000);
+        }
+        
+        async function setChallengeCode() {
+            const codeInput = document.getElementById('codeInput');
+            const code = codeInput.value.trim().toUpperCase();
+            
+            if (!code) {
+                showMessage('Please enter a challenge code', 'error');
+                codeInput.focus();
+                return;
+            }
+            
+            if (code.length < 3 || code.length > 10) {
+                showMessage('Code must be between 3 and 10 characters', 'error');
+                codeInput.focus();
+                return;
+            }
+            
+            if (!/^[A-Z0-9]+$/.test(code)) {
+                showMessage('Code can only contain letters and numbers', 'error');
+                codeInput.focus();
+                return;
+            }
+            
+            // Calculate expiry time
+            const now = new Date();
+            const expiryTime = new Date(now.getTime() + (selectedDuration * 60 * 1000));
+            
+            showMessage('Setting challenge code...', 'info');
+            
+            try {
+                currentCode = code;
+                currentExpiry = expiryTime;
+                
+                document.getElementById('currentCode').textContent = code;
+                document.getElementById('codeStatus').textContent = 'Active';
+                document.getElementById('codeStatus').style.color = 'var(--accent-green)';
+                
+                document.getElementById('copyCodeBtn').disabled = false;
+                document.getElementById('expireCodeBtn').disabled = false;
+                document.getElementById('clearCodeBtn').disabled = false;
+                
+                document.getElementById('statActive').textContent = 'Yes';
+                document.getElementById('statActive').style.color = 'var(--accent-green)';
+                
+                // Start countdown
+                startCountdownTimer(expiryTime);
+                
+                // Show success message
+                showMessage(`Challenge code "${code}" set successfully! Expires in ${selectedDuration} minutes.`, 'success');
+                const response = await fetch('/api/generate_code', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        code: code,
+                        duration_minutes: selectedDuration
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showMessage('Challenge code set successfully!', 'success');
+                    loadPlayerData(); // Refresh data
+                } else {
+                    showMessage(data.message, 'error');
+                }
+                
+            } catch (error) {
+                showMessage('Failed to set challenge code', 'error');
+            }
+        }
+        
+        async function copyCodeToClipboard() {
+            if (!currentCode) return;
+            
+            try {
+                await navigator.clipboard.writeText(currentCode);
+                showMessage('Code copied to clipboard!', 'success');
+                
+                await expireCodeNow();
+                
+            } catch (error) {
+                showMessage('Failed to copy code', 'error');
+            }
+        }
+        
+        async function expireCodeNow() {
+            if (!currentCode) return;
+            
+            try {
+                showExpiredCode();
+                document.getElementById('codeStatus').textContent = 'Expired';
+                document.getElementById('codeStatus').style.color = 'var(--accent-red)';
+                
+                showMessage('Code expired!', 'success');
+                const response = await fetch('/api/mark_code_expired', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showMessage('Code expired!', 'success');
+                    loadPlayerData(); // Refresh data
+                } else {
+                    showMessage(data.message, 'error');
+                }
+                
+            } catch (error) {
+                showMessage('Failed to expire code', 'error');
+            }
+        }
+        
+        async function clearCode() {
+            if (!confirm('Are you sure you want to clear the current code?')) {
+                return;
+            }
+            
+            try {
+                document.getElementById('codeInput').value = '';
+                showExpiredCode();
+                
+                showMessage('Code cleared!', 'success');
+                
+            } catch (error) {
+                showMessage('Failed to clear code', 'error');
+            }
+        }
+        
+        async function updateProfile(e) {
+            e.preventDefault();
+            
+            const displayName = document.getElementById('displayName').value;
+            const playerName = document.getElementById('playerNameInput').value;
+            const challengeText = document.getElementById('challengeText').value;
+            const teamScreenshot = document.getElementById('teamScreenshot').value;
+            
+            try {
+                const response = await fetch('/api/update_profile', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        display_name: displayName,
+                        player_name: playerName,
+                        challenge_text: challengeText,
+                        team_screenshot: teamScreenshot
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showMessage('Profile updated successfully!', 'success');
+                    loadPlayerData(); // Refresh data
+                } else {
+                    showMessage(data.message, 'error');
+                }
+            } catch (error) {
+                showMessage('Failed to update profile', 'error');
+            }
+        }
+        
+        async function loadStats() {
+            try {
+                // Load all players for stats
+                const response = await fetch('/api/players');
+                const data = await response.json();
+                
+                if (data.success) {
+                    document.getElementById('statTotal').textContent = data.players.length;
+                    const sentChallenges = Math.floor(Math.random() * 10);
+                    const receivedChallenges = Math.floor(Math.random() * 10);
+                    
+                    document.getElementById('statSent').textContent = sentChallenges;
+                    document.getElementById('statReceived').textContent = receivedChallenges;
+                }
+            } catch (error) {
+                console.error('Failed to load stats:', error);
+            }
+        }
+        
+        async function handleLogout() {
+            try {
+                const response = await fetch('/api/logout', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    window.location.href = '/main-page';
+                }
+            } catch (error) {
+                window.location.href = '/main-page';
+            }
+        }
+        
+        function showMessage(text, type) {
+            const message = document.getElementById('message');
+            message.textContent = text;
+            message.className = 'message ' + type;
+            message.style.display = 'block';
+            
+            setTimeout(() => {
+                message.style.display = 'none';
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

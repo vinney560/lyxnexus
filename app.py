@@ -73,6 +73,7 @@ def database_url():
     return None
 
 app.config['SQLALCHEMY_DATABASE_URI'] = database_url()
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # Read from Aiven connection max pooling for reuse pool
 app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
     'pool_size': 10,
@@ -135,8 +136,7 @@ app.config['SESSION_FILE_DIR'] = './flask_session/'
 app.config['SESSION_COOKIE_HTTPONLY'] = True       
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'      
 app.config['SESSION_COOKIE_SECURE'] = True
-app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=1) 
-app.permanent_session_lifetime = timedelta(hours=1)
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7)
 # =======================================
 #   RATE LIMITER INITIALIZATION
 # ===============================
@@ -829,6 +829,39 @@ class Enrollment(db.Model):
             'payment_status': self.payment_status,
             'notes': self.notes
         }
+
+# KONAMI Models
+class Player(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    konami_id = db.Column(db.String(50), unique=True, nullable=False)
+    player_name = db.Column(db.String(100), nullable=False)
+    display_name = db.Column(db.String(100))
+    password_hash = db.Column(db.String(200), nullable=False)
+    team_screenshot = db.Column(db.String(1000), default='https://wallpapercave.com/wp/rB0uGTi.jpg')
+    challenge_text = db.Column(db.String(500))
+    challenge_code = db.Column(db.String(10))
+    code_expires_at = db.Column(db.DateTime)
+    is_admin = db.Column(db.Boolean, default=False)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone(timedelta(hours=3))))
+    last_active = db.Column(db.DateTime, default=lambda: datetime.now(timezone(timedelta(hours=3))))
+    
+    def set_password(self, password):
+        self.password_hash = password  # In production, use proper hashing
+    
+    def check_password(self, password):
+        return self.password_hash == password  # In production, use proper hashing    
+
+class Challenge(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    challenger_id = db.Column(db.Integer, db.ForeignKey('player.id'), nullable=False)
+    target_id = db.Column(db.Integer, db.ForeignKey('player.id'), nullable=False)
+    code = db.Column(db.String(10))
+    status = db.Column(db.String(20), default='pending')
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone(timedelta(hours=3))))
+    
+    challenger = db.relationship('Player', foreign_keys=[challenger_id])
+    target = db.relationship('Player', foreign_keys=[target_id])
+
 # ======================================================    
 from werkzeug.security import generate_password_hash
 # Master key for Admin Access  
@@ -853,6 +886,18 @@ def initialize_operator_and_admin_code():
         db.session.add(new_admin_code)
         db.session.commit()
         print(Fore.GREEN + "Default admin code initialized")
+    if not Player.query.filter_by(konami_id='ADMIN001').first():
+        admin = Player(
+            konami_id='ADMIN001',
+            player_name='SystemAdmin',
+            display_name='Administrator',
+            challenge_text='Welcome to Konami Network!',
+            is_admin=True
+        )
+        admin.set_password('admin123')
+        db.session.add(admin)
+        db.session.commit()
+        print(Fore.GREEN + "Default admin player created with konami_id 'ADMIN001' and password 'admin123'")
 #==========================================
 # Execute raw SQL if needed
 #db.session.execute(text('ALTER TABLE "user" ADD COLUMN status BOOLEAN DEFAULT TRUE'))
@@ -863,7 +908,7 @@ from sqlalchemy import text
 with app.app_context():
     try:
         # Create tables if they don't exist
-        db.create_all()
+        db.create_all()        
         db.session.commit()
         print(Fore.GREEN + "✅ Database tables created successfully!")
 
@@ -10163,7 +10208,322 @@ def create_new_user_from_import(user_data):
     if new_user.mobile and not new_user.validate_mobile(new_user.mobile):
         raise ValueError(f"Invalid mobile number: {new_user.mobile}")
     
-    db.session.add(new_user)    
+    db.session.add(new_user)   
+
+# ==============  LyxKonami  =============
+# Routes for templates
+@app.route('/konami/')
+def konami_index():
+    return render_template('konami_login.html')
+
+@app.route('/konami/register_page')
+def konami_register_page():
+    return render_template('konami_register.html')
+
+@app.route('/konami/dashboard')
+def konami_dashboard():
+    if 'player_id' not in session:
+        return redirect('/konami/')
+    return render_template('konami_dashboard.html')
+
+@app.route('/konami/players')
+def konami_players_page():
+    if 'player_id' not in session:
+        return redirect('/konami/')
+    return render_template('konami_players.html')
+
+@app.route('/konami/admin')
+def konami_admin_page():
+    player = Player.query.get(session['player_id'])
+    if not player.is_admin:
+        return redirect('/konami/dashboard')
+    return render_template('konami_admin.html')
+
+# API Routes
+@app.route('/api/login', methods=['POST'])
+def api_login():
+    data = request.get_json()
+    konami_id = data.get('konami_id')
+    password = data.get('password')
+    
+    player = Player.query.filter_by(konami_id=konami_id).first()
+    
+    if player and player.check_password(password):
+        session['player_id'] = player.id
+        session['player_name'] = player.display_name or player.player_name
+        session['is_admin'] = player.is_admin
+        
+        player.last_active = datetime.now(timezone(timedelta(hours=3)))
+        db.session.commit()
+        
+        return jsonify({'success': True, 'player': {
+            'id': player.id,
+            'name': player.display_name,
+            'is_admin': player.is_admin
+        }})
+    
+    return jsonify({'success': False, 'message': 'Invalid Konami ID or password'}), 401
+
+@app.route('/api/register', methods=['POST'])
+def api_register():
+    data = request.get_json()
+    
+    # Validation
+    if not all(k in data for k in ['konami_id', 'player_name', 'password']):
+        return jsonify({'success': False, 'message': 'Missing fields'}), 400
+    
+    if Player.query.filter_by(konami_id=data['konami_id']).first():
+        return jsonify({'success': False, 'message': 'Konami ID already exists'}), 400
+    
+    # Create player
+    player = Player(
+        konami_id=data['konami_id'],
+        player_name=data['player_name'],
+        display_name=data.get('display_name', data['player_name']),
+        challenge_text=data.get('challenge_text', 'Ready for challenges!'),
+        team_screenshot=data.get('team_screenshot', '')
+    )
+    player.set_password(data['password'])
+    
+    db.session.add(player)
+    db.session.commit()
+    
+    return jsonify({'success': True, 'message': 'Registration successful'})
+
+@app.route('/api/player/me')
+def api_player_me():    
+    player = Player.query.get(session['player_id'])
+    if not player:
+        return jsonify({'success': False, 'message': 'Player not found'}), 404
+    
+    return jsonify({'success': True, 'player': {
+        'id': player.id,
+        'konami_id': player.konami_id,
+        'player_name': player.player_name,
+        'display_name': player.display_name,
+        'challenge_text': player.challenge_text,
+        'team_screenshot': player.team_screenshot,
+        'challenge_code': player.challenge_code,
+        'code_expires': player.code_expires_at.isoformat() if player.code_expires_at else None,
+        'is_admin': player.is_admin,
+        'created_at': player.created_at.isoformat()
+    }})
+
+@app.route('/api/players')
+def api_players():   
+    players = Player.query.filter(Player.id != session['player_id']).all()
+    players_data = []
+    
+    for p in players:
+        has_active_code = p.challenge_code and p.code_expires_at and p.code_expires_at > datetime.now(timezone(timedelta(hours=3)))
+        players_data.append({
+            'id': p.id,
+            'konami_id': p.konami_id,
+            'display_name': p.display_name,
+            'player_name': p.player_name,
+            'challenge_text': p.challenge_text,
+            'team_screenshot': p.team_screenshot or 'https://cdn.wallpapersafari.com/88/15/ISdtbl.jpg',
+            'challenge_code': p.challenge_code if has_active_code else None,
+            'code_expires': p.code_expires_at.isoformat() if has_active_code else None,
+            'is_admin': p.is_admin,
+            'last_active': p.last_active.isoformat() if p.last_active else None
+        })
+    
+    return jsonify({'success': True, 'players': players_data})
+
+@app.route('/api/update_profile', methods=['POST'])
+def api_update_profile():
+    data = request.get_json()
+    player = Player.query.get(session['player_id'])
+    
+    if 'display_name' in data:
+        player.display_name = data['display_name']
+    
+    if 'player_name' in data:
+        player.player_name = data['player_name']
+    
+    if 'challenge_text' in data:
+        player.challenge_text = data['challenge_text']
+    
+    if 'team_screenshot' in data:
+        player.team_screenshot = data['team_screenshot']
+    
+    db.session.commit()
+    session['player_name'] = player.display_name
+    
+    return jsonify({'success': True, 'message': 'Profile updated'})
+
+import re
+@app.route('/api/generate_code', methods=['POST'])
+def api_set_custom_code():
+    data = request.get_json()
+    code = data.get('code', '').upper().strip()
+    duration = data.get('duration_minutes', 20)
+    
+    # Validate code
+    if not code:
+        return jsonify({'success': False, 'message': 'Please enter a code'}), 400
+    
+    if len(code) < 3 or len(code) > 10:
+        return jsonify({'success': False, 'message': 'Code must be 3-10 characters'}), 400
+    
+    if not re.match('^[A-Z0-9]+$', code):
+        return jsonify({'success': False, 'message': 'Code can only contain letters and numbers'}), 400
+    
+    player = Player.query.get(session['player_id'])
+    
+    # Set custom code
+    player.challenge_code = code
+    player.code_expires_at = datetime.now(timezone(timedelta(hours=3))) + timedelta(minutes=duration)
+    
+    db.session.commit()
+    
+    return jsonify({
+        'success': True,
+        'message': f'Custom code "{code}" set successfully!',
+        'code': code,
+        'expires_at': player.code_expires_at.isoformat()
+    })
+
+@app.route('/api/mark_code_expired', methods=['POST'])
+def api_mark_code_expired():
+    player = Player.query.get(session['player_id'])
+    player.code_expires_at = datetime.now(timezone(timedelta(hours=3)))  # Expire immediately
+    db.session.commit()
+    
+    return jsonify({'success': True, 'message': 'Code expired'})
+
+@app.route('/api/use_code', methods=['POST'])
+def api_use_code():
+    data = request.get_json()
+    code = data.get('code', '').upper()
+    
+    # Find player with active code
+    target = Player.query.filter(
+        Player.challenge_code == code,
+        Player.code_expires_at > datetime.now(timezone(timedelta(hours=3)))
+    ).first()
+    
+    if not target:
+        return jsonify({'success': False, 'message': 'Invalid or expired code'}), 400
+    
+    if target.id == session['player_id']:
+        return jsonify({'success': False, 'message': 'Cannot use your own code'}), 400
+    
+    # Create challenge
+    challenge = Challenge(
+        challenger_id=session['player_id'],
+        target_id=target.id,
+        code=code
+    )
+    
+    # Mark code as expired after use
+    target.code_expires_at = datetime.now(timezone(timedelta(hours=3)))
+    
+    db.session.add(challenge)
+    db.session.commit()
+    
+    return jsonify({
+        'success': True,
+        'message': f'Challenge sent to {target.display_name}!'
+    })
+
+# Admin API Routes
+@app.route('/api/admin/players')
+def api_admin_players():
+    player = Player.query.get(session['player_id'])
+    if not player.is_admin:
+        return jsonify({'success': False, 'message': 'Admin access required'}), 403
+    
+    players = Player.query.all()
+    players_data = []
+    
+    for p in players:
+        players_data.append({
+            'id': p.id,
+            'konami_id': p.konami_id,
+            'player_name': p.player_name,
+            'display_name': p.display_name,
+            'challenge_text': p.challenge_text,
+            'team_screenshot': p.team_screenshot,
+            'challenge_code': p.challenge_code,
+            'code_expires': p.code_expires_at.isoformat() if p.code_expires_at else None,
+            'is_admin': p.is_admin,
+            'created_at': p.created_at.isoformat(),
+            'last_active': p.last_active.isoformat() if p.last_active else None
+        })
+    
+    return jsonify({'success': True, 'players': players_data})
+
+@app.route('/api/admin/update_player', methods=['POST'])
+def api_admin_update_player():
+    admin = Player.query.get(session['player_id'])
+    if not admin.is_admin:
+        return jsonify({'success': False, 'message': 'Admin access required'}), 403
+    
+    data = request.get_json()
+    player = Player.query.get(data.get('player_id'))
+    
+    if not player:
+        return jsonify({'success': False, 'message': 'Player not found'}), 404
+    
+    if 'player_name' in data:
+        player.player_name = data['player_name']
+    
+    if 'display_name' in data:
+        player.display_name = data['display_name']
+    
+    if 'challenge_text' in data:
+        player.challenge_text = data['challenge_text']
+    
+    if 'is_admin' in data:
+        player.is_admin = data['is_admin']
+    
+    db.session.commit()
+    
+    return jsonify({'success': True, 'message': 'Player updated'})
+
+@app.route('/api/admin/delete_player', methods=['POST'])
+def api_admin_delete_player():
+    admin = Player.query.get(session['player_id'])
+    if not admin.is_admin:
+        return jsonify({'success': False, 'message': 'Admin access required'}), 403
+    
+    data = request.get_json()
+    player_id = data.get('player_id')
+    
+    if player_id == session['player_id']:
+        return jsonify({'success': False, 'message': 'Cannot delete yourself'}), 400
+    
+    player = Player.query.get(player_id)
+    if player:
+        db.session.delete(player)
+        db.session.commit()
+        return jsonify({'success': True, 'message': 'Player deleted'})
+    
+    return jsonify({'success': False, 'message': 'Player not found'}), 404
+
+@app.route('/api/admin/challenges')
+def api_admin_challenges():
+    player = Player.query.get(session['player_id'])
+    if not player.is_admin:
+        return jsonify({'success': False, 'message': 'Admin access required'}), 403
+    
+    challenges = Challenge.query.all()
+    challenges_data = []
+    
+    for c in challenges:
+        challenges_data.append({
+            'id': c.id,
+            'challenger': c.challenger.display_name,
+            'target': c.target.display_name,
+            'code': c.code,
+            'status': c.status,
+            'created_at': c.created_at.isoformat()
+        })
+    
+    return jsonify({'success': True, 'challenges': challenges_data})
+
 #==========================================
 # Error Handlers
 #==========================================

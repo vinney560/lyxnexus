@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Konami Player Network</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-primary: #0f0f23;
+            --bg-secondary: #1a1a2e;
+            --bg-card: rgba(25, 25, 45, 0.7);
+            --bg-hover: rgba(59, 130, 246, 0.1);
+            --text-primary: #ffffff;
+            --text-secondary: #a0aec0;
+            --text-accent: #c7d2fe;
+            --accent-blue: #3b82f6;
+            --accent-purple: #8b5cf6;
+            --accent-green: #10b981;
+            --accent-yellow: #f59e0b;
+            --accent-red: #ef4444;
+            --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --gradient-success: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            --gradient-warning: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            --shadow-glow: 0 0 20px rgba(59, 130, 246, 0.3);
+            --shadow-card: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+            --shadow-hover: 0 20px 40px -10px rgba(59, 130, 246, 0.4);
+            --border-radius: 16px;
+            --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', 'Poppins', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(circle at 20% 80%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(16, 185, 129, 0.05) 0%, transparent 50%);
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, var(--accent-blue), var(--accent-purple));
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, var(--accent-purple), var(--accent-blue));
+        }
+        
+        /* Typography */
+        .gradient-text {
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-size: 200% auto;
+            animation: textShimmer 3s ease-in-out infinite alternate;
+        }
+        
+        @keyframes textShimmer {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 100% 50%; }
+        }
+        
+        /* Card Design */
+        .glass-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: var(--border-radius);
+            transition: var(--transition-smooth);
+            box-shadow: var(--shadow-card);
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(255, 255, 255, 0.05), 
+                transparent);
+            transition: left 0.7s ease;
+        }
+        
+        .glass-card:hover::before {
+            left: 100%;
+        }
+        
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-accent);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .form-input, .form-textarea {
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 1rem;
+            transition: var(--transition-smooth);
+        }
+        
+        .form-input:focus, .form-textarea:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+        
+        .form-textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .form-hint {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: 5px;
+        }
+        
+        /* Buttons */
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-family: inherit;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: var(--gradient-primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-glow);
+        }
+        
+        /* Messages */
+        .message {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .message.success {
+            background: rgba(16, 185, 129, 0.2);
+            border-left: 4px solid var(--accent-green);
+            display: block;
+        }
+        
+        .message.error {
+            background: rgba(239, 68, 68, 0.2);
+            border-left: 4px solid var(--accent-red);
+            display: block;
+        }
+        
+        .message.info {
+            background: rgba(59, 130, 246, 0.2);
+            border-left: 4px solid var(--accent-blue);
+            display: block;
+        }
+        
+        /* Layout */
+        .auth-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .auth-card {
+            width: 100%;
+            max-width: 500px;
+            padding: 40px;
+        }
+        
+        .auth-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .auth-title {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+        
+        .auth-subtitle {
+            color: var(--text-secondary);
+            margin-top: 10px;
+        }
+        
+        .auth-link {
+            text-align: center;
+            margin-top: 20px;
+            color: var(--text-secondary);
+        }
+        
+        .auth-link a {
+            color: var(--accent-blue);
+            text-decoration: none;
+        }
+        
+        .auth-link a:hover {
+            text-decoration: underline;
+        }
+        
+        .screenshot-preview {
+            margin-top: 10px;
+        }
+        
+        .preview-image {
+            max-width: 100%;
+            border-radius: 8px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="glass-card auth-card">
+            <div class="auth-header">
+                <h1 class="gradient-text auth-title">
+                    <i class="fas fa-user-plus"></i> Join Konami Network
+                </h1>
+                <p class="auth-subtitle">
+                    Create your account to connect with players
+                </p>
+            </div>
+            
+            <form id="registerForm">
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-id-card"></i> Konami ID *
+                    </label>
+                    <input type="text" id="konamiId" class="form-input" placeholder="Your unique Konami ID" required>
+                    <div class="form-hint">This is your official Konami game ID</div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-user"></i> Player Name *
+                    </label>
+                    <input type="text" id="playerName" class="form-input" placeholder="Your in-game name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-user-tag"></i> Display Name
+                    </label>
+                    <input type="text" id="displayName" class="form-input" placeholder="How others will see you">
+                    <div class="form-hint">Leave blank to use your player name</div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-lock"></i> Password *
+                    </label>
+                    <input type="password" id="password" class="form-input" placeholder="Create a password" required minlength="6">
+                    <div class="form-hint">Minimum 6 characters</div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-lock"></i> Confirm Password *
+                    </label>
+                    <input type="password" id="confirmPassword" class="form-input" placeholder="Confirm your password" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-bullhorn"></i> Challenge Message
+                    </label>
+                    <textarea id="challengeText" class="form-textarea" placeholder="Looking for strong opponents!">Ready for challenges!</textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-camera"></i> Team Strength Screenshot
+                    </label>
+                    <input type="file" id="screenshot" class="form-input" accept="image/*" style="padding: 10px;">
+                    <div class="form-hint">Upload a screenshot of your team lineup (optional)</div>
+                    <div id="screenshotPreview" class="screenshot-preview"></div>
+                </div>
+                
+                <div class="form-group" style="margin-top: 30px;">
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">
+                        <i class="fas fa-user-plus"></i> Create Account
+                    </button>
+                </div>
+                
+                <div class="auth-link">
+                    Already have an account? 
+                    <a href="/">Sign in here</a>
+                </div>
+            </form>
+            
+            <div id="message" class="message" style="margin-top: 20px;"></div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const registerForm = document.getElementById('registerForm');
+            const message = document.getElementById('message');
+            const screenshotInput = document.getElementById('screenshot');
+            const screenshotPreview = document.getElementById('screenshotPreview');
+            
+            // Handle screenshot preview
+            screenshotInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file && file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        screenshotPreview.innerHTML = `
+                            <img src="${e.target.result}" alt="Preview" class="preview-image">
+                        `;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+            
+            registerForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const konamiId = document.getElementById('konamiId').value;
+                const playerName = document.getElementById('playerName').value;
+                const displayName = document.getElementById('displayName').value;
+                const password = document.getElementById('password').value;
+                const confirmPassword = document.getElementById('confirmPassword').value;
+                const challengeText = document.getElementById('challengeText').value;
+                
+                if (!konamiId || !playerName || !password || !confirmPassword) {
+                    showMessage('Please fill all required fields', 'error');
+                    return;
+                }
+                
+                if (password !== confirmPassword) {
+                    showMessage('Passwords do not match', 'error');
+                    return;
+                }
+                
+                if (password.length < 6) {
+                    showMessage('Password must be at least 6 characters', 'error');
+                    return;
+                }
+                
+                showMessage('Creating account...', 'info');
+                
+                try {
+                    // Handle file upload (convert to base64 for demo)
+                    let screenshotBase64 = null;
+                    if (screenshotInput.files.length > 0) {
+                        const file = screenshotInput.files[0];
+                        screenshotBase64 = await convertToBase64(file);
+                    }
+                    
+                    const response = await fetch('/api/register', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            konami_id: konamiId,
+                            player_name: playerName,
+                            display_name: displayName || playerName,
+                            password: password,
+                            challenge_text: challengeText,
+                            team_screenshot: screenshotBase64
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        showMessage('Account created successfully! Redirecting to login...', 'success');
+                        setTimeout(() => {
+                            window.location.href = '/konami/';
+                        }, 2000);
+                    } else {
+                        showMessage(data.message || 'Registration failed', 'error');
+                    }
+                } catch (error) {
+                    showMessage('Network error. Please try again.', 'error');
+                }
+            });
+            
+            function convertToBase64(file) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.readAsDataURL(file);
+                    reader.onload = () => resolve(reader.result);
+                    reader.onerror = error => reject(error);
+                });
+            }
+            
+            function showMessage(text, type) {
+                message.textContent = text;
+                message.className = 'message ' + type;
+                message.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>
