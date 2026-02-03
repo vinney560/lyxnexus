@@ -286,22 +286,22 @@
                     <label class="form-label">
                         <i class="fas fa-id-card"></i> Konami ID *
                     </label>
-                    <input type="text" id="konamiId" class="form-input" placeholder="Your unique Konami ID" required>
+                    <input type="text" id="konamiId" class="form-input" placeholder="Your unique Konami ID" minlength="6" required>
                     <div class="form-hint">This is your official Konami game ID</div>
                 </div>
                 
                 <div class="form-group">
                     <label class="form-label">
-                        <i class="fas fa-user"></i> Player Name *
+                        <i class="fas fa-user"></i> Team Name *
                     </label>
-                    <input type="text" id="playerName" class="form-input" placeholder="Your in-game name" required>
+                    <input type="text" id="playerName" class="form-input" placeholder="Your team name" minlength="3" maxlength="24" required>
                 </div>
                 
                 <div class="form-group">
                     <label class="form-label">
                         <i class="fas fa-user-tag"></i> Display Name
                     </label>
-                    <input type="text" id="displayName" class="form-input" placeholder="How others will see you">
+                    <input type="text" id="displayName" class="form-input" placeholder="How others will see you" minlength="3" maxlength="24">
                     <div class="form-hint">Leave blank to use your player name</div>
                 </div>
                 

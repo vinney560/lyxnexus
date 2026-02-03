@@ -846,10 +846,10 @@ class Player(db.Model):
     last_active = db.Column(db.DateTime, default=lambda: nairobi_time)
     
     def set_password(self, password):
-        self.password_hash = password  # In production, use proper hashing
+        self.password_hash = password
     
     def check_password(self, password):
-        return self.password_hash == password  # In production, use proper hashing    
+        return self.password_hash == password
 
 class Challenge(db.Model):
     id = db.Column(db.Integer, primary_key=True)
