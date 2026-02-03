@@ -10279,10 +10279,15 @@ def api_register():
     return jsonify({'success': True, 'message': 'Registration successful'})
 
 @app.route('/api/player/me')
-def api_player_me():    
+def api_player_me():
+    if 'player_id' not in session:
+        return jsonify({'success': False, 'message': 'Not logged in'}), 401
+    
     player = Player.query.get(session['player_id'])
     if not player:
         return jsonify({'success': False, 'message': 'Player not found'}), 404
+    
+    print(f"DEBUG: Player {player.id} - code: {player.challenge_code}, expires: {player.code_expires_at}")  # Add this debug line
     
     return jsonify({'success': True, 'player': {
         'id': player.id,
@@ -10291,10 +10296,10 @@ def api_player_me():
         'display_name': player.display_name,
         'challenge_text': player.challenge_text,
         'team_screenshot': player.team_screenshot,
-        'challenge_code': player.challenge_code,
-        'code_expires': player.code_expires_at.isoformat() if player.code_expires_at else None,
+        'challenge_code': player.challenge_code,  # Make sure this is included
+        'code_expires': player.code_expires_at.isoformat() if player.code_expires_at else None,  # Make sure this is included
         'is_admin': player.is_admin,
-        'created_at': player.created_at.isoformat()
+        'created_at': player.created_at.isoformat() if player.created_at else None
     }})
 
 @app.route('/api/players')
@@ -10347,6 +10352,7 @@ def api_set_custom_code():
     data = request.get_json()
     code = data.get('code', '').upper().strip()
     duration = data.get('duration_minutes', 20)
+    print(Fore.RED + f"==> Setting custom code: {code} for duration: {duration} minutes")
     
     # Validate code
     if not code:
