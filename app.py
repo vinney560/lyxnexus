@@ -10268,6 +10268,7 @@ def api_register():
     
     # Create player
     player = Player(
+        id=gen_unique_id(Player),
         konami_id=data['konami_id'],
         player_name=data['player_name'],
         display_name=data.get('display_name', data['player_name']),
@@ -10290,7 +10291,7 @@ def api_player_me():
     if not player:
         return jsonify({'success': False, 'message': 'Player not found'}), 404
     
-    print(f"DEBUG: Player {player.id} - code: {player.challenge_code}, expires: {player.code_expires_at}")  # Add this debug line
+    print(f"DEBUG: Player {player.id} - code: {player.challenge_code}, expires: {player.code_expires_at}")  # debug line
     
     return jsonify({'success': True, 'player': {
         'id': player.id,
@@ -10299,8 +10300,8 @@ def api_player_me():
         'display_name': player.display_name,
         'challenge_text': player.challenge_text,
         'team_screenshot': player.team_screenshot,
-        'challenge_code': player.challenge_code,  # Make sure this is included
-        'code_expires': player.code_expires_at.isoformat() if player.code_expires_at else None,  # Make sure this is included
+        'challenge_code': player.challenge_code,
+        'code_expires': player.code_expires_at.isoformat() if player.code_expires_at else None,  
         'is_admin': player.is_admin,
         'created_at': player.created_at.isoformat() if player.created_at else None
     }})
