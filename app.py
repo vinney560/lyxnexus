@@ -492,6 +492,12 @@ class File(db.Model):
 class UploadedFile(db.Model):
     __tablename__ = 'uploaded_files'
     
+    __table_args__ = (
+        db.Index('idx_uploaded_files_created_at', 'created_at'),
+        db.Index('idx_uploaded_files_file_type', 'file_type'),
+        db.Index('idx_uploaded_files_filename', 'filename'),
+        db.Index('idx_uploaded_files_type_created', 'file_type', 'created_at'),
+    )
     id = db.Column(db.Integer, primary_key=True)
     public_id = db.Column(db.String(200), unique=True, nullable=False)
     filename = db.Column(db.String(200), nullable=False)
@@ -541,6 +547,13 @@ class FileTag(db.Model):
     __table_args__ = (db.UniqueConstraint('file_id', 'tag', name='unique_file_tag'),)
 
 class TopicMaterial(db.Model):
+    __table_args__ = (
+        db.Index('idx_topic_material_topic_id', 'topic_id'),
+        db.Index('idx_topic_material_file_id', 'file_id'),
+        db.Index('idx_topic_material_topic_order', 'topic_id', 'order_index'),
+        db.Index('idx_topic_material_created_at', 'created_at'),
+        db.Index('idx_topic_material_topic_created', 'topic_id', 'created_at'),
+    )
     id = db.Column(db.Integer, primary_key=True)
     topic_id = db.Column(db.Integer, db.ForeignKey('topic.id'), nullable=False)
     file_id = db.Column(db.Integer, db.ForeignKey('uploaded_files.id'), nullable=False)
@@ -664,8 +677,14 @@ class OperatorCode(db.Model):
 #=========================================
 """ TO store users who have permitte Notification on there devices """
 class PushSubscription(db.Model):
+    __tablename__ = 'push_subscription'
+    __table_args__ = (
+        db.Index('idx_push_subscription_user_id', 'user_id'),
+    )
+    
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), 
+                        nullable=False, index=True)
     endpoint = db.Column(db.String(500), unique=True, nullable=False)
     p256dh = db.Column(db.String(255), nullable=False)
     auth = db.Column(db.String(255), nullable=False)
@@ -679,8 +698,7 @@ class PushSubscription(db.Model):
         return {
             "endpoint": self.endpoint,
             "keys": {"p256dh": self.p256dh, "auth": self.auth}
-        }
-    
+        }    
 #==========================================  
 class Share(db.Model):
     __tablename__ = 'shares'
@@ -737,19 +755,29 @@ class UserNotification(db.Model):
     
     # Relationship
     user = db.relationship('User', backref='notifications', lazy=True)
-#===============================================
-# models.py - Add these classes
-
+# ================= PAST PAPERS =====================
 class PastPaper(db.Model):
     __tablename__ = 'past_papers'
-    
+    __table_args__ = (
+        db.Index('idx_past_papers_course_code', 'course_code'),
+        db.Index('idx_past_papers_year', 'year'),
+        db.Index('idx_past_papers_semester', 'semester'),
+        db.Index('idx_past_papers_exam_type', 'exam_type'),
+        db.Index('idx_past_papers_is_active', 'is_active'),        
+        db.Index('idx_past_papers_uploaded_at', 'uploaded_at'),
+        db.Index('idx_past_papers_course_year', 'course_code', 'year'),
+        db.Index('idx_past_papers_course_semester', 'course_code', 'semester'),
+        db.Index('idx_past_papers_year_semester', 'year', 'semester'),
+        db.Index('idx_past_papers_download_count', 'download_count'),
+        db.Index('idx_past_papers_uploaded_by', 'uploaded_by'),
+    )
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(200), nullable=False)
     description = db.Column(db.Text)
     year = db.Column(db.Integer)
     semester = db.Column(db.String(50))
     course_code = db.Column(db.String(50))
-    exam_type = db.Column(db.String(50))  # e.g., "Final", "Midterm", "Quiz"
+    exam_type = db.Column(db.String(50))  # e.g., "Final", "Midsem", "Quiz"
     uploaded_at = db.Column(db.DateTime, default=datetime.utcnow)
     uploaded_by = db.Column(db.Integer, db.ForeignKey('user.id'))
     download_count = db.Column(db.Integer, default=0)
@@ -761,7 +789,14 @@ class PastPaper(db.Model):
 
 class PastPaperFile(db.Model):
     __tablename__ = 'past_paper_files'
-    
+    __table_args__ = (
+        db.Index('idx_past_paper_files_past_paper_id', 'past_paper_id'),
+        db.Index('idx_past_paper_files_file_id', 'file_id'),
+        db.Index('idx_past_paper_files_paper_order', 'past_paper_id', 'order'),
+        db.Index('idx_past_paper_files_added_at', 'added_at'),
+        db.Index('idx_past_paper_files_paper_added', 'past_paper_id', 'added_at'),
+    )
+
     id = db.Column(db.Integer, primary_key=True)
     past_paper_id = db.Column(db.Integer, db.ForeignKey('past_papers.id', ondelete='CASCADE'), nullable=False)
     file_id = db.Column(db.Integer, db.ForeignKey('uploaded_files.id', ondelete='CASCADE'), nullable=False)
