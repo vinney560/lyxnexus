@@ -29,6 +29,7 @@ from bs4 import BeautifulSoup # HTTP Response
 from flask_session import Session # Short term In-SYstem Memory keeping
 from flask_limiter import Limiter # Prevent Brute Force Attack
 from flask_limiter.util import get_remote_address # Efficient Block of Specific IP 
+from flask import request
 from pywebpush import webpush, WebPushException # CHrome Notification Push Module
 from colorama import Fore # Coloring logs
 #==========================================
@@ -140,12 +141,33 @@ app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7)
 # =======================================
 #   RATE LIMITER INITIALIZATION
 # ===============================
-limiter = Limiter(
-    key_func=lambda: current_user.id if current_user.is_authenticated else get_remote_address(),
-    app=app,                    
-    default_limits=["2200 per day", "200 per hour"]
-)
+def get_rate_limit_key():
+    """Proper key function that won't break"""
+    try:
+        # Check if user is authenticated
+        if hasattr(current_user, 'is_authenticated') and current_user.is_authenticated:
+            return str(current_user.id)  # Must return string
+        
+        if request.headers.get('X-Forwarded-For'):
+            return request.headers.get('X-Forwarded-For').split(',')[0].strip()
+        if request.headers.get('X-Real-IP'):
+            return request.headers.get('X-Real-IP')
+        
+        return get_remote_address()
+    except Exception as e:
+        # Fail safe - still rate limit by IP
+        print(f"Rate limit key error: {e}")
+        return get_remote_address() or '127.0.0.1'
 
+limiter = Limiter(
+    key_func=get_rate_limit_key,
+    app=app,
+    default_limits=[
+        "1000 per day",    # Normal users: ~30 visits/day is typical
+        "200 per hour",    # Burst protection
+        "10 per minute"    # Prevent rapid-fire requests
+    ]
+)
 # ===============================
 login_manager = LoginManager()
 login_manager.init_app(app)
