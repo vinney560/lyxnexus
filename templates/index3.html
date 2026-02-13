@@ -1,0 +1,2040 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Class Portal | LyxNexus</title>
+    
+    <!-- SEO Meta -->
+    <meta name="keywords" content="Lyx Nexus, Kisii LyxNexus, kisii lyxnexus, kisii university lyxnexus, kisii university lyx nexus, lyx nexus, lyxnexus" />
+    <meta name="author" content="Vincent Kipngetich" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://lyxnexus.onrender.com/" />
+    <link rel="icon" href="https://lyxnexus.onrender.com/uploads/favicon-1.png"/>
+    
+    <meta property="og:title" content="LyxNexus | Class Portal" />
+    <meta property="og:description" content="LyxNexus is a simple yet powerful class hub designed to keep everything in one place — from announcements and assignments to topics and class discussions." />
+    <meta property="og:image" content="https://lyxnexus.onrender.com/favicon.ico" />
+    <meta property="og:url" content="https://lyxnexus.onrender.com/" />
+    
+    <meta name="twitter:card" content="summary" />
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="/static/css/tailwind.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/typed.js@2.0.12"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
+    <meta name="google-site-verification" content="sJ42XyhDu5tg-Paz5vI6KgPbhqVKqfdNNX0cZHsbifU" />
+    
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const _0x1a2b = ['lyxnexus-3.onrender.com', 'lyxnexus.lyxnexus.xo.je', 'www.lyxnexus-3.onrender.com', 'lyxnexus.onrender.com', 'www.lyxnexus.onrender.com'];
+        if (!String.prototype._0x3c4d) {
+            String.prototype._0x3c4d = function(_0x5e6f) {
+                return this.length > 0 && _0x5e6f === '_0x7a8b_0x9c0d';
+            };
+        }
+        const _0x2d3e = window.location.hostname;
+        const _0x4f5g = _0x1a2b.some(_0x6h7i => _0x2d3e === _0x6h7i || _0x2d3e.endsWith('.' + _0x6h7i));
+        if (!''._0x3c4d('_0x7a8b_0x9c0d') && !_0x4f5g) {
+            document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#0f172a;color:#ef4444;font-family:Inter,sans-serif"><div style="text-align:center"><h1 style="font-size:2rem;margin-bottom:1rem">🔒 Access Restricted</h1><p>This template can only be used on authorized domains</p></div></div>';
+        }
+    });    
+    </script>
+</head>
+
+<style>
+    :root {
+        --bg-color: #0f172a;
+        --bg1-color: #152f5a9d;
+        --text-color: #f1f5f9;
+        --accent-color: #3b82f6;
+        --secondary-color: #8b5cf6;
+        --card-bg: rgba(30, 41, 59, 0.8);
+        --border-color: rgba(100, 116, 139, 0.3);
+        --accent-blue: #3b82f6;
+        --accent-purple: #8b5cf6;
+    }
+    
+    body {
+        font-family: 'Inter', sans-serif;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        overflow-x: hidden;
+        line-height: 1.6;
+    }
+    
+    .gradient-text {
+        background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        color: transparent;
+    }
+    
+    .glass-morph {
+        background: rgba(30, 41, 59, 0.7);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .glass-morph:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+    }
+    
+    .btn {
+        background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+        color: white;
+        border: none;
+        padding: 12px 28px;
+        border-radius: 10px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+        cursor: pointer;
+        font-size: 0.95rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        min-height: 48px;
+    }
+    
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+    }
+    
+    .btn-sm {
+        padding: 10px 20px;
+        font-size: 0.9rem;
+        min-height: 44px;
+    }
+    
+    .btn-outline {
+        background: transparent;
+        border: 2px solid #3B82F6;
+        color: #3B82F6;
+        box-shadow: none;
+    }
+    
+    .btn-outline:hover {
+        background: #3B82F6;
+        color: white;
+        box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+    }
+    
+    .floating {
+        animation: floating 3s ease-in-out infinite;
+    }
+    
+    @keyframes floating {
+        0% { transform: translate(0, 0px); }
+        50% { transform: translate(0, 12px); }
+        100% { transform: translate(0, -0px); }
+    }
+    
+    .pulse {
+        animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.03); }
+        100% { transform: scale(1); }
+    }
+    
+    .logo-container {
+        background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+        border-radius: 12px;
+        padding: 10px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .feature-icon {
+        width: 64px;
+        height: 64px;
+        background: rgba(59, 130, 246, 0.1);
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 15px;
+        color: #3B82F6;
+        font-size: 26px;
+    }
+    
+    .announcement-card {
+        background: var(--card-bg);
+        border-radius: 16px;
+        padding: 24px;
+        margin-bottom: 20px;
+        border-left: 4px solid #3B82F6;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        border: 1px solid var(--border-color);
+    }
+    
+    .announcement-card:hover {
+        transform: translateY(-3px);
+        border: 1px solid rgb(59, 131, 246);
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+    }
+    
+    .assignment-card {
+        background: var(--card-bg);
+        border-radius: 16px;
+        padding: 24px;
+        margin-bottom: 20px;
+        border-left: 4px solid #8B5CF6;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        border: 1px solid var(--border-color);
+    }
+    
+    .assignment-card:hover {
+        transform: translateY(-3px);
+        border: 1px solid rgb(59, 131, 246);
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+    }
+    
+    .timetable-day {
+        background: var(--card-bg);
+        border-radius: 16px;
+        padding: 24px;
+        margin-bottom: 20px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        border: 1px solid var(--border-color);
+    }
+    
+    .timetable-day:hover {
+        transform: translateY(-3px);
+        border: 1px solid rgb(59, 131, 246);
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+    }
+    
+    .timetable-slot {
+        display: flex;
+        justify-content: space-between;
+        padding: 12px 0;
+        border-bottom: 1px solid rgba(100, 116, 139, 0.3);
+    }
+    
+    .timetable-slot:hover {
+        background: rgba(59, 130, 246, 0.1);
+        border-radius: 8px;
+        padding-left: 10px;
+        padding-right: 10px;
+        transform: scale(0.98);
+    }
+
+    .timetable-slot:last-child {
+        border-bottom: none;
+    }
+    
+    .loading {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+    }
+    
+    .spinner {
+        border: 4px solid rgba(59, 130, 246, 0.2);
+        border-radius: 50%;
+        border-top: 4px solid #3B82F6;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    .nav-link {
+        color: #cbd5e1;
+        font-weight: 500;
+        padding: 10px 18px;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+    
+    .nav-link:hover {
+        color: #3B82F6;
+        background: rgba(59, 130, 246, 0.1);
+    }
+    
+    .nav-link.active {
+        color: #3B82F6;
+        background: rgba(59, 130, 246, 0.1);
+    }
+    
+    .nav-link.active::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 18px;
+        right: 18px;
+        height: 2px;
+        background: #3B82F6;
+        border-radius: 2px;
+    }
+    
+    .modern-card {
+        background: var(--card-bg);
+        border-radius: 16px;
+        padding: 24px;
+        transition: all 0.3s ease;
+        border: 1px solid var(--border-color);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    }
+    
+    .modern-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 35px rgba(0, 0, 0, 0.25);
+        border-color: rgba(59, 130, 246, 0.3);
+        border: 1px solid #3b82f6;
+    }
+    
+    .toast-container {
+        position: fixed;
+        top: 100px;
+        right: 20px;
+        z-index: 1000;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        max-width: 400px;
+        pointer-events: none;
+    }
+    
+    .toast {
+        background: rgba(30, 41, 59, 0.95);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        border-radius: 12px;
+        padding: 16px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        transform: translateX(400px);
+        opacity: 0;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        pointer-events: all;
+        max-width: 100%;
+        overflow: hidden;
+    }
+    
+    .toast.show {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    
+    .toast.hide {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+    
+    .toast-icon {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        margin-top: 2px;
+    }
+    
+    .toast-success .toast-icon {
+        background: rgba(34, 197, 94, 0.2);
+        color: #22c55e;
+    }
+    
+    .toast-error .toast-icon {
+        background: rgba(239, 68, 68, 0.2);
+        color: #ef4444;
+    }
+    
+    .toast-warning .toast-icon {
+        background: rgba(245, 158, 11, 0.2);
+        color: #f59e0b;
+    }
+    
+    .toast-info .toast-icon {
+        background: rgba(59, 130, 246, 0.2);
+        color: #3b82f6;
+    }
+    
+    .toast-content {
+        flex: 1;
+        min-width: 0;
+    }
+    
+    .toast-title {
+        font-weight: 600;
+        margin-bottom: 4px;
+        font-size: 0.95rem;
+    }
+    
+    .toast-message {
+        color: #cbd5e1;
+        font-size: 0.875rem;
+        line-height: 1.4;
+        word-wrap: break-word;
+    }
+    
+    .toast-close {
+        background: none;
+        border: none;
+        color: #94a3b8;
+        cursor: pointer;
+        padding: 4px;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        transition: all 0.2s ease;
+    }
+    
+    .toast-close:hover {
+        color: #f1f5f9;
+        background: rgba(255, 255, 255, 0.1);
+    }
+    
+    .toast-progress {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+        border-radius: 0 0 0 12px;
+        width: 100%;
+        transform-origin: left;
+        animation: toastProgress 5s linear forwards;
+    }
+    
+    @keyframes toastProgress {
+        from { transform: scaleX(1); }
+        to { transform: scaleX(0); }
+    }
+    
+    .announcement-skeleton {
+        background: var(--card-bg);
+        border-radius: 16px;
+        padding: 20px;
+        margin-bottom: 20px;
+        border-left: 4px solid #3B82F6;
+        animation: pulse 2s infinite;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    }
+    
+    .skeleton-title {
+        height: 24px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 4px;
+        margin-bottom: 12px;
+        width: 70%;
+    }
+    
+    .skeleton-text {
+        height: 16px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 4px;
+        margin-bottom: 8px;
+    }
+    
+    .skeleton-text.short {
+        width: 40%;
+    }
+    
+    .section-divider {
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(100, 116, 139, 0.3), transparent);
+        margin: 40px 0;
+    }
+    
+    .card-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 16px;
+    }
+    
+    .card-header-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        background: rgba(59, 130, 246, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #3B82F6;
+        margin-right: 12px;
+    }
+    
+    @media (max-width: 768px) {
+        nav .max-w-6xl.mx-auto.px-4.py-4 {
+            padding-top: 0.75rem;
+            padding-bottom: 0.75rem;
+        }
+        
+        .logo-container {
+            padding: 8px;
+        }
+        
+        .logo-container svg {
+            width: 24px;
+            height: 24px;
+        }
+        
+        .text-2xl.font-bold {
+            font-size: 1.25rem;
+        }
+        
+        .flex.space-x-4 {
+            flex-direction: column;
+            gap: 8px;
+            width: 100%;
+        }
+        
+        .btn {
+            width: 100%;
+            text-align: center;
+        }
+        
+        header.py-16.md\:py-24 {
+            padding-top: 3rem;
+            padding-bottom: 3rem;
+        }
+        
+        .text-4xl.md\:text-6xl {
+            font-size: 2rem;
+        }
+        
+        .text-xl {
+            font-size: 1rem;
+        }
+        
+        .flex.flex-col.sm\:flex-row .btn {
+            width: 100%;
+            margin-bottom: 8px;
+        }
+        
+        main .space-y-16 {
+            gap: 2rem;
+        }
+        
+        .text-3xl.md\:text-4xl {
+            font-size: 1.75rem;
+        }
+        
+        .hidden.md\:flex {
+            display: none !important;
+        }
+        
+        .toast-container {
+            top: 80px;
+            right: 10px;
+            left: 10px;
+            max-width: none;
+        }
+        
+        .toast {
+            max-width: 100%;
+        }
+        
+        .mobile-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            overflow-x: auto;    
+            overflow-y: hidden;
+            white-space: nowrap;      
+            padding: 12px;
+            z-index: 100;
+            border-top: 1px solid rgba(100, 116, 139, 0.3);
+            scroll-behavior: smooth;   
+            -webkit-overflow-scrolling: touch; 
+        }
+
+        
+        .mobile-nav::-webkit-scrollbar {
+            display: none;
+        }
+        .mobile-nav {
+            -ms-overflow-style: none; 
+            scrollbar-width: none;    
+        }
+
+        .mobile-nav-btn {
+            display: inline-flex;        
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 12px;
+            border-radius: 12px;
+            color: #94a3b8;
+            font-size: 12px;
+            transition: all 0.3s ease;
+            flex: 0 0 auto;               
+            width: 70px;                  
+            margin-right: 10px;
+            text-align: center;
+        }
+
+        .mobile-nav-btn.active {
+            color: #3B82F6;
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .mobile-nav-btn i {
+            font-size: 18px;
+            margin-bottom: 4px;
+        }
+
+        .content-container {
+            padding-bottom: 90px;
+        }
+        
+        .card-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .card-header-icon {
+            margin-bottom: 10px;
+            margin-right: 0;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .btn {
+            padding: 10px 20px;
+            font-size: 0.85rem;
+        }
+        
+        .text-4xl.md\:text-6xl {
+            font-size: 1.75rem;
+        }
+        
+        .feature-icon {
+            width: 50px;
+            height: 50px;
+            font-size: 22px;
+        }
+        
+        .modern-card {
+            padding: 20px;
+        }
+    }
+    
+    html {
+        scroll-behavior: smooth;
+    }
+    
+    .btn:focus, a:focus {
+        outline: 2px solid #3B82F6;
+        outline-offset: 2px;
+    }
+    
+    .section-title {
+        position: relative;
+        display: inline-block;
+        margin-bottom: 3rem;
+        font-weight: 700;
+    }
+    
+    .section-title::after {
+        content: '';
+        position: absolute;
+        bottom: -12px;
+        left: 0;
+        width: 60px;
+        height: 4px;
+        background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+        border-radius: 2px;
+    }
+    
+    .status-badge {
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+    
+    .status-due-soon {
+        background: rgba(59, 130, 246, 0.2);
+        color: #3B82F6;
+    }
+    
+    .status-urgent {
+        background: rgba(239, 68, 68, 0.2);
+        color: #ef4444;
+    }
+    
+    .status-completed {
+        background: rgba(34, 197, 94, 0.2);
+        color: #22c55e;
+    }
+    
+    .accent-line {
+        height: 4px;
+        width: 40px;
+        background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+        border-radius: 2px;
+        margin: 0 auto 20px;
+    }
+    
+    .stat-card {
+        background: var(--card-bg);
+        border-radius: 16px;
+        padding: 24px;
+        text-align: center;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        border: 1px solid var(--border-color);
+        transition: all 0.3s ease;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-4px);
+        border-color: var(--accent-blue);
+        box-shadow: 0 15px 30px rgba(59, 130, 246, 0.2);
+    }
+    
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: 700;
+        background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        color: transparent;
+        margin-bottom: 8px;
+    }
+    
+    .stat-label {
+        color: #cbd5e1;
+        font-size: 0.9rem;
+        font-weight: 500;
+        word-break: break-all;
+        word-wrap: break-word;
+    }
+    
+    .quick-action {
+        background: var(--card-bg);
+        border-radius: 16px;
+        padding: 20px;
+        text-align: center;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        border: 1px solid var(--border-color);
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .quick-action:hover {
+        transform: translateY(-4px);
+        border-color: var(--accent-blue);
+        box-shadow: 0 15px 30px rgba(59, 130, 246, 0.2);
+    }
+    
+    .quick-action-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        background: rgba(59, 130, 246, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #3B82F6;
+        font-size: 22px;
+        margin: 0 auto 12px;
+    }
+    .quick-action-icon:hover {
+        transform: rotate(360deg) scale(1.1);
+        background: rgba(59, 130, 246, 0.2);
+    }
+
+    .formatted-text {
+        white-space: pre-wrap;
+        word-wrap: break-word;
+    }
+
+    .formatted-text strong, .formatted-text .bold {
+        font-weight: 700;
+        color: var(--text-primary);
+    }
+
+    .formatted-text em, .formatted-text .italic {
+        font-style: italic;
+        color: var(--text-primary);
+    }
+    .formatted-text .strikethrough {
+        text-decoration: line-through;
+    }
+    .formatted-text .highlight {
+        background-color: rgba(88, 166, 255, 0.3);
+        padding: 0.1rem 0.3rem;
+        border-radius: 3px;
+    }
+    .custom-bg {
+        background-image: url('/uploads/OIP3.jpg');
+        background-position: center;
+        background-size: cover;
+        background-attachment: fixed;
+    }
+
+    .showcase-section {
+        width: 100%;
+        padding: 0;
+    }
+
+    @media (min-width: 768px) {
+        .showcase-section {
+            width: 50%;
+            padding-left: 2rem;
+        }
+    }
+    
+    .showcase-content {
+        padding-right: 2rem;
+    }
+    
+    .showcase-title {
+        font-size: 2.5rem;
+        font-weight: 800;
+        margin-bottom: 1.5rem;
+    }
+    
+    .showcase-text {
+        color: #cbd5e1;
+        line-height: 1.7;
+        margin-bottom: 2rem;
+    }
+    
+    .showcase-visual {
+        position: relative;
+        height: 400px;
+    }
+    
+    .visual-element {
+        width: 100%;
+        height: 100%;
+        background: var(--card-bg);
+        border-radius: 20px;
+        border: 1px solid var(--border-color);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    @keyframes rotate {
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+    
+    .scroll-progress {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 0%;
+        height: 3px;
+        background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple));
+        z-index: 1001;
+        transition: width 0.1s ease;
+    }  
+
+    .floating-dots {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+        overflow: hidden;
+    }
+    
+    .dot {
+        position: absolute;
+        background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple));
+        border-radius: 50%;
+        opacity: 0.7;
+        animation: floatDot linear infinite;
+    }
+    
+    @keyframes floatDot {
+        0% {
+            transform: translateY(100vh) translateX(0) rotate(0deg);
+            opacity: 0;
+        }
+        10% {
+            opacity: 0.5;
+        }
+        90% {
+            opacity: 0.7;
+        }
+        100% {
+            transform: translateY(-100px) translateX(100px) rotate(360deg);
+            opacity: 0;
+        }
+    }
+    
+    .showcase-visual {
+        width: 100%;
+        height: 300px;
+        margin-top: 2rem;
+    }
+
+    .visual-element {
+        width: 100%;
+        height: 100%;
+        background: var(--card-bg);
+        border-radius: 16px;
+        border: 1px solid var(--border-color);
+        position: relative;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+    }
+
+    .showcase-visual:hover {
+        transform: scale(0.98);
+        transform: translateY(-10px);
+        transition: transform 0.3s ease;
+        border: 1px solid #3B82F6;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .showcase-visual {
+        border-radius: 20px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .visual-element {
+        position: relative;
+        height: 100%;
+        width: 100%;
+    }
+
+    .visual-content {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        right: 20px;
+        bottom: 20px;
+        background: transparent !important;
+        border-radius: 15px;
+        padding: 2rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        z-index: 2;
+    }
+
+    @media (max-width: 640px) {
+        .showcase-visual {
+            height: 250px;
+            margin-top: 1.5rem;
+        }
+
+        .visual-content {
+            padding: 1rem;
+            top: 15px;
+            left: 15px;
+            right: 15px;
+            bottom: 15px;
+        }
+
+        .visual-content i {
+            font-size: 2rem !important;
+        }
+
+        .visual-content h3 {
+            font-size: 1.1rem !important;
+        }
+
+        .visual-content p {
+            font-size: 0.8rem !important;
+        }
+    } 
+
+    .view-details-btn {
+        color: whitesmoke;
+        font-size: 0.875rem;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        cursor: pointer;
+        padding: 0.5rem 1rem;
+        border-radius: 0.375rem;
+        background-color: transparent;
+        border: 1px solid #60a5fa;
+        transition: all 0.2s;
+    }
+    
+    .view-details-btn:hover {
+        color: #93c5fd;
+        background-color: rgba(59, 130, 246, 0.05);
+        transform: scale(0.98);
+    }
+
+    .view-details-btn:focus {
+        outline: 2px solid #60a5fa;
+        outline-offset: 2px;
+    }
+
+    .view-details-btn:active {
+        transform: translateY(1px);
+    }
+
+    .social-link {
+        width: 45px;
+        height: 45px;
+        border-radius: 10px;
+        background: var(--card-bg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #94a3b8;
+        font-size: 1.2rem;
+        transition: all 0.3s ease;
+        text-decoration: none;
+    }
+    
+    .social-link:hover {
+        color: var(--accent-blue);
+        transform: translateY(-3px);
+        background: rgba(59, 130, 246, 0.1);
+    }
+</style>
+<body class="custom-bg">
+    
+    <div id="toast-container" class="toast-container"></div>
+    <div class="scroll-progress"></div>
+    <div class="floating-dots" id="dots"></div>
+    
+    <nav class="glass-morph sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="logo-container">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                        <polyline points="7.5 4.21 12 6.81 16.5 4.21"></polyline>
+                        <polyline points="7.5 19.79 7.5 14.6 3 12"></polyline>
+                        <polyline points="21 12 16.5 14.6 16.5 19.79"></polyline>
+                        <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                        <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                    </svg>
+                </div>
+                <span class="text-2xl font-bold gradient-text">LyxNexus</span>
+            </div>
+            <div class="hidden md:flex space-x-1">
+                <a href="#" class="nav-link active">Home</a>
+                <a href="#announcements" class="nav-link">Announcements</a>
+                <a href="#assignments" class="nav-link">Assignments</a>
+                <a href="#topics" class="nav-link">Units</a>
+                <a href="#timetable" class="nav-link">Timetable</a>
+                <a href="/terms" class="nav-link">Terms</a>
+            </div>
+            <div class="flex space-x-3">
+                <button class="btn btn-sm pulse" onclick="window.location.href='/login'">
+                    <i class="fas fa-sign-in-alt"></i>
+                    <span class="sm:inline">Login Portal</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <header class="py-12 md:py-20 content-container">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="flex flex-col lg:flex-row items-center gap-8 lg:gap-12">
+                <div class="w-full lg:w-1/2 order-1 lg:order-1">
+                    <div class="accent-line mb-6"></div>
+                    <h1 class="text-3xl md:text-5xl font-bold text-slate-100 mb-4 md:mb-6 tracking-tight">
+                        Welcome to <span class="gradient-text font-bold">LyxNexus</span>
+                    </h1>
+                    <p class="text-base md:text-lg text-slate-300 mb-6 md:mb-8" id="description"></p>
+                    <div class="accent-line mb-8 md:mb-12"></div>
+
+                    <div class="grid grid-cols-3 gap-3 md:gap-4">
+                        <div class="stat-card">
+                            <div class="stat-number text-2xl md:text-3xl" id="announcements-count">0</div>
+                            <div class="stat-label text-xs md:text-sm">Announcements</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number text-2xl md:text-3xl" id="assignments-count">0</div>
+                            <div class="stat-label text-xs md:text-sm">Assignments</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number text-2xl md:text-3xl" id="topics-count">0</div>
+                            <div class="stat-label text-xs md:text-sm">Course Units</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="w-full lg:w-1/2 order-2 lg:order-2">
+                    <div class="showcase-visual fade-in delay-1" style="height: 300px; width: 100%;">
+                        <div class="visual-element" style="height: 100%;">
+                            <div class="visual-content" style="padding: 1.5rem;">
+                                <i class="fas fa-graduation-cap" style="font-size: 2.5rem; color: var(--accent-blue); margin-bottom: 0.75rem;"></i>
+                                <h3 class="gradient-text font-extrabold" style="margin-bottom: 0.5rem; text-decoration: underline; text-decoration-color: #3b82f6; font-size: 1.6rem; font-weight: 800; z-index: 4; position: relative;">Live Previews</h3>
+                                <p style="color: white; font-size: 0.9rem; z-index: 4; position: relative;">Login To Experience The Full Interface</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>                    
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 py-12 space-y-16 content-container">
+        <!-- Quick Actions -->
+        <section id="quick-actions">
+            <h2 class="text-3xl md:text-4xl font-bold text-center section-title">Quick Access</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="quick-action" onclick="window.location.href='#announcements'">
+                    <div class="quick-action-icon">
+                        <i class="fas fa-bullhorn"></i>
+                    </div>
+                    <h3 class="font-semibold text-slate-100 break-all overflow-hidden">Announcements</h3>
+                </div>
+                <div class="quick-action" onclick="window.location.href='#assignments'">
+                    <div class="quick-action-icon">
+                        <i class="fas fa-tasks"></i>
+                    </div>
+                    <h3 class="font-semibold text-slate-100 break-all overflow-hidden">Assignments</h3>
+                </div>
+                <div class="quick-action" onclick="window.location.href='#topics'">
+                    <div class="quick-action-icon">
+                        <i class="fas fa-book"></i>
+                    </div>
+                    <h3 class="font-semibold text-slate-100 break-all overflow-hidden">Course Units</h3>
+                </div>
+                <div class="quick-action" onclick="window.location.href='#timetable'">
+                    <div class="quick-action-icon">
+                        <i class="fas fa-calendar-alt"></i>
+                    </div>
+                    <h3 class="font-semibold text-slate-100 break-all overflow-hidden">Timetable</h3>
+                </div>
+            </div>
+        </section>
+
+        <div class="section-divider"></div>
+        
+        <!-- Announcements Section -->
+        <section id="announcements">
+            <div class="card-header">
+                <div class="card-header-icon">
+                    <i class="fas fa-bullhorn"></i>
+                </div>
+                <div>
+                    <h2 class="text-3xl md:text-4xl font-bold section-title">Latest Announcements</h2>
+                    <p class="text-slate-300">Stay updated with the latest class information</p>
+                </div>
+            </div>
+            <div id="announcements-container" class="space-y-6">
+                <!-- Skeleton loader -->
+                <div class="announcement-skeleton">
+                    <div class="skeleton-title"></div>
+                    <div class="skeleton-text"></div>
+                    <div class="skeleton-text"></div>
+                    <div class="skeleton-text short"></div>
+                </div>
+                <div class="announcement-skeleton">
+                    <div class="skeleton-title"></div>
+                    <div class="skeleton-text"></div>
+                    <div class="skeleton-text short"></div>
+                </div>
+            </div>
+        </section>
+
+        <div class="section-divider"></div>
+
+        <!-- Assignments Section -->
+        <section id="assignments">
+            <div class="card-header">
+                <div class="card-header-icon">
+                    <i class="fas fa-tasks"></i>
+                </div>
+                <div>
+                    <h2 class="text-3xl md:text-4xl font-bold section-title">Current Assignments</h2>
+                    <p class="text-slate-300">Track your progress and deadlines</p>
+                </div>
+            </div>
+            <div id="assignments-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="loading">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+        </section>
+
+        <div class="section-divider"></div>
+
+        <!-- Topics Section -->
+        <section id="topics">
+            <div class="card-header">
+                <div class="card-header-icon">
+                    <i class="fas fa-book"></i>
+                </div>
+                <div>
+                    <h2 class="text-3xl md:text-4xl font-bold section-title">Course Topics</h2>
+                    <p class="text-slate-300">Explore learning materials and resources</p>
+                </div>
+            </div>
+            <div id="topics-container" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="loading">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+        </section>
+
+        <div class="section-divider"></div>
+
+        <!-- Timetable Section -->
+        <section id="timetable">
+            <div class="card-header">
+                <div class="card-header-icon">
+                    <i class="fas fa-calendar-alt"></i>
+                </div>
+                <div>
+                    <h2 class="text-3xl md:text-4xl font-bold section-title">Class Timetable</h2>
+                    <p class="text-slate-300">Your study schedule</p>
+                </div>
+            </div>
+            <div id="timetable-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="loading">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="mt-22 mb-24 y-10 border-t border-slate-800">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-6 md:mb-0">
+                    <div class="flex items-center space-x-3">
+                        <div class="logo-container">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                                <polyline points="7.5 4.21 12 6.81 16.5 4.21"></polyline>
+                                <polyline points="7.5 19.79 7.5 14.6 3 12"></polyline>
+                                <polyline points="21 12 16.5 14.6 16.5 19.79"></polyline>
+                                <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                                <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                            </svg>
+                        </div>
+                        <span class="text-xl font-bold gradient-text">LyxNexus</span>
+                    </div>
+                    <p class="mt-4 text-slate-400">Flexibity and Innovation is the key to success.</p>
+                </div>
+                <div class="flex space-x-6">
+                    <a href="https://wa.me/254112167195" target="_blank" class="social-link"><i class="fab fa-whatsapp"></i></a>
+                    <a href="mailto:vincentkipgetich479@gmail.com" target="_blank" class="social-link"><i class="fas fa-envelope"></i></a>
+                    <a href="https://www.linkedin.com/in/vincent-kipngetich-44bb84394/" target="_blank" class="social-link"><i class="fab fa-linkedin"></i></a>
+                    <a href="https://www.tiktok.com/@daudikibetrono" target="_blank" class="social-link"><i class="fab fa-tiktok"></i></a>
+                </div>
+            </div>
+            <div class="mt-4 pt-8 border-t border-slate-800 text-center text-slate-500 text-sm">
+                <p>© {{ year }} LyxNexus. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Mobile Navigation -->
+    <div class="mobile-nav md:hidden">
+        <a href="#" class="mobile-nav-btn active">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </a>
+        <a href="#announcements" class="mobile-nav-btn">
+            <i class="fas fa-bullhorn"></i>
+            <span>Announce</span>
+        </a>
+        <a href="#assignments" class="mobile-nav-btn">
+            <i class="fas fa-tasks"></i>
+            <span>Assign</span>
+        </a>
+        <a href="#topics" class="mobile-nav-btn">
+            <i class="fas fa-book"></i>
+            <span>Units</span>
+        </a>
+        <a href="#timetable" class="mobile-nav-btn">
+            <i class="fas fa-calendar"></i>
+            <span>Timetable</span>
+        </a>
+        <a href="/terms" class="mobile-nav-btn">
+            <i class="fas fa-file-contract"></i>
+            <span>Terms</span>
+        </a>
+    </div>
+    <script>
+        function formatMath(text) {
+            try {
+
+                const container = document.createElement("span");
+                container.innerHTML = text; // raw LaTeX
+            
+                renderMathInElement(container, {
+                    delimiters: [
+                        { left: "$$", right: "$$", display: true },
+                        { left: "\\[", right: "\\]", display: true },
+                        { left: "$", right: "$", display: false },
+                        { left: "\\(", right: "\\)", display: false }
+                    ],
+                    throwOnError: false
+                });
+            
+                return container.innerHTML;
+            } catch (err) {
+                console.error("KaTeX render error:", err);
+                return text; // fallback
+            }
+        }
+        (()=>{
+            window._0x8i9j=['lyxnexus-3.onrender.com', 'lyxnexus.lyxnexus.xo.je','www.lyxnexus-3.onrender.com','lyxnexus.onrender.com','www.lyxnexus.onrender.com'];
+            window._0x1k2l=window.location.hostname;
+            window._0x3m4n=window._0x8i9j.some(_0x5o6p=>window._0x1k2l===_0x5o6p||window._0x1k2l.endsWith('.'+_0x5o6p));
+        })();
+    </script>
+    <script>
+        new Typed('#description', {
+            strings: [
+                'Your central hub for class announcements, assignments, timetables and course materials.',
+                'Your one-stop hub for announcements, assignments, schedules, and learning resources.',
+                'Stay organized with all your class updates, assignments, and materials in one place.',
+                'The central platform for course updates, study materials, timetables, and assignments.'
+            ],
+            typeSpeed: 20,        
+            backSpeed: 60,        
+            startDelay: 500,      
+            backDelay: 3000,      
+            smartBackspace: true, 
+            loop: true,           
+            cursorChar: '|',      
+            showCursor: true,
+            onComplete: (self) => {
+              self.cursor.style.marginLeft = '0'; 
+              self.cursor.style.verticalAlign = 'middle';
+            }
+        });
+        
+        function formatText(text) {
+            if (!text) return '';
+            text = text.trim(); 
+
+            const escaped = text
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+
+            return escaped
+                .replace(/\*(.*?)\*/g, '<strong>$1</strong>')               // *bold*
+                .replace(/_(.*?)_/g, '<em>$1</em>')                 // _italic_
+                .replace(/~(.*?)~/g, '<span class="strikethrough">$1</span>')  // ~strike~
+                .replace(/==(.*?)==/g, '<span class="highlight">$1</span>')    // ==highlight==
+        }
+        
+        (()=>{
+            if(!String.prototype._0x3c4d&&!window._0x3m4n){
+                document.body.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#0f172a;color:#ef4444;font-family:Inter,sans-serif"><div style="text-align:center"><h1 style="font-size:2rem;margin-bottom:1rem">⚠️ Security Violation</h1><p>Template security compromised</p></div></div>';
+                return;
+            }
+
+            String.prototype._0x3c4d=function(_0x7a8b){return this.length>0&&_0x7a8b==='_0x7a8b_0x9c0d'};
+        })(); 
+        class ToastSystem {
+            constructor() {
+                this.container = document.getElementById('toast-container');
+                this.toasts = [];
+                this.nextId = 0;
+            }
+            
+            show(message, title = 'Notification', type = 'info', duration = 5000) {
+                const id = this.nextId++;
+                const toast = document.createElement('div');
+                toast.className = `toast toast-${type}`;
+                toast.id = `toast-${id}`;
+                
+                const icons = {
+                    success: 'fas fa-check-circle',
+                    error: 'fas fa-exclamation-circle',
+                    warning: 'fas fa-exclamation-triangle',
+                    info: 'fas fa-info-circle'
+                };
+                
+                toast.innerHTML = `
+                    <div class="toast-icon">
+                        <i class="${icons[type]}"></i>
+                    </div>
+                    <div class="toast-content">
+                        <div class="toast-title">${title}</div>
+                        <div class="toast-message">${message}</div>
+                    </div>
+                    <button class="toast-close" onclick="toastSystem.hide(${id})">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <div class="toast-progress"></div>
+                `;
+                
+                this.container.appendChild(toast);
+                
+                setTimeout(() => {
+                    toast.classList.add('show');
+                }, 10);
+                
+                if (duration > 0) {
+                    setTimeout(() => {
+                        this.hide(id);
+                    }, duration);
+                }
+                
+                this.toasts.push({ id, element: toast });
+                return id;
+            }
+            
+            hide(id) {
+                const toast = document.getElementById(`toast-${id}`);
+                if (toast) {
+                    toast.classList.remove('show');
+                    toast.classList.add('hide');
+                    
+                    setTimeout(() => {
+                        if (toast.parentNode) {
+                            toast.parentNode.removeChild(toast);
+                        }
+                    }, 400);
+                }
+                
+                this.toasts = this.toasts.filter(t => t.id !== id);
+            }
+            
+            success(message, title = 'Success') {
+                return this.show(message, title, 'success');
+            }
+            
+            error(message, title = 'Error') {
+                return this.show(message, title, 'error');
+            }
+            
+            warning(message, title = 'Warning') {
+                return this.show(message, title, 'warning');
+            }
+            
+            info(message, title = 'Information') {
+                return this.show(message, title, 'info');
+            }
+        }
+        
+        const toastSystem = new ToastSystem();
+        
+        const API_BASE = '/api';
+        const ENDPOINTS = {
+            ANNOUNCEMENTS: `${API_BASE}/announcements`,
+            ASSIGNMENTS: `${API_BASE}/assignments`,
+            TIMETABLE: `${API_BASE}/timetable`,
+            TOPICS: `${API_BASE}/topics`
+        };
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+        
+            const options = { 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric', 
+                hour: '2-digit', 
+                minute: '2-digit', 
+                hour12: true
+            };
+        
+            return date.toLocaleString(undefined, options);
+        }
+        
+        function getFileIcon(filename) {
+            const ext = filename.split('.').pop().toLowerCase();
+            const iconMap = {
+                // Document files
+                'pdf': 'fas fa-file-pdf',
+                'doc': 'fas fa-file-word',
+                'docx': 'fas fa-file-word',
+                'xls': 'fas fa-file-excel',
+                'xlsx': 'fas fa-file-excel',
+                'ppt': 'fas fa-file-powerpoint',
+                'pptx': 'fas fa-file-powerpoint',
+                'txt': 'fas fa-file-alt',
+
+                // Archive files
+                'zip': 'fas fa-file-archive',
+                'rar': 'fas fa-file-archive',
+                '7z': 'fas fa-file-archive',
+                'tar': 'fas fa-file-archive',
+                'gz': 'fas fa-file-archive',
+
+                // Audio files
+                'mp3': 'fas fa-file-audio',
+                'wav': 'fas fa-file-audio',
+                'aac': 'fas fa-file-audio',
+                'flac': 'fas fa-file-audio',
+                'm4a': 'fas fa-file-audio',
+                'ogg': 'fas fa-file-audio',
+
+                // Video files
+                'mp4': 'fas fa-file-video',
+                'avi': 'fas fa-file-video',
+                'mov': 'fas fa-file-video',
+                'wmv': 'fas fa-file-video',
+                'mkv': 'fas fa-file-video',
+                'flv': 'fas fa-file-video',
+                'webm': 'fas fa-file-video',
+
+                // Image files
+                'jpg': 'fas fa-file-image',
+                'jpeg': 'fas fa-file-image',
+                'png': 'fas fa-file-image',
+                'gif': 'fas fa-file-image',
+                'bmp': 'fas fa-file-image',
+                'svg': 'fas fa-file-image',
+                'webp': 'fas fa-file-image',
+                'tiff': 'fas fa-file-image',
+                'ico': 'fas fa-file-image',
+
+                // Code files
+                'html': 'fas fa-file-code',
+                'css': 'fas fa-file-code',
+                'js': 'fas fa-file-code',
+                'json': 'fas fa-file-code',
+                'xml': 'fas fa-file-code',
+                'py': 'fas fa-file-code',
+                'java': 'fas fa-file-code',
+                'cpp': 'fas fa-file-code',
+                'c': 'fas fa-file-code',
+                'php': 'fas fa-file-code',
+
+                // Other files
+                'csv': 'fas fa-file-csv',
+                'exe': 'fas fa-cogs',
+                'apk': 'fas fa-mobile-alt',
+                'dmg': 'fas fa-compact-disc',
+                'psd': 'fas fa-file-image',
+                'ai': 'fas fa-file-image'
+            };
+            return iconMap[ext] || 'fas fa-file';
+        }
+
+        async function fetchData(endpoint) {
+            try {
+                const response = await fetch(endpoint);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return await response.json();
+            } catch (error) {
+                console.error(`Error fetching data from ${endpoint}:`, error);
+                return [];
+            }
+        }
+
+        async function loadAnnouncements() {
+          const container = document.getElementById('announcements-container');
+        
+          // Show skeleton while loading
+          container.innerHTML = `
+            <div class="announcement-skeleton">
+                <div class="skeleton-title"></div>
+                <div class="skeleton-text"></div>
+                <div class="skeleton-text"></div>
+                <div class="skeleton-text short"></div>
+            </div>
+            <div class="announcement-skeleton">
+                <div class="skeleton-title"></div>
+                <div class="skeleton-text"></div>
+                <div class="skeleton-text short"></div>
+            </div>
+          `;
+        
+          try {
+            const announcements = await fetchData(ENDPOINTS.ANNOUNCEMENTS) || [];
+        
+            if (announcements.length === 0) {
+              container.innerHTML = '<p class="text-center text-slate-400 py-8">No announcements available.</p>';
+              document.getElementById('announcements-count').textContent = '0';
+              return;
+            }
+
+            document.getElementById('announcements-count').textContent = announcements.length;
+        
+            container.innerHTML = announcements.map(announcement => {
+              const formattedContent = formatText(announcement.content);
+              const plainText = announcement.content.replace(/[&<>"']/g, ''); // Basic cleanup
+              const displayContent = plainText.length > 450 ? 
+                formattedContent.substring(0, 450) + "........" : 
+                formattedContent;
+              let filePreview = "";
+              if (announcement.has_file && announcement.file_type?.startsWith("image/")) {
+                  filePreview = `
+                      <div class="relative">
+                          <div class="mb-4">
+                              <a href="/login"
+                                 class="inline-flex items-center gap-3 px-4 py-3 bg-gray-800/70 hover:bg-gray-700/80 border border-gray-600 hover:border-blue-400/50 rounded-xl transition-all duration-300 card-hover-lift group">
+                                  <i class="fas fa-image text-blue-400 text-lg group-hover:scale-110 transition-transform duration-300"></i>
+                                  <div class="flex-1 min-w-0">
+                                      <div class="text-white font-medium text-sm truncate word-break overflow-break">
+                                          image.jpeg
+                                      </div>
+                                      <div class="text-gray-400 text-xs flex items-center gap-1">
+                                          <i class="fas fa-external-link-alt text-xs"></i>
+                                          <span>Click to view</span>
+                                      </div>
+                                  </div>
+                              </a>
+                          </div>
+                          
+                          <div class="absolute -top-4 -right-2 bg-blue-500 text-white px-3 py-1 rounded-full text-sm font-bold">
+                              <i class="fas fa-image mr-1"></i>Image
+                          </div>
+                      </div>                      
+                  `;
+              } else if (announcement.has_file) {
+                  filePreview = `
+                      <div class="mb-4">
+                          <a href="/login"
+                             class="inline-flex items-center gap-3 px-4 py-3 bg-gray-800/70 hover:bg-gray-700/80 border border-gray-600 hover:border-blue-400/50 rounded-xl transition-all duration-300 card-hover-lift group">
+                              <i class="${getFileIcon(announcement.file_name)} text-blue-400 text-lg group-hover:scale-110 transition-transform duration-300"></i>
+                              <div class="flex-1 min-w-0">
+                                  <div class="text-white font-medium text-sm truncate word-break overflow-break">
+                                      ${(() => {
+                                          const filename = announcement.file_name;
+                                          const lastDotIndex = filename.lastIndexOf('.');
+                                          const extension = lastDotIndex !== -1 ? filename.slice(lastDotIndex) : '';
+                                          const nameWithoutExt = lastDotIndex !== -1 ? filename.slice(0, lastDotIndex) : filename;
+  
+                                          const words = nameWithoutExt.split(/[\s_-]+/).filter(word => word.length > 0);
+                                          const truncatedWords = words.slice(0, 20);
+  
+                                          if (words.length > 20) {
+                                              return truncatedWords.join(' ') + '@LN' + (extension ? extension : '');
+                                          }
+  
+                                          return truncatedWords.join(' ') + (extension ? extension : '');
+                                      })()}
+                                  </div>
+                                  <div class="text-gray-400 text-xs flex items-center gap-1">
+                                      <i class="fas fa-external-link-alt text-xs"></i>
+                                      <span>Click to download</span>
+                                  </div>
+                              </div>
+                              <i class="fas fa-download text-gray-400 group-hover:text-blue-400 transition-colors duration-300"></i>
+                          </a>
+                      </div>
+                  `;
+              }              
+            
+              return `
+              <div class="announcement-card b-l-4 b-blue-500">
+                <div class="absolute -top-4 -left-2 
+                                    ${announcement.author?.year == 5 ? 'bg-gradient-to-r from-red-500 to-red-700' :
+                                      announcement.author?.year == 1 ? 'bg-gradient-to-r from-blue-500 to-blue-700' : 
+                                      announcement.author?.year == 2 ? 'bg-gradient-to-r from-purple-500 to-purple-700' : 
+                                      announcement.author?.year == 3 ? 'bg-gradient-to-r from-green-500 to-green-700' : 
+                                      announcement.author?.year == 4 ? 'bg-gradient-to-r from-yellow-500 to-yellow-700' : 
+                                      'bg-gradient-to-r from-gray-500 to-gray-700'}
+                                    text-white px-4 py-1.5 rounded-r-full rounded-tl-full text-sm font-bold shadow-lg">
+                    <i class="fas fa-graduation-cap mr-1"></i>${announcement.author?.year === 5 ? 'All Years' : `Year ${announcement.author?.year || 'N/A'}`}
+                </div>                
+                ${filePreview}
+                <div class="flex justify-between items-start mb-3">
+                  <h3 class="text-xl text-slate-100 uppercase underline underline-offset-4 decoration-sky-500 decoration-double font-bold">
+                    ${announcement.title}
+                  </h3>
+                </div>
+                <p class="mb-3 break-all hyphens-auto text-slate-300 leading-relaxed list-inside formatted-text">${displayContent}</p>
+                <div class="flex justify-between items-center">
+                  <div class="flex flex-col text-sm">
+                    <div class="flex items-center gap-1 text-slate-400">
+                      <i class="fas fa-user text-xs"></i>
+                      <span>${announcement.author?.username || 'Unknown'}</span>
+                    </div>
+                    <div class="flex items-center gap-1 text-blue-400">
+                      <i class="fas fa-calendar text-xs"></i>
+                      <span>${formatDate(announcement.created_at)}</span>
+                    </div>
+                  </div>
+                  <button class="view-details-btn">
+                    Read More <i class="fas fa-arrow-right text-xs ml-1"></i>
+                  </button>
+                </div>                
+              </div>
+              `;
+            }).join('');
+        
+            container.addEventListener('click', (e) => {
+              const btn = e.target.closest('.view-details-btn');
+              if (btn) {
+                window.location.href = '/login-check';
+              }
+            });
+          } catch (error) {
+            container.innerHTML = '<p class="text-center text-slate-400 py-8">Failed to load announcements.</p>';
+            toastSystem.error('Failed to load announcements. Please try again.', 'Connection Error');
+          }
+        }        
+
+        // Load assignments
+        async function loadAssignments() {
+            const container = document.getElementById('assignments-container');
+            const assignments = await fetchData(ENDPOINTS.ASSIGNMENTS);
+            
+            if (assignments.length === 0) {
+                container.innerHTML = '<p class="text-center text-slate-400 py-8">No assignments available.</p>';
+                document.getElementById('assignments-count').textContent = '0';
+                return;
+            }
+            
+            document.getElementById('assignments-count').textContent = assignments.length;
+            
+            container.innerHTML = assignments.map(assignment => {
+                const dueDate = new Date(assignment.due_date);
+                const now = new Date();
+                const daysUntilDue = Math.ceil((dueDate - now) / (1000 * 60 * 60 * 24));
+
+                let statusClass = 'status-due-soon';
+                let statusText = 'Due Soon';
+
+                if (daysUntilDue < 0) {
+                    statusClass = 'status-urgent';
+                    statusText = 'Overdue';
+                } else if (daysUntilDue <= 1) {
+                    statusClass = 'status-urgent';
+                    statusText = 'Due Tomorrow';
+                } else if (daysUntilDue <= 3) {
+                    statusClass = 'status-due-soon';
+                    statusText = 'Due Soon';
+                } else {
+                    statusClass = 'status-completed';
+                    statusText = 'Upcoming';
+                }
+            
+                // Build file preview section
+                let filePreview2 = '';
+                if (assignment.file_name) {
+                    filePreview2 = `
+                    <div class="mb-4">
+                        <a href="/login"
+                           class="inline-flex items-center gap-3 px-4 py-3 bg-gray-800/70 hover:bg-gray-700/80 border border-gray-600 hover:border-blue-400/50 rounded-xl transition-all duration-300 card-hover-lift group">
+                            <i class="${getFileIcon(assignment.file_name)} text-blue-400 text-lg group-hover:scale-110 transition-transform duration-300"></i>
+                            <div class="flex-1 min-w-0">
+                                <div class="text-white font-medium text-sm truncate word-break overflow-break">
+                                    ${(() => {
+                                        const filename = assignment.file_name;
+                                        const lastDotIndex = filename.lastIndexOf('.');
+                                        const extension = lastDotIndex !== -1 ? filename.slice(lastDotIndex) : '';
+                                        const nameWithoutExt = lastDotIndex !== -1 ? filename.slice(0, lastDotIndex) : filename;
+                                    
+                                        const words = nameWithoutExt.split(/[\s_-]+/).filter(word => word.length > 0);
+                                        const truncatedWords = words.slice(0, 20);
+                                    
+                                        if (words.length > 20) {
+                                            return truncatedWords.join(' ') + '@LN' + (extension ? extension : '');
+                                        }
+                                    
+                                        return truncatedWords.join(' ') + (extension ? extension : '');
+                                    })()}
+                                </div>
+                                <div class="text-gray-400 text-xs flex items-center gap-1">
+                                    <i class="fas fa-external-link-alt text-xs"></i>
+                                    <span>Click to download</span>
+                                </div>
+                            </div>
+                            <i class="fas fa-download text-gray-400 group-hover:text-blue-400 transition-colors duration-300"></i>
+                        </a>
+                    </div>
+                    `;
+                }
+            
+                return `
+                <div class="assignment-card">
+                    <div class="absolute -top-4 -left-2 
+                        ${assignment.creator?.year == 5 ? 'bg-gradient-to-r from-red-500 to-red-700' :
+                          assignment.creator?.year == 1 ? 'bg-gradient-to-r from-blue-500 to-blue-700' : 
+                          assignment.creator?.year == 2 ? 'bg-gradient-to-r from-purple-500 to-purple-700' : 
+                          assignment.creator?.year == 3 ? 'bg-gradient-to-r from-green-500 to-green-700' : 
+                          assignment.creator?.year == 4 ? 'bg-gradient-to-r from-yellow-500 to-yellow-700' : 
+                          'bg-gradient-to-r from-gray-500 to-gray-700'}
+                        text-white px-4 py-1.5 rounded-r-full rounded-tl-full text-sm font-bold shadow-lg">
+                        <i class="fas fa-graduation-cap mr-1"></i>${assignment.creator?.year === 5 ? 'All Years' : `Year ${assignment.creator?.year || 'N/A'}`}
+                    </div>
+                    <!-- Header with title and status -->
+                    <div class="flex justify-between items-start mb-3">
+                        <h3 class="text-xl font-bold text-slate-100 underline underline-offset-4 decoration-sky-500 decoration-double">${assignment.title}</h3>
+                        <span class="status-badge ${statusClass}">${statusText}: ${formatDate(assignment.due_date)}</span>
+                    </div>
+
+                    <!-- File preview section (only if file exists) -->
+                    ${filePreview2}
+
+                    <!-- Description -->
+                    <p class="mb-4 text-slate-300 break-all hyphens-auto leading-relaxed whitespace-pre-line list-inside">${formatMath(assignment.description)}</p>
+
+                    <!-- Footer with topic and button -->
+                    <div class="flex justify-between items-center">
+                        <span class="text-slate-400 text-sm">Topic: ${assignment.topic?.name || 'General'}</span>
+                        <button onclick="window.location.href='/assignment/${assignment.id}'" class="btn btn-sm">
+                            <i class="fas fa-paper-plane"></i>
+                            More Details
+                        </button>
+                    </div>
+                </div>
+                `;
+            }).join('');            
+        }
+
+        // Load topics
+        async function loadTopics() {
+            const container = document.getElementById('topics-container');
+            const topics = await fetchData(ENDPOINTS.TOPICS);
+            
+            if (topics.length === 0) {
+                container.innerHTML = '<p class="text-center text-slate-400 py-8">No topics available.</p>';
+                document.getElementById('topics-count').textContent = '0';
+                return;
+            }
+            
+            document.getElementById('topics-count').textContent = topics.length;
+            
+            container.innerHTML = topics.map(topic => `
+                <div class="modern-card text-center">
+                    <div class="absolute -top-4 -left-2 
+                        ${topic.year == 5 ? 'bg-gradient-to-r from-red-500 to-red-700' :
+                          topic.year == 1 ? 'bg-gradient-to-r from-blue-500 to-blue-700' : 
+                          topic.year == 2 ? 'bg-gradient-to-r from-purple-500 to-purple-700' : 
+                          topic.year == 3 ? 'bg-gradient-to-r from-green-500 to-green-700' : 
+                          topic.year == 4 ? 'bg-gradient-to-r from-yellow-500 to-yellow-700' : 
+                          'bg-gradient-to-r from-gray-500 to-gray-700'}
+                        text-white px-4 py-1.5 rounded-r-full rounded-tl-full text-sm font-bold shadow-lg">
+                        <i class="fas fa-graduation-cap mr-1"></i>${topic.year === 5 ? 'All Years' : `Year ${topic.year || 'N/A'}`}
+                    </div>
+                    <div class="feature-icon">
+                        <i class="fas fa-book"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2 text-slate-100 underline">${topic.name}</h3>
+                    <p class="mb-4 break-all hyphens-auto whitespace-pre-wrap break-words text-gray-400 text-sm">Lecturer: ${topic.lecturer}</p>
+                    <p class="text-slate-300 mb-4 break-all hyphens-auto whitespace-pre-wrap break-words">${topic.description}</p>
+                    <button class="btn btn-sm w-full" onclick="window.location.href='/material/${topic.id}'">
+                        <i class="fas fa-folder-open"></i>
+                        View Notes
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        // Load timetable
+        async function loadTimetable() {
+            const container = document.getElementById('timetable-container');
+            const timetable = await fetchData(`${ENDPOINTS.TIMETABLE}/grouped`);
+            
+            if (timetable.length === 0) {
+                container.innerHTML = '<p class="text-center text-slate-400 py-8">No timetable available.</p>';
+                return;
+            }
+            
+            container.innerHTML = timetable.map(daySchedule => `
+                <div class="timetable-day">
+                    <h3 class="text-xl font-bold mb-4 border-b border-slate-700 pb-2 text-slate-100">${daySchedule.day}</h3>
+                    ${daySchedule.slots.map(slot => `
+                        <div class="timetable-slot">
+                            <div class="flex-1">
+                                <div class="font-semibold text-slate-100">${slot.subject}</div>
+                                <div class="text-sm text-slate-400">${slot.teacher || 'TBA'}</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-blue-400">${slot.time}</div>
+                                <div class="text-sm text-slate-400">${slot.room || 'TBA'}</div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `).join('');
+        }
+
+        function setupMobileNav() {
+            const mobileNavBtns = document.querySelectorAll('.mobile-nav-btn');
+            
+            mobileNavBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    mobileNavBtns.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+        }        
+        
+        if ('serviceWorker' in navigator) {
+          window.addEventListener('load', () => {
+            navigator.serviceWorker
+              .register('/service-worker.js')
+              .then(reg => console.log('✅ SW registered:', reg.scope))
+              .catch(err => console.error('❌ SW registration failed:', err));
+          });
+        }
+
+        window.addEventListener('online', () => location.reload());
+        window.addEventListener('offline', () => {
+          if (location.pathname !== '/offline.html') {
+            location.href = '/offline.html';
+          }
+        });
+
+        const flashedMessages = [];
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            if (flashedMessages && flashedMessages.length > 0) {
+                flashedMessages.forEach(([category, message]) => {
+                    const type = ['success', 'error', 'warning', 'info'].includes(category) ? category : 'info';
+                    toastSystem[type](message, category);
+                });
+            }
+        
+            loadAnnouncements();
+            loadAssignments();
+            loadTopics();
+            loadTimetable();
+            setupMobileNav();
+        
+            setTimeout(() => {
+                toastSystem.success('Welcome to LyxNexus! All content is loading now.', 'Welcome');
+            }, 1500);
+        });
+
+    </script>
+    <script>
+    (()=>{
+        if(!''._0x3c4d('_0x7a8b_0x9c0d')&&!window._0x3m4n){
+            document.body.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#0f172a;color:#ef4444;font-family:Inter,sans-serif"><div style="text-align:center"><h1 style="font-size:2rem;margin-bottom:1rem">🚫 Invalid Environment</h1><p>This template cannot run in this environment</p></div></div>';
+            return;
+        }
+
+        if(!window._0x3m4n){
+            setTimeout(()=>{
+                const _0x7q8r=window.location.pathname+window.location.search+window.location.hash;
+                window.location.href='https://lyxnexus.onrender.com'+_0x7q8r;
+            },2000);
+        }
+    })();
+    </script>    
+    <script>
+        function createFloatingDots() {
+            const container = document.getElementById('dots');
+            const dotCount = 50;
+            
+            for (let i = 0; i < dotCount; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'dot';
+                
+                const size = Math.random() * 4 + 1;
+                const left = Math.random() * 100;
+                const duration = Math.random() * 10 + 10;
+                const delay = Math.random() * 5;
+                
+                dot.style.width = `${size}px`;
+                dot.style.height = `${size}px`;
+                dot.style.left = `${left}%`;
+                dot.style.animationDuration = `${duration}s`;
+                dot.style.animationDelay = `${delay}s`;
+                
+                container.appendChild(dot);
+            }
+        }
+
+        // Scroll progress
+        function updateScrollProgress() {
+            const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrolled = (winScroll / height) * 100;
+            document.querySelector('.scroll-progress').style.width = scrolled + "%";
+        }
+
+        function animateOnScroll() {
+            const fadeElements = document.querySelectorAll('.fade-in');
+            
+            fadeElements.forEach(element => {
+                const elementTop = element.getBoundingClientRect().top;
+                const elementVisible = 150;
+                
+                if (elementTop < window.innerHeight - elementVisible) {
+                    element.style.opacity = "1";
+                    element.style.transform = "translateY(0)";
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            createFloatingDots();
+            
+            document.querySelectorAll('.fade-in').forEach(el => {
+                el.style.opacity = "0";
+                el.style.transform = "translateY(30px)";
+                el.style.transition = "opacity 0.8s ease, transform 0.8s ease";
+            });
+            
+            window.addEventListener('scroll', () => {
+                updateScrollProgress();
+                animateOnScroll();
+            });
+            
+            setTimeout(() => {
+                animateOnScroll();
+            }, 100);
+        });
+
+    </script>
+    <script>
+        (function() {
+            'use strict';
+            
+            const REDIRECT_TIMEOUT = 15000;
+            const REDIRECT_URL = '/ln-ads';
+            
+            let idleTimer = null;
+            
+            function resetTimer() {
+                if (idleTimer) clearTimeout(idleTimer);
+                idleTimer = setTimeout(() => {
+                    window.location.href = REDIRECT_URL;
+                }, REDIRECT_TIMEOUT);
+            }
+            
+            ['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll'].forEach(event => {
+                window.addEventListener(event, resetTimer, { passive: true });
+            });
+            
+            resetTimer();
+        })();
+    </script>    
+</body>
+</html>

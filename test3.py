@@ -36,7 +36,7 @@ MOCK_COURSES = [
 @app.route('/')
 def home():
     """Home page route"""
-    return render_template('index.html', year=datetime.datetime.now().year)
+    return render_template('index.html')
 
 @app.route('/api/notify')
 def mock_notifications():
@@ -770,6 +770,11 @@ def get_current_user():
 
 @app.route('/api/announcements/specified')
 def get_announcements():
+    """Get all announcements"""
+    return jsonify(mock_data['announcements'])
+
+@app.route('/api/announcements')
+def get_iannouncements():
     """Get all announcements"""
     return jsonify(mock_data['announcements'])
 
