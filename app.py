@@ -599,6 +599,10 @@ class AIConverse(db.Model):
 Purpose is to track user activities and visits for analytics and see visits insted of using the console
 """
 class Visit(db.Model):
+    __table_args__ = (
+        db.Index('idx_visit_user_timestamp', 'user_id', 'timestamp'),
+        db.Index('idx_visit_timestamp', 'timestamp'),
+    )
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     page = db.Column(db.String(100), default='main_page')
@@ -944,13 +948,64 @@ def ignore_bad_fd(record):
 logging.getLogger().addFilter(ignore_bad_fd)
 
 """Function to clean old data for user vsits(> a month)"""
-def cleanup_old_visits():
-    """Delete visits older than 30 days"""
-    cutoff_time = datetime.utcnow() - timedelta(days=30)
-    old_visits = Visit.query.filter(Visit.timestamp < cutoff_time).delete()
-    old_activities = UserActivity.query.filter(UserActivity.timestamp < cutoff_time).delete()
-    db.session.commit()
-    return old_visits, old_activities
+from sqlalchemy import func, or_
+
+def cleanup_old_visits(max_visits_per_user=15, days_old=30):
+    try:
+        cutoff_time = datetime.utcnow() - timedelta(days=days_old)
+        
+        print(f"Starting cleanup: Deleting visits older than {days_old} days and keeping max {max_visits_per_user} per user...")
+        
+        # 1. Delete old activities (no per-user limits needed)
+        deleted_activities = UserActivity.query.filter(
+            UserActivity.timestamp < cutoff_time
+        ).delete(synchronize_session=False)
+        print(f"✓ Deleted {deleted_activities} old activities")
+        
+        # 2. Create a subquery that ranks visits per user by recency
+        # Only rank visits newer than cutoff to avoid re-ranking already-deleted data
+        ranked_visits = db.session.query(
+            Visit.id,
+            func.row_number().over(
+                partition_by=Visit.user_id,
+                order_by=Visit.timestamp.desc()
+            ).label('rank')
+        ).filter(Visit.timestamp >= cutoff_time).subquery()
+        
+        # 3. Get IDs of visits that exceed per-user limit
+        excess_visit_ids = db.session.query(ranked_visits.c.id).filter(
+            ranked_visits.c.rank > max_visits_per_user
+        ).subquery()
+        
+        # 4. Delete in a single query:
+        deleted_visits = Visit.query.filter(
+            or_(
+                Visit.timestamp < cutoff_time,
+                Visit.id.in_(excess_visit_ids)
+            )
+        ).delete(synchronize_session=False)
+        
+        db.session.commit()
+        
+        # 5. Get remaining stats
+        remaining_visits = Visit.query.count()
+        remaining_users = db.session.query(func.count(func.distinct(Visit.user_id))).scalar()
+        
+        print(f"✓ Deleted {deleted_visits} visits total")
+        print(f"✓ Current state: {remaining_visits} visits from {remaining_users} users")
+        print("✅ Cleanup completed successfully")
+        
+        return {
+            'deleted_visits': deleted_visits,
+            'deleted_activities': deleted_activities,
+            'remaining_visits': remaining_visits,
+            'remaining_users': remaining_users
+        }
+        
+    except Exception as e:
+        db.session.rollback()
+        print(f"❌ Cleanup failed: {e}")
+        raise
 
 def _year():
     return datetime.now().strftime('%Y')
