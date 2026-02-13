@@ -3180,6 +3180,7 @@ def admin_edit_user(user_id):
 
 @app.route('/api/admin/update_user/<int:user_id>', methods=['PUT'])
 @login_required
+@admin_required
 def api_update_user(user_id):
     """API endpoint to update user details"""
     if not current_user.year == 5:
@@ -3279,6 +3280,7 @@ def api_update_user(user_id):
 
 @app.route('/api/admin/get_user/<int:user_id>')
 @login_required
+@admin_required
 def api_get_user(user_id):
     """API endpoint to get user details"""
     if not current_user.year == 5:
@@ -7294,6 +7296,7 @@ def toggle_pay(user_id):
 import io
 
 @app.route('/api/announcements/specified')
+@login_required
 def get_specified_announcements():
     try:
         announcements = Announcement.query\
@@ -7520,6 +7523,7 @@ def serve_announcement_file(id, filename):
 # =========================================
 
 @app.route('/api/assignments/specified')
+@login_required
 def get_specified_assignments():
     """Get all assignments"""
     try:
@@ -7812,6 +7816,7 @@ def preview():
 # =========================================
 
 @app.route('/api/topics/specified')
+@login_required
 def get_specified_topics():
     """Get all topics"""
     try:
@@ -7925,6 +7930,7 @@ def delete_topic(id):
 #            TIMETABLE API ROUTES
 #==========================================
 @app.route('/api/timetable/specified/grouped', methods=['GET'])
+@login_required
 def get_specified_timetable():
     """Get timetable grouped by day"""
 
