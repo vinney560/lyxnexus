@@ -10604,10 +10604,12 @@ def api_admin_challenges():
 #==========================================
 
 @app.errorhandler(404)
+@limiter.limit("5 per minute")
 def not_found_error(error):
     return render_template('404.html'), 404
 
 @app.errorhandler(403)
+@limiter.limit("5 per minute")
 def forbidden_error(error):
     return render_template('403.html'), 403
 
@@ -10644,6 +10646,7 @@ def ratelimit_handler(e):
         return redirect(url_for('home'))
 
 @app.errorhandler(500)
+@limiter.limit("5 per minute")
 def internal_error(error):
     app.logger.error(f'Internal Server Error: {error}', exc_info=True)
     flash('Oops! Something went wrong. Try again.', 'error')
