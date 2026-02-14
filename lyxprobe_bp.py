@@ -906,7 +906,11 @@ class ProbeCommandProcessor:
     
     def cmd_cleanup_old_visits(self, args):
         max_visits_per_user=15
-        days_old= args[0] if args.isdigit() else 7
+        identifier = args[0]
+        if identifier.isdigit():
+            days_old = int(identifier)
+        else:
+            return self.format_output("ERROR", "Usage: clean-visits [days]", "error")
         try:
             cutoff_time = datetime.utcnow() - timedelta(days=days_old)
 
