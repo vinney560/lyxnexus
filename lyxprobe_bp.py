@@ -8,10 +8,10 @@ from flask import Blueprint, render_template, jsonify, request, abort
 from flask_login import current_user, login_required
 from functools import wraps
 from datetime import datetime, timedelta, timezone
-from app import db, User
+from app import db, User, UserActivity, Visit
 import threading
 import time
-    
+from sqlalchemy import func, or_    
 
 # ============ BLUEPRINT INITIALIZATION ============
 probe_bp = Blueprint("probe", __name__, url_prefix='/probe')
@@ -59,7 +59,8 @@ class ProbeCommandProcessor:
             'modify': self.cmd_modify,
             'free_trial': self.cmd_free_trial,
             'kill': self.cmd_killed,
-            'unkill': self.cmd_unkilled
+            'unkill': self.cmd_unkilled,
+            'clean-visits': self.cmd_cleanup_old_visits
         }
     
     def process(self, command):
@@ -120,6 +121,7 @@ class ProbeCommandProcessor:
             "expire_trial [id]    - Expire trial for user",
             "kill [id]            - Set killed status for user",
             "unkill [id]          - Remove killed status for user",
+            "clean-visits [days]  - Clean up old user visits",
             "",
             "=== SECURITY OPERATIONS ===",
             "kill-rogue           - Remove unverified admins",
@@ -440,7 +442,7 @@ class ProbeCommandProcessor:
             ).all()
             
             if not users:
-                return self.format_output("FREE TRIAL", "No users found with no free trial", "warning")
+                return self.format_output("FREE TRIAL", "No users found with Expired trial", "warning")
             
             killed = []
             for user in users:
@@ -902,6 +904,59 @@ class ProbeCommandProcessor:
                                  f"Use 'copy to clipboard' for data.", 
                                  "success")
     
+    def cmd_cleanup_old_visits(self, args):
+        max_visits_per_user=15
+        days_old= args[0] if args.isdigit() else 7
+        try:
+            cutoff_time = datetime.utcnow() - timedelta(days=days_old)
+
+            print(f"Starting cleanup: Deleting visits older than {days_old} days and keeping max {max_visits_per_user} per user...")
+
+            # 1. Delete old activities (no per-user limits needed)
+            deleted_activities = UserActivity.query.filter(
+                UserActivity.timestamp < cutoff_time
+            ).delete(synchronize_session=False)
+            print(f"✓ Deleted {deleted_activities} old activities")
+
+            # 2. Create a subquery that ranks visits per user by recency
+            # Only rank visits newer than cutoff to avoid re-ranking already-deleted data
+            ranked_visits = db.session.query(
+                Visit.id,
+                func.row_number().over(
+                    partition_by=Visit.user_id,
+                    order_by=Visit.timestamp.desc()
+                ).label('rank')
+            ).filter(Visit.timestamp >= cutoff_time).subquery()
+
+            # 3. Get IDs of visits that exceed per-user limit
+            excess_visit_ids = db.session.query(ranked_visits.c.id).filter(
+                ranked_visits.c.rank > max_visits_per_user
+            ).subquery()
+
+            # 4. Delete in a single query:
+            deleted_visits = Visit.query.filter(
+                or_(
+                    Visit.timestamp < cutoff_time,
+                    Visit.id.in_(excess_visit_ids)
+                )
+            ).delete(synchronize_session=False)
+
+            db.session.commit()
+
+            # 5. Get remaining stats
+            remaining_visits = Visit.query.count()
+            remaining_users = db.session.query(func.count(func.distinct(Visit.user_id))).scalar()
+            return self.format_output("CLEANUP SUCCESS", 
+                                 f"Deleted {deleted_visits} visits total\n"
+                                 f"Deleted {deleted_activities} old activities\n"
+                                 f"Current state: {remaining_visits} visits from {remaining_users} users", 
+                                 "success")
+
+        except Exception as e:
+            db.session.rollback()
+            print(f"❌ Cleanup failed: {e}")
+            return self.format_output("ERROR", f"Cleanup failed: {str(e)}", "error")
+
     def cmd_ping(self, args):
         """Check server connectivity"""
         return self.format_output("PONG", "Server is responding", "success")
