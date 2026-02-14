@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LyxNexus Platform Introduction</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="{{ url_for('tailwindcss') }}"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -441,6 +441,7 @@
                 </a>
                 <button onclick="window.location.href='/login'" class="w-full py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-full font-semibold hover:from-blue-600 hover:to-purple-700 transition-all">
                     Get Started
+                    <i class="fas fa-arrow-right fa-bounce"></i>
                 </button>
             </div>
         </div>
@@ -473,6 +474,10 @@
                     <button class="video-selector-btn" data-video="2">
                         <i class="fas fa-play-circle mr-2"></i>
                         Introduction Video 2
+                    </button>
+                    <button class="video-selector-btn" data-video="3">
+                        <i class="fas fa-play-circle mr-2"></i>
+                        Introduction Video 3
                     </button>
                 </div>
             </div>
@@ -536,16 +541,15 @@
                                                    id="volumeControl">
                                         </div>
                                     </div>
-                                </div>
-                                
-                                <div class="flex items-center space-x-4 sm:space-x-6 flex-wrap">
                                     <!-- Time Display -->
                                     <div class="flex items-center space-x-1 sm:space-x-2">
                                         <span id="currentTime" class="time-display">0:00</span>
                                         <span class="text-gray-400">/</span>
                                         <span id="duration" class="time-display">0:00</span>
                                     </div>
-                                    
+                                </div>
+                                
+                                <div class="flex items-center space-x-4 sm:space-x-6 flex-wrap">
                                     <!-- Playback Speed -->
                                     <div class="relative">
                                         <button id="speedBtn" class="control-btn">
@@ -644,7 +648,7 @@
                         Create Free Account
                     </button>
                     <button onclick="window.location.href='/#announcements'" class="px-6 sm:px-8 py-3 sm:py-4 bg-transparent border-2 border-blue-500 text-blue-400 rounded-full font-bold text-base sm:text-lg hover:bg-blue-500/10 transition-all transform hover:-translate-y-1 flex items-center justify-center">
-                        <i class="fas fa-list-alt mr-2 sm:mr-3"></i>
+                        <i class="fas fa-list-alt fa-beat-fade mr-2 sm:mr-3"></i>
                         Explore All Features
                     </button>
                 </div>
@@ -679,13 +683,18 @@
         // Video URLs
         const videos = {
             1: {
-                url: "https://res.cloudinary.com/dmkfmr8ry/video/upload/v1769432950/LN_Ad_1_utnghk.mp4",
+                url: "https://res.cloudinary.com/dmkfmr8ry/video/upload/v1771094366/LN_Ad_4_zxirm7.mp4",
                 title: "Introduction Video 1",
                 poster: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80"
             },
             2: {
                 url: "https://res.cloudinary.com/dmkfmr8ry/video/upload/v1769433368/LN_Ad_3_dtq3q8.mp4",
                 title: "Introduction Video 2",
+                poster: "https://images.unsplash.com/photo-1501504905252-473c47e087f8?w=800&auto=format"
+            },
+            3: {
+                url: "https://res.cloudinary.com/dmkfmr8ry/video/upload/v1769432950/LN_Ad_1_utnghk.mp4",
+                title: "Introduction Video 3",
                 poster: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80"
             }
         };

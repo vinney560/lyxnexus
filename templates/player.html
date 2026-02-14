@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Playing: {{ file.filename }}</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="{{ url_for('tailwindcss') }}"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -373,16 +373,16 @@
                                        id="volumeControl">
                             </div>
                         </div>
-                    </div>
-                    
-                    <div class="flex items-center space-x-4 sm:space-x-6 flex-wrap">
+                        
                         <!-- Time Display -->
                         <div class="flex items-center space-x-1 sm:space-x-2">
                             <span id="currentTime" class="time-display">0:00</span>
                             <span class="text-gray-400">/</span>
                             <span id="duration" class="time-display">0:00</span>
                         </div>
-                        
+                    </div>
+                    
+                    <div class="flex items-center space-x-4 sm:space-x-6 flex-wrap">
                         <!-- Playback Speed -->
                         <div class="relative">
                             <button id="speedBtn" class="control-btn">

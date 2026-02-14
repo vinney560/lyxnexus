@@ -5200,6 +5200,10 @@ def offline_html():
 @app.route('/service-worker.js')
 def sw():
     return send_from_directory('static', 'service-worker.js', mimetype='application/javascript')
+# ------------------------------------------------------------------
+@app.route('/tailwind.all.css')
+def tailwindcss():
+    return send_from_directory('static', 'css/tailwind.all.css', mimetype='application/javascript')
 #-------------------------------------------------------------------
 @app.route('/is_authenticated')
 def is_authenticated():
