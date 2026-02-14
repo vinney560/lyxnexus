@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, url_for, jsonify, request
+from flask import Flask, render_template, redirect, url_for, jsonify, request, send_from_directory
 from datetime import datetime, timedelta, time
 from flask_login import current_user
 
@@ -7,6 +7,11 @@ app = Flask(__name__)
 @app.route('/main-page')
 def main_page():
     return render_template('main_page.html', current_user=current_user)
+
+@app.route('/tailwind.all.css')
+def tailwindcss():
+    return send_from_directory('static', 'css/tailwind.all.css', mimetype='application/javascript')
+
 
 @app.route('/')
 def main():

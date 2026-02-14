@@ -11,6 +11,7 @@ const STATIC_ASSETS = [
   '/uploads/favicon-1.png',
   '/uploads/notify.mp3',
   '/static/css/tailwind.min.css',
+  '/static/css/tailwind.all.css',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'
 ];
 

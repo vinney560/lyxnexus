@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, session
+from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, session, send_from_directory
 import datetime
 import random
 
@@ -762,6 +762,11 @@ current_user = mock_data['users'][0]
 @app.route('/main-page')
 def main_page():
     return render_template('main_page.html', current_user=current_user)
+
+@app.route('/tailwind.all.css')
+def tailwindcss():
+    return send_from_directory('static', 'css/tailwind.all.css', mimetype='application/javascript')
+
 
 @app.route('/api/user')
 def get_current_user():

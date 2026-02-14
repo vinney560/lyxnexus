@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, session
+from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, session, send_from_directory
 import datetime
 import random
 
@@ -38,6 +38,10 @@ MOCK_COURSES = [
 def home():
     """Home page route"""
     return render_template('index.html', year=datetime.datetime.now().year)
+
+@app.route('/tailwind.all.css')
+def tailwindcss():
+    return send_from_directory('static', 'css/tailwind.all.css', mimetype='application/javascript')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
