@@ -115,9 +115,11 @@ class ProbeCommandProcessor:
             "unverify [id]        - Unverify admin account",
             "modify  [id]         - Modify user info",
             "free_trial           - Set free trial for all users",
+            "expire_trial         - Expire trial for all users",
             "free_trial [id]      - Set free trial for user",
+            "expire_trial [id]    - Expire trial for user",
             "kill [id]            - Set killed status for user",
-            "unkill [id]           - Remove killed status for user",
+            "unkill [id]          - Remove killed status for user",
             "",
             "=== SECURITY OPERATIONS ===",
             "kill-rogue           - Remove unverified admins",
@@ -454,6 +456,68 @@ class ProbeCommandProcessor:
                 f"Targets: {len(users)} granted free trial user(s)",
                 f"Actions:",
                 f"  • Free trial granted to all applicable accounts",
+                f"",
+                f"AFFECTED ACCOUNTS:"
+            ] + killed
+            
+            return self.format_output("OPERATION SUCCESSFUL", "\n".join(result), "success")
+        except Exception as e:
+            db.session.rollback()
+            return self.format_output("ERROR", f"Operation failed: {str(e)}", "error")
+
+    def cmd_expire_trial(self, args):
+        """\Expire trial to specific user or all users"""
+        if args:
+            # Expire trial to specific user by ID
+            try:
+                user_id = int(args[0])
+                user = User.query.get(user_id)
+                
+                if not user:
+                    return self.format_output("ERROR", f"User ID {user_id} not found", "error")
+                
+                old_status = "Active" if user.status else "Banned"
+                user.free_trial = False
+                db.session.commit()
+                
+                result = [
+                    f"Operation: EXPIRE-TRIAL-USER [{user.id}]",
+                    f"Time: {datetime.now(timezone(timedelta(hours=3))).strftime('%H:%M:%S')}",
+                    f"Target: [{user.id}] {user.username} (was {old_status})",
+                    f"Actions:",
+                    f"  • Trial expired"
+                ]
+                
+                return self.format_output("OPERATION SUCCESSFUL", "\n".join(result), "success")
+            except ValueError:
+                return self.format_output("ERROR", "Invalid user ID", "error")
+            except Exception as e:
+                db.session.rollback()
+                return self.format_output("ERROR", f"Operation failed: {str(e)}", "error")  
+
+        try:
+            # Find all users with free trial
+            users = User.query.filter(
+                User.free_trial == True
+            ).all()
+            
+            if not users:
+                return self.format_output("EXPIRE TRIAL", "No users found with active trial", "warning")
+            
+            killed = []
+            for user in users:
+                old_status = "Active" if user.status else "Banned"
+                user.free_trial = False
+                killed.append(f"[{user.id}] {user.username} (was {old_status})")
+            
+            db.session.commit()
+            
+            result = [
+                f"Operation: EXPIRE-TRIAL",
+                f"Time: {datetime.now(timezone(timedelta(hours=3))).strftime('%H:%M:%S')}",
+                f"Targets: {len(users)} expired trial user(s)",
+                f"Actions:",
+                f"  • Trial expired for all applicable accounts",
                 f"",
                 f"AFFECTED ACCOUNTS:"
             ] + killed
