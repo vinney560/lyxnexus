@@ -984,7 +984,7 @@ class ProbeCommandProcessor:
         if admin_code:
             return self.format_output("ADMIN CODE", 
                                  f"Hashed Code: [{admin_code.code}]\n"
-                                 f"Created on:  {admin_code.created_at.strftime('%d/%m/%Y %H:%M:%S') if admin_code.created_at else 'Not specified'}", 
+                                 f"Created on:  {admin_code.created_at.strftime('%d/%m/%Y %H:%M:%S') if admin_code.created_at else 'Not specified'}\n", 
                                  f"Updated on:  {admin_code.updated_at.strftime('%d/%m/%Y %H:%M:%S') if admin_code.updated_at else 'Not specified'}", 
                                  "info")
         else:

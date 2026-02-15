@@ -5212,6 +5212,30 @@ _0eXv4 --> static/js
 @app.route('/_0eXv3/<filename>')
 def css_files(filename):
     return send_from_directory('static/css', filename)
+
+# ========   MOCKERY FOR HACKERS ========
+from flask import render_template_string
+@app.route('/_0eXv3/tailwind.all.css.map')
+def mockery_map_1():
+    return render_template_string('''<h1>Fuck you bitch...</h1>''')
+@app.route('/.env.backup')
+def mockery_map_2():
+    return render_template_string('''<h1>Fuck you bitch...</h1>''')
+@app.route('/env')
+def mockery_map_3():
+    return render_template_string('''<h1>Fuck you bitch...</h1>''')
+@app.route('/.env')
+def mockery_map_4():
+    return render_template_string('''<h1>Fuck you bitch...</h1>''')
+@app.route('/.env.production')
+def mockery_map_5():
+    return render_template_string('''<h1>Fuck you bitch...</h1>''')
+@app.route('/backup')
+def mockery_map_6():
+    return render_template_string('''<h1>Fuck you bitch...</h1>''')
+@app.route('/backups')
+def mockery_map_7():
+    return jsonify({"message": "Fuck you BITCH!!!!!!! Umekosa kazi ama?"})
 # ------------------------------------------------------------------
 @app.route('/_0eXv4/<filename>')
 def js_files(filename):
