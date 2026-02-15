@@ -2,13 +2,17 @@
 """
 LyxProbe v2.0 - Command Line Interface for System Administration
 Advanced monitoring and administration tool with CLI interface
+We can:
+- Fully control user
+- Partially control UserActivity and Visit
+- Read Admin and Operator code status
 """
 
 from flask import Blueprint, render_template, jsonify, request, abort
 from flask_login import current_user, login_required
 from functools import wraps
 from datetime import datetime, timedelta, timezone
-from app import db, User, UserActivity, Visit
+from app import db, User, UserActivity, Visit, AdminCode
 import threading
 import time
 from sqlalchemy import func, or_    
@@ -37,6 +41,7 @@ class ProbeCommandProcessor:
             'help': self.cmd_help,
             'clear': self.cmd_clear,
             'date': self.cmd_date,
+            'time': self.cmd_date,
             'whoami': self.cmd_whoami,
             'list-admins': self.cmd_list_admins,
             'list-operators': self.cmd_list_operators,
@@ -57,10 +62,12 @@ class ProbeCommandProcessor:
             'version': self.cmd_version,
             'shutdown': self.cmd_shutdown,
             'modify': self.cmd_modify,
-            'free_trial': self.cmd_free_trial,
+            'free-trial': self.cmd_free_trial,
             'kill': self.cmd_killed,
             'unkill': self.cmd_unkilled,
-            'clean-visits': self.cmd_cleanup_old_visits
+            'expire-trial': self.cmd_expire_trial,
+            'clean-visits': self.cmd_cleanup_old_visits,
+            'admin-code': self.cmd_admin_code
         }
     
     def process(self, command):
@@ -102,8 +109,12 @@ class ProbeCommandProcessor:
             "whoami               - Show current operator info",
             "ping                 - Check server connectivity",
             "echo [text]          - Echo back text",
+            "system-info          - Display system statistics",
+            "export [table]       - Export data (users/admins)",
+            "reboot               - Reboot the server",
+            "version              - Show software version",
             "",
-            "=== USER MANAGEMENT ===",
+            "==== USER MANAGEMENT ====",
             "list-users           - List all users",
             "list-admins          - List all administrators",
             "list-operators       - List all operators",
@@ -115,10 +126,10 @@ class ProbeCommandProcessor:
             "verify [id]          - Verify admin account",
             "unverify [id]        - Unverify admin account",
             "modify  [id]         - Modify user info",
-            "free_trial           - Set free trial for all users",
-            "expire_trial         - Expire trial for all users",
+            "free-trial           - Set free trial for all users",
+            "expire-trial         - Expire trial for all users",
             "free_trial [id]      - Set free trial for user",
-            "expire_trial [id]    - Expire trial for user",
+            "expire-trial [id]    - Expire trial for user",
             "kill [id]            - Set killed status for user",
             "unkill [id]          - Remove killed status for user",
             "clean-visits [days]  - Clean up old user visits",
@@ -126,10 +137,7 @@ class ProbeCommandProcessor:
             "=== SECURITY OPERATIONS ===",
             "kill-rogue           - Remove unverified admins",
             "kill-rogue [id]      - Remove unverified admin by ID",
-            "system-info          - Display system statistics",
-            "export [table]       - Export data (users/admins)",
-            "reboot               - Reboot the server",
-            "version              - Show software version",
+            "admin-code           - View the current admin code status",
             "",
             "=== SYNTAX ===",
             "> command [argument] - Run command with argument",
@@ -970,6 +978,18 @@ class ProbeCommandProcessor:
         text = " ".join(args) if args else "(silence)"
         return self.format_output("ECHO", text, "info")
     
+    def cmd_admin_code(self, args):
+        """View the current admin code status"""
+        admin_code = AdminCode.query.first()
+        if admin_code:
+            return self.format_output("ADMIN CODE", 
+                                 f"Hashed Code: [{admin_code.code}]\n"
+                                 f"Created on:  {admin_code.created_at.strftime('%d/%m/%Y %H:%M:%S') if admin_code.created_at else 'Not specified'}", 
+                                 f"Updated on:  {admin_code.updated_at.strftime('%d/%m/%Y %H:%M:%S') if admin_code.updated_at else 'Not specified'}", 
+                                 "info")
+        else:
+            return self.format_output("ADMIN CODE", "No admin code set", "info")
+        
     def cmd_reboot(self, args):
         """Reboot the server - simulation"""
         # Extract timeout if provided
@@ -1013,7 +1033,7 @@ class ProbeCommandProcessor:
         self.system_status = 'online'
     def cmd_version(self, args):
         """Show software version"""
-        return self.format_output("VERSION", "LyxNexus Probe v2.07", "info")
+        return self.format_output("VERSION", "LyxNexus Probe v2.12", "info")
     
     def cmd_shutdown(self, args):
         """Shutdown the server"""
