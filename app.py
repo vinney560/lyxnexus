@@ -5205,15 +5205,27 @@ def sw():
 def tailwindcss():
     return send_from_directory('static', 'css/tailwind.all.css', mimetype='application/javascript')
 #-------------------------------------------------------------------
+"""
+_0eXv3 --> static/css
+_0eXv4 --> static/js
+"""
+@app.route('/_0eXv3/<filename>')
+def css_files(filename):
+    return send_from_directory('static/css', filename)
+# ------------------------------------------------------------------
+@app.route('/_0eXv4/<filename>')
+def js_files(filename):
+    return send_from_directory('static/js', filename, mimetype='application/javascript')
+#-------------------------------------------------------------------
+@app.route('/pushify.js')
+def serve_pushify():
+    return send_file('pushify.js', mimetype='application/javascript')
+# ------------------------------------------------------------------
 @app.route('/is_authenticated')
 def is_authenticated():
     return jsonify({
         'authenticated': current_user.is_authenticated or session.get('authenticated', False)
     })
-#-------------------------------------------------------------------
-@app.route('/pushify.js')
-def serve_pushify():
-    return send_file('pushify.js', mimetype='application/javascript')
 #-------------------------------------------------------------------
 @app.route("/subscribe", methods=["POST"])
 @login_required
