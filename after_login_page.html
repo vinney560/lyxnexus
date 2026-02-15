@@ -1,0 +1,2296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | LyxNexus</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <meta name="keywords" content="Lyx Nexus, Kisii LyxNexus, kisii lyxnexus, kisii university lyxnexus, kisii university lyx nexus, lyx nexus, lyxnexus" />
+    <meta name="author" content="Vincent Kipngetich" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://lyxnexus.onrender.com/" />
+    <link rel="icon" href="https://lyxnexus.onrender.com/uploads/favicon-1.png"/>
+        
+    <meta property="og:title" content="Login | LyxNexus" />
+    <meta property="og:description" content="LyxNexus Login require very simple steps; Enter your Username and Mobile Number to continue" />
+    <meta property="og:image" content="https://lyxnexus.onrender.com/favicon.ico" />
+    <meta property="og:url" content="https://lyxnexus.onrender.com/" />
+    <meta name="twitter:card" content="summary" />
+    <script src="/_0eXv3/tailwind.all.css"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<style>
+    :root {
+        --bg-color: #111827;
+        --text-color: #F9FAFB;
+        --accent-color: #4A90E2;
+        --secondary-color: #8B5CF6;
+        --success-color: #10B981;
+        --warning-color: #F59E0B;
+        --error-color: #EF4444;
+    }
+    
+    body {
+        font-family: 'Poppins', sans-serif;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow-x: hidden;
+    }
+    
+    .gradient-text {
+        background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        color: transparent;
+    }
+    
+    .glass-morph {
+        background: rgba(30, 30, 40, 0.6);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        box-shadow: 0 8px 32px rgba(0, 31, 135, 0.2);
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        transition: all 0.3s ease;
+    }
+    
+    .glass-morph:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 40px rgba(0, 31, 135, 0.3);
+    }
+    
+    .btn {
+        background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 50px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+        cursor: pointer;
+        width: 100%;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .btn::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        transform: translate(-50%, -50%);
+        transition: width 0.3s, height 0.3s;
+    }
+    
+    .btn:active::after {
+        width: 300px;
+        height: 300px;
+    }
+    
+    .btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+    }
+    
+    .btn-outline {
+        background: transparent;
+        border: 2px solid #3B82F6;
+        border-radius: 25px;
+        padding: 8px 20px;
+        color: #3B82F6;
+    }
+    
+    .btn-outline:hover {
+        background: #3B82F6;
+        color: white;
+    }
+    
+    .btn-admin {
+        background: linear-gradient(90deg, #8B5CF6, #EC4899);
+        box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+    }
+    
+    .btn-admin:hover {
+        box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
+    }
+    
+    .logo-container {
+        background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+        border-radius: 20px;
+        padding: 15px;
+        display: inline-block;
+        margin-bottom: 10px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .logo-container:hover {
+        transform: scale(1.05);
+        box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+    }
+    
+    .form-input {
+        background: rgba(30, 30, 40, 0.8);
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        border-radius: 10px;
+        padding: 12px 15px;
+        color: white;
+        width: 100%;
+        margin-bottom: 15px;
+        transition: all 0.3s ease;
+    }
+    
+    .form-input:focus {
+        outline: none;
+        border-color: #3B82F6;
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+        color: #D1D5DB;
+    }
+    
+    .floating {
+        animation: floating 3s ease-in-out infinite;
+    }
+    
+    @keyframes floating {
+        0% { transform: translate(0, 0px); }
+        50% { transform: translate(0, 15px); }
+        100% { transform: translate(0, -0px); }
+    }
+    
+    .tab-content {
+        display: none;
+    }
+    
+    .tab-content.active {
+        display: block;
+    }
+    
+    .tab-button {
+        background: transparent;
+        border: none;
+        padding: 12px 20px;
+        color: #9CA3AF;
+        border-bottom: 2px solid transparent;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    
+    .tab-button.active {
+        color: #3B82F6;
+        border-bottom-color: #3B82F6;
+    }
+    
+    .subtab-content {
+        display: none;
+    }
+    
+    .subtab-content.active {
+        display: block;
+    }
+    
+    .subtab-button {
+        background: transparent;
+        border: none;
+        padding: 10px 15px;
+        color: #9CA3AF;
+        border-bottom: 2px solid transparent;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        font-size: 14px;
+    }
+    
+    .subtab-button.active {
+        color: #8B5CF6;
+        border-bottom-color: #8B5CF6;
+    }
+    
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+        animation: fadeIn 0.3s ease;
+    }
+    
+    .modal-content {
+        background: var(--bg-color);
+        border-radius: 15px;
+        padding: 30px;
+        width: 90%;
+        max-width: 500px;
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        animation: slideUp 0.3s ease;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    
+    @keyframes slideUp {
+        from { 
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to { 
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .admin-badge {
+        background: linear-gradient(90deg, #8B5CF6, #EC4899);
+        color: white;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        display: inline-block;
+        margin-left: 10px;
+    }
+    
+    .toast-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        max-width: 400px;
+    }
+    
+    .toast {
+        background: rgba(30, 30, 40, 0.95);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        border-radius: 12px;
+        padding: 16px 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        transform: translateX(400px);
+        opacity: 0;
+        transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        max-width: 400px;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .toast::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 100%;
+        width: 4px;
+    }
+    
+    .toast.show {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    
+    .toast.hide {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+    
+    .toast-success {
+        border-color: rgba(16, 185, 129, 0.4);
+    }
+    
+    .toast-success::before {
+        background: var(--success-color);
+    }
+    
+    .toast-error {
+        border-color: rgba(239, 68, 68, 0.4);
+    }
+    
+    .toast-error::before {
+        background: var(--error-color);
+    }
+    
+    .toast-warning {
+        border-color: rgba(245, 158, 11, 0.4);
+    }
+    
+    .toast-warning::before {
+        background: var(--warning-color);
+    }
+    
+    .toast-info {
+        border-color: rgba(59, 130, 246, 0.4);
+    }
+    
+    .toast-info::before {
+        background: var(--accent-color);
+    }
+    
+    .toast-icon {
+        font-size: 20px;
+        flex-shrink: 0;
+    }
+    
+    .toast-success .toast-icon {
+        color: var(--success-color);
+    }
+    
+    .toast-error .toast-icon {
+        color: var(--error-color);
+    }
+    
+    .toast-warning .toast-icon {
+        color: var(--warning-color);
+    }
+    
+    .toast-info .toast-icon {
+        color: var(--accent-color);
+    }
+    
+    .toast-content {
+        flex: 1;
+    }
+    
+    .toast-title {
+        font-weight: 600;
+        margin-bottom: 4px;
+        font-size: 14px;
+    }
+    
+    .toast-message {
+        font-size: 13px;
+        color: #D1D5DB;
+        line-height: 1.4;
+    }
+    
+    .toast-close {
+        background: none;
+        border: none;
+        color: #9CA3AF;
+        cursor: pointer;
+        font-size: 16px;
+        padding: 4px;
+        border-radius: 4px;
+        transition: all 0.2s ease;
+        flex-shrink: 0;
+    }
+    
+    .toast-close:hover {
+        color: white;
+        background: rgba(255, 255, 255, 0.1);
+    }
+    
+    .toast-progress {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        height: 3px;
+        background: rgba(255, 255, 255, 0.3);
+        width: 100%;
+        border-radius: 0 0 12px 12px;
+        overflow: hidden;
+    }
+    
+    .toast-progress-bar {
+        height: 100%;
+        border-radius: 0 0 12px 12px;
+        transition: width 0.1s linear;
+    }
+    
+    .toast-success .toast-progress-bar {
+        background: var(--success-color);
+    }
+    
+    .toast-error .toast-progress-bar {
+        background: var(--error-color);
+    }
+    
+    .toast-warning .toast-progress-bar {
+        background: var(--warning-color);
+    }
+    
+    .toast-info .toast-progress-bar {
+        background: var(--accent-color);
+    }
+    
+    .nav-header {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        padding: 20px;
+        z-index: 100;
+    }
+    
+    .nav-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+    
+    .nav-logo {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        padding: 8px 16px;
+        border-radius: 12px;
+    }
+    
+    .nav-logo:hover {
+        background: rgba(59, 130, 246, 0.1);
+    }
+    
+    .nav-logo-text {
+        font-size: 24px;
+        font-weight: 700;
+        background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        color: transparent;
+    }
+    
+    .nav-links {
+        display: flex;
+        gap: 20px;
+    }
+    
+    .nav-link {
+        color: #9CA3AF;
+        text-decoration: none;
+        font-weight: 500;
+        padding: 8px 16px;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+    
+    .nav-link:hover {
+        color: white;
+        background: rgba(59, 130, 246, 0.1);
+    }
+    
+    @media (max-width: 768px) {
+        .toast-container {
+            right: 10px;
+            left: 10px;
+            max-width: none;
+        }
+        
+        .toast {
+            max-width: none;
+        }
+        
+        .nav-header {
+            padding: 15px;
+        }
+        
+        .nav-links {
+            display: none;
+        }
+        
+        .nav-logo-text {
+            font-size: 20px;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .modal-content {
+            margin: 20px;
+            padding: 20px;
+            width: calc(100% - 40px);
+        }
+        
+        .tab-button {
+            padding: 10px 15px;
+            font-size: 14px;
+        }
+        
+        .subtab-button {
+            padding: 8px 12px;
+            font-size: 12px;
+        }
+    }
+
+    .mobile-validation-message {
+        font-size: 12px;
+        margin-top: 4px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .form-input.valid {
+        border-color: #10B981;
+        background: rgba(16, 185, 129, 0.05);
+    }
+
+    .form-input.warning {
+        border-color: #F59E0B;
+        background: rgba(245, 158, 11, 0.05);
+    }
+
+    .form-input.error {
+        border-color: #EF4444;
+        background: rgba(239, 68, 68, 0.05);
+    }
+
+    .submit-blocked {
+        opacity: 0.6;
+        cursor: not-allowed !important;
+        pointer-events: none;
+    }
+
+    .student-subtype-tabs {
+        display: flex;
+        border-radius: 10px;
+        background: rgba(30, 30, 40, 0.6);
+        padding: 4px;
+        margin-bottom: 20px;
+    }
+
+    .student-subtype-tab {
+        flex: 1;
+        text-align: center;
+        padding: 10px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 500;
+        font-size: 14px;
+    }
+
+    .student-subtype-tab.active {
+        background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+        color: white;
+    }
+
+    .student-subtype-tab:not(.active):hover {
+        background: rgba(59, 130, 246, 0.2);
+    }
+
+    .custom-bg {
+        background-image: url('/uploads/OIP10.jpg');
+    }
+
+    .confirm-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    .confirm-modal-content {
+        text-align: center;
+        background: var(--bg-color);
+        border-radius: 15px;
+        padding: 30px;
+        width: 90%;
+        max-width: 500px;
+        border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+
+    .confirm-modal.active {
+        display: flex;
+    }
+    
+    .loading {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 40px;
+    }
+    
+    .spinner {
+        border: 4px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        border-top: 4px solid #3B82F6;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    .btn-danger {
+        background: linear-gradient(90deg, #EF4444, #DC2626);
+    }
+
+    .btn-secondary {
+        background: linear-gradient(90deg, #6B7280, #4B5563);
+    } 
+    
+    .modal-body::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .modal-body::-webkit-scrollbar-track {
+        background: rgba(55, 65, 81, 0.3);
+        border-radius: 10px;
+        margin: 4px 0;
+    }
+
+    .modal-body::-webkit-scrollbar-thumb {
+        background: linear-gradient(to bottom, #3b82f6, #8b5cf6);
+        border-radius: 10px;
+        border: 2px solid rgba(31, 41, 55, 0.5);
+    }
+
+    .modal-body::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(to bottom, #2563eb, #7c3aed);
+    }
+
+    .modal-body {
+        scrollbar-width: thin;
+        scrollbar-color: #3b82f6 rgba(55, 65, 81, 0.3);
+    }
+
+    .modal-content {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .modal-body {
+        flex: 1;
+        padding-bottom: 0;
+    }
+
+    .modal-footer {
+        flex-shrink: 0;
+    }
+
+    .selected-year-display {
+        margin-top: auto;
+        position: relative;
+        z-index: 5;
+    }
+
+    #year-validation {
+        position: relative;
+        z-index: 5;
+    }
+</style>
+<body class="custom-bg bg-fixed bg-center bg-cover">
+    <header class="nav-header">
+        <div class="nav-content">
+            <div class="nav-logo" onclick="goToHome()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                    <polyline points="7.5 4.21 12 6.81 16.5 4.21"></polyline>
+                    <polyline points="7.5 19.79 7.5 14.6 3 12"></polyline>
+                    <polyline points="21 12 16.5 14.6 16.5 19.79"></polyline>
+                    <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                    <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                </svg>
+                <span class="nav-logo-text">Home</span>
+            </div>
+            <div class="nav-links">
+                <a href="#" class="nav-link" onclick="window.location.href='/terms'">
+                    <i class="fas fa-info-circle mr-2"></i>Terms
+                </a>
+                <a href="#" class="nav-link" onclick="showToast('+254112167195', 'info')">
+                    <i class="fas fa-envelope mr-2"></i>Contact
+                </a>
+                <a href="#" class="nav-link" onclick="window.location.href='/navigation-guide'">
+                    <i class="fas fa-question-circle mr-2"></i>Help
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <div class="toast-container" id="toast-container"></div>
+
+    <div class="w-full max-w-md mx-4">
+        <div class="glass-morph rounded-2xl p-8">
+            <div class="text-center mb-8">
+                <div class="logo-container floating" onclick="goToHome()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                        <polyline points="7.5 4.21 12 6.81 16.5 4.21"></polyline>
+                        <polyline points="7.5 19.79 7.5 14.6 3 12"></polyline>
+                        <polyline points="21 12 16.5 14.6 16.5 19.79"></polyline>
+                        <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                        <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                    </svg>
+                </div>
+                <h1 class="text-3xl font-bold gradient-text">LyxNexus</h1>
+                <button class="btn-outline mt-2" id="autoAuthenticate">
+                    <i class="fas fa-sign-in-alt mr-2"></i> Auto Authenticate
+                </button>
+                <p class="text-gray-400 mt-2">Enter your credentials to continue</p>
+<!-- Year Display in Form (Add this in the form sections) -->
+                <div id="year-display" class="glass-morph rounded-lg p-4 mb-4 hidden">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <i class="fas fa-graduation-cap text-blue-400 mr-3 text-lg"></i>
+                            <div>
+                                <p class="text-sm text-gray-400">Academic Year</p>
+                                <p class="font-semibold" id="display-year">Not selected</p>
+                            </div>
+                        </div>
+                        <button type="button" onclick="openYearModal()" class="text-sm text-blue-400 hover:text-blue-300 flex items-center">
+                            <i class="fas fa-edit mr-1"></i> Change
+                        </button>
+                    </div>
+                </div>                            
+            </div>
+
+            <div class="flex border-b border-gray-700 mb-6">
+                <button class="tab-button active" data-tab="student-tab">Student Login</button>
+                <button class="tab-button" data-tab="admin-tab">Admin Access</button>
+            </div>
+
+            <!-- Student Login Form -->
+            <div id="student-tab" class="tab-content active">
+                <!-- Student Subtype Tabs -->
+                <div class="student-subtype-tabs">
+                    <div class="student-subtype-tab active" data-subtype="login">
+                        Login
+                    </div>
+                    <div class="student-subtype-tab" data-subtype="register">
+                        Register
+                    </div>
+                </div>
+                <!-- Year Selection Trigger -->
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-calendar-alt mr-2"></i>Academic Year
+                    </label>
+                    <div id="year-display" class="glass-morph rounded-lg p-4 mb-4 hidden">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <i class="fas fa-graduation-cap text-blue-400 mr-3 text-lg"></i>
+                                <div>
+                                    <p class="text-sm text-gray-400">Academic Year</p>
+                                    <p class="font-semibold" id="display-year">Not selected</p>
+                                </div>
+                            </div>
+                            <button type="button" onclick="openYearModal('student')" class="text-sm text-blue-400 hover:text-blue-300 flex items-center">
+                                <i class="fas fa-edit mr-1"></i> Change
+                            </button>
+                        </div>
+                    </div>
+                    <button type="button" onclick="openYearModal('student')" class="btn-outline w-full" id="year-select-btn">
+                        <i class="fas fa-calendar-plus mr-2"></i> Select Academic Year
+                    </button>
+                </div>
+                <form id="student-login-form" method="POST" onsubmit="return validateStudentForm(event)">
+                    <input type="hidden" name="login_type" value="student">
+                    <input type="hidden" name="login_subtype" id="student-login-subtype" value="login">
+                    <input type="hidden" id="year-data" name="year" value="">
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="username">Username</label>
+                        <input type="text" id="username" name="username" class="form-input" placeholder="Full Name" minlength="3" value="lyxin" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="mobile">Mobile Number</label>
+                        <input type="tel" id="mobile" name="mobile" class="form-input" placeholder="07XX XXX XXX or 07XX XXX XXX" value="01 121 671 99" required>
+                        <p class="text-gray-400 text-xs mt-1">Enter your 10-digit mobile number</p>
+                    </div>
+                    
+                    <button type="submit" class="btn mt-4" id="login-student">
+                        <i class="fas fa-sign-in-alt mr-2"></i> Login as Student
+                    </button>
+                </form>
+                
+                <div class="mt-6 text-center">
+                    <p class="text-gray-400">Need admin access?</p>
+                    <button class="btn-outline mt-2 text-sm" id="switch-to-admin-btn">
+                        <i class="fas fa-user-shield mr-2"></i> Switch to Admin
+                    </button>
+                </div>
+            </div>
+
+            <div id="admin-tab" class="tab-content">
+                <div class="glass-morph rounded-lg p-4 mb-4">
+                    <div class="flex items-center">
+                        <i class="fas fa-info-circle text-blue-400 mr-3"></i>
+                        <span class="text-sm">Admin access requires special privileges</span>
+                    </div>
+                </div>
+                
+                <div class="flex border-b border-gray-700 mb-4">
+                    <button class="subtab-button active" data-subtab="admin-login-tab">Admin Login</button>
+                    <button class="subtab-button" data-subtab="master-key-tab">Master Key Access</button>
+                </div>
+                
+                <!-- Normal Admin Login -->
+                <div id="admin-login-tab" class="subtab-content active">
+                    <form id="admin-login-form" method="POST" onsubmit="return validateAdminForm(event)">
+                        <input type="hidden" name="login_type" value="admin">
+                        <input type="hidden" id="admin-year-data" name="year" value="">
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="admin-username">Username</label>
+                            <input type="text" id="admin-username" name="username" class="form-input" placeholder="Enter admin username" maxlength="30" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="admin-mobile">Mobile Number</label>
+                            <input type="tel" id="admin-mobile" name="mobile" class="form-input" placeholder="07XX XXX XXX or 01XX XXX XXX" required>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-admin mt-4" id="admin-login-btn">
+                            <i class="fas fa-key mr-2"></i> Login as Admin
+                        </button>
+                    </form>
+                </div>
+                
+                <!-- Master Key Admin Access -->
+                <div id="master-key-tab" class="subtab-content">
+                    <form id="master-key-form" method="POST" onsubmit="return validateMasterKeyForm(event)">
+                        <input type="hidden" name="login_type" value="admin">
+                        <input type="hidden" id="master-year-data" name="year" value="">
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="master-key-username">Username</label>
+                            <input type="text" id="master-key-username" name="username" class="form-input" placeholder="Enter Username" maxlength="30" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="master-key-mobile">Mobile Number</label>
+                            <input type="tel" id="master-key-mobile" name="mobile" class="form-input" placeholder="07XX XXX XXX or 01XX XXX XXX" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="master-key-input">Master Authorization Key</label>
+                            <input type="password" id="master-key-input" name="master_key" class="form-input" placeholder="Enter master key" required>
+                            <p class="text-gray-400 text-xs mt-1">This will create or promote to admin account</p>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-admin mt-4" id="master-key-btn">
+                            <i class="fas fa-user-shield mr-2"></i> Access with Master Key
+                        </button>
+                    </form>
+                </div>
+                
+                <div class="mt-6 text-center">
+                    <p class="text-gray-400">Don't have admin access?</p>
+                    <button class="btn-outline mt-2 text-sm" id="register-admin-btn">
+                        <i class="fas fa-user-plus mr-2"></i> Register as Admin
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center mt-6 text-gray-500 text-sm">
+            <p>&copy; 2026 LyxNexus. All rights reserved.</p>
+        </div>
+    </div>
+
+    <!-- Register Admin Modal -->
+    <div id="register-admin-modal" class="modal">
+        <div class="modal-content">
+            <h3 class="text-xl font-bold mb-4 gradient-text">Register as Administrator</h3>
+            <div class="glass-morph rounded-lg p-4 mb-4">
+                <div class="flex items-center">
+                    <i class="fas fa-shield-alt text-purple-400 mr-3"></i>
+                    <span class="text-sm">Admin registration requires master authorization</span>
+                </div>
+            </div>
+            <!-- Year Selection Trigger -->
+            <div class="form-group">
+                <label class="form-label">
+                    <i class="fas fa-calendar-alt mr-2"></i>Academic Year
+                </label>
+                <div id="year-display" class="glass-morph rounded-lg p-4 mb-4 hidden">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <i class="fas fa-graduation-cap text-blue-400 mr-3 text-lg"></i>
+                            <div>
+                                <p class="text-sm text-gray-400">Academic Year</p>
+                                <p class="font-semibold" id="display-year">Not selected</p>
+                            </div>
+                        </div>
+                        <button type="button" onclick="openYearModal('student')" class="text-sm text-blue-400 hover:text-blue-300 flex items-center">
+                            <i class="fas fa-edit mr-1"></i> Change
+                        </button>
+                    </div>
+                </div>
+                <button type="button" onclick="openYearModal('student')" class="btn-outline w-full" id="year-select-btn">
+                    <i class="fas fa-calendar-plus mr-2"></i> Select Academic Year
+                </button>
+            </div>
+            <form id="register-admin-form" onsubmit="return validateRegisterAdminForm(event)">
+                <input type="hidden" id="register-admin-year-data" name="year" value="">
+                <div class="form-group">
+                    <label class="form-label" for="new-admin-mobile">Mobile Number</label>
+                    <input type="tel" id="new-admin-mobile" name="mobile" class="form-input" placeholder="07XX XXX XXX or 01XX XXX XXX" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="new-admin-username">Username</label>
+                    <input type="text" id="new-admin-username" name="username" class="form-input" placeholder="Admin Username" maxlength="30" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="register-master-key">Master Authorization Key</label>
+                    <input type="password" id="register-master-key" name="master_key" class="form-input" placeholder="Enter master key" required>
+                    <p class="text-gray-400 text-xs mt-1">Contact system administrator for the master key</p>
+                </div>
+                
+                <div class="flex justify-end space-x-3 mt-6">
+                    <button type="button" class="btn-outline" id="cancel-register-admin">Cancel</button>
+                    <button type="submit" class="btn btn-admin" id="register-admin-submit-btn">
+                        <i class="fas fa-user-shield mr-2"></i> Register
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="confirm-modal" class="confirm-modal">
+        <div class="confirm-modal-content">
+            <h3 class="text-2xl font-bold mb-4 gradient-text" id="confirm-title">Confirm Action</h3>
+            <p class="text-gray-400 font-awesome"> Hope this is your mobile. <span id="confirm-mobile" class="text-gray-300 mb-1 font-bold underline"></span></p>
+            <p class="text-gray-300 mb-4">By continuing, you agree to our <a href="/terms" class="font-bold text-purple-400 hover:underline">Terms of Usage</a></p>
+            <p id="billing-info" class="hidden text-sm mb-6 text-blue-400/80 bg-blue-950/30 border border-blue-500/30 rounded-lg px-4 py-2.5 inline-flex items-center gap-2 backdrop-blur-sm">
+                <i class="fas fa-bolt text-yellow-400 text-xs"></i>
+                <span>Billing on registration as been added! <span class="font-semibold text-blue-300">Stay tuned.</span></span>
+            </p>
+            <div class="flex flex-col-reverse sm:flex-row justify-end space-y-4 sm:space-y-0 space-y-reverse sm:space-x-3">
+                <button type="button" class="btn btn-secondary" id="confirm-cancel-btn">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirm-action-btn">
+                    <span class="btn-spinner"></span>
+                    Yes
+                </button>
+            </div>
+        </div>
+    </div>    
+
+    <div id="year-modal" class="modal hidden fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+        <div class="modal-content relative bg-gradient-to-br from-gray-900 to-gray-950 border border-gray-700 rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-hidden">
+            <!-- Modal Header -->
+            <div class="modal-header sticky top-0 z-10 bg-gradient-to-r from-gray-900 to-gray-800 border-b border-gray-700/50 px-6 py-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div class="p-2 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600">
+                            <i class="fas fa-graduation-cap text-white text-lg"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-white">Select Academic Year</h3>
+                    </div>
+                    <button class="modal-close p-2 rounded-lg bg-gray-800/50 border border-gray-600/30 text-gray-400 hover:text-white hover:bg-gray-700/50 hover:border-gray-500/50 transition-all duration-200"
+                            onclick="closeYearModal()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <p class="text-gray-400 text-sm mt-2">
+                    Choose your current year of study
+                </p>
+            </div>
+
+            <!-- Year Modal Body -->
+            <div class="modal-body px-6 py-4 overflow-y-auto max-h-[calc(90vh-180px)] scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800/30 scrollbar-thumb-rounded-full">
+                <div class="year-grid space-y-3 mb-4">
+                    <div id="year-validation" class="hidden bg-red-500/10 border border-red-500/20 rounded-lg p-3 mb-6">
+                        <div class="flex items-center text-red-400">
+                            <i class="fas fa-exclamation-circle mr-2"></i>
+                            <span class="text-sm">Please select an academic year</span>
+                        </div>
+                    </div>
+
+                    <div class="year-option group cursor-pointer p-4 rounded-xl border-2 border-transparent bg-gray-800/30 hover:bg-gray-800/50 hover:border-blue-500/30 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+                         data-year="1" onclick="selectYearOption(1)">
+                        <div class="flex items-center">
+                            <div class="year-icon w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center mr-4">
+                                <i class="fas fa-1 text-white text-xl font-bold"></i>
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="text-lg font-semibold text-white">First Year</h4>
+                                <p class="text-gray-400 text-sm">Foundation courses</p>
+                            </div>
+                            <div class="year-checkbox w-6 h-6 rounded-md border-2 border-gray-600 group-[.selected]:border-blue-500 group-[.selected]:bg-blue-500 flex items-center justify-center">
+                                <i class="fas fa-check text-white text-xs opacity-0 group-[.selected]:opacity-100 transition-opacity"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="year-option group cursor-pointer p-4 rounded-xl border-2 border-transparent bg-gray-800/30 hover:bg-gray-800/50 hover:border-purple-500/30 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+                         data-year="2" onclick="selectYearOption(2)">
+                        <div class="flex items-center">
+                            <div class="year-icon w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center mr-4">
+                                <i class="fas fa-2 text-white text-xl font-bold"></i>
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="text-lg font-semibold text-white">Second Year</h4>
+                                <p class="text-gray-400 text-sm">Intermediate level</p>
+                            </div>
+                            <div class="year-checkbox w-6 h-6 rounded-md border-2 border-gray-600 group-[.selected]:border-purple-500 group-[.selected]:bg-purple-500 flex items-center justify-center">
+                                <i class="fas fa-check text-white text-xs opacity-0 group-[.selected]:opacity-100 transition-opacity"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="year-option group cursor-pointer p-4 rounded-xl border-2 border-transparent bg-gray-800/30 hover:bg-gray-800/50 hover:border-green-500/30 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+                         data-year="3" onclick="selectYearOption(3)">
+                        <div class="flex items-center">
+                            <div class="year-icon w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-green-700 flex items-center justify-center mr-4">
+                                <i class="fas fa-3 text-white text-xl font-bold"></i>
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="text-lg font-semibold text-white">Third Year</h4>
+                                <p class="text-gray-400 text-sm">Advanced courses</p>
+                            </div>
+                            <div class="year-checkbox w-6 h-6 rounded-md border-2 border-gray-600 group-[.selected]:border-green-500 group-[.selected]:bg-green-500 flex items-center justify-center">
+                                <i class="fas fa-check text-white text-xs opacity-0 group-[.selected]:opacity-100 transition-opacity"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="year-option group cursor-pointer p-4 rounded-xl border-2 border-transparent bg-gray-800/30 hover:bg-gray-800/50 hover:border-yellow-500/30 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+                         data-year="4" onclick="selectYearOption(4)">
+                        <div class="flex items-center">
+                            <div class="year-icon w-12 h-12 rounded-xl bg-gradient-to-br from-yellow-500 to-yellow-700 flex items-center justify-center mr-4">
+                                <i class="fas fa-4 text-white text-xl font-bold"></i>
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="text-lg font-semibold text-white">Fourth Year</h4>
+                                <p class="text-gray-400 text-sm">Final year projects</p>
+                            </div>
+                            <div class="year-checkbox w-6 h-6 rounded-md border-2 border-gray-600 group-[.selected]:border-yellow-500 group-[.selected]:bg-yellow-500 flex items-center justify-center">
+                                <i class="fas fa-check text-white text-xs opacity-0 group-[.selected]:opacity-100 transition-opacity"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="selected-year-display bg-gray-800/40 border border-gray-700/50 rounded-xl p-4 mt-2 mb-6">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <i class="fas fa-calendar-check text-blue-400 mr-3 text-lg"></i>
+                            <div>
+                                <p class="text-sm text-gray-400">Selected Year</p>
+                                <p id="selected-year-text" class="text-lg font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                                    No year selected
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer bg-gradient-to-t from-gray-900 via-gray-900 to-gray-900 px-6 py-4 border-t border-gray-700/50">
+                <div class="flex space-x-3">
+                    <button class="flex-1 py-3 px-4 rounded-xl bg-gray-800/50 border border-gray-600/30 text-gray-300 hover:text-white hover:bg-gray-700/50 hover:border-gray-500/50 transition-all duration-200 font-medium"
+                            onclick="clearYearSelection()">
+                        <i class="fas fa-undo-alt mr-2"></i>Clear
+                    </button>
+                    <button class="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-blue-500 to-purple-600 text-white font-medium hover:from-blue-600 hover:to-purple-700 hover:shadow-lg hover:shadow-blue-500/25 transition-all duration-200"
+                            onclick="confirmYearSelection()">
+                        <i class="fas fa-check mr-2"></i>Confirm
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = '/api';
+        const ENDPOINTS = {
+            REGISTER_ADMIN: `${API_BASE}/register-admin`,
+            PROMOTE_TO_ADMIN: `${API_BASE}/promote-to-admin`,
+            CHECK_ADMIN: `${API_BASE}/check-admin`,
+            LOGIN: '/login'
+        };
+
+        const autoAuthenticateBtn = document.getElementById('autoAuthenticate');
+        autoAuthenticateBtn.addEventListener('click', async () => { 
+            autoAuthenticateBtn.innerHTML = '<i class="fas fa-spin fa-spinner"></i>';  
+            autoAuthenticateBtn.disabled = true;
+
+            try {
+                const res = await fetch('/auto-authenticate', { method: 'POST' });
+                const data = await res.json();
+
+                if (data.status === 'success') {
+                    if (data.is_admin) {
+                        window.location.href = '/admin';
+                    } else {
+                        window.location.href = '/main-page';
+                    }
+                } else {
+                    showToast('Auto authentication failed. Please login manually.', 'error');
+                    autoAuthenticateBtn.innerHTML = '<i class="fas fa-sign-in-alt mr-2"></i> Auto Authenticate';
+                    autoAuthenticateBtn.disabled = false;
+                }
+            } catch (error) {
+                console.error('Auto-auth error:', error);
+                showToast('Auto authentication failed. Please login manually.', 'error');
+                autoAuthenticateBtn.innerHTML = '<i class="fas fa-sign-in-alt mr-2"></i> Auto Authenticate';
+                autoAuthenticateBtn.disabled = false;
+            }
+        });
+
+        class MobileValidator {
+            constructor() {
+                this.validPrefixes = ['07', '01'];
+                this.suspiciousPatterns = this.initializeSuspiciousPatterns();
+                this.fakeNumbers = this.initializeFakeNumbers();
+                this.carrierMap = this.initializeCarrierMap();
+                this.blockedNumbers = this.initializeBlockedNumbers();
+            }
+
+            initializeSuspiciousPatterns() {
+                return [
+                    // Repeated digits
+                    /(\d)\1{7,}/, // 8 or more repeated digits
+                    /(\d)\1{6,}/, // 7 or more repeated digits
+                    
+                    // Sequential digits (forward and reverse)
+                    /0123456789|1234567890|2345678901|3456789012|4567890123/,
+                    /9876543210|8765432109|7654321098|6543210987|5432109876/,
+                    
+                    // All same digit
+                    /^(\d)\1+$/,
+                    
+                    // Common fake/test patterns
+                    /^555\d+$/, /^999\d+$/, /^000\d+$/, /^111\d+$/, /^222\d+$/, /^333\d+$/, /^444\d+$/, /^666\d+$/, /^777\d+$/, /^888\d+$/,
+                    /^123456\d*$/, /^654321\d*$/, /^111111\d*$/, /^000000\d*$/, /^222222\d*$/, /^333333\d*$/, /^444444\d*$/, /^555555\d*$/, /^666666\d*$/, /^777777\d*$/, /^888888\d*$/, /^999999\d*$/,
+                    
+                    // Specific patterns
+                    /^(07|01)(\d)\2{7}$/, // All same digit after prefix
+                    /^(07|01)123456\d{2}$/, /^(07|01)654321\d{2}$/,
+                    
+                    // Repeated pairs
+                    /^(07|01)(\d\d)\2\2\2$/,
+                    
+                    // Incremental(desc&&acs) patterns
+                    /^(07|01)(\d)\3{0,1}(\d)\4{0,1}(\d)\5{0,1}(\d)\6{0,1}$/
+                ];
+            }
+
+            initializeFakeNumbers() {
+                const prefixes = ['07', '01'];
+                const fakePatterns = [
+                    '88888888', '77777777', '66666666', '55555555', '44444444', '33333333', '22222222', '11111111',
+                    '00000000', '99999999', '12345678', '76543210', '01234567', '98765432', '11223344', '22334455',
+                    '11112222', '22223333', '33334444', '44445555', '55556666', '66667777', '77778888', '88889999',
+                    '12121212', '23232323', '34343434', '45454545', '56565656', '67676767', '78787878', '89898989',
+                    '10101010', '20202020', '30303030', '40404040', '50505050', '60606060', '70707070', '80808080', '90909090'
+                ];
+
+                return prefixes.flatMap(prefix => 
+                    fakePatterns.map(pattern => prefix + pattern)
+                );
+            }
+
+            initializeBlockedNumbers() {
+                return [
+                    '0700000000', '0711111111', '0722222222', '0733333333', '0744444444',
+                    '0755555555', '0766666666', '0777777777', '0788888888', '0799999999',
+                    '0100000000', '0111111111', '0122222222', '0133333333', '0144444444',
+                    '0155555555', '0166666666', '0177777777', '0188888888', '0199999999',
+                    '0712345678', '0776543210', '0701234567', '0798765432'
+                ];
+            }
+
+            initializeCarrierMap() {
+                return {
+                    '70': 'Safaricom', '71': 'Safaricom', '72': 'Safaricom', 
+                    '73': 'Airtel', '74': 'Safaricom', '79': 'Safaricom',
+                    '75': 'Airtel', '76': 'Airtel', 
+                    '77': 'Telkom', '78': 'Airtel',
+                    '10': 'Airtel (01)', '11': 'Safaricom (01)', '12': 'Safaricom (01)',
+                    '13': 'Safaricom (01)', '14': 'Safaricom (01)', '15': 'Safaricom (01)',
+                    '16': 'Safaricom (01)', '17': 'Safaricom (01)', '18': 'Safaricom (01)',
+                    '19': 'Safaricom (01)'
+                };
+            }
+
+            validate(mobile) {
+                const cleanMobile = this.cleanNumber(mobile);
+                
+                const basicValidation = this.validateBasic(cleanMobile);
+                if (!basicValidation.valid) return basicValidation;
+
+                const prefixValidation = this.validatePrefix(cleanMobile);
+                if (!prefixValidation.valid) return prefixValidation;
+
+                if (this.isBlocked(cleanMobile)) {
+                    return { 
+                        valid: false, 
+                        reason: 'This mobile number is not allowed' 
+                    };
+                }
+
+                if (this.isSuspicious(cleanMobile)) {
+                    return { 
+                        valid: false, 
+                        reason: 'Suspicious number pattern detected' 
+                    };
+                }
+
+                return { 
+                    valid: true, 
+                    number: cleanMobile, 
+                    prefix: cleanMobile.substring(0, 2),
+                    formatted: this.getFormattedNumber(cleanMobile),
+                    carrier: this.getCarrierInfo(cleanMobile)
+                };
+            }
+
+            cleanNumber(mobile) {
+                return mobile.replace(/\D/g, '');
+            }
+
+            validateBasic(mobile) {
+                if (mobile.length !== 10) {
+                    return { 
+                        valid: false, 
+                        reason: 'Mobile number must be exactly 10 digits' 
+                    };
+                }
+
+                if (!/^\d+$/.test(mobile)) {
+                    return { 
+                        valid: false, 
+                        reason: 'Mobile number must contain only digits' 
+                    };
+                }
+
+                return { valid: true };
+            }
+
+            validatePrefix(mobile) {
+                const prefix = mobile.substring(0, 2);
+                if (!this.validPrefixes.includes(prefix)) {
+                    return { 
+                        valid: false, 
+                        reason: 'Mobile numbers must start with 07 or 01' 
+                    };
+                }
+                return { valid: true };
+            }
+
+            isBlocked(mobile) {
+                return this.blockedNumbers.includes(mobile);
+            }
+
+            isSuspicious(mobile) {
+                const cleanMobile = this.cleanNumber(mobile);
+                
+                if (this.fakeNumbers.includes(cleanMobile)) {
+                    return true;
+                }
+
+                if (this.suspiciousPatterns.some(pattern => pattern.test(cleanMobile))) {
+                    return true;
+                }
+
+                return this.hasRepeatedGroups(cleanMobile) || 
+                       this.isSequential(cleanMobile);
+            }
+
+            hasRepeatedGroups(mobile) {
+                const cleanMobile = this.cleanNumber(mobile);
+                const groups = cleanMobile.match(/(\d)\1+/g);
+                if (groups && groups.length >= 2) {
+                    const totalRepeated = groups.reduce((sum, group) => sum + group.length, 0);
+                    return totalRepeated >= 6;
+                }
+                return false;
+            }
+
+            isSequential(mobile) {
+                const cleanMobile = this.cleanNumber(mobile);
+                const digits = cleanMobile.split('').map(Number);
+                
+                let increasing = true;
+                for (let i = 2; i < digits.length - 1; i++) {
+                    if (digits[i] + 1 !== digits[i + 1]) {
+                        increasing = false;
+                        break;
+                    }
+                }
+                
+                let decreasing = true;
+                for (let i = 2; i < digits.length - 1; i++) {
+                    if (digits[i] - 1 !== digits[i + 1]) {
+                        decreasing = false;
+                        break;
+                    }
+                }
+                
+                return increasing || decreasing;
+            }
+
+            getCarrierInfo(mobile) {
+                const cleanMobile = this.cleanNumber(mobile);
+                const carrierPrefix = cleanMobile.substring(1, 3);
+                return this.carrierMap[carrierPrefix] || 'Unknown Carrier';
+            }
+
+            getValidationMessage(validation) {
+                const messages = {
+                    'Mobile number must be exactly 10 digits': 'Please enter a 10-digit mobile number',
+                    'Mobile number must contain only digits': 'Please enter only digits',
+                    'Mobile numbers must start with 07 or 01': 'Mobile number must start with 07 or 01',
+                    'This mobile number is not allowed': 'This mobile number is not accepted',
+                    'Suspicious number pattern detected': 'This appears to be an invalid or fake number'
+                };
+
+                return messages[validation.reason] || validation.reason;
+            }
+
+            getFormattedNumber(mobile) {
+                const cleanMobile = this.cleanNumber(mobile);
+                if (cleanMobile.length !== 10) return mobile;
+                
+                return `${cleanMobile.substring(0, 2)} ${cleanMobile.substring(2, 5)} ${cleanMobile.substring(5, 8)} ${cleanMobile.substring(8)}`;
+            }
+
+            // Strict validation - no suspicious numbers allowed
+            validateStrict(mobile) {
+                const validation = this.validate(mobile);
+                if (!validation.valid) return validation;
+                
+                if (this.isSuspicious(validation.number)) {
+                    return { 
+                        valid: false, 
+                        reason: 'Suspicious number pattern detected' 
+                    };
+                }
+                
+                return validation;
+            }
+        }
+
+        const mobileValidator = new MobileValidator();
+        let selectedYear = null;
+        let currentFormType = null; // 'student', 'admin', 'master', 'register-admin'
+
+        // Open the year selection modal
+        function openYearModal(formType) {
+            currentFormType = formType;
+            document.getElementById('year-modal').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+            document.getElementById('year-validation').classList.add('hidden');
+
+            let savedYear;
+            switch(formType) {
+                case 'student':
+                    savedYear = document.getElementById('year-data').value;
+                    break;
+                case 'admin':
+                    savedYear = document.getElementById('admin-year-data').value;
+                    break;
+                case 'master':
+                    savedYear = document.getElementById('master-year-data').value;
+                    break;
+                case 'register-admin':
+                    savedYear = document.getElementById('register-admin-year-data').value;
+                    break;
+            }
+
+            if (savedYear) {
+                selectYearOption(parseInt(savedYear));
+            } else {
+                selectedYear = null;
+                document.querySelectorAll('.year-option').forEach(option => {
+                    option.classList.remove('selected');
+                });
+                document.getElementById('selected-year-text').textContent = 'No year selected';
+            }
+        }
+
+        // Close the year selection modal
+        function closeYearModal() {
+            document.getElementById('year-modal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        // Select a year option
+        function selectYearOption(year) {
+            selectedYear = year;
+            document.querySelectorAll('.year-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            const selectedOption = document.querySelector(`.year-option[data-year="${year}"]`);
+            selectedOption.classList.add('selected');
+
+            // Update selected year display
+            const yearNames = {
+                1: 'First Year (Year 1)',
+                2: 'Second Year (Year 2)',
+                3: 'Third Year (Year 3)',
+                4: 'Fourth Year (Year 4)'
+            };
+
+            document.getElementById('selected-year-text').innerHTML = `
+                <span style="color: #3b82f6">${yearNames[year]}</span>
+            `;
+            document.getElementById('year-validation').classList.add('hidden');
+        }
+
+        // Confirm the year selection
+        function confirmYearSelection() {
+            if (!selectedYear) {
+                document.getElementById('year-validation').classList.remove('hidden');
+
+                // Shake animation for error
+                const modalContent = document.querySelector('.modal-content');
+                modalContent.style.animation = 'none';
+                setTimeout(() => {
+                    modalContent.style.animation = 'shake 0.5s ease';
+                }, 10);
+
+                return;
+            }
+
+            // Set the hidden input value based on current form type
+            let yearInputId, displayElementId, yearDisplayId, yearSelectBtnId;
+
+            switch(currentFormType) {
+                case 'student':
+                    yearInputId = 'year-data';
+                    yearDisplayId = 'year-display';
+                    displayElementId = 'display-year';
+                    yearSelectBtnId = 'year-select-btn';
+                    break;
+                case 'admin':
+                    yearInputId = 'admin-year-data';
+                    yearDisplayId = 'admin-year-display';
+                    displayElementId = 'admin-display-year';
+                    yearSelectBtnId = 'admin-year-select-btn';
+                    break;
+                case 'master':
+                    yearInputId = 'master-year-data';
+                    yearDisplayId = 'master-year-display';
+                    displayElementId = 'master-display-year';
+                    yearSelectBtnId = 'master-year-select-btn';
+                    break;
+                case 'register-admin':
+                    yearInputId = 'register-admin-year-data';
+                    yearDisplayId = 'register-admin-year-display';
+                    displayElementId = 'register-admin-display-year';
+                    yearSelectBtnId = 'register-admin-year-select-btn';
+                    break;
+            }
+
+            // Set the hidden input value
+            document.getElementById(yearInputId).value = selectedYear;
+
+            // Update display in form
+            const yearNames = {
+                1: 'Year 1',
+                2: 'Year 2',
+                3: 'Year 3',
+                4: 'Year 4'
+            };
+
+            if (displayElementId && document.getElementById(displayElementId)) {
+                document.getElementById(displayElementId).textContent = yearNames[selectedYear];
+            }
+
+            if (yearDisplayId && document.getElementById(yearDisplayId)) {
+                document.getElementById(yearDisplayId).classList.remove('hidden');
+            }
+
+            if (yearSelectBtnId && document.getElementById(yearSelectBtnId)) {
+                document.getElementById(yearSelectBtnId).classList.add('hidden');
+            }
+
+            // Close modal
+            closeYearModal();
+
+            // Show success notification
+            showYearSelectionSuccess(selectedYear);
+        }
+
+        function showYearSelectionSuccess(year) {
+            showToast(`Academic year set to Year ${year}`, 'success', 'Year Selected');
+        }
+
+        function clearYearSelection() {
+            selectedYear = null;
+
+            // Clear modal selection
+            const yearOptions = document.querySelectorAll('.year-option');
+            if (yearOptions.length > 0) {
+                yearOptions.forEach(option => {
+                    option.classList.remove('selected');
+                });
+            }
+
+            const selectedYearText = document.getElementById('selected-year-text');
+            if (selectedYearText) {
+                selectedYearText.textContent = 'No year selected';
+            }
+
+            const yearValidation = document.getElementById('year-validation');
+            if (yearValidation) {
+                yearValidation.classList.add('hidden');
+            }
+
+            // Clear hidden input values in all forms
+            const yearInputs = [
+                'year-data',
+                'admin-year-data', 
+                'master-year-data',
+                'register-admin-year-data'
+            ];
+
+            yearInputs.forEach(inputId => {
+                const input = document.getElementById(inputId);
+                if (input) {
+                    input.value = '';
+                }
+            });
+
+            if (selectedYearText || yearValidation) {
+                showToast('Year selection cleared', 'success', 'Selection Cleared');
+            }
+        }        
+
+        // Validate year selection in form submission
+        function validateYearSelection() {
+            let yearInput;
+
+            switch(currentFormType) {
+                case 'student':
+                    yearInput = document.getElementById('year-data');
+                    break;
+                case 'admin':
+                    yearInput = document.getElementById('admin-year-data');
+                    break;
+                case 'master':
+                    yearInput = document.getElementById('master-year-data');
+                    break;
+                case 'register-admin':
+                    yearInput = document.getElementById('register-admin-year-data');
+                    break;
+                default:
+                    yearInput = document.getElementById('year-data');
+            }
+
+            if (!yearInput || !yearInput.value) {
+                // Open modal if no year selected
+                if (currentFormType) {
+                    openYearModal(currentFormType);
+                } else {
+                    openYearModal('student');
+                }
+
+                // Show error in modal
+                setTimeout(() => {
+                    document.getElementById('year-validation').classList.remove('hidden');
+                }, 300);
+
+                return false;
+            }
+
+            return true;
+        }
+        
+        class ToastManager {
+            constructor() {
+                this.container = document.getElementById('toast-container');
+                this.toasts = new Set();
+            }
+            
+            show(title, message, type = 'info', duration = 5000) {
+                const toast = document.createElement('div');
+                toast.className = `toast toast-${type}`;
+                
+                const icons = {
+                    success: 'fa-check-circle',
+                    error: 'fa-exclamation-triangle',
+                    warning: 'fa-exclamation-circle',
+                    info: 'fa-info-circle'
+                };
+                
+                toast.innerHTML = `
+                    <div class="toast-icon">
+                        <i class="fas ${icons[type]}"></i>
+                    </div>
+                    <div class="toast-content">
+                        <div class="toast-title">${title}</div>
+                        <div class="toast-message">${message}</div>
+                    </div>
+                    <button class="toast-close" onclick="toastManager.close(this.parentElement)">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <div class="toast-progress">
+                        <div class="toast-progress-bar" style="width: 100%"></div>
+                    </div>
+                `;
+                
+                this.container.appendChild(toast);
+                this.toasts.add(toast);
+                
+                setTimeout(() => {
+                    toast.classList.add('show');
+                }, 10);
+                
+                const progressBar = toast.querySelector('.toast-progress-bar');
+                let width = 100;
+                const interval = setInterval(() => {
+                    if (width <= 0) {
+                        clearInterval(interval);
+                        this.close(toast);
+                    } else {
+                        width -= (100 / (duration / 100));
+                        progressBar.style.width = `${width}%`;
+                    }
+                }, 100);
+                
+                setTimeout(() => {
+                    this.close(toast);
+                }, duration);
+                
+                return toast;
+            }
+            
+            close(toast) {
+                if (!this.toasts.has(toast)) return;
+                
+                toast.classList.remove('show');
+                toast.classList.add('hide');
+                
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.parentNode.removeChild(toast);
+                    }
+                    this.toasts.delete(toast);
+                }, 400);
+            }
+        }
+        
+        const toastManager = new ToastManager();
+        
+        function showToast(message, type = 'info', title = null) {
+            const titles = {
+                success: 'Success',
+                error: 'Error',
+                warning: 'Warning',
+                info: 'Information'
+            };
+            
+            return toastManager.show(title || titles[type], message, type);
+        }
+
+        // Mobile input formatting and validation
+        function setupMobileValidation() {
+            const mobileInputs = document.querySelectorAll('input[type="tel"]');
+
+            mobileInputs.forEach(input => {
+                input.addEventListener('input', function() {
+                    formatMobileInput(this);
+                    validateMobileInputRealTime(this);
+                });
+
+                input.addEventListener('blur', function() {
+                    validateMobileInputRealTime(this);
+                });
+
+                input.addEventListener('focus', function() {
+                    clearMobileValidation(this);
+                });
+            });
+        }
+
+        function formatMobileInput(input) {
+            let value = input.value.replace(/\D/g, '');
+            
+            if (value.length > 10) {
+                value = value.substring(0, 10);
+            }
+            
+            let formattedValue = '';
+            for (let i = 0; i < value.length; i++) {
+                if (i === 2 || i === 5 || i === 8) {
+                    formattedValue += ' ';
+                }
+                formattedValue += value[i];
+            }
+            
+            input.value = formattedValue.trim();
+        }
+
+        function clearMobileValidation(input) {
+            input.classList.remove('valid', 'warning', 'error');
+            
+            let existingMessage = input.parentNode.querySelector('.mobile-validation-message');
+            if (existingMessage) {
+                existingMessage.remove();
+            }
+        }
+
+        function validateMobileInputRealTime(input) {
+            const rawValue = input.value.replace(/\D/g, '');
+            const validation = mobileValidator.validateStrict(rawValue);
+            
+            clearMobileValidation(input);
+            
+            if (!validation.valid) {
+                input.classList.add('error');
+                showMobileError(input, mobileValidator.getValidationMessage(validation));
+                return false;
+            } else {
+                input.classList.add('valid');
+                const carrier = mobileValidator.getCarrierInfo(rawValue);
+                showMobileSuccess(input, `✓ Valid • ${carrier}`);
+                return true;
+            }
+        }
+
+        function showMobileError(input, message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'mobile-validation-message text-red-400 text-xs mt-1 flex items-center';
+            errorDiv.innerHTML = `<i class="fas fa-exclamation-circle mr-1"></i> ${message}`;
+            input.parentNode.appendChild(errorDiv);
+        }
+
+        function showMobileSuccess(input, message) {
+            const successDiv = document.createElement('div');
+            successDiv.className = 'mobile-validation-message text-green-400 text-xs mt-1 flex items-center';
+            successDiv.innerHTML = `<i class="fas fa-check-circle mr-1"></i> ${message}`;
+            input.parentNode.appendChild(successDiv);
+        }
+
+        // Student subtype management
+        function setupStudentSubtypeTabs() {
+            const subtypeTabs = document.querySelectorAll('.student-subtype-tab');
+            
+            subtypeTabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const subtype = this.getAttribute('data-subtype');
+                    
+                    // Update active tab
+                    subtypeTabs.forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Update hidden input value
+                    document.getElementById('student-login-subtype').value = subtype;
+                    
+                    const loginButton = document.getElementById('login-student');
+                    if (subtype === 'login') {
+                        loginButton.innerHTML = '<i class="fas fa-sign-in-alt mr-2"></i> Login as Student';
+                    } else {
+                        loginButton.innerHTML = '<i class="fas fa-user-plus mr-2"></i> Register as Student';
+                    }
+                    
+                    updateStudentFormForSubtype(subtype);
+                });
+            });
+        }
+
+        function updateStudentFormForSubtype(subtype) {
+            const usernameField = document.getElementById('username');
+            const mobileField = document.getElementById('mobile');
+            
+            if (subtype === 'register') {
+                usernameField.placeholder = 'Full Name';
+                mobileField.placeholder = '07XX XXX XXX or 01XX XXX XXX';
+                
+            } else {
+                usernameField.placeholder = 'Full Name';
+                mobileField.placeholder = '07XX XXX XXX or 01XX XXX XXX';
+            }
+        }
+
+        function showConfirmModal(mobile, billingInfo) {
+            const modal = document.getElementById('confirm-modal');
+            const billingElement = document.getElementById('billing-info');
+            const mobileElement = document.getElementById('confirm-mobile');
+            mobileElement.textContent = mobile;
+            modal.classList.add('active');
+            if (billingInfo) {
+                billingElement.classList.remove('hidden');
+            } else {
+                billingElement.classList.add('hidden');
+            }
+
+            document.getElementById('confirm-action-btn').onclick = function() {
+                const event = window.pendingFormEvent;
+                const loginButton = document.getElementById('login-student');
+                const subtype = document.getElementById('student-login-subtype').value;
+
+                if (subtype === 'login') {
+                    loginButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in...';
+                    showToast('Logging in...', 'info', 'Please Wait');
+                } else {
+                    loginButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Registering...';
+                    showToast('Creating account...', 'info', 'Please Wait');
+                }
+                loginButton.disabled = true;
+                modal.classList.remove('active');
+                event.target.submit();
+            };
+
+            document.getElementById('confirm-cancel-btn').onclick = function() {
+                modal.classList.remove('active');
+            };
+        }    
+        // FORM VALIDATION FUNCTIONS
+        function validateStudentForm(event) {
+            const mobile = document.getElementById('mobile').value;
+            const username = document.getElementById('username').value;
+            const loginButton = document.getElementById('login-student');
+            const subtype = document.getElementById('student-login-subtype').value;
+            currentFormType = 'student';
+
+            if (subtype === 'register') {
+                const yearInput = document.getElementById('year-data');
+                if (!yearInput.value) {
+                    event.preventDefault();
+                    showToast('Please select your academic year', 'error', 'Year Validation Error');
+                    openYearModal('student');
+                    return false;
+                }
+
+                if (!validateYearSelection()) {
+                    event.preventDefault();
+                    return false;
+                }
+            }
+
+            if (!username.trim()) {
+                event.preventDefault();
+                showToast('Please enter a username', 'error', 'Year Validation Error');
+                return false;
+            }
+            
+            const rawMobile = mobile.replace(/\D/g, '');
+            const validation = mobileValidator.validateStrict(rawMobile);
+            
+            if (!validation.valid) {
+                event.preventDefault();
+                showToast(mobileValidator.getValidationMessage(validation), 'error', 'Invalid Mobile Number');
+                document.getElementById('mobile').focus();
+                return false;
+            }
+            
+            document.getElementById('mobile').value = rawMobile;
+            
+            let confirmMessage;
+            if (subtype === 'login') {
+                mobileValue = `${validation.formatted}`;
+                billingInfo = false;
+            } else if (subtype === 'register') {
+                mobileValue = `${validation.formatted}`;
+                billingInfo = true;
+            }
+            
+            window.pendingFormEvent = event;
+            showConfirmModal(mobileValue, billingInfo);
+            return false;
+            if (!confirmAction) {
+                event.preventDefault();
+                return false;
+            }
+            
+            // Update button text based on subtype
+            if (subtype === 'login') {
+                loginButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in...';
+            } else {
+                loginButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Registering...';
+            }
+            loginButton.disabled = true;
+            
+            if (subtype === 'login') {
+                showToast('Logging in...', 'info', 'Please Wait');
+            } else {
+                showToast('Creating account...', 'info', 'Please Wait');
+            }
+            
+            return true;
+        }
+
+        function validateAdminForm(event) {
+            const mobile = document.getElementById('admin-mobile').value;
+            const username = document.getElementById('admin-username').value;
+            const loginButton = document.getElementById('admin-login-btn');
+            currentFormType = 'admin';
+
+            if (!username.trim()) {
+                event.preventDefault();
+                showToast('Please enter a username', 'error', 'Validation Error');
+                return false;
+            }
+            
+            const rawMobile = mobile.replace(/\D/g, '');
+            const validation = mobileValidator.validateStrict(rawMobile);
+            
+            if (!validation.valid) {
+                event.preventDefault();
+                showToast(mobileValidator.getValidationMessage(validation), 'error', 'Invalid Mobile Number');
+                document.getElementById('admin-mobile').focus();
+                return false;
+            }
+            
+            // Update the mobile field with clean number before submission
+            document.getElementById('admin-mobile').value = rawMobile;
+            
+            loginButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Authenticating...';
+            loginButton.disabled = true;
+            
+            showToast('Authenticating admin access...', 'info', 'Please Wait');
+            
+            return true;
+        }
+
+        function validateMasterKeyForm(event) {
+            const mobile = document.getElementById('master-key-mobile').value;
+            const username = document.getElementById('master-key-username').value;
+            const masterKey = document.getElementById('master-key-input').value;
+            const loginButton = document.getElementById('master-key-btn');
+            currentFormType = 'master';
+
+            if (!username.trim()) {
+                event.preventDefault();
+                showToast('Please enter a username', 'error', 'Validation Error');
+                return false;
+            }
+            
+            if (!masterKey) {
+                event.preventDefault();
+                showToast('Please enter the master authorization key', 'error', 'Validation Error');
+                return false;
+            }
+            
+            const rawMobile = mobile.replace(/\D/g, '');
+            const validation = mobileValidator.validateStrict(rawMobile);
+            
+            if (!validation.valid) {
+                event.preventDefault();
+                showToast(mobileValidator.getValidationMessage(validation), 'error', 'Invalid Mobile Number');
+                document.getElementById('master-key-mobile').focus();
+                return false;
+            }
+            
+            document.getElementById('master-key-mobile').value = rawMobile;
+            
+            loginButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+            loginButton.disabled = true;
+            
+            showToast('Processing master key access...', 'info', 'Please Wait');
+            
+            return true;
+        }
+
+        function validateRegisterAdminForm(event) {
+            event.preventDefault();
+            currentFormType = 'register-admin';
+
+            const yearInput = document.getElementById('year-data');
+            const yearValue = yearInput.value;
+
+            if (!yearValue || yearValue.trim() === '') {
+                showToast('Please select an academic year', 'error');
+                return false;
+            }
+
+            // Parse safely
+            const year = parseInt(yearValue);
+            if (isNaN(year) || year < 1 || year > 4) {
+                showToast('Please select a valid academic year (1-4)', 'error');
+                return false;
+            }
+
+            if (!yearInput.value) {
+                event.preventDefault();
+                showToast('Please select your academic year', 'error', 'Validation Error');
+                openYearModal('student');
+                return false;
+            }
+
+            if (!validateYearSelection()) {
+                event.preventDefault();
+                return false;
+            }
+            const mobile = document.getElementById('new-admin-mobile').value;
+            const username = document.getElementById('new-admin-username').value;
+            const masterKey = document.getElementById('register-master-key').value;
+            const submitButton = document.getElementById('register-admin-submit-btn');
+            
+            if (!username.trim()) {
+                showToast('Please enter a username', 'error', 'Validation Error');
+                return false;
+            }
+            
+            if (!masterKey) {
+                showToast('Please enter the master authorization key', 'error', 'Validation Error');
+                return false;
+            }
+            
+            const rawMobile = mobile.replace(/\D/g, '');
+            const validation = mobileValidator.validateStrict(rawMobile);
+            
+            if (!validation.valid) {
+                showToast(mobileValidator.getValidationMessage(validation), 'error', 'Invalid Mobile Number');
+                document.getElementById('new-admin-mobile').focus();
+                return false;
+            }
+            
+            const formData = {
+                mobile: rawMobile,
+                username: username,
+                year: year,
+                master_key: masterKey
+            };
+            
+            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Registering...';
+            submitButton.disabled = true;
+            
+            registerAdmin(formData)
+                .then(result => {
+                    showToast('Admin account created successfully! You can now login.', 'success');
+                    closeModal('register-admin-modal');
+                    
+                    openTab('admin-tab');
+                    document.getElementById('admin-mobile').value = rawMobile;
+                    document.getElementById('admin-username').value = username;
+                })
+                .catch(error => {
+                    promoteToAdmin(formData)
+                        .then(result => {
+                            showToast('User promoted to admin successfully! You can now login.', 'success');
+                            closeModal('register-admin-modal');
+                            
+                            openTab('admin-tab');
+                            document.getElementById('admin-mobile').value = rawMobile;
+                            document.getElementById('admin-username').value = username;
+                        })
+                        .catch(promoteError => {
+                            showToast(promoteError.message || 'Admin registration failed', 'error', 'Registration Failed');
+                        });
+                })
+                .finally(() => {
+                    submitButton.innerHTML = '<i class="fas fa-user-shield mr-1"></i> Register';
+                    submitButton.disabled = false;
+                });
+            
+            return false;
+        }
+
+        async function registerAdmin(formData) {
+            try {
+                const response = await fetch(ENDPOINTS.REGISTER_ADMIN, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.error || 'Registration failed');
+                }
+                
+                return data;
+            } catch (error) {
+                throw error;
+            }
+        }
+
+        async function promoteToAdmin(formData) {
+            try {
+                const response = await fetch(ENDPOINTS.PROMOTE_TO_ADMIN, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.error || 'Promotion failed');
+                }
+                
+                return data;
+            } catch (error) {
+                throw error;
+            }
+        }
+
+        function goToHome() {
+            window.location.href = '/';
+        }
+
+        function openTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.classList.remove('active');
+            });
+            
+            const tabElement = document.getElementById(tabName);
+            if (tabElement) {
+                tabElement.classList.add('active');
+            }
+            
+            document.querySelectorAll('.tab-button').forEach(button => {
+                if (button.getAttribute('data-tab') === tabName) {
+                    button.classList.add('active');
+                }
+            });
+        }
+
+        function openSubTab(subTabName) {
+            document.querySelectorAll('.subtab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            document.querySelectorAll('.subtab-button').forEach(button => {
+                button.classList.remove('active');
+            });
+            
+            const subtabElement = document.getElementById(subTabName);
+            if (subtabElement) {
+                subtabElement.classList.add('active');
+            }
+            
+            document.querySelectorAll('.subtab-button').forEach(button => {
+                if (button.getAttribute('data-subtab') === subTabName) {
+                    button.classList.add('active');
+                }
+            });
+        }
+
+        function openRegisterAdminModal() {
+            document.getElementById('register-admin-modal').style.display = 'flex';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            
+                
+                    
+                        showToast("No account found with this mobile number. Please register instead.", "error");
+                    
+                
+            
+            
+            // Tab management
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.addEventListener('click', function() {
+                    const tabName = this.getAttribute('data-tab');
+                    openTab(tabName);
+                });
+            });
+            
+            document.querySelectorAll('.subtab-button').forEach(button => {
+                button.addEventListener('click', function() {
+                    const subTabName = this.getAttribute('data-subtab');
+                    openSubTab(subTabName);
+                });
+            });
+            // Year modal close when clicking outside
+            document.getElementById('year-modal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeYearModal();
+                }
+            });
+
+            // Keyboard support for year modal
+            document.addEventListener('keydown', function(e) {
+                const modal = document.getElementById('year-modal');
+                if (modal.style.display === 'flex') {
+                    if (e.key === 'Escape') {
+                        closeYearModal();
+                    } else if (e.key === 'Enter') {
+                        confirmYearSelection();
+                    } else if (e.key >= '1' && e.key <= '4') {
+                        selectYearOption(parseInt(e.key));
+                    }
+                }
+            });
+
+            // Make year options keyboard accessible
+            document.querySelectorAll('.year-option').forEach(option => {
+                option.tabIndex = 0;
+                option.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        const year = parseInt(this.dataset.year);
+                        selectYearOption(year);
+                    }
+                });
+            });            
+            
+            // Student subtype tabs
+            setupStudentSubtypeTabs();
+            
+            document.getElementById('switch-to-admin-btn').addEventListener('click', function() {
+                openTab('admin-tab');
+            });
+            
+            document.getElementById('register-admin-btn').addEventListener('click', function() {
+                openRegisterAdminModal();
+            });
+            
+            document.getElementById('cancel-register-admin').addEventListener('click', function() {
+                closeModal('register-admin-modal');
+            });
+            
+            document.addEventListener('click', function(event) {
+                if (event.target.classList.contains('modal')) {
+                    event.target.style.display = 'none';
+                }
+            });
+            
+            // Setup mobile validation
+            setupMobileValidation();
+            
+            setTimeout(() => {
+                showToast('Please enter valid credentials to continue', 'info', 'Welcome to LyxNexus');
+            }, 1000);
+        });
+    </script>    
+</body>
+</html>

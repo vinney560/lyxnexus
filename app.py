@@ -5213,7 +5213,7 @@ _0eXv4 --> static/js
 def css_files(filename):
     return send_from_directory('static/css', filename)
 
-# ========   MOCKERY FOR HACKERS ========
+# ===============   MOCKERY FOR HACKERS ========
 from flask import render_template_string
 @app.route('/_0eXv3/tailwind.all.css.map')
 def mockery_map_1():
@@ -7373,33 +7373,36 @@ import io
 @app.route('/api/announcements/specified')
 @login_required
 def get_specified_announcements():
-    try:
-        announcements = Announcement.query\
-            .join(User, Announcement.user_id == User.id)\
-            .filter(
-                or_(
-                    User.year == current_user.year,
-                    User.year == 5
-                )
-            )\
-            .order_by(Announcement.created_at.desc())\
-            .all()
-        result = [{
-            'id': a.id,
-            'title': a.title,
-            'content': a.content,
-            'highlighted': a.highlighted,
-            'created_at': a.created_at.isoformat(),
-            'author': {'id': a.author.id, 'username': a.author.username} if a.author else None,
-            'has_file': a.has_file(), 
-            'file_name': a.file_name,
-            'file_type': a.file_type,
-            'file_url': a.get_file_url()
-        } for a in announcements]
-        return jsonify(result)
-    except Exception as e:
-        app.logger.exception("Failed to fetch announcements")
-        return jsonify({'error': 'Failed to fetch announcements'}), 500
+    if current_user:
+        try:
+            announcements = Announcement.query\
+                .join(User, Announcement.user_id == User.id)\
+                .filter(
+                    or_(
+                        User.year == current_user.year,
+                        User.year == 5
+                    )
+                )\
+                .order_by(Announcement.created_at.desc())\
+                .all()
+            result = [{
+                'id': a.id,
+                'title': a.title,
+                'content': a.content,
+                'highlighted': a.highlighted,
+                'created_at': a.created_at.isoformat(),
+                'author': {'id': a.author.id, 'username': a.author.username} if a.author else None,
+                'has_file': a.has_file(), 
+                'file_name': a.file_name,
+                'file_type': a.file_type,
+                'file_url': a.get_file_url()
+            } for a in announcements]
+            return jsonify(result)
+        except Exception as e:
+            app.logger.exception("Failed to fetch announcements")
+            return jsonify({'error': 'Failed to fetch announcements'}), 500
+    flash("Login required to access this resource!", "error")
+    return redirect(url_for('login'))
 
 @app.route('/api/announcements')
 def get_announcements():
