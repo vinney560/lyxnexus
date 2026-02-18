@@ -239,8 +239,8 @@ class User(db.Model, UserMixin):
                                  backref='author',
                                  lazy=True) 
     payments = db.relationship('Payment', 
-                               backref='user', 
-                               lazy=True)      
+                               backref='user',
+                               lazy=True)  
      
     def validate_mobile(self, mobile):
         """Validate mobile number format"""
@@ -930,6 +930,7 @@ class Challenge(db.Model):
 
 # Payment Model
 class Payment(db.Model):
+    __tablename__ = 'payment'
     id = db.Column(db.Integer, primary_key=True)
     phone = db.Column(db.String(20), nullable=False)
     amount = db.Column(db.Integer, nullable=False)
@@ -973,7 +974,7 @@ from sqlalchemy import text
 with app.app_context():
     try:
         # Create tables if they don't exist
-        db.create_all()    
+        db.create_all()
         db.session.commit()
         print(Fore.GREEN + "✅ Database tables created successfully!")
 
@@ -10733,6 +10734,7 @@ def pay_to_ln():
     
     # Save pending payment in DB
     pending = Payment(
+        user_id=current_user.id,
         phone=phone,
         amount=amount,
         status="Pending",
