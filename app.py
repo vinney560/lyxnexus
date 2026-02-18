@@ -1135,7 +1135,7 @@ def payment_required(f):
             if request.path.startswith('/api/') or request.is_json:
                 return jsonify({'error': 'Payment required to access this feature.'}), 402
             flash('Payment required to access this feature.', 'warning')
-            return redirect(url_for('activation_payment'))
+            return redirect(url_for('lyx_payment_page'))
         return f(*args, **kwargs)
     return pay_decor
 #------------------------------------------------------------------------------
@@ -2735,7 +2735,7 @@ def handle_student_login(user, username, mobile, login_subtype, next_page, year)
             if user.paid is False:
                 login_user(user)
                 flash('Your account is inactive. Pay you registration Fee or contact Admin for assistance.', 'error')
-                return redirect(url_for('main_page'))
+                return redirect(url_for('lyx_payment_page'))
             
         if user.free_trial is True:
             if user.paid is False:
@@ -2765,7 +2765,7 @@ def format_mobile_send(mobile):
 @login_required
 def activation_payment():
     user = User.query.filter_by(id=current_user.id).first()
-    return render_template('payment_stk.html',
+    return render_template('payment.html',
                                  username=user.username,
                                  mobile=format_mobile_display(user.mobile),
                                  year=_year())
@@ -5153,7 +5153,7 @@ def check():
         else:
             if current_user.paid is False:
                 flash("Your account is inactive. Please complete the payment to activate your account.", 'error')
-                return redirect(url_for('activation_payment'))
+                return redirect(url_for('lyx_payment_page'))
             return redirect(url_for('main_page'))
     else:
         return redirect(url_for('login'))
@@ -5180,6 +5180,7 @@ def help_logout():
 #--------------------------------------------------------------------
 @app.route('/main-page')
 @login_required
+@payment_required
 def main_page():
     return render_template('main_page.html', year=_year())
 #-----------------------------------------------------------------
@@ -10773,6 +10774,9 @@ def api_admin_challenges():
 @login_required
 def lyx_payment_page():
     """Render the payment page"""
+    has_paid = current_user.paid
+    if has_paid:
+        return redirect(url_for('main_page'))
     return render_template('payment_stk.html')
 
 @limiter.limit("5 per minute")
