@@ -10705,11 +10705,13 @@ def api_admin_challenges():
 # =========================================
 
 @app.route('/pay/4122/ln')
+@login_required
 def lyx_payment_page():
     """Render the payment page"""
     return render_template('payment_stk.html')
 
 @app.route('/api/pay', methods=['POST'])
+@login_required
 def pay_to_ln():
     data = request.json
     phone = data.get('phone')
@@ -10738,7 +10740,7 @@ def pay_to_ln():
         phone=phone,
         amount=amount,
         status="Pending",
-        timestamp=datetime.now(timezone.utc)
+        timestamp=datetime.now(timezone(timedelta(hours=3)))
     )
     db.session.add(pending)
     db.session.commit()
@@ -10853,6 +10855,7 @@ def payment_callback():
         return jsonify({"ResultCode": 1, "ResultDesc": "Error"})
 
 @app.route('/api/payment-status/<int:payment_id>')
+@login_required
 def payment_status(payment_id):
     """Check payment status"""
     payment = db.session.get(Payment, payment_id)
@@ -10869,6 +10872,7 @@ def payment_status(payment_id):
     })
 
 @app.route('/api/payments')
+@login_required
 def get_payments():
     """Get payment history"""
     payments = Payment.query.order_by(Payment.timestamp.desc()).limit(10).all()
@@ -10936,6 +10940,7 @@ def admin_get_payments():
         }), 500
 
 @app.route('/api/admin/payments/<int:payment_id>/success', methods=['POST'])
+@admin_required
 def admin_mark_payment_success(payment_id):
     """Admin manually mark payment as success"""
     try:
@@ -10965,6 +10970,7 @@ def admin_mark_payment_success(payment_id):
         }), 500
 
 @app.route('/api/admin/stats')
+@admin_required
 def admin_stats():
     """Get payment statistics"""
     try:
