@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | Payment Monitor</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-deep: #0a0f1a;
+            --bg-void: #050a14;
+            --accent-blue: #3b82f6;
+            --accent-purple: #8b5cf6;
+            --accent-green: #10b981;
+            --accent-red: #ef4444;
+            --accent-yellow: #f59e0b;
+            --glass-bg: rgba(15, 23, 42, 0.8);
+            --glass-border: rgba(59, 130, 246, 0.2);
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(145deg, var(--bg-deep), var(--bg-void));
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .header {
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 25px 30px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 20px 35px -10px rgba(0,0,0,0.5);
+        }
+
+        .header-title h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(145deg, var(--accent-blue), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 5px;
+        }
+
+        .header-title p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .stats-container {
+            display: flex;
+            gap: 20px;
+        }
+
+        .stat-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(59, 130, 246, 0.15);
+            border-radius: 16px;
+            padding: 15px 25px;
+            text-align: center;
+            min-width: 120px;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Filters */
+        .filters-section {
+            background: rgba(15, 23, 42, 0.5);
+            backdrop-filter: blur(8px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 25px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 250px;
+            position: relative;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px 15px 12px 45px;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 12px;
+            color: white;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+            background: rgba(0,0,0,0.5);
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .filter-select {
+            padding: 10px 15px;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 10px;
+            color: white;
+            font-size: 0.95rem;
+            cursor: pointer;
+            min-width: 140px;
+        }
+
+        .filter-select option {
+            background: var(--bg-deep);
+        }
+
+        .date-range {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .date-input {
+            padding: 10px 12px;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 10px;
+            color: white;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(145deg, var(--accent-blue), var(--accent-purple));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.5);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--accent-blue);
+            color: var(--accent-blue);
+        }
+
+        .btn-outline:hover {
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        /* Table */
+        .table-container {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(8px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 20px;
+            overflow-x: auto;
+            box-shadow: 0 20px 35px -10px rgba(0,0,0,0.5);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1200px;
+        }
+
+        th {
+            text-align: left;
+            padding: 18px 15px;
+            color: var(--text-secondary);
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid rgba(59, 130, 246, 0.2);
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            color: var(--text-primary);
+        }
+
+        tr:hover {
+            background: rgba(59, 130, 246, 0.05);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: capitalize;
+        }
+
+        .status-success {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .status-pending {
+            background: rgba(245, 158, 11, 0.2);
+            color: #f59e0b;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .status-failed {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .paid-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .paid-true {
+            color: #10b981;
+        }
+
+        .paid-false {
+            color: #ef4444;
+        }
+
+        .receipt-code {
+            font-family: monospace;
+            background: rgba(0,0,0,0.3);
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            color: var(--accent-yellow);
+        }
+
+        .timestamp {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .user-info {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .user-phone {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        /* Pagination */
+        .pagination {
+            margin-top: 25px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+
+        .page-btn {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .page-btn:hover, .page-btn.active {
+            background: var(--accent-blue);
+            color: white;
+            border-color: var(--accent-blue);
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--bg-deep);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 30px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .modal-header h2 {
+            font-size: 1.8rem;
+            background: linear-gradient(145deg, var(--accent-blue), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .modal-close {
+            font-size: 1.5rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .modal-close:hover {
+            color: var(--accent-red);
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .detail-item {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(59, 130, 246, 0.15);
+            border-radius: 12px;
+            padding: 15px;
+        }
+
+        .detail-label {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-bottom: 5px;
+        }
+
+        .detail-value {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        /* Loading */
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 60px;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(59, 130, 246, 0.2);
+            border-top-color: var(--accent-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
+            
+            .stats-container {
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .filters-section {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-title">
+                <h1>Payment Monitor Dashboard</h1>
+                <p>Real-time payment tracking and management</p>
+            </div>
+            <div class="stats-container" id="stats-container">
+                <div class="stat-card">
+                    <div class="stat-value" id="total-payments">0</div>
+                    <div class="stat-label">Total</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" style="color: #10b981;" id="success-payments">0</div>
+                    <div class="stat-label">Success</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" style="color: #f59e0b;" id="pending-payments">0</div>
+                    <div class="stat-label">Pending</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" style="color: #ef4444;" id="failed-payments">0</div>
+                    <div class="stat-label">Failed</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="filters-section">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" placeholder="Search by phone, username, receipt..." onkeyup="filterTable()">
+            </div>
+            
+            <div class="filter-group">
+                <select class="filter-select" id="statusFilter" onchange="filterTable()">
+                    <option value="all">All Status</option>
+                    <option value="Success">Success</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Failed">Failed</option>
+                </select>
+                
+                <select class="filter-select" id="paidFilter" onchange="filterTable()">
+                    <option value="all">All Users</option>
+                    <option value="true">Paid Only</option>
+                    <option value="false">Unpaid Only</option>
+                </select>
+            </div>
+            
+            <div class="date-range">
+                <input type="date" class="date-input" id="dateFrom" onchange="filterTable()">
+                <span style="color: var(--text-muted);">to</span>
+                <input type="date" class="date-input" id="dateTo" onchange="filterTable()">
+            </div>
+            
+            <button class="btn btn-outline" onclick="resetFilters()">
+                <i class="fas fa-redo"></i> Reset
+            </button>
+            
+            <button class="btn btn-primary" onclick="refreshData()">
+                <i class="fas fa-sync-alt"></i> Refresh
+            </button>
+        </div>
+
+        <!-- Table -->
+        <div class="table-container">
+            <table id="paymentsTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Timestamp (EAT)</th>
+                        <th>User Details</th>
+                        <th>Payment Phone</th>
+                        <th>Amount</th>
+                        <th>MPESA Receipt</th>
+                        <th>Payment Status</th>
+                        <th>User Paid Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <tr>
+                        <td colspan="9" class="loading">
+                            <div class="spinner"></div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination" id="pagination"></div>
+    </div>
+
+    <!-- Payment Detail Modal -->
+    <div class="modal" id="paymentModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Payment Details</h2>
+                <i class="fas fa-times modal-close" onclick="closeModal()"></i>
+            </div>
+            <div id="modalContent">
+                <!-- Dynamic content -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // State
+        let allPayments = [];
+        let filteredPayments = [];
+        let currentPage = 1;
+        const itemsPerPage = 15;
+
+        // Load data on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadPayments();
+        });
+
+        // Fetch payments from API
+        async function loadPayments() {
+            try {
+                const response = await fetch('/api/admin/payments');
+                const data = await response.json();
+                
+                if (data.success) {
+                    allPayments = data.payments;
+                    filteredPayments = [...allPayments];
+                    updateStats();
+                    renderTable();
+                } else {
+                    showError('Failed to load payments');
+                }
+            } catch (error) {
+                console.error('Error loading payments:', error);
+                showError('Network error. Please refresh.');
+            }
+        }
+
+        // Update statistics
+        function updateStats() {
+            const total = allPayments.length;
+            const success = allPayments.filter(p => p.status === 'Success').length;
+            const pending = allPayments.filter(p => p.status === 'Pending').length;
+            const failed = allPayments.filter(p => p.status === 'Failed').length;
+            
+            document.getElementById('total-payments').textContent = total;
+            document.getElementById('success-payments').textContent = success;
+            document.getElementById('pending-payments').textContent = pending;
+            document.getElementById('failed-payments').textContent = failed;
+        }
+
+        // Filter table
+        function filterTable() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const statusFilter = document.getElementById('statusFilter').value;
+            const paidFilter = document.getElementById('paidFilter').value;
+            const dateFrom = document.getElementById('dateFrom').value;
+            const dateTo = document.getElementById('dateTo').value;
+
+            filteredPayments = allPayments.filter(payment => {
+                // Search filter
+                const matchesSearch = searchTerm === '' || 
+                    payment.phone.toLowerCase().includes(searchTerm) ||
+                    (payment.mpesa_receipt && payment.mpesa_receipt.toLowerCase().includes(searchTerm)) ||
+                    (payment.user && payment.user.username && payment.user.username.toLowerCase().includes(searchTerm)) ||
+                    (payment.user && payment.user.phone && payment.user.phone.toLowerCase().includes(searchTerm));
+
+                // Status filter
+                const matchesStatus = statusFilter === 'all' || payment.status === statusFilter;
+
+                // Paid filter
+                const matchesPaid = paidFilter === 'all' || 
+                    (paidFilter === 'true' && payment.user && payment.user.paid) ||
+                    (paidFilter === 'false' && payment.user && !payment.user.paid);
+
+                // Date filter
+                let matchesDate = true;
+                if (dateFrom && dateTo) {
+                    const paymentDate = new Date(payment.timestamp);
+                    const from = new Date(dateFrom);
+                    const to = new Date(dateTo);
+                    to.setHours(23, 59, 59);
+                    matchesDate = paymentDate >= from && paymentDate <= to;
+                }
+
+                return matchesSearch && matchesStatus && matchesPaid && matchesDate;
+            });
+
+            currentPage = 1;
+            renderTable();
+        }
+
+        // Reset filters
+        function resetFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('statusFilter').value = 'all';
+            document.getElementById('paidFilter').value = 'all';
+            document.getElementById('dateFrom').value = '';
+            document.getElementById('dateTo').value = '';
+            filteredPayments = [...allPayments];
+            renderTable();
+        }
+
+        // Refresh data
+        function refreshData() {
+            loadPayments();
+        }
+
+        // Render table
+        function renderTable() {
+            const tbody = document.getElementById('tableBody');
+            const start = (currentPage - 1) * itemsPerPage;
+            const end = start + itemsPerPage;
+            const pagePayments = filteredPayments.slice(start, end);
+
+            if (filteredPayments.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="9" style="text-align: center; padding: 40px; color: var(--text-muted);">
+                            <i class="fas fa-inbox" style="font-size: 3rem; margin-bottom: 15px; display: block;"></i>
+                            No payments found
+                        </td>
+                    </tr>
+                `;
+            } else {
+                tbody.innerHTML = pagePayments.map(payment => `
+                    <tr>
+                        <td>#${payment.id}</td>
+                        <td>
+                            <div class="timestamp">
+                                <i class="far fa-clock"></i>
+                                ${formatDate(payment.timestamp)}
+                            </div>
+                        </td>
+                        <td>
+                            <div class="user-info">
+                                <strong>${payment.user?.username || 'N/A'}</strong>
+                                <span class="user-phone">
+                                    <i class="fas fa-phone-alt"></i> ${payment.user?.phone || 'N/A'}
+                                </span>
+                            </div>
+                        </td>
+                        <td>${payment.phone}</td>
+                        <td><strong>Ksh ${payment.amount}</strong></td>
+                        <td>
+                            ${payment.mpesa_receipt ? 
+                                `<span class="receipt-code">${payment.mpesa_receipt}</span>` : 
+                                '<span style="color: var(--text-muted);">—</span>'}
+                        </td>
+                        <td>
+                            <span class="status-badge status-${payment.status.toLowerCase()}">
+                                ${payment.status}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="paid-badge">
+                                ${payment.user?.paid ? 
+                                    '<i class="fas fa-check-circle paid-true"></i> Paid' : 
+                                    '<i class="fas fa-times-circle paid-false"></i> Unpaid'}
+                            </span>
+                        </td>
+                        <td>
+                            <button class="btn-outline" style="padding: 5px 15px;" onclick="viewPayment(${payment.id})">
+                                <i class="fas fa-eye"></i> View
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+
+            renderPagination();
+        }
+
+        // Render pagination
+        function renderPagination() {
+            const totalPages = Math.ceil(filteredPayments.length / itemsPerPage);
+            const pagination = document.getElementById('pagination');
+            
+            if (totalPages <= 1) {
+                pagination.innerHTML = '';
+                return;
+            }
+
+            let html = '';
+            for (let i = 1; i <= totalPages; i++) {
+                html += `<div class="page-btn ${i === currentPage ? 'active' : ''}" onclick="goToPage(${i})">${i}</div>`;
+            }
+            
+            pagination.innerHTML = html;
+        }
+
+        // Go to page
+        function goToPage(page) {
+            currentPage = page;
+            renderTable();
+        }
+
+        // View payment details
+        function viewPayment(paymentId) {
+            const payment = allPayments.find(p => p.id === paymentId);
+            if (!payment) return;
+
+            const modal = document.getElementById('paymentModal');
+            const modalContent = document.getElementById('modalContent');
+            
+            modalContent.innerHTML = `
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <div class="detail-label">Payment ID</div>
+                        <div class="detail-value">#${payment.id}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Amount</div>
+                        <div class="detail-value">Ksh ${payment.amount}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Status</div>
+                        <div class="detail-value">
+                            <span class="status-badge status-${payment.status.toLowerCase()}">${payment.status}</span>
+                        </div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Timestamp (EAT)</div>
+                        <div class="detail-value">${formatDate(payment.timestamp, true)}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Payment Phone</div>
+                        <div class="detail-value">${payment.phone}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">MPESA Receipt</div>
+                        <div class="detail-value">
+                            ${payment.mpesa_receipt || '<span style="color: var(--text-muted);">Not available</span>'}
+                        </div>
+                    </div>
+                </div>
+
+                <h3 style="margin: 20px 0 15px; color: var(--accent-blue);">User Information</h3>
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <div class="detail-label">Username</div>
+                        <div class="detail-value">${payment.user?.username || 'N/A'}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">User Phone</div>
+                        <div class="detail-value">${payment.user?.phone || 'N/A'}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">User Paid Status</div>
+                        <div class="detail-value">
+                            ${payment.user?.paid ? 
+                                '<span style="color: #10b981;"><i class="fas fa-check-circle"></i> Paid</span>' : 
+                                '<span style="color: #ef4444;"><i class="fas fa-times-circle"></i> Unpaid</span>'}
+                        </div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">User ID</div>
+                        <div class="detail-value">${payment.user_id}</div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 25px; display: flex; gap: 10px; justify-content: flex-end;">
+                    <button class="btn-outline" onclick="closeModal()">Close</button>
+                    ${payment.status === 'Pending' ? `
+                        <button class="btn-primary" onclick="markAsSuccess(${payment.id})">
+                            <i class="fas fa-check"></i> Mark as Success
+                        </button>
+                    ` : ''}
+                </div>
+            `;
+
+            modal.classList.add('active');
+        }
+
+        // Close modal
+        function closeModal() {
+            document.getElementById('paymentModal').classList.remove('active');
+        }
+
+        // Mark payment as success
+        async function markAsSuccess(paymentId) {
+            if (!confirm('Mark this payment as Success? This will update user paid status.')) return;
+
+            try {
+                const response = await fetch(`/api/admin/payments/${paymentId}/success`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    showToast('Payment marked as success', 'success');
+                    closeModal();
+                    loadPayments();
+                } else {
+                    showToast(data.message || 'Failed to update', 'error');
+                }
+            } catch (error) {
+                showToast('Network error', 'error');
+            }
+        }
+
+        // Format date to EAT (UTC+3)
+        function formatDate(dateString, full = false) {
+            const date = new Date(dateString);
+            const options = full ? {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: true,
+                timeZone: 'Africa/Nairobi'
+            } : {
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                timeZone: 'Africa/Nairobi'
+            };
+            
+            return date.toLocaleString('en-KE', options);
+        }
+
+        // Show error message
+        function showError(message) {
+            document.getElementById('tableBody').innerHTML = `
+                <tr>
+                    <td colspan="9" style="text-align: center; padding: 40px; color: var(--accent-red);">
+                        <i class="fas fa-exclamation-triangle" style="font-size: 3rem; margin-bottom: 15px; display: block;"></i>
+                        ${message}
+                    </td>
+                </tr>
+            `;
+        }
+
+        // Show toast (simplified)
+        function showToast(message, type) {
+            alert(`${type.toUpperCase()}: ${message}`);
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>

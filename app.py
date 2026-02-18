@@ -10885,6 +10885,109 @@ def get_payments():
         } for p in payments]
     })
 
+@app.route('/admin/4123/payment-monitor')
+@admin_required
+def admin_payment_monitor():
+    """Render admin payment monitor"""
+    return render_template('admin_payment_monitor.html')
+
+@app.route('/api/admin/payments')
+@admin_required
+def admin_get_payments():
+    """Get all payments with user data for admin"""
+    try:
+        # Join Payment with User to get all required fields
+        payments = db.session.query(
+            Payment, User
+        ).join(
+            User, Payment.user_id == User.id
+        ).order_by(
+            Payment.timestamp.desc()
+        ).all()
+        
+        result = []
+        for payment, user in payments:
+            result.append({
+                "id": payment.id,
+                "phone": payment.phone,
+                "amount": payment.amount,
+                "mpesa_receipt": payment.mpesa_receipt,
+                "status": payment.status,
+                "timestamp": payment.timestamp.isoformat(),
+                "user_id": payment.user_id,
+                "user": {
+                    "id": user.id,
+                    "username": user.username,
+                    "phone": user.mobile,
+                    "paid": user.paid
+                } if user else None
+            })
+        
+        return jsonify({
+            "success": True,
+            "payments": result,
+            "total": len(result)
+        })
+        
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "message": str(e)
+        }), 500
+
+@app.route('/api/admin/payments/<int:payment_id>/success', methods=['POST'])
+def admin_mark_payment_success(payment_id):
+    """Admin manually mark payment as success"""
+    try:
+        payment = db.session.get(Payment, payment_id)
+        if not payment:
+            return jsonify({"success": False, "message": "Payment not found"}), 404
+        
+        # Update payment status
+        payment.status = "Success"
+        
+        # Update user paid status
+        user = db.session.get(User, payment.user_id)
+        if user:
+            user.paid = True
+        
+        db.session.commit()
+        
+        return jsonify({
+            "success": True,
+            "message": "Payment marked as success"
+        })
+        
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "message": str(e)
+        }), 500
+
+@app.route('/api/admin/stats')
+def admin_stats():
+    """Get payment statistics"""
+    try:
+        total = Payment.query.count()
+        success = Payment.query.filter_by(status="Success").count()
+        pending = Payment.query.filter_by(status="Pending").count()
+        failed = Payment.query.filter_by(status="Failed").count()
+        
+        return jsonify({
+            "success": True,
+            "stats": {
+                "total": total,
+                "success": success,
+                "pending": pending,
+                "failed": failed
+            }
+        })
+        
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "message": str(e)
+        }), 500
 #==========================================
 # Error Handlers
 #==========================================
