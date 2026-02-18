@@ -10703,7 +10703,7 @@ def api_admin_challenges():
 # Payment (LyxNexus Enterprices)
 # =========================================
 
-@app.route('/payment/?')
+@app.route('/payment/#/1')
 def lyx_payment_page():
     """Render the payment page"""
     return render_template('payment_stk.html')
