@@ -2792,7 +2792,7 @@ def payment_activation():
                     'message': 'Invalid Mpesa receipt format'
                 }), 400
             
-            payment_receipt = Payment.query.filter_by(receipt=mpesa_msg).first()
+            payment_receipt = Payment.query.filter_by(mpesa_receipt=mpesa_msg).first()
             if payment_receipt:
                 return jsonify({
                     'success': False,
@@ -2804,7 +2804,8 @@ def payment_activation():
                     id=gen_unique_id(Payment),
                     user_id=current_user.id,
                     phone=mobile,
-                    amount=payment_receipt.amount,
+                    mpesa_receipt=mpesa_msg,
+                    amount=19,
                     status="Pending",
                     timestamp=datetime.now(timezone(timedelta(hours=3)))
                 )
@@ -2867,7 +2868,7 @@ def payment_activation():
         flash("Invalid Mpesa receipt.", "error")
         return redirect(url_for('login'))
     
-    payment_receipt = Payment.query.filter_by(receipt=mpesa_msg).first()
+    payment_receipt = Payment.query.filter_by(mpesa_receipt=mpesa_msg).first()
     if payment_receipt:
         return jsonify({
             'success': False,
@@ -2879,7 +2880,8 @@ def payment_activation():
             id=gen_unique_id(Payment),
             user_id=current_user.id,
             phone=mobile,
-            amount=payment_receipt.amount,
+            amount=19,
+            mpesa_receipt=mpesa_msg,
             status="Pending",
             timestamp=datetime.now(timezone(timedelta(hours=3)))
         )
