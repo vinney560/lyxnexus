@@ -10703,7 +10703,7 @@ def api_admin_challenges():
 # Payment (LyxNexus Enterprices)
 # =========================================
 
-@app.route('/payment/#/1')
+@app.route('/pay/#/ln')
 def lyx_payment_page():
     """Render the payment page"""
     return render_template('payment_stk.html')
@@ -10810,7 +10810,7 @@ def pay_to_ln():
     except Exception as e:
         return jsonify({"success": False, "message": f"Payment error: {str(e)}"}), 500
 
-@app.route('/payment/?/callback', methods=['POST'])
+@app.route('/payment/4121/callback', methods=['POST'])
 def payment_callback():
     """M-Pesa callback endpoint"""
     data = request.get_json()
