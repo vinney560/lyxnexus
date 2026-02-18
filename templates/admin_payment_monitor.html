@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard | Payment Monitor</title>
+    <title>Payment Monitor | LyxNexus Admin</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="/_0eXv3/tailwind.all.css"></script>
@@ -691,7 +691,7 @@
             const total = allPayments.length;
             const success = allPayments.filter(p => p.status === 'Success').length;
             const pending = allPayments.filter(p => p.status === 'Pending').length;
-            const failed = allPayments.filter(p => p.status === 'Failed').length;
+            const failed = allPayments.filter(p => p.status === 'Failed' && p.status === 'Cancelled' && p.status === 'Expired').length;
             
             document.getElementById('total-payments').textContent = total;
             document.getElementById('success-payments').textContent = success;
@@ -910,9 +910,9 @@
                 </div>
 
                 <div style="margin-top: 25px; display: flex; gap: 10px; justify-content: flex-end;">
-                    <button class="btn-outline" onclick="closeModal()">Close</button>
+                    <button class="btn btn-outline" onclick="closeModal()">Close</button>
                     ${payment.status === 'Pending' ? `
-                        <button class="btn-primary" onclick="markAsSuccess(${payment.id})">
+                        <button class="btn btn-primary" onclick="markAsSuccess(${payment.id})">
                             <i class="fas fa-check"></i> Mark as Success
                         </button>
                     ` : ''}

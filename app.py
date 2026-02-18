@@ -10882,59 +10882,197 @@ def pay_to_ln():
 
 @app.route('/payment/4121/callback', methods=['POST'])
 def payment_callback():
-    """M-Pesa callback endpoint"""
+    """M-Pesa callback endpoint - Enhanced with full status detection"""
     data = request.get_json()
-    print("Callback Received:", data)
+    print("🔔 Callback Received:", json.dumps(data, indent=2))
     
     try:
         callback_data = data['Body']['stkCallback']
+        result_code = callback_data['ResultCode']
+        result_desc = callback_data['ResultDesc']
+        checkout_id = callback_data.get('CheckoutRequestID', 'N/A')
         
-        if callback_data['ResultCode'] == 0:
-            # Successful payment
-            metadata = callback_data['CallbackMetadata']['Item']
+        # Log all possible result codes
+        print(f"📊 Result Code: {result_code} - {result_desc}")
+        print(f"🆔 Checkout ID: {checkout_id}")
+        
+        # Find payment by any means possible
+        payment = None
+        
+        # Try to find by phone number first (if available)
+        if result_code == 0:  # Only success has metadata
+            metadata = callback_data.get('CallbackMetadata', {}).get('Item', [])
             phone_number = None
             receipt = None
+            amount = None
             
             for item in metadata:
                 if item['Name'] == 'PhoneNumber':
                     phone_number = str(item['Value'])
                 elif item['Name'] == 'MpesaReceiptNumber':
                     receipt = item['Value']
+                elif item['Name'] == 'Amount':
+                    amount = item['Value']
             
-            # Find pending payment
+            if phone_number:
+                payment = Payment.query.filter_by(
+                    phone=phone_number, 
+                    status="Pending"
+                ).order_by(Payment.timestamp.desc()).first()
+        
+        # If not found by phone, try to find by recent timestamp
+        if not payment:
+            # Get most recent pending payment (fallback)
             payment = Payment.query.filter_by(
-                phone=phone_number, 
                 status="Pending"
             ).order_by(Payment.timestamp.desc()).first()
-            
-            if payment:
-                payment.status = "Success"
+        
+        if not payment:
+            print("❌ No matching pending payment found")
+            return jsonify({"ResultCode": 1, "ResultDesc": "Payment not found"})
+        
+        # Handle different result codes
+        # Full list of M-Pesa result codes
+        result_codes = {
+            0: {"status": "Success", "message": "Transaction completed successfully"},
+            1: {"status": "Failed", "message": "Insufficient balance"},
+            2: {"status": "Failed", "message": "Wrong PIN provided"},  # User entered wrong PIN
+            3: {"status": "Failed", "message": "User cancelled the transaction"},  # ← CANCELLED!
+            4: {"status": "Failed", "message": "Transaction expired"},  # STK push expired
+            5: {"status": "Failed", "message": "Transaction declined"},
+            6: {"status": "Failed", "message": "Duplicate transaction"},
+            7: {"status": "Failed", "message": "Transaction reversed"},
+            8: {"status": "Failed", "message": "Transaction failed - Try again"},
+            9: {"status": "Failed", "message": "Transaction timed out"},  # Timeout
+            10: {"status": "Failed", "message": "Invalid transaction"},
+            11: {"status": "Failed", "message": "Transaction locked"},
+            12: {"status": "Failed", "message": "Limit exceeded"},
+            13: {"status": "Failed", "message": "Invalid account"},
+            14: {"status": "Failed", "message": "System error"},
+            17: {"status": "Failed", "message": "User cancelled the request"},  # Another cancel code
+            18: {"status": "Failed", "message": "Duplicate detection"},
+            19: {"status": "Failed", "message": "Transaction rejected"},
+            20: {"status": "Failed", "message": "Service temporarily unavailable"},
+            26: {"status": "Failed", "message": "Transaction not allowed"},
+            29: {"status": "Failed", "message": "Transaction limit reached"},
+            30: {"status": "Failed", "message": "Invalid PIN attempts exceeded"},
+            31: {"status": "Failed", "message": "PIN retries exceeded"},
+            32: {"status": "Failed", "message": "Transaction cancelled by user"},  # ← Explicit cancel
+            33: {"status": "Failed", "message": "Transaction cancelled"},
+            34: {"status": "Failed", "message": "Request cancelled by user"},  # ← User cancelled
+            35: {"status": "Failed", "message": "Transaction declined by system"},
+            96: {"status": "Failed", "message": "System malfunction"},
+            97: {"status": "Failed", "message": "Timeout in processing"},
+            98: {"status": "Failed", "message": "Invalid request"},
+            99: {"status": "Failed", "message": "Unknown error"},
+            1001: {"status": "Failed", "message": "Transaction rejected by system"},
+            1002: {"status": "Failed", "message": "Transaction expired - Timeout"},  # STK expired
+            1003: {"status": "Failed", "message": "Transaction cancelled by user"},  # User cancelled
+            1004: {"status": "Failed", "message": "Transaction failed - Try again"},
+            1032: {"status": "Failed", "message": "Transaction cancelled by user"},  # Common cancel code!
+            1037: {"status": "Failed", "message": "Transaction timeout - No response"},  # User didn't respond
+            1041: {"status": "Failed", "message": "Transaction cancelled"},  # Cancel
+            2001: {"status": "Failed", "message": "Initiator authentication failed"}
+        }
+        
+        # Get result info
+        result_info = result_codes.get(result_code, {"status": "Failed", "message": f"Unknown error ({result_code})"})
+        
+        # Check specifically for cancelled transactions
+        cancelled_codes = [3, 17, 32, 33, 34, 1003, 1032, 1041]
+        is_cancelled = result_code in cancelled_codes
+        
+        if result_code == 0:
+            # SUCCESS
+            payment.status = "Success"
+            if receipt:
                 payment.mpesa_receipt = receipt
-                db.session.commit()
+            status_message = "Payment completed successfully"
+            print(f"✅ Payment SUCCESS - Receipt: {receipt}")
             
-            return jsonify({"ResultCode": 0, "ResultDesc": "Accepted"})
+        elif is_cancelled:
+            # CANCELLED BY USER
+            payment.status = "Cancelled"
+            status_message = "Transaction cancelled by user"
+            print(f"❌ Payment CANCELLED - User cancelled the transaction")
+            
+        elif result_code in [2, 30, 31]:
+            # PIN ERRORS
+            payment.status = "Failed"
+            status_message = "Wrong PIN or PIN attempts exceeded"
+            print(f"❌ Payment FAILED - PIN error: {result_desc}")
+            
+        elif result_code in [4, 1002, 1037]:
+            # EXPIRED / TIMEOUT
+            payment.status = "Expired"
+            status_message = "Transaction expired - No response from user"
+            print(f"⏰ Payment EXPIRED - User didn't complete transaction")
+            
+        elif result_code in [1, 12, 29]:
+            # LIMIT/BALANCE ISSUES
+            payment.status = "Failed"
+            status_message = "Insufficient balance or limit exceeded"
+            print(f"❌ Payment FAILED - Balance/limit issue")
+            
         else:
-            return jsonify({"ResultCode": 0, "ResultDesc": "Failed"})
+            # OTHER FAILURES
+            payment.status = "Failed"
+            status_message = result_info['message']
+            print(f"❌ Payment FAILED - {result_desc}")
+        
+        # Save to database
+        db.session.commit()
+        
+        # Log the final status
+        print(f"📝 Payment #{payment.id} updated to: {payment.status}")
+        print(f"📋 Message: {status_message}")
+        
+        # Return appropriate response to M-Pesa
+        return jsonify({
+            "ResultCode": 0,  # Always 0 to acknowledge receipt
+            "ResultDesc": "Accepted"
+        })
             
     except Exception as e:
-        print("Callback error:", str(e))
-        return jsonify({"ResultCode": 1, "ResultDesc": "Error"})
-
+        print("💥 Callback processing error:", str(e))
+        print(traceback.format_exc())
+        return jsonify({
+            "ResultCode": 1, 
+            "ResultDesc": "Error processing callback"
+        })
+    
 @app.route('/api/payment-status/<int:payment_id>')
 @login_required
 def payment_status(payment_id):
-    """Check payment status"""
+    """Check payment status with more details"""
     payment = db.session.get(Payment, payment_id)
     
     if not payment:
         return jsonify({"success": False, "message": "Payment not found"}), 404
     
+    # Add more status information
+    status_messages = {
+        "Pending": "Waiting for payment",
+        "Success": "Payment completed successfully",
+        "Failed": "Payment failed - Please try again",
+        "Cancelled": "Transaction cancelled - Please try again",
+        "Expired": "Session expired - Please start over"
+    }
+    
+    # Check if payment was cancelled or expired
+    is_action_needed = payment.status in ["Pending", "Failed", "Cancelled", "Expired"]
+    
     return jsonify({
         "success": True,
+        "payment_id": payment.id,
         "status": payment.status,
+        "status_message": status_messages.get(payment.status, "Unknown status"),
         "receipt": payment.mpesa_receipt,
         "amount": payment.amount,
-        "timestamp": payment.timestamp.isoformat()
+        "phone": payment.phone,
+        "timestamp": payment.timestamp.isoformat(),
+        "action_needed": is_action_needed,
+        "can_retry": payment.status != "Success"  # Can retry if not success
     })
 
 @app.route('/api/payments')
