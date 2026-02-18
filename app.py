@@ -2807,7 +2807,7 @@ def payment_activation():
                     mpesa_receipt=mpesa_msg,
                     amount=19,
                     status="Pending",
-                    timestamp=datetime.now(timezone(timedelta(hours=3)))
+                    timestamp=datetime.now(timezone(timedelta(hours=6)))
                 )
                 try:
                     db.session.add(new_payment_receipt)
@@ -2883,7 +2883,7 @@ def payment_activation():
             amount=19,
             mpesa_receipt=mpesa_msg,
             status="Pending",
-            timestamp=datetime.now(timezone(timedelta(hours=3)))
+            timestamp=datetime.now(timezone(timedelta(hours=6)))
         )
         try:
             db.session.add(new_payment_receipt)
@@ -10811,7 +10811,7 @@ def pay_to_ln():
         phone=phone,
         amount=amount,
         status="Pending",
-        timestamp=datetime.now(timezone(timedelta(hours=3)))
+        timestamp=datetime.now(timezone(timedelta(hours=6)))
     )
     db.session.add(pending)
     db.session.commit()
