@@ -2775,7 +2775,7 @@ def payment_activation():
     if request.method == 'POST':
         try:
             data = request.get_json()
-            mobile = re.sub(r'\D', '', data.get('mobile', ''))
+            mobile = current_user.mobile
             mpesa_msg = re.sub(r'\W', '', data.get('mpesa_message', ''))[:10]
 
             if not mpesa_msg or mpesa_msg == '':
@@ -2855,7 +2855,7 @@ def payment_activation():
             }), 500
     
     # Handle GET request (for backward compatibility)
-    mobile = re.sub(r'\D', '', request.args.get('mobile', ''))
+    mobile = current_user.mobile
     mpesa_msg = re.sub(r'\W', '', request.args.get('mpesa_message', ''))[:10]
 
     if not mpesa_msg or mpesa_msg == '':

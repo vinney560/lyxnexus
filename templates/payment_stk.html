@@ -1174,8 +1174,8 @@
             `;
 
             const cleanCode = code.replace(/[^A-Z0-9]/gi, '').toUpperCase();
-            
-            fetch('/verify-payment', {
+
+            fetch('/activation', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ mpesa_message: cleanCode })
@@ -1198,7 +1198,7 @@
                     showToast('Payment verified! Redirecting...', 'success', 'Success');
                     
                     setTimeout(() => {
-                        window.location.href = data.redirect_url || '/success';
+                        window.location.href = data.redirect_url || '/main-page';
                     }, 3000);
                 } else {
                     statusDiv.innerHTML = `
