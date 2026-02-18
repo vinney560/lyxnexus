@@ -32,6 +32,7 @@ from flask_limiter.util import get_remote_address # Efficient Block of Specific 
 from flask import request
 from pywebpush import webpush, WebPushException # CHrome Notification Push Module
 from colorama import Fore # Coloring logs
+import base64
 #==========================================
 
 app = Flask(__name__)
@@ -236,7 +237,11 @@ class User(db.Model, UserMixin):
                              lazy=True)
     timetables = db.relationship('Timetable', 
                                  backref='author',
-                                 lazy=True)        
+                                 lazy=True) 
+    payments = db.relationship('Payment', 
+                               backref='user', 
+                               lazy=True)      
+     
     def validate_mobile(self, mobile):
         """Validate mobile number format"""
         if not mobile:
@@ -923,6 +928,17 @@ class Challenge(db.Model):
     challenger = db.relationship('Player', foreign_keys=[challenger_id])
     target = db.relationship('Player', foreign_keys=[target_id])
 
+# Payment Model
+class Payment(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    phone = db.Column(db.String(20), nullable=False)
+    amount = db.Column(db.Integer, nullable=False)
+    mpesa_receipt = db.Column(db.String(50), nullable=True)
+    status = db.Column(db.String(20), default='Pending')
+    timestamp = db.Column(db.DateTime, default=lambda: datetime.now(timezone(timedelta(hours=3))))
+    
+    # Foreign Key
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 # ======================================================    
 from werkzeug.security import generate_password_hash
 # Master key for Admin Access  
@@ -10682,6 +10698,190 @@ def api_admin_challenges():
         })
     
     return jsonify({'success': True, 'challenges': challenges_data})
+
+# =========================================
+# Payment (LyxNexus Enterprices)
+# =========================================
+
+@app.route('/payment/?')
+def lyx_payment_page():
+    """Render the payment page"""
+    return render_template('payment_stk.html')
+
+@app.route('/api/pay', methods=['POST'])
+def pay_to_ln():
+    data = request.json
+    phone = data.get('phone')
+    amount = data.get('amount')
+    
+    # Validate input
+    if not phone or not amount:
+        return jsonify({"success": False, "message": "Phone or amount missing"}), 400
+    
+    try:
+        amount = int(amount)
+        if amount <= 0:
+            return jsonify({"success": False, "message": "Amount must be positive"}), 400
+    except ValueError:
+        return jsonify({"success": False, "message": "Amount must be an integer"}), 400
+    
+    # Normalize phone to Safaricom format: 2547XXXXXXX
+    if phone.startswith("0"):
+        phone = "254" + phone[1:]
+    elif phone.startswith("+"):
+        phone = phone.replace("+", "")
+    
+    # Save pending payment in DB
+    pending = Payment(
+        phone=phone,
+        amount=amount,
+        status="Pending",
+        timestamp=datetime.now(timezone.utc)
+    )
+    db.session.add(pending)
+    db.session.commit()
+    
+    # M-Pesa credentials (from .env)
+    consumer_key = os.getenv("MPESA_CONSUMER_KEY")
+    consumer_secret = os.getenv("MPESA_CONSUMER_SECRET")
+    passkey = os.getenv("MPESA_PASSKEY")
+    business_short_code = os.getenv("MPESA_SHORTCODE", "174379")
+    callback_url = os.getenv("CALLBACK_URL")
+    
+    try:
+        base_url = "https://sandbox.safaricom.co.ke"
+        
+        # Get access token
+        auth_response = requests.get(
+            f"{base_url}/oauth/v1/generate?grant_type=client_credentials",
+            auth=(consumer_key, consumer_secret),
+            timeout=30
+        )
+        auth_response.raise_for_status()
+        access_token = auth_response.json().get("access_token")
+        
+        if not access_token:
+            return jsonify({"success": False, "message": "Failed to get access token"}), 500
+        
+        # STK Push
+        timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
+        password = base64.b64encode(
+            (business_short_code + passkey + timestamp).encode()
+        ).decode()
+        
+        headers = {
+            "Authorization": f"Bearer {access_token}",
+            "Content-Type": "application/json"
+        }
+        
+        payload = {
+            "BusinessShortCode": business_short_code,
+            "Password": password,
+            "Timestamp": timestamp,
+            "TransactionType": "CustomerPayBillOnline",
+            "Amount": amount,
+            "PartyA": phone,
+            "PartyB": business_short_code,
+            "PhoneNumber": phone,
+            "CallBackURL": callback_url,
+            "AccountReference": "Payment",
+            "TransactionDesc": "Subscription Payment"
+        }
+        
+        response = requests.post(
+            f"{base_url}/mpesa/stkpush/v1/processrequest",
+            json=payload,
+            headers=headers,
+            timeout=30
+        )
+        response.raise_for_status()
+        
+        result = response.json()
+        
+        if result.get("ResponseCode") == "0":
+            return jsonify({
+                "success": True,
+                "message": "STK Push sent. Check your phone.",
+                "payment_id": pending.id
+            })
+        else:
+            return jsonify({"success": False, "message": result.get("ResponseDescription", "Payment failed")}), 400
+            
+    except Exception as e:
+        return jsonify({"success": False, "message": f"Payment error: {str(e)}"}), 500
+
+@app.route('/payment/?/callback', methods=['POST'])
+def payment_callback():
+    """M-Pesa callback endpoint"""
+    data = request.get_json()
+    print("Callback Received:", data)
+    
+    try:
+        callback_data = data['Body']['stkCallback']
+        
+        if callback_data['ResultCode'] == 0:
+            # Successful payment
+            metadata = callback_data['CallbackMetadata']['Item']
+            phone_number = None
+            receipt = None
+            
+            for item in metadata:
+                if item['Name'] == 'PhoneNumber':
+                    phone_number = str(item['Value'])
+                elif item['Name'] == 'MpesaReceiptNumber':
+                    receipt = item['Value']
+            
+            # Find pending payment
+            payment = Payment.query.filter_by(
+                phone=phone_number, 
+                status="Pending"
+            ).order_by(Payment.timestamp.desc()).first()
+            
+            if payment:
+                payment.status = "Success"
+                payment.mpesa_receipt = receipt
+                db.session.commit()
+            
+            return jsonify({"ResultCode": 0, "ResultDesc": "Accepted"})
+        else:
+            return jsonify({"ResultCode": 0, "ResultDesc": "Failed"})
+            
+    except Exception as e:
+        print("Callback error:", str(e))
+        return jsonify({"ResultCode": 1, "ResultDesc": "Error"})
+
+@app.route('/api/payment-status/<int:payment_id>')
+def payment_status(payment_id):
+    """Check payment status"""
+    payment = db.session.get(Payment, payment_id)
+    
+    if not payment:
+        return jsonify({"success": False, "message": "Payment not found"}), 404
+    
+    return jsonify({
+        "success": True,
+        "status": payment.status,
+        "receipt": payment.mpesa_receipt,
+        "amount": payment.amount,
+        "timestamp": payment.timestamp.isoformat()
+    })
+
+@app.route('/api/payments')
+def get_payments():
+    """Get payment history"""
+    payments = Payment.query.order_by(Payment.timestamp.desc()).limit(10).all()
+    
+    return jsonify({
+        "success": True,
+        "payments": [{
+            "id": p.id,
+            "phone": p.phone,
+            "amount": p.amount,
+            "status": p.status,
+            "receipt": p.mpesa_receipt,
+            "timestamp": p.timestamp.isoformat()
+        } for p in payments]
+    })
 
 #==========================================
 # Error Handlers
