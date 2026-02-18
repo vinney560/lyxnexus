@@ -20,6 +20,7 @@
 
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="/_0eXv3/tailwind.all.css"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
         :root {
             --bg-color: #111827;
@@ -120,6 +121,7 @@
             background: rgba(59, 130, 246, 0.2);
             border-color: #3B82F6;
             box-shadow: 0 0 30px rgba(59, 130, 246, 0.3);
+            cursor: not-allowed;
         }
         
         .option-icon {
@@ -326,6 +328,11 @@
         .btn-stk {
             background: linear-gradient(90deg, #3B82F6, #2563EB);
             box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-disabled {
+            cursor: not-allowed;
+            opacity: 0.3;
         }
         
         .btn-outline {
@@ -569,18 +576,109 @@
             .payment-options {
                 grid-template-columns: 1fr;
             }
+
+            .phone-input {
+                width: 20%;
+            }
             
             .till-number-display {
                 font-size: 2rem;
             }
         }
+        .activation-explanation {
+        background: rgba(30, 30, 40, 0.7);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        border-radius: 15px;
+        padding: 25px;
+        margin: 20px 0;
+        transition: all 0.3s ease;
+    }
+
+    .activation-explanation:hover {
+        border-color: rgba(59, 130, 246, 0.4);
+        box-shadow: 0 8px 25px rgba(0, 31, 135, 0.2);
+    }
+
+    .explanation-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 15px;
+        color: #E5E7EB;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .explanation-title i {
+        color: #3B82F6;
+    }
+
+    .benefit-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        margin-bottom: 15px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .benefit-item:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+
+    .benefit-icon {
+        color: #10B981;
+        font-size: 1.1rem;
+        margin-top: 3px;
+        flex-shrink: 0;
+    }
+
+    .benefit-content h4 {
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 4px;
+        color: #D1D5DB;
+    }
+
+    .benefit-content p {
+        font-size: 0.9rem;
+        color: #9CA3AF;
+        line-height: 1.5;
+    }
+
+    .platform-note {
+        background: rgba(16, 185, 129, 0.1);
+        border: 1px solid rgba(16, 185, 129, 0.2);
+        border-radius: 12px;
+        padding: 20px;
+        margin-top: 20px;
+        text-align: center;
+    }
+
+    .platform-note h4 {
+        color: #10B981;
+        font-weight: 600;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .platform-note p {
+        color: #9CA3AF;
+        font-size: 0.9rem;
+        line-height: 1.5;
+    }
     </style>
 </head>
 <body>
     <div class="toast-container" id="toast-container"></div>
 
     <div class="w-full max-w-3xl">
-        <div class="glass-morph rounded-2xl p-6 shadow-lg">
+        <div class="glass-morph rounded-2xl shadow-lg p-6 md: p-2">
             <div class="text-center mb-8">
                 <div class="success-icon mx-auto mb-4">
                     <i class="fas fa-lock"></i>
@@ -617,7 +715,7 @@
                             Use Till Number <strong>3109959</strong> for Ksh. 19.
                         </div>
                         <div class="mt-3 text-till-color">
-                            <i class="fas fa-clock mr-1"></i> Instant • No phone needed
+                            <i class="fas fa-clock mr-1"></i> Instant • Copy Paste
                         </div>
                     </div>
 
@@ -639,7 +737,7 @@
 
                 <button class="btn" onclick="proceedToPayment()" id="proceed-btn" disabled>
                     <i class="fas fa-arrow-right mr-2"></i>
-                    Proceed to Payment
+                    Proceed
                 </button>
             </div>
 
@@ -747,7 +845,7 @@
                     <div class="phone-input-group">
                         <span class="phone-prefix">+254</span>
                         <input type="tel" id="stk-phone" class="phone-input" 
-                               placeholder="712345678" value=""
+                               placeholder="712345678" value="" maxlength="9"
                                oninput="validateStkPhone()">
                     </div>
                     <div class="text-xs text-gray-500 mt-2" id="stk-phone-validation"></div>
@@ -774,7 +872,7 @@
                     </button>
                 </div>
 
-                <button class="btn btn-stk mt-4" onclick="initiateStkPush()" id="stk-push-btn">
+                <button class="btn btn-stk btn-disabled mt-4" onclick="initiateStkPush()" id="stk-push-btn">
                     <i class="fas fa-paper-plane mr-2"></i>
                     Send STK Push
                 </button>
@@ -798,6 +896,70 @@
             </div>
 
             <div id="verification-status" class="payment-status"></div>
+            <!-- Activation Fee Explanation -->
+            <div class="activation-explanation">
+                <h3 class="explanation-title">
+                    <i class="fas fa-hand-holding-usd"></i>
+                    Why a One-Time Activation Fee?
+                </h3>
+                
+                <div class="benefit-item">
+                    <div class="benefit-icon">
+                        <i class="fas fa-heart"></i>
+                    </div>
+                    <div class="benefit-content">
+                        <h4>Support Development & Founders</h4>
+                        <p>Your contribution directly supports our developers and founders who dedicate time and resources to build and improve LyxNexus. This ensures continued passion and commitment to the platform.</p>
+                    </div>
+                </div>
+
+                <div class="benefit-item">
+                    <div class="benefit-icon">
+                        <i class="fas fa-server"></i>
+                    </div>
+                    <div class="benefit-content">
+                        <h4>Server Maintenance & Uptime</h4>
+                        <p>Maintaining reliable servers, ensuring 24/7 uptime, and providing secure data storage requires ongoing investment. Your fee helps cover these essential infrastructure costs.</p>
+                    </div>
+                </div>
+
+                <div class="benefit-item">
+                    <div class="benefit-icon">
+                        <i class="fas fa-sync-alt"></i>
+                    </div>
+                    <div class="benefit-content">
+                        <h4>Continuous Updates & Improvements</h4>
+                        <p>We regularly release new features, security updates, and platform enhancements. The activation fee funds this continuous development cycle, keeping LyxNexus modern and efficient.</p>
+                    </div>
+                </div>
+
+                <div class="benefit-item">
+                    <div class="benefit-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="benefit-content">
+                        <h4>Platform Integrity & User Management</h4>
+                        <p>A small fee helps us maintain platform integrity, prevent abuse, and ensure resources are allocated to genuine users who value the service.</p>
+                    </div>
+                </div>
+
+                <div class="platform-note">
+                    <h4><i class="fas fa-unlock"></i> Important Clarification</h4>
+                    <p>
+                        <strong>LyxNexus is a completely free platform.</strong> We do not charge for any services, features, or content access. 
+                        All our educational resources and tools are sourced from open-access materials. 
+                        This one-time activation fee <strong>is strictly for the reasons mentioned above</strong> and not for service charges.
+                    </p>
+                </div>
+
+                <div class="mt-5 p-4 bg-blue-900/20 border border-blue-800/30 rounded-lg flex items-start gap-3">
+                    <i class="fas fa-exclamation-circle text-blue-400 mt-0.5"></i>
+                    <div class="text-sm text-blue-300">
+                        This is a <strong class="text-blue-200 font-semibold">one-time only</strong> fee. After activation, you'll have 
+                        <strong class="text-blue-200 font-semibold">lifetime access</strong> to all LyxNexus features with no recurring charges.
+                    </div>
+                </div>
+            </div>
         </div>
         
         <div class="text-center mt-8 text-gray-500 text-sm">
@@ -882,6 +1044,7 @@
                 showToast('Please select a payment method', 'error', 'Selection Required');
                 return;
             }
+
             document.getElementById('step1').classList.remove('active');
             document.getElementById('step2').classList.add('active');
             document.getElementById('step1-content').style.display = 'none';
@@ -890,6 +1053,7 @@
                 document.getElementById('till-payment-section').classList.add('active');
                 startCountdown('till');
             } else {
+                showToast('STK Push payment is not available at the moment', 'info', 'Not Available');
                 document.getElementById('stk-payment-section').classList.add('active');
                 startCountdown('stk');
             }
@@ -999,6 +1163,11 @@
                 validation.innerHTML = '';
                 return false;
             }
+
+            if (!/^[71][0-9]{8}$/.test(phone)) {
+                validation.innerHTML = '<span class="text-yellow-400">Phone must start with 7 or 1 and be 9 digits</span>';
+                return false;
+            }
             
             const cleanPhone = phone.replace(/\D/g, '');
             
@@ -1035,6 +1204,7 @@
         }
 
         function initiateStkPush() {
+            return;
             const phone = document.getElementById('stk-phone').value.trim();
             
             if (!validateStkPhone()) {
@@ -1434,7 +1604,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             showToast('Choose your payment method to continue', 'info', 'Welcome');
             setTimeout(() => {
-                selectOption('stk');
+                //selectOption('stk');
             }, 1000);
         });
 

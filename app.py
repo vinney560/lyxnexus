@@ -10775,6 +10775,7 @@ def lyx_payment_page():
     """Render the payment page"""
     return render_template('payment_stk.html')
 
+@limiter.limit("5 per minute")
 @app.route('/api/pay', methods=['POST'])
 @login_required
 def pay_to_ln():
