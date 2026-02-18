@@ -2765,7 +2765,7 @@ def format_mobile_send(mobile):
 @login_required
 def activation_payment():
     user = User.query.filter_by(id=current_user.id).first()
-    return render_template('payment.html',
+    return render_template('payment_stk.html',
                                  username=user.username,
                                  mobile=format_mobile_display(user.mobile),
                                  year=_year())
