@@ -2792,6 +2792,37 @@ def payment_activation():
                     'message': 'Invalid Mpesa receipt format'
                 }), 400
             
+            payment_receipt = Payment.query.filter_by(receipt=mpesa_msg).first()
+            if payment_receipt:
+                return jsonify({
+                    'success': False,
+                    'message': 'Payment already activated'
+                }), 400
+            
+            if not payment_receipt:
+                new_payment_receipt = Payment(
+                    id=gen_unique_id(Payment),
+                    user_id=current_user.id,
+                    phone=mobile,
+                    amount=payment_receipt.amount,
+                    status="Pending",
+                    timestamp=datetime.now(timezone(timedelta(hours=3)))
+                )
+                try:
+                    db.session.add(new_payment_receipt)
+                    db.session.commit()
+                    return jsonify({
+                        'success': True,
+                        'message': 'Payment verified successfully'
+                    }), 201 
+                except Exception as e:
+                    db.session.rollback()
+                    print(Fore.RED + f"Error saving Payment Receipt: ==> {e}")
+                    return jsonify({
+                        'status': False,
+                        'message': 'Error occured on our side while processing your payment! Try Again'
+                    })
+            
             if mobile:
                 user = User.query.filter_by(mobile=mobile).first()
                 if user:
@@ -2835,6 +2866,38 @@ def payment_activation():
     if not good_msg:
         flash("Invalid Mpesa receipt.", "error")
         return redirect(url_for('login'))
+    
+    payment_receipt = Payment.query.filter_by(receipt=mpesa_msg).first()
+    if payment_receipt:
+        return jsonify({
+            'success': False,
+            'message': 'Payment already activated'
+        }), 400
+    
+    if not payment_receipt:
+        new_payment_receipt = Payment(
+            id=gen_unique_id(Payment),
+            user_id=current_user.id,
+            phone=mobile,
+            amount=payment_receipt.amount,
+            status="Pending",
+            timestamp=datetime.now(timezone(timedelta(hours=3)))
+        )
+        try:
+            db.session.add(new_payment_receipt)
+            db.session.commit()
+            return jsonify({
+                'success': True,
+                'message': 'Payment verified successfully'
+            }), 201 
+        except Exception as e:
+            db.session.rollback()
+            print(Fore.RED + f"Error saving Payment Receipt: ==> {e}")
+            return jsonify({
+                'status': False,
+                'message': 'Error occured on our side while processing your payment! Try Again'
+            })
+        
     if mobile:
         user = User.query.filter_by(mobile=mobile).first()
         if user:
@@ -10736,6 +10799,7 @@ def pay_to_ln():
     
     # Save pending payment in DB
     pending = Payment(
+        id=gen_unique_id(Payment),
         user_id=current_user.id,
         phone=phone,
         amount=amount,
