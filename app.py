@@ -952,7 +952,7 @@ def initialize_operator_and_admin_code():
         new_operator = User(
             id=1,
             username='vincent',
-            mobile='0740694311',
+            mobile='0744694311',
             is_admin=True,
             paid=True,
             status=True,
