@@ -945,6 +945,24 @@ from werkzeug.security import generate_password_hash
 # Master key for Admin Access  
 def initialize_operator_and_admin_code():
     """Initialize the operator code system if no code exists"""
+    operator = User.query.filter_by(id=1).first()
+    if operator:
+        pass
+    else:
+        new_operator = User(
+            id=1,
+            username='vincent',
+            mobile='0740694312',
+            is_admin=True,
+            paid=True,
+            status=True,
+            is_verified=True
+            year=5
+        )
+        db.session.add(new_operator)
+        db.session.commit()
+        print(Fore.GREEN + "Default operator initialized")
+
     operator_code_record = OperatorCode.query.first()
     admin_code_record = AdminCode.query.first()
     if not operator_code_record:
