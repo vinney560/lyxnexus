@@ -956,7 +956,7 @@ def initialize_operator_and_admin_code():
             is_admin=True,
             paid=True,
             status=True,
-            is_verified=True
+            is_verified=True,
             year=5
         )
         db.session.add(new_operator)
