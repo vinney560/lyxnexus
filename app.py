@@ -33,7 +33,22 @@ from flask import request
 from pywebpush import webpush, WebPushException # CHrome Notification Push Module
 from colorama import Fore # Coloring logs
 import base64
+import flask
 #==========================================
+
+# Official workaround for Flask 3.x compatibility
+if not hasattr(flask.ctx.RequestContext, 'session'):
+    # Create the session property with both getter and setter
+    def _get_session(self):
+        return getattr(self, '_session', None)
+    
+    def _set_session(self, value):
+        self._session = value
+    
+    # Apply the property to RequestContext
+    flask.ctx.RequestContext.session = property(_get_session, _set_session)
+    
+    print("✅ Applied Flask 3.x SocketIO compatibility patch")
 
 app = Flask(__name__)
 load_dotenv()
@@ -178,7 +193,13 @@ login_manager.refresh_view = 'login'
 
 jwt = JWTManager(app) # Initialized but domant
 Compress(app)
-socketio = SocketIO(app, cors_allowed_origins="*", async_mode="eventlet", ping_timeout=20, ping_interval=10) # because we are using socketIO for messaging and it must run on its on
+socketio = SocketIO(app,
+                    cors_allowed_origins="*",
+                    async_mode="eventlet",
+                    manage_session=False,
+                    ping_timeout=20,
+                    ping_interval=10) # because we are using socketIO for messaging and it must run on its on
+
 db = SQLAlchemy(app)
 Session(app)
 
