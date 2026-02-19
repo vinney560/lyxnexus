@@ -260,20 +260,104 @@
     .modal-content {
         background: var(--bg-color);
         border-radius: 15px;
-        padding: 30px;
+        padding: 20px;
         width: 90%;
         max-width: 800px;
         border: 1px solid rgba(59, 130, 246, 0.3);
         animation: slideUp 0.3s ease;
         max-height: 90vh;
         overflow-y: auto;
-        scrollbar-width: none;
-        -ms-overflow-style: none;
+        scrollbar-width: thin;
+        scrollbar-color: #3B82F6 rgba(30, 30, 40, 0.8);
     }
 
     .modal-content::-webkit-scrollbar {
-        display: none;
+        width: 8px;
+        height: 8px;
     }
+
+    .modal-content::-webkit-scrollbar-track {
+        background: rgba(30, 30, 40, 0.8);
+        border-radius: 10px;
+        margin: 5px;
+    }
+
+    .modal-content::-webkit-scrollbar-thumb {
+        background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+        border-radius: 10px;
+        border: 2px solid transparent;
+        background-clip: padding-box;
+        transition: all 0.3s ease;
+    }
+
+    .modal-content::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(135deg, #2563EB, #7C3AED);
+        border: 1px solid transparent;
+        background-clip: padding-box;
+    }
+
+    .modal-content::-webkit-scrollbar-thumb:active {
+        background: linear-gradient(135deg, #1D4ED8, #6D28D9);
+        border: 1px solid transparent;
+        background-clip: padding-box;
+    }
+
+    .modal-content::-webkit-scrollbar-corner {
+        background: transparent;
+    }
+
+    #available-files {
+        max-height: 60vh;
+        overflow-y: auto;
+        scrollbar-width: thin;
+        scrollbar-color: #3B82F6 rgba(30, 30, 40, 0.6);
+    }
+
+    #available-files::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    #available-files::-webkit-scrollbar-track {
+        background: rgba(30, 30, 40, 0.6);
+        border-radius: 10px;
+        margin: 2px;
+    }
+
+    #available-files::-webkit-scrollbar-thumb {
+        background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+        border-radius: 10px;
+        border: 1px solid transparent;
+        background-clip: padding-box;
+        transition: all 0.3s ease;
+    }
+
+    #available-files::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(135deg, #2563EB, #7C3AED);
+    }
+
+    #available-files::-webkit-scrollbar-thumb:active {
+        background: linear-gradient(135deg, #1D4ED8, #6D28D9);
+    }
+
+    @keyframes scrollbar-glow {
+        0% { box-shadow: 0 0 2px #3B82F6; }
+        50% { box-shadow: 0 0 8px #8B5CF6; }
+        100% { box-shadow: 0 0 2px #3B82F6; }
+    }
+
+    .modal-content::-webkit-scrollbar-thumb {
+        animation: scrollbar-glow 3s infinite;
+    }
+
+    .modal-content {
+        scrollbar-width: thin;
+        scrollbar-color: #3B82F6 #1F2937;
+    }
+
+    #available-files {
+        scrollbar-width: thin;
+        scrollbar-color: #3B82F6 #1F2937;
+    }    
     
     @keyframes fadeIn {
         from { opacity: 0; }
@@ -711,8 +795,17 @@
         display: -webkit-box;
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        word-break: break-word;
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+        hyphens: auto;
+        -webkit-hyphens: auto;
+        -ms-hyphens: auto;
+        word-break: break-all;
     }
-    
+
     .material-description {
         font-size: 14px;
         line-height: 1.5;
@@ -721,13 +814,34 @@
         display: -webkit-box;
         -webkit-line-clamp: 3;
         -webkit-box-orient: vertical;
-    }
-    
+        overflow: hidden;
+        text-overflow: ellipsis;
+        word-break: break-word;
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+        hyphens: auto;
+        -webkit-hyphens: auto;
+        -ms-hyphens: auto;
+        word-break: break-all;
+    }        
+
     .material-filename {
         font-size: 12px;
         color: #9CA3AF;
         line-height: 1.4;
         margin-bottom: 4px;
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        word-break: break-word;
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+        hyphens: auto;
+        -webkit-hyphens: auto;
+        -ms-hyphens: auto;
+        word-break: break-all;
     }
     
     .material-meta {
@@ -910,7 +1024,7 @@
                     </div>
                     <span class="text-xl sm:text-2xl font-bold gradient-text">Unit Notes</span>
                 </div>
-                <div class="nav-buttons-grid">
+                <div class="flex flex-row justify-end space-x-3 sm:flex-col sm:space-x-0 sm:space-y-4 md:flex-row md:space-y-0 md:space-x-3 lg:flex-row lg:space-y-0 lg:space-x-3 mt-4">
                     {% if current_user.is_admin %}
                     <button class="btn bg-red-600 hover:bg-gray-700" onclick="window.location.href='/admin'">
                         <i class="fas fa-arrow-left mr-2"></i> Back 
@@ -1036,9 +1150,11 @@
                 </div>
             </div>
             
-            <div class="flex flex-col-reverse sm:flex-row justify-end space-y-4 sm:space-y-0 space-y-reverse sm:space-x-3 mt-4">
-                <button type="button" class="btn btn-secondary w-full sm:w-auto" onclick="closeModal('add-material-modal')">Cancel</button>
-                <button type="button" class="btn btn-success w-full sm:w-auto mb-4 sm:mb-0" id="add-materials-btn" onclick="addMaterials()">
+            <div class="flex flex-col sm:flex-row md:flex-row justify-end space-y-4 sm:space-y-0 sm:space-x-3 md:space-x-3 mt-4">
+                <button type="button" class="btn btn-secondary w-full md:w-auto" onclick="closeModal('add-material-modal')">
+                    <i class="fas fa-times mr-2"></i> Cancel
+                </button>
+                <button type="button" class="btn btn-success w-full md:w-auto" id="add-materials-btn" onclick="addMaterials()">
                     <i class="fas fa-plus mr-2"></i> Add Selected Files
                 </button>
             </div>
@@ -1270,6 +1386,10 @@
                 downloadMaterial(fileId);
             }
         }
+        function formatTextWithUnderscores(text) {
+            if (!text) return text;
+            return text.replace(/_/g, ' ​');
+        }
 
         async function loadTopicMaterials() {
             const container = document.getElementById('materials-container');
@@ -1320,13 +1440,13 @@
                                     </div>
                                 </div>
                                 <div class="material-card-content ml-3">
-                                    <h3 class="material-name truncate break-all">${material.display_name}</h3>
-                                    <p class="material-description truncate break-all">${material.description || 'No description'}</p>
+                                    <h3 class="material-name">${formatTextWithUnderscores(material.display_name)}</h3>
+                                    <p class="material-description">${material.description || 'No description'}</p>
                                     <div class="material-meta">
-                                        <span class="material-filename truncate break-all" title="${material.filename}">
-                                            <i class="fas fa-file mr-1 truncate"></i>
-                                            ${material.filename}
-                                        </span>
+                                        <p class="material-filename" title="${formatTextWithUnderscores(material.filename)}">
+                                            <i class="fas fa-file mr-1"></i>
+                                            ${formatTextWithUnderscores(material.filename)}
+                                        </p>
                                         <span>
                                             <i class="fas fa-database mr-1"></i> ${formatFileSize(material.file_size)}
                                         </span>

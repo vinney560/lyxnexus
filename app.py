@@ -606,7 +606,7 @@ class AIConverse(db.Model):
     
     # Index
     __table_args__ = (
-        db.Index('idx_user_created', 'user_id', 'created_at'),
+        db.Index('idx_user_created_at', 'user_id', 'created_at'),
         db.Index('idx_created_at', 'created_at'),
     )
     
@@ -2760,16 +2760,6 @@ def format_mobile_send(mobile):
         return f"{digits}"
     return mobile
 #==================================================================
-# False Payment activation due to missing system to activate automatically
-@app.route('/payment')
-@login_required
-def activation_payment():
-    user = User.query.filter_by(id=current_user.id).first()
-    return render_template('payment.html',
-                                 username=user.username,
-                                 mobile=format_mobile_display(user.mobile),
-                                 year=_year())
-
 @app.route('/activation', methods=['GET', 'POST'])
 def payment_activation():
     if request.method == 'POST':
@@ -2807,7 +2797,7 @@ def payment_activation():
                     mpesa_receipt=mpesa_msg,
                     amount=19,
                     status="Pending",
-                    timestamp=datetime.now(timezone(timedelta(hours=6)))
+                    timestamp=datetime.now(timezone(timedelta(hours=3)))
                 )
                 try:
                     db.session.add(new_payment_receipt)
@@ -2883,7 +2873,7 @@ def payment_activation():
             amount=19,
             mpesa_receipt=mpesa_msg,
             status="Pending",
-            timestamp=datetime.now(timezone(timedelta(hours=6)))
+            timestamp=datetime.now(timezone(timedelta(hours=3)))
         )
         try:
             db.session.add(new_payment_receipt)
@@ -10772,7 +10762,7 @@ def api_admin_challenges():
 
 @app.route('/pay/4122/ln')
 @login_required
-def lyx_payment_page():
+def ln_payment_page():
     """Render the payment page"""
     has_paid = current_user.paid
     if has_paid:
@@ -10811,7 +10801,7 @@ def pay_to_ln():
         phone=phone,
         amount=amount,
         status="Pending",
-        timestamp=datetime.now(timezone(timedelta(hours=6)))
+        timestamp=datetime.now(timezone(timedelta(hours=3)))
     )
     db.session.add(pending)
     db.session.commit()
