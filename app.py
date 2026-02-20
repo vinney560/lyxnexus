@@ -1611,7 +1611,7 @@ def robots():
 Allow: /
 Disallow: /admin/
 
-Sitemap: https://lyxnexus.lyxnexus.xo.je/sitemap.xml
+Sitemap: https://lyxnexus.onrender.com/sitemap.xml
 """
 
 from datetime import datetime, timezone, timedelta
@@ -1625,43 +1625,36 @@ def sitemap():
   <url>
     <loc>{base_url}/</loc>
     <lastmod>{current_date}</lastmod>
-    <changefreq>monthly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
     <loc>{base_url}/developer</loc>
     <lastmod>{current_date}</lastmod>
-    <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>{base_url}/dashboard</loc>
     <lastmod>{current_date}</lastmod>
-    <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>{base_url}/messages</loc>
     <lastmod>{current_date}</lastmod>
-    <changefreq>daily</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>{base_url}/files</loc>
+    <loc>{base_url}/store/</loc>
     <lastmod>{current_date}</lastmod>
-    <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
     <loc>{base_url}/profile</loc>
     <lastmod>{current_date}</lastmod>
-    <changefreq>montlyly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>{base_url}/terms</loc>
     <lastmod>{current_date}</lastmod>
-    <changefreq>yearly</changefreq>
     <priority>1.0</priority>
   </url>
 </urlset>'''
