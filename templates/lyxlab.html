@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LyxLab Projects</title>
+    <title>LyxLab Projects | Unofficial</title>
     
     <!-- SEO Meta -->
     <meta name="keywords" content="Lyx Nexus, Kisii LyxNexus, kisii lyxnexus, kisii university lyxnexus, kisii university lyx nexus, lyx nexus, lyxnexus" />
@@ -12,250 +12,585 @@
     <link rel="canonical" href="https://lyxnexus.onrender.com/" />
     <link rel="icon" href="https://lyxnexus.onrender.com/uploads/favicon-1.png"/>
     
-    <meta property="og:title" content="LyxLab Intelligence | Unofficial" />
-    <meta property="og:description" content="LyxLab is a collection of all the projects I have made." />
+    <meta property="og:title" content="LyxLab Intelligence | Redesigned Portfolio" />
+    <meta property="og:description" content="Explore cutting-edge projects and innovations from LyxLab" />
     <meta property="og:image" content="https://lyxnexus.onrender.com/favicon.ico" />
     <meta property="og:url" content="https://lyxnexus.onrender.com/" />
     
-    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:card" content="summary_large_image" />
 
     <script src="/_0eXv3/tailwind.all.css"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        .glass-morph {
-            background: rgba(30, 30, 40, 0.6);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(59, 130, 246, 0.3);
+        :root {
+            --primary: #3b82f6;
+            --primary-glow: rgba(59, 130, 246, 0.5);
+            --secondary: #8b5cf6;
+            --accent: #ec4899;
+            --glass-bg: rgba(20, 20, 30, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-highlight: rgba(255, 255, 255, 0.05);
         }
-        
-        .gradient-text {
-            background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+
+        .glass-morph {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px) saturate(180%);
+            -webkit-backdrop-filter: blur(12px) saturate(180%);
+            border: 1px solid var(--glass-border);
+            border-bottom: 1px solid var(--glass-highlight);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.36);
+        }
+
+        .glass-morph-enhanced {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            backdrop-filter: blur(16px) saturate(200%);
+            -webkit-backdrop-filter: blur(16px) saturate(200%);
+            border: 1px solid rgba(255, 255, 255, 0.125);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        }
+
+        .gradient-text-animated {
+            background: linear-gradient(
+                90deg,
+                var(--primary),
+                var(--secondary),
+                var(--accent),
+                var(--primary)
+            );
+            background-size: 300% auto;
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
+            animation: gradientFlow 8s ease infinite;
         }
-        
+
+        @keyframes gradientFlow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
         .project-card {
-            transition: all 0.3s ease;
+            position: relative;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            animation: cardFloat 6s ease-in-out infinite;
+            animation-delay: calc(var(--card-index) * 0.2s);
         }
-        
+
         .project-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 40px rgba(0, 31, 135, 0.3);
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 0 2px var(--primary-glow);
         }
-        
-        .loading-spinner {
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #3B82F6;
+
+        .project-card::before {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            background: linear-gradient(45deg, var(--primary), var(--secondary), var(--accent));
+            border-radius: 1.2rem;
+            opacity: 0;
+            transition: opacity 0.4s;
+            z-index: -1;
+        }
+
+        .project-card:hover::before {
+            opacity: 0.3;
+        }
+
+        @keyframes cardFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        .loading-spinner-modern {
+            width: 50px;
+            height: 50px;
+            border: 3px solid transparent;
+            border-top: 3px solid var(--primary);
+            border-right: 3px solid var(--secondary);
+            border-bottom: 3px solid var(--accent);
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
+            animation: spinModern 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
         }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+
+        @keyframes spinModern {
+            0% { transform: rotate(0deg) scale(1); }
+            50% { transform: rotate(180deg) scale(1.1); }
+            100% { transform: rotate(360deg) scale(1); }
         }
-        
-        .fade-in {
-            animation: fadeIn 0.5s ease-in;
+
+        .fade-in-up {
+            animation: fadeInUp 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+            opacity: 0;
         }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
         }
-        
+
         .status-badge {
             display: inline-flex;
             align-items: center;
             padding: 4px 12px;
-            border-radius: 20px;
+            border-radius: 100px;
             font-size: 12px;
             font-weight: 600;
             text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
         }
-        
+
+        .status-badge::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transform: rotate(45deg);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) rotate(45deg); }
+        }
+
         .status-active {
-            background-color: rgba(34, 197, 94, 0.2);
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(34, 197, 94, 0.1));
             color: #22c55e;
             border: 1px solid rgba(34, 197, 94, 0.3);
+            box-shadow: 0 0 10px rgba(34, 197, 94, 0.2);
         }
-        
+
         .status-development {
-            background-color: rgba(245, 158, 11, 0.2);
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(245, 158, 11, 0.1));
             color: #f59e0b;
             border: 1px solid rgba(245, 158, 11, 0.3);
+            box-shadow: 0 0 10px rgba(245, 158, 11, 0.2);
         }
-        
+
         .status-planned {
-            background-color: rgba(99, 102, 241, 0.2);
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(99, 102, 241, 0.1));
             color: #6366f1;
             border: 1px solid rgba(99, 102, 241, 0.3);
-        }
-        
-        .btn-disabled {
-            background-color: #4b5563;
-            color: #9ca3af;
-            cursor: not-allowed;
-            opacity: 0.6;
-        }
-        
-        .btn-disabled:hover {
-            background-color: #4b5563;
-            transform: none;
-        }
-        
-        .credential-field {
-            display: flex;
-            justify-content: between;
-            align-items: center;
-            padding: 6px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        .credential-field:last-child {
-            border-bottom: none;
-        }
-        
-        .field-name {
-            text-transform: capitalize;
-            color: #9ca3af;
-            font-size: 14px;
-            min-width: 80px;
-        }
-        
-        .field-value {
-            font-family: monospace;
-            font-size: 14px;
-            text-align: right;
-            flex: 1;
-            margin-left: 10px;
-        }
-        
-        .mobile-value {
-            color: #60a5fa;
-        }
-        
-        .email-value {
-            color: #f472b6;
-        }
-        
-        .username-value {
-            color: #34d399;
-        }
-        
-        .password-value {
-            color: #f87171;
+            box-shadow: 0 0 10px rgba(99, 102, 241, 0.2);
         }
 
-        .logo-container {
-            display: contents;
-            border: 2px solid #44ff0b;
+        .search-container {
+            position: relative;
+            transition: all 0.3s;
         }
 
-        .logo-container:hover {
-            transform: scale(1.035);
-            border: 3px solid #37d506;
+        .search-container:focus-within {
+            transform: scale(1.02);
+        }
+
+        .search-input {
+            background: rgba(30, 30, 40, 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(10, 140, 221, 0.333);
+            transition: all 0.3s;
+            padding-left: 3rem;
+        }
+
+        .search-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 20px var(--primary-glow);
+            outline: none;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+            transition: all 0.3s;
+            pointer-events: none;
+        }
+
+        .search-container:focus-within .search-icon {
+            color: var(--primary);
+        }
+
+        .clear-search {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+            cursor: pointer;
+            transition: all 0.2s;
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .clear-search.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .clear-search:hover {
+            color: white;
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        #particle-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .floating-element {
+            position: absolute;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            filter: blur(40px);
+            opacity: 0.15;
+            z-index: -1;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, var(--secondary), var(--accent));
+        }
+
+        .stat-item {
+            transition: all 0.3s;
+        }
+
+        .stat-item:hover {
+            transform: scale(1.05);
+        }
+
+        .stat-number {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            .project-card {
+                margin: 10px 0;
+            }
+            
+            .gradient-text-animated {
+                font-size: 2rem;
+            }
+        }
+
+        .logo-animated {
+            animation: logoPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes logoPulse {
+            0%, 100% { transform: scale(1); filter: brightness(1); }
+            50% { transform: scale(1.05); filter: brightness(1.2); }
         }
     </style>
 </head>
-<body class="bg-gray-900 text-white min-h-screen">
-    <div class="container mx-auto px-4 py-8">
-        <!-- Header -->
-        <header class="text-center mb-12">
-            <div class="logo-container inline-block rounded-full bg-gradient-to-r from-blue-500 to-purple-600 mb-4">
-                <img src="{{ url_for('uploaded_file', filename='lyxlab.png') }}"
-                    alt="LyxLab Intelligence"
-                    class="w-20 h-20 rounded-full object-cover"/>
+<body class="bg-gray-900 text-white min-h-screen overflow-x-hidden">
+    <canvas id="particle-canvas"></canvas>
+    <div class="floating-element" style="top: 10%; left: 5%; width: 300px; height: 300px;"></div>
+    <div class="floating-element" style="bottom: 10%; right: 5%; width: 400px; height: 400px; background: linear-gradient(135deg, var(--secondary), var(--accent));"></div>
+
+    <div class="container mx-auto px-4 py-8 relative z-10">
+        <header class="text-center mb-12 fade-in-up">
+            <div class="logo-animated inline-block rounded-full bg-gradient-to-r from-blue-500 to-purple-600 mb-4 p-1">
+                <div class="bg-gray-900 rounded-full p-1">
+                    <img src="{{ url_for('uploaded_file', filename='lyxlab.png') }}"
+                        alt="LyxLab Intelligence"
+                        class="w-24 h-24 rounded-full object-cover"/>
+                </div>
             </div>
-            <h1 class="text-4xl font-bold gradient-text mb-2">LyxLab</h1>
-            <p class="text-gray-400 text-lg">Explore my projects and demo credentials</p>
+            <h1 class="text-5xl md:text-6xl font-bold gradient-text-animated mb-4">LyxLab</h1>
+            <p class="text-gray-300 text-lg md:text-xl max-w-2xl mx-auto mb-6">Where innovation meets execution — exploring the future through code</p>
+            <div class="flex flex-wrap justify-center gap-6 mb-8">
+                <div class="stat-item glass-morph rounded-xl px-6 py-3">
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-code text-blue-400"></i>
+                        <span class="stat-number" id="projectCount">0</span>
+                        <span class="text-gray-400">Projects</span>
+                    </div>
+                </div>
+                <div class="stat-item glass-morph rounded-xl px-6 py-3">
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-check-circle text-green-400"></i>
+                        <span class="stat-number" id="activeCount">0</span>
+                        <span class="text-gray-400">Active</span>
+                    </div>
+                </div>
+                <div class="stat-item glass-morph rounded-xl px-6 py-3">
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-tools text-yellow-400"></i>
+                        <span class="stat-number" id="devCount">0</span>
+                        <span class="text-gray-400">In Development</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="search-container max-w-xl mx-auto mb-6">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" 
+                       id="searchInput" 
+                       class="search-input w-full rounded-2xl py-4 px-12 text-white placeholder-gray-500"
+                       placeholder="Search projects by name, description, or credentials...">
+                <i class="fas fa-times clear-search" id="clearSearch" onclick="clearSearch()"></i>
+            </div>
             
-            <!-- Status Legend -->
-            <div class="flex flex-wrap justify-center gap-4 mt-6">
-                <div class="flex items-center gap-2">
-                    <div class="w-3 h-3 bg-green-500 rounded-full"></div>
-                    <span class="text-sm text-gray-400">Active</span>
-                </div>
-                <div class="flex items-center gap-2">
-                    <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                    <span class="text-sm text-gray-400">Development</span>
-                </div>
-                <div class="flex items-center gap-2">
-                    <div class="w-3 h-3 bg-indigo-500 rounded-full"></div>
-                    <span class="text-sm text-gray-400">Planned</span>
-                </div>
+            <div class="flex flex-wrap justify-center gap-3 mb-8">
+                <button class="filter-chip active px-4 py-2 rounded-full text-sm transition-all" data-filter="all">
+                    <span class="flex items-center gap-2">
+                        <i class="fas fa-layer-group"></i>
+                        All Projects
+                    </span>
+                </button>
+                <button class="filter-chip px-4 py-2 rounded-full text-sm transition-all" data-filter="active">
+                    <span class="flex items-center gap-2">
+                        <i class="fas fa-check-circle"></i>
+                        Active
+                    </span>
+                </button>
+                <button class="filter-chip px-4 py-2 rounded-full text-sm transition-all" data-filter="development">
+                    <span class="flex items-center gap-2">
+                        <i class="fas fa-tools"></i>
+                        Development
+                    </span>
+                </button>
+                <button class="filter-chip px-4 py-2 rounded-full text-sm transition-all" data-filter="planned">
+                    <span class="flex items-center gap-2">
+                        <i class="fas fa-clock"></i>
+                        Planned
+                    </span>
+                </button>
             </div>
         </header>
 
-        <!-- Loading State -->
-        <div id="loadingState" class="text-center py-12">
-            <div class="loading-spinner mx-auto mb-4"></div>
-            <p class="text-gray-400">Loading projects...</p>
+        <div id="loadingState" class="text-center py-20">
+            <div class="loading-spinner-modern mx-auto mb-6"></div>
+            <p class="text-gray-400 text-lg animate-pulse">Loading innovative projects...</p>
         </div>
 
-        <!-- Error State -->
-        <div id="errorState" class="hidden text-center py-12">
-            <i class="fas fa-exclamation-triangle text-yellow-500 text-5xl mb-4"></i>
-            <h2 class="text-2xl font-bold mb-2">Failed to Load Projects</h2>
-            <p class="text-gray-400 mb-4" id="errorMessage"></p>
-            <button onclick="loadProjects()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors">
-                <i class="fas fa-redo mr-2"></i>Try Again
-            </button>
+        <div id="errorState" class="hidden text-center py-20">
+            <div class="glass-morph-enhanced rounded-2xl p-8 max-w-md mx-auto">
+                <i class="fas fa-exclamation-triangle text-yellow-500 text-5xl mb-4"></i>
+                <h2 class="text-2xl font-bold mb-2">Failed to Load Projects</h2>
+                <p class="text-gray-400 mb-6" id="errorMessage"></p>
+                <button onclick="loadProjects()" class="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-3 rounded-xl transition-all transform hover:scale-105">
+                    <i class="fas fa-redo mr-2"></i>Try Again
+                </button>
+            </div>
         </div>
 
-        <!-- Projects Grid -->
-        <div id="projectsGrid" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">        
+        <div id="noResultsState" class="hidden text-center py-20">
+            <div class="glass-morph-enhanced rounded-2xl p-8 max-w-md mx-auto">
+                <i class="fas fa-search text-blue-400 text-5xl mb-4"></i>
+                <h2 class="text-2xl font-bold mb-2">No Projects Found</h2>
+                <p class="text-gray-400 mb-4" id="noResultsMessage">No projects match your search criteria</p>
+                <button onclick="clearSearch()" class="text-blue-400 hover:text-blue-300 transition-colors">
+                    <i class="fas fa-undo mr-2"></i>Clear Search
+                </button>
+            </div>
+        </div>
+
+        <div id="projectsGrid" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">        
         </div>
     </div>
 
     <script>
-        // DOM Elements
         const loadingState = document.getElementById('loadingState');
         const errorState = document.getElementById('errorState');
         const projectsGrid = document.getElementById('projectsGrid');
+        const noResultsState = document.getElementById('noResultsState');
         const errorMessage = document.getElementById('errorMessage');
+        const noResultsMessage = document.getElementById('noResultsMessage');
+        const searchInput = document.getElementById('searchInput');
+        const clearSearchBtn = document.getElementById('clearSearch');
+        const projectCountSpan = document.getElementById('projectCount');
+        const activeCountSpan = document.getElementById('activeCount');
+        const devCountSpan = document.getElementById('devCount');        
+        const canvas = document.getElementById('particle-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
 
-        // Status configuration
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2;
+                this.speedX = Math.random() * 1 - 0.5;
+                this.speedY = Math.random() * 1 - 0.5;
+                this.color = `rgba(59, 130, 246, ${Math.random() * 0.3})`;
+            }
+            
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                
+                if (this.x > canvas.width) this.x = 0;
+                if (this.x < 0) this.x = canvas.width;
+                if (this.y > canvas.height) this.y = 0;
+                if (this.y < 0) this.y = canvas.height;
+            }
+            
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function initParticles() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            particles = [];
+            for (let i = 0; i < 50; i++) {
+                particles.push(new Particle());
+            }
+        }
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let particle of particles) {
+                particle.update();
+                particle.draw();
+            }
+            requestAnimationFrame(animateParticles);
+        }
+
+        window.addEventListener('resize', initParticles);
+        initParticles();
+        animateParticles();
         const statusConfig = {
             'active': { class: 'status-active', icon: 'fa-check-circle', text: 'Active' },
             'development': { class: 'status-development', icon: 'fa-tools', text: 'Development' },
             'planned': { class: 'status-planned', icon: 'fa-clock', text: 'Planned' }
         };
 
-        // Field type configuration for styling
         const fieldConfig = {
-            'mobile': { class: 'mobile-value', icon: 'fa-phone' },
-            'email': { class: 'email-value', icon: 'fa-envelope' },
-            'username': { class: 'username-value', icon: 'fa-user' },
-            'password': { class: 'password-value', icon: 'fa-lock' }
+            'mobile': { class: 'text-blue-400', icon: 'fa-phone' },
+            'email': { class: 'text-pink-400', icon: 'fa-envelope' },
+            'username': { class: 'text-emerald-400', icon: 'fa-user' },
+            'password': { class: 'text-red-400', icon: 'fa-lock' }
         };
 
-        // Load projects from API
+        let allProjects = {};
+
+        const filterChips = document.querySelectorAll('.filter-chip');
+        let currentFilter = 'all';
+
+        filterChips.forEach(chip => {
+            chip.addEventListener('click', () => {
+                filterChips.forEach(c => c.classList.remove('active', 'bg-blue-600', 'text-white'));
+                chip.classList.add('active', 'bg-blue-600', 'text-white');
+                currentFilter = chip.dataset.filter;
+                filterProjects();
+            });
+        });
+
+        searchInput.addEventListener('input', (e) => {
+            if (e.target.value.length > 0) {
+                clearSearchBtn.classList.add('visible');
+            } else {
+                clearSearchBtn.classList.remove('visible');
+            }
+            filterProjects();
+        });
+
+        function clearSearch() {
+            searchInput.value = '';
+            clearSearchBtn.classList.remove('visible');
+            filterProjects();
+        }
+
+        function filterProjects() {
+            const searchTerm = searchInput.value.toLowerCase().trim();
+            
+            const filtered = Object.entries(allProjects).filter(([url, project]) => {
+                if (currentFilter !== 'all' && project.status !== currentFilter) {
+                    return false;
+                }
+                
+                if (searchTerm) {
+                    const searchableText = [
+                        project.name,
+                        project.description,
+                        ...Object.values(project.credentials || {})
+                    ].join(' ').toLowerCase();
+                    
+                    return searchableText.includes(searchTerm);
+                }
+                
+                return true;
+            });
+
+            if (filtered.length === 0 && (searchTerm || currentFilter !== 'all')) {
+                projectsGrid.classList.add('hidden');
+                noResultsState.classList.remove('hidden');
+                noResultsMessage.textContent = searchTerm ? 
+                    `No projects match "${searchTerm}"` : 
+                    `No ${currentFilter} projects found`;
+            } else {
+                noResultsState.classList.add('hidden');
+                renderProjects(Object.fromEntries(filtered));
+            }
+        }
+
         async function loadProjects() {
             try {
-                // Show loading, hide others
                 loadingState.classList.remove('hidden');
                 errorState.classList.add('hidden');
                 projectsGrid.classList.add('hidden');
+                noResultsState.classList.add('hidden');
 
-                // Fetch data from API
                 const response = await fetch('/lyx-lab/data/projects');
                 
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 
-                const projects = await response.json();
+                allProjects = await response.json();
                 
-                // Hide loading
+                // Update stats
+                updateStats(allProjects);
+                
                 loadingState.classList.add('hidden');
-                
-                // Render projects
-                renderProjects(projects);
+                filterProjects();
                 
             } catch (error) {
                 console.error('Error loading projects:', error);
@@ -265,17 +600,42 @@
             }
         }
 
-        // Check if URL is valid
+        function updateStats(projects) {
+            const total = Object.keys(projects).length;
+            const active = Object.values(projects).filter(p => p.status === 'active').length;
+            const dev = Object.values(projects).filter(p => p.status === 'development').length;
+            
+            animateNumber(projectCountSpan, 0, total);
+            animateNumber(activeCountSpan, 0, active);
+            animateNumber(devCountSpan, 0, dev);
+        }
+
+        function animateNumber(element, start, end) {
+            let current = start;
+            const increment = end > start ? 1 : -1;
+            const duration = 1000;
+            const stepTime = 20;
+            const steps = duration / stepTime;
+            const step = (end - start) / steps;
+            
+            const timer = setInterval(() => {
+                current += step;
+                if ((step > 0 && current >= end) || (step < 0 && current <= end)) {
+                    current = end;
+                    clearInterval(timer);
+                }
+                element.textContent = Math.round(current);
+            }, stepTime);
+        }
+
         function isValidUrl(url) {
             return url && url.length > 0 && url.startsWith('http');
         }
 
-        // Check if credentials exist
         function hasCredentials(credentials) {
             return credentials && Object.keys(credentials).length > 0;
         }
 
-        // Get status badge HTML
         function getStatusBadge(status) {
             const config = statusConfig[status] || statusConfig.active;
             return `
@@ -286,24 +646,23 @@
             `;
         }
 
-        // Render credential fields
         function renderCredentialFields(credentials) {
             if (!credentials) return '';
             
             return Object.entries(credentials).map(([field, value]) => {
                 const config = fieldConfig[field] || { class: 'text-gray-300', icon: 'fa-key' };
                 return `
-                    <div class="credential-field">
-                        <span class="field-name">
-                            <i class="fas ${config.icon} mr-1 text-xs"></i>${field}:
+                    <div class="flex justify-between items-center py-2 border-b border-gray-700 last:border-0 group hover:bg-gray-700/30 transition-colors px-2 rounded">
+                        <span class="text-gray-400 text-sm flex items-center">
+                            <i class="fas ${config.icon} mr-2 w-4 ${config.class}"></i>
+                            ${field}:
                         </span>
-                        <span class="field-value ${config.class}">${value}</span>
+                        <span class="font-mono text-sm ${config.class} group-hover:scale-105 transition-transform">${value}</span>
                     </div>
                 `;
             }).join('');
         }
 
-        // Render projects to the grid
         function renderProjects(projects) {
             projectsGrid.innerHTML = '';
             
@@ -313,54 +672,65 @@
                 const status = project.status || 'active';
                 
                 const projectCard = document.createElement('div');
-                projectCard.className = 'project-card glass-morph rounded-2xl p-6 fade-in';
+                projectCard.className = 'project-card glass-morph-enhanced rounded-2xl p-6';
+                projectCard.style.setProperty('--card-index', index);
+                projectCard.style.animation = 'fadeInUp 0.6s ease forwards';
                 projectCard.style.animationDelay = `${index * 0.1}s`;
+                const gradients = ['from-blue-500 to-cyan-500', 'from-purple-500 to-pink-500', 'from-emerald-500 to-teal-500', 'from-orange-500 to-red-500'];
+                const gradient = gradients[index % gradients.length];
                 
                 projectCard.innerHTML = `
-                    <div class="flex justify-between items-start mb-4">
-                        <div class="flex items-center">
-                            <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center mr-4">
-                                <i class="fas fa-cube text-white"></i>
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-14 h-14 rounded-xl bg-gradient-to-br ${gradient} flex items-center justify-center shadow-lg transform hover:scale-110 transition-transform">
+                                <i class="fas fa-cube text-2xl text-white"></i>
                             </div>
                             <div>
-                                <h3 class="text-xl font-bold">${project.name}</h3>
-                                ${getStatusBadge(status)}
+                                <h3 class="text-xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">${project.name}</h3>
+                                <div class="mt-1">${getStatusBadge(status)}</div>
                             </div>
                         </div>
                     </div>
                     
                     ${project.description ? `
-                        <div class="mb-4 p-3 bg-gray-800 rounded-lg">
-                            <p class="text-gray-300 text-sm">${project.description}</p>
+                        <div class="mb-4 p-4 bg-gray-800/50 rounded-xl border border-gray-700">
+                            <p class="text-gray-300 text-sm leading-relaxed">${project.description}</p>
                         </div>
                     ` : ''}
                     
                     <div class="mb-4">
-                        <label class="text-gray-400 text-sm block mb-1">Project URL</label>
+                        <div class="text-gray-400 text-sm mb-2 flex items-center">
+                            <i class="fas fa-link mr-2"></i>Project URL
+                        </div>
                         ${hasUrl ? `
-                            <a href="${url}" target="_blank" class="text-blue-400 hover:text-blue-300 break-words block truncate" title="${url}">
-                                <i class="fas fa-link mr-1 text-xs"></i>${url}
+                            <a href="${url}" target="_blank" class="text-blue-400 hover:text-blue-300 break-words block truncate bg-gray-800/50 p-3 rounded-lg border border-gray-700 hover:border-blue-500 transition-all group">
+                                <i class="fas fa-external-link-alt mr-2 text-xs"></i>
+                                <span class="group-hover:underline">${url}</span>
                             </a>
                         ` : `
-                            <span class="text-gray-500 italic">
-                                <i class="fas fa-unlink mr-1 text-xs"></i>No URL available
+                            <span class="text-gray-500 italic bg-gray-800/50 p-3 rounded-lg block border border-gray-700">
+                                <i class="fas fa-unlink mr-2"></i>No URL available
                             </span>
                         `}
                     </div>
                     
                     ${hasCreds ? `
                         <div class="mb-4">
-                            <label class="text-gray-400 text-sm block mb-2">Demo Credentials</label>
-                            <div class="bg-gray-800 rounded-lg p-3">
+                            <div class="text-gray-400 text-sm mb-2 flex items-center">
+                                <i class="fas fa-key mr-2"></i>Demo Credentials
+                            </div>
+                            <div class="bg-gray-800/50 rounded-xl p-3 border border-gray-700">
                                 ${renderCredentialFields(project.credentials)}
                             </div>
                         </div>
                     ` : `
                         <div class="mb-4">
-                            <label class="text-gray-400 text-sm block mb-2">Credentials</label>
-                            <div class="bg-gray-800 rounded-lg p-3 text-center">
-                                <span class="text-gray-500 italic text-sm">
-                                    <i class="fas fa-lock-open mr-1"></i>No credentials required
+                            <div class="text-gray-400 text-sm mb-2 flex items-center">
+                                <i class="fas fa-lock-open mr-2"></i>Access
+                            </div>
+                            <div class="bg-gray-800/50 rounded-xl p-4 text-center border border-gray-700">
+                                <span class="text-gray-400 italic text-sm">
+                                    <i class="fas fa-globe mr-1"></i>Open access - no credentials needed
                                 </span>
                             </div>
                         </div>
@@ -369,25 +739,27 @@
                     <div class="flex space-x-3">
                         ${hasUrl ? `
                             <a href="${url}" target="_blank" 
-                               class="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-center py-2 px-4 rounded-lg transition-colors flex items-center justify-center">
-                                <i class="fas fa-external-link-alt mr-2"></i>Visit Project
+                               class="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-center py-3 px-4 rounded-xl transition-all transform hover:scale-105 flex items-center justify-center gap-2">
+                                <i class="fas fa-external-link-alt"></i>
+                                <span>Launch Project</span>
                             </a>
                         ` : `
                             <button disabled
-                                    class="flex-1 btn-disabled text-center py-2 px-4 rounded-lg flex items-center justify-center">
-                                <i class="fas fa-external-link-alt mr-2"></i>Visit Project
+                                    class="flex-1 bg-gray-700 text-gray-400 cursor-not-allowed text-center py-3 px-4 rounded-xl flex items-center justify-center gap-2 opacity-50">
+                                <i class="fas fa-external-link-alt"></i>
+                                <span>Unavailable</span>
                             </button>
                         `}
                         
                         ${hasCreds ? `
-                            <button onclick="copyCredentials(${JSON.stringify(project.credentials)}, '${project.name}')" 
-                                    class="bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded-lg transition-colors flex items-center justify-center"
+                            <button onclick='copyCredentials(${JSON.stringify(project.credentials)}, "${project.name}")' 
+                                    class="bg-gray-700 hover:bg-gray-600 text-white py-3 px-4 rounded-xl transition-all transform hover:scale-105 flex items-center justify-center group"
                                     title="Copy credentials">
-                                <i class="fas fa-copy"></i>
+                                <i class="fas fa-copy group-hover:scale-110 transition-transform"></i>
                             </button>
                         ` : `
                             <button disabled
-                                    class="btn-disabled py-2 px-4 rounded-lg flex items-center justify-center"
+                                    class="bg-gray-700 text-gray-400 cursor-not-allowed py-3 px-4 rounded-xl opacity-50"
                                     title="No credentials to copy">
                                 <i class="fas fa-copy"></i>
                             </button>
@@ -401,25 +773,22 @@
             projectsGrid.classList.remove('hidden');
         }
 
-        // Copy credentials to clipboard
         function copyCredentials(credentials, projectName) {
             const credentialText = Object.entries(credentials)
                 .map(([field, value]) => `${field.charAt(0).toUpperCase() + field.slice(1)}: ${value}`)
                 .join('\n');
             
-            const text = `Project: ${projectName}\n${credentialText}`;
+            const text = `🚀 Project: ${projectName}\n🔑 Credentials:\n${credentialText}`;
             
             navigator.clipboard.writeText(text).then(() => {
-                showNotification('Credentials copied to clipboard!', 'success');
+                showNotification('✅ Credentials copied to clipboard!', 'success');
             }).catch(err => {
                 console.error('Failed to copy: ', err);
-                showNotification('Failed to copy credentials', 'error');
+                showNotification('❌ Failed to copy credentials', 'error');
             });
         }
 
-        // Show notification
         function showNotification(message, type) {
-            // Remove existing notification
             const existingNotification = document.getElementById('copyNotification');
             if (existingNotification) {
                 existingNotification.remove();
@@ -427,29 +796,58 @@
 
             const notification = document.createElement('div');
             notification.id = 'copyNotification';
-            notification.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg transition-all duration-300 ${
-                type === 'success' ? 'bg-green-600' : 'bg-red-600'
+            notification.className = `fixed top-6 right-6 z-50 p-4 rounded-2xl shadow-2xl transition-all duration-500 transform translate-x-0 ${
+                type === 'success' ? 'bg-gradient-to-r from-green-600 to-emerald-600' : 'bg-gradient-to-r from-red-600 to-pink-600'
             }`;
+            notification.style.animation = 'slideIn 0.3s ease-out';
             notification.innerHTML = `
-                <div class="flex items-center">
-                    <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'} mr-2"></i>
-                    <span>${message}</span>
+                <div class="flex items-center gap-3">
+                    <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'} text-2xl"></i>
+                    <span class="font-medium">${message}</span>
                 </div>
             `;
 
             document.body.appendChild(notification);
 
-            // Auto remove after 3 seconds
             setTimeout(() => {
+                notification.style.transform = 'translateX(400px)';
                 notification.style.opacity = '0';
-                notification.style.transform = 'translateX(100%)';
-                setTimeout(() => notification.remove(), 300);
+                setTimeout(() => notification.remove(), 500);
             }, 3000);
-        }
-
-        // Initialize when page loads
+        }        
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from {
+                    transform: translateX(400px);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+            
+            .filter-chip {
+                background: rgba(255, 255, 255, 0.05);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                color: #9ca3af;
+            }
+            
+            .filter-chip:hover {
+                background: rgba(59, 130, 246, 0.2);
+                border-color: rgba(59, 130, 246, 0.3);
+                color: white;
+            }
+            
+            .filter-chip.active {
+                background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+                border-color: transparent;
+                color: white;
+            }
+        `;
+        document.head.appendChild(style);
         document.addEventListener('DOMContentLoaded', loadProjects);
-
         setInterval(loadProjects, 5 * 60 * 1000);
     </script>
 </body>

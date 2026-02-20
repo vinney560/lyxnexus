@@ -961,7 +961,35 @@ class Payment(db.Model):
     
     # Foreign Key
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-# ======================================================    
+# ====================================================== 
+# Exam Result Model
+class ExamResult(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    unit_code = db.Column(db.String(20))
+    unit_name = db.Column(db.String(100))
+    marks = db.Column(db.Float)
+    grade = db.Column(db.String(2))
+    teacher_name = db.Column(db.String(100))
+    semester = db.Column(db.Integer)  # 1 or 2
+    year = db.Column(db.Integer)      # 1-4
+    exam_date = db.Column(db.String(20), default=lambda: datetime.now().strftime('%Y-%m-%d'))
+    verified_date = db.Column(db.String(20), default=lambda: datetime.now().strftime('%Y-%m-%d'))
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'unit_code': self.unit_code,
+            'unit_name': self.unit_name,
+            'marks': self.marks,
+            'grade': self.grade,
+            'teacher_name': self.teacher_name,
+            'semester': self.semester,
+            'year': self.year,
+            'exam_date': self.exam_date,
+            'verified_date': self.verified_date
+        }
+#=============================================   
 from werkzeug.security import generate_password_hash
 # Master key for Admin Access  
 def initialize_operator_and_admin_code():
@@ -11235,6 +11263,119 @@ def admin_stats():
             "success": False,
             "message": str(e)
         }), 500
+
+# ============== Exam Result ==============
+# Grade calculator
+def calculate_grade(marks):
+    if marks >= 70:
+        return 'A'
+    elif marks >= 60:
+        return 'B'
+    elif marks >= 50:
+        return 'C'
+    elif marks >= 40:
+        return 'D'
+    else:
+        return 'E'
+
+# Grade point for GPA
+def grade_to_point(grade):
+    points = {'A': 4.0, 'B': 3.0, 'C': 2.0, 'D': 1.0, 'E': 0.0}
+    return points.get(grade, 0.0)
+
+@app.route('/exam-tracker')
+def exam_tracker():
+    return render_template('exam_tracker.html', year=datetime.now().year)
+
+# API: Get all exams of current user
+@app.route('/api/exams')
+def get_exams():
+    # Get filter parameters
+    semester = request.args.get('semester')
+    year = request.args.get('year')
+    search = request.args.get('search', '').lower()
+    
+    # Base query
+    query = ExamResult.query.filter_by(user_id=current_user.id)
+    
+    # Apply filters
+    if semester:
+        query = query.filter_by(semester=int(semester))
+    if year:
+        query = query.filter_by(year=int(year))
+    
+    # Get all results
+    exams = query.all()
+    
+    # Apply search filter (client-side or server-side)
+    if search:
+        exams = [e for e in exams if search in e.unit_code.lower() 
+                 or search in e.unit_name.lower() 
+                 or search in e.teacher_name.lower()]
+    
+    return jsonify([e.to_dict() for e in exams])
+
+# API: Get GPA statistics
+@app.route('/api/gpa')
+def get_gpa():
+    semester = request.args.get('semester')
+    year = request.args.get('year')
+    
+    query = ExamResult.query.filter_by(user_id=current_user.id)
+    if semester:
+        query = query.filter_by(semester=int(semester))
+    if year:
+        query = query.filter_by(year=int(year))
+    
+    exams = query.all()
+    
+    if not exams:
+        return jsonify({'gpa': 0, 'total_units': 0})
+    
+    total_points = sum(grade_to_point(e.grade) for e in exams)
+    gpa = round(total_points / len(exams), 2)
+    
+    return jsonify({
+        'gpa': gpa,
+        'total_units': len(exams),
+        'semester': semester,
+        'year': year
+    })
+
+# API: Add new exam
+@app.route('/api/exams', methods=['POST'])
+def add_exam_result():
+    data = request.json
+    
+    # Calculate grade from marks
+    grade = calculate_grade(data['marks'])
+    
+    # Create new exam record
+    exam = ExamResult(
+        id=gen_unique_id(ExamResult),
+        user_id=current_user.id,
+        unit_code=data['unit_code'],
+        unit_name=data['unit_name'],
+        marks=data['marks'],
+        grade=grade,
+        teacher_name=data['teacher_name'],
+        semester=data['semester'],
+        year=data['year']
+    )
+    
+    db.session.add(exam)
+    db.session.commit()
+    
+    return jsonify({'success': True, 'exam': exam.to_dict()})
+
+# API: Delete exam
+@app.route('/api/exams/<int:exam_id>', methods=['DELETE'])
+def delete_exam_result(exam_id):
+    exam = ExamResult.query.get_or_404(exam_id)
+    db.session.delete(exam)
+    db.session.commit()
+    return jsonify({'success': True})
+
 #==========================================
 # Error Handlers
 #==========================================
