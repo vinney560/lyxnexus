@@ -1628,6 +1628,11 @@ def sitemap():
     <priority>1.0</priority>
   </url>
   <url>
+    <loc>{base_url}/login</loc>
+    <lastmod>{current_date}</lastmod>
+    <priority>1.0</priority>
+  </url>
+  <url>
     <loc>{base_url}/developer</loc>
     <lastmod>{current_date}</lastmod>
     <priority>0.9</priority>
@@ -1654,6 +1659,11 @@ def sitemap():
   </url>
   <url>
     <loc>{base_url}/terms</loc>
+    <lastmod>{current_date}</lastmod>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>{base_url}/navigation-guide</loc>
     <lastmod>{current_date}</lastmod>
     <priority>1.0</priority>
   </url>
