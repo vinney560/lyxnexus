@@ -13,7 +13,7 @@ projects = {
         },
         'status': 'active'
     },
-    'https://viewtv.viewtv.gt.tc': {
+    'https://viewstream-1.onrender.com': {
         'name': 'View Tv',
         'credentials': {
             'email': 'vinneyjoy1@gmail.com',

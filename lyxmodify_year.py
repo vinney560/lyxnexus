@@ -27,7 +27,7 @@ def admin_required(f):
                 ), 403
             abort(403)
         return f(*args, **kwargs)
-    return decorator_admin  # REMOVED THE () - THIS WAS THE MAIN ISSUE
+    return decorator_admin
     
 # Serve the Template at /admin/year/    
 @modify_year_bp.route('/')

@@ -818,7 +818,7 @@
                         <i class="fas fa-sign-out-alt"></i>
                         Exit Admin Mode
                     </a>
-                    <a href="/main-page" class="btn btn-secondary">
+                    <a href="/dashboard" class="btn btn-secondary">
                         <i class="fas fa-user"></i>
                         User Dashboard
                     </a>
@@ -846,6 +846,14 @@
                 <div class="status-item">
                     <div class="status-indicator active"></div>
                     <span class="status-text">API: RESPONSIVE</span>
+                </div>
+                <div class="status-item">
+                    <div class="status-indicator active"></div>
+                    <span class="status-text">Karma AI: Active</span>
+                </div>
+                <div class="status-item">
+                    <div class="status-indicator active"></div>
+                    <span class="status-text">Gemini AI: Active</span>
                 </div>
                 <div class="status-item">
                     <span class="status-text" id="currentTime">Loading...</span>
@@ -914,13 +922,10 @@
 
         // Initialize stats with dynamic values
         function initializeStats() {
-            // Simulate API calls to get real data
-            setTimeout(() => {
-                document.getElementById('totalUsers').textContent = '1,247';
-                document.getElementById('avgYear').textContent = '2.8';
-                document.getElementById('adminsCount').textContent = '18';
-                document.getElementById('onlineUsers').textContent = '893';
-            }, 1000);
+            document.getElementById('totalUsers').textContent = '1,247';
+            document.getElementById('avgYear').textContent = '2.8';
+            document.getElementById('adminsCount').textContent = '18';
+            document.getElementById('onlineUsers').textContent = '893';
         }
 
         // Start real-time updates
