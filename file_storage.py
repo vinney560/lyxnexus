@@ -8,7 +8,7 @@ import cloudinary.api
 import requests
 from sqlalchemy.exc import IntegrityError
 from app import db, UploadedFile, FileTag
-from datetime import timedelta
+from datetime import timedelta, timezone
 import time
 import os
 from functools import wraps
@@ -433,6 +433,7 @@ def delete_file(file_id):
         db.session.rollback()
         print(f"Database deletion error: {e}")
         return jsonify({'error': str(e)}), 500
+    
 @storage_bp.route('/api/files/search')
 @login_required
 @payment_required
@@ -471,7 +472,7 @@ def get_stats():
     
     total_size = db.session.query(db.func.sum(UploadedFile.file_size)).scalar() or 0
     
-    week_ago = datetime.utcnow().timestamp() - (7 * 24 * 60 * 60)
+    week_ago = datetime.now(timezone.utc).timestamp() - (7 * 24 * 60 * 60)
     recent_uploads = UploadedFile.query.filter(
         db.func.strftime('%s', UploadedFile.created_at) > week_ago
     ).count()

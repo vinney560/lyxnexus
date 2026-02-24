@@ -17,7 +17,7 @@ from sqlalchemy.pool import QueuePool
 from sqlalchemy.orm import sessionmaker
 from flask_cors import CORS
 from datetime import timedelta, datetime, date, timezone
-from flask_compress import Compress # I think for more speed
+from flask_compress import Compress
 from dotenv import load_dotenv # Loads environments where keys are safly stored 
 import traceback
 import uuid
@@ -205,7 +205,7 @@ Session(app)
 
 """Get Nai tm in Str"""
 def nairobi_time():
-    return (datetime.utcnow() + timedelta(hours=3)).strftime('%Y-%m-%d %H:%M:%S')
+    return (datetime.now(timezone.utc) + timedelta(hours=3)).strftime('%Y-%m-%d %H:%M:%S')
 
 # =========================================
 # USER MODEL
@@ -733,13 +733,13 @@ class Share(db.Model):
     share_id = db.Column(db.String(36), unique=True, nullable=False)
     owner_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     used = db.Column(db.Boolean, default=False)
-    created_at = db.Column(db.DateTime, default=(datetime.utcnow() + timedelta(hours=3)), nullable=False)
+    created_at = db.Column(db.DateTime, default=(datetime.now(timezone.utc) + timedelta(hours=3)), nullable=False)
 
     owner = db.relationship('User', backref='shares')
 
     def is_expired(self):
         from datetime import timedelta, datetime
-        return (datetime.utcnow() + timedelta(hours=3)) > self.created_at + timedelta(hours=2)
+        return (datetime.now(timezone.utc) + timedelta(hours=3)) > self.created_at + timedelta(hours=2)
 # =========================================
 # NOTIFICATION MODELS
 # =========================================
@@ -929,8 +929,8 @@ class Player(db.Model):
     challenge_code = db.Column(db.String(10))
     code_expires_at = db.Column(db.DateTime)
     is_admin = db.Column(db.Boolean, default=False)
-    created_at = db.Column(db.DateTime, default=lambda: datetime.utcnow())
-    last_active = db.Column(db.DateTime, default=lambda: datetime.utcnow())
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    last_active = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     
     def set_password(self, password):
         self.password_hash = password
@@ -944,7 +944,7 @@ class Challenge(db.Model):
     target_id = db.Column(db.Integer, db.ForeignKey('player.id'), nullable=False)
     code = db.Column(db.String(10))
     status = db.Column(db.String(20), default='pending')
-    created_at = db.Column(db.DateTime, default=lambda: datetime.utcnow())
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     
     challenger = db.relationship('Player', foreign_keys=[challenger_id])
     target = db.relationship('Player', foreign_keys=[target_id])
@@ -1093,7 +1093,7 @@ from sqlalchemy import func, or_
 
 def cleanup_old_visits(max_visits_per_user=15, days_old=30):
     try:
-        cutoff_time = datetime.utcnow() - timedelta(days=days_old)
+        cutoff_time = datetime.now(timezone.utc) - timedelta(days=days_old)
         
         print(f"Starting cleanup: Deleting visits older than {days_old} days and keeping max {max_visits_per_user} per user...")
         
@@ -1156,7 +1156,7 @@ def send_notification(user_id, title, message):
         'title': title,
         'message': message,
         'type': 'info',
-        'timestamp': datetime.utcnow().isoformat()
+        'timestamp': datetime.now(timezone.utc).isoformat()
     }
 
     socketio.emit('push_notification', notification_data, room=f'user_{user_id}')
@@ -1255,6 +1255,11 @@ def clone_database_robust():
 @admin_required
 def clone_db_page():
     """Render the database cloning page"""
+    print(f'''
+Visited: [CLONE PAGE]
+Time: [ {datetime.now(timezone(timedelta(hours=3))).strftime('%d/%m/%Y %H:%M:%S')} ]
+Admin: [ {current_user.id} | {current_user.username} ]
+''')
     return render_template("clone-db.html", year=_year())
 
 # API Access to DB Clone Feature
@@ -1333,7 +1338,7 @@ atexit.register(lambda: scheduler.shutdown(wait=False))
 """Closes any Ideal Conn to prevent Max conn Limit"""
 def auto_close_sessions():
     print('=' * 70)
-    start_time = datetime.utcnow()
+    start_time = datetime.now(timezone.utc)
     print(f"[{start_time.strftime('%Y-%m-%d %H:%M:%S UTC')}] Starting database session cleanup...")
 
     try:
@@ -1392,7 +1397,7 @@ def auto_close_sessions():
             except Exception as e:
                 print(f"ℹ️ Final count failed: {e}")
 
-        end_time = datetime.utcnow()
+        end_time = datetime.now(timezone.utc)
         elapsed = (end_time - start_time).total_seconds()
 
         # Summary
@@ -1405,7 +1410,7 @@ def auto_close_sessions():
         print("#" * 70)
 
     except Exception as e:
-        now = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC')
+        now = datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')
         print(f"❌ [{now}] Error during cleanup: {e}")
         print("#" * 70)
 
@@ -1421,7 +1426,7 @@ with app.app_context():
         )
         scheduler.start()
         atexit.register(lambda: scheduler.shutdown(wait=False))
-        now = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC')
+        now = datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')
         print(f"[{now}] DB session auto-cleaner started (runs every 1 minutes).")
         
     except Exception as e:
@@ -1437,7 +1442,7 @@ from datetime import datetime, timedelta
 """CLeans Old Announcement on accordance of its life (Saves DB Storage)"""
 def delete_old_announcements():
     with app.app_context():
-        now = datetime.utcnow() + timedelta(hours=3)
+        now = datetime.now(timezone.utc) + timedelta(hours=3)
         cutoff = now - timedelta(days=30)
         print(f"Current time (UTC+3): {now}")
         print(f"Deleting announcements created before: {cutoff}")
@@ -1490,7 +1495,6 @@ def master_cleanup():
             
         except Exception as e:
             print(f"[ERROR] Master cleanup failed: {e}")
-            import traceback
             traceback.print_exc()
 
 def cleanup_online_users(current_time):
@@ -1542,7 +1546,7 @@ with app.app_context():
         
         atexit.register(lambda: master_scheduler.shutdown(wait=False))
         
-        now = (datetime.utcnow() + timedelta(hours=3)).strftime('%Y-%m-%d %H:%M:%S')
+        now = (datetime.now(timezone.utc) + timedelta(hours=3)).strftime('%Y-%m-%d %H:%M:%S')
         print(f"[{now}] Single master scheduler started with all jobs")
         
     except Exception as e:
@@ -1567,7 +1571,7 @@ def get_timetable_and_notify():
     """Check for upcoming classes and send webpush notifications once per class."""
     with app.app_context():
         try:
-            now = datetime.utcnow() + timedelta(hours=3)  # Nairobi time
+            now = datetime.now(timezone.utc) + timedelta(hours=3)  # Nairobi time
             current_day = now.strftime("%A")
 
             # Fetch today's timetable
@@ -1590,7 +1594,7 @@ def get_timetable_and_notify():
                         ),
                         'type': 'Upcoming Class',
                         'timetable_id': timetable.id,
-                        'timestamp': datetime.utcnow().isoformat()
+                        'timestamp': datetime.now(timezone.utc).isoformat()
                     }
                     send_webpush(data)
 
@@ -1624,7 +1628,7 @@ with app.app_context():
         # Ensure scheduler shutdown on exit
         atexit.register(lambda: scheduler.shutdown(wait=False))
 
-        now = (datetime.utcnow() + timedelta(hours=3)).strftime('%Y-%m-%d %H:%M:%S UTC')
+        now = (datetime.now(timezone.utc) + timedelta(hours=3)).strftime('%Y-%m-%d %H:%M:%S UTC')
         print(f"[{now}] Upcoming class notifier started (runs every 10 minutes).")
 
     except Exception as e:
@@ -2373,6 +2377,11 @@ from werkzeug.security import generate_password_hash, check_password_hash
 @login_required
 @admin_required
 def secret_code():
+    print(f'''
+Visited: [ADMIN SECRET CODE PAGE]
+Time: [ {datetime.now(timezone(timedelta(hours=3))).strftime('%d/%m/%Y %H:%M:%S')} ]
+Admin: [ {current_user.id} | {current_user.username} ]
+''')
     # Get the current admin code
     admin_code_record = AdminCode.query.first()
     
@@ -2412,6 +2421,11 @@ def secret_code():
 def operator_secret_code():
     if not current_user.year == 5:
         abort(403)
+    print(f'''
+Visited: [OPERATOR SECRET CODE PAGE]
+Time: [ {datetime.now(timezone(timedelta(hours=3))).strftime('%d/%m/%Y %H:%M:%S')} ]
+Admin: [ {current_user.id} | {current_user.username} ]
+''')
     # Get the current operator code
     operator_code_record = OperatorCode.query.first()
     
@@ -2983,7 +2997,7 @@ def get_notifications():
         from datetime import datetime, timedelta
         
         # Use consistent time comparison
-        current_time = datetime.utcnow() + timedelta(hours=3)
+        current_time = datetime.now(timezone.utc) + timedelta(hours=3)
         
         all_notifications = Notification.query.all()
         
@@ -3065,7 +3079,6 @@ def get_notifications():
         
     except Exception as e:
         print(Fore.RED + f"[ERROR] in /api/notify: {str(e)}")
-        import traceback
         traceback.print_exc()
         return jsonify({'error': str(e)}), 500
     
@@ -3081,7 +3094,7 @@ def mark_all_notifications_read():
         
         for user_notif in user_notifications:
             user_notif.is_read = True
-            user_notif.read_at = datetime.utcnow() + timedelta(hours=3)
+            user_notif.read_at = datetime.now(timezone.utc) + timedelta(hours=3)
         
         db.session.commit()
         
@@ -3124,7 +3137,11 @@ def search_users():
 @admin_required
 def create_notification():
     """Create a new notification with specific user targeting"""
-    
+    print(f'''
+Visited: [CREATE NOTIFICATION PAGE]
+Time: [ {datetime.now(timezone(timedelta(hours=3))).strftime('%d/%m/%Y %H:%M:%S')} ]
+Admin: [ {current_user.id} | {current_user.username} ]
+''')
     try:
         data = request.get_json()
         
@@ -3143,7 +3160,7 @@ def create_notification():
             notification.expires_at = nairobi_time + timedelta(hours=3)
         else:
             # Default to 7 days from now in UTC
-            notification.expires_at = datetime.utcnow() + timedelta(days=7)
+            notification.expires_at = datetime.now(timezone.utc) + timedelta(days=7)
         
         db.session.add(notification)
         db.session.flush()
@@ -3161,7 +3178,7 @@ def create_notification():
         db.session.commit()
         
         # Debug output
-        nairobi_now = datetime.utcnow() + timedelta(hours=3)
+        nairobi_now = datetime.now(timezone.utc) + timedelta(hours=3)
         return jsonify({
             'success': True,
             'message': 'Notification created successfully',
@@ -3184,7 +3201,11 @@ def create_notification():
 @login_required
 @admin_required
 def admin_notifications():
-    
+    print(f'''
+Visited: [NOTIFICATION PAGE]
+Time: [ {datetime.now(timezone(timedelta(hours=3))).strftime('%d/%m/%Y %H:%M:%S')} ]
+Admin: [ {current_user.id} | {current_user.username} ]
+''')
     notifications = Notification.query.order_by(Notification.created_at.desc()).all()
     
     # Convert SQLAlchemy objects to serializable data
@@ -3249,7 +3270,11 @@ def update_notification(notification_id):
 @admin_required
 def delete_notification(notification_id):
     """Delete a notification"""
-    
+    print(f'''
+Visited: [DELETE NOTIFICATION PAGE]
+Time: [ {datetime.now(timezone(timedelta(hours=3))).strftime('%d/%m/%Y %H:%M:%S')} ]
+Admin: [ {current_user.id} | {current_user.username} ]
+''')
     try:
         notification = Notification.query.get_or_404(notification_id)
         db.session.delete(notification)
@@ -3343,6 +3368,11 @@ from sqlalchemy.exc import IntegrityError
 @admin_required
 def admin_edit_user(user_id):
     """Admin edit user details page"""
+    print(f'''
+Visited: [EDIT USER ID: {user_id} PAGE]
+Time: [ {datetime.now(timezone(timedelta(hours=3))).strftime('%d/%m/%Y %H:%M:%S')} ]
+Admin: [ {current_user.id} | {current_user.username} ]
+''')
     if not current_user.year == 5:
         flash('Operator access required', 'error')
         return redirect(url_for('admin_users'))
@@ -3360,6 +3390,11 @@ def admin_edit_user(user_id):
 @admin_required
 def api_update_user(user_id):
     """API endpoint to update user details"""
+    print(f'''
+Visited: [UPDATE USER ID: {user_id} PAGE]
+Time: [ {datetime.now(timezone(timedelta(hours=3))).strftime('%d/%m/%Y %H:%M:%S')} ]
+Admin: [ {current_user.id} | {current_user.username} ]
+''')
     if not current_user.year == 5:
         return jsonify({'error': 'Unauthorized'}), 403
     
@@ -3492,6 +3527,11 @@ import json
 @login_required
 @admin_required
 def ai_chat():
+    print(f'''
+Visited: [ADMIN AI PAGE]
+Time: [ {datetime.now(timezone(timedelta(hours=3))).strftime('%d/%m/%Y %H:%M:%S')} ]
+Admin: [ {current_user.id} | {current_user.username} ]
+''')
     return render_template('ai_chat.html', year=_year())
 
 # Update the AI chat send route to handle write operations
@@ -3767,7 +3807,7 @@ def create_ai_announcement(data, current_user):
             'message': f'New announcement: {title}',
             'type': 'announcement',
             'announcement_id': announcement.id,
-            'timestamp': datetime.utcnow().isoformat()
+            'timestamp': datetime.now(timezone.utc).isoformat()
         })
         
         return True, f"Announcement '{title}' created successfully", {
@@ -3869,7 +3909,7 @@ def create_ai_assignment(data, current_user):
             'message': f'New assignment: {title}',
             'type': 'assignment',
             'assignment_id': assignment.id,
-            'timestamp': datetime.utcnow().isoformat()
+            'timestamp': datetime.now(timezone.utc).isoformat()
         })
         
         return True, f"Assignment '{title}' created successfully", {
@@ -3995,7 +4035,7 @@ def send_ai_notification(data, current_user):
                 'title': title,
                 'message': message,
                 'type': 'info',
-                'timestamp': datetime.utcnow().isoformat()
+                'timestamp': datetime.now(timezone.utc).isoformat()
             })
             return True, "Notification broadcast to all users", None
             
@@ -5256,6 +5296,11 @@ def developer():
 @login_required
 @admin_required
 def admin_page():
+    print(f'''
+Visited: [ADMIN PAGE]
+Time: [ {datetime.now(timezone(timedelta(hours=3))).strftime('%d/%m/%Y %H:%M:%S')} ]
+Admin: [ {current_user.id} | {current_user.username} ]
+''')
     topics = Topic.query.all()
     return render_template('admin.html', year=_year(), topics=topics)
 #--------------------------------------------------------------------
@@ -5263,6 +5308,11 @@ def admin_page():
 @login_required
 @admin_required
 def admin_users():
+    print(f'''
+Visited: [ADMIN USERS MNGMNT PAGE]
+Time: [ {datetime.now(timezone(timedelta(hours=3))).strftime('%d/%m/%Y %H:%M:%S')} ]
+Admin: [ {current_user.id} | {current_user.username} ]
+''')
     return render_template('admin_users.html')
 #-----------------------------------------------------------------
 @app.route('/portfolio')
@@ -5288,6 +5338,11 @@ def fee_info():
 @login_required
 @admin_required
 def operator_page():
+    print(f'''
+Visited: [OPERATORS PAGE]
+Time: [ {datetime.now(timezone(timedelta(hours=3))).strftime('%d/%m/%Y %H:%M:%S')} ]
+Admin: [ {current_user.id} | {current_user.username} ]
+''')
     if  not current_user.year == 5:
         abort(403)
     return render_template('operator_page.html')
@@ -5528,6 +5583,11 @@ notificationapi.init(
 @admin_required
 @login_required
 def serve_call():
+    print(f'''
+Visited: [PHONE PAGE]
+Time: [ {datetime.now(timezone(timedelta(hours=3))).strftime('%d/%m/%Y %H:%M:%S')} ]
+Admin: [ {current_user.id} | {current_user.username} ]
+''')
     return render_template('call.html')
 
 @app.route('/send-notification', methods=['POST'])
@@ -5825,6 +5885,11 @@ def get_file_count():
 @admin_required
 def upload_file():
     """Upload a new file"""
+    print(f'''
+Visited: [UPLOAD FILE TO FILE MODEL PAGE]
+Time: [ {datetime.now(timezone(timedelta(hours=3))).strftime('%d/%m/%Y %H:%M:%S')} ]
+Admin: [ {current_user.id} | {current_user.username} ]
+''')
     if 'file' not in request.files:
         return jsonify({'error': 'No file provided'}), 400
     
@@ -6018,7 +6083,7 @@ def download_file(id):
             share_id=share_uuid,
             owner_id=user_id,
             used=False,
-            created_at=datetime.utcnow() + timedelta(hours=3)
+            created_at=datetime.now(timezone.utc) + timedelta(hours=3)
         )
         db.session.add(new_share)
         db.session.commit()
@@ -6042,7 +6107,7 @@ def access_share(share_id):
         ), 404
 
     # Check if link expired
-    if datetime.utcnow() > share.created_at + timedelta(hours=LINK_EXPIRY_HOURS):
+    if datetime.now(timezone.utc) > share.created_at + timedelta(hours=LINK_EXPIRY_HOURS):
         db.session.delete(share)
         db.session.commit()
         return render_template(
@@ -6071,6 +6136,11 @@ def access_share(share_id):
 @login_required
 @admin_required
 def view_shares():
+    print(f'''
+Visited: [SHARES PAGE]
+Time: [ {datetime.now(timezone(timedelta(hours=3))).strftime('%d/%m/%Y %H:%M:%S')} ]
+Admin: [ {current_user.id} | {current_user.username} ]
+''')
     return render_template('admin_shares.html')
 
 @app.route('/admin/shares/data')
@@ -6135,7 +6205,11 @@ def modify_share(id):
 def delete_file(id):
     """Delete a file"""
     file = File.query.get_or_404(id)
-
+    print(f'''
+Visited: [DELETE FILE ON FILE MODEL PAGE]
+Time: [ {datetime.now(timezone(timedelta(hours=3))).strftime('%d/%m/%Y %H:%M:%S')} ]
+Admin: [ {current_user.id} | {current_user.username} ]
+''')
     try:
         db.session.delete(file)
         db.session.commit()
@@ -6615,7 +6689,7 @@ def create_private_room():
             'hashed_key': hashed_key,
             'creator_id': current_user.id,
             'members': [current_user.id],
-            'created_at': datetime.utcnow().isoformat()
+            'created_at': datetime.now(timezone.utc).isoformat()
         }
         
         return jsonify({'success': True, 'room_name': room_name})
@@ -6666,7 +6740,7 @@ def join_private_room():
 
 def cleanup_disconnected_users():
     """Remove users who haven't been seen for more than 30 seconds"""
-    current_time = datetime.utcnow() + timedelta(hours=3)
+    current_time = datetime.now(timezone.utc) + timedelta(hours=3)
     disconnected_users = []
     
     for user_id, user_data in online_users.items():
@@ -6698,7 +6772,7 @@ def update_user_presence(user_id, username, is_admin=False, room='general'):
         'username': username,
         'is_admin': is_admin,
         'current_room': room,
-        'last_seen': (datetime.utcnow() + timedelta(hours=3)).isoformat()
+        'last_seen': (datetime.now(timezone.utc) + timedelta(hours=3)).isoformat()
     }
     
     room_users = []
@@ -7090,6 +7164,7 @@ def handle_get_messages(data):
             })
             
         except Exception as e:
+            db.session.rollback()
             emit('messages_error', {
                 'error': str(e),
                 'room': room
@@ -7378,10 +7453,15 @@ def get_user_statistics():
 @admin_required
 def delete_user(user_id):
     user = User.query.get_or_404(user_id)
-
+    
     if user.id == current_user.id:
         return jsonify({'error': 'Cannot delete your own account'}), 400
-
+    
+    print(f'''
+Visited: [DELETE USER ID {user.id} PAGE]
+Time: [ {datetime.now(timezone(timedelta(hours=3))).strftime('%d/%m/%Y %H:%M:%S')} ]
+Admin: [ {current_user.id} | {current_user.username} ]
+''')
     try:
         # =====================================================
         # 1️. Delete MessageReads for messages SENT BY this user
@@ -7467,6 +7547,12 @@ def toggle_admin(user_id):
     if user.id == current_user.id:
         return jsonify({'error': 'Cannot modify your own admin status'}), 400
     
+    print(f'''
+Visited: [CHANGE USER ID {user.id} ADMIN PAGE]
+Time: [ {datetime.now(timezone(timedelta(hours=3))).strftime('%d/%m/%Y %H:%M:%S')} ]
+Admin: [ {current_user.id} | {current_user.username} ]
+''')
+    
     user.is_admin = not user.is_admin
     db.session.commit()
     
@@ -7482,7 +7568,12 @@ def toggle_status(user_id):
 
     if user.id == current_user.id:
         return jsonify({'error': 'cannot modify self status'}), 400
-    
+
+    print(f'''
+Visited: [CHANGE USER ID {user.id} STATUS PAGE]
+Time: [ {datetime.now(timezone(timedelta(hours=3))).strftime('%d/%m/%Y %H:%M:%S')} ]
+Admin: [ {current_user.id} | {current_user.username} ]
+''')    
     user.status = not user.status
     print(Fore.MAGENTA + f"User {user.username} status changed to {user.status}")
     db.session.commit()
@@ -7500,6 +7591,11 @@ def toggle_pay(user_id):
     if user.id == current_user.id:
         return jsonify({'error': 'cannot modify self pay status'}), 400
     
+    print(f'''
+Visited: [CHANGE USER ID {user.id} PAY PAGE]
+Time: [ {datetime.now(timezone(timedelta(hours=3))).strftime('%d/%m/%Y %H:%M:%S')} ]
+Admin: [ {current_user.id} | {current_user.username} ]
+''')
     user.paid = not user.paid
     print(f"User {user.username} pay changed to {user.paid}")
     db.session.commit()
@@ -7542,6 +7638,7 @@ def get_specified_announcements():
             } for a in announcements]
             return jsonify(result)
         except Exception as e:
+            db.session.rollback()
             app.logger.exception("Failed to fetch announcements")
             return jsonify({'error': 'Failed to fetch announcements'}), 500
     flash("Login required to access this resource!", "error")
@@ -7568,6 +7665,7 @@ def get_announcements():
         } for a in announcements]
         return jsonify(result)
     except Exception as e:
+        db.session.rollback()
         app.logger.exception("Failed to fetch announcements")
         return jsonify({'error': 'Failed to fetch announcements'}), 500
 
@@ -7583,7 +7681,11 @@ def shorten_filename_create(filename, length=17):
 def create_announcement():
     if not current_user.is_admin:
         return jsonify({'error': 'Unauthorized'}), 403
-
+    print(f'''
+Visited: [CREATE ANN PAGE]
+Time: [ {datetime.now(timezone(timedelta(hours=3))).strftime('%d/%m/%Y %H:%M:%S')} ]
+Admin: [ {current_user.id} | {current_user.username} ]
+''')
     title = request.form.get('title', '').strip()
     content = request.form.get('content')
     import json
@@ -7619,7 +7721,7 @@ def create_announcement():
         'message': f'announcement created: {announcement.title}',
         'type': 'announcement',
         'announcement_id': announcement.id,
-        'timestamp': datetime.utcnow().isoformat()
+        'timestamp': datetime.now(timezone.utc).isoformat()
     }) 
 
     # Prepare notification payload once
@@ -7628,7 +7730,7 @@ def create_announcement():
         'message': f'New announcement: {announcement.title}',
         'type': 'announcement',
         'announcement_id': announcement.id,
-        'timestamp': datetime.utcnow().isoformat()
+        'timestamp': datetime.now(timezone.utc).isoformat()
     }
 
     # Mirror to browser push
@@ -7675,14 +7777,14 @@ def update_announcement(id):
         'message': f'announcement edited: {announcement.title}',
         'type': 'announcement',
         'announcement_id': announcement.id,
-        'timestamp': datetime.utcnow().isoformat()
+        'timestamp': datetime.now(timezone.utc).isoformat()
     })   
     data = {
         'title': 'Announcement Edited',
         'message': f'announcement edited: {announcement.title}',
         'type': 'announcement', 
         'announcement_id': announcement.id,
-        'timestamp': datetime.utcnow().isoformat()
+        'timestamp': datetime.now(timezone.utc).isoformat()
     }
     send_webpush(data)
     #whatsapp_bulk(f"Announcement edited: *{announcement.title}*\n\n"
@@ -7699,6 +7801,12 @@ def delete_announcement(id):
     if not current_user.is_admin:
         return jsonify({'error': 'Unauthorized'}), 403
     
+    print(f'''
+Visited: [DELETE ANN PAGE]
+Time: [ {datetime.now(timezone(timedelta(hours=3))).strftime('%d/%m/%Y %H:%M:%S')} ]
+Admin: [ {current_user.id} | {current_user.username} ]
+''')
+    
     announcement = Announcement.query.get_or_404(id)
     send_notification(
         current_user.id,
@@ -7711,14 +7819,14 @@ def delete_announcement(id):
         'message': f'Announcement was deleted by {current_user.username}',
         'type': 'announcement',
         'announcement_id': announcement.id,
-        'timestamp': datetime.utcnow().isoformat()
+        'timestamp': datetime.now(timezone.utc).isoformat()
     })    
     data = {
         'title': 'Announcement Deleted',
         'message': f'Announcement was deleted by {current_user.username}',
         'type': 'announcement',
         'announcement_id': announcement.id,
-        'timestamp': datetime.utcnow().isoformat()
+        'timestamp': datetime.now(timezone.utc).isoformat()
     }
     db.session.delete(announcement)
     db.session.commit()
@@ -7779,6 +7887,7 @@ def get_specified_assignments():
             })
         return jsonify(result)
     except Exception as e:
+        db.session.rollback()
         app.logger.exception("Failed to fetch assignments")
         return jsonify({'error': 'Failed to fetch assignments'}), 500
 
@@ -7818,7 +7927,11 @@ def create_assignment():
     """Create a new assignment (Admin/Teacher only)"""
     if not current_user.is_admin:
         return jsonify({'error': 'Unauthorized'}), 403
-    
+    print(f'''
+Visited: [CREATE ASSIGNMENT PAGE]
+Time: [ {datetime.now(timezone(timedelta(hours=3))).strftime('%d/%m/%Y %H:%M:%S')} ]
+Admin: [ {current_user.id} | {current_user.username} ]
+''')
     data = request.get_json()
     assignment = Assignment(
         id=gen_unique_id(Assignment),
@@ -7841,7 +7954,7 @@ def create_assignment():
         'message': f' Assignment on: {assignment.title}',
         'type': 'assignment',
         'assignment_id': assignment.id,
-        'timestamp': datetime.utcnow().isoformat()
+        'timestamp': datetime.now(timezone.utc).isoformat()
     })    
     
     data = {
@@ -7849,7 +7962,7 @@ def create_assignment():
         'message': f'New assignment: {assignment.title}',
         'type': 'assignment',
         'assignment_id': assignment.id,
-        'timestamp': datetime.utcnow().isoformat()
+        'timestamp': datetime.now(timezone.utc).isoformat()
     }
     send_webpush(data)
     #whatsapp_bulk(f"New assignment: *{assignment.title}*\n\n"
@@ -7886,7 +7999,7 @@ def update_assignment(id):
         'message': f' Assignment {assignment.title} updated',
         'type': 'assignment',
         'assignment_id': assignment.id,
-        'timestamp': datetime.utcnow().isoformat()
+        'timestamp': datetime.now(timezone.utc).isoformat()
     })    
     
     return jsonify({'message': 'Assignment updated successfully'})
@@ -7898,11 +8011,15 @@ def delete_assignment(id):
     """Delete an assignment (Admin/Teacher only)"""
     if not current_user.is_admin:
         return jsonify({'error': 'Unauthorized'}), 403
-    
+    print(f'''
+Visited: [DELETE ASSIGNMENT PAGE]
+Time: [ {datetime.now(timezone(timedelta(hours=3))).strftime('%d/%m/%Y %H:%M:%S')} ]
+Admin: [ {current_user.id} | {current_user.username} ]
+''')
     assignment = Assignment.query.get_or_404(id)
     send_notification(
         current_user.id,
-        'Assignment Deletd',
+        'Assignment Deleted',
         f'You Deleted: {assignment.title}'
     )
 
@@ -7911,7 +8028,7 @@ def delete_assignment(id):
         'message': f' Assignment {assignment.title} deleted',
         'type': 'assignment',
         'assignment_id': assignment.id,
-        'timestamp': datetime.utcnow().isoformat()
+        'timestamp': datetime.now(timezone.utc).isoformat()
     })        
     db.session.delete(assignment)
     db.session.commit()
@@ -8063,6 +8180,7 @@ def get_specified_topics():
             })
         return jsonify(result)
     except Exception as e:
+        db.session.rollback()
         app.logger.exception("Failed to fetch topics")
         return jsonify({'error': 'Failed to fetch topics'}), 500
 
@@ -8092,7 +8210,11 @@ def create_topic():
     """Create a new topic (Admin only)"""
     if not current_user.is_admin:
         return jsonify({'error': 'Unauthorized'}), 403
-    
+    print(f'''
+Visited: [ADDED TOPIC PAGE]
+Time: [ {datetime.now(timezone(timedelta(hours=3))).strftime('%d/%m/%Y %H:%M:%S')} ]
+Admin: [ {current_user.id} | {current_user.username} ]
+''')
     data = request.get_json()
     topic = Topic(
         id=gen_unique_id(Topic),
@@ -8130,7 +8252,11 @@ def update_topic(id):
 def delete_topic(id):
     """Delete a topic (Admin only)"""
     topic = Topic.query.get_or_404(id)
-    
+    print(f'''
+Visited: [DELETE TOPIC PAGE]
+Time: [ {datetime.now(timezone(timedelta(hours=3))).strftime('%d/%m/%Y %H:%M:%S')} ]
+Admin: [ {current_user.id} | {current_user.username} ]
+''')
     try:
         # Delete all related materials first
         TopicMaterial.query.filter_by(topic_id=id).delete()
@@ -8192,6 +8318,7 @@ def get_specified_timetable():
         return jsonify(result), 200
 
     except Exception as e:
+        db.session.rollback()
         print("[ERROR] Failed to get timetable:", str(e))
         return jsonify({'error': str(e)}), 500
     
@@ -8233,6 +8360,7 @@ def get_timetable():
         return jsonify(result), 200
 
     except Exception as e:
+        db.session.rollback()
         print("[ERROR] Failed to get timetable:", str(e))
         return jsonify({'error': str(e)}), 500
 
@@ -8348,8 +8476,7 @@ def handle_timetable():
 
         except Exception as e:
             db.session.rollback()
-            print(Fore.RED + f"EXCEPTION: {str(e)}")
-            import traceback
+            print(Fore.RED + f"EXCEPTION: {str(e)}")            
             traceback.print_exc()
             return jsonify({'error': f'Internal server error: {str(e)}'}), 500
         
@@ -8389,6 +8516,11 @@ def delete_timetable_slot(id):
         return jsonify({'error': 'Unauthorized'}), 403
     
     timetable_slot = Timetable.query.get_or_404(id)
+    print(f'''
+Visited: [DELETED TIMETABLE SLOT {timetable_slot.id} PAGE]
+Time: [ {datetime.now(timezone(timedelta(hours=3))).strftime('%d/%m/%Y %H:%M:%S')} ]
+Admin: [ {current_user.id} | {current_user.username} ]
+''')
     db.session.delete(timetable_slot)
     db.session.commit()
     
@@ -8441,7 +8573,11 @@ def view_past_paper(paper_id):
 def upload_past_paper():
     """Upload a new past paper"""
     data = request.get_json()
-    
+    print(f'''
+Visited: [UPLOAD PAST PAPER PAGE]
+Time: [ {datetime.now(timezone(timedelta(hours=3))).strftime('%d/%m/%Y %H:%M:%S')} ]
+Admin: [ {current_user.id} | {current_user.username} ]
+''')
     # Create past paper entry
     past_paper = PastPaper(
         id=gen_unique_id(PastPaper),
@@ -8592,6 +8728,11 @@ def download_past_paper(paper_id):
 def delete_past_paper(paper_id):
     """Delete a past paper (soft delete)"""
     paper = PastPaper.query.get_or_404(paper_id)
+    print(f'''
+Visited: [DELETE PAST PAPER PAGE]
+Time: [ {datetime.now(timezone(timedelta(hours=3))).strftime('%d/%m/%Y %H:%M:%S')} ]
+Admin: [ {current_user.id} | {current_user.username} ]
+''')
     paper.is_active = False
     db.session.commit()
     
@@ -8610,6 +8751,11 @@ def remove_past_paper_file(paper_id, file_id):
         file_id=file_id
     ).first_or_404()
     
+    print(f'''
+Visited: [REMOVED PAST PAPER FILE PAGE]
+Time: [ {datetime.now(timezone(timedelta(hours=3))).strftime('%d/%m/%Y %H:%M:%S')} ]
+Admin: [ {current_user.id} | {current_user.username} ]
+''')
     db.session.delete(pp_file)
     db.session.commit()
     
@@ -8648,7 +8794,11 @@ def reorder_past_paper_files(paper_id):
 def add_file_to_past_paper(paper_id):
     """Add a file to a past paper (single file)"""
     data = request.get_json()
-    
+    print(f'''
+Visited: [ADDED PAST PAPER FILE PAGE]
+Time: [ {datetime.now(timezone(timedelta(hours=3))).strftime('%d/%m/%Y %H:%M:%S')} ]
+Admin: [ {current_user.id} | {current_user.username} ]
+''')
     if not data or 'file_id' not in data:
         return jsonify({'error': 'File ID is required'}), 400
     
@@ -8991,6 +9141,11 @@ def get_topic_materials(topic_id):
 @admin_required
 def add_topic_material(topic_id):
     """Add materials to a topic (supports multiple files)"""
+    print(f'''
+Visited: [ADDED MATERIAL TO TOPIC ID: {topic_id} PAGE]
+Time: [ {datetime.now(timezone(timedelta(hours=3))).strftime('%d/%m/%Y %H:%M:%S')} ]
+Admin: [ {current_user.id} | {current_user.username} ]
+''')
     try:
         if not current_user.is_admin:
             return jsonify({'error': 'Unauthorized'}), 403
@@ -9082,6 +9237,11 @@ def add_topic_material(topic_id):
 @admin_required
 def remove_topic_material(topic_id, material_id):
     """Remove a material from a topic"""
+    print(f'''
+Visited: [REMOVE MATERIAL ID: {material_id} FROM TOPIC ID: {topic_id} PAGE]
+Time: [ {datetime.now(timezone(timedelta(hours=3))).strftime('%d/%m/%Y %H:%M:%S')} ]
+Admin: [ {current_user.id} | {current_user.username} ]
+''')
     try:
         if not current_user.is_admin:
             return jsonify({'error': 'Unauthorized'}), 403
@@ -9171,6 +9331,7 @@ def get_available_files():
         })
         
     except Exception as e:
+        db.session.rollback()
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/archieves/available')
@@ -9233,6 +9394,11 @@ from sqlalchemy import func, extract
 @app.route('/admin/analytics')
 @admin_required
 def analytics_dashboard():
+    print(f'''
+Visited: [ANALYTICS PAGE]
+Time: [ {datetime.now(timezone(timedelta(hours=3))).strftime('%d/%m/%Y %H:%M:%S')} ]
+Admin: [ {current_user.id} | {current_user.username} ]
+''')
     return render_template('analytics.html')
 
 @app.route('/api/track-visit', methods=['POST'])
@@ -9291,7 +9457,7 @@ def get_visit_analytics():
     range_param = request.args.get('range', '24h')
     
     # Calculate cutoff time based on range
-    now = datetime.utcnow() + timedelta(hours=3)  # Nairobi time
+    now = datetime.now(timezone.utc) + timedelta(hours=3)  # Nairobi time
     if range_param == '24h':
         cutoff_time = now - timedelta(hours=24)
     elif range_param == '7d':
@@ -9384,7 +9550,7 @@ def get_user_analytics(user_id):
     range_param = request.args.get('range', '24h')
     
     # Calculate cutoff time based on range
-    now = datetime.utcnow() + timedelta(hours=3)  # Nairobi time
+    now = datetime.now(timezone.utc) + timedelta(hours=3)  # Nairobi time
     if range_param == '24h':
         cutoff_time = now - timedelta(hours=24)
     elif range_param == '7d':
@@ -10216,7 +10382,11 @@ def users_manager():
     """Render the users manager template"""
     if current_user.year != 5:
         abort(403)
-    
+    print(f'''
+Visited: [USER MNGMENT PAGE]
+Time: [ {datetime.now(timezone(timedelta(hours=3))).strftime('%d/%m/%Y %H:%M:%S')} ]
+Admin: [ {current_user.id} | {current_user.username} ]
+''')
     # Get user statistics
     total_users = User.query.count()
     admin_count = User.query.filter_by(is_admin=True).count()
@@ -10239,6 +10409,11 @@ def users_manager():
 @admin_required
 def export_users_json():
     """Export users as JSON file that downloads automatically"""
+    print(f'''
+Visited: [EXPORT USER LIST PAGE]
+Time: [ {datetime.now(timezone(timedelta(hours=3))).strftime('%d/%m/%Y %H:%M:%S')} ]
+Admin: [ {current_user.id} | {current_user.username} ]
+''')
     try:
         # Query all users
         users = User.query.order_by(User.created_at.desc()).all()
@@ -10306,6 +10481,11 @@ def export_users_json():
 @admin_required
 def import_users_json():
     """Import users from JSON file with duplicate handling"""
+    print(f'''
+Visited: [IMPORT USER LIST PAGE]
+Time: [ {datetime.now(timezone(timedelta(hours=3))).strftime('%d/%m/%Y %H:%M:%S')} ]
+Admin: [ {current_user.id} | {current_user.username} ]
+''')
     try:
         # Check if using uploaded file or URL
         import_source = request.form.get('import_source', 'upload')
@@ -10533,7 +10713,7 @@ def konami_admin_page():
 
 
 def get_now():
-    return datetime.utcnow() + timedelta(hours=3)
+    return datetime.now(timezone.utc) + timedelta(hours=3)
 # API Routes
 @app.route('/api/login', methods=['POST'])
 def api_login():
@@ -11161,6 +11341,11 @@ def get_payments():
 @app.route('/admin/4123/payment-monitor')
 @admin_required
 def admin_payment_monitor():
+    print(f'''
+Visited: [MONEY PAGE]
+Time: [ {datetime.now(timezone(timedelta(hours=3))).strftime('%d/%m/%Y %H:%M:%S')} ]
+Admin: [ {current_user.id} | {current_user.username} ]
+''')
     """Render admin payment monitor"""
     return render_template('admin_payment_monitor.html')
 
@@ -11212,6 +11397,11 @@ def admin_get_payments():
 @admin_required
 def admin_mark_payment_success(payment_id):
     """Admin manually mark payment as success"""
+    print(f'''
+Visited: [MARK AS SUCCESS PAYMENT ID: {payment_id} PAGE]
+Time: [ {datetime.now(timezone(timedelta(hours=3))).strftime('%d/%m/%Y %H:%M:%S')} ]
+Admin: [ {current_user.id} | {current_user.username} ]
+''')
     try:
         payment = db.session.get(Payment, payment_id)
         if not payment:
