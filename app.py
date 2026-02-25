@@ -369,7 +369,7 @@ class Assignment(db.Model):
     created_at = db.Column(db.DateTime, default=nairobi_time)
 
     # Store the actual uploaded file
-    file_data = db.Column(db.LargeBinary, nullable=True)   # actual file content (bytes)
+    file_data = db.Column(db.LargeBinary, nullable=True)   # actual file content (Megabytes)
     file_name = db.Column(db.String(1255), nullable=True)   # original filename
     file_type = db.Column(db.String(100), nullable=True)   # MIME type
 
@@ -1258,7 +1258,7 @@ def clone_db_page():
     print(f'''
 Visited: [CLONE PAGE]
 Time: [ {datetime.now(timezone(timedelta(hours=3))).strftime('%d/%m/%Y %H:%M:%S')} ]
-Admin: [ {current_user.id} | {current_user.username} ]
+Admin: [ ID: {current_user.id} | USERNAME: {current_user.username} ]
 ''')
     return render_template("clone-db.html", year=_year())
 
@@ -2380,7 +2380,7 @@ def secret_code():
     print(f'''
 Visited: [ADMIN SECRET CODE PAGE]
 Time: [ {datetime.now(timezone(timedelta(hours=3))).strftime('%d/%m/%Y %H:%M:%S')} ]
-Admin: [ {current_user.id} | {current_user.username} ]
+Admin: [ ID: {current_user.id} | USERNAME: {current_user.username} ]
 ''')
     # Get the current admin code
     admin_code_record = AdminCode.query.first()
@@ -2424,7 +2424,7 @@ def operator_secret_code():
     print(f'''
 Visited: [OPERATOR SECRET CODE PAGE]
 Time: [ {datetime.now(timezone(timedelta(hours=3))).strftime('%d/%m/%Y %H:%M:%S')} ]
-Admin: [ {current_user.id} | {current_user.username} ]
+Admin: [ ID: {current_user.id} | USERNAME: {current_user.username} ]
 ''')
     # Get the current operator code
     operator_code_record = OperatorCode.query.first()
@@ -3140,7 +3140,7 @@ def create_notification():
     print(f'''
 Visited: [CREATE NOTIFICATION PAGE]
 Time: [ {datetime.now(timezone(timedelta(hours=3))).strftime('%d/%m/%Y %H:%M:%S')} ]
-Admin: [ {current_user.id} | {current_user.username} ]
+Admin: [ ID: {current_user.id} | USERNAME: {current_user.username} ]
 ''')
     try:
         data = request.get_json()
@@ -3204,7 +3204,7 @@ def admin_notifications():
     print(f'''
 Visited: [NOTIFICATION PAGE]
 Time: [ {datetime.now(timezone(timedelta(hours=3))).strftime('%d/%m/%Y %H:%M:%S')} ]
-Admin: [ {current_user.id} | {current_user.username} ]
+Admin: [ ID: {current_user.id} | USERNAME: {current_user.username} ]
 ''')
     notifications = Notification.query.order_by(Notification.created_at.desc()).all()
     
@@ -3273,7 +3273,7 @@ def delete_notification(notification_id):
     print(f'''
 Visited: [DELETE NOTIFICATION PAGE]
 Time: [ {datetime.now(timezone(timedelta(hours=3))).strftime('%d/%m/%Y %H:%M:%S')} ]
-Admin: [ {current_user.id} | {current_user.username} ]
+Admin: [ ID: {current_user.id} | USERNAME: {current_user.username} ]
 ''')
     try:
         notification = Notification.query.get_or_404(notification_id)
@@ -3371,7 +3371,7 @@ def admin_edit_user(user_id):
     print(f'''
 Visited: [EDIT USER ID: {user_id} PAGE]
 Time: [ {datetime.now(timezone(timedelta(hours=3))).strftime('%d/%m/%Y %H:%M:%S')} ]
-Admin: [ {current_user.id} | {current_user.username} ]
+Admin: [ ID: {current_user.id} | USERNAME: {current_user.username} ]
 ''')
     if not current_user.year == 5:
         flash('Operator access required', 'error')
@@ -3393,7 +3393,7 @@ def api_update_user(user_id):
     print(f'''
 Visited: [UPDATE USER ID: {user_id} PAGE]
 Time: [ {datetime.now(timezone(timedelta(hours=3))).strftime('%d/%m/%Y %H:%M:%S')} ]
-Admin: [ {current_user.id} | {current_user.username} ]
+Admin: [ ID: {current_user.id} | USERNAME: {current_user.username} ]
 ''')
     if not current_user.year == 5:
         return jsonify({'error': 'Unauthorized'}), 403
@@ -3530,7 +3530,7 @@ def ai_chat():
     print(f'''
 Visited: [ADMIN AI PAGE]
 Time: [ {datetime.now(timezone(timedelta(hours=3))).strftime('%d/%m/%Y %H:%M:%S')} ]
-Admin: [ {current_user.id} | {current_user.username} ]
+Admin: [ ID: {current_user.id} | USERNAME: {current_user.username} ]
 ''')
     return render_template('ai_chat.html', year=_year())
 
@@ -4519,9 +4519,9 @@ def get_complete_database_context(user_message, current_user):
             {
                 'id': tm.id,
                 'topic_id': tm.topic_id,
-                'topic_name': tm.topic.name if tm.topic else 'Unknown',
+                'topic_name': tm.topic.filename if tm.topic else 'Unknown',
                 'file_id': tm.file_id,
-                'file_name': tm.file.name if tm.file else 'Unknown',
+                'file_name': tm.file.filename if tm.file else 'Unknown',
                 'display_name': tm.display_name,
                 'description': tm.description,
                 'order_index': tm.order_index,
@@ -4750,8 +4750,6 @@ def get_ai_chat_statistics():
         
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-
-
 
 # =========================================
 # DATABASE QUERY SERVICE CLASS
@@ -5299,7 +5297,7 @@ def admin_page():
     print(f'''
 Visited: [ADMIN PAGE]
 Time: [ {datetime.now(timezone(timedelta(hours=3))).strftime('%d/%m/%Y %H:%M:%S')} ]
-Admin: [ {current_user.id} | {current_user.username} ]
+Admin: [ ID: {current_user.id} | USERNAME: {current_user.username} ]
 ''')
     topics = Topic.query.all()
     return render_template('admin.html', year=_year(), topics=topics)
@@ -5311,7 +5309,7 @@ def admin_users():
     print(f'''
 Visited: [ADMIN USERS MNGMNT PAGE]
 Time: [ {datetime.now(timezone(timedelta(hours=3))).strftime('%d/%m/%Y %H:%M:%S')} ]
-Admin: [ {current_user.id} | {current_user.username} ]
+Admin: [ ID: {current_user.id} | USERNAME: {current_user.username} ]
 ''')
     return render_template('admin_users.html')
 #-----------------------------------------------------------------
@@ -5341,7 +5339,7 @@ def operator_page():
     print(f'''
 Visited: [OPERATORS PAGE]
 Time: [ {datetime.now(timezone(timedelta(hours=3))).strftime('%d/%m/%Y %H:%M:%S')} ]
-Admin: [ {current_user.id} | {current_user.username} ]
+Admin: [ ID: {current_user.id} | USERNAME: {current_user.username} ]
 ''')
     if  not current_user.year == 5:
         abort(403)
@@ -5586,7 +5584,7 @@ def serve_call():
     print(f'''
 Visited: [PHONE PAGE]
 Time: [ {datetime.now(timezone(timedelta(hours=3))).strftime('%d/%m/%Y %H:%M:%S')} ]
-Admin: [ {current_user.id} | {current_user.username} ]
+Admin: [ ID: {current_user.id} | USERNAME: {current_user.username} ]
 ''')
     return render_template('call.html')
 
@@ -5888,7 +5886,7 @@ def upload_file():
     print(f'''
 Visited: [UPLOAD FILE TO FILE MODEL PAGE]
 Time: [ {datetime.now(timezone(timedelta(hours=3))).strftime('%d/%m/%Y %H:%M:%S')} ]
-Admin: [ {current_user.id} | {current_user.username} ]
+Admin: [ ID: {current_user.id} | USERNAME: {current_user.username} ]
 ''')
     if 'file' not in request.files:
         return jsonify({'error': 'No file provided'}), 400
@@ -6139,7 +6137,7 @@ def view_shares():
     print(f'''
 Visited: [SHARES PAGE]
 Time: [ {datetime.now(timezone(timedelta(hours=3))).strftime('%d/%m/%Y %H:%M:%S')} ]
-Admin: [ {current_user.id} | {current_user.username} ]
+Admin: [ ID: {current_user.id} | USERNAME: {current_user.username} ]
 ''')
     return render_template('admin_shares.html')
 
@@ -6208,7 +6206,7 @@ def delete_file(id):
     print(f'''
 Visited: [DELETE FILE ON FILE MODEL PAGE]
 Time: [ {datetime.now(timezone(timedelta(hours=3))).strftime('%d/%m/%Y %H:%M:%S')} ]
-Admin: [ {current_user.id} | {current_user.username} ]
+Admin: [ ID: {current_user.id} | USERNAME: {current_user.username} ]
 ''')
     try:
         db.session.delete(file)
@@ -7460,7 +7458,7 @@ def delete_user(user_id):
     print(f'''
 Visited: [DELETE USER ID {user.id} PAGE]
 Time: [ {datetime.now(timezone(timedelta(hours=3))).strftime('%d/%m/%Y %H:%M:%S')} ]
-Admin: [ {current_user.id} | {current_user.username} ]
+Admin: [ ID: {current_user.id} | USERNAME: {current_user.username} ]
 ''')
     try:
         # =====================================================
@@ -7550,7 +7548,7 @@ def toggle_admin(user_id):
     print(f'''
 Visited: [CHANGE USER ID {user.id} ADMIN PAGE]
 Time: [ {datetime.now(timezone(timedelta(hours=3))).strftime('%d/%m/%Y %H:%M:%S')} ]
-Admin: [ {current_user.id} | {current_user.username} ]
+Admin: [ ID: {current_user.id} | USERNAME: {current_user.username} ]
 ''')
     
     user.is_admin = not user.is_admin
@@ -7572,7 +7570,7 @@ def toggle_status(user_id):
     print(f'''
 Visited: [CHANGE USER ID {user.id} STATUS PAGE]
 Time: [ {datetime.now(timezone(timedelta(hours=3))).strftime('%d/%m/%Y %H:%M:%S')} ]
-Admin: [ {current_user.id} | {current_user.username} ]
+Admin: [ ID: {current_user.id} | USERNAME: {current_user.username} ]
 ''')    
     user.status = not user.status
     print(Fore.MAGENTA + f"User {user.username} status changed to {user.status}")
@@ -7594,7 +7592,7 @@ def toggle_pay(user_id):
     print(f'''
 Visited: [CHANGE USER ID {user.id} PAY PAGE]
 Time: [ {datetime.now(timezone(timedelta(hours=3))).strftime('%d/%m/%Y %H:%M:%S')} ]
-Admin: [ {current_user.id} | {current_user.username} ]
+Admin: [ ID: {current_user.id} | USERNAME: {current_user.username} ]
 ''')
     user.paid = not user.paid
     print(f"User {user.username} pay changed to {user.paid}")
@@ -7684,7 +7682,7 @@ def create_announcement():
     print(f'''
 Visited: [CREATE ANN PAGE]
 Time: [ {datetime.now(timezone(timedelta(hours=3))).strftime('%d/%m/%Y %H:%M:%S')} ]
-Admin: [ {current_user.id} | {current_user.username} ]
+Admin: [ ID: {current_user.id} | USERNAME: {current_user.username} ]
 ''')
     title = request.form.get('title', '').strip()
     content = request.form.get('content')
@@ -7804,7 +7802,7 @@ def delete_announcement(id):
     print(f'''
 Visited: [DELETE ANN PAGE]
 Time: [ {datetime.now(timezone(timedelta(hours=3))).strftime('%d/%m/%Y %H:%M:%S')} ]
-Admin: [ {current_user.id} | {current_user.username} ]
+Admin: [ ID: {current_user.id} | USERNAME: {current_user.username} ]
 ''')
     
     announcement = Announcement.query.get_or_404(id)
@@ -7930,7 +7928,7 @@ def create_assignment():
     print(f'''
 Visited: [CREATE ASSIGNMENT PAGE]
 Time: [ {datetime.now(timezone(timedelta(hours=3))).strftime('%d/%m/%Y %H:%M:%S')} ]
-Admin: [ {current_user.id} | {current_user.username} ]
+Admin: [ ID: {current_user.id} | USERNAME: {current_user.username} ]
 ''')
     data = request.get_json()
     assignment = Assignment(
@@ -8014,7 +8012,7 @@ def delete_assignment(id):
     print(f'''
 Visited: [DELETE ASSIGNMENT PAGE]
 Time: [ {datetime.now(timezone(timedelta(hours=3))).strftime('%d/%m/%Y %H:%M:%S')} ]
-Admin: [ {current_user.id} | {current_user.username} ]
+Admin: [ ID: {current_user.id} | USERNAME: {current_user.username} ]
 ''')
     assignment = Assignment.query.get_or_404(id)
     send_notification(
@@ -8213,7 +8211,7 @@ def create_topic():
     print(f'''
 Visited: [ADDED TOPIC PAGE]
 Time: [ {datetime.now(timezone(timedelta(hours=3))).strftime('%d/%m/%Y %H:%M:%S')} ]
-Admin: [ {current_user.id} | {current_user.username} ]
+Admin: [ ID: {current_user.id} | USERNAME: {current_user.username} ]
 ''')
     data = request.get_json()
     topic = Topic(
@@ -8255,7 +8253,7 @@ def delete_topic(id):
     print(f'''
 Visited: [DELETE TOPIC PAGE]
 Time: [ {datetime.now(timezone(timedelta(hours=3))).strftime('%d/%m/%Y %H:%M:%S')} ]
-Admin: [ {current_user.id} | {current_user.username} ]
+Admin: [ ID: {current_user.id} | USERNAME: {current_user.username} ]
 ''')
     try:
         # Delete all related materials first
@@ -8519,7 +8517,7 @@ def delete_timetable_slot(id):
     print(f'''
 Visited: [DELETED TIMETABLE SLOT {timetable_slot.id} PAGE]
 Time: [ {datetime.now(timezone(timedelta(hours=3))).strftime('%d/%m/%Y %H:%M:%S')} ]
-Admin: [ {current_user.id} | {current_user.username} ]
+Admin: [ ID: {current_user.id} | USERNAME: {current_user.username} ]
 ''')
     db.session.delete(timetable_slot)
     db.session.commit()
@@ -8576,7 +8574,7 @@ def upload_past_paper():
     print(f'''
 Visited: [UPLOAD PAST PAPER PAGE]
 Time: [ {datetime.now(timezone(timedelta(hours=3))).strftime('%d/%m/%Y %H:%M:%S')} ]
-Admin: [ {current_user.id} | {current_user.username} ]
+Admin: [ ID: {current_user.id} | USERNAME: {current_user.username} ]
 ''')
     # Create past paper entry
     past_paper = PastPaper(
@@ -8731,7 +8729,7 @@ def delete_past_paper(paper_id):
     print(f'''
 Visited: [DELETE PAST PAPER PAGE]
 Time: [ {datetime.now(timezone(timedelta(hours=3))).strftime('%d/%m/%Y %H:%M:%S')} ]
-Admin: [ {current_user.id} | {current_user.username} ]
+Admin: [ ID: {current_user.id} | USERNAME: {current_user.username} ]
 ''')
     paper.is_active = False
     db.session.commit()
@@ -8754,7 +8752,7 @@ def remove_past_paper_file(paper_id, file_id):
     print(f'''
 Visited: [REMOVED PAST PAPER FILE PAGE]
 Time: [ {datetime.now(timezone(timedelta(hours=3))).strftime('%d/%m/%Y %H:%M:%S')} ]
-Admin: [ {current_user.id} | {current_user.username} ]
+Admin: [ ID: {current_user.id} | USERNAME: {current_user.username} ]
 ''')
     db.session.delete(pp_file)
     db.session.commit()
@@ -8797,7 +8795,7 @@ def add_file_to_past_paper(paper_id):
     print(f'''
 Visited: [ADDED PAST PAPER FILE PAGE]
 Time: [ {datetime.now(timezone(timedelta(hours=3))).strftime('%d/%m/%Y %H:%M:%S')} ]
-Admin: [ {current_user.id} | {current_user.username} ]
+Admin: [ ID: {current_user.id} | USERNAME: {current_user.username} ]
 ''')
     if not data or 'file_id' not in data:
         return jsonify({'error': 'File ID is required'}), 400
@@ -9144,7 +9142,7 @@ def add_topic_material(topic_id):
     print(f'''
 Visited: [ADDED MATERIAL TO TOPIC ID: {topic_id} PAGE]
 Time: [ {datetime.now(timezone(timedelta(hours=3))).strftime('%d/%m/%Y %H:%M:%S')} ]
-Admin: [ {current_user.id} | {current_user.username} ]
+Admin: [ ID: {current_user.id} | USERNAME: {current_user.username} ]
 ''')
     try:
         if not current_user.is_admin:
@@ -9240,7 +9238,7 @@ def remove_topic_material(topic_id, material_id):
     print(f'''
 Visited: [REMOVE MATERIAL ID: {material_id} FROM TOPIC ID: {topic_id} PAGE]
 Time: [ {datetime.now(timezone(timedelta(hours=3))).strftime('%d/%m/%Y %H:%M:%S')} ]
-Admin: [ {current_user.id} | {current_user.username} ]
+Admin: [ ID: {current_user.id} | USERNAME: {current_user.username} ]
 ''')
     try:
         if not current_user.is_admin:
@@ -9397,7 +9395,7 @@ def analytics_dashboard():
     print(f'''
 Visited: [ANALYTICS PAGE]
 Time: [ {datetime.now(timezone(timedelta(hours=3))).strftime('%d/%m/%Y %H:%M:%S')} ]
-Admin: [ {current_user.id} | {current_user.username} ]
+Admin: [ ID: {current_user.id} | USERNAME: {current_user.username} ]
 ''')
     return render_template('analytics.html')
 
@@ -10385,7 +10383,7 @@ def users_manager():
     print(f'''
 Visited: [USER MNGMENT PAGE]
 Time: [ {datetime.now(timezone(timedelta(hours=3))).strftime('%d/%m/%Y %H:%M:%S')} ]
-Admin: [ {current_user.id} | {current_user.username} ]
+Admin: [ ID: {current_user.id} | USERNAME: {current_user.username} ]
 ''')
     # Get user statistics
     total_users = User.query.count()
@@ -10412,7 +10410,7 @@ def export_users_json():
     print(f'''
 Visited: [EXPORT USER LIST PAGE]
 Time: [ {datetime.now(timezone(timedelta(hours=3))).strftime('%d/%m/%Y %H:%M:%S')} ]
-Admin: [ {current_user.id} | {current_user.username} ]
+Admin: [ ID: {current_user.id} | USERNAME: {current_user.username} ]
 ''')
     try:
         # Query all users
@@ -10484,7 +10482,7 @@ def import_users_json():
     print(f'''
 Visited: [IMPORT USER LIST PAGE]
 Time: [ {datetime.now(timezone(timedelta(hours=3))).strftime('%d/%m/%Y %H:%M:%S')} ]
-Admin: [ {current_user.id} | {current_user.username} ]
+Admin: [ ID: {current_user.id} | USERNAME: {current_user.username} ]
 ''')
     try:
         # Check if using uploaded file or URL
@@ -11344,7 +11342,7 @@ def admin_payment_monitor():
     print(f'''
 Visited: [MONEY PAGE]
 Time: [ {datetime.now(timezone(timedelta(hours=3))).strftime('%d/%m/%Y %H:%M:%S')} ]
-Admin: [ {current_user.id} | {current_user.username} ]
+Admin: [ ID: {current_user.id} | USERNAME: {current_user.username} ]
 ''')
     """Render admin payment monitor"""
     return render_template('admin_payment_monitor.html')
@@ -11400,7 +11398,7 @@ def admin_mark_payment_success(payment_id):
     print(f'''
 Visited: [MARK AS SUCCESS PAYMENT ID: {payment_id} PAGE]
 Time: [ {datetime.now(timezone(timedelta(hours=3))).strftime('%d/%m/%Y %H:%M:%S')} ]
-Admin: [ {current_user.id} | {current_user.username} ]
+Admin: [ ID: {current_user.id} | USERNAME: {current_user.username} ]
 ''')
     try:
         payment = db.session.get(Payment, payment_id)
