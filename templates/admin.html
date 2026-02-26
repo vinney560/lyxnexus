@@ -1902,7 +1902,7 @@
                                         <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
                                             <span style="font-weight: 500;">${escapeHtml(slot.subject)}</span>
                                             <span class="year-badge ${slot.year == 5 ? 'all' : `year${slot.year || 0}`}" style="font-size: 10px; padding: 2px 8px;">
-                                                ${s.year === 5 ? 'All' : `Y${s.year || 1}`}
+                                                ${slot.year === 5 ? 'All' : `Y${slot.year || 1}`}
                                             </span>
                                         </div>
                                         <div style="font-size: 13px; color: var(--gray); display: flex; gap: 16px; flex-wrap: wrap;">
@@ -1967,7 +1967,7 @@
                                 <div style="font-size: 14px; color: var(--gray);">Units</div>
                             </div>
                             <div style="text-align: center; padding: 20px; background: rgba(245, 158, 11, 0.1); border-radius: 16px;">
-                                <div style="font-size: 32px; font-weight: 700; color: var(--warning);">${users?.length || 0}</div>
+                                <div style="font-size: 32px; font-weight: 700; color: var(--warning);">${users?.final_count || 0}</div>
                                 <div style="font-size: 14px; color: var(--gray);">Users</div>
                             </div>
                         </div>
