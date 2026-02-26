@@ -42,6 +42,7 @@
         overflow: hidden;
     }
 
+    /* Custom Scrollbar */
     ::-webkit-scrollbar {
         width: 6px;
         height: 6px;
@@ -61,62 +62,28 @@
         background: var(--primary-light);
     }
 
+    /* Layout */
     .app-container {
         display: flex;
         height: 100vh;
         overflow: hidden;
-        position: relative;
     }
 
+    /* Sidebar */
     .sidebar {
         width: 280px;
-        background: rgba(2, 6, 23, 0.95);
+        background: rgba(2, 6, 23, 0.8);
         backdrop-filter: blur(10px);
         border-right: 1px solid var(--border);
         display: flex;
         flex-direction: column;
         overflow-y: auto;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        position: relative;
-        z-index: 50;
-    }
-
-    .sidebar.collapsed {
-        width: 120px;
-    }
-
-    .sidebar.collapsed .logo-text,
-    .sidebar.collapsed .logo-badge,
-    .sidebar.collapsed .nav-label,
-    .sidebar.collapsed .nav-item span:not(.icon-only) {
-        display: none;
-    }
-
-    .sidebar.collapsed .nav-item {
-        justify-content: center;
-        padding: 12px 0;
-    }
-
-    .sidebar.collapsed .nav-item i {
-        margin: 0;
-        font-size: 20px;
-    }
-
-    .sidebar.collapsed .sidebar-header {
-        padding: 20px 0;
-        justify-content: center;
-    }
-
-    .sidebar.collapsed .logo-wrapper {
-        justify-content: center;
+        transition: all 0.3s ease;
     }
 
     .sidebar-header {
         padding: 24px;
         border-bottom: 1px solid var(--border);
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
     }
 
     .logo-wrapper {
@@ -136,7 +103,6 @@
         font-size: 20px;
         color: white;
         box-shadow: 0 8px 16px rgba(99, 102, 241, 0.2);
-        flex-shrink: 0;
     }
 
     .logo-text {
@@ -146,7 +112,6 @@
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         letter-spacing: -0.5px;
-        white-space: nowrap;
     }
 
     .logo-badge {
@@ -157,34 +122,9 @@
         color: var(--primary-light);
         margin-top: 2px;
         display: inline-block;
-        white-space: nowrap;
     }
 
-    .toggle-sidebar {
-        width: 32px;
-        height: 32px;
-        border-radius: 8px;
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid var(--border);
-        color: var(--gray);
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: all 0.2s ease;
-        flex-shrink: 0;
-    }
-
-    .toggle-sidebar:hover {
-        background: var(--primary);
-        color: white;
-        border-color: transparent;
-    }
-
-    .sidebar.collapsed .toggle-sidebar i {
-        transform: rotate(180deg);
-    }
-
+    /* Navigation */
     .nav-section {
         padding: 20px;
         flex: 1;
@@ -197,7 +137,6 @@
         color: var(--gray);
         margin-bottom: 12px;
         font-weight: 600;
-        transition: opacity 0.2s ease;
     }
 
     .nav-item {
@@ -211,7 +150,6 @@
         margin-bottom: 4px;
         cursor: pointer;
         border: 1px solid transparent;
-        white-space: nowrap;
     }
 
     .nav-item:hover {
@@ -230,18 +168,18 @@
     .nav-item i {
         width: 20px;
         font-size: 16px;
-        flex-shrink: 0;
     }
 
+    /* Main Content */
     .main-content {
         flex: 1;
         display: flex;
         flex-direction: column;
         overflow: hidden;
         background: rgba(15, 23, 42, 0.4);
-        transition: all 0.3s ease;
     }
 
+    /* Top Bar */
     .top-bar {
         background: rgba(2, 6, 23, 0.6);
         backdrop-filter: blur(10px);
@@ -250,32 +188,6 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
-    }
-
-    .top-bar-left {
-        display: flex;
-        align-items: center;
-        gap: 16px;
-    }
-
-    .menu-toggle {
-        width: 40px;
-        height: 40px;
-        border-radius: 10px;
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid var(--border);
-        color: var(--gray);
-        cursor: pointer;
-        display: none;
-        align-items: center;
-        justify-content: center;
-        transition: all 0.2s ease;
-    }
-
-    .menu-toggle:hover {
-        background: var(--primary);
-        color: white;
-        border-color: transparent;
     }
 
     .page-title {
@@ -302,21 +214,16 @@
         justify-content: center;
         font-weight: 600;
         color: white;
-        cursor: pointer;
-        transition: all 0.2s ease;
     }
 
-    .user-avatar:hover {
-        transform: scale(1.05);
-        box-shadow: 0 8px 16px rgba(99, 102, 241, 0.3);
-    }
-
+    /* Content Area */
     .content-area {
         flex: 1;
         overflow-y: auto;
         padding: 24px;
     }
 
+    /* Quick Actions */
     .quick-actions {
         display: flex;
         gap: 12px;
@@ -350,6 +257,7 @@
         font-size: 14px;
     }
 
+    /* Sub Tabs */
     .sub-tabs {
         display: flex;
         gap: 8px;
@@ -389,6 +297,7 @@
         box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
     }
 
+    /* Cards Grid */
     .content-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
@@ -398,7 +307,7 @@
     .card {
         background: var(--card-bg);
         backdrop-filter: blur(10px);
-        border-radius: 14px;
+        border-radius: 20px;
         border: 1px solid var(--border);
         overflow: hidden;
         transition: all 0.3s ease;
@@ -434,18 +343,12 @@
         font-weight: 600;
         font-size: 16px;
         color: var(--light);
-        text-decoration: underline;
-
     }
 
     .card-subtitle {
         font-size: 12px;
         color: var(--gray);
         margin-top: 4px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        flex-wrap: wrap;
     }
 
     .card-body {
@@ -460,6 +363,7 @@
         gap: 8px;
     }
 
+    /* Year Badges */
     .year-badge {
         display: inline-flex;
         align-items: center;
@@ -475,8 +379,8 @@
     .year-badge.year2 { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
     .year-badge.year3 { background: linear-gradient(135deg, #10b981, #059669); }
     .year-badge.year4 { background: linear-gradient(135deg, #f59e0b, #d97706); }
-    .year-badge.year5 { background: linear-gradient(135deg, #ef4444, #dc2626); }
 
+    /* Buttons */
     .btn-icon {
         width: 32px;
         height: 32px;
@@ -529,21 +433,7 @@
         color: white;
     }
 
-    .btn-sm.success {
-        background: var(--success);
-        color: white;
-    }
-
-    .btn-sm.secondary {
-        background: rgba(255, 255, 255, 0.1);
-        color: var(--light);
-        border: 1px solid var(--border);
-    }
-
-    .btn-sm.secondary:hover {
-        background: rgba(255, 255, 255, 0.15);
-    }
-
+    /* Custom Confirm Modal */
     .confirm-modal {
         position: fixed;
         top: 0;
@@ -647,6 +537,7 @@
         background: #dc2626;
     }
 
+    /* Toast Notifications */
     .toast-container {
         position: fixed;
         top: 20px;
@@ -680,6 +571,7 @@
     .toast.error { border-left: 4px solid var(--danger); }
     .toast.info { border-left: 4px solid var(--primary); }
 
+    /* Loading Spinner */
     .spinner {
         width: 40px;
         height: 40px;
@@ -693,13 +585,13 @@
         to { transform: rotate(360deg); }
     }
 
+    /* Empty State */
     .empty-state {
         text-align: center;
         padding: 60px 20px;
         background: var(--card-bg);
         border-radius: 20px;
         border: 1px solid var(--border);
-        grid-column: 1 / -1;
     }
 
     .empty-state i {
@@ -721,6 +613,7 @@
         margin: 0 auto 20px;
     }
 
+    /* File Attachment */
     .attachment-preview {
         display: flex;
         align-items: center;
@@ -746,9 +639,32 @@
         align-items: center;
         justify-content: center;
         color: white;
-        flex-shrink: 0;
     }
 
+    /* Responsive */
+    @media (max-width: 768px) {
+        .sidebar {
+            position: fixed;
+            left: -280px;
+            height: 100vh;
+            z-index: 100;
+        }
+
+        .sidebar.open {
+            left: 0;
+        }
+
+        .content-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .sub-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+        }
+    }
+
+    /* Modal */
     .modal {
         position: fixed;
         top: 0;
@@ -770,13 +686,12 @@
     .modal-content {
         background: var(--card-bg);
         border: 1px solid var(--border);
-        border-radius: 14px;
+        border-radius: 24px;
         padding: 24px;
         width: 90%;
         max-width: 500px;
         max-height: 90vh;
         overflow-y: auto;
-        animation: scaleIn 0.3s ease;
     }
 
     .form-input {
@@ -797,10 +712,6 @@
         box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
     }
 
-    .form-input::placeholder {
-        color: var(--gray);
-    }
-
     .file-input-label {
         display: block;
         padding: 12px 16px;
@@ -810,173 +721,33 @@
         text-align: center;
         cursor: pointer;
         transition: all 0.2s ease;
-        color: var(--gray);
     }
 
     .file-input-label:hover {
         border-color: var(--primary);
         background: rgba(99, 102, 241, 0.1);
-        color: var(--light);
     }
 
-    .file-input-wrapper {
-        position: relative;
-        margin-bottom: 16px;
-    }
-
-    .file-input-wrapper input[type=file] {
+    /* Loading Overlay */
+    .loading-overlay {
         position: absolute;
-        opacity: 0;
-        width: 100%;
-        height: 100%;
-        cursor: pointer;
-    }
-
-    .file-info {
-        background: rgba(0, 0, 0, 0.2);
-        border-radius: 12px;
-        padding: 12px;
-        margin-top: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-    }
-
-    @media (max-width: 1024px) {
-        .content-grid {
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-        }
-    }
-
-    @media (max-width: 768px) {
-        .sidebar {
-            position: fixed;
-            left: -280px;
-            height: 100vh;
-            z-index: 100;
-            box-shadow: 2px 0 20px rgba(0, 0, 0, 0.3);
-        }
-
-        .sidebar.mobile-open {
-            left: 0;
-        }
-
-        .menu-toggle {
-            display: flex;
-        }
-
-        .content-grid {
-            grid-template-columns: 1fr;
-        }
-
-        .sub-tabs {
-            flex-wrap: nowrap;
-            overflow-x: auto;
-            padding: 4px;
-            border-radius: 50px;
-        }
-
-        .quick-actions {
-            flex-wrap: nowrap;
-            overflow-x: auto;
-            padding-bottom: 4px;
-        }
-
-        .quick-actions::-webkit-scrollbar {
-            display: none;
-        }
-
-        .action-btn {
-            flex-shrink: 0;
-        }
-
-        .top-bar {
-            padding: 12px 16px;
-        }
-
-        .content-area {
-            padding: 16px;
-        }
-    }
-
-    @media (max-width: 480px) {
-        .card-header {
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .card-header > div:last-child {
-            align-self: flex-end;
-        }
-
-        .user-menu .btn-icon {
-            display: none;
-        }
-
-        .page-title {
-            font-size: 18px;
-        }
-    }
-
-    @media (min-width: 2560px) {
-        .content-grid {
-            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
-        }
-
-        .sidebar {
-            width: 320px;
-        }
-
-        .sidebar.collapsed {
-            width: 100px;
-        }
-    }
-
-    .loading-container {
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(2, 6, 23, 0.8);
+        backdrop-filter: blur(4px);
         display: flex;
         align-items: center;
         justify-content: center;
-        min-height: 200px;
-    }
-
-    .icon-only {
-        display: none;
-    }
-
-    .sidebar.collapsed .icon-only {
-        display: inline-block;
-    }
-
-    .status-badge {
-        display: inline-flex;
-        align-items: center;
-        padding: 2px 8px;
-        border-radius: 20px;
-        font-size: 11px;
-        font-weight: 500;
-    }
-
-    .status-badge.online {
-        background: rgba(16, 185, 129, 0.2);
-        color: var(--success);
-    }
-
-    .status-badge.offline {
-        background: rgba(100, 116, 139, 0.2);
-        color: var(--gray);
-    }
-
-    @keyframes slideInLeft {
-        from {
-            transform: translateX(-100%);
-        }
-        to {
-            transform: translateX(0);
-        }
+        z-index: 100;
     }
 </style>
 <body>
+    <!-- Toast Container -->
     <div class="toast-container" id="toast-container"></div>
+
+    <!-- Custom Confirm Modal -->
     <div class="confirm-modal" id="confirm-modal">
         <div class="confirm-content">
             <div class="confirm-icon">
@@ -991,6 +762,7 @@
         </div>
     </div>
 
+    <!-- Image Preview Modal -->
     <div class="modal" id="image-modal">
         <div class="modal-content" style="max-width: 800px; background: transparent; border: none; padding: 0;">
             <img id="modal-image" src="" style="width: 100%; border-radius: 16px;" alt="Preview">
@@ -998,6 +770,7 @@
     </div>
 
     <div class="app-container">
+        <!-- Sidebar -->
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <div class="logo-wrapper">
@@ -1009,134 +782,100 @@
                         <span class="logo-badge">Admin Portal</span>
                     </div>
                 </div>
-                <button class="toggle-sidebar" id="toggle-sidebar" onclick="toggleSidebar()">
-                    <i class="fas fa-chevron-left"></i>
-                </button>
             </div>
 
             <div class="nav-section">
                 <div class="nav-label">Main</div>
-                <div class="nav-item active" onclick="switchMainTab('dashboard')" title="Dashboard">
+                <div class="nav-item active" onclick="switchMainTab('dashboard')">
                     <i class="fas fa-chart-pie"></i>
                     <span>Dashboard</span>
-                    <span class="icon-only" style="display: none;">DB</span>
                 </div>
-                <div class="nav-item" onclick="switchMainTab('announcements')" title="Announcements">
+                <div class="nav-item" onclick="switchMainTab('announcements')">
                     <i class="fas fa-bullhorn"></i>
                     <span>Announcements</span>
-                    <span class="icon-only" style="display: none;">Ann</span>
                 </div>
-                <div class="nav-item" onclick="switchMainTab('assignments')" title="Assignments">
+                <div class="nav-item" onclick="switchMainTab('assignments')">
                     <i class="fas fa-tasks"></i>
                     <span>Assignments</span>
-                    <span class="icon-only" style="display: none;">Asg</span>
                 </div>
-                <div class="nav-item" onclick="switchMainTab('topics')" title="Units">
-                    <i class="fas fa-book"></i>
+                <div class="nav-item" onclick="switchMainTab('topics')">
+                    <i class="fas fa-folder"></i>
                     <span>Units</span>
-                    <span class="icon-only" style="display: none;">Unt</span>
                 </div>
-                <div class="nav-item" onclick="switchMainTab('timetable')" title="Timetable">
+                <div class="nav-item" onclick="switchMainTab('timetable')">
                     <i class="fas fa-calendar"></i>
                     <span>Timetable</span>
-                    <span class="icon-only" style="display: none;">TT</span>
                 </div>
 
-                <div class="nav-label" style="margin-top: 20px;">Resources</div>
-                <div class="nav-item" onclick="window.location.href='/files'" title="Files">
+                <div class="nav-label" style="margin-top: 20px;">Quick Access</div>
+                <div class="nav-item" onclick="window.location.href='/files'">
                     <i class="fas fa-file"></i>
                     <span>Files</span>
-                    <span class="icon-only" style="display: none;">Fls</span>
                 </div>
-                <div class="nav-item" onclick="window.location.href='/store'" title="File Store">
-                    <i class="fas fa-folder-open"></i>
+                <div class="nav-item" onclick="window.location.href='/store'">
+                    <i class="fas fa-archive"></i>
                     <span>Archives</span>
-                    <span class="icon-only" style="display: none;">Arc</span>
                 </div>
-                <div class="nav-item" onclick="window.location.href='/past-papers'" title="Past Papers">
+                <div class="nav-item" onclick="window.location.href='/past-papers'">
                     <i class="fas fa-scroll"></i>
                     <span>Papers</span>
-                    <span class="icon-only" style="display: none;">Pap</span>
                 </div>
 
-                <div class="nav-label" style="margin-top: 20px;">Administration</div>
-                <div class="nav-item" onclick="window.location.href='/admin/users'" title="User Management">
+                <div class="nav-label" style="margin-top: 20px;">Admin</div>
+                <div class="nav-item" onclick="window.location.href='/admin/users'">
                     <i class="fas fa-users"></i>
                     <span>Users</span>
-                    <span class="icon-only" style="display: none;">Usr</span>
                 </div>
-                <div class="nav-item" onclick="window.location.href='/admin/secret-code'" title="Secret Code">
-                    <i class="fas fa-shield-alt"></i>
+                <div class="nav-item" onclick="window.location.href='/admin/secret-code'">
+                    <i class="fas fa-shield"></i>
                     <span>Secret Code</span>
-                    <span class="icon-only" style="display: none;">Cod</span>
                 </div>
-                <div class="nav-item" onclick="window.location.href='/admin/operator'" title="Operator">
-                    <i class="fas fa-cog"></i>
-                    <span>Operator</span>
-                    <span class="icon-only" style="display: none;">Ops</span>
-                </div>
-                <div class="nav-item" onclick="window.location.href='/admin/clone-db'" title="Clone Database">
+                <div class="nav-item" onclick="window.location.href='/admin/clone-db'">
                     <i class="fas fa-database"></i>
                     <span>Database</span>
-                    <span class="icon-only" style="display: none;">DB</span>
-                </div>
-                <div class="nav-item" onclick="window.location.href='/profile'" title="Profile">
-                    <i class="fas fa-user"></i>
-                    <span>Profile</span>
-                    <span class="icon-only" style="display: none;">Prf</span>
-                </div>
-                <div class="nav-item" onclick="window.location.href='/messages'" title="Messages">
-                    <i class="fas fa-comments"></i>
-                    <span>Messages</span>
-                    <span class="icon-only" style="display: none;">Msg</span>
-                </div>
-            </div>
-
-            <div class="nav-section" style="border-top: 1px solid var(--border);">
-                <div class="nav-item" onclick="logout()">
-                    <i class="fas fa-sign-out-alt"></i>
-                    <span>Logout</span>
-                    <span class="icon-only" style="display: none;">Ext</span>
                 </div>
             </div>
         </aside>
 
+        <!-- Main Content Area -->
         <main class="main-content">
+            <!-- Top Bar -->
             <div class="top-bar">
-                <div class="top-bar-left">
-                    <button class="menu-toggle" id="menu-toggle" onclick="toggleMobileMenu()">
-                        <i class="fas fa-bars"></i>
-                    </button>
-                    <h1 class="page-title" id="page-title">Dashboard</h1>
-                </div>
+                <button class="btn-icon" id="menu-toggle" style="display: none;">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h1 class="page-title" id="page-title">Dashboard</h1>
                 <div class="user-menu">
-                    <button class="btn-icon" onclick="window.location.href='/messages'">
-                        <i class="fas fa-comments"></i>
-                    </button>
-                    <button class="btn-icon" onclick="window.location.href='/profile'">
-                        <i class="fas fa-user"></i>
-                    </button>
                     <button class="btn-icon" onclick="logout()">
                         <i class="fas fa-sign-out-alt"></i>
                     </button>
-                    <div class="user-avatar" id="user-avatar" onclick="window.location.href='/profile'">A</div>
+                    <div class="user-avatar" id="user-avatar">A</div>
                 </div>
             </div>
 
+            <!-- Content Area with Scroll -->
             <div class="content-area" id="content-area">
+                <!-- Quick Actions -->
                 <div class="quick-actions" id="quick-actions">
+                    <!-- Dynamically filled -->
                 </div>
+
+                <!-- Sub Tabs -->
                 <div class="sub-tabs" id="sub-tabs">
+                    <!-- Dynamically filled -->
                 </div>
+
+                <!-- Content Grid -->
                 <div id="content-container" class="content-grid">
-                    <div class="loading-container">
-                        <div class="spinner"></div>
+                    <div class="loading-container" style="grid-column: 1/-1; text-align: center; padding: 60px;">
+                        <div class="spinner" style="margin: 0 auto;"></div>
                     </div>
                 </div>
             </div>
         </main>
     </div>
 
+    <!-- Create Modal (Universal) -->
     <div class="modal" id="create-modal">
         <div class="modal-content">
             <h3 class="text-xl font-bold mb-4" id="modal-title">Create New</h3>
@@ -1144,26 +883,21 @@
                 <input type="hidden" id="modal-id">
                 <div id="modal-fields"></div>
                 
+                <!-- File Upload Section (for announcements/assignments) -->
                 <div id="modal-file-section" style="display: none;">
                     <div class="file-input-wrapper">
-                        <input type="file" id="modal-file">
+                        <input type="file" id="modal-file" style="display: none;">
                         <label for="modal-file" class="file-input-label">
-                            <i class="fas fa-upload mr-2"></i>Attach File (Optional)
+                            <i class="fas fa-upload mr-2"></i>Attach File
                         </label>
                     </div>
-                    <div id="modal-file-info" class="file-info" style="display: none;">
-                        <div style="display: flex; align-items: center; gap: 8px;">
-                            <i class="fas fa-file"></i>
-                            <span id="modal-file-name"></span>
-                        </div>
-                        <button type="button" class="btn-icon" onclick="clearModalFile()">
-                            <i class="fas fa-times"></i>
-                        </button>
+                    <div id="modal-file-info" class="file-info" style="display: none; margin-top: 12px;">
+                        <!-- Filled by JS -->
                     </div>
                 </div>
 
-                <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px;">
-                    <button type="button" class="btn-sm secondary" onclick="closeCreateModal()">Cancel</button>
+                <div class="flex justify-end space-x-3 mt-4">
+                    <button type="button" class="btn-sm cancel" onclick="closeCreateModal()">Cancel</button>
                     <button type="submit" class="btn-sm primary" id="modal-submit">Save</button>
                 </div>
             </form>
@@ -1171,6 +905,7 @@
     </div>
 
     <script>
+        // ==================== Configuration ====================
         const API_BASE = '/api';
         const ENDPOINTS = {
             ANNOUNCEMENTS: `${API_BASE}/announcements`,
@@ -1178,54 +913,18 @@
             TIMETABLE: `${API_BASE}/timetable`,
             TOPICS: `${API_BASE}/topics`,
             FILES: `${API_BASE}/files`,
-            USERS: `${API_BASE}/users`,
-            CURRENT_USER: `${API_BASE}/user/profile`
+            USERS: `${API_BASE}/users`
         };
 
+        // ==================== State Management ====================
         let currentMainTab = 'dashboard';
         let currentSubTab = 'announcements';
         let currentEditingId = null;
         let currentFile = null;
         let toastManager;
         let confirmResolver = null;
-        let isSidebarCollapsed = false;
 
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            isSidebarCollapsed = !isSidebarCollapsed;
-            sidebar.classList.toggle('collapsed');
-            localStorage.setItem('sidebarCollapsed', isSidebarCollapsed);
-        }
-
-        function toggleMobileMenu() {
-            const sidebar = document.getElementById('sidebar');
-            sidebar.classList.toggle('mobile-open');
-        }
-
-        const savedState = localStorage.getItem('sidebarCollapsed');
-        if (savedState === 'true') {
-            document.getElementById('sidebar').classList.add('collapsed');
-            isSidebarCollapsed = true;
-        }
-
-        document.addEventListener('click', (e) => {
-            const sidebar = document.getElementById('sidebar');
-            const menuToggle = document.getElementById('menu-toggle');
-            
-            if (window.innerWidth <= 768) {
-                if (!sidebar.contains(e.target) && !menuToggle.contains(e.target) && sidebar.classList.contains('mobile-open')) {
-                    sidebar.classList.remove('mobile-open');
-                }
-            }
-        });
-
-        window.addEventListener('resize', () => {
-            const sidebar = document.getElementById('sidebar');
-            if (window.innerWidth > 768) {
-                sidebar.classList.remove('mobile-open');
-            }
-        });
-
+        // ==================== Custom Confirm ====================
         function showConfirm(title, message) {
             return new Promise((resolve) => {
                 confirmResolver = resolve;
@@ -1251,6 +950,7 @@
             }
         });
 
+        // ==================== Toast System ====================
         class ToastManager {
             constructor() {
                 this.container = document.getElementById('toast-container');
@@ -1268,7 +968,7 @@
                 }[type];
 
                 toast.innerHTML = `
-                    <i class="fas ${icon}" style="color: var(--${type}); font-size: 20px;"></i>
+                    <i class="fas ${icon}" style="color: var(--${type});"></i>
                     <div style="flex: 1;">
                         <div style="font-weight: 600; margin-bottom: 4px;">${title || titles[type]}</div>
                         <div style="font-size: 13px; color: var(--gray);">${message}</div>
@@ -1286,6 +986,7 @@
 
         toastManager = new ToastManager();
 
+        // ==================== Utility Functions ====================
         function escapeHtml(str) {
             if (!str && str !== 0) return '';
             return String(str)
@@ -1302,8 +1003,7 @@
                 const d = new Date(dateString);
                 return d.toLocaleDateString('en-US', { 
                     month: 'short', 
-                    day: 'numeric',
-                    year: 'numeric',
+                    day: 'numeric', 
                     hour: '2-digit', 
                     minute: '2-digit' 
                 });
@@ -1318,16 +1018,14 @@
             const icons = {
                 pdf: 'fa-file-pdf', doc: 'fa-file-word', docx: 'fa-file-word',
                 txt: 'fa-file-alt', zip: 'fa-file-archive', jpg: 'fa-file-image',
-                jpeg: 'fa-file-image', png: 'fa-file-image', gif: 'fa-file-image',
-                mp4: 'fa-file-video', mp3: 'fa-file-audio', xls: 'fa-file-excel',
-                xlsx: 'fa-file-excel', ppt: 'fa-file-powerpoint', pptx: 'fa-file-powerpoint'
+                jpeg: 'fa-file-image', png: 'fa-file-image', gif: 'fa-file-image'
             };
             return icons[ext] || 'fa-file';
         }
 
         function isImageFile(filename) {
             if (!filename) return false;
-            return ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(filename.split('.').pop().toLowerCase());
+            return ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(filename.split('.').pop().toLowerCase());
         }
 
         function formatFileSize(bytes) {
@@ -1338,25 +1036,6 @@
         }
 
         // ==================== API Functions ====================
-
-        // Then fetch and store
-        async function loadUserData() {
-            try {
-                const response = await fetch(ENDPOINTS.CURRENT_USER);
-                if (!response.ok) throw new Error('Failed to fetch user');
-                const userData = await response.json();
-                localStorage.setItem('user', JSON.stringify(userData));
-                document.getElementById('user-avatar').textContent = 
-                    (userData.username || 'A').charAt(0).toUpperCase();
-
-                return userData;
-            } catch (error) {
-                console.error('Error loading user:', error);
-                toastManager.show('Failed to load user data', 'error');
-                return null;
-            }
-        }
-
         async function fetchData(url) {
             try {
                 const res = await fetch(url);
@@ -1398,15 +1077,8 @@
             document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
             event.currentTarget.classList.add('active');
             
-            const titles = {
-                dashboard: 'Dashboard',
-                announcements: 'Announcements',
-                assignments: 'Assignments',
-                topics: 'Units',
-                timetable: 'Timetable'
-            };
-            
-            document.getElementById('page-title').textContent = titles[tab] || tab;
+            document.getElementById('page-title').textContent = 
+                tab.charAt(0).toUpperCase() + tab.slice(1);
             
             updateQuickActions(tab);
             updateSubTabs(tab);
@@ -1415,31 +1087,14 @@
 
         function updateQuickActions(tab) {
             const actions = {
-                announcements: [
-                    { icon: 'fa-plus', text: 'New Announcement', action: 'createAnnouncement' },
-                    { icon: 'fa-filter', text: 'Filter', action: 'filterContent' },
-                    { icon: 'fa-search', text: 'Search', action: 'searchContent' }
-                ],
-                assignments: [
-                    { icon: 'fa-plus', text: 'New Assignment', action: 'createAssignment' },
-                    { icon: 'fa-filter', text: 'Filter', action: 'filterContent' },
-                    { icon: 'fa-calendar', text: 'Due Soon', action: 'filterDueSoon' }
-                ],
-                topics: [
-                    { icon: 'fa-plus', text: 'New Unit', action: 'createTopic' },
-                    { icon: 'fa-filter', text: 'Filter', action: 'filterContent' },
-                    { icon: 'fa-chart-bar', text: 'Statistics', action: 'showStats' }
-                ],
-                timetable: [
-                    { icon: 'fa-plus', text: 'New Slot', action: 'createTimetable' },
-                    { icon: 'fa-filter', text: 'Filter', action: 'filterContent' },
-                    { icon: 'fa-print', text: 'Print', action: 'printTimetable' }
-                ],
+                announcements: [{ icon: 'fa-plus', text: 'New Announcement', action: 'createAnnouncement' }],
+                assignments: [{ icon: 'fa-plus', text: 'New Assignment', action: 'createAssignment' }],
+                topics: [{ icon: 'fa-plus', text: 'New Unit', action: 'createTopic' }],
+                timetable: [{ icon: 'fa-plus', text: 'New Slot', action: 'createTimetable' }],
                 dashboard: [
                     { icon: 'fa-bullhorn', text: 'Announcements', action: 'switchMainTab:announcements' },
                     { icon: 'fa-tasks', text: 'Assignments', action: 'switchMainTab:assignments' },
-                    { icon: 'fa-folder', text: 'Units', action: 'switchMainTab:topics' },
-                    { icon: 'fa-calendar', text: 'Timetable', action: 'switchMainTab:timetable' }
+                    { icon: 'fa-folder', text: 'Units', action: 'switchMainTab:topics' }
                 ]
             };
 
@@ -1458,28 +1113,20 @@
             const subTabs = {
                 announcements: [
                     { id: 'announcements', name: 'All Announcements' },
-                    { id: 'my-announcements', name: 'My Announcements' },
-                    { id: 'highlighted', name: 'Highlighted' },
-                    { id: 'archived', name: 'Archived' }
+                    { id: 'my-announcements', name: 'My Announcements' }
                 ],
                 assignments: [
                     { id: 'assignments', name: 'All Assignments' },
                     { id: 'due-soon', name: 'Due Soon' },
-                    { id: 'overdue', name: 'Overdue' },
-                    { id: 'completed', name: 'Completed' },
-                    { id: 'draft', name: 'Drafts' }
+                    { id: 'completed', name: 'Completed' }
                 ],
                 topics: [
                     { id: 'topics', name: 'All Units' },
-                    { id: 'my-topics', name: 'My Units' },
-                    { id: 'active', name: 'Active' },
-                    { id: 'archived', name: 'Archived' }
+                    { id: 'my-topics', name: 'My Units' }
                 ],
                 timetable: [
                     { id: 'timetable', name: 'Weekly View' },
-                    { id: 'today', name: 'Today' },
-                    { id: 'tomorrow', name: 'Tomorrow' },
-                    { id: 'this-week', name: 'This Week' }
+                    { id: 'today', name: 'Today' }
                 ],
                 dashboard: []
             };
@@ -1514,12 +1161,10 @@
             
             // Show loading
             container.innerHTML = `
-                <div class="loading-container">
-                    <div class="spinner"></div>
+                <div class="loading-container" style="grid-column: 1/-1; text-align: center; padding: 60px;">
+                    <div class="spinner" style="margin: 0 auto;"></div>
                 </div>
             `;
-
-            await new Promise(resolve => setTimeout(resolve, 300));
 
             switch(mainTab) {
                 case 'announcements':
@@ -1543,20 +1188,13 @@
         async function loadAnnouncements(filter = 'announcements') {
             const items = await fetchData(ENDPOINTS.ANNOUNCEMENTS);
             const container = document.getElementById('content-container');
-            let filtered = items;
-            if (filter === 'my-announcements') {
-                const user = JSON.parse(localStorage.getItem('user') || '{}');
-                filtered = items.filter(a => a.author?.id === user.id);
-            } else if (filter === 'highlighted') {
-                filtered = items.filter(a => a.highlight);
-            }
 
-            if (!filtered || filtered.length === 0) {
+            if (!items || items.length === 0) {
                 container.innerHTML = `
-                    <div class="empty-state">
+                    <div class="empty-state" style="grid-column: 1/-1;">
                         <i class="fas fa-bullhorn"></i>
-                        <h3>No Announcements Found</h3>
-                        <p>${filter === 'my-announcements' ? "You haven't created any announcements yet." : 'Create your first announcement to get started'}</p>
+                        <h3>No Announcements</h3>
+                        <p>Create your first announcement to get started</p>
                         <button class="btn-sm primary" onclick="createAnnouncement()">
                             <i class="fas fa-plus mr-1"></i> Create Announcement
                         </button>
@@ -1565,24 +1203,19 @@
                 return;
             }
 
-            container.innerHTML = filtered.map(item => `
+            container.innerHTML = items.map(item => `
                 <div class="card">
                     <div class="card-header">
                         <div>
-                            <h3 class="card-title">${escapeHtml(item.title || '')}</h3>
+                            <h3 class="card-title">${escapeHtml(item.title || 'Untitled')}</h3>
                             <div class="card-subtitle">
                                 <span class="year-badge ${item.author?.year == 5 ? 'all' : `year${item.author?.year || 1}`}">
                                     <i class="fas fa-graduation-cap"></i>
                                     ${item.author?.year == 5 ? 'All Years' : `Year ${item.author?.year || 1}`}
                                 </span>
-                                <span>
+                                <span style="margin-left: 8px;">
                                     <i class="fas fa-user"></i> ${escapeHtml(item.author?.username || 'Unknown')}
                                 </span>
-                                ${item.highlight ? `
-                                    <span class="status-badge" style="background: rgba(245, 158, 11, 0.2); color: var(--warning);">
-                                        <i class="fas fa-star"></i> Highlighted
-                                    </span>
-                                ` : ''}
                             </div>
                         </div>
                         <div style="display: flex; gap: 4px;">
@@ -1595,7 +1228,7 @@
                         </div>
                     </div>
                     <div class="card-body">
-                        <p style="color: var(--gray); line-height: 1.6; margin-bottom: 16px;">${escapeHtml(item.content)}</p>
+                        <p style="color: var(--gray); line-height: 1.6;">${escapeHtml(item.content)}</p>
                         
                         ${item.file_name ? `
                             <div class="attachment-preview" onclick="window.open('/announcement-file/${item.id}/${encodeURIComponent(item.file_name)}', '_blank')">
@@ -1604,9 +1237,8 @@
                                 </div>
                                 <div style="flex: 1;">
                                     <div style="font-weight: 500;">${escapeHtml(item.file_name)}</div>
-                                    <div style="font-size: 12px; color: var(--gray);">${formatFileSize(item.file_size)} • Click to download</div>
+                                    <div style="font-size: 12px; color: var(--gray);">Click to download</div>
                                 </div>
-                                <i class="fas fa-download" style="color: var(--gray);"></i>
                             </div>
                         ` : ''}
                     </div>
@@ -1614,11 +1246,6 @@
                         <span style="color: var(--gray); font-size: 12px;">
                             <i class="fas fa-clock"></i> ${formatDate(item.created_at)}
                         </span>
-                        ${item.updated_at !== item.created_at ? `
-                            <span style="color: var(--gray); font-size: 12px; margin-left: 12px;">
-                                <i class="fas fa-pencil-alt"></i> Edited ${formatDate(item.updated_at)}
-                            </span>
-                        ` : ''}
                     </div>
                 </div>
             `).join('');
@@ -1627,25 +1254,13 @@
         async function loadAssignments(filter = 'assignments') {
             const items = await fetchData(ENDPOINTS.ASSIGNMENTS);
             const container = document.getElementById('content-container');
-            const now = new Date();
 
-            let filtered = items;
-            if (filter === 'due-soon') {
-                filtered = items.filter(a => {
-                    const due = new Date(a.due_date);
-                    const diffDays = Math.ceil((due - now) / (1000 * 60 * 60 * 24));
-                    return diffDays > 0 && diffDays <= 3;
-                });
-            } else if (filter === 'overdue') {
-                filtered = items.filter(a => new Date(a.due_date) < now);
-            }
-
-            if (!filtered || filtered.length === 0) {
+            if (!items || items.length === 0) {
                 container.innerHTML = `
-                    <div class="empty-state">
+                    <div class="empty-state" style="grid-column: 1/-1;">
                         <i class="fas fa-tasks"></i>
-                        <h3>No Assignments Found</h3>
-                        <p>${filter === 'due-soon' ? 'No assignments due soon' : 'Create your first assignment to get started'}</p>
+                        <h3>No Assignments</h3>
+                        <p>Create your first assignment to get started</p>
                         <button class="btn-sm primary" onclick="createAssignment()">
                             <i class="fas fa-plus mr-1"></i> Create Assignment
                         </button>
@@ -1654,14 +1269,11 @@
                 return;
             }
 
-            container.innerHTML = filtered.map(item => {
+            container.innerHTML = items.map(item => {
                 const due = new Date(item.due_date);
+                const now = new Date();
                 const isOverdue = due < now;
-                const diffDays = Math.ceil((due - now) / (1000 * 60 * 60 * 24));
-                const timeLeft = isOverdue ? 'Overdue' : 
-                               diffDays === 0 ? 'Due today' :
-                               diffDays === 1 ? 'Due tomorrow' :
-                               `${diffDays} days left`;
+                const timeLeft = Math.ceil((due - now) / (1000 * 60 * 60 * 24));
 
                 return `
                     <div class="card">
@@ -1674,7 +1286,7 @@
                                         ${item.creator?.year == 5 ? 'All Years' : `Year ${item.creator?.year || 1}`}
                                     </span>
                                     ${item.topic?.name ? `
-                                        <span>
+                                        <span style="margin-left: 8px;">
                                             <i class="fas fa-folder"></i> ${escapeHtml(item.topic.name)}
                                         </span>
                                     ` : ''}
@@ -1690,17 +1302,19 @@
                             </div>
                         </div>
                         <div class="card-body">
-                            <p style="color: var(--gray); margin-bottom: 16px;">${escapeHtml(item.description)}</p>
+                            <p style="color: var(--gray); margin-bottom: 12px;">${escapeHtml(item.description)}</p>
                             
-                            <div style="background: rgba(0,0,0,0.2); padding: 12px; border-radius: 12px; margin-bottom: 16px;">
+                            <div style="background: rgba(0,0,0,0.2); padding: 12px; border-radius: 12px;">
                                 <div style="display: flex; justify-content: space-between; align-items: center;">
                                     <span style="color: ${isOverdue ? 'var(--danger)' : 'var(--success)'}; font-weight: 500;">
                                         <i class="fas ${isOverdue ? 'fa-exclamation-circle' : 'fa-clock'}"></i>
                                         Due: ${formatDate(item.due_date)}
                                     </span>
-                                    <span style="color: ${isOverdue ? 'var(--danger)' : 'var(--gray)'}; font-size: 12px; font-weight: 500;">
-                                        ${timeLeft}
-                                    </span>
+                                    ${!isOverdue ? `
+                                        <span style="color: var(--gray); font-size: 12px;">
+                                            ${timeLeft} day${timeLeft !== 1 ? 's' : ''} left
+                                        </span>
+                                    ` : ''}
                                 </div>
                             </div>
 
@@ -1711,9 +1325,8 @@
                                     </div>
                                     <div style="flex: 1;">
                                         <div style="font-weight: 500;">${escapeHtml(item.file_name)}</div>
-                                        <div style="font-size: 12px; color: var(--gray);">${formatFileSize(item.file_size)} • Click to download</div>
+                                        <div style="font-size: 12px; color: var(--gray);">Click to download</div>
                                     </div>
-                                    <i class="fas fa-download" style="color: var(--gray);"></i>
                                 </div>
                             ` : ''}
                         </div>
@@ -1728,9 +1341,9 @@
 
             if (!items || items.length === 0) {
                 container.innerHTML = `
-                    <div class="empty-state">
+                    <div class="empty-state" style="grid-column: 1/-1;">
                         <i class="fas fa-folder"></i>
-                        <h3>No Units Found</h3>
+                        <h3>No Units</h3>
                         <p>Create your first unit to get started</p>
                         <button class="btn-sm primary" onclick="createTopic()">
                             <i class="fas fa-plus mr-1"></i> Create Unit
@@ -1750,9 +1363,6 @@
                                     <i class="fas fa-graduation-cap"></i>
                                     ${item.year == 5 ? 'All Years' : `Year ${item.year || 1}`}
                                 </span>
-                                <span>
-                                    <i class="fas fa-chalkboard-teacher"></i> ${escapeHtml(item.lecturer || 'TBA')}
-                                </span>
                             </div>
                         </div>
                         <div style="display: flex; gap: 4px;">
@@ -1768,25 +1378,15 @@
                         </div>
                     </div>
                     <div class="card-body">
-                        <p style="color: var(--gray); margin-bottom: 16px;">${escapeHtml(item.description || 'No description available')}</p>
+                        <p style="color: var(--gray); margin-bottom: 12px;">${escapeHtml(item.description || 'No description')}</p>
                         
                         <div style="background: rgba(0,0,0,0.2); padding: 12px; border-radius: 12px;">
-                            <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
-                                <span><i class="fas fa-user"></i> ${escapeHtml(item.lecturer || 'TBA')}</span>
+                            <div style="display: flex; align-items: center; gap: 16px;">
+                                <span><i class="fas fa-chalkboard-teacher"></i> ${escapeHtml(item.lecturer || 'TBA')}</span>
                                 ${item.contact ? `
                                     <span><i class="fas fa-phone"></i> ${escapeHtml(item.contact)}</span>
                                 ` : ''}
-                                <span><i class="fas fa-clock"></i> Created ${formatDate(item.created_at)}</span>
                             </div>
-                        </div>
-                        
-                        <div style="margin-top: 16px; display: flex; gap: 8px;">
-                            <button class="btn-sm primary" onclick="window.location.href='/material/${item.id}'">
-                                <i class="fas fa-book-open"></i> View Materials
-                            </button>
-                            <button class="btn-sm secondary" onclick="window.location.href='/assignments?topic=${item.id}'">
-                                <i class="fas fa-tasks"></i> Assignments
-                            </button>
                         </div>
                     </div>
                 </div>
@@ -1796,8 +1396,6 @@
         async function loadTimetable(filter = 'timetable') {
             const raw = await fetchData(ENDPOINTS.TIMETABLE);
             const container = document.getElementById('content-container');
-            const now = new Date();
-            const today = now.toLocaleDateString('en-US', { weekday: 'long' });
 
             let slots = [];
             if (Array.isArray(raw) && raw.length && raw[0].day && raw[0].slots) {
@@ -1808,23 +1406,12 @@
                 slots = raw;
             }
 
-            // Apply filters
-            let filtered = slots;
-            if (filter === 'today') {
-                filtered = slots.filter(s => (s.day_of_week || s.day) === today);
-            } else if (filter === 'tomorrow') {
-                const tomorrow = new Date(now);
-                tomorrow.setDate(tomorrow.getDate() + 1);
-                const tomorrowDay = tomorrow.toLocaleDateString('en-US', { weekday: 'long' });
-                filtered = slots.filter(s => (s.day_of_week || s.day) === tomorrowDay);
-            }
-
-            if (!filtered || filtered.length === 0) {
+            if (!slots || slots.length === 0) {
                 container.innerHTML = `
-                    <div class="empty-state">
+                    <div class="empty-state" style="grid-column: 1/-1;">
                         <i class="fas fa-calendar"></i>
-                        <h3>No Timetable Slots Found</h3>
-                        <p>${filter === 'today' ? 'No classes scheduled for today' : 'Create your first timetable slot'}</p>
+                        <h3>No Timetable</h3>
+                        <p>Create your first timetable slot</p>
                         <button class="btn-sm primary" onclick="createTimetable()">
                             <i class="fas fa-plus mr-1"></i> Add Slot
                         </button>
@@ -1833,7 +1420,7 @@
                 return;
             }
 
-            const grouped = filtered.reduce((acc, slot) => {
+            const grouped = slots.reduce((acc, slot) => {
                 const day = slot.day_of_week || slot.day || 'Unsorted';
                 if (!acc[day]) acc[day] = [];
                 acc[day].push(slot);
@@ -1849,24 +1436,18 @@
                     <div class="card" style="grid-column: 1/-1;">
                         <div class="card-header">
                             <h3 class="card-title">${day}</h3>
-                            <span class="status-badge" style="background: rgba(99, 102, 241, 0.2); color: var(--primary);">
-                                ${grouped[day].length} slot${grouped[day].length > 1 ? 's' : ''}
-                            </span>
                         </div>
                         <div class="card-body">
                             ${grouped[day].map(slot => `
                                 <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border);">
-                                    <div style="flex: 1;">
-                                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-                                            <span style="font-weight: 500;">${escapeHtml(slot.subject)}</span>
-                                            <span class="year-badge ${slot.year == 5 ? 'all' : `year${slot.year || 1}`}" style="font-size: 10px; padding: 2px 8px;">
-                                                Y${slot.year || 1}
-                                            </span>
-                                        </div>
-                                        <div style="font-size: 13px; color: var(--gray); display: flex; gap: 16px; flex-wrap: wrap;">
-                                            <span><i class="fas fa-clock"></i> ${escapeHtml(slot.start_time)} - ${escapeHtml(slot.end_time)}</span>
-                                            <span><i class="fas fa-chalkboard-teacher"></i> ${escapeHtml(slot.teacher || 'TBA')}</span>
-                                            <span><i class="fas fa-door-open"></i> ${escapeHtml(slot.room || 'TBA')}</span>
+                                    <div>
+                                        <div style="font-weight: 500;">${escapeHtml(slot.subject)}</div>
+                                        <div style="font-size: 13px; color: var(--gray);">
+                                            <span>${escapeHtml(slot.start_time)} - ${escapeHtml(slot.end_time)}</span>
+                                            <span style="margin: 0 8px;">•</span>
+                                            <span>${escapeHtml(slot.teacher || 'TBA')}</span>
+                                            <span style="margin: 0 8px;">•</span>
+                                            <span>${escapeHtml(slot.room || 'TBA')}</span>
                                         </div>
                                     </div>
                                     <div style="display: flex; gap: 4px;">
@@ -1886,52 +1467,15 @@
         }
 
         async function loadDashboard() {
-            const [announcements, assignments, topics, users] = await Promise.all([
+            const [announcements, assignments, topics] = await Promise.all([
                 fetchData(ENDPOINTS.ANNOUNCEMENTS),
                 fetchData(ENDPOINTS.ASSIGNMENTS),
-                fetchData(ENDPOINTS.TOPICS),
-                fetchData(ENDPOINTS.USERS)
+                fetchData(ENDPOINTS.TOPICS)
             ]);
-
-            const now = new Date();
-            const upcomingAssignments = (assignments || [])
-                .filter(a => new Date(a.due_date) > now)
-                .sort((a, b) => new Date(a.due_date) - new Date(b.due_date))
-                .slice(0, 5);
-
-            const recentAnnouncements = (announcements || [])
-                .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-                .slice(0, 5);
 
             const container = document.getElementById('content-container');
             
             container.innerHTML = `
-                <div class="card" style="grid-column: 1/-1;">
-                    <div class="card-header">
-                        <h3 class="card-title">Quick Overview</h3>
-                    </div>
-                    <div class="card-body">
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px;">
-                            <div style="text-align: center; padding: 20px; background: rgba(99, 102, 241, 0.1); border-radius: 16px;">
-                                <div style="font-size: 32px; font-weight: 700; color: var(--primary);">${announcements?.length || 0}</div>
-                                <div style="font-size: 14px; color: var(--gray);">Announcements</div>
-                            </div>
-                            <div style="text-align: center; padding: 20px; background: rgba(139, 92, 246, 0.1); border-radius: 16px;">
-                                <div style="font-size: 32px; font-weight: 700; color: var(--secondary);">${assignments?.length || 0}</div>
-                                <div style="font-size: 14px; color: var(--gray);">Assignments</div>
-                            </div>
-                            <div style="text-align: center; padding: 20px; background: rgba(16, 185, 129, 0.1); border-radius: 16px;">
-                                <div style="font-size: 32px; font-weight: 700; color: var(--success);">${topics?.length || 0}</div>
-                                <div style="font-size: 14px; color: var(--gray);">Units</div>
-                            </div>
-                            <div style="text-align: center; padding: 20px; background: rgba(245, 158, 11, 0.1); border-radius: 16px;">
-                                <div style="font-size: 32px; font-weight: 700; color: var(--warning);">${users?.length || 0}</div>
-                                <div style="font-size: 14px; color: var(--gray);">Users</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
                 <div class="card">
                     <div class="card-header">
                         <h3 class="card-title">Recent Announcements</h3>
@@ -1940,17 +1484,12 @@
                         </button>
                     </div>
                     <div class="card-body">
-                        ${recentAnnouncements.length > 0 ? recentAnnouncements.map(a => `
+                        ${(announcements || []).slice(0, 3).map(a => `
                             <div style="padding: 12px 0; border-bottom: 1px solid var(--border);">
-                                <div style="font-weight: 500;">${escapeHtml(a.title || '')}</div>
-                                <div style="font-size: 12px; color: var(--gray); display: flex; justify-content: space-between; margin-top: 4px;">
-                                    <span>${escapeHtml(a.author?.username || 'Unknown')}</span>
-                                    <span>${formatDate(a.created_at)}</span>
-                                </div>
+                                <div style="font-weight: 500;">${escapeHtml(a.title || 'Untitled')}</div>
+                                <div style="font-size: 12px; color: var(--gray);">${formatDate(a.created_at)}</div>
                             </div>
-                        `).join('') : `
-                            <p style="color: var(--gray); text-align: center; padding: 20px;">No recent announcements</p>
-                        `}
+                        `).join('') || '<p style="color: var(--gray);">No announcements</p>'}
                     </div>
                 </div>
 
@@ -1962,25 +1501,12 @@
                         </button>
                     </div>
                     <div class="card-body">
-                        ${upcomingAssignments.length > 0 ? upcomingAssignments.map(a => {
-                            const due = new Date(a.due_date);
-                            const diffDays = Math.ceil((due - now) / (1000 * 60 * 60 * 24));
-                            return `
-                                <div style="padding: 12px 0; border-bottom: 1px solid var(--border);">
-                                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                                        <div>
-                                            <div style="font-weight: 500;">${escapeHtml(a.title)}</div>
-                                            <div style="font-size: 12px; color: var(--gray);">${escapeHtml(a.topic?.name || 'No topic')}</div>
-                                        </div>
-                                        <span style="font-size: 12px; color: ${diffDays <= 2 ? 'var(--warning)' : 'var(--gray)'};">
-                                            ${diffDays === 0 ? 'Today' : diffDays === 1 ? 'Tomorrow' : `${diffDays} days`}
-                                        </span>
-                                    </div>
-                                </div>
-                            `;
-                        }).join('') : `
-                            <p style="color: var(--gray); text-align: center; padding: 20px;">No upcoming assignments</p>
-                        `}
+                        ${(assignments || []).slice(0, 3).map(a => `
+                            <div style="padding: 12px 0; border-bottom: 1px solid var(--border);">
+                                <div style="font-weight: 500;">${escapeHtml(a.title)}</div>
+                                <div style="font-size: 12px; color: var(--gray);">Due: ${formatDate(a.due_date)}</div>
+                            </div>
+                        `).join('') || '<p style="color: var(--gray);">No assignments</p>'}
                     </div>
                 </div>
 
@@ -2003,22 +1529,26 @@
 
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="card-title">Quick Actions</h3>
+                        <h3 class="card-title">Quick Stats</h3>
                     </div>
                     <div class="card-body">
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-                            <button class="btn-sm primary" onclick="createAnnouncement()" style="justify-content: center;">
-                                <i class="fas fa-bullhorn"></i> Announce
-                            </button>
-                            <button class="btn-sm primary" onclick="createAssignment()" style="justify-content: center;">
-                                <i class="fas fa-tasks"></i> Assignment
-                            </button>
-                            <button class="btn-sm primary" onclick="createTopic()" style="justify-content: center;">
-                                <i class="fas fa-folder"></i> Unit
-                            </button>
-                            <button class="btn-sm primary" onclick="createTimetable()" style="justify-content: center;">
-                                <i class="fas fa-calendar"></i> Timetable
-                            </button>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                            <div style="text-align: center;">
+                                <div style="font-size: 24px; font-weight: 700; color: var(--primary);">${announcements?.length || 0}</div>
+                                <div style="font-size: 12px; color: var(--gray);">Announcements</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 24px; font-weight: 700; color: var(--secondary);">${assignments?.length || 0}</div>
+                                <div style="font-size: 12px; color: var(--gray);">Assignments</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 24px; font-weight: 700; color: var(--success);">${topics?.length || 0}</div>
+                                <div style="font-size: 12px; color: var(--gray);">Units</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 24px; font-weight: 700; color: var(--warning);">${(await fetchData(ENDPOINTS.USERS))?.length || 0}</div>
+                                <div style="font-size: 12px; color: var(--gray);">Users</div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -2026,52 +1556,27 @@
         }
 
         // ==================== CRUD Operations ====================
-        function filterContent() {
-            toastManager.show('Filter feature coming soon', 'info');
-        }
-
-        function searchContent() {
-            toastManager.show('Search feature coming soon', 'info');
-        }
-
-        function filterDueSoon() {
-            switchSubTab('due-soon');
-        }
-
-        function showStats() {
-            toastManager.show('Statistics feature coming soon', 'info');
-        }
-
-        function printTimetable() {
-            window.print();
-        }
-
-        function clearModalFile() {
-            currentFile = null;
-            document.getElementById('modal-file').value = '';
-            document.getElementById('modal-file-info').style.display = 'none';
-        }
-
         function createAnnouncement() {
             openCreateModal('announcement', 'Create Announcement', [
                 { type: 'text', id: 'title', placeholder: 'Title (Optional)' },
                 { type: 'textarea', id: 'content', placeholder: 'Content', required: true },
-                { type: 'checkbox', id: 'highlight', label: 'Highlight this announcement' }
+                { type: 'checkbox', id: 'highlight', label: 'Highlight' }
             ], true);
         }
 
         function createAssignment() {
             openCreateModal('assignment', 'Create Assignment', [
-                { type: 'text', id: 'title', placeholder: 'Assignment Title', required: true },
+                { type: 'text', id: 'title', placeholder: 'Title', required: true },
                 { type: 'textarea', id: 'description', placeholder: 'Description', required: true },
                 { type: 'datetime-local', id: 'due_date', required: true },
-                { type: 'select', id: 'topic_id', placeholder: 'Select Topic (Optional)', options: [] }
+                { type: 'select', id: 'topic_id', placeholder: 'Select Topic', options: [] }
             ], true);
             
+            // Load topics for dropdown
             fetchData(ENDPOINTS.TOPICS).then(topics => {
                 const select = document.getElementById('modal-topic_id');
                 if (select) {
-                    select.innerHTML = '<option value="">Select Topic (Optional)</option>' + 
+                    select.innerHTML = '<option value="">Select Topic</option>' + 
                         topics.map(t => `<option value="${t.id}">${escapeHtml(t.name)}</option>`).join('');
                 }
             });
@@ -2080,7 +1585,7 @@
         function createTopic() {
             openCreateModal('topic', 'Create Unit', [
                 { type: 'text', id: 'name', placeholder: 'Unit Name', required: true },
-                { type: 'text', id: 'lecturer', placeholder: 'Lecturer Name', required: true },
+                { type: 'text', id: 'lecturer', placeholder: 'Lecturer', required: true },
                 { type: 'text', id: 'contact', placeholder: 'Contact (Optional)' },
                 { type: 'textarea', id: 'description', placeholder: 'Description (Optional)' }
             ]);
@@ -2090,18 +1595,18 @@
             openCreateModal('timetable', 'Create Timetable Slot', [
                 { type: 'select', id: 'day_of_week', placeholder: 'Select Day', required: true,
                   options: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] },
-                { type: 'time', id: 'start_time', placeholder: 'Start Time', required: true },
-                { type: 'time', id: 'end_time', placeholder: 'End Time', required: true },
+                { type: 'time', id: 'start_time', required: true },
+                { type: 'time', id: 'end_time', required: true },
                 { type: 'text', id: 'subject', placeholder: 'Subject', required: true },
                 { type: 'text', id: 'room', placeholder: 'Room (Optional)' },
                 { type: 'text', id: 'teacher', placeholder: 'Teacher (Optional)' },
-                { type: 'select', id: 'topic_id', placeholder: 'Select Topic (Optional)', options: [] }
+                { type: 'select', id: 'topic_id', placeholder: 'Select Topic', options: [] }
             ]);
 
             fetchData(ENDPOINTS.TOPICS).then(topics => {
                 const select = document.getElementById('modal-topic_id');
                 if (select) {
-                    select.innerHTML = '<option value="">Select Topic (Optional)</option>' + 
+                    select.innerHTML = '<option value="">Select Topic</option>' + 
                         topics.map(t => `<option value="${t.id}">${escapeHtml(t.name)}</option>`).join('');
                 }
             });
@@ -2115,9 +1620,9 @@
                 if (field.type === 'textarea') {
                     return `<textarea class="form-input" id="modal-${field.id}" placeholder="${field.placeholder}" ${field.required ? 'required' : ''}></textarea>`;
                 } else if (field.type === 'checkbox') {
-                    return `<label style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px; cursor: pointer;">
-                        <input type="checkbox" id="modal-${field.id}" style="width: 16px; height: 16px; accent-color: var(--primary);">
-                        <span style="color: var(--gray);">${field.label}</span>
+                    return `<label style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px;">
+                        <input type="checkbox" id="modal-${field.id}">
+                        <span>${field.label}</span>
                     </label>`;
                 } else if (field.type === 'select') {
                     const options = field.options || [];
@@ -2125,8 +1630,6 @@
                         <option value="">${field.placeholder}</option>
                         ${options.map(opt => `<option value="${opt}">${opt}</option>`).join('')}
                     </select>`;
-                } else if (field.type === 'time') {
-                    return `<input type="time" class="form-input" id="modal-${field.id}" ${field.required ? 'required' : ''}>`;
                 } else {
                     return `<input type="${field.type}" class="form-input" id="modal-${field.id}" 
                         placeholder="${field.placeholder}" ${field.required ? 'required' : ''}>`;
@@ -2136,7 +1639,6 @@
             document.getElementById('modal-fields').innerHTML = fieldsHtml;
             document.getElementById('modal-file-section').style.display = hasFile ? 'block' : 'none';
             document.getElementById('modal-id').value = '';
-            document.getElementById('modal-submit').textContent = 'Save';
             
             modal.classList.add('show');
         }
@@ -2147,13 +1649,13 @@
             currentFile = null;
         }
 
+        // Modal Form Submit
         document.getElementById('modal-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            const title = document.getElementById('modal-title').textContent;
-            const type = title.includes('Announcement') ? 'announcement' :
-                         title.includes('Assignment') ? 'assignment' :
-                         title.includes('Unit') ? 'topic' : 'timetable';
+            const type = document.getElementById('modal-title').textContent.includes('Announcement') ? 'announcement' :
+                         document.getElementById('modal-title').textContent.includes('Assignment') ? 'assignment' :
+                         document.getElementById('modal-title').textContent.includes('Unit') ? 'topic' : 'timetable';
 
             const data = {};
             const fields = document.querySelectorAll('#modal-fields input, #modal-fields textarea, #modal-fields select');
@@ -2161,26 +1663,19 @@
                 const id = field.id.replace('modal-', '');
                 if (field.type === 'checkbox') {
                     data[id] = field.checked;
-                } else if (field.type === 'datetime-local') {
-                    data[id] = field.value;
                 } else {
                     data[id] = field.value;
                 }
             });
 
-            if (type === 'announcement' || type === 'assignment' || type === 'topic') {
-                const user = JSON.parse(localStorage.getItem('user') || '{}');
-                data.year = user.year || 1;
-            }
-
             try {
                 let result;
                 if (currentEditingId) {
                     result = await sendData(`${ENDPOINTS[type.toUpperCase()]}${type === 'timetable' ? '' : 'S'}/${currentEditingId}`, data, 'PUT');
-                    toastManager.show(`${title} updated successfully`, 'success');
+                    toastManager.show(`${type} updated successfully`, 'success');
                 } else {
                     result = await sendData(ENDPOINTS[type.toUpperCase()] + (type === 'timetable' ? '' : 'S'), data, 'POST');
-                    toastManager.show(`${title} created successfully`, 'success');
+                    toastManager.show(`${type} created successfully`, 'success');
                 }
 
                 if (currentFile && result.id) {
@@ -2190,18 +1685,28 @@
                 closeCreateModal();
                 loadTabContent(currentMainTab, currentSubTab);
             } catch (err) {
-                toastManager.show(`Error saving ${title.toLowerCase()}`, 'error');
+                toastManager.show(`Error saving ${type}`, 'error');
             }
         });
 
+        // File input handling
         document.getElementById('modal-file')?.addEventListener('change', (e) => {
             currentFile = e.target.files[0];
             if (currentFile) {
-                document.getElementById('modal-file-info').style.display = 'flex';
-                document.getElementById('modal-file-name').textContent = currentFile.name;
+                document.getElementById('modal-file-info').style.display = 'block';
+                document.getElementById('modal-file-info').innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <i class="fas fa-file"></i>
+                        <span>${currentFile.name}</span>
+                        <button type="button" class="btn-icon" onclick="document.getElementById('modal-file').value=''; this.parentElement.style.display='none';">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                `;
             }
         });
-        
+
+        // Edit functions
         async function editAnnouncement(id) {
             const items = await fetchData(ENDPOINTS.ANNOUNCEMENTS);
             const item = items.find(x => x.id == id);
@@ -2212,7 +1717,6 @@
             document.getElementById('modal-title').value = item.title || '';
             document.getElementById('modal-content').value = item.content || '';
             document.getElementById('modal-highlight').checked = item.highlight || false;
-            document.getElementById('modal-submit').textContent = 'Update';
             currentEditingId = id;
         }
 
@@ -2225,18 +1729,8 @@
             document.getElementById('modal-id').value = item.id;
             document.getElementById('modal-title').value = item.title || '';
             document.getElementById('modal-description').value = item.description || '';
-            
-            if (item.due_date) {
-                const dueDate = new Date(item.due_date);
-                const formattedDue = dueDate.toISOString().slice(0, 16);
-                document.getElementById('modal-due_date').value = formattedDue;
-            }
-            
-            setTimeout(() => {
-                document.getElementById('modal-topic_id').value = item.topic?.id || '';
-            }, 500);
-            
-            document.getElementById('modal-submit').textContent = 'Update';
+            document.getElementById('modal-due_date').value = item.due_date ? new Date(item.due_date).toISOString().slice(0,16) : '';
+            document.getElementById('modal-topic_id').value = item.topic?.id || '';
             currentEditingId = id;
         }
 
@@ -2251,7 +1745,6 @@
             document.getElementById('modal-lecturer').value = item.lecturer || '';
             document.getElementById('modal-contact').value = item.contact || '';
             document.getElementById('modal-description').value = item.description || '';
-            document.getElementById('modal-submit').textContent = 'Update';
             currentEditingId = id;
         }
 
@@ -2277,22 +1770,18 @@
             document.getElementById('modal-subject').value = slot.subject || '';
             document.getElementById('modal-room').value = slot.room || '';
             document.getElementById('modal-teacher').value = slot.teacher || '';
-            
-            setTimeout(() => {
-                document.getElementById('modal-topic_id').value = slot.topic?.id || '';
-            }, 500);
-            
-            document.getElementById('modal-submit').textContent = 'Update';
+            document.getElementById('modal-topic_id').value = slot.topic?.id || '';
             currentEditingId = id;
         }
 
+        // Delete functions with custom confirm
         async function deleteAnnouncement(id) {
             const confirmed = await showConfirm('Delete Announcement', 'Are you sure you want to delete this announcement? This action cannot be undone.');
             if (!confirmed) return;
 
             try {
                 await deleteData(`${ENDPOINTS.ANNOUNCEMENTS}/${id}`);
-                toastManager.show('Announcement deleted successfully', 'success');
+                toastManager.show('Announcement deleted', 'success');
                 loadAnnouncements(currentSubTab);
             } catch {
                 toastManager.show('Failed to delete announcement', 'error');
@@ -2300,12 +1789,12 @@
         }
 
         async function deleteAssignment(id) {
-            const confirmed = await showConfirm('Delete Assignment', 'Are you sure you want to delete this assignment? All associated data will be lost.');
+            const confirmed = await showConfirm('Delete Assignment', 'Are you sure you want to delete this assignment?');
             if (!confirmed) return;
 
             try {
                 await deleteData(`${ENDPOINTS.ASSIGNMENTS}/${id}`);
-                toastManager.show('Assignment deleted successfully', 'success');
+                toastManager.show('Assignment deleted', 'success');
                 loadAssignments(currentSubTab);
             } catch {
                 toastManager.show('Failed to delete assignment', 'error');
@@ -2313,12 +1802,12 @@
         }
 
         async function deleteTopic(id) {
-            const confirmed = await showConfirm('Delete Unit', 'Are you sure you want to delete this unit? This may affect related assignments and materials.');
+            const confirmed = await showConfirm('Delete Unit', 'Are you sure you want to delete this unit?');
             if (!confirmed) return;
 
             try {
                 await deleteData(`${ENDPOINTS.TOPICS}/${id}`);
-                toastManager.show('Unit deleted successfully', 'success');
+                toastManager.show('Unit deleted', 'success');
                 loadTopics(currentSubTab);
             } catch {
                 toastManager.show('Failed to delete unit', 'error');
@@ -2326,15 +1815,15 @@
         }
 
         async function deleteTimetableSlot(id) {
-            const confirmed = await showConfirm('Delete Timetable Slot', 'Are you sure you want to delete this timetable slot?');
+            const confirmed = await showConfirm('Delete Slot', 'Are you sure you want to delete this timetable slot?');
             if (!confirmed) return;
 
             try {
                 await deleteData(`${ENDPOINTS.TIMETABLE}/${id}`);
-                toastManager.show('Timetable slot deleted successfully', 'success');
+                toastManager.show('Slot deleted', 'success');
                 loadTimetable(currentSubTab);
             } catch {
-                toastManager.show('Failed to delete timetable slot', 'error');
+                toastManager.show('Failed to delete slot', 'error');
             }
         }
 
@@ -2346,17 +1835,35 @@
         async function logout() {
             const confirmed = await showConfirm('Logout', 'Are you sure you want to logout?');
             if (confirmed) {
-                localStorage.removeItem('user');
                 window.location.href = '/logout';
             }
         }
 
         // ==================== Initialization ====================
-        document.addEventListener('DOMContentLoaded', async () => {
-            await loadUserData();
-            loadDashboard();
-        }); 
+        document.addEventListener('DOMContentLoaded', () => {
+            // Set user avatar
+            const userStr = localStorage.getItem('user') || '{}';
+            try {
+                const user = JSON.parse(userStr);
+                document.getElementById('user-avatar').textContent = 
+                    (user.username || 'A').charAt(0).toUpperCase();
+            } catch {
+                document.getElementById('user-avatar').textContent = 'A';
+            }
 
+            // Mobile menu toggle
+            const menuToggle = document.getElementById('menu-toggle');
+            const sidebar = document.getElementById('sidebar');
+            
+            menuToggle.addEventListener('click', () => {
+                sidebar.classList.toggle('open');
+            });
+
+            // Load initial content
+            loadDashboard();
+        });
+
+        // Close modal on outside click
         document.getElementById('create-modal').addEventListener('click', (e) => {
             if (e.target === document.getElementById('create-modal')) {
                 closeCreateModal();
@@ -2369,6 +1876,7 @@
             }
         });
 
+        // Escape key handlers
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 document.getElementById('create-modal').classList.remove('show');
@@ -2376,21 +1884,6 @@
                 document.getElementById('confirm-modal').classList.remove('show');
             }
         });
-
-        const modal = document.getElementById('create-modal');
-        const observer = new MutationObserver((mutations) => {
-            mutations.forEach((mutation) => {
-                if (mutation.attributeName === 'class') {
-                    if (modal.classList.contains('show')) {
-                        document.body.style.overflow = 'hidden';
-                    } else {
-                        document.body.style.overflow = '';
-                    }
-                }
-            });
-        });
-
-        observer.observe(modal, { attributes: true });
     </script>
 </body>
 </html>

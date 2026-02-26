@@ -1302,7 +1302,7 @@ os.makedirs("logs", exist_ok=True)
 
 def log_status(message: str):
     """Append timestamped messages to a local log file"""
-    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    timestamp = (datetime.now(timezone(timedelta(hours=3)))).strftime("%Y-%m-%d %H:%M:%S")
     line = f"[{timestamp}] {message}\n"
     print(line.strip()) 
     with open(LOG_FILE, "a", encoding="utf-8") as f:
@@ -2686,12 +2686,11 @@ import random
 def get_random_welcome_message(username, mobile):
     """Pick one of three random welcome messages with emoji variations"""
     
-    # Random emoji sets
     emoji_sets = [
-        ["✨", "🎯", "🚀", "💫", "🌟"],  # Stars set
-        ["🎉", "🥳", "🎊", "👏", "👍"],  # Celebration set
-        ["📚", "🎓", "💡", "📖", "✏️"],   # Education set
-        ["🔥", "⚡", "💥", "🎇", "🌈"]    # Energy set
+        ["✨", "🎯", "🚀", "💫", "🌟"],
+        ["🎉", "🥳", "🎊", "👏", "👍"],
+        ["📚", "🎓", "💡", "📖", "✏️"],
+        ["🔥", "⚡", "💥", "🎇", "🌈"] 
     ]
     
     emojis = random.choice(emoji_sets)
@@ -2703,11 +2702,10 @@ def get_random_welcome_message(username, mobile):
 Hello *{username.capitalize()}*! {emojis[3]}
 
 We're excited to welcome you! {emojis[4]}
-
 {emojis[1]} *Account Details:*
 > • Username: {username.capitalize()}
 > • Mobile: *{format_mobile_display(mobile)}*
-> • Created at: {(datetime.now() + timedelta(hours=3)).strftime('%d/%m/%Y | %H:%M:%S')}
+> • Created on: {(datetime.now(timezone.utc) + timedelta(hours=3)).strftime('%d/%m/%Y | %I:%M:%S %p')}
 > • Status: Active {emojis[2]}
 
 {emojis[2]} *Getting Started:*
@@ -2715,46 +2713,47 @@ We're excited to welcome you! {emojis[4]}
 2. Meet peers
 3. Start learning!
 
-• https://lyxnexus.lyxnexus.xo.je
+• https://lyxnexus.onrender.com
 • Tell a friend to tell a friend. Let's Grow Together.
 Best,
-LyxNexus Team {emojis[0]}""",
+
+~ *LyxNexus* Team {emojis[0]}""",
         
         # Message 2
-        f"""{emojis[0]} YOU'RE IN! {emojis[0]}
+        f"""    {emojis[0]} YOU'RE IN! {emojis[0]}
 
 Hey *{username.capitalize()}*! {emojis[3]}
 
 ✅ Account created successfully!
-
 > • Username: *{username.capitalize()}*
 > • Mobile: *{format_mobile_display(mobile)}*
-> • Created at: {(datetime.now() + timedelta(hours=3)).strftime('%d/%m/%Y | %H:%M:%S')}
+> • Created on: {(datetime.now(timezone.utc) + timedelta(hours=3)).strftime('%d/%m/%Y | %I:%M:%S %p')}
 
 {emojis[1]} Ready to begin?
 {emojis[2]} Login now!
 
-• https://lyxnexus.lyxnexus.xo.je
+• https://lyxnexus.onrender.com
 • Share with friends. Let's Grow Together.
-– LyxNexus {emojis[4]}""",
+
+~ *LyxNexus* {emojis[4]}""",
         
         # Message 3
         f"""Greetings *{username.capitalize()}*! {emojis[0]}
 
-Welcome to LyxNexus {emojis[1]}
-
+Welcome to *LyxNexus* {emojis[1]}
 Your learning journey starts now {emojis[2]}
 
 > • Username: *{username.capitalize()}*
 > • Mobile: *{format_mobile_display(mobile)}*
-> • Created at: {(datetime.now() + timedelta(hours=3)).strftime('%d/%m/%Y | %H:%M:%S')}
+> • Created on: {(datetime.now(timezone.utc) + timedelta(hours=3)).strftime('%d/%m/%Y | %I:%M:%S %p')}
 🔐 Account secured
 
 {emojis[3]} Explore. Learn. Grow.
 
-• https://lyxnexus.lyxnexus.xo.je
+• https://lyxnexus.onrender.com
 • Share with a friend with a friend. Let's Grow Together.
-LyxNexus Team {emojis[4]}"""
+
+~ *LyxNexus* Team {emojis[4]}"""
     ]
     
     return random.choice(messages)
@@ -5608,7 +5607,7 @@ def phone_call():
         mobile_number = data.get('mobile')
         message_content = data.get('message')
         
-        print(f"[{(datetime.now() + timedelta(hours=3))}] Sending notification to: {mobile_number}")
+        print(f"[{(datetime.now(timezone(timedelta(hours=3))))}] Sending notification to: {mobile_number}")
         print(f"Message: {message_content[:100]}...")
             
         notification_payload = {
@@ -5635,7 +5634,7 @@ def phone_call():
             "message": "Notification sent successfully",
             "data": {
                 "to": mobile_number,
-                "timestamp": (datetime.now() + timedelta(hours=3)).isoformat(),
+                "timestamp": (datetime.now(timezone(timedelta(hours=3)))).isoformat(),
                 "message_preview": message_content[:50] + "..." if len(message_content) > 50 else message_content
             },
             "response": {
@@ -11087,7 +11086,7 @@ def pay_to_ln():
             return jsonify({"success": False, "message": "Failed to get access token"}), 500
         
         # STK Push
-        timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
+        timestamp = (datetime.now(timezone(timedelta(hours=3)))).strftime('%Y%m%d%H%M%S')
         password = base64.b64encode(
             (business_short_code + passkey + timestamp).encode()
         ).decode()
@@ -11483,7 +11482,7 @@ def grade_to_point(grade):
 
 @app.route('/exam-tracker')
 def exam_tracker():
-    return render_template('exam_tracker.html', year=datetime.now().year)
+    return render_template('exam_tracker.html', year=_year)
 
 # API: Get all exams of current user
 @app.route('/api/exams')

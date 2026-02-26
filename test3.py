@@ -32,11 +32,13 @@ MOCK_COURSES = [
     {'id': 4, 'name': 'Database Management', 'code': 'DB301'},
     {'id': 5, 'name': 'Mobile App Development', 'code': 'MOBILE202'}
 ]
-
+@app.route('/_0eXv3/<filename>')
+def css_files(filename):
+    return send_from_directory('static/css', filename)
 @app.route('/')
 def home():
     """Home page route"""
-    return render_template('index.html')
+    return render_template('admin.html')
 
 @app.route('/api/notify')
 def mock_notifications():
@@ -730,7 +732,8 @@ class MockDataGenerator:
                     'teacher': self.fake.name(),
                     'time': time_slot,
                     'room': random.choice(rooms),
-                    'type': random.choice(['Lecture', 'Lab', 'Tutorial'])
+                    'type': random.choice(['Lecture', 'Lab', 'Tutorial']),
+                    'year': random.choice(['1', '2', '3'])
                 }
                 day_slots.append(slot)
             
@@ -762,6 +765,13 @@ current_user = mock_data['users'][0]
 @app.route('/main-page')
 def main_page():
     return render_template('main_page.html', current_user=current_user)
+
+@app.route('/api/user/profile')
+def user_profile():
+    user_data = {
+        'id': 1,
+    }
+    return jsonify(user_data)
 
 @app.route('/tailwind.all.css')
 def tailwindcss():

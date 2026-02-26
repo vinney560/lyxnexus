@@ -1,19 +1,21 @@
 import requests
+import os
 
-api_key = "774660F4-D219-483F-A251-08EAFE2B5346"
-phone = "254740694312"  # Replace with actual number
-message = "Hello!"
+API_KEY = "774660F4-D219-483F-A251-08EAFE2B5346"
+API_URL = 'https://app.appslink.io/instances/87c9ed9d-fa3d-45fa-8b86-0a32e38e1435'
 
-# Try these different URL formats
-urls = [
-    f"https://appslink.io/api/send?apikey={api_key}&number={phone}&message={message}",
-    f"https://appslink.io/send?api_key={api_key}&to={phone}&text={message}",
-    f"https://api.appslink.io/v1/messages?key={api_key}&phone={phone}&msg={message}"
-]
+payload = {
+    "to": "+254740694312",
+    "type": "text",
+    "text": {"body": "Hello from AppsLink.io!"}
+}
 
-for url in urls:
-    print(f"Trying: {url}")
-    response = requests.get(url)
-    print(f"Status: {response.status_code}")
-    print(f"Response: {response.text}")
-    print("-" * 50)
+response = requests.get(API_URL, json=payload, headers={
+    'Authorization': f'Bearer {API_KEY}',
+    'Content-Type': 'application/json'
+})
+
+if response.ok:
+    print("Message sent:", response.text)
+else:
+    print(f"Error {response.status_code}: {response.text}")
