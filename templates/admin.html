@@ -498,6 +498,34 @@
         border-color: transparent;
     }
 
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+    }
+
+    @keyframes shimmer {
+        0% { background-position: -1000px 0; }
+        100% { background-position: 1000px 0; }
+    }
+
+    @keyframes successPop {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.1); box-shadow: 0 0 20px var(--success); }
+        100% { transform: scale(1); }
+    }
+
+    @keyframes loadingSpin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    @keyframes checkmark {
+        0% { transform: scale(0); opacity: 0; }
+        50% { transform: scale(1.2); }
+        100% { transform: scale(1); opacity: 1; }
+    }
+
     .btn-sm {
         padding: 6px 12px;
         border-radius: 8px;
@@ -509,30 +537,107 @@
         cursor: pointer;
         border: 1px solid transparent;
         transition: all 0.2s ease;
+        background: rgba(6, 172, 243, 0.687);
     }
 
     .btn-sm.primary {
-        background: var(--primary);
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+
+    .btn-sm.primary::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s ease;
+    }
+
+    .btn-sm.primary:hover::before {
+        left: 100%;
+    }
+
+    .btn-sm.primary.saving {
+        animation: pulse 1s infinite;
+        pointer-events: none;
+        opacity: 0.8;
+        background: linear-gradient(135deg, var(--primary-dark), var(--secondary));
+    }
+
+    .btn-sm.primary.saving i {
+        animation: loadingSpin 1s linear infinite;
+    }
+
+    .btn-sm.primary.success {
+        animation: successPop 0.5s ease;
+        background: linear-gradient(135deg, var(--success), #059669);
+    }
+
+    .btn-sm.primary.success i {
+        animation: checkmark 0.5s ease;
+    }
+
+    .btn-sm.primary.error {
+        animation: pulse 0.5s ease;
+        background: linear-gradient(135deg, var(--danger), #dc2626);
+    }
+
+    /* Shimmer effect for loading state */
+    .btn-sm.primary.saving::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+        animation: shimmer 2s infinite;
+    }
+
+    /* Icon animations */
+    .btn-sm.primary i {
+        transition: all 0.3s ease;
+    }
+
+    .btn-sm.primary:not(.saving):not(.success):hover i {
+        transform: scale(1.2);
+    }
+
+    /* Button click effect */
+    .btn-sm.primary:active:not(.saving) {
+        transform: scale(0.95);
+    }
+
+    /* Success state icon */
+    .btn-sm.primary.success i {
         color: white;
     }
 
-    .btn-sm.primary:hover {
-        background: var(--primary-dark);
+    /* Disabled state */
+    .btn-sm.primary:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
     }
 
-    .btn-sm.warning {
-        background: var(--warning);
-        color: white;
+    /* Ripple effect on click */
+    .btn-sm.primary .ripple {
+        position: absolute;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.5);
+        transform: scale(0);
+        animation: ripple 0.6s ease-out;
+        pointer-events: none;
     }
 
-    .btn-sm.danger {
-        background: var(--danger);
-        color: white;
-    }
-
-    .btn-sm.success {
-        background: var(--success);
-        color: white;
+    @keyframes ripple {
+        to {
+            transform: scale(4);
+            opacity: 0;
+        }
     }
 
     .btn-sm.secondary {
@@ -1722,11 +1827,8 @@
                         </div>
                         
                         <div style="margin-top: 16px; display: flex; gap: 8px;">
-                            <button class="btn-sm primary" onclick="window.location.href='/material/${item.id}'">
-                                <i class="fas fa-book-open"></i> View Materials
-                            </button>
-                            <button class="btn-sm secondary" onclick="window.location.href='/assignments?topic=${item.id}'">
-                                <i class="fas fa-tasks"></i> Assignments
+                            <button class="btn-md primary" onclick="window.location.href='/material/${item.id}'">
+                                <i class="fas fa-tasks"></i> View Materials
                             </button>
                         </div>
                     </div>
@@ -1955,7 +2057,7 @@
             
             const fieldsHtml = fields.map(field => {
                 if (field.type === 'textarea') {
-                    return `<textarea class="form-input" id="modal-${field.id}" placeholder="${field.placeholder}" ${field.required ? 'required' : ''}>${field.value || ''}</textarea>`;
+                    return `<textarea class="form-input" id="modal-${field.id}" placeholder="${field.placeholder}" ${field.required ? 'required' : ''} style="height: ${field.height || '100px'};">${field.value || ''}</textarea>`;
                 } else if (field.type === 'checkbox') {
                     return `<label style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px; cursor: pointer;">
                         <input type="checkbox" id="modal-${field.id}" style="width: 16px; height: 16px; accent-color: var(--primary);" ${field.checked ? 'checked' : ''}>
@@ -1985,7 +2087,6 @@
             document.getElementById('modal-file-section').style.display = hasFile ? 'block' : 'none';
             document.getElementById('modal-id').value = currentEditingId || '';
             document.getElementById('modal-submit').textContent = currentEditingId ? 'Update' : 'Save';
-            
             modal.classList.add('show');
         }
 
@@ -2017,7 +2118,7 @@
                 currentEditingId = id;
                 openCreateModal('Edit Announcement', [
                     { type: 'text', id: 'title', placeholder: 'Title (Optional)', value: item.title || '' },
-                    { type: 'textarea', id: 'content', placeholder: 'Content', required: true, value: item.content || '' },
+                    { type: 'textarea', id: 'content', placeholder: 'Content', required: true, height: '150px', value: item.content || '' },
                     { type: 'checkbox', id: 'highlight', label: 'Highlight this announcement', checked: item.highlight || false }
                 ], true);
             } catch (error) {
@@ -2329,15 +2430,38 @@
             }
         });
 
-        // Modal form submit
+        // Replace your existing modal form submit handler with this enhanced version:
+
+        // Modal form submit with animations
         document.getElementById('modal-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-            
+
+            const submitBtn = document.getElementById('modal-submit');
+            const originalText = submitBtn.innerHTML;
             const title = document.getElementById('modal-title').textContent;
             const type = title.includes('Announcement') ? 'announcement' :
                          title.includes('Assignment') ? 'assignment' :
                          title.includes('Unit') ? 'topic' : 'timetable';
-
+        
+            // Create ripple effect on click
+            const ripple = document.createElement('span');
+            ripple.className = 'ripple';
+            const rect = submitBtn.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            ripple.style.width = ripple.style.height = size + 'px';
+            ripple.style.left = (e.clientX - rect.left - size/2) + 'px';
+            ripple.style.top = (e.clientY - rect.top - size/2) + 'px';
+            submitBtn.appendChild(ripple);
+        
+            // Remove ripple after animation
+            setTimeout(() => ripple.remove(), 600);
+        
+            // Show saving state
+            submitBtn.classList.add('saving');
+            submitBtn.classList.remove('success', 'error');
+            submitBtn.innerHTML = '<i class="fas fa-spinner"></i> Saving...';
+            submitBtn.disabled = true;
+        
             const data = {};
             const fields = document.querySelectorAll('#modal-fields input, #modal-fields textarea, #modal-fields select');
             fields.forEach(field => {
@@ -2350,36 +2474,63 @@
                     data[id] = field.value;
                 }
             });
-
+        
             if (type === 'announcement' || type === 'assignment' || type === 'topic') {
                 const user = JSON.parse(localStorage.getItem('user') || '{}');
                 data.year = user.year || 1;
             }
-
+        
             try {
                 let result;
                 const endpoint = type === 'timetable' ? ENDPOINTS.TIMETABLE : ENDPOINTS[type.toUpperCase() + 'S'];
-                
+
                 if (currentEditingId) {
                     result = await sendData(`${endpoint}/${currentEditingId}`, data, 'PUT');
-                    toastManager.show(`${title} updated successfully`, 'success');
                 } else {
                     result = await sendData(endpoint, data, 'POST');
-                    toastManager.show(`${title} created successfully`, 'success');
                 }
-
+            
+                // Handle file upload if exists
                 if (currentFile && result && result.id) {
                     const uploadEndpoint = type === 'timetable' ? ENDPOINTS.TIMETABLE : ENDPOINTS[type.toUpperCase() + 'S'];
                     await uploadFile(uploadEndpoint, currentFile, result.id);
                 }
+            
+                // Show success state
+                submitBtn.classList.remove('saving');
+                submitBtn.classList.add('success');
+                submitBtn.innerHTML = '<i class="fas fa-check"></i> Success!';
 
-                closeCreateModal();
-                await loadTabContent(currentMainTab, currentSubTab);
+                // Close modal after success animation
+                setTimeout(() => {
+                    closeCreateModal();
+                    toastManager.show(`${title} ${currentEditingId ? 'updated' : 'created'} successfully`, 'success');
+                }, 800);
+            
+                // Reload content after modal closes
+                setTimeout(() => {
+                    loadTabContent(currentMainTab, currentSubTab);
+                }, 1000);
+            
             } catch (err) {
                 console.error('Save error:', err);
+
+                // Show error state
+                submitBtn.classList.remove('saving');
+                submitBtn.classList.add('error');
+                submitBtn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Failed!';
+
+                // Show error message
                 toastManager.show(`Error saving ${title.toLowerCase()}`, 'error');
+
+                // Reset button after error
+                setTimeout(() => {
+                    submitBtn.classList.remove('error');
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                }, 2000);
             }
-        });
+        });        
 
         // Modal file input
         document.getElementById('modal-file').addEventListener('change', (e) => {
