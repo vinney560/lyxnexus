@@ -7927,31 +7927,60 @@ def create_assignment():
     """Create a new assignment (Admin/Teacher only)"""
     if not current_user.is_admin:
         return jsonify({'error': 'Unauthorized'}), 403
+    
     print(f'''
 Visited: [CREATE ASSIGNMENT PAGE]
 Time: [ {datetime.now(timezone(timedelta(hours=3))).strftime('%d/%m/%Y %H:%M:%S')} ]
 Admin: [ ID: {current_user.id} | USERNAME: {current_user.username} ]
 ''')
-    data = request.get_json()
+
+    # Check if request is JSON or FormData
+    if request.is_json:
+        # Handle JSON request
+        data = request.get_json()
+        title = data.get('title')
+        description = data.get('description')
+        due_date = datetime.fromisoformat(data.get('due_date')) if data.get('due_date') else None
+        topic_id = data.get('topic_id')
+        file = None
+    else:
+        # Handle FormData request
+        title = request.form.get('title')
+        description = request.form.get('description')
+        due_date = datetime.fromisoformat(request.form.get('due_date')) if request.form.get('due_date') else None
+        topic_id = request.form.get('topic_id')
+        year = request.form.get('year', current_user.year)
+        file = request.files.get('file')
+
+    # Create assignment
     assignment = Assignment(
         id=gen_unique_id(Assignment),
-        title=data.get('title'),
-        description=data.get('description'),
-        due_date=datetime.fromisoformat(data.get('due_date')) if data.get('due_date') else None,
-        topic_id=data.get('topic_id'),
+        title=title,
+        description=description,
+        due_date=due_date,
+        topic_id=topic_id,
         user_id=current_user.id
     )
+
+    # Handle file upload if present
+    if file:
+        assignment.file_name = shorten_filename_create(secure_filename(file.filename))
+        assignment.file_type = file.mimetype
+        assignment.file_data = file.read()
+
     db.session.add(assignment)
     db.session.commit()
+
+    # Send notifications
     send_notification(
         current_user.id,
         'Assignment Given',
-        f'You Deleted: {assignment.title}'
+        f'You created: {assignment.title}'
     )
 
     socketio.emit('push_notification', {
         'title': 'Assignment handed out', 
-        'message': f' Assignment on: {assignment.title}',
+        'message': f'Assignment on: {assignment.title}',
         'type': 'assignment',
         'assignment_id': assignment.id,
         'timestamp': datetime.now(timezone.utc).isoformat()
@@ -7965,10 +7994,11 @@ Admin: [ ID: {current_user.id} | USERNAME: {current_user.username} ]
         'timestamp': datetime.now(timezone.utc).isoformat()
     }
     send_webpush(data)
-    #whatsapp_bulk(f"New assignment: *{assignment.title}*\n\n"
-    #              f"🔗 *LyxNexus Bot*\n\n")
 
-    return jsonify({'message': 'Assignment created successfully', 'id': assignment.id}), 201
+    return jsonify({
+        'message': 'Assignment created successfully', 
+        'id': assignment.id
+    }), 201
 
 @app.route('/api/assignments/<int:id>', methods=['PUT'])
 @login_required
@@ -7979,15 +8009,31 @@ def update_assignment(id):
         return jsonify({'error': 'Unauthorized'}), 403
     
     assignment = Assignment.query.get_or_404(id)
-    data = request.get_json()
     
-    assignment.title = data.get('title', assignment.title)
-    assignment.description = data.get('description', assignment.description)
-    if data.get('due_date'):
-        assignment.due_date = datetime.fromisoformat(data.get('due_date'))
-    assignment.topic_id = data.get('topic_id', assignment.topic_id)
+    if request.is_json:
+        data = request.get_json()
+        assignment.title = data.get('title', assignment.title)
+        assignment.description = data.get('description', assignment.description)
+        if data.get('due_date'):
+            assignment.due_date = datetime.fromisoformat(data.get('due_date'))
+        assignment.topic_id = data.get('topic_id', assignment.topic_id)
+        file = None
+    else:
+        assignment.title = request.form.get('title', assignment.title)
+        assignment.description = request.form.get('description', assignment.description)
+        if request.form.get('due_date'):
+            assignment.due_date = datetime.fromisoformat(request.form.get('due_date'))
+        assignment.topic_id = request.form.get('topic_id', assignment.topic_id)        
+        file = request.files.get('file')
+    
+    if file:
+        assignment.file_name = shorten_filename_create(secure_filename(file.filename))
+        assignment.file_type = file.mimetype
+        assignment.file_data = file.read()
     
     db.session.commit()
+
+    # Send notifications
     send_notification(
         current_user.id,
         'Assignment Updated',
@@ -7996,7 +8042,7 @@ def update_assignment(id):
 
     socketio.emit('push_notification', {
         'title': 'Assignment Updated', 
-        'message': f' Assignment {assignment.title} updated',
+        'message': f'Assignment {assignment.title} updated',
         'type': 'assignment',
         'assignment_id': assignment.id,
         'timestamp': datetime.now(timezone.utc).isoformat()
