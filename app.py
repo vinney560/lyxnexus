@@ -7757,10 +7757,6 @@ def update_announcement(id):
             announcement.file_name = shorten_filename_create(secure_filename(file.filename))
             announcement.file_type = file.mimetype
             announcement.file_data = file.read()
-        else:
-            announcement.file_name = None
-            announcement.file_type = None
-            announcement.file_data = None
 
     announcement.title = title
     announcement.content = content
@@ -8034,10 +8030,6 @@ def update_assignment(id):
         assignment.file_name = shorten_filename_create(secure_filename(file.filename))
         assignment.file_type = file.mimetype
         assignment.file_data = file.read()
-    else:
-        assignment.file_name = None
-        assignment.file_type = None
-        assignment.file_data = None
     
     db.session.commit()
 
