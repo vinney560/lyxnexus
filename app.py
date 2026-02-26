@@ -8357,6 +8357,7 @@ def get_timetable():
                     'id': slot.topic.id,
                     'name': slot.topic.name
                 } if slot.topic else None,
+                'year': slot.year,
             })
 
         result = [
@@ -8372,6 +8373,7 @@ def get_timetable():
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/timetable', methods=['GET', 'POST'])
+@admin_required
 def handle_timetable_admin():
     if request.method == 'GET':
         timetable_slots = Timetable.query\
