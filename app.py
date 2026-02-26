@@ -404,7 +404,7 @@ class Timetable(db.Model):
     subject = db.Column(db.String(200), nullable=False)
     room = db.Column(db.String(100), nullable=True)
     teacher = db.Column(db.String(200), nullable=True)
-    created_at = db.Column(db.DateTime, default=nairobi_time)
+    created_at = db.Column(db.DateTime, default=datetime.now(timezone.utc) + timedelta(hours=3))
     updated_at = db.Column(db.DateTime, default=nairobi_time, onupdate=nairobi_time)
 
     topic_id = db.Column(db.Integer, db.ForeignKey('topic.id'), nullable=True)
@@ -668,7 +668,7 @@ class Visit(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     page = db.Column(db.String(100), default='main_page')
     section = db.Column(db.String(50))
-    timestamp = db.Column(db.DateTime, default=nairobi_time)
+    timestamp = db.Column(db.DateTime, default=datetime.now(timezone.utc) + timedelta(hours=3))
     session_id = db.Column(db.String(100))
     user_agent = db.Column(db.Text)
     
@@ -679,7 +679,7 @@ class UserActivity(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     action = db.Column(db.String(50))  
     target = db.Column(db.String(100)) 
-    timestamp = db.Column(db.DateTime, default=nairobi_time)
+    timestamp = db.Column(db.DateTime, default=datetime.now(timezone.utc) + timedelta(hours=3))
     duration = db.Column(db.Integer)
     
     user = db.relationship('User', backref=db.backref('activities', lazy=True))
@@ -756,7 +756,7 @@ class Notification(db.Model):
     message = db.Column(db.Text, nullable=False)
     target_audience = db.Column(db.String(50), default='all')  # 'all', 'students', 'admins', 'specific'
     is_active = db.Column(db.Boolean, default=True)
-    created_at = db.Column(db.DateTime, default=nairobi_time)
+    created_at = db.Column(db.DateTime, default=datetime.now(timezone.utc) + timedelta(hours=3))
     expires_at = db.Column(db.DateTime, nullable=True)
     
     # Relationships
@@ -777,7 +777,7 @@ class UserNotification(db.Model):
     notification_id = db.Column(db.Integer, db.ForeignKey('notification.id'), nullable=False)
     is_read = db.Column(db.Boolean, default=False)
     read_at = db.Column(db.DateTime, nullable=True)
-    created_at = db.Column(db.DateTime, default=nairobi_time)
+    created_at = db.Column(db.DateTime, default=datetime.now(timezone.utc) + timedelta(hours=3))
     
     # Relationship
     user = db.relationship('User', backref='notifications', lazy=True)
@@ -3008,25 +3008,10 @@ def get_notifications():
         # Use consistent time comparison
         current_time = datetime.now(timezone.utc) + timedelta(hours=3)
         
-        all_notifications = Notification.query.all()
-        
-        for notification in all_notifications:
-            if notification.expires_at:
-                is_future = notification.expires_at > current_time
-                time_diff = notification.expires_at - current_time
-            else:
-                print(Fore.RESET + f"  - No expiration (always active)")
-            
-            # Check if passes active filter
-            passes_active = notification.is_active == True
-            # Check if passes expiration filter  
-            passes_expiry = notification.expires_at is None or notification.expires_at > current_time
-            passes_both = passes_active and passes_expiry
-            
         # Now run the actual query
         active_notifications = Notification.query.filter(
             Notification.is_active == True,
-            (Notification.expires_at > current_time) | (Notification.expires_at == None)
+            (func.timezone('UTC', Notification.expires_at) > current_time) | (Notification.expires_at == None)
         ).all()
         
         user_notifications = []
@@ -7851,6 +7836,7 @@ Admin: [ ID: {current_user.id} | USERNAME: {current_user.username} ]
     return jsonify({'message': 'Announcement deleted successfully'})
 
 @app.route('/announcement-file/<int:id>/<filename>')
+@login_required
 def serve_announcement_file(id, filename):
     announcement = Announcement.query.get_or_404(id)
     if not announcement.has_file() or announcement.file_name != filename:

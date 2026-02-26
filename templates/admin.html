@@ -2450,7 +2450,7 @@
             ripple.style.top = (e.clientY - rect.top - size/2) + 'px';
             submitBtn.appendChild(ripple);
             setTimeout(() => ripple.remove(), 600);
-            
+
             submitBtn.classList.add('saving');
             submitBtn.classList.remove('success', 'error');
             submitBtn.innerHTML = '<i class="fas fa-spinner"></i> Saving...';
@@ -2464,10 +2464,9 @@
                 const needsFormData = type === 'announcement' || type === 'assignment';
             
                 if (needsFormData) {
-                    // Use FormData for announcements and assignments (supports file upload)
                     const formData = new FormData();
                     const fields = document.querySelectorAll('#modal-fields input, #modal-fields textarea, #modal-fields select');
-                    
+
                     fields.forEach(field => {
                         const id = field.id.replace('modal-', '');
                         if (field.type === 'checkbox') {
@@ -2479,11 +2478,9 @@
                         }
                     });
                 
-                    // Add user year
                     const user = JSON.parse(localStorage.getItem('user') || '{}');
                     formData.append('year', user.year || 1);
                 
-                    // Add file if exists
                     if (currentFile) {
                         formData.append('file', currentFile);
                     }
@@ -2504,10 +2501,9 @@
                         result = await response.json();
                     }
                 } else {
-                    // Use JSON for topics and timetable (no file uploads)
                     const data = {};
                     const fields = document.querySelectorAll('#modal-fields input, #modal-fields textarea, #modal-fields select');
-                    
+
                     fields.forEach(field => {
                         const id = field.id.replace('modal-', '');
                         if (field.type === 'checkbox') {
@@ -2519,7 +2515,6 @@
                         }
                     });
                 
-                    // Add user year for topics
                     if (type === 'topic') {
                         const user = JSON.parse(localStorage.getItem('user') || '{}');
                         data.year = user.year || 1;
@@ -2543,6 +2538,7 @@
                 }, 800);
             
                 setTimeout(() => {
+                    submitBtn.disabled = false;
                     loadTabContent(currentMainTab, currentSubTab);
                 }, 1000);
             
