@@ -1,31 +1,19 @@
 import requests
 
-url = "https://mywhinlite.p.rapidapi.com/sendmsg"
+api_key = "774660F4-D219-483F-A251-08EAFE2B5346"
+phone = "254740694312"  # Replace with actual number
+message = "Hello!"
 
-payload = {
-    "phone_number_or_group_id": "254740694312",  
-    "is_group": False,
-    "message": "Hello! This API works too! https://rapidapi.com/inutil-inutil-default/api/mywhinlite"
-}
-headers = {
-    "x-rapidapi-key": "e58f612ademsh7e87404e0c73949p1409e8jsnc030330352f6",
-    "x-rapidapi-host": "mywhinlite.p.rapidapi.com",
-    "Content-Type": "application/json"
-}
+# Try these different URL formats
+urls = [
+    f"https://appslink.io/api/send?apikey={api_key}&number={phone}&message={message}",
+    f"https://appslink.io/send?api_key={api_key}&to={phone}&text={message}",
+    f"https://api.appslink.io/v1/messages?key={api_key}&phone={phone}&msg={message}"
+]
 
-try:
-    response = requests.post(url, json=payload, headers=headers)
-    
-    # Debug information
-    print(f"Status Code: {response.status_code}")
-    print(f"Response Headers: {dict(response.headers)}")
-    print(f"Raw Response Text: {response.text}")
-    
-    # Try to parse JSON
-    print("\nAttempting to parse JSON:")
-    print(response.json())
-    
-except requests.exceptions.RequestException as e:
-    print(f"Request Error: {e}")
-except ValueError as e:
-    print(f"JSON Parse Error: {e}")
+for url in urls:
+    print(f"Trying: {url}")
+    response = requests.get(url)
+    print(f"Status: {response.status_code}")
+    print(f"Response: {response.text}")
+    print("-" * 50)
