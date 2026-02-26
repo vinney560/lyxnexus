@@ -7682,7 +7682,7 @@ def shorten_filename_create(filename, length=17):
     name, ext = os.path.splitext(filename)
     return f"{name[:length]}_LN{ext}" if len(name) > length else f"{name}_LN{ext}"
 
-@app.route('/api/announcements/create', methods=['POST'])
+@app.route('/api/announcements', methods=['POST'])
 @login_required
 @admin_required
 def create_announcement():
@@ -7756,22 +7756,29 @@ def update_announcement(id):
         return jsonify({'error': 'Unauthorized'}), 403
 
     announcement = Announcement.query.get_or_404(id)
-    title = request.form.get('title', announcement.title)
-    content = request.form.get('content', announcement.content)
-    file = request.files.get('file')
-    highlighted = json.loads(request.form.get('highlight', 'false').lower())
+    
+    if request.is_json:
+        data = request.get_json()
+        title = data.get('title', announcement.title)
+        content = data.get('content', announcement.content)
+        highlighted = data.get('highlight', announcement.highlighted)
+    else:
+        title = request.form.get('title', announcement.title)
+        content = request.form.get('content', announcement.content)
+        highlighted = json.loads(request.form.get('highlight', 'false').lower())
+        file = request.files.get('file')
+        
+        if file:
+            announcement.file_name = shorten_filename_create(secure_filename(file.filename))
+            announcement.file_type = file.mimetype
+            announcement.file_data = file.read()
 
     announcement.title = title
     announcement.content = content
     announcement.highlighted = highlighted
 
-    if file:
-        announcement.file_name = shorten_filename_create(secure_filename(file.filename))
-        announcement.file_type = file.mimetype
-        announcement.file_data = file.read()
-
     db.session.commit()
-
+    
     send_notification(
         current_user.id,
         'Edited Announcement Created',

@@ -665,7 +665,7 @@
                             <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
                                 <span style="font-weight: 500;">${s.subject}</span>
                                 <span class="flex items-center gap-2 mb-1 rounded-lg bg-gradient-to-r ${s.year == 5 ? 'from-red-600 to-red-500' : s.year == 1 ? 'from-blue-600 to-blue-500' : s.year == 2 ? 'from-purple-600 to-purple-500' : s.year == 3 ? 'from-green-600 to-green-500' : 'from-slate-600 to-slate-500'} text-white w-max ${s.year == 5 ? 'all' : `year${s.year || 1}`}" style="font-size: 10px; padding: 1px 8px;">
-                                    Y${s.year || 1}
+                                    ${s.year === 5 ? 'All' : `Y${s.year || 1}`}
                                 </span>
                             </div>
                             <span class="text-xs text-slate-400 block">${s.teacher || 'TBA'}</span>
