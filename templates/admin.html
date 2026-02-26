@@ -435,7 +435,8 @@
         font-size: 16px;
         color: var(--light);
         text-decoration: underline;
-
+        text-decoration-color: var(--primary);
+        text-underline-offset: 4px;
     }
 
     .card-subtitle {
@@ -965,15 +966,6 @@
         background: rgba(100, 116, 139, 0.2);
         color: var(--gray);
     }
-
-    @keyframes slideInLeft {
-        from {
-            transform: translateX(-100%);
-        }
-        to {
-            transform: translateX(0);
-        }
-    }
 </style>
 <body>
     <div class="toast-container" id="toast-container"></div>
@@ -1009,94 +1001,94 @@
                         <span class="logo-badge">Admin Portal</span>
                     </div>
                 </div>
-                <button class="toggle-sidebar" id="toggle-sidebar" onclick="toggleSidebar()">
+                <button class="toggle-sidebar" id="toggle-sidebar">
                     <i class="fas fa-chevron-left"></i>
                 </button>
             </div>
 
             <div class="nav-section">
                 <div class="nav-label">Main</div>
-                <div class="nav-item active" onclick="switchMainTab('dashboard')" title="Dashboard">
+                <div class="nav-item active" data-tab="dashboard">
                     <i class="fas fa-chart-pie"></i>
                     <span>Dashboard</span>
-                    <span class="icon-only" style="display: none;">DB</span>
+                    <span class="icon-only">DB</span>
                 </div>
-                <div class="nav-item" onclick="switchMainTab('announcements')" title="Announcements">
+                <div class="nav-item" data-tab="announcements">
                     <i class="fas fa-bullhorn"></i>
                     <span>Announcements</span>
-                    <span class="icon-only" style="display: none;">Ann</span>
+                    <span class="icon-only">Ann</span>
                 </div>
-                <div class="nav-item" onclick="switchMainTab('assignments')" title="Assignments">
+                <div class="nav-item" data-tab="assignments">
                     <i class="fas fa-tasks"></i>
                     <span>Assignments</span>
-                    <span class="icon-only" style="display: none;">Asg</span>
+                    <span class="icon-only">Asg</span>
                 </div>
-                <div class="nav-item" onclick="switchMainTab('topics')" title="Units">
+                <div class="nav-item" data-tab="topics">
                     <i class="fas fa-book"></i>
                     <span>Units</span>
-                    <span class="icon-only" style="display: none;">Unt</span>
+                    <span class="icon-only">Unt</span>
                 </div>
-                <div class="nav-item" onclick="switchMainTab('timetable')" title="Timetable">
+                <div class="nav-item" data-tab="timetable">
                     <i class="fas fa-calendar"></i>
                     <span>Timetable</span>
-                    <span class="icon-only" style="display: none;">TT</span>
+                    <span class="icon-only">TT</span>
                 </div>
 
                 <div class="nav-label" style="margin-top: 20px;">Resources</div>
-                <div class="nav-item" onclick="window.location.href='/files'" title="Files">
+                <div class="nav-item" onclick="window.location.href='/files'">
                     <i class="fas fa-file"></i>
                     <span>Files</span>
-                    <span class="icon-only" style="display: none;">Fls</span>
+                    <span class="icon-only">Fls</span>
                 </div>
-                <div class="nav-item" onclick="window.location.href='/store'" title="File Store">
+                <div class="nav-item" onclick="window.location.href='/store'">
                     <i class="fas fa-folder-open"></i>
                     <span>Archives</span>
-                    <span class="icon-only" style="display: none;">Arc</span>
+                    <span class="icon-only">Arc</span>
                 </div>
-                <div class="nav-item" onclick="window.location.href='/past-papers'" title="Past Papers">
+                <div class="nav-item" onclick="window.location.href='/past-papers'">
                     <i class="fas fa-scroll"></i>
                     <span>Papers</span>
-                    <span class="icon-only" style="display: none;">Pap</span>
+                    <span class="icon-only">Pap</span>
                 </div>
 
                 <div class="nav-label" style="margin-top: 20px;">Administration</div>
-                <div class="nav-item" onclick="window.location.href='/admin/users'" title="User Management">
+                <div class="nav-item" onclick="window.location.href='/admin/users'">
                     <i class="fas fa-users"></i>
                     <span>Users</span>
-                    <span class="icon-only" style="display: none;">Usr</span>
+                    <span class="icon-only">Usr</span>
                 </div>
-                <div class="nav-item" onclick="window.location.href='/admin/secret-code'" title="Secret Code">
+                <div class="nav-item" onclick="window.location.href='/admin/secret-code'">
                     <i class="fas fa-shield-alt"></i>
                     <span>Secret Code</span>
-                    <span class="icon-only" style="display: none;">Cod</span>
+                    <span class="icon-only">Cod</span>
                 </div>
-                <div class="nav-item" onclick="window.location.href='/admin/operator'" title="Operator">
+                <div class="nav-item" onclick="window.location.href='/admin/operator'">
                     <i class="fas fa-cog"></i>
                     <span>Operator</span>
-                    <span class="icon-only" style="display: none;">Ops</span>
+                    <span class="icon-only">Ops</span>
                 </div>
-                <div class="nav-item" onclick="window.location.href='/admin/clone-db'" title="Clone Database">
+                <div class="nav-item" onclick="window.location.href='/admin/clone-db'">
                     <i class="fas fa-database"></i>
                     <span>Database</span>
-                    <span class="icon-only" style="display: none;">DB</span>
+                    <span class="icon-only">DB</span>
                 </div>
-                <div class="nav-item" onclick="window.location.href='/profile'" title="Profile">
+                <div class="nav-item" onclick="window.location.href='/profile'">
                     <i class="fas fa-user"></i>
                     <span>Profile</span>
-                    <span class="icon-only" style="display: none;">Prf</span>
+                    <span class="icon-only">Prf</span>
                 </div>
-                <div class="nav-item" onclick="window.location.href='/messages'" title="Messages">
+                <div class="nav-item" onclick="window.location.href='/messages'">
                     <i class="fas fa-comments"></i>
                     <span>Messages</span>
-                    <span class="icon-only" style="display: none;">Msg</span>
+                    <span class="icon-only">Msg</span>
                 </div>
             </div>
 
             <div class="nav-section" style="border-top: 1px solid var(--border);">
-                <div class="nav-item" onclick="logout()">
+                <div class="nav-item" id="logout-btn">
                     <i class="fas fa-sign-out-alt"></i>
                     <span>Logout</span>
-                    <span class="icon-only" style="display: none;">Ext</span>
+                    <span class="icon-only">Ext</span>
                 </div>
             </div>
         </aside>
@@ -1104,7 +1096,7 @@
         <main class="main-content">
             <div class="top-bar">
                 <div class="top-bar-left">
-                    <button class="menu-toggle" id="menu-toggle" onclick="toggleMobileMenu()">
+                    <button class="menu-toggle" id="menu-toggle">
                         <i class="fas fa-bars"></i>
                     </button>
                     <h1 class="page-title" id="page-title">Dashboard</h1>
@@ -1116,7 +1108,7 @@
                     <button class="btn-icon" onclick="window.location.href='/profile'">
                         <i class="fas fa-user"></i>
                     </button>
-                    <button class="btn-icon" onclick="logout()">
+                    <button class="btn-icon" id="topbar-logout">
                         <i class="fas fa-sign-out-alt"></i>
                     </button>
                     <div class="user-avatar" id="user-avatar" onclick="window.location.href='/profile'">A</div>
@@ -1124,10 +1116,8 @@
             </div>
 
             <div class="content-area" id="content-area">
-                <div class="quick-actions" id="quick-actions">
-                </div>
-                <div class="sub-tabs" id="sub-tabs">
-                </div>
+                <div class="quick-actions" id="quick-actions"></div>
+                <div class="sub-tabs" id="sub-tabs"></div>
                 <div id="content-container" class="content-grid">
                     <div class="loading-container">
                         <div class="spinner"></div>
@@ -1156,14 +1146,14 @@
                             <i class="fas fa-file"></i>
                             <span id="modal-file-name"></span>
                         </div>
-                        <button type="button" class="btn-icon" onclick="clearModalFile()">
+                        <button type="button" class="btn-icon" id="clear-modal-file">
                             <i class="fas fa-times"></i>
                         </button>
                     </div>
                 </div>
 
                 <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px;">
-                    <button type="button" class="btn-sm secondary" onclick="closeCreateModal()">Cancel</button>
+                    <button type="button" class="btn-sm secondary" id="cancel-modal">Cancel</button>
                     <button type="submit" class="btn-sm primary" id="modal-submit">Save</button>
                 </div>
             </form>
@@ -1171,6 +1161,7 @@
     </div>
 
     <script>
+        // ==================== Configuration ====================
         const API_BASE = '/api';
         const ENDPOINTS = {
             ANNOUNCEMENTS: `${API_BASE}/announcements`,
@@ -1182,6 +1173,7 @@
             CURRENT_USER: `${API_BASE}/user/profile`
         };
 
+        // ==================== State Management ====================
         let currentMainTab = 'dashboard';
         let currentSubTab = 'announcements';
         let currentEditingId = null;
@@ -1190,67 +1182,7 @@
         let confirmResolver = null;
         let isSidebarCollapsed = false;
 
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            isSidebarCollapsed = !isSidebarCollapsed;
-            sidebar.classList.toggle('collapsed');
-            localStorage.setItem('sidebarCollapsed', isSidebarCollapsed);
-        }
-
-        function toggleMobileMenu() {
-            const sidebar = document.getElementById('sidebar');
-            sidebar.classList.toggle('mobile-open');
-        }
-
-        const savedState = localStorage.getItem('sidebarCollapsed');
-        if (savedState === 'true') {
-            document.getElementById('sidebar').classList.add('collapsed');
-            isSidebarCollapsed = true;
-        }
-
-        document.addEventListener('click', (e) => {
-            const sidebar = document.getElementById('sidebar');
-            const menuToggle = document.getElementById('menu-toggle');
-            
-            if (window.innerWidth <= 768) {
-                if (!sidebar.contains(e.target) && !menuToggle.contains(e.target) && sidebar.classList.contains('mobile-open')) {
-                    sidebar.classList.remove('mobile-open');
-                }
-            }
-        });
-
-        window.addEventListener('resize', () => {
-            const sidebar = document.getElementById('sidebar');
-            if (window.innerWidth > 768) {
-                sidebar.classList.remove('mobile-open');
-            }
-        });
-
-        function showConfirm(title, message) {
-            return new Promise((resolve) => {
-                confirmResolver = resolve;
-                document.getElementById('confirm-title').textContent = title;
-                document.getElementById('confirm-message').textContent = message;
-                document.getElementById('confirm-modal').classList.add('show');
-            });
-        }
-
-        document.getElementById('confirm-cancel').addEventListener('click', () => {
-            document.getElementById('confirm-modal').classList.remove('show');
-            if (confirmResolver) {
-                confirmResolver(false);
-                confirmResolver = null;
-            }
-        });
-
-        document.getElementById('confirm-ok').addEventListener('click', () => {
-            document.getElementById('confirm-modal').classList.remove('show');
-            if (confirmResolver) {
-                confirmResolver(true);
-                confirmResolver = null;
-            }
-        });
-
+        // ==================== Toast Manager ====================
         class ToastManager {
             constructor() {
                 this.container = document.getElementById('toast-container');
@@ -1286,6 +1218,7 @@
 
         toastManager = new ToastManager();
 
+        // ==================== Utility Functions ====================
         function escapeHtml(str) {
             if (!str && str !== 0) return '';
             return String(str)
@@ -1325,11 +1258,6 @@
             return icons[ext] || 'fa-file';
         }
 
-        function isImageFile(filename) {
-            if (!filename) return false;
-            return ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(filename.split('.').pop().toLowerCase());
-        }
-
         function formatFileSize(bytes) {
             if (!bytes) return '0 KB';
             if (bytes < 1024) return bytes + ' B';
@@ -1338,8 +1266,6 @@
         }
 
         // ==================== API Functions ====================
-
-        // Then fetch and store
         async function loadUserData() {
             try {
                 const response = await fetch(ENDPOINTS.CURRENT_USER);
@@ -1348,11 +1274,9 @@
                 localStorage.setItem('user', JSON.stringify(userData));
                 document.getElementById('user-avatar').textContent = 
                     (userData.username || 'A').charAt(0).toUpperCase();
-
                 return userData;
             } catch (error) {
                 console.error('Error loading user:', error);
-                toastManager.show('Failed to load user data', 'error');
                 return null;
             }
         }
@@ -1392,11 +1316,34 @@
             return await res.json();
         }
 
+        // ==================== Confirm Modal ====================
+        function showConfirm(title, message) {
+            return new Promise((resolve) => {
+                confirmResolver = resolve;
+                document.getElementById('confirm-title').textContent = title;
+                document.getElementById('confirm-message').textContent = message;
+                document.getElementById('confirm-modal').classList.add('show');
+            });
+        }
+
+        // ==================== Sidebar Functions ====================
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            isSidebarCollapsed = !isSidebarCollapsed;
+            sidebar.classList.toggle('collapsed');
+            localStorage.setItem('sidebarCollapsed', isSidebarCollapsed);
+        }
+
+        function toggleMobileMenu() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('mobile-open');
+        }
+
         // ==================== Tab Management ====================
         function switchMainTab(tab) {
             currentMainTab = tab;
             document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-            event.currentTarget.classList.add('active');
+            document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
             
             const titles = {
                 dashboard: 'Dashboard',
@@ -1436,22 +1383,27 @@
                     { icon: 'fa-print', text: 'Print', action: 'printTimetable' }
                 ],
                 dashboard: [
-                    { icon: 'fa-bullhorn', text: 'Announcements', action: 'switchMainTab:announcements' },
-                    { icon: 'fa-tasks', text: 'Assignments', action: 'switchMainTab:assignments' },
-                    { icon: 'fa-folder', text: 'Units', action: 'switchMainTab:topics' },
-                    { icon: 'fa-calendar', text: 'Timetable', action: 'switchMainTab:timetable' }
+                    { icon: 'fa-bullhorn', text: 'Announcements', action: 'announcements' },
+                    { icon: 'fa-tasks', text: 'Assignments', action: 'assignments' },
+                    { icon: 'fa-folder', text: 'Units', action: 'topics' },
+                    { icon: 'fa-calendar', text: 'Timetable', action: 'timetable' }
                 ]
             };
 
             const container = document.getElementById('quick-actions');
-            container.innerHTML = (actions[tab] || []).map(action => `
-                <button class="action-btn" onclick="${action.action.includes(':') ? 
-                    `switchMainTab('${action.action.split(':')[1]}')` : 
-                    `${action.action}()`}">
-                    <i class="fas ${action.icon}"></i>
-                    <span>${action.text}</span>
-                </button>
-            `).join('');
+            container.innerHTML = (actions[tab] || []).map(action => {
+                if (tab === 'dashboard') {
+                    return `<button class="action-btn" onclick="switchMainTab('${action.action}')">
+                        <i class="fas ${action.icon}"></i>
+                        <span>${action.text}</span>
+                    </button>`;
+                } else {
+                    return `<button class="action-btn" onclick="window.${action.action}()">
+                        <i class="fas ${action.icon}"></i>
+                        <span>${action.text}</span>
+                    </button>`;
+                }
+            }).join('');
         }
 
         function updateSubTabs(mainTab) {
@@ -1459,27 +1411,21 @@
                 announcements: [
                     { id: 'announcements', name: 'All Announcements' },
                     { id: 'my-announcements', name: 'My Announcements' },
-                    { id: 'highlighted', name: 'Highlighted' },
-                    { id: 'archived', name: 'Archived' }
+                    { id: 'highlighted', name: 'Highlighted' }
                 ],
                 assignments: [
                     { id: 'assignments', name: 'All Assignments' },
                     { id: 'due-soon', name: 'Due Soon' },
-                    { id: 'overdue', name: 'Overdue' },
-                    { id: 'completed', name: 'Completed' },
-                    { id: 'draft', name: 'Drafts' }
+                    { id: 'overdue', name: 'Overdue' }
                 ],
                 topics: [
                     { id: 'topics', name: 'All Units' },
-                    { id: 'my-topics', name: 'My Units' },
-                    { id: 'active', name: 'Active' },
-                    { id: 'archived', name: 'Archived' }
+                    { id: 'my-topics', name: 'My Units' }
                 ],
                 timetable: [
                     { id: 'timetable', name: 'Weekly View' },
                     { id: 'today', name: 'Today' },
-                    { id: 'tomorrow', name: 'Tomorrow' },
-                    { id: 'this-week', name: 'This Week' }
+                    { id: 'tomorrow', name: 'Tomorrow' }
                 ],
                 dashboard: []
             };
@@ -1512,7 +1458,6 @@
         async function loadTabContent(mainTab, subTab) {
             const container = document.getElementById('content-container');
             
-            // Show loading
             container.innerHTML = `
                 <div class="loading-container">
                     <div class="spinner"></div>
@@ -1543,6 +1488,7 @@
         async function loadAnnouncements(filter = 'announcements') {
             const items = await fetchData(ENDPOINTS.ANNOUNCEMENTS);
             const container = document.getElementById('content-container');
+            
             let filtered = items;
             if (filter === 'my-announcements') {
                 const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -1569,7 +1515,7 @@
                 <div class="card">
                     <div class="card-header">
                         <div>
-                            <h3 class="card-title">${escapeHtml(item.title || '')}</h3>
+                            <h3 class="card-title">${escapeHtml(item.title || 'Untitled')}</h3>
                             <div class="card-subtitle">
                                 <span class="year-badge ${item.author?.year == 5 ? 'all' : `year${item.author?.year || 1}`}">
                                     <i class="fas fa-graduation-cap"></i>
@@ -1614,11 +1560,6 @@
                         <span style="color: var(--gray); font-size: 12px;">
                             <i class="fas fa-clock"></i> ${formatDate(item.created_at)}
                         </span>
-                        ${item.updated_at !== item.created_at ? `
-                            <span style="color: var(--gray); font-size: 12px; margin-left: 12px;">
-                                <i class="fas fa-pencil-alt"></i> Edited ${formatDate(item.updated_at)}
-                            </span>
-                        ` : ''}
                     </div>
                 </div>
             `).join('');
@@ -1808,7 +1749,6 @@
                 slots = raw;
             }
 
-            // Apply filters
             let filtered = slots;
             if (filter === 'today') {
                 filtered = slots.filter(s => (s.day_of_week || s.day) === today);
@@ -1942,7 +1882,7 @@
                     <div class="card-body">
                         ${recentAnnouncements.length > 0 ? recentAnnouncements.map(a => `
                             <div style="padding: 12px 0; border-bottom: 1px solid var(--border);">
-                                <div style="font-weight: 500;">${escapeHtml(a.title || '')}</div>
+                                <div style="font-weight: 500;">${escapeHtml(a.title || 'Untitled')}</div>
                                 <div style="font-size: 12px; color: var(--gray); display: flex; justify-content: space-between; margin-top: 4px;">
                                     <span>${escapeHtml(a.author?.username || 'Unknown')}</span>
                                     <span>${formatDate(a.created_at)}</span>
@@ -1986,23 +1926,6 @@
 
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="card-title">Units Overview</h3>
-                        <button class="btn-icon" onclick="switchMainTab('topics')">
-                            <i class="fas fa-arrow-right"></i>
-                        </button>
-                    </div>
-                    <div class="card-body">
-                        ${(topics || []).slice(0, 3).map(t => `
-                            <div style="padding: 12px 0; border-bottom: 1px solid var(--border);">
-                                <div style="font-weight: 500;">${escapeHtml(t.name)}</div>
-                                <div style="font-size: 12px; color: var(--gray);">${escapeHtml(t.lecturer || 'TBA')}</div>
-                            </div>
-                        `).join('') || '<p style="color: var(--gray);">No units</p>'}
-                    </div>
-                </div>
-
-                <div class="card">
-                    <div class="card-header">
                         <h3 class="card-title">Quick Actions</h3>
                     </div>
                     <div class="card-body">
@@ -2025,43 +1948,99 @@
             `;
         }
 
-        // ==================== CRUD Operations ====================
-        function filterContent() {
-            toastManager.show('Filter feature coming soon', 'info');
+        // ==================== Modal Functions ====================
+        function openCreateModal(title, fields, hasFile = false) {
+            const modal = document.getElementById('create-modal');
+            document.getElementById('modal-title').textContent = title;
+            
+            const fieldsHtml = fields.map(field => {
+                if (field.type === 'textarea') {
+                    return `<textarea class="form-input" id="modal-${field.id}" placeholder="${field.placeholder}" ${field.required ? 'required' : ''}>${field.value || ''}</textarea>`;
+                } else if (field.type === 'checkbox') {
+                    return `<label style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px; cursor: pointer;">
+                        <input type="checkbox" id="modal-${field.id}" style="width: 16px; height: 16px; accent-color: var(--primary);" ${field.checked ? 'checked' : ''}>
+                        <span style="color: var(--gray);">${field.label}</span>
+                    </label>`;
+                } else if (field.type === 'select') {
+                    const options = field.options || [];
+                    return `<select class="form-input" id="modal-${field.id}" ${field.required ? 'required' : ''}>
+                        <option value="">${field.placeholder}</option>
+                        ${options.map(opt => {
+                            if (typeof opt === 'object') {
+                                return `<option value="${opt.value}" ${opt.value == field.value ? 'selected' : ''}>${opt.label}</option>`;
+                            } else {
+                                return `<option value="${opt}" ${opt == field.value ? 'selected' : ''}>${opt}</option>`;
+                            }
+                        }).join('')}
+                    </select>`;
+                } else if (field.type === 'time' || field.type === 'datetime-local') {
+                    return `<input type="${field.type}" class="form-input" id="modal-${field.id}" value="${field.value || ''}" ${field.required ? 'required' : ''}>`;
+                } else {
+                    return `<input type="${field.type}" class="form-input" id="modal-${field.id}" 
+                        placeholder="${field.placeholder}" value="${field.value || ''}" ${field.required ? 'required' : ''}>`;
+                }
+            }).join('');
+
+            document.getElementById('modal-fields').innerHTML = fieldsHtml;
+            document.getElementById('modal-file-section').style.display = hasFile ? 'block' : 'none';
+            document.getElementById('modal-id').value = currentEditingId || '';
+            document.getElementById('modal-submit').textContent = currentEditingId ? 'Update' : 'Save';
+            
+            modal.classList.add('show');
         }
 
-        function searchContent() {
-            toastManager.show('Search feature coming soon', 'info');
-        }
-
-        function filterDueSoon() {
-            switchSubTab('due-soon');
-        }
-
-        function showStats() {
-            toastManager.show('Statistics feature coming soon', 'info');
-        }
-
-        function printTimetable() {
-            window.print();
-        }
-
-        function clearModalFile() {
+        function closeCreateModal() {
+            document.getElementById('create-modal').classList.remove('show');
+            currentEditingId = null;
             currentFile = null;
-            document.getElementById('modal-file').value = '';
-            document.getElementById('modal-file-info').style.display = 'none';
         }
 
-        function createAnnouncement() {
-            openCreateModal('announcement', 'Create Announcement', [
+        // ==================== CRUD Operations ====================
+        window.createAnnouncement = function() {
+            currentEditingId = null;
+            openCreateModal('Create Announcement', [
                 { type: 'text', id: 'title', placeholder: 'Title (Optional)' },
                 { type: 'textarea', id: 'content', placeholder: 'Content', required: true },
                 { type: 'checkbox', id: 'highlight', label: 'Highlight this announcement' }
             ], true);
-        }
+        };
 
-        function createAssignment() {
-            openCreateModal('assignment', 'Create Assignment', [
+        window.editAnnouncement = async function(id) {
+            try {
+                const items = await fetchData(ENDPOINTS.ANNOUNCEMENTS);
+                const item = items.find(x => x.id == id);
+                if (!item) {
+                    toastManager.show('Announcement not found', 'error');
+                    return;
+                }
+
+                currentEditingId = id;
+                openCreateModal('Edit Announcement', [
+                    { type: 'text', id: 'title', placeholder: 'Title (Optional)', value: item.title || '' },
+                    { type: 'textarea', id: 'content', placeholder: 'Content', required: true, value: item.content || '' },
+                    { type: 'checkbox', id: 'highlight', label: 'Highlight this announcement', checked: item.highlight || false }
+                ], true);
+            } catch (error) {
+                toastManager.show('Failed to load announcement', 'error');
+            }
+        };
+
+        window.deleteAnnouncement = async function(id) {
+            const confirmed = await showConfirm('Delete Announcement', 'Are you sure you want to delete this announcement?');
+            if (!confirmed) return;
+
+            try {
+                await deleteData(`${ENDPOINTS.ANNOUNCEMENTS}/${id}`);
+                toastManager.show('Announcement deleted successfully', 'success');
+                await loadAnnouncements(currentSubTab);
+            } catch (error) {
+                toastManager.show('Failed to delete announcement', 'error');
+            }
+        };
+
+        window.createAssignment = function() {
+            currentEditingId = null;
+            openCreateModal('Create Assignment', [
                 { type: 'text', id: 'title', placeholder: 'Assignment Title', required: true },
                 { type: 'textarea', id: 'description', placeholder: 'Description', required: true },
                 { type: 'datetime-local', id: 'due_date', required: true },
@@ -2075,23 +2054,102 @@
                         topics.map(t => `<option value="${t.id}">${escapeHtml(t.name)}</option>`).join('');
                 }
             });
-        }
+        };
 
-        function createTopic() {
-            openCreateModal('topic', 'Create Unit', [
+        window.editAssignment = async function(id) {
+            try {
+                const items = await fetchData(ENDPOINTS.ASSIGNMENTS);
+                const item = items.find(x => x.id == id);
+                if (!item) {
+                    toastManager.show('Assignment not found', 'error');
+                    return;
+                }
+
+                currentEditingId = id;
+                const dueDate = item.due_date ? new Date(item.due_date).toISOString().slice(0, 16) : '';
+                
+                openCreateModal('Edit Assignment', [
+                    { type: 'text', id: 'title', placeholder: 'Assignment Title', required: true, value: item.title || '' },
+                    { type: 'textarea', id: 'description', placeholder: 'Description', required: true, value: item.description || '' },
+                    { type: 'datetime-local', id: 'due_date', required: true, value: dueDate },
+                    { type: 'select', id: 'topic_id', placeholder: 'Select Topic (Optional)', options: [], value: item.topic?.id || '' }
+                ], true);
+
+                const topics = await fetchData(ENDPOINTS.TOPICS);
+                const select = document.getElementById('modal-topic_id');
+                if (select) {
+                    select.innerHTML = '<option value="">Select Topic (Optional)</option>' + 
+                        topics.map(t => `<option value="${t.id}" ${t.id == item.topic?.id ? 'selected' : ''}>${escapeHtml(t.name)}</option>`).join('');
+                }
+            } catch (error) {
+                toastManager.show('Failed to load assignment', 'error');
+            }
+        };
+
+        window.deleteAssignment = async function(id) {
+            const confirmed = await showConfirm('Delete Assignment', 'Are you sure you want to delete this assignment?');
+            if (!confirmed) return;
+
+            try {
+                await deleteData(`${ENDPOINTS.ASSIGNMENTS}/${id}`);
+                toastManager.show('Assignment deleted successfully', 'success');
+                await loadAssignments(currentSubTab);
+            } catch (error) {
+                toastManager.show('Failed to delete assignment', 'error');
+            }
+        };
+
+        window.createTopic = function() {
+            currentEditingId = null;
+            openCreateModal('Create Unit', [
                 { type: 'text', id: 'name', placeholder: 'Unit Name', required: true },
                 { type: 'text', id: 'lecturer', placeholder: 'Lecturer Name', required: true },
                 { type: 'text', id: 'contact', placeholder: 'Contact (Optional)' },
                 { type: 'textarea', id: 'description', placeholder: 'Description (Optional)' }
             ]);
-        }
+        };
 
-        function createTimetable() {
-            openCreateModal('timetable', 'Create Timetable Slot', [
+        window.editTopic = async function(id) {
+            try {
+                const items = await fetchData(ENDPOINTS.TOPICS);
+                const item = items.find(x => x.id == id);
+                if (!item) {
+                    toastManager.show('Topic not found', 'error');
+                    return;
+                }
+
+                currentEditingId = id;
+                openCreateModal('Edit Unit', [
+                    { type: 'text', id: 'name', placeholder: 'Unit Name', required: true, value: item.name || '' },
+                    { type: 'text', id: 'lecturer', placeholder: 'Lecturer Name', required: true, value: item.lecturer || '' },
+                    { type: 'text', id: 'contact', placeholder: 'Contact (Optional)', value: item.contact || '' },
+                    { type: 'textarea', id: 'description', placeholder: 'Description (Optional)', value: item.description || '' }
+                ]);
+            } catch (error) {
+                toastManager.show('Failed to load topic', 'error');
+            }
+        };
+
+        window.deleteTopic = async function(id) {
+            const confirmed = await showConfirm('Delete Unit', 'Are you sure you want to delete this unit?');
+            if (!confirmed) return;
+
+            try {
+                await deleteData(`${ENDPOINTS.TOPICS}/${id}`);
+                toastManager.show('Unit deleted successfully', 'success');
+                await loadTopics(currentSubTab);
+            } catch (error) {
+                toastManager.show('Failed to delete unit', 'error');
+            }
+        };
+
+        window.createTimetable = function() {
+            currentEditingId = null;
+            openCreateModal('Create Timetable Slot', [
                 { type: 'select', id: 'day_of_week', placeholder: 'Select Day', required: true,
                   options: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] },
-                { type: 'time', id: 'start_time', placeholder: 'Start Time', required: true },
-                { type: 'time', id: 'end_time', placeholder: 'End Time', required: true },
+                { type: 'time', id: 'start_time', required: true },
+                { type: 'time', id: 'end_time', required: true },
                 { type: 'text', id: 'subject', placeholder: 'Subject', required: true },
                 { type: 'text', id: 'room', placeholder: 'Room (Optional)' },
                 { type: 'text', id: 'teacher', placeholder: 'Teacher (Optional)' },
@@ -2105,48 +2163,173 @@
                         topics.map(t => `<option value="${t.id}">${escapeHtml(t.name)}</option>`).join('');
                 }
             });
-        }
+        };
 
-        function openCreateModal(type, title, fields, hasFile = false) {
-            const modal = document.getElementById('create-modal');
-            document.getElementById('modal-title').textContent = title;
-            
-            const fieldsHtml = fields.map(field => {
-                if (field.type === 'textarea') {
-                    return `<textarea class="form-input" id="modal-${field.id}" placeholder="${field.placeholder}" ${field.required ? 'required' : ''}></textarea>`;
-                } else if (field.type === 'checkbox') {
-                    return `<label style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px; cursor: pointer;">
-                        <input type="checkbox" id="modal-${field.id}" style="width: 16px; height: 16px; accent-color: var(--primary);">
-                        <span style="color: var(--gray);">${field.label}</span>
-                    </label>`;
-                } else if (field.type === 'select') {
-                    const options = field.options || [];
-                    return `<select class="form-input" id="modal-${field.id}" ${field.required ? 'required' : ''}>
-                        <option value="">${field.placeholder}</option>
-                        ${options.map(opt => `<option value="${opt}">${opt}</option>`).join('')}
-                    </select>`;
-                } else if (field.type === 'time') {
-                    return `<input type="time" class="form-input" id="modal-${field.id}" ${field.required ? 'required' : ''}>`;
-                } else {
-                    return `<input type="${field.type}" class="form-input" id="modal-${field.id}" 
-                        placeholder="${field.placeholder}" ${field.required ? 'required' : ''}>`;
+        window.editTimetableSlot = async function(id) {
+            try {
+                const raw = await fetchData(ENDPOINTS.TIMETABLE);
+                let slots = [];
+                if (Array.isArray(raw) && raw.length && raw[0].day && raw[0].slots) {
+                    raw.forEach(d => {
+                        d.slots.forEach(s => slots.push({ ...s, day: d.day }));
+                    });
+                } else if (Array.isArray(raw)) {
+                    slots = raw;
                 }
-            }).join('');
+                
+                const slot = slots.find(s => s.id == id);
+                if (!slot) {
+                    toastManager.show('Timetable slot not found', 'error');
+                    return;
+                }
 
-            document.getElementById('modal-fields').innerHTML = fieldsHtml;
-            document.getElementById('modal-file-section').style.display = hasFile ? 'block' : 'none';
-            document.getElementById('modal-id').value = '';
-            document.getElementById('modal-submit').textContent = 'Save';
-            
-            modal.classList.add('show');
-        }
+                currentEditingId = id;
+                openCreateModal('Edit Timetable Slot', [
+                    { type: 'select', id: 'day_of_week', placeholder: 'Select Day', required: true,
+                      options: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+                      value: slot.day_of_week || slot.day || '' },
+                    { type: 'time', id: 'start_time', required: true, value: slot.start_time || '' },
+                    { type: 'time', id: 'end_time', required: true, value: slot.end_time || '' },
+                    { type: 'text', id: 'subject', placeholder: 'Subject', required: true, value: slot.subject || '' },
+                    { type: 'text', id: 'room', placeholder: 'Room (Optional)', value: slot.room || '' },
+                    { type: 'text', id: 'teacher', placeholder: 'Teacher (Optional)', value: slot.teacher || '' },
+                    { type: 'select', id: 'topic_id', placeholder: 'Select Topic (Optional)', options: [], value: slot.topic?.id || '' }
+                ]);
 
-        function closeCreateModal() {
-            document.getElementById('create-modal').classList.remove('show');
-            currentEditingId = null;
+                const topics = await fetchData(ENDPOINTS.TOPICS);
+                const select = document.getElementById('modal-topic_id');
+                if (select) {
+                    select.innerHTML = '<option value="">Select Topic (Optional)</option>' + 
+                        topics.map(t => `<option value="${t.id}" ${t.id == slot.topic?.id ? 'selected' : ''}>${escapeHtml(t.name)}</option>`).join('');
+                }
+            } catch (error) {
+                toastManager.show('Failed to load timetable slot', 'error');
+            }
+        };
+
+        window.deleteTimetableSlot = async function(id) {
+            const confirmed = await showConfirm('Delete Timetable Slot', 'Are you sure you want to delete this slot?');
+            if (!confirmed) return;
+
+            try {
+                await deleteData(`${ENDPOINTS.TIMETABLE}/${id}`);
+                toastManager.show('Timetable slot deleted successfully', 'success');
+                await loadTimetable(currentSubTab);
+            } catch (error) {
+                toastManager.show('Failed to delete timetable slot', 'error');
+            }
+        };
+
+        window.downloadAssignmentFile = function(id) {
+            window.open(`${ENDPOINTS.ASSIGNMENTS}/${id}/download`, '_blank');
+        };
+
+        window.filterContent = function() {
+            toastManager.show('Filter feature coming soon', 'info');
+        };
+
+        window.searchContent = function() {
+            toastManager.show('Search feature coming soon', 'info');
+        };
+
+        window.filterDueSoon = function() {
+            switchSubTab('due-soon');
+        };
+
+        window.showStats = function() {
+            toastManager.show('Statistics feature coming soon', 'info');
+        };
+
+        window.printTimetable = function() {
+            window.print();
+        };
+
+        window.clearModalFile = function() {
             currentFile = null;
-        }
+            document.getElementById('modal-file').value = '';
+            document.getElementById('modal-file-info').style.display = 'none';
+        };
 
+        // ==================== Event Listeners ====================
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Load user data
+            await loadUserData();
+
+            // Load sidebar state
+            const savedState = localStorage.getItem('sidebarCollapsed');
+            if (savedState === 'true') {
+                document.getElementById('sidebar').classList.add('collapsed');
+                isSidebarCollapsed = true;
+            }
+
+            // Load initial content
+            await loadDashboard();
+        });
+
+        // Sidebar toggle
+        document.getElementById('toggle-sidebar').addEventListener('click', toggleSidebar);
+
+        // Mobile menu toggle
+        document.getElementById('menu-toggle').addEventListener('click', toggleMobileMenu);
+
+        // Close mobile menu when clicking outside
+        document.addEventListener('click', (e) => {
+            const sidebar = document.getElementById('sidebar');
+            const menuToggle = document.getElementById('menu-toggle');
+            
+            if (window.innerWidth <= 768) {
+                if (!sidebar.contains(e.target) && !menuToggle.contains(e.target) && sidebar.classList.contains('mobile-open')) {
+                    sidebar.classList.remove('mobile-open');
+                }
+            }
+        });
+
+        // Handle resize
+        window.addEventListener('resize', () => {
+            const sidebar = document.getElementById('sidebar');
+            if (window.innerWidth > 768) {
+                sidebar.classList.remove('mobile-open');
+            }
+        });
+
+        // Nav items click
+        document.querySelectorAll('.nav-item[data-tab]').forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                switchMainTab(item.dataset.tab);
+            });
+        });
+
+        // Logout buttons
+        const logoutHandler = async () => {
+            const confirmed = await showConfirm('Logout', 'Are you sure you want to logout?');
+            if (confirmed) {
+                localStorage.removeItem('user');
+                window.location.href = '/logout';
+            }
+        };
+
+        document.getElementById('logout-btn').addEventListener('click', logoutHandler);
+        document.getElementById('topbar-logout').addEventListener('click', logoutHandler);
+
+        // Confirm modal buttons
+        document.getElementById('confirm-cancel').addEventListener('click', () => {
+            document.getElementById('confirm-modal').classList.remove('show');
+            if (confirmResolver) {
+                confirmResolver(false);
+                confirmResolver = null;
+            }
+        });
+
+        document.getElementById('confirm-ok').addEventListener('click', () => {
+            document.getElementById('confirm-modal').classList.remove('show');
+            if (confirmResolver) {
+                confirmResolver(true);
+                confirmResolver = null;
+            }
+        });
+
+        // Modal form submit
         document.getElementById('modal-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -2161,7 +2344,7 @@
                 const id = field.id.replace('modal-', '');
                 if (field.type === 'checkbox') {
                     data[id] = field.checked;
-                } else if (field.type === 'datetime-local') {
+                } else if (field.type === 'datetime-local' || field.type === 'time') {
                     data[id] = field.value;
                 } else {
                     data[id] = field.value;
@@ -2175,188 +2358,49 @@
 
             try {
                 let result;
+                const endpoint = type === 'timetable' ? ENDPOINTS.TIMETABLE : ENDPOINTS[type.toUpperCase() + 'S'];
+                
                 if (currentEditingId) {
-                    result = await sendData(`${ENDPOINTS[type.toUpperCase()]}${type === 'timetable' ? '' : 'S'}/${currentEditingId}`, data, 'PUT');
+                    result = await sendData(`${endpoint}/${currentEditingId}`, data, 'PUT');
                     toastManager.show(`${title} updated successfully`, 'success');
                 } else {
-                    result = await sendData(ENDPOINTS[type.toUpperCase()] + (type === 'timetable' ? '' : 'S'), data, 'POST');
+                    result = await sendData(endpoint, data, 'POST');
                     toastManager.show(`${title} created successfully`, 'success');
                 }
 
-                if (currentFile && result.id) {
-                    await uploadFile(ENDPOINTS[type.toUpperCase() + 'S'], currentFile, result.id);
+                if (currentFile && result && result.id) {
+                    const uploadEndpoint = type === 'timetable' ? ENDPOINTS.TIMETABLE : ENDPOINTS[type.toUpperCase() + 'S'];
+                    await uploadFile(uploadEndpoint, currentFile, result.id);
                 }
 
                 closeCreateModal();
-                loadTabContent(currentMainTab, currentSubTab);
+                await loadTabContent(currentMainTab, currentSubTab);
             } catch (err) {
+                console.error('Save error:', err);
                 toastManager.show(`Error saving ${title.toLowerCase()}`, 'error');
             }
         });
 
-        document.getElementById('modal-file')?.addEventListener('change', (e) => {
+        // Modal file input
+        document.getElementById('modal-file').addEventListener('change', (e) => {
             currentFile = e.target.files[0];
             if (currentFile) {
                 document.getElementById('modal-file-info').style.display = 'flex';
                 document.getElementById('modal-file-name').textContent = currentFile.name;
             }
         });
-        
-        async function editAnnouncement(id) {
-            const items = await fetchData(ENDPOINTS.ANNOUNCEMENTS);
-            const item = items.find(x => x.id == id);
-            if (!item) return;
 
-            createAnnouncement();
-            document.getElementById('modal-id').value = item.id;
-            document.getElementById('modal-title').value = item.title || '';
-            document.getElementById('modal-content').value = item.content || '';
-            document.getElementById('modal-highlight').checked = item.highlight || false;
-            document.getElementById('modal-submit').textContent = 'Update';
-            currentEditingId = id;
-        }
+        // Clear modal file
+        document.getElementById('clear-modal-file').addEventListener('click', () => {
+            currentFile = null;
+            document.getElementById('modal-file').value = '';
+            document.getElementById('modal-file-info').style.display = 'none';
+        });
 
-        async function editAssignment(id) {
-            const items = await fetchData(ENDPOINTS.ASSIGNMENTS);
-            const item = items.find(x => x.id == id);
-            if (!item) return;
+        // Cancel modal
+        document.getElementById('cancel-modal').addEventListener('click', closeCreateModal);
 
-            createAssignment();
-            document.getElementById('modal-id').value = item.id;
-            document.getElementById('modal-title').value = item.title || '';
-            document.getElementById('modal-description').value = item.description || '';
-            
-            if (item.due_date) {
-                const dueDate = new Date(item.due_date);
-                const formattedDue = dueDate.toISOString().slice(0, 16);
-                document.getElementById('modal-due_date').value = formattedDue;
-            }
-            
-            setTimeout(() => {
-                document.getElementById('modal-topic_id').value = item.topic?.id || '';
-            }, 500);
-            
-            document.getElementById('modal-submit').textContent = 'Update';
-            currentEditingId = id;
-        }
-
-        async function editTopic(id) {
-            const items = await fetchData(ENDPOINTS.TOPICS);
-            const item = items.find(x => x.id == id);
-            if (!item) return;
-
-            createTopic();
-            document.getElementById('modal-id').value = item.id;
-            document.getElementById('modal-name').value = item.name || '';
-            document.getElementById('modal-lecturer').value = item.lecturer || '';
-            document.getElementById('modal-contact').value = item.contact || '';
-            document.getElementById('modal-description').value = item.description || '';
-            document.getElementById('modal-submit').textContent = 'Update';
-            currentEditingId = id;
-        }
-
-        async function editTimetableSlot(id) {
-            const raw = await fetchData(ENDPOINTS.TIMETABLE);
-            let slots = [];
-            if (Array.isArray(raw) && raw.length && raw[0].day && raw[0].slots) {
-                raw.forEach(d => {
-                    d.slots.forEach(s => slots.push({ ...s, day: d.day }));
-                });
-            } else if (Array.isArray(raw)) {
-                slots = raw;
-            }
-            
-            const slot = slots.find(s => s.id == id);
-            if (!slot) return;
-
-            createTimetable();
-            document.getElementById('modal-id').value = slot.id;
-            document.getElementById('modal-day_of_week').value = slot.day_of_week || slot.day || '';
-            document.getElementById('modal-start_time').value = slot.start_time || '';
-            document.getElementById('modal-end_time').value = slot.end_time || '';
-            document.getElementById('modal-subject').value = slot.subject || '';
-            document.getElementById('modal-room').value = slot.room || '';
-            document.getElementById('modal-teacher').value = slot.teacher || '';
-            
-            setTimeout(() => {
-                document.getElementById('modal-topic_id').value = slot.topic?.id || '';
-            }, 500);
-            
-            document.getElementById('modal-submit').textContent = 'Update';
-            currentEditingId = id;
-        }
-
-        async function deleteAnnouncement(id) {
-            const confirmed = await showConfirm('Delete Announcement', 'Are you sure you want to delete this announcement? This action cannot be undone.');
-            if (!confirmed) return;
-
-            try {
-                await deleteData(`${ENDPOINTS.ANNOUNCEMENTS}/${id}`);
-                toastManager.show('Announcement deleted successfully', 'success');
-                loadAnnouncements(currentSubTab);
-            } catch {
-                toastManager.show('Failed to delete announcement', 'error');
-            }
-        }
-
-        async function deleteAssignment(id) {
-            const confirmed = await showConfirm('Delete Assignment', 'Are you sure you want to delete this assignment? All associated data will be lost.');
-            if (!confirmed) return;
-
-            try {
-                await deleteData(`${ENDPOINTS.ASSIGNMENTS}/${id}`);
-                toastManager.show('Assignment deleted successfully', 'success');
-                loadAssignments(currentSubTab);
-            } catch {
-                toastManager.show('Failed to delete assignment', 'error');
-            }
-        }
-
-        async function deleteTopic(id) {
-            const confirmed = await showConfirm('Delete Unit', 'Are you sure you want to delete this unit? This may affect related assignments and materials.');
-            if (!confirmed) return;
-
-            try {
-                await deleteData(`${ENDPOINTS.TOPICS}/${id}`);
-                toastManager.show('Unit deleted successfully', 'success');
-                loadTopics(currentSubTab);
-            } catch {
-                toastManager.show('Failed to delete unit', 'error');
-            }
-        }
-
-        async function deleteTimetableSlot(id) {
-            const confirmed = await showConfirm('Delete Timetable Slot', 'Are you sure you want to delete this timetable slot?');
-            if (!confirmed) return;
-
-            try {
-                await deleteData(`${ENDPOINTS.TIMETABLE}/${id}`);
-                toastManager.show('Timetable slot deleted successfully', 'success');
-                loadTimetable(currentSubTab);
-            } catch {
-                toastManager.show('Failed to delete timetable slot', 'error');
-            }
-        }
-
-        function downloadAssignmentFile(id) {
-            window.open(`${ENDPOINTS.ASSIGNMENTS}/${id}/download`, '_blank');
-        }
-
-        // ==================== Logout ====================
-        async function logout() {
-            const confirmed = await showConfirm('Logout', 'Are you sure you want to logout?');
-            if (confirmed) {
-                localStorage.removeItem('user');
-                window.location.href = '/logout';
-            }
-        }
-
-        // ==================== Initialization ====================
-        document.addEventListener('DOMContentLoaded', async () => {
-            await loadUserData();
-            loadDashboard();
-        }); 
-
+        // Close modal on outside click
         document.getElementById('create-modal').addEventListener('click', (e) => {
             if (e.target === document.getElementById('create-modal')) {
                 closeCreateModal();
@@ -2369,6 +2413,7 @@
             }
         });
 
+        // Escape key handlers
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 document.getElementById('create-modal').classList.remove('show');
@@ -2377,6 +2422,7 @@
             }
         });
 
+        // Modal body scroll lock
         const modal = document.getElementById('create-modal');
         const observer = new MutationObserver((mutations) => {
             mutations.forEach((mutation) => {
@@ -2389,8 +2435,9 @@
                 }
             });
         });
-
         observer.observe(modal, { attributes: true });
+
+        console.log('Admin portal initialized with working CRUD operations');
     </script>
 </body>
 </html>
