@@ -208,7 +208,7 @@ def upload_multiple_files():
                 existing_file.duration = upload_result.get('duration')
                 existing_file.resource_type = upload_result.get('resource_type', resource_type)
                 existing_file.file_type = file_type
-                existing_file.updated_at = datetime.utcnow() + timedelta(hours=3)
+                existing_file.updated_at = datetime.now(timezone.utc) + timedelta(hours=3)
                 file_record = existing_file
             else:
                 # Create new record
@@ -225,8 +225,8 @@ def upload_multiple_files():
                     duration=upload_result.get('duration'),
                     resource_type=upload_result.get('resource_type', resource_type),
                     folder=upload_result.get('folder', 'flask_uploads'),
-                    created_at=datetime.utcnow() + timedelta(hours=3),
-                    updated_at=datetime.utcnow() + timedelta(hours=3)
+                    created_at=datetime.now(timezone.utc) + timedelta(hours=3),
+                    updated_at=datetime.now(timezone.utc) + timedelta(hours=3)
                 )
                 db.session.add(new_file)
                 file_record = new_file

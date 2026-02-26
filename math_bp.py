@@ -1,9 +1,8 @@
 # math.py
 from flask import Blueprint, request, session, jsonify, Response, stream_with_context
 from flask_login import current_user, login_required
-from datetime import datetime, date, time
+from datetime import datetime, date, time, timedelta, timezone
 import requests
-from datetime import timedelta
 import json
 import time
 import random
@@ -230,7 +229,7 @@ CURRENT STUDENT QUERY: {prompt}
 
 **PLATFORM CONTEXT:**
 - Current user: {current_user.username}
-- Time: {(datetime.utcnow() + timedelta(hours=3)).strftime('%Y-%m-%d %H:%M:%S')} EAT
+- Time: {(datetime.now(timezone.utc) + timedelta(hours=3)).strftime('%Y-%m-%d %H:%M:%S')} EAT
 - LyxNexus Math Assistant - Specialized for assignment help
 """
     math_prompt += r"""

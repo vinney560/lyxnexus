@@ -920,7 +920,7 @@ class ProbeCommandProcessor:
         else:
             return self.format_output("ERROR", "Usage: clean-visits [days]", "error")
         try:
-            cutoff_time = datetime.utcnow() - timedelta(days=days_old)
+            cutoff_time = datetime.now(timezone.utc) - timedelta(days=days_old)
 
             print(f"Starting cleanup: Deleting visits older than {days_old} days and keeping max {max_visits_per_user} per user...")
 

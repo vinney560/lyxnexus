@@ -1,9 +1,8 @@
 # gemini_bp.py
 from flask import Blueprint, request, session, jsonify, Response, stream_with_context
 from flask_login import current_user, login_required
-from datetime import datetime, date, time
+from datetime import datetime, date, time, timedelta, timezone
 import requests
-from datetime import timedelta
 import json
 import time
 import random
@@ -142,7 +141,7 @@ class AIConversationService:
             stats['total_tokens_used'] = total_tokens or 0
             
             # Recent activity (last 7 days)
-            week_ago = datetime.utcnow() - timedelta(days=7)
+            week_ago = datetime.now(timezone.utc) - timedelta(days=7)
             stats['recent_conversations'] = base_query.filter(
                 AIConverse.created_at >= week_ago
             ).count()
@@ -523,7 +522,7 @@ PLATFORM CONTEXT:
 - LyxNexus is an educational platform for managing course Units, assignments, Course Units Materials, Announcements, and communications.
 - LyxNexus support: vincentkipngetich479@gmail.com or +254740694312 for WhatsApp or Contant
 - Current user: Username: {current_user.username}, ID: {current_user.id}, Mobile: {current_user.mobile}, Admin Status: {current_user.is_admin}, Member Since: {current_user.created_at}
-- Time: {(datetime.utcnow() + timedelta(hours=3)).strftime('%Y-%m-%d %H:%M:%S')} EAT
+- Time: {(datetime.now(timezone.utc) + timedelta(hours=3)).strftime('%Y-%m-%d %H:%M:%S')} EAT
 
 "Refer User only by his or her Username, if asked about account details you can disclose the other user details"
 "You have access to real-time internet search via Google Search to get the latest information when needed. Use this capability to provide current, up-to-date answers about recent events, news, weather, or any topics that require current information beyond the LyxNexus platform data."
