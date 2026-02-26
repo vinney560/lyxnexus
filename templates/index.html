@@ -648,19 +648,35 @@
     }
 
     async function loadTimetable() {
-      const container = document.getElementById('timetable-container');
-      const data = await fetchData(ENDPOINTS.TIMETABLE);
-      if (!data.length) { container.innerHTML = '<p class="text-slate-400 col-span-2 text-center glass-card p-6">📆 Timetable not published.</p>'; return; }
-      container.innerHTML = data.map(day => `
-        <div class="glass-card p-5 rounded-xl">
-          <h3 class="text-xl font-bold text-white mb-3 border-b border-white/10 pb-2">${day.day}</h3>
-          ${day.slots.map(s => `
-            <div class="flex justify-between py-2 border-b border-white/5 last:border-0 hover:bg-white/5 px-2 rounded-lg transition text-sm">
-              <div><span class="font-medium text-white">${s.subject}</span><span class="text-xs text-slate-400 block">${s.teacher || 'TBA'}</span></div>
-              <div class="text-right"><span class="text-blue-400">${s.time}</span><span class="text-xs text-slate-400 block">${s.room || 'TBA'}</span></div>
-            </div>`).join('')}
-        </div>`).join('');
-    }
+        const container = document.getElementById('timetable-container');
+        const data = await fetchData(ENDPOINTS.TIMETABLE);
+        
+        if (!data || !data.length) { 
+            container.innerHTML = '<p class="text-slate-400 col-span-2 text-center glass-card p-6">📆 Timetable not published.</p>'; 
+            return; 
+        }
+        
+        container.innerHTML = data.map(day => `
+            <div class="glass-card p-5 rounded-xl">
+                <h3 class="text-xl font-bold text-white mb-3 border-b border-white/10 pb-2">${day.day}</h3>
+                ${day.slots.map(s => `
+                    <div class="flex justify-between py-2 border-b border-white/5 last:border-0 hover:bg-white/5 px-2 rounded-lg transition text-sm">
+                        <div>
+                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                                <span style="font-weight: 500;">${s.subject}</span>
+                                <span class="flex items-center gap-2 mb-1 rounded-lg bg-gradient-to-r ${s.year == 5 ? 'from-red-600 to-red-500' : s.year == 1 ? 'from-blue-600 to-blue-500' : s.year == 2 ? 'from-purple-600 to-purple-500' : s.year == 3 ? 'from-green-600 to-green-500' : 'from-slate-600 to-slate-500'} text-white w-max ${s.year == 5 ? 'all' : `year${s.year || 1}`}" style="font-size: 10px; padding: 1px 8px;">
+                                    Y${s.year || 1}
+                                </span>
+                            </div>
+                            <span class="text-xs text-slate-400 block">${s.teacher || 'TBA'}</span>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-blue-400">${s.time || (s.start_time + ' - ' + s.end_time)}</span>
+                            <span class="text-xs text-slate-400 block">${s.room || 'TBA'}</span>
+                        </div>
+                    </div>`).join('')}
+            </div>`).join('');
+    }    
 
     new Typed('#typed-hero', {
       strings: [
