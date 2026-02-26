@@ -2301,31 +2301,41 @@ print("📱 Use: whatsapp_bulk('Your message')")
 print("🧪 Test first: test_whatsapp_api()")
 # ==================== END SMS SERVICE ====================
 
-# ==================== START OF RAPID API WASMS ====================
+# ==================== START OF RAPID API MYWHINLITE ====================
 def send_msg(mobile, msg):
-    url = "https://whatsapp-messaging-hub.p.rapidapi.com/WhatsappSendMessage"
+    url = "https://mywhinlite.p.rapidapi.com/sendmsg"
 
     payload = {
-    	"token": os.getenv("TOKEN_WASMS"),
-    	"phone_number_or_group_id": mobile,
-    	"is_group": False,
-    	"message": msg,
-    	"quoted_message_id": "",
-    	"quoted_phone_number": "",
-    	"reply_privately": False,
-    	"reply_privately_group_id": ""
+        "phone_number_or_group_id": mobile,
+        "is_group": False,
+        "message": msg
     }
+
     headers = {
-    	"x-rapidapi-key": "4406e83311msh635cb32b3525e4bp17f9c1jsn874626c65441",
-    	"x-rapidapi-host": "whatsapp-messaging-hub.p.rapidapi.com",
-    	"Content-Type": "application/json"
+        "x-rapidapi-key": "e58f612ademsh7e87404e0c73949p1409e8jsnc030330352f6",
+        "x-rapidapi-host": "mywhinlite.p.rapidapi.com",
+        "Content-Type": "application/json"
     }
 
     response = requests.post(url, json=payload, headers=headers)
 
-    print(response.json())
+    if response.status_code == 200:
+        print(Fore.GREEN + "=" * 50)
+        print("Sent successfully!")
+        h = response.headers
+        print(f"Limit: {h.get('X-RateLimit-rapid-free-plans-hard-limit-Limit')}")
+        print(f"Remaining: {h.get('X-RateLimit-rapid-free-plans-hard-limit-Remaining')}")
+        print(f"Reset(Secs): {h.get('X-RateLimit-rapid-free-plans-hard-limit-Reset')}")
+        print(f"Requests Limit: {h.get('X-RateLimit-Requests-Limit')}")
+        print(f"Requests Remaining: {h.get('X-RateLimit-Requests-Remaining')}")
+        print(Fore.GREEN + "=" * 50)
+    else:
+        print(Fore.RED + "=" * 50)
+        print(f"Status Code: {response.status_code}")
+        print(f"Response: {response.text}")
+        print(Fore.RED + "=" * 50)
 
-#======== END OF RAPID API WASMS ==========
+#======== END OF RAPID API MYWHINLITE ==========
 import secrets
 
 def gen_unique_id(_tablename, max_attempts=100):
