@@ -2432,7 +2432,7 @@
 
         document.getElementById('modal-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-
+        
             const submitBtn = document.getElementById('modal-submit');
             const originalText = submitBtn.innerHTML;
             const title = document.getElementById('modal-title').textContent;
@@ -2450,48 +2450,93 @@
             ripple.style.top = (e.clientY - rect.top - size/2) + 'px';
             submitBtn.appendChild(ripple);
             setTimeout(() => ripple.remove(), 600);
+            
             submitBtn.classList.add('saving');
             submitBtn.classList.remove('success', 'error');
             submitBtn.innerHTML = '<i class="fas fa-spinner"></i> Saving...';
             submitBtn.disabled = true;
         
-            const data = {};
-            const fields = document.querySelectorAll('#modal-fields input, #modal-fields textarea, #modal-fields select');
-            fields.forEach(field => {
-                const id = field.id.replace('modal-', '');
-                if (field.type === 'checkbox') {
-                    data[id] = field.checked;
-                } else if (field.type === 'datetime-local' || field.type === 'time') {
-                    data[id] = field.value;
-                } else {
-                    data[id] = field.value;
-                }
-            });
-        
-            if (type === 'announcement' || type === 'assignment' || type === 'topic') {
-                const user = JSON.parse(localStorage.getItem('user') || '{}');
-                data.year = user.year || 1;
-            }
-        
             try {
                 let result;
                 const endpoint = type === 'timetable' ? ENDPOINTS.TIMETABLE : ENDPOINTS[type.toUpperCase() + 'S'];
-
-                if (currentEditingId) {
-                    result = await sendData(`${endpoint}/${currentEditingId}`, data, 'PUT');
+            
+                // Check if this type needs FormData (only announcements and assignments)
+                const needsFormData = type === 'announcement' || type === 'assignment';
+            
+                if (needsFormData) {
+                    // Use FormData for announcements and assignments (supports file upload)
+                    const formData = new FormData();
+                    const fields = document.querySelectorAll('#modal-fields input, #modal-fields textarea, #modal-fields select');
+                    
+                    fields.forEach(field => {
+                        const id = field.id.replace('modal-', '');
+                        if (field.type === 'checkbox') {
+                            formData.append(id, field.checked);
+                        } else if (field.type === 'datetime-local' || field.type === 'time') {
+                            formData.append(id, field.value);
+                        } else {
+                            formData.append(id, field.value);
+                        }
+                    });
+                
+                    // Add user year
+                    const user = JSON.parse(localStorage.getItem('user') || '{}');
+                    formData.append('year', user.year || 1);
+                
+                    // Add file if exists
+                    if (currentFile) {
+                        formData.append('file', currentFile);
+                    }
+                
+                    if (currentEditingId) {
+                        const response = await fetch(`${endpoint}/${currentEditingId}`, {
+                            method: 'PUT',
+                            body: formData
+                        });
+                        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                        result = await response.json();
+                    } else {
+                        const response = await fetch(endpoint, {
+                            method: 'POST',
+                            body: formData
+                        });
+                        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                        result = await response.json();
+                    }
                 } else {
-                    result = await sendData(endpoint, data, 'POST');
+                    // Use JSON for topics and timetable (no file uploads)
+                    const data = {};
+                    const fields = document.querySelectorAll('#modal-fields input, #modal-fields textarea, #modal-fields select');
+                    
+                    fields.forEach(field => {
+                        const id = field.id.replace('modal-', '');
+                        if (field.type === 'checkbox') {
+                            data[id] = field.checked;
+                        } else if (field.type === 'datetime-local' || field.type === 'time') {
+                            data[id] = field.value;
+                        } else {
+                            data[id] = field.value;
+                        }
+                    });
+                
+                    // Add user year for topics
+                    if (type === 'topic') {
+                        const user = JSON.parse(localStorage.getItem('user') || '{}');
+                        data.year = user.year || 1;
+                    }
+                
+                    if (currentEditingId) {
+                        result = await sendData(`${endpoint}/${currentEditingId}`, data, 'PUT');
+                    } else {
+                        result = await sendData(endpoint, data, 'POST');
+                    }
                 }
-        
-                if (currentFile && result && result.id) {
-                    const uploadEndpoint = type === 'timetable' ? ENDPOINTS.TIMETABLE : ENDPOINTS[type.toUpperCase() + 'S'];
-                    await uploadFile(uploadEndpoint, currentFile, result.id);
-                }
-        
+            
+                // Show success state
                 submitBtn.classList.remove('saving');
                 submitBtn.classList.add('success');
                 submitBtn.innerHTML = '<i class="fas fa-check"></i> Success!';
-
+            
                 setTimeout(() => {
                     closeCreateModal();
                     toastManager.show(`${title} ${currentEditingId ? 'updated' : 'created'} successfully`, 'success');
@@ -2499,20 +2544,19 @@
             
                 setTimeout(() => {
                     loadTabContent(currentMainTab, currentSubTab);
-                    submitBtn.disabled = false;
                 }, 1000);
             
             } catch (err) {
                 console.error('Save error:', err);
-
+            
                 // Show error state
                 submitBtn.classList.remove('saving');
                 submitBtn.classList.add('error');
                 submitBtn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Failed!';
-
+            
                 // Show error message
                 toastManager.show(`Error saving ${title.toLowerCase()}`, 'error');
-
+            
                 setTimeout(() => {
                     submitBtn.classList.remove('error');
                     submitBtn.innerHTML = originalText;
