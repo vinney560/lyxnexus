@@ -2353,27 +2353,19 @@
 
         // ==================== Event Listeners ====================
         document.addEventListener('DOMContentLoaded', async () => {
-            // Load user data
             await loadUserData();
 
-            // Load sidebar state
             const savedState = localStorage.getItem('sidebarCollapsed');
             if (savedState === 'true') {
                 document.getElementById('sidebar').classList.add('collapsed');
                 isSidebarCollapsed = true;
             }
 
-            // Load initial content
             await loadDashboard();
         });
 
-        // Sidebar toggle
         document.getElementById('toggle-sidebar').addEventListener('click', toggleSidebar);
-
-        // Mobile menu toggle
         document.getElementById('menu-toggle').addEventListener('click', toggleMobileMenu);
-
-        // Close mobile menu when clicking outside
         document.addEventListener('click', (e) => {
             const sidebar = document.getElementById('sidebar');
             const menuToggle = document.getElementById('menu-toggle');
@@ -2392,8 +2384,7 @@
                 sidebar.classList.remove('mobile-open');
             }
         });
-
-        // Nav items click
+        
         document.querySelectorAll('.nav-item[data-tab]').forEach(item => {
             item.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -2401,7 +2392,6 @@
             });
         });
 
-        // Logout buttons
         const logoutHandler = async () => {
             const confirmed = await showConfirm('Logout', 'Are you sure you want to logout?');
             if (confirmed) {
@@ -2412,8 +2402,6 @@
 
         document.getElementById('logout-btn').addEventListener('click', logoutHandler);
         document.getElementById('topbar-logout').addEventListener('click', logoutHandler);
-
-        // Confirm modal buttons
         document.getElementById('confirm-cancel').addEventListener('click', () => {
             document.getElementById('confirm-modal').classList.remove('show');
             if (confirmResolver) {
@@ -2430,9 +2418,6 @@
             }
         });
 
-        // Replace your existing modal form submit handler with this enhanced version:
-
-        // Modal form submit with animations
         document.getElementById('modal-form').addEventListener('submit', async (e) => {
             e.preventDefault();
 
@@ -2452,11 +2437,7 @@
             ripple.style.left = (e.clientX - rect.left - size/2) + 'px';
             ripple.style.top = (e.clientY - rect.top - size/2) + 'px';
             submitBtn.appendChild(ripple);
-        
-            // Remove ripple after animation
             setTimeout(() => ripple.remove(), 600);
-        
-            // Show saving state
             submitBtn.classList.add('saving');
             submitBtn.classList.remove('success', 'error');
             submitBtn.innerHTML = '<i class="fas fa-spinner"></i> Saving...';
@@ -2489,25 +2470,21 @@
                 } else {
                     result = await sendData(endpoint, data, 'POST');
                 }
-            
-                // Handle file upload if exists
+        
                 if (currentFile && result && result.id) {
                     const uploadEndpoint = type === 'timetable' ? ENDPOINTS.TIMETABLE : ENDPOINTS[type.toUpperCase() + 'S'];
                     await uploadFile(uploadEndpoint, currentFile, result.id);
                 }
-            
-                // Show success state
+        
                 submitBtn.classList.remove('saving');
                 submitBtn.classList.add('success');
                 submitBtn.innerHTML = '<i class="fas fa-check"></i> Success!';
 
-                // Close modal after success animation
                 setTimeout(() => {
                     closeCreateModal();
                     toastManager.show(`${title} ${currentEditingId ? 'updated' : 'created'} successfully`, 'success');
                 }, 800);
             
-                // Reload content after modal closes
                 setTimeout(() => {
                     loadTabContent(currentMainTab, currentSubTab);
                 }, 1000);
@@ -2523,7 +2500,6 @@
                 // Show error message
                 toastManager.show(`Error saving ${title.toLowerCase()}`, 'error');
 
-                // Reset button after error
                 setTimeout(() => {
                     submitBtn.classList.remove('error');
                     submitBtn.innerHTML = originalText;
@@ -2532,7 +2508,6 @@
             }
         });        
 
-        // Modal file input
         document.getElementById('modal-file').addEventListener('change', (e) => {
             currentFile = e.target.files[0];
             if (currentFile) {
@@ -2541,17 +2516,13 @@
             }
         });
 
-        // Clear modal file
         document.getElementById('clear-modal-file').addEventListener('click', () => {
             currentFile = null;
             document.getElementById('modal-file').value = '';
             document.getElementById('modal-file-info').style.display = 'none';
         });
 
-        // Cancel modal
         document.getElementById('cancel-modal').addEventListener('click', closeCreateModal);
-
-        // Close modal on outside click
         document.getElementById('create-modal').addEventListener('click', (e) => {
             if (e.target === document.getElementById('create-modal')) {
                 closeCreateModal();
@@ -2573,7 +2544,6 @@
             }
         });
 
-        // Modal body scroll lock
         const modal = document.getElementById('create-modal');
         const observer = new MutationObserver((mutations) => {
             mutations.forEach((mutation) => {
@@ -2587,8 +2557,6 @@
             });
         });
         observer.observe(modal, { attributes: true });
-
-        console.log('Admin portal initialized with working CRUD operations');
     </script>
 </body>
 </html>
