@@ -2386,19 +2386,12 @@
         
         elements.prevPage.addEventListener('click', function() {
             if (currentPage > 1) {
-                currentPage--;
-                displayUsers(filteredUsers);
-                updatePagination();
+                loadUsers(currentPage - 1);
             }
         });
 
         elements.nextPage.addEventListener('click', function() {
-            const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
-            if (currentPage < totalPages) {
-                currentPage++;
-                displayUsers(filteredUsers);
-                updatePagination();
-            }
+            loadUsers(currentPage + 1);
         });
         
         elements.refreshBtn.addEventListener('click', () => loadUsers(currentPage));
