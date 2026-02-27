@@ -38,7 +38,7 @@ def css_files(filename):
 @app.route('/')
 def home():
     """Home page route"""
-    return render_template('admin.html')
+    return render_template('index.html')
 
 @app.route('/api/notify')
 def mock_notifications():
@@ -766,9 +766,14 @@ current_user = mock_data['users'][0]
 def main_page():
     return render_template('main_page.html', current_user=current_user)
 
-@app.route('/admin/a')
-def ads():
-    return render_template('admin_users.html')
+
+@app.route('/admin')
+def adsm():
+    return render_template('admin.html')
+
+@app.route('/admin/u')
+def adsa():
+    return render_template('admin_users.html')    
 
 @app.route('/api/user/profile')
 def user_profile():

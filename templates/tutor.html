@@ -1,0 +1,2416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management | LyxNexus Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
+    <script src="/_0eXv3/tailwind.all.css"></script>
+    <script src="/_0eXv4/n-s.js"></script>
+    <script src="/_0eXv4/loading.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<style>
+    :root {
+        --bg-color: #111827;
+        --text-color: #F9FAFB;
+        --accent-color: #4A90E2;
+        --secondary-color: #8B5CF6;
+        --primary: #6366f1;
+        --primary-dark: #4f46e5;
+        --primary-light: #818cf8;
+        --secondary: #8b5cf6;
+    }
+    
+    body {
+        font-family: 'Poppins', sans-serif;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+    }
+
+    ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: rgba(15, 23, 42, 0.3);
+        border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: var(--primary-light);
+    }
+    
+    .gradient-text {
+        background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        color: transparent;
+    }
+    
+    .glass-morph {
+        background: rgba(30, 30, 40, 0.6);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        box-shadow: 0 8px 32px rgba(0, 31, 135, 0.2);
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .glass-morph:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 40px rgba(0, 31, 135, 0.3);
+    }
+    
+    .btn {
+        background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 50px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+        font-size: 14px;
+        position: relative;
+        overflow: hidden;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 44px;
+    }
+    
+    .btn:not(.btn-loading):hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+    }
+    
+    .btn:disabled, .btn.btn-loading {
+        opacity: 0.7;
+        cursor: not-allowed;
+        transform: none !important;
+    }
+    
+    .btn-loading .btn-spinner {
+        display: inline-block;
+    }
+    
+    .btn-spinner {
+        display: none;
+        width: 16px;
+        height: 16px;
+        border: 2px solid transparent;
+        border-top: 2px solid white;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-right: 8px;
+    }
+    
+    .btn-danger {
+        background: linear-gradient(90deg, #EF4444, #DC2626);
+    }
+    
+    .btn-warning {
+        background: linear-gradient(90deg, #F59E0B, #D97706);
+    }
+    
+    .btn-success {
+        background: linear-gradient(90deg, #10B981, #059669);
+    }
+    
+    .btn-secondary {
+        background: linear-gradient(90deg, #6B7280, #4B5563);
+    }
+
+    .btn-ai {
+        background: linear-gradient(90deg, #a3aa3f, #5a761a);
+    }
+    
+    .btn-dashboard {
+        background: linear-gradient(135deg, #6f31b5, #1a1ad7);
+    }
+
+    .btn-shares {
+        background: linear-gradient(90deg, #F97316, #C2410C);
+    }
+
+    .btn-notify {
+        background: linear-gradient(90deg, #10B981, #059669);
+        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+    }
+
+    .btn-info {
+        background: linear-gradient(90deg, #0EA5E9, #0369A1);
+    }
+
+    .btn-phone {
+        background: linear-gradient(90deg, #ff4d4d 0%, #c7304e 40%, #442e76 100%);
+    }
+
+    .btn-events {
+        background: linear-gradient(90deg, #f97316, #c2410c);
+    }
+
+    .btn-money {
+        background: linear-gradient(145deg, #14B8A6, #0D9488, #115E59);
+    }
+    
+    .logo-container {
+        background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+        border-radius: 20px;
+        padding: 12px;
+        display: inline-block;
+        margin-bottom: 20px;
+        margin-left: 60px;
+    }
+    
+    .admin-card {
+        background: rgba(30, 30, 40, 0.7);
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 20px;
+        transition: all 0.3s ease;
+    }
+    
+    .admin-card.loading {
+        opacity: 0.7;
+        pointer-events: none;
+    }
+    
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    .modal-content {
+        background: var(--bg-color);
+        border-radius: 15px;
+        padding: 30px;
+        width: 90%;
+        max-width: 500px;
+        border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+    
+    .loading {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 40px;
+    }
+    
+    .spinner {
+        border: 4px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        border-top: 4px solid #3B82F6;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    .status-badge {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+    
+    .status-admin {
+        background: linear-gradient(90deg, #8B5CF6, #7C3AED);
+        color: white;
+    }
+
+    .status-allowed {
+        background-color: #16a34a; /* green */
+    }
+
+    .status-banned {
+        background-color: #dc2626; /* red */
+    }
+
+    .status-user {
+        background: rgba(59, 130, 246, 0.2);
+        color: #3B82F6;
+        border: 1px solid #3B82F6;
+    }
+    
+    .status-online {
+        background: rgba(16, 185, 129, 0.2);
+        color: #10B981;
+        border: 1px solid #10B981;
+    }
+    
+    .stats-card {
+        background: rgba(30, 30, 40, 0.7);
+        border-radius: 12px;
+        padding: 20px;
+        text-align: center;
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        transition: transform 0.3s ease;
+    }
+    
+    .stats-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .stats-number {
+        font-size: 2rem;
+        font-weight: bold;
+        background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        color: transparent;
+    }
+    
+    /* Enhanced Search Styles */
+    .search-container {
+        position: relative;
+        margin-bottom: 20px;
+    }
+    
+    .search-input {
+        width: 100%;
+        padding: 12px 20px 12px 45px;
+        background: rgba(30, 30, 40, 0.7);
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        border-radius: 50px;
+        color: white;
+        font-size: 16px;
+        transition: all 0.3s ease;
+    }
+    
+    .search-input:focus {
+        outline: none;
+        border-color: #3B82F6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+    }
+    
+    .search-icon {
+        position: absolute;
+        left: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #9CA3AF;
+    }
+    
+    .search-filters {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 15px;
+    }
+    
+    .filter-select {
+        background: rgba(30, 30, 40, 0.7);
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        border-radius: 8px;
+        color: white;
+        padding: 8px 12px;
+        font-size: 14px;
+    }
+    
+    .filter-select:focus {
+        outline: none;
+        border-color: #3B82F6;
+    }
+    
+    /* Chart Container - Reduced Size */
+    .chart-container {
+        background: rgba(30, 30, 40, 0.7);
+        border-radius: 15px;
+        padding: 15px;
+        margin-bottom: 15px;
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        height: 350px;
+        position: relative;
+    }
+    
+    .chart-title {
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 10px;
+        text-align: center;
+    }
+    
+    @media (max-width: 768px) {
+        nav.glass-morph {
+          position: static !important;
+          top: auto !important;
+        }
+        
+        .btn {
+            padding: 12px 16px;
+            font-size: 13px;
+            min-height: 48px;
+            width: 100%;
+        }
+        
+        .modal-content {
+            margin: 20px;
+            padding: 20px;
+            width: calc(100% - 40px);
+        }
+        
+        .admin-card {
+            padding: 15px;
+        }
+        
+        .stats-card {
+            padding: 15px;
+        }
+        
+        .stats-number {
+            font-size: 1.5rem;
+        }
+        
+        .chart-container {
+            padding: 15px;
+            height: 320px;
+        }
+        
+        .search-filters {
+            flex-direction: column;
+        }
+    }
+
+    @media (max-width: 640px) {
+        .flex.justify-between.items-center {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 15px;
+        }
+    }
+
+    .user-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+    
+    .user-table th,
+    .user-table td {
+        padding: 12px 15px;
+        text-align: left;
+        border-bottom: 1px solid rgba(59, 130, 246, 0.2);
+    }
+    
+    .user-table th {
+        background: rgba(30, 30, 40, 0.8);
+        color: #3B82F6;
+        font-weight: 600;
+    }
+    
+    .user-table tr:hover {
+        background: rgba(59, 130, 246, 0.1);
+    }
+
+    .overflow-x-auto {
+        scrollbar-width: thin;
+        scrollbar-color: var(--accent-color);
+        position: relative;
+    }
+
+    .overflow-x-auto::-webkit-scrollbar {
+        height: 8px;
+    }
+
+    .overflow-x-auto::-webkit-scrollbar-track {
+        background: var(--bg-color);
+        border-radius: 4px;
+    }
+
+    .overflow-x-auto::-webkit-scrollbar-thumb {
+        background: linear-gradient(135deg, #48e148, #4f46e5, #f954ba);
+        border-radius: 4px;
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+
+    .overflow-x-auto:hover::-webkit-scrollbar-thumb {
+        opacity: 1;
+    }
+
+    .overflow-x-auto {
+        overflow-x: auto;
+    }
+
+    .overflow-x-auto::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(135deg, #4f46e5, #f954ba, #48e148);
+    }    
+    .last-updated {
+        background: rgba(16, 185, 129, 0.2);
+        color: #10B981;
+        padding: 8px 15px;
+        border-radius: 20px;
+        font-size: 12px;
+        border: 1px solid #10B981;
+    }
+    
+    .action-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        min-width: 140px;
+    }
+    
+    @media (min-width: 640px) {
+        .action-buttons {
+            flex-direction: row;
+            flex-wrap: wrap;
+        }
+    }
+    
+    #toast-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 1100;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 10px;
+        max-height: calc(100vh - 40px);
+        overflow-y: auto;
+        pointer-events: none;
+        overflow: auto;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+
+    .toast {
+        position: relative;
+        padding: 15px 20px;
+        border-radius: 10px;
+        color: white;
+        max-width: 350px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        transform: translateX(150%);
+        transition: transform 0.3s ease;
+        pointer-events: auto;
+    }
+
+    .toast.show {
+        transform: translateX(0);
+    }
+
+    .toast-close {
+        background: rgba(31, 41, 55, 0.9);
+        border: none;
+        cursor: pointer;
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        font-size: 12px;
+        opacity: 0.8;
+        transition: all 0.2s ease;
+        z-index: 10;
+    }
+    
+    .toast-close:hover {
+        opacity: 1;
+        background: rgba(55, 65, 81, 0.9);
+        transform: scale(1.1);
+    }
+
+    .toast-success {
+        background: linear-gradient(90deg, #10B981, #059669);
+    }
+
+    .toast-error {
+        background: linear-gradient(90deg, #EF4444, #DC2626);
+    }
+
+    .toast-info {
+        background: linear-gradient(90deg, #3B82F6, #1D4ED8);
+    }
+    
+    .toast-success {
+        background: linear-gradient(90deg, #10B981, #059669);
+    }
+    
+    .toast-error {
+        background: linear-gradient(90deg, #EF4444, #DC2626);
+    }
+    
+    .toast-info {
+        background: linear-gradient(90deg, #3B82F6, #1D4ED8);
+    }
+    
+    .pulse {
+        animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+        0% { opacity: 1; }
+        50% { opacity: 0.7; }
+        100% { opacity: 1; }
+    }
+    
+    .quick-stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+    
+    .quick-stat {
+        background: rgba(30, 30, 40, 0.7);
+        border-radius: 12px;
+        padding: 15px;
+        text-align: center;
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        transition: all 0.3s ease;
+    }
+    
+    .quick-stat:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+    
+    .quick-stat-value {
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+    
+    .quick-stat-label {
+        font-size: 0.875rem;
+        color: #9CA3AF;
+    }
+    
+    .online-users-panel {
+        background: rgba(30, 30, 40, 0.7);
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 20px;
+        border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    
+    .online-user-item {
+        display: flex;
+        align-items: center;
+        padding: 10px;
+        border-radius: 8px;
+        margin-bottom: 8px;
+        background: rgba(16, 185, 129, 0.1);
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+    
+    .online-indicator {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #10B981;
+        margin-right: 10px;
+        animation: pulse 2s infinite;
+    }
+    
+    .filters-panel {
+        background: rgba(30, 30, 40, 0.7);
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 20px;
+        border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+    
+    .filters-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+    
+    .filter-group {
+        margin-bottom: 15px;
+    }
+    
+    .filter-label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 500;
+    }
+    
+    .activity-bar {
+        width: 100%;
+        height: 6px;
+        background: rgba(75, 85, 99, 0.5);
+        border-radius: 3px;
+        overflow: hidden;
+        margin-top: 5px;
+    }
+    
+    .activity-progress {
+        height: 100%;
+        background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+        border-radius: 3px;
+        transition: width 0.5s ease;
+    }
+    
+    .stats-icon {
+        font-size: 1.5rem;
+        margin-bottom: 10px;
+        opacity: 0.8;
+    }
+    
+    .chart-wrapper {
+        position: relative;
+        height: 200px;
+        width: 100%;
+    }
+    
+    .card-header {
+        border-bottom: 1px solid rgba(59, 130, 246, 0.2);
+        padding-bottom: 15px;
+        margin-bottom: 15px;
+    }
+    
+    .section-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 5px;
+    }
+    
+    .section-subtitle {
+        color: #9CA3AF;
+        font-size: 0.875rem;
+    }
+    
+    .highlight-card {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+
+    .sidebar {
+        position: fixed;
+        top: 0;
+        left: -320px;
+        width: 250px;
+        height: 100vh;
+        background: linear-gradient(180deg, #1b204a 0%, #0d0d0d 100%);
+        box-shadow: 2px 0 20px rgba(0, 0, 0, 0.5);
+        transition: left 0.3s ease-in-out;
+        z-index: 100001;
+        transform: none !important;
+        isolation: isolate;
+        border-right: 1px solid rgba(255, 255, 255, 0.1);
+        overflow-y: auto;
+    }
+
+    .sidebar.open {
+        left: 0;
+    }
+
+    .sidebar-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .sidebar-title {
+        color: white;
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin: 0;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .sidebar-close {
+        background: rgba(255, 255, 255, 0.1);
+        border: none;
+        color: white;
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .sidebar-close:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: rotate(90deg);
+    }
+
+    .sidebar-content {
+        padding: 20px;
+    }
+
+    .sidebar-divider {
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        margin: 20px 0;
+    }
+
+    .sidebar-footer {
+        padding: 20px;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        margin-top: auto;
+    }
+
+    .user-info {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 0.9rem;
+    }
+
+    .user-info i {
+        font-size: 1.5rem;
+        color: #667eea;
+    }
+    
+    .sidebar-toggle {
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        border: none;
+        color: white;
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s;
+        z-index: 999;
+    }
+
+    .sidebar-toggle:hover {
+        transform: scale(1.05);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+    }
+
+    .sidebar-toggle i {
+        font-size: 1.2rem;
+    }
+
+    .sidebar-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(3px);
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s;
+        z-index: 9999;
+        transform: none !important;
+    }
+
+    .sidebar-overlay.active {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    body, html, #app, .main-container {
+        transform: none !important;
+        isolation: auto;
+    }
+
+    .nav-buttons-container {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        width: 100%;
+    }
+
+    .nav-buttons-container .btn {
+        width: 100%;
+        text-align: left;
+        padding: 12px;
+        border-radius: 10px;
+        border: none;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        transition: all 0.2s;
+        background: rgba(255, 255, 255, 0.05);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        cursor: pointer;
+    }
+
+    .nav-buttons-container .btn:hover {
+        background: rgba(255, 255, 255, 0.1);
+        transform: translateX(5px);
+        border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .nav-buttons-container .btn-success { 
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    }
+    .nav-buttons-container .btn-phone { 
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    }
+    .nav-buttons-container .btn-events { 
+        background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    }
+    .nav-buttons-container .btn-dashboard { 
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    }
+    .nav-buttons-container .btn-shares { 
+        background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
+    }
+    .nav-buttons-container .btn-notify { 
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    }
+    .nav-buttons-container .btn-ai { 
+        background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+    }
+    .nav-buttons-container .btn-info { 
+        background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+    }
+    .nav-buttons-container .btn-money { 
+        background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+    }
+    .nav-buttons-container .btn-secondary { 
+        background: rgba(255, 255, 255, 0.1);
+    }
+    .nav-buttons-container .btn-danger { 
+        background: linear-gradient(135deg, #ef4444 0%, #7f1d1d 100%);
+    }
+
+    .nav-buttons-container .btn i {
+        width: 24px;
+        font-size: 1.1rem;
+        margin-right: 12px;
+    }
+
+    .original-nav {
+        display: none;
+    } 
+</style>
+<body>
+
+    <div id="toast-container"></div>
+
+    <button class="sidebar-toggle" onclick="toggleSidebar()">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+    <nav class="glass-morph sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-4">
+            <div class="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
+                <div class="flex items-center space-x-2">
+                    <div class="logo-container">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                            <polyline points="7.5 4.21 12 6.81 16.5 4.21"></polyline>
+                            <polyline points="7.5 19.79 7.5 14.6 3 12"></polyline>
+                            <polyline points="21 12 16.5 14.6 16.5 19.79"></polyline>
+                            <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                            <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                        </svg>                        
+                    </div>
+                    <span class="text-xl sm:text-2xl font-bold gradient-text mr-1">Students Management</span>
+                </div>
+
+                <!-- Sidebar -->
+                <div class="sidebar" id="sidebar">
+                    <div class="sidebar-header">
+                        <h3 class="sidebar-title">Navigation</h3>
+                        <button class="sidebar-close" onclick="toggleSidebar()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+
+                    <div class="sidebar-content">
+                        <div class="nav-buttons-container">
+                            <button class="btn btn-success" onclick="window.location.href='/konami/'">
+                                <i class="fas fa-gamepad mr-2"></i> Konami
+                            </button>
+                            <button class="btn btn-phone" onclick="window.location.href='/admin/phone'">
+                                <i class="fas fa-mobile-alt mr-2"></i> Phones
+                            </button>
+                            <button class="btn btn-events" onclick="window.location.href='/events/admin/events'">
+                                <i class="fas fa-calendar-alt mr-2"></i> Events
+                            </button>
+                            <button class="btn btn-dashboard" onclick="window.location.href='/dashboard'">
+                                <i class="fas fa-tachometer-alt mr-2"></i> Dashboard
+                            </button>
+                            <button class="btn btn-shares" onclick="window.location.href='/admin/shares'">
+                                <i class="fas fa-share-alt mr-2"></i> Shares
+                            </button>
+                            <button class="btn btn-notify" onclick="window.location.href='/admin/notifications'">
+                                <i class="fas fa-bell mr-2"></i> Notification
+                            </button>
+                            <button class="btn btn-ai" onclick="window.location.href='/ai-chat'">
+                                <i class="fas fa-robot mr-2"></i> AI Help
+                            </button>
+                            <button class="btn btn-info" onclick="window.location.href='/admin/analytics'">
+                                <i class="fas fa-chart-bar mr-2"></i> Analytics
+                            </button>
+                            <button class="btn btn-money" onclick="window.location.href='/admin/4123/payment-monitor'">
+                                <i class="fas fa-money-bill-wave-alt mr-2"></i> Money
+                            </button>
+
+                            <div class="sidebar-divider"></div>
+
+                            <button class="btn btn-secondary" onclick="window.location.href='/admin'">
+                                <i class="fas fa-arrow-left mr-2"></i> Back
+                            </button>
+                            <button class="btn btn-danger" onclick="logout()">
+                                <i class="fas fa-sign-out-alt mr-2"></i> Logout
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="sidebar-footer">
+                        <div class="user-info">
+                            <i class="fas fa-user-circle"></i>
+                            <span>Logged in as Admin</span>
+                        </div>
+                    </div>
+                </div>                
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto px-4 py-8">
+
+        <div class="mb-8">
+            <h1 class="text-2xl sm:text-3xl font-bold gradient-text mb-2">User Management</h1>
+            <p class="text-gray-400">Manage system users and administrator privileges</p>
+            <div class="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4 mt-4">
+                <div class="last-updated">
+                    <i class="fas fa-sync-alt mr-2"></i>
+                    <span id="last-updated-text">Last updated: Just now</span>
+                </div>
+                <div class="text-sm text-gray-400">
+                    <i class="fas fa-clock mr-1"></i>
+                    Auto-refresh every 120 seconds
+                </div>
+            </div>
+        </div>
+
+        <!-- Enhanced Quick Stats -->
+        <div class="quick-stats-grid mb-6">
+            <div class="quick-stat">
+                <div class="stats-icon text-blue-400">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="quick-stat-value" id="total-users">0</div>
+                <div class="quick-stat-label">Total Users</div>
+            </div>
+            <div class="quick-stat">
+                <div class="stats-icon text-purple-400">
+                    <i class="fas fa-user-shield"></i>
+                </div>
+                <div class="quick-stat-value" id="admin-users">0</div>
+                <div class="quick-stat-label">Administrators</div>
+            </div>
+            <div class="quick-stat">
+                <div class="stats-icon text-green-400">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="quick-stat-value" id="regular-users">0</div>
+                <div class="quick-stat-label">Regular Users</div>
+            </div>
+            <div class="quick-stat highlight-card">
+                <div class="stats-icon text-yellow-400">
+                    <i class="fas fa-user-plus"></i>
+                </div>
+                <div class="quick-stat-value" id="today-users">0</div>
+                <div class="quick-stat-label">Today's Registrations</div>
+            </div>
+            <div class="quick-stat">
+                <div class="stats-icon text-indigo-400">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="quick-stat-value" id="active-today">0</div>
+                <div class="quick-stat-label">Active Today</div>
+            </div>
+            <div class="quick-stat highlight-card">
+                <div class="stats-icon text-green-400">
+                    <i class="fas fa-circle"></i>
+                </div>
+                <div class="quick-stat-value" id="online-users">0</div>
+                <div class="quick-stat-label">Online Now</div>
+            </div>
+            <div class="quick-stat">
+                <div class="stats-icon text-orange-400">
+                    <i class="fas fa-bolt"></i>
+                </div>
+                <div class="quick-stat-value" id="avg-activity">0</div>
+                <div class="quick-stat-label">Avg. Activity</div>
+            </div>
+            <div class="quick-stat">
+                <div class="stats-icon text-pink-400">
+                    <i class="fas fa-fire"></i>
+                </div>
+                <div class="quick-stat-value" id="total-activity">0</div>
+                <div class="quick-stat-label">Total Activities</div>
+            </div>
+            <div class="quick-stat highlight-card">
+                <div class="stats-icon text-yellow-400">
+                    <i class="fas fa-bell"></i>
+                </div>
+                <div class="quick-stat-value" id="all-subs-users">0</div>
+                <div class="quick-stat-label">Enabled WebPush</div>
+            </div>
+        </div>
+
+        <!-- Online Users Panel -->
+        <div class="online-users-panel">
+            <div class="card-header">
+                <h3 class="section-title">
+                    <i class="fas fa-circle mr-2 text-green-400"></i> Online Users
+                    <span class="text-sm text-gray-400 ml-2" id="online-count">(0)</span>
+                </h3>
+                <p class="section-subtitle">Users currently active in the system</p>
+            </div>
+            <div class="flex justify-between items-center mb-4">
+                <button class="btn btn-info btn-sm" onclick="refreshOnlineUsers()">
+                    <i class="fas fa-sync-alt mr-2"></i> Refresh
+                </button>
+            </div>
+            <div id="online-users-list" class="max-h-40 overflow-y-auto">
+                <div class="text-center text-gray-400 py-4">
+                    <div class="spinner mx-auto"></div>
+                    <p class="mt-2">Loading online users...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Analysis Charts -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
+            <div class="chart-container">
+                <div class="card-header">
+                    <h3 class="chart-title">User Registration Trend</h3>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="registration-chart"></canvas>
+                </div>
+            </div>
+            <div class="chart-container">
+                <div class="card-header">
+                    <h3 class="chart-title">User Activity Distribution</h3>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="activity-chart"></canvas>
+                </div>
+            </div>
+            <div class="chart-container">
+                <div class="card-header">
+                    <h3 class="chart-title">Admin vs Regular Users</h3>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="role-chart"></canvas>
+                </div>
+            </div>
+            <div class="chart-container">
+                <div class="card-header">
+                    <h3 class="chart-title">User Activity Timeline</h3>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="timeline-chart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Enhanced Search Engine -->
+        <div class="glass-morph rounded-xl p-4 sm:p-6 mb-6">
+            <div class="card-header">
+                <h3 class="section-title">
+                    <i class="fas fa-search mr-2"></i> User Search & Filters
+                </h3>
+                <p class="section-subtitle">Find users by name, ID, role, or activity level</p>
+            </div>
+            <div class="search-container">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" id="search-input" class="search-input" placeholder="Search users by username, mobile, ID, or role...">
+            </div>
+            
+            <div class="search-filters">
+                <select id="role-filter" class="filter-select">
+                    <option value="">All Roles</option>
+                    <option value="admin">Administrators</option>
+                    <option value="user">Regular Users</option>
+                </select>
+                
+                <select id="activity-filter" class="filter-select">
+                    <option value="">All Activity Levels</option>
+                    <option value="high">High Activity</option>
+                    <option value="medium">Medium Activity</option>
+                    <option value="low">Low Activity</option>
+                </select>
+                
+                <select id="status-filter" class="filter-select">
+                    <option value="">All Status</option>
+                    <option value="online">Online</option>
+                    <option value="offline">Offline</option>
+                </select>
+
+                <select id="payment-status-filter" class="filter-select">
+                    <option value="">All Payment Status</option>
+                    <option value="paid">Paid</option>
+                    <option value="unpaid">Unpaid</option>
+                </select>
+                
+                <select id="date-filter" class="filter-select">
+                    <option value="">All Time</option>
+                    <option value="today">Today</option>
+                    <option value="week">This Week</option>
+                    <option value="month">This Month</option>
+                </select>
+                
+                <button class="btn btn-secondary" id="clear-filters">
+                    <i class="fas fa-times mr-2"></i> Clear Filters
+                </button>
+            </div>
+        </div>
+
+        <!-- User Table -->
+        <div class="glass-morph rounded-xl p-4 sm:p-6">
+            <div class="card-header">
+                <h2 class="section-title">All Users <span id="user-count" class="text-gray-400">(0)</span></h2>
+                <p class="section-subtitle">Manage user roles, view activity, and perform administrative actions</p>
+            </div>
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4 sm:gap-0">
+                <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 w-full sm:w-auto">
+                    <button class="btn" id="refresh-btn" onclick="refreshUsers()">
+                        <i class="fas fa-sync-alt mr-2"></i> Refresh Now
+                    </button>
+                    <button class="btn btn-success" id="export-btn">
+                        <i class="fas fa-download mr-2"></i> Export Data
+                    </button>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="user-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Year</th>
+                            <th>Username</th>
+                            <th>Mobile</th>
+                            <th>Role</th>
+                            <th>Status</th>
+                            <th>Payment</th>
+                            <th>Seen</th>
+                            <th>Created</th>
+                            <th>Activity</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="users-table-body">
+                        <tr>
+                            <td colspan="8" class="text-center py-8">
+                                <div class="loading">
+                                    <div class="spinner"></div>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Pagination -->
+            <div class="flex justify-between items-center mt-6">
+                <div class="text-sm text-gray-400">
+                    Showing <span id="showing-start">0</span> to <span id="showing-end">0</span> of <span id="showing-total">0</span> users
+                </div>
+                <div class="flex space-x-2">
+                    <button class="btn btn-secondary" id="prev-page" disabled>
+                        <i class="fas fa-chevron-left mr-2"></i> Previous
+                    </button>
+                    <button class="btn btn-secondary" id="next-page" disabled>
+                        Next <i class="fas fa-chevron-right ml-2"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="confirm-modal" class="modal">
+        <div class="modal-content">
+            <h3 class="text-xl font-bold mb-4" id="confirm-title">Confirm Action</h3>
+            <p id="confirm-message" class="text-gray-300 mb-6">Are you sure you want to perform this action?</p>
+            <div class="flex flex-col-reverse sm:flex-row justify-end space-y-4 sm:space-y-0 space-y-reverse sm:space-x-3">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('confirm-modal')">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirm-action-btn">
+                    <span class="btn-spinner"></span>
+                    Confirm
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = '/api';
+        const USERS_ENDPOINT = `${API_BASE}/users`;
+        const ONLINE_USERS_ENDPOINT = `${API_BASE}/online-users`;
+        
+        let currentUserId = null;
+        let pollInterval;
+        let isRefreshing = false;
+        let allUsers = [];
+        let filteredUsers = [];
+        let onlineUsers = [];        
+        let currentPage = 1;
+        const usersPerPage = 10;
+        let charts = {};
+
+        // Initialize charts with smaller sizes
+        function initializeCharts() {
+            const registrationCtx = document.getElementById('registration-chart').getContext('2d');
+            const activityCtx = document.getElementById('activity-chart').getContext('2d');
+            const roleCtx = document.getElementById('role-chart').getContext('2d');
+            const timelineCtx = document.getElementById('timeline-chart').getContext('2d');
+            
+            // Registration Trend Chart
+            charts.registration = new Chart(registrationCtx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'User Registrations',
+                        data: [],
+                        borderColor: '#3B82F6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        tension: 0.4,
+                        fill: true,
+                        pointBackgroundColor: '#3B82F6',
+                        pointBorderColor: '#ffffff',
+                        pointBorderWidth: 2,
+                        pointRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Activity Distribution Chart
+            charts.activity = new Chart(activityCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['High Activity', 'Medium Activity', 'Low Activity'],
+                    datasets: [{
+                        data: [0, 0, 0],
+                        backgroundColor: [
+                            'rgba(16, 185, 129, 0.8)',
+                            'rgba(59, 130, 246, 0.8)',
+                            'rgba(107, 114, 128, 0.8)'
+                        ],
+                        borderColor: [
+                            'rgba(16, 185, 129, 1)',
+                            'rgba(59, 130, 246, 1)',
+                            'rgba(107, 114, 128, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: '#F9FAFB',
+                                font: {
+                                    size: 11
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Role Distribution Chart
+            charts.role = new Chart(roleCtx, {
+                type: 'pie',
+                data: {
+                    labels: ['Administrators', 'Regular Users'],
+                    datasets: [{
+                        data: [0, 0],
+                        backgroundColor: [
+                            'rgba(139, 92, 246, 0.8)',
+                            'rgba(59, 130, 246, 0.8)'
+                        ],
+                        borderColor: [
+                            'rgba(139, 92, 246, 1)',
+                            'rgba(59, 130, 246, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: '#F9FAFB',
+                                font: {
+                                    size: 11
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Activity Timeline Chart
+            charts.timeline = new Chart(timelineCtx, {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'User Activity',
+                        data: [],
+                        backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                        borderColor: 'rgba(59, 130, 246, 1)',
+                        borderWidth: 1,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Update charts with backend data
+        function updateCharts(users, chartData = null) {
+            // Use backend chart data if provided
+            if (chartData) {
+                if (chartData.registration_trend) {
+                    charts.registration.data.labels = chartData.registration_trend.labels || [];
+                    charts.registration.data.datasets[0].data = chartData.registration_trend.data || [];
+                    charts.registration.update();
+                }
+                
+                if (chartData.activity_distribution) {
+                    charts.activity.data.datasets[0].data = [
+                        chartData.activity_distribution.high || 0,
+                        chartData.activity_distribution.medium || 0,
+                        chartData.activity_distribution.low || 0
+                    ];
+                    charts.activity.update();
+                }
+                
+                if (chartData.role_distribution) {
+                    charts.role.data.datasets[0].data = [
+                        chartData.role_distribution.admins || 0,
+                        chartData.role_distribution.users || 0
+                    ];
+                    charts.role.update();
+                }
+                
+                if (chartData.activity_timeline) {
+                    charts.timeline.data.labels = chartData.activity_timeline.labels || [];
+                    charts.timeline.data.datasets[0].data = chartData.activity_timeline.data || [];
+                    charts.timeline.update();
+                }
+            } else {
+                // Fallback to frontend calculations if no chart data provided
+                // Update registration trend (last 30 days)
+                const last30Days = [...Array(30)].map((_, i) => {
+                    const d = new Date();
+                    d.setDate(d.getDate() - i);
+                    return d.toISOString().split('T')[0];
+                }).reverse();
+                
+                const registrationData = last30Days.map(day => {
+                    return users.filter(user => {
+                        const userDate = user.created_at.split('T')[0];
+                        return userDate === day;
+                    }).length;
+                });
+                
+                charts.registration.data.labels = last30Days.map(date => {
+                    const d = new Date(date);
+                    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                });
+                charts.registration.data.datasets[0].data = registrationData;
+                charts.registration.update();
+                
+                // Update activity distribution
+                const highActivity = users.filter(user => (user.announcements_count + user.assignments_count) > 10).length;
+                const mediumActivity = users.filter(user => {
+                    const activity = user.announcements_count + user.assignments_count;
+                    return activity > 3 && activity <= 10;
+                }).length;
+                const lowActivity = users.filter(user => (user.announcements_count + user.assignments_count) <= 3).length;
+                
+                charts.activity.data.datasets[0].data = [highActivity, mediumActivity, lowActivity];
+                charts.activity.update();
+                
+                // Update role distribution
+                const adminCount = users.filter(user => user.is_admin).length;
+                const userCount = users.length - adminCount;
+                
+                charts.role.data.datasets[0].data = [adminCount, userCount];
+                charts.role.update();
+                
+                // Update activity timeline (last 7 days)
+                const last7Days = [...Array(7)].map((_, i) => {
+                    const d = new Date();
+                    d.setDate(d.getDate() - i);
+                    return d.toISOString().split('T')[0];
+                }).reverse();
+                
+                // Calculate activity for each day
+                const activityData = last7Days.map(day => {
+                    return users.filter(user => {
+                        const userDate = new Date(user.created_at).toISOString().split('T')[0];
+                        return userDate === day;
+                    }).length;
+                });
+                
+                charts.timeline.data.labels = last7Days.map(date => {
+                    const d = new Date(date);
+                    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                });
+                charts.timeline.data.datasets[0].data = activityData;
+                charts.timeline.update();
+            }
+        }
+
+        // Format date
+        function formatDate(dateString) {
+            if (!dateString) return 'N/A';
+            const date = new Date(dateString);
+            return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        }
+        
+        function formatRelativeTime(dateString) {
+            if (!dateString) return 'N/A';
+        
+            // Convert to Date and shift to UTC+3 (Nairobi)
+            const dateUTC = new Date(dateString);
+            const date = new Date(dateUTC.getTime() + 3 * 60 * 60 * 1000);
+        
+            // Compare with current Nairobi time
+            const nowUTC = new Date();
+            const now = new Date(nowUTC.getTime() + 3 * 60 * 60 * 1000);
+        
+            const diffMs = now - date;
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMs / 3600000);
+            const diffDays = Math.floor(diffMs / 86400000);
+        
+            if (diffMins < 1) return 'Just now';
+            if (diffMins < 60) return `${diffMins}m ago`;
+            if (diffHours < 24) return `${diffHours}h ago`;
+            if (diffDays < 7) return `${diffDays}d ago`;
+            return formatDate(date.toISOString());
+        }
+
+        function updateLastUpdated() {
+            // Show Nairobi time in the "Last updated" area
+            const nowUTC = new Date();
+            const nowNairobi = new Date(nowUTC.getTime());
+        
+            document.getElementById('last-updated-text').textContent =
+                `Last updated: ${nowNairobi.toLocaleTimeString([], {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                })}`;
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.querySelector('.sidebar-overlay');
+
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('active');
+
+            // Prevent body scroll when sidebar is open
+            if (sidebar.classList.contains('open')) {
+                document.body.style.overflow = 'hidden';
+            } else {
+                document.body.style.overflow = '';
+            }
+        }
+
+        // Close sidebar on escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const sidebar = document.getElementById('sidebar');
+                if (sidebar.classList.contains('open')) {
+                    toggleSidebar();
+                }
+            }
+        });
+
+        window.addEventListener('resize', function() {
+            if (window.innerWidth > 768) {
+                const sidebar = document.getElementById('sidebar');
+                const overlay = document.querySelector('.sidebar-overlay');
+                if (sidebar.classList.contains('open')) {
+                    toggleSidebar();
+                }
+            }
+        });        
+
+        function showToast(message, type = 'info', duration = 5000) {
+            const toastContainer = document.getElementById('toast-container');
+            const toastId = 'toast-' + Date.now();
+        
+            const toast = document.createElement('div');
+            toast.id = toastId;
+            toast.className = `toast toast-${type}`;
+            toast.innerHTML = `
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'} mr-2"></i>
+                        <span>${message}</span>
+                    </div>
+                    <button class="toast-close absolute -top-0 -right-0 bg-gray-800 hover:bg-gray-700 rounded-full w-6 h-6 flex items-center justify-center text-white border border-gray-600 transition-all" onclick="removeToast('${toastId}')">
+                        <i class="fas fa-times text-xs"></i>
+                    </button>                    
+                </div>
+            `;
+            
+            toastContainer.appendChild(toast);
+            
+            // Show toast with slight delay to allow DOM update
+            setTimeout(() => {
+                toast.classList.add('show');
+            }, 10);
+        
+            // Auto remove after duration (if not already closed)
+            const autoRemove = setTimeout(() => {
+                removeToast(toastId);
+            }, duration);
+        
+            // Store timeout ID for potential cleanup
+            toast.dataset.timeoutId = autoRemove;
+        
+            return toastId;
+        }
+
+        function removeToast(toastId) {
+            const toast = document.getElementById(toastId);
+            if (!toast) return;
+
+            // Clear the auto-remove timeout if it exists
+            if (toast.dataset.timeoutId) {
+                clearTimeout(parseInt(toast.dataset.timeoutId));
+            }
+
+            toast.classList.remove('show');
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.parentNode.removeChild(toast);
+                }
+            }, 300);
+        }        
+
+        function setButtonLoading(button, isLoading) {
+            if (isLoading) {
+                button.classList.add('btn-loading');
+                button.disabled = true;
+            } else {
+                button.classList.remove('btn-loading');
+                button.disabled = false;
+            }
+        }
+
+        // Fetch online users
+        async function fetchOnlineUsers() {
+            try {
+                const response = await fetch(ONLINE_USERS_ENDPOINT);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return await response.json();
+            } catch (error) {
+                return [];
+            }
+        }
+
+
+        // Display online users
+        function displayOnlineUsers(users) {
+            const container = document.getElementById('online-users-list');
+            const countElement = document.getElementById('online-count');
+            const quickStatElement = document.getElementById('online-users');
+            
+            onlineUsers = users;
+            quickStatElement.textContent = users.length;
+            countElement.textContent = `(${users.length})`;
+            
+            if (users.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center text-gray-400 py-4">
+                        <i class="fas fa-users-slash text-2xl mb-2"></i>
+                        <p>No users online</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = users.map(user => `
+                <div class="online-user-item">
+                    <div class="online-indicator"></div>
+                    <div class="flex-1">
+                        <div class="font-medium">${user.username || 'Unknown User'}</div>
+                        <div class="text-xs text-gray-400">
+                            ${user.is_admin ? 'Admin' : 'User'} • ${user.current_room || 'general'}
+                        </div>
+                    </div>
+                    <div class="text-xs text-gray-400">
+                        ${formatRelativeTime(user.last_seen)}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Refresh online users
+        async function refreshOnlineUsers() {
+            try {
+                const users = await fetchOnlineUsers();
+                displayOnlineUsers(users);
+                showToast('Online users updated', 'success');
+            } catch (error) {
+                showToast('Failed to update online users', 'error');
+            }
+        }
+
+        // rapidly Refresh online users
+        async function rapidRefreshOnlineUsers() {
+            try {
+                const users = await fetchOnlineUsers();
+                displayOnlineUsers(users);
+            } catch (error) {
+                console.log("Failed to Refresh User");
+            }
+        }
+
+        // Enhanced user search and filtering
+        function filterUsers() {
+            const searchTerm = document.getElementById('search-input').value.toLowerCase();
+            const roleFilter = document.getElementById('role-filter').value;
+            const activityFilter = document.getElementById('activity-filter').value;
+            const statusFilter = document.getElementById('status-filter').value;
+            const paymentStatusFilter = document.getElementById('payment-status-filter').value;
+            const dateFilter = document.getElementById('date-filter').value;
+            
+            filteredUsers = allUsers.filter(user => {
+                // Text search
+                const matchesSearch = !searchTerm || 
+                    (user.username && user.username.toLowerCase().includes(searchTerm)) ||
+                    (user.mobile && user.mobile.includes(searchTerm)) ||
+                    (user.id && user.id.toString().includes(searchTerm));
+                
+                // Role filter
+                const matchesRole = !roleFilter || 
+                    (roleFilter === 'admin' && user.is_admin) ||
+                    (roleFilter === 'user' && !user.is_admin);
+                    
+                // Payment Status filter
+                const matchesPayment = !paymentStatusFilter || 
+                    (paymentStatusFilter === 'paid' && user.paid) ||
+                    (paymentStatusFilter === 'unpaid' && !user.paid);
+                    
+                // Activity filter
+                let matchesActivity = true;
+                if (activityFilter) {
+                    const totalActivity = user.announcements_count + user.assignments_count;
+                    if (activityFilter === 'high') {
+                        matchesActivity = totalActivity > 10;
+                    } else if (activityFilter === 'medium') {
+                        matchesActivity = totalActivity > 3 && totalActivity <= 10;
+                    } else if (activityFilter === 'low') {
+                        matchesActivity = totalActivity <= 3;
+                    }
+                }
+                
+                // Status filter (online/offline)
+                let matchesStatus = true;
+                if (statusFilter) {
+                    const isOnline = onlineUsers.some(onlineUser => onlineUser.user_id === user.id);
+                    if (statusFilter === 'online') {
+                        matchesStatus = isOnline;
+                    } else if (statusFilter === 'offline') {
+                        matchesStatus = !isOnline;
+                    }
+                }
+                
+                // Date filter
+                let matchesDate = true;
+                if (dateFilter) {
+                    const userDate = new Date(user.created_at);
+                    const now = new Date();
+                    
+                    if (dateFilter === 'today') {
+                        matchesDate = userDate.toDateString() === now.toDateString();
+                    } else if (dateFilter === 'week') {
+                        const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+                        matchesDate = userDate >= weekAgo;
+                    } else if (dateFilter === 'month') {
+                        const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+                        matchesDate = userDate >= monthAgo;
+                    }
+                }
+                
+                return matchesSearch && matchesRole && matchesActivity && matchesStatus && matchesDate;
+            });
+            
+            currentPage = 1;
+            updateUserTable();
+            updatePagination();
+        }
+
+        function updatePagination(paginationData = null) {
+            let totalUsers, totalPages;
+
+            if (paginationData) {
+                // Use backend pagination data - use total_filtered for accurate page count
+                totalUsers = paginationData.total_filtered || paginationData.total || filteredUsers.length;
+                totalPages = paginationData.pages || Math.ceil(totalUsers / usersPerPage);
+            } else {
+                // Fallback to frontend calculation
+                totalUsers = filteredUsers.length;
+                totalPages = Math.ceil(totalUsers / usersPerPage);
+            }
+
+            const startIndex = (currentPage - 1) * usersPerPage + 1;
+            const endIndex = Math.min(currentPage * usersPerPage, totalUsers);
+
+            document.getElementById('showing-start').textContent = totalUsers > 0 ? startIndex : 0;
+            document.getElementById('showing-end').textContent = endIndex;
+            document.getElementById('showing-total').textContent = totalUsers;
+            document.getElementById('user-count').textContent = `(${totalUsers})`;
+
+            document.getElementById('prev-page').disabled = currentPage === 1;
+            document.getElementById('next-page').disabled = currentPage === totalPages || totalPages === 0;
+
+        }
+
+        function updateStatistics(users, stats = null) {
+            if (stats) {
+                document.getElementById('total-users').textContent = stats.total_users || 0;
+                document.getElementById('admin-users').textContent = stats.admin_users || 0;
+                document.getElementById('regular-users').textContent = stats.regular_users || 0;
+                document.getElementById('today-users').textContent = stats.today_users || 0;
+                document.getElementById('active-today').textContent = stats.active_today || 0;
+                document.getElementById('online-users').textContent = stats.online_users || 0;
+                document.getElementById('avg-activity').textContent = stats.avg_activity || 0;
+                document.getElementById('total-activity').textContent = stats.total_activity || 0;
+                document.getElementById('all-subs-users').textContent = stats.total_webpush_users || 0;
+            } else {
+                const totalUsers = users.length;
+                const adminUsers = users.filter(user => user.is_admin).length;
+                const regularUsers = totalUsers - adminUsers;
+                
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                const todayUsers = users.filter(user => {
+                    const userDate = new Date(user.created_at);
+                    return userDate >= today;
+                }).length;
+                
+                const activeToday = users.filter(user => {
+                    return Math.random() > 0.7; // 30% of users are "active today"
+                }).length;
+                
+                // Calculate average activity
+                const totalActivity = users.reduce((sum, user) => {
+                    return sum + user.announcements_count + user.assignments_count;
+                }, 0);
+                const avgActivity = totalUsers > 0 ? (totalActivity / totalUsers).toFixed(1) : 0;
+
+                document.getElementById('total-users').textContent = totalUsers;
+                document.getElementById('admin-users').textContent = adminUsers;
+                document.getElementById('regular-users').textContent = regularUsers;
+                document.getElementById('today-users').textContent = todayUsers;
+                document.getElementById('active-today').textContent = activeToday;
+                document.getElementById('avg-activity').textContent = avgActivity;
+                document.getElementById('total-activity').textContent = totalActivity;
+            }
+        }
+
+        async function fetchUsers(page = 1) {
+            try {
+                const params = new URLSearchParams({
+                    page: page,
+                    per_page: usersPerPage
+                });
+
+                // Add search and filter parameters if they exist
+                const searchTerm = document.getElementById('search-input').value;
+                const roleFilter = document.getElementById('role-filter').value;
+                const paymentStatusFilter = document.getElementById('payment-status-filter').value;
+                const activityFilter = document.getElementById('activity-filter').value;
+                const statusFilter = document.getElementById('status-filter').value;
+                const dateFilter = document.getElementById('date-filter').value;
+
+                if (searchTerm) params.append('search', searchTerm);
+                if (roleFilter) params.append('role', roleFilter);
+                if (paymentStatusFilter) params.append('payment_filter', paymentStatusFilter);
+                if (activityFilter) params.append('activity_level', activityFilter);
+                if (statusFilter) params.append('status', statusFilter);
+                if (dateFilter) params.append('date_filter', dateFilter);
+
+                const response = await fetch(`${USERS_ENDPOINT}?${params}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                showToast('Failed to load users: ' + error.message, 'error');
+                return { users: [], pagination: null, stats: null, chart_data: null };
+            }
+        }
+
+        async function loadUsers(page = 1) {
+            if (isRefreshing) return;
+
+            try {
+                isRefreshing = true;
+                setButtonLoading(document.getElementById('refresh-btn'), true);
+
+                const data = await fetchUsers(page);
+                allUsers = data.users || []; // Extract users array from response
+                filteredUsers = [...allUsers];
+                currentPage = page;
+
+                updateLastUpdated();
+                updateStatistics(allUsers, data.stats); // Pass stats to update function
+                updateCharts(allUsers, data.chart_data); // Pass chart data to update function
+                updateUserTable();
+                updatePagination(data.pagination);
+
+                setButtonLoading(document.getElementById('refresh-btn'), false);
+                isRefreshing = false;
+
+                if (allUsers.length === 0) {
+                    showToast('No users found matching your criteria', 'info');
+                } else {
+                    showToast(`Loaded ${allUsers.length} users successfully`, 'success');
+                }
+            } catch (error) {
+                document.getElementById('users-table-body').innerHTML = `
+                    <tr>
+                        <td colspan="8" class="text-center py-8 text-red-400">
+                            <i class="fas fa-exclamation-triangle mr-2"></i>
+                            Error loading users. Please try again.
+                            <br><small class="text-gray-400">${error.message}</small>
+                        </td>
+                    </tr>
+                `;
+                setButtonLoading(document.getElementById('refresh-btn'), false);
+                isRefreshing = false;
+                showToast('Failed to load users', 'error');
+            }
+        }
+
+        function displayUsers(users) {
+            const container = document.getElementById('users-table-body');
+            
+            if (users.length === 0) {
+                container.innerHTML = `
+                    <tr>
+                        <td colspan="8" class="text-center py-8 text-gray-400">
+                            <i class="fas fa-users mr-2"></i>
+                            No users found.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            container.innerHTML = users.map(user => {
+                const isOnline = onlineUsers.some(onlineUser => onlineUser.user_id === user.id);
+                const totalActivity = user.announcements_count + user.assignments_count;
+                const activityPercentage = Math.min(totalActivity * 5, 100);
+                
+                return `
+                <tr>
+                    <td class="font-mono text-sm">#${user.id}</td>
+                    <td class="text-center">${user.year || 'N/A'}</td>
+                    <td>
+                        <div class="font-medium">${user.username || 'N/A'}</div>
+                        <div class="text-xs text-gray-400">ID: ${user.id}</div>
+                    </td>
+                    <td>${user.mobile || 'N/A'}</td>
+                    <td>
+                        <span class="status-badge ${user.is_admin ? 'status-admin' : 'status-user'}">
+                            ${user.is_admin ? 'Admin' : 'User'}
+                        </span>
+                    </td>
+                    <td>
+                        ${(() => {
+                            const status = (user.status === true || user.status === 'true' || user.status === 1);
+                        
+                            return `
+                                <span class="status-badge ${status ? 'status-allowed' : 'status-banned'}">
+                                    ${status ? 'Allowed' : 'Banned'}
+                                </span>
+                            `;
+                        })()}
+                    </td>
+                    <td>
+                        ${(() => {
+                            const paid = (user.paid === true || user.paid === 'true' || user.paid === 1);
+                        
+                            return `
+                                <span class="status-badge ${paid ? 'status-allowed' : 'status-banned'}">
+                                    ${paid ? 'Paid' : 'Unpaid'}
+                                </span>
+                            `;
+                        })()}
+                    </td>
+                    <td>
+                        <span class="status-badge ${isOnline ? 'status-online' : 'status-user'}">
+                            ${isOnline ? 'Online' : 'Offline'}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="text-sm">${formatDate(user.created_at)}</div>
+                        <div class="text-xs text-gray-400">${formatRelativeTime(user.created_at)}</div>
+                    </td>
+                    <td>
+                        <div class="text-sm">
+                            <i class="fas fa-bullhorn mr-1 text-blue-400"></i> ${user.announcements_count}
+                            <i class="fas fa-tasks ml-3 mr-1 text-green-400"></i> ${user.assignments_count}
+                        </div>
+                        <div class="activity-bar">
+                            <div class="activity-progress" style="width: ${activityPercentage}%"></div>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            ${user.is_admin ? 
+                                `<button class="btn btn-warning btn-sm toggle-admin-btn" data-user-id="${user.id}">
+                                    <span class="btn-spinner"></span>
+                                    <i class="fas fa-user-minus mr-1"></i> Remove Admin
+                                </button>` :
+                                `<button class="btn btn-warning btn-sm toggle-admin-btn" data-user-id="${user.id}">
+                                    <span class="btn-spinner"></span>
+                                    <i class="fas fa-user-shield mr-1"></i> Make Admin
+                                </button>`
+                            }
+                            ${!user.is_admin ? 
+                                `<button class="btn btn-danger btn-sm delete-user-btn" data-user-id="${user.id}">
+                                    <span class="btn-spinner"></span>
+                                    <i class="fas fa-trash mr-1"></i> Delete
+                                </button>` :
+                                `<button class="btn btn-secondary btn-sm" disabled>
+                                    <i class="fas fa-trash mr-1"></i> Delete
+                                </button>`
+                            }
+                            ${(() => {
+                                
+                                const status = (user.status === true || user.status === 'true' || user.status === 1);
+
+                                return status ? 
+                                    `<button class="btn btn-danger btn-sm toggle-status-btn" data-user-id="${user.id}">
+                                        <span class="btn-spinner"></span>
+                                        <i class="fas fa-user-slash mr-1"></i> Ban
+                                    </button>` :
+                                    `<button class="btn btn-success btn-sm toggle-status-btn" data-user-id="${user.id}">
+                                        <span class="btn-spinner"></span>
+                                        <i class="fas fa-user-check mr-1"></i> Unban
+                                    </button>`;
+                            })()}
+                            ${(() => {
+                                
+                                const paid = (user.paid === true || user.paid === 'true' || user.paid === 1);
+
+                                return paid ? 
+                                    `<button class="btn btn-danger btn-sm toggle-pay-btn" data-user-id="${user.id}">
+                                        <span class="btn-spinner"></span>
+                                        <i class="fas fa-user-slash mr-1"></i> Unpay
+                                    </button>` :
+                                    `<button class="btn btn-success btn-sm toggle-pay-btn" data-user-id="${user.id}">
+                                        <span class="btn-spinner"></span>
+                                        <i class="fas fa-user-check mr-1"></i> Pay
+                                    </button>`;
+                            })()}
+                            ${user.year === 5 ? 
+                                `<div class="relative group">
+                                    <button disabled 
+                                            class="btn btn-secondary btn-sm cursor-not-allowed">
+                                        <i class="fas fa-lock mr-1.5"></i>
+                                        Modify
+                                    </button>
+                                    <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-gray-300 text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
+                                        System accounts cannot be modified
+                                        <div class="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-gray-900"></div>
+                                    </div>
+                                </div>` :
+                                `<button onclick="window.location.href='/admin/${user.id}/modify'" 
+                                   class="btn bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white btn-sm">
+                                    <i class="fas fa-edit mr-1.5"></i>
+                                    Modify
+                                </button>`
+                            }                            
+                        </div>
+                    </td>
+                </tr>
+            `}).join('');
+            
+            document.querySelectorAll('.toggle-admin-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const userId = this.getAttribute('data-user-id');
+                    toggleAdmin(userId, this);
+                });
+            });
+            
+            document.querySelectorAll('.toggle-status-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const userId = this.getAttribute('data-user-id');
+                    toggleStatus(userId, this);
+                });
+            });
+
+            document.querySelectorAll('.toggle-pay-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const userId = this.getAttribute('data-user-id');
+                    togglePay(userId, this);
+                });
+            });
+
+            document.querySelectorAll('.delete-user-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const userId = this.getAttribute('data-user-id');
+                    confirmDelete(userId, this);
+                });
+            });
+        }
+
+        function updateUserTable() {
+            displayUsers(filteredUsers);
+        }
+
+        function filterUsers() {
+            
+            currentPage = 1;
+            loadUsers(currentPage);
+        }
+
+        // Update user status for control
+        async function toggleStatus(userId, button) {
+            if (!userId) return;
+            
+            try {
+                setButtonLoading(button, true);
+
+                const response = await fetch(`${USERS_ENDPOINT}/${userId}/toggle-status`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    'X-CSRFToken': getCSRFToken()    
+                    }
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Failed to update user status');
+                }
+
+                const result = await response.json();
+                showToast(`User status updated successfully`, 'success');
+                await loadUsers(); //Refresh list
+            } catch (error) {
+                showToast('Error: ' + error.message, 'error');
+                setButtonLoading(button, false);
+            }
+        }
+
+        // Update user pay for control
+        async function togglePay(userId, button) {
+            if (!userId) return;
+            
+            try {
+                setButtonLoading(button, true);
+
+                const response = await fetch(`${USERS_ENDPOINT}/${userId}/toggle-pay`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    'X-CSRFToken': getCSRFToken()    
+                    }
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Failed to update user paid status');
+                }
+
+                const result = await response.json();
+                showToast(`User Paid Status updated successfully`, 'success');
+                await loadUsers(); //Refresh list
+            } catch (error) {
+                showToast('Error: ' + error.message, 'error');
+                setButtonLoading(button, false);
+            }
+        }
+
+        async function toggleAdmin(userId, button) {
+            if (!userId) return;
+            
+            try {
+                setButtonLoading(button, true);
+                
+                const response = await fetch(`${USERS_ENDPOINT}/${userId}/toggle-admin`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    'X-CSRFToken': getCSRFToken()
+                    }
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Failed to update admin status');
+                }
+                
+                const result = await response.json();
+                showToast(`Admin status updated successfully`, 'success');
+                await loadUsers(); // Refresh list
+            } catch (error) {
+                showToast('Error: ' + error.message, 'error');
+                setButtonLoading(button, false);
+            }
+        }
+
+        // Get CSRF token for Flask-WTF protection
+        function getCSRFToken() {
+            return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+        }
+
+        // Confirm delete
+        function confirmDelete(userId, button) {
+            currentUserId = userId;
+            currentButton = button;
+            document.getElementById('confirm-title').textContent = 'Confirm User Deletion';
+            document.getElementById('confirm-message').textContent = 
+                'Are you sure you want to delete this user? This action cannot be undone.';
+            
+            const confirmBtn = document.getElementById('confirm-action-btn');
+            confirmBtn.onclick = () => deleteUser(button);
+            
+            openModal('confirm-modal');
+        }
+
+        async function deleteUser(button) {
+            if (!currentUserId) return;
+            
+            try {
+                setButtonLoading(document.getElementById('confirm-action-btn'), true);
+                
+                const response = await fetch(`${USERS_ENDPOINT}/${currentUserId}/delete`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCSRFToken()
+                    }
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Failed to delete user');
+                }
+                
+                closeModal('confirm-modal');
+                showToast('User deleted successfully', 'success');
+                await loadUsers(); // Refresh list
+                currentUserId = null;
+            } catch (error) {
+                showToast('Error: ' + error.message, 'error');
+                setButtonLoading(document.getElementById('confirm-action-btn'), false);
+                closeModal('confirm-modal');
+            }
+        }
+
+        function refreshUsers() {
+            loadUsers(currentPage);
+        }
+
+        function openModal(modalId) {
+            document.getElementById(modalId).style.display = 'flex';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+            setButtonLoading(document.getElementById('confirm-action-btn'), false);
+        }
+
+        function exportUserData() {
+            showToast('Preparing user data for export...', 'info', 3000);
+            setTimeout(() => {
+                window.location.href = '/admin/users-manager';
+            }, 2000);
+        }
+
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+                setButtonLoading(document.getElementById('confirm-action-btn'), false);
+            }
+        }
+
+        function logout() {
+            showToast("Logging out...", 'info', 2000);
+            setTimeout(() => {
+              window.location.href = '/logout';  
+            }, 1500);
+        }
+
+        function stopAllPolling() {
+            if (pollInterval) clearInterval(pollInterval);
+            if (rapidPolling) clearInterval(rapidPolling);
+        }
+
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                stopAllPolling();
+            } else {
+                // refresh immediately upon page unhidding/visible
+                refreshOnlineUsers();
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize charts
+            initializeCharts();
+            
+            // Load initial data
+            loadUsers();
+            refreshOnlineUsers();
+            
+            // Set up event listeners for search and filters
+            document.getElementById('search-input').addEventListener('input', filterUsers);
+            document.getElementById('role-filter').addEventListener('change', filterUsers);
+            document.getElementById('payment-status-filter').addEventListener('change', filterUsers);
+            document.getElementById('activity-filter').addEventListener('change', filterUsers);
+            document.getElementById('status-filter').addEventListener('change', filterUsers);
+            document.getElementById('date-filter').addEventListener('change', filterUsers);
+            document.getElementById('clear-filters').addEventListener('click', function() {
+                document.getElementById('search-input').value = '';
+                document.getElementById('role-filter').value = '';
+                document.getElementById('payment-status-filter').value = '';
+                document.getElementById('activity-filter').value = '';
+                document.getElementById('status-filter').value = '';
+                document.getElementById('date-filter').value = '';
+                filterUsers();
+            });
+            
+            document.getElementById('prev-page').addEventListener('click', function() {
+                if (currentPage > 1) {
+                    loadUsers(currentPage - 1);
+                }
+            });
+
+            document.getElementById('next-page').addEventListener('click', function() {
+                loadUsers(currentPage + 1);
+            });
+            
+            // Export button
+            document.getElementById('export-btn').addEventListener('click', exportUserData);
+            
+            // Auto-refresh
+            pollInterval = setInterval(() => {
+                loadUsers(currentPage);
+                refreshOnlineUsers();
+            }, 120000);
+            
+            // Auto Rapid Poll
+            rapidPolling = setInterval(() => {
+                rapidRefreshOnlineUsers();
+            }, 10000); //10s
+
+            window.addEventListener('beforeunload', function() {
+                if (pollInterval) {
+                    clearInterval(pollInterval);
+                    clearInterval(rapidPolling);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+
+i want a new design, structure and appearence. make something cool, sleek and modern. also make it fast and fix all the css and js error. restructure, change appearance and cool interaction features. make it look very new, sleek and mordern and also fast
