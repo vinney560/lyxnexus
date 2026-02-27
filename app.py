@@ -10844,7 +10844,13 @@ def api_players():
     players_data = []
     
     for p in players:
-        has_active_code = p.challenge_code and p.code_expires_at and func.timezone('UTC', p.code_expires_at) > get_now()
+        has_active_code = False
+        if p.challenge_code and p.code_expires_at:            
+            expires_at = p.code_expires_at
+            if expires_at.tzinfo is None:
+                expires_at = expires_at.replace(tzinfo=timezone.utc)
+            has_active_code = expires_at > get_now()
+
         players_data.append({
             'id': p.id,
             'konami_id': p.konami_id,
