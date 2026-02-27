@@ -1140,7 +1140,7 @@
                         </button>
                         <button class="text-gray-400 hover:text-white transition-colors text-sm"
                                 onclick="showNotification('Version', 'Dashboard v3.04')">
-                            v3.04
+                            v3.07
                         </button>
                     </div>
                 </div>
@@ -1199,24 +1199,18 @@
             }
         };
         
-        // Initialize Dashboard
-        document.addEventListener('DOMContentLoaded', function() {
-            // Load data with a slight delay for smoother UX
+        document.addEventListener('DOMContentLoaded', function() {            
             setTimeout(() => {
                 loadDashboardData();
-            }, 300);
-            
-            // Set up auto-refresh (every 2 minutes)
+            }, 300);            
             setInterval(loadDashboardData, 120000);
             
-            // Add click animations to cards
             document.querySelectorAll('.stat-card').forEach(card => {
                 card.addEventListener('click', function() {
                     createRippleEffect(this);
                 });
             });
-            
-            // Initialize tooltips
+                        
             initializeTooltips();
         });
         
@@ -1224,8 +1218,7 @@
         async function loadDashboardData() {
             try {
                 showLoadingState();
-                
-                // Log dashboard view
+                                
                 await logActivity('view', 'dashboard');
                 
                 // Fetch user data
@@ -1236,16 +1229,12 @@
                 
                 // Update UI with user data
                 updateUserProfile(userData._data);
-                
-                // Fetch activity data
+                                
                 const activityResponse = await fetch('/dashboard/api/activity');
                 if (!activityResponse.ok) throw new Error(`HTTP error! status: ${activityResponse.status}`);
                 const activityData = await activityResponse.json();
-                
-                // Update activity feed
                 updateActivityFeed(activityData);
                 
-                // Fetch stats for charts
                 const statsResponse = await fetch('/dashboard/api/stats');
                 if (statsResponse.ok) {
                     const statsData = await statsResponse.json();
@@ -1254,7 +1243,6 @@
                     updateCharts(userData._data, activityData, null);
                 }
                 
-                // Show success notification
                 showNotification('Dashboard Updated', 'All data has been refreshed successfully');
                 
             } catch (error) {
@@ -1267,26 +1255,21 @@
         
         // Update User Profile
         function updateUserProfile(user) {
-            // Update user info
             const username = user.username || 'User';
             const initials = username.charAt(0).toUpperCase();
             
-            // Update all avatar elements
             document.getElementById('sidebar-user-avatar').textContent = initials;
             document.getElementById('header-user-avatar').textContent = initials;
             document.getElementById('profile-avatar').textContent = initials;
             
-            // Update username displays
             document.getElementById('sidebar-username').textContent = username;
             document.getElementById('header-username').textContent = username;
             document.getElementById('profile-username').textContent = username;
             document.getElementById('welcome-message').textContent = `Welcome back, ${username}`;
             
-            // Update user details with animations
             document.getElementById('user-status').textContent = user.status ? 'Active' : 'Inactive';
             document.getElementById('status-trend').textContent = user.status ? 'All systems operational' : 'Account requires attention';
             
-            // File statistics with conditional styling
             const availableFiles = user.available_files || 0;
             animateCounter('available-files', availableFiles);
             const filesIcon = document.getElementById('files-icon');

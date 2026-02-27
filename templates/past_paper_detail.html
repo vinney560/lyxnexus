@@ -139,13 +139,16 @@
         padding: 20px;
         margin-bottom: 20px;
         transition: all 0.3s ease;
-        border-left: 4px solid transparent;
+        border-bottom: 4px solid transparent;
+        border-top: 1px double rgba(69, 252, 2, 0.614);
+        border-right: 1px double rgba(69, 252, 2, 0.614);
+        border-left: 1px double rgba(69, 252, 2, 0.614);
     }
     
     .file-card:hover {
         transform: translateY(-2px);
         box-shadow: 0 8px 25px rgba(0, 31, 135, 0.3);
-        border-left-color: #3B82F6;
+        border: 2px dotted rgba(28, 114, 253, 0.406);
     }
     
     .file-card.dragging {
@@ -604,6 +607,7 @@
             width: 100%;
             justify-content: space-between;
             margin-top: 15px;
+            align-items: center;
         }
         
         .toast-container {
@@ -908,22 +912,26 @@
         }
 
         function getFileIcon(fileType, filename) {
-            if (fileType.includes('pdf')) {
-                return { icon: 'fa-file-pdf', class: 'file-icon-pdf' };
-            } else if (fileType.includes('image')) {
-                return { icon: 'fa-file-image', class: 'file-icon-image' };
-            } else if (fileType.includes('zip') || fileType.includes('rar') || fileType.includes('tar') || fileType.includes('7z')) {
-                return { icon: 'fa-file-archive', class: 'file-icon-archive' };
-            } else if (fileType.includes('word') || fileType.includes('document') || filename.match(/\.(doc|docx)$/i)) {
-                return { icon: 'fa-file-word', class: 'file-icon-doc' };
-            } else if (fileType.includes('excel') || filename.match(/\.(xls|xlsx)$/i)) {
-                return { icon: 'fa-file-excel', class: 'file-icon-doc' };
-            } else if (fileType.includes('powerpoint') || filename.match(/\.(ppt|pptx)$/i)) {
-                return { icon: 'fa-file-powerpoint', class: 'file-icon-doc' };
-            } else if (fileType.includes('text') || filename.match(/\.(txt|rtf)$/i)) {
-                return { icon: 'fa-file-alt', class: 'file-icon-doc' };
+            if (filename.match(/\.(pdf)$/i)) {
+                return { icon: 'fa-file-pdf', class: 'file-icon-pdf', type: 'document' };
+            } else if (filename.match(/\.(mp4|mov|avi|mkv|wmv|flv|webm|mpg|mpeg)$/i)) {
+                return { icon: 'fa-file-video', class: 'file-icon-video', type: 'video' };
+            } else if (filename.match(/\.(mp3|wav|ogg|flac|aac|m4a)$/i)) {
+                return { icon: 'fa-file-audio', class: 'file-icon-audio', type: 'audio' };
+            } else if (fileType.includes('image') || filename.match(/\.(jpg|jpeg|png|gif|bmp|webp|svg)$/i)) {
+                return { icon: 'fa-file-image', class: 'file-icon-image', type: 'image' };
+            } else if (fileType.includes('archive') || filename.match(/\.(zip|rar|7z|tar|gz)$/i)) {
+                return { icon: 'fa-file-archive', class: 'file-icon-archive', type: 'archive' };
+            } else if (filename.match(/\.(doc|docx)$/i)) {
+                return { icon: 'fa-file-word', class: 'file-icon-doc', type: 'document' };
+            } else if (filename.match(/\.(xls|xlsx)$/i)) {
+                return { icon: 'fa-file-excel', class: 'file-icon-doc', type: 'document' };
+            } else if (filename.match(/\.(ppt|pptx)$/i)) {
+                return { icon: 'fa-file-powerpoint', class: 'file-icon-doc', type: 'document' };
+            } else if (filename.match(/\.(txt|rtf)$/i)) {
+                return { icon: 'fa-file-text', class: 'file-icon-doc', type: 'document' };
             } else {
-                return { icon: 'fa-file', class: 'file-icon-generic' };
+                return { icon: 'fa-file', class: 'file-icon-generic', type: 'generic' };
             }
         }
 
@@ -999,7 +1007,7 @@
                                 <div class="flex items-start">
                                     <div class="flex-1">
                                         <h3 class="ppd-name">
-                                            ${file.display_name}
+                                            ${formatTextWithUnderscores(file.display_name)}
                                         </h3>
                                         <p class="ppd-description">${file.description || 'No description'}</p>
                                     </div>
@@ -1009,7 +1017,7 @@
                                     </div>
                                     ` : ''}
                                 </div>
-                                <div class="flex flex-wrap items-center mt-2 text-sm text-gray-500">
+                                <div class="flex flex-wrap items-center mt-2 text-gray-500">
                                     <p class="ppd-filename">
                                         <i class="fas fa-file mr-1"></i> ${file.filename}
                                     </p>
@@ -1040,6 +1048,11 @@
             if (IS_ADMIN) {
                 initializeDragAndDrop();
             }
+        }
+
+        function formatTextWithUnderscores(text) {
+            if (!text) return text;
+            return text.replace(/_/g, ' ​');
         }
 
         async function loadAvailableFiles(search = '') {
@@ -1084,9 +1097,12 @@
                                 <i class="fas ${fileIcon.icon}"></i>
                             </div>
                             <div class="flex-1 min-w-0">
-                                <h4 class="font-semibold text-white truncate whitespace-normal break-words overflow-hidden">${file.name}</h4>
-                                <p class="text-sm text-gray-400 filename">${file.filename} • ${formatFileSize(file.file_size)}</p>
-                                ${file.description ? `<p class="text-sm text-gray-500 mt-1 truncate">${file.description}</p>` : ''}
+                                <h4 class="ppd-name">${formatTextWithUnderscores(file.name)}</h4>
+                                ${file.description ? `<p class="ppd-description">${file.description}</p>` : ''}
+                                <p class="ppd-filename">
+                                    <i class="fas fa-file mr-1"></i>
+                                    ${formatTextWithUnderscores(file.filename)}
+                                </p>
                             </div>
                         </div>
                     </div>

@@ -38,7 +38,7 @@ def css_files(filename):
 @app.route('/')
 def home():
     """Home page route"""
-    return render_template('index.html')
+    return render_template('admin.html')
 
 @app.route('/api/notify')
 def mock_notifications():

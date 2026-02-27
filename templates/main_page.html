@@ -202,11 +202,10 @@
     }
     
     .announcement-card {
-        background: rgba(30, 30, 40, 0.7);
+        background: transparent;
         border-radius: 15px;
-        padding: 10px;
+        padding: 8px;
         margin-bottom: 21px;
-        border-left: 4px solid #3B82F6;
         transition: all 0.3s ease;
         position: relative;
         overflow: hidden;
@@ -1606,8 +1605,19 @@
     }
 
     .announcement-text {
-        padding-bottom: 25px;
+        padding-bottom: 10px;
         position: relative;
+        font-size: 15px;
+    }
+
+    .announcement-text::first-letter {
+        text-transform: uppercase;
+        font-weight: 800;
+        font-size: 1.5em;
+        float: left;
+        line-height: 0.8;
+        margin-right: 0.1px;
+        color: #60a5fa
     }
 
     .announcement-text:not(.expanded) {
@@ -1617,8 +1627,8 @@
         overflow: hidden;
         position: relative;
         margin-top: 10px;
-        line-height: 1.5;
-        max-height: calc(10 * 1.5em);
+        line-height: 1.2;
+        max-height: calc(10 * 1.2em);
     }
 
     .announcement-text:not(.expanded)::after {
@@ -2101,192 +2111,6 @@
         document.addEventListener("DOMContentLoaded", function() {
             window.Userstatus = {{ current_user.status|tojson }};
             
-        });
-        
-        const LikeSystem = {
-            storageKey: 'min_like_system',
-            likes: 217,
-            
-            init() {
-                this.loadState();
-                this.render();
-                this.setupEvents();
-            },
-            
-            loadState() {
-                const saved = localStorage.getItem(this.storageKey);
-                if (saved) {
-                    const data = JSON.parse(saved);
-                    this.likes = data.likes;
-                    this.hasLiked = data.hasLiked || false;
-                } else {
-                    this.likes = 217;
-                    this.hasLiked = false;
-                }
-            },
-            
-            saveState() {
-                const data = {
-                    likes: this.likes,
-                    hasLiked: this.hasLiked
-                };
-                localStorage.setItem(this.storageKey, JSON.stringify(data));
-            },
-            
-            handleLike() {
-                if (this.hasLiked) {
-                    this.showTooltip("Already liked!");
-                    return;
-                }
-                
-                // Add like
-                this.likes++;
-                this.hasLiked = true;
-                this.saveState();
-                
-                // Animate
-                this.animateLike();
-                this.showTooltip("Liked! +1");
-                
-                // Update UI
-                this.render();
-                
-                // Hide tooltip after delay
-                setTimeout(() => this.hideTooltip(), 1500);
-            },
-            
-            animateLike() {
-                const btn = document.getElementById('likeBtn');
-                const badge = document.getElementById('likeBadge');
-                const icon = document.getElementById('likeIcon');
-                const count = document.getElementById('likeCount');
-                
-                // Button animation
-                btn.classList.add('liked');
-                setTimeout(() => btn.classList.remove('liked'), 600);
-                
-                // Badge animation
-                badge.classList.add('badge-pop');
-                setTimeout(() => badge.classList.remove('badge-pop'), 500);
-                
-                // Icon color change
-                icon.style.color = '#f472b6';
-                setTimeout(() => {
-                    if (this.hasLiked) {
-                        icon.style.color = '#f472b6';
-                    }
-                }, 300);
-                
-                // Count animation
-                count.style.transform = 'translateY(-2px)';
-                count.style.color = '#fce7f3';
-                setTimeout(() => {
-                    count.style.transform = '';
-                    count.style.color = '';
-                }, 300);
-            },
-            
-            showTooltip(text) {
-                const tooltip = document.getElementById('likeTooltip');
-                const status = document.getElementById('likeStatus');
-                
-                status.textContent = text;
-                tooltip.classList.remove('opacity-0', 'invisible');
-                tooltip.classList.add('opacity-100', 'visible');
-            },
-            
-            hideTooltip() {
-                const tooltip = document.getElementById('likeTooltip');
-                tooltip.classList.remove('opacity-100', 'visible');
-                tooltip.classList.add('opacity-0', 'invisible');
-            },
-            
-            render() {
-                // Update count
-                document.getElementById('likeCount').textContent = this.likes;
-                document.getElementById('totalLikes').textContent = this.likes;
-                document.getElementById('userLikes').textContent = this.hasLiked ? '1' : '0';
-                
-                // Update icon
-                const icon = document.getElementById('likeIcon');
-                const btn = document.getElementById('likeBtn');
-                
-                if (this.hasLiked) {
-                    icon.className = 'fas fa-heart text-xs';
-                    icon.style.color = '#f472b6';
-                    btn.classList.add('cursor-default');
-                    document.getElementById('statusText').textContent = 'Already liked';
-                    document.getElementById('statusText').className = 'text-xs text-pink-400 font-medium';
-                } else {
-                    icon.className = 'fas fa-heart text-xs';
-                    icon.style.color = '';
-                    btn.classList.remove('cursor-default');
-                    document.getElementById('statusText').textContent = 'Ready to like';
-                    document.getElementById('statusText').className = 'text-xs text-green-400 font-medium';
-                }
-                
-                // Update badge gradient based on likes
-                const badge = document.getElementById('likeBadge');
-                badge.className = 'text-white rounded-full px-3 py-1.5 flex items-center gap-2 shadow-xl border-2 border-gray-800 ';
-                
-                if (this.likes < 20) {
-                    badge.className += 'bg-gradient-to-br from-pink-500 to-red-500';
-                } else if (this.likes < 50) {
-                    badge.className += 'bg-gradient-to-br from-purple-500 to-pink-500';
-                } else if (this.likes < 100) {
-                    badge.className += 'bg-gradient-to-br from-red-500 to-orange-500';
-                } else {
-                    badge.className += 'bg-gradient-to-br from-yellow-500 to-red-500 animate-pulse';
-                }
-            },
-            
-            setupEvents() {
-                // Like button click
-                document.getElementById('likeBtn').addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    this.handleLike();
-                });
-                
-                // Badge hover shows tooltip
-                const badge = document.getElementById('likeBadge');
-                badge.addEventListener('mouseenter', () => {
-                    if (!this.hasLiked) {
-                        this.showTooltip("Click to like");
-                    } else {
-                        this.showTooltip("You liked this!");
-                    }
-                });
-                
-                badge.addEventListener('mouseleave', () => {
-                    this.hideTooltip();
-                });
-                
-                // Keyboard shortcut: L
-                document.addEventListener('keydown', (e) => {
-                    if (e.key === 'l' || e.key === 'L') {
-                        e.preventDefault();
-                        this.handleLike();
-                    }
-                });
-                
-                // Reset on double-click (for testing)
-                document.getElementById('likeBadge').addEventListener('dblclick', (e) => {
-                    e.stopPropagation();
-                    if (confirm('Reset likes to 217?')) {
-                        this.likes = 217;
-                        this.hasLiked = false;
-                        this.saveState();
-                        this.render();
-                        this.showTooltip("Reset complete");
-                        setTimeout(() => this.hideTooltip(), 1500);
-                    }
-                });
-            }
-        };
-
-        // Initialize
-        document.addEventListener('DOMContentLoaded', () => {
-            LikeSystem.init();
         });
 
         document.addEventListener('DOMContentLoaded', function() {
@@ -3641,7 +3465,7 @@
                     }
                 
                     return `
-                        <div class="announcement-card border border-blue-800 shadow-md bg-gray-900/60 rounded-2xl transition duration-200 ease-in-out overflow-hidden mb-6 p-2 relative card-hover-lift fade-in">
+                        <div class="announcement-card border border-blue-800 shadow-md bg-gray-900/60 rounded-2xl transition duration-200 ease-in-out overflow-hidden mb-6 p-1 relative card-hover-lift fade-in">
                             <!-- OG Preview -->
                             <div id="${previewId}" class="w-full border-b border-gray-800 rounded-xl mb-2"></div>
                         
@@ -3663,7 +3487,7 @@
                                     </i>
                                 </div>
                             
-                                <p class="mb-3 break-all hyphens-auto text-slate-300 leading-relaxed list-inside formatted-text">${this.highlightText(formatText(announcement.content), this.currentQuery)}</p>
+                                <p class="mb-2 break-all hyphens-auto text-slate-300 leading-relaxed list-inside formatted-text">${this.highlightText(formatText(announcement.content), this.currentQuery)}</p>
                             
                                 <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
                                     <span class="text-gray-400 text-xs sm:text-sm">
@@ -4791,7 +4615,7 @@
             } else if (isRecent) {
                 borderClass = "border-l-2 border-l-yellow-600 border-t border-t-amber-600 border-r border-r-orange-600 border-b border-b-orange-600 shadow-sm";
             } else {
-                borderClass = "border border-blue-600 shadow-md";
+                borderClass = "border border-blue-600/20 border-b-blue-600/40 shadow-md";
             }            
             // File preview (image or link)
             let filePreview = "";
@@ -4804,7 +4628,7 @@
                 `;
             } else if (announcement.has_file) {
                 filePreview = `
-                    <div class="mb-4">
+                    <div class="mb-2">
                         <a href="${announcement.file_url}" target="_blank" 
                            class="inline-flex items-center gap-3 px-4 py-3 bg-gray-800/70 hover:bg-gray-700/80 border border-gray-600 hover:border-blue-400/50 rounded-xl transition-all duration-300 card-hover-lift group">
                             <i class="${getFileIcon(announcement.file_name)} text-blue-400 text-lg group-hover:scale-110 transition-transform duration-300"></i>
@@ -4838,14 +4662,14 @@
             }
 
             return `
-                <div class="announcement-card ${borderClass} ${newClass} bg-gray-900/60 rounded-2xl transition duration-200 ease-in-out overflow-hidden card-hover-lift fade-in announcement-content" data-announcement-id="${announcement.id}">
+                <div class="announcement-card ${borderClass} ${newClass} bg-gray-900/40 backdrop-blur-sm rounded-2xl transition-all duration-300 hover:scale-[1.02] hover:bg-gray-900/60 hover:border-gray-700/80 shadow-xl overflow-hidden fade-in announcement-content" data-announcement-id="${announcement.id}">
                     <!-- Pin button -->
                     <button 
                         onclick="togglePin(${announcement.id})"
-                        class="absolute top-3 right-3 p-1 rounded-full transition duration-200 z-10 ${
+                        class="absolute top-4 right-4 p-2 rounded-xl transition-all duration-200 z-10 ${
                             isPinned
-                            ? "bg-yellow-400/20 text-yellow-400 hover:bg-yellow-400/30"
-                            : "text-gray-500 hover:text-yellow-400 hover:bg-gray-800/40"
+                            ? "bg-yellow-500/20 text-yellow-400 hover:bg-yellow-500/30 ring-1 ring-yellow-500/30"
+                            : "text-gray-500 hover:text-yellow-400 hover:bg-gray-800/60"
                         }"
                         title="${isPinned ? "Unpin" : "Pin"}"
                     >
@@ -4853,77 +4677,82 @@
                             viewBox="0 0 24 24" 
                             fill="${isPinned ? 'currentColor' : 'none'}" 
                             stroke="currentColor" 
-                            stroke-width="1.9" 
-                            class="w-6 h-6 drop-shadow-sm">
+                            stroke-width="1.8" 
+                            class="w-5 h-5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 2c.8 0 1.5.7 1.5 1.5V9l3 3v1.5h-3l-.25 6.5a.75.75 0 01-1.5 0L11 13.5H8V12l3-3V3.5C11 2.7 11.7 2 12 2z" />
                         </svg>
                     </button>
-
+                
                     <!-- New item indicator -->
-                    ${isNew ? `<div class="absolute top-3 left-3 w-3 h-3 bg-green-500 rounded-full animate-pulse z-10"></div>` : ''}
-
+                    ${isNew ? `<div class="absolute top-4 left-4 flex items-center gap-1.5 z-10">
+                        <span class="relative flex h-2.5 w-2.5">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                        </span>
+                        <span class="text-xs font-medium text-emerald-400">New</span>
+                    </div>` : ''}
+                
                     <!-- OG Preview -->
-                    <div id="${previewId}" class="w-full border-b border-gray-800 rounded-lg mb-2"></div>
-
+                    <div id="${previewId}" class="w-full border-b border-gray-800/50 rounded-t-lg overflow-hidden mb-1"></div>
+                
                     <!-- File/Image Preview -->
                     ${filePreview}
-
-                    <!-- Floating Like Badge -->
-                    <div class="like-badge">
-                        <div class="relative">
-                            <!-- Badge -->
-                            <div id="likeBadge" class="bg-gradient-to-br from-pink-500 to-red-500 text-white rounded-full px-3 py-1.5 flex items-center gap-2 shadow-xl border-2 border-gray-800">
-                                <button id="likeBtn" class="like-btn focus:outline-none">
-                                    <i id="likeIcon" class="fas fa-heart text-xs"></i>
-                                </button>
-                                <span id="likeCount" class="font-bold text-sm">217</span>
-                            </div>
-
-                            <!-- Tooltip -->
-                            <div id="likeTooltip" class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 bg-gray-900 text-gray-300 text-xs px-3 py-1.5 rounded-lg opacity-0 invisible transition-all duration-200 whitespace-nowrap border border-gray-700">
-                                Click to like • <span id="likeStatus">You can like</span>
-                                <div class="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-gray-900"></div>
-                            </div>
-                        </div>
-                    </div>                    
+                
                     <!-- Announcement Body -->
-                    <div class="announcement-body p-4 sm:p-5">
-                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-3 gap-2">
-                            <h3 class="text-xl uppercase break-all underline underline-offset-8 decoration-red-500 decoration-double sm:text-2xl font-extrabold text-white leading-snug break-words">
+                    <div class="announcement-body p-5 sm:p-6">
+                        <!-- Header -->
+                        <div class="flex justify-between items-start gap-2 mb-2">
+                            <h3 class="text-xl sm:text-2xl font-bold text-white leading-tight tracking-tight">
                                 ${announcement.title}
                             </h3>
+
+                            <!-- Like Badge - Moved here for cleaner layout -->
+                            <div class="flex-shrink-0">
+                                <div class="relative">
+                                    <!-- Tooltip -->
+                                    <div id="likeTooltip" class="absolute bottom-full right-0 mb-2 bg-gray-900 text-gray-300 text-xs px-3 py-1.5 rounded-lg opacity-0 invisible transition-all duration-200 whitespace-nowrap border border-gray-700 shadow-lg">
+                                        Click to like • <span id="likeStatus">You can like</span>
+                                        <div class="absolute top-full right-4 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-gray-900"></div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-
+                    
+                        <!-- Decorative line -->
+                        <div class="h-px bg-gradient-to-r from-transparent via-red-500/50 to-transparent my-2"></div>
+                    
+                        <!-- Content -->
                         <div class="announcement-content-wrapper mb-4">
-
-                            <div class="announcement-text break-all hyphens-auto text-slate-300 leading-relaxed list-inside formatted-text">${formatText(announcement.content)}</div>
-
+                            <div class="announcement-text text-gray-300 leading-relaxed formatted-text prose prose-invert max-w-none">${formatText(announcement.content)}</div>
+                        
                             ${(() => {
                                 if (shouldTruncate(announcement.content, 300)) {
                                     return `
                                         <button onclick="toggleExpand(${announcement.id})" 
-                                                class="show-more-btn mt-2 text-green-400 hover:text-blue-300 text-sm font-medium flex items-center gap-1 transition-colors">
-                                            <i class="fas fa-chevron-down text-xs"></i>
+                                                class="show-more-btn mt-3 text-sm font-medium text-blue-400 hover:text-blue-300 flex items-center gap-1.5 transition-colors group">
                                             <span>Show more</span>
+                                            <i class="fas fa-chevron-down text-xs group-hover:translate-y-0.5 transition-transform"></i>
                                         </button>
                                     `;
                                 }
                                 return '';
                             })()}
-                        </div>                                    
+                        </div>
+                    
+                        <!-- Footer -->
+                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mt-auto pt-2 border-t border-gray-600/50">
+                            <div class="flex items-center gap-2 text-gray-400">
+                                <div class="w-6 h-6 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                                    <i class="fas fa-user text-xs text-white"></i>
+                                </div>
+                                <span class="text-sm font-medium">${announcement.author?.username || "Unknown"}</span>
+                            </div>
 
-                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mt-auto pt-4 border-t border-gray-700">
-                            <span class="text-gray-400 text-xs sm:text-sm">
-                                <i class="fas fa-user text-xs mr-1"></i>${announcement.author?.username || "Unknown"}
-                            </span>
-                            <div class="flex items-center gap-2">
-                                <i class="fa fa-clock text-gray-400"></i>
-                                <span class="text-xs sm:text-sm whitespace-nowrap font-bold 
-                                           underline underline-offset-2 decoration-blue-400 
-                                           text-transparent bg-clip-text 
-                                           bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400">
+                            <div class="flex items-center gap-2 text-sm">
+                                <i class="far fa-clock text-gray-500"></i>
+                                <time datetime="${announcement.created_at}" class="text-gray-400 font-mono text-xs sm:text-sm">
                                     ${formatDate(announcement.created_at)}
-                                </span>
+                                </time>
                             </div>
                         </div>
                     </div>
