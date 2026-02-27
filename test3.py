@@ -660,7 +660,7 @@ class MockDataGenerator:
             
             content = self.fake.paragraph(nb_sentences=random.randint(2, 4))
             if random.choice([True, False]):
-                content = f"**Important Update**: {content}"
+                content = f"==Important Update==: {content}"
             if random.choice([True, False]):
                 content += f"\n\nCheck out this resource: {self.fake.url()}"
             
@@ -765,6 +765,10 @@ current_user = mock_data['users'][0]
 @app.route('/main-page')
 def main_page():
     return render_template('main_page.html', current_user=current_user)
+
+@app.route('/admin/a')
+def ads():
+    return render_template('admin_users.html')
 
 @app.route('/api/user/profile')
 def user_profile():
