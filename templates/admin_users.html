@@ -8,16 +8,14 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Google Fonts (Poppins) -->
+
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Socket.io (kept for compatibility) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
-    <!-- Legacy scripts (kept, no visual impact) -->
+    <!-- Legacy scripts -->
     <script src="/_0eXv3/tailwind.all.css"></script>
     <script src="/_0eXv4/n-s.js"></script>
     <script src="/_0eXv4/loading.js"></script>
     <style>
-        /* ----- MODERN RESET / VARIABLES ----- */
         * {
             margin: 0;
             padding: 0;
@@ -42,6 +40,9 @@
             --glass-edge: rgba(255, 255, 255, 0.05);
             --shadow-card: 0 20px 30px -10px rgba(0, 0, 0, 0.6);
             --transition-default: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            --gray-400: #9ca3af;
+            --secondary-600: #9333ea;
+            --primary-600: #2563eb;
         }
 
         body {
@@ -54,7 +55,6 @@
                               radial-gradient(circle at 90% 70%, rgba(139, 92, 246, 0.03) 0%, transparent 40%);
         }
 
-        /* ----- CUSTOM SCROLLBAR ----- */
         ::-webkit-scrollbar {
             width: 5px;
             height: 5px;
@@ -71,7 +71,6 @@
             background: var(--primary);
         }
 
-        /* ----- UTILITY CLASSES (preserve old names, redefine) ----- */
         .glass-morph {
             background: rgba(20, 30, 45, 0.7);
             backdrop-filter: blur(16px) saturate(180%);
@@ -85,7 +84,6 @@
             box-shadow: 0 12px 40px rgba(59, 130, 246, 0.15);
         }
 
-        /* buttons – modern, sleek, with icon support */
         .btn {
             display: inline-flex;
             align-items: center;
@@ -129,7 +127,6 @@
             transform: translateY(1px);
         }
         .btn-primary, .btn-success, .btn-danger, .btn-warning, .btn-info, .btn-ai, .btn-dashboard, .btn-phone, .btn-events, .btn-shares, .btn-notify, .btn-money, .btn-secondary {
-            /* all special buttons keep gradient but we refine */
             background: linear-gradient(145deg, #1e2a3a, #141b2b);
             border: 1px solid rgba(59, 130, 246, 0.2);
         }
@@ -155,7 +152,6 @@
             filter: grayscale(60%);
         }
 
-        /* loading spinner inside button */
         .btn-spinner {
             display: none;
             width: 16px;
@@ -169,7 +165,6 @@
             display: inline-block;
         }
 
-        /* badges */
         .status-badge {
             display: inline-block;
             padding: 0.2rem 0.8rem;
@@ -208,7 +203,6 @@
             color: #fecaca;
         }
 
-        /* ----- HEADER (sticky, glass, with toggle) ----- */
         .sticky-nav {
             position: sticky;
             top: 0;
@@ -286,12 +280,10 @@
             gap: 0.5rem;
         }
 
-        /* remove old fixed toggle */
         .sidebar-toggle.old-fixed {
             display: none;
         }
 
-        /* ----- SIDEBAR (modern glass) ----- */
         .sidebar {
             position: fixed;
             top: 0;
@@ -372,8 +364,9 @@
             margin: 1.2rem 0;
         }
         .sidebar-footer {
-            padding: 1.5rem;
-            border-top: 1px solid rgba(255,255,255,0.05);
+            padding: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            background: rgba(0, 0, 0, 0.2);
         }
         .user-info {
             display: flex;
@@ -399,17 +392,15 @@
             visibility: visible;
         }
 
-        /* main content */
         .main-container {
-            max-width: 1440px;
+            max-width: calc(100% - 20px);
             margin: 0 auto;
-            padding: 2rem;
+            padding: 10px;
         }
 
-        /* quick stats grid */
         .quick-stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
             gap: 1rem;
             margin-bottom: 2rem;
         }
@@ -417,8 +408,8 @@
             background: var(--card-bg);
             backdrop-filter: blur(12px);
             border: 1px solid var(--glass-edge);
-            border-radius: 28px;
-            padding: 1.2rem 1rem;
+            border-radius: 14px;
+            padding: 0.8rem 0.5rem;
             text-align: center;
             transition: var(--transition-default);
             box-shadow: var(--shadow-card);
@@ -448,16 +439,16 @@
             color: var(--text-secondary);
         }
 
-        /* online panel */
         .online-users-panel {
             background: var(--card-bg);
             backdrop-filter: blur(12px);
             border: 1px solid rgba(16,185,129,0.2);
-            border-radius: 32px;
+            border-radius: 18px;
             padding: 1.5rem;
             margin-bottom: 2rem;
             box-shadow: var(--shadow-card);
         }
+
         .online-user-item {
             background: rgba(16,185,129,0.05);
             border: 1px solid rgba(16,185,129,0.15);
@@ -469,10 +460,12 @@
             gap: 0.8rem;
             transition: 0.2s;
         }
+
         .online-user-item:hover {
             background: rgba(16,185,129,0.1);
             border-color: #10b98160;
         }
+
         .online-indicator {
             width: 10px;
             height: 10px;
@@ -482,7 +475,6 @@
             animation: pulse 2s infinite;
         }
 
-        /* charts grid */
         .chart-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -493,7 +485,7 @@
             background: var(--card-bg);
             backdrop-filter: blur(12px);
             border: 1px solid var(--glass-edge);
-            border-radius: 32px;
+            border-radius: 18px;
             padding: 1.5rem;
             height: 300px;
             box-shadow: var(--shadow-card);
@@ -510,11 +502,10 @@
             width: 100%;
         }
 
-        /* filter panel */
         .filters-panel {
             background: var(--card-bg);
             backdrop-filter: blur(12px);
-            border-radius: 36px;
+            border-radius: 18px;
             padding: 1.8rem;
             margin-bottom: 2rem;
             border: 1px solid var(--glass-edge);
@@ -556,11 +547,10 @@
             cursor: pointer;
         }
 
-        /* table */
         .table-wrapper {
             background: var(--card-bg);
             backdrop-filter: blur(12px);
-            border-radius: 32px;
+            border-radius: 24px;
             padding: 1.8rem;
             border: 1px solid var(--glass-edge);
             box-shadow: var(--shadow-card);
@@ -619,7 +609,6 @@
             box-shadow: 0 30px 60px rgba(0,0,0,0.6);
         }
 
-        /* toasts */
         #toast-container {
             position: fixed;
             top: 20px;
@@ -633,7 +622,7 @@
             background: rgba(20,30,45,0.9);
             backdrop-filter: blur(16px);
             border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 60px;
+            border-radius: 10px;
             padding: 0.9rem 1.5rem;
             color: white;
             box-shadow: 0 10px 30px rgba(0,0,0,0.4);
@@ -646,10 +635,10 @@
         .toast-error { border-left: 5px solid #ef4444; }
         .toast-info { border-left: 5px solid #3b82f6; }
 
-        /* responsiveness */
         @media (max-width: 768px) {
             .nav-container { padding: 0.75rem 1rem; }
             .gradient-text { font-size: 1.2rem; }
+            .header-title { display: none; }
             .quick-stats-grid { grid-template-columns: repeat(2,1fr); }
             .chart-grid { grid-template-columns: 1fr; }
             .filter-select { width: 100%; }
@@ -657,12 +646,118 @@
         }
         @keyframes spin { to { transform: rotate(360deg); } }
         @keyframes pulse { 50% { opacity: 0.5; } }
+
+        .footer-btn {
+            flex: 1;
+            padding: 10px;
+            border-radius: 12px;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            background: rgba(255, 255, 255, 0.03);
+            color: var(--gray-400);
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .footer-btn:hover {
+            background: rgba(59, 130, 246, 0.1);
+            border-color: rgba(59, 130, 246, 0.4);
+            color: white;
+        }
+
+        .footer-btn.danger:hover {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: rgba(239, 68, 68, 0.3);
+            color: #ef4444;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .user-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, var(--primary-600), var(--secondary-600));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .user-details h4 {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .user-details p {
+            font-size: 0.75rem;
+            color: var(--gray-500);
+        }
+
+        .footer-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .nav-section {
+            padding: 8px 16px;
+        }
+
+        .nav-section-title {
+            color: var(--gray-500);
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 8px 16px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            margin: 2px 8px;
+            border-radius: 14px;
+            color: var(--gray-400);
+            transition: all 0.2s ease;
+            cursor: pointer;
+            border: 1px solid transparent;
+        }
+
+        .nav-item:hover {
+            background: rgba(59, 130, 246, 0.1);
+            color: white;
+            border-color: var(--glass-border-hover);
+            transform: translateX(4px);
+        }
+
+        .nav-item i {
+            width: 20px;
+            font-size: 1.1rem;
+            color: var(--primary-400);
+        }
+
+        .nav-item.active {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(168, 85, 247, 0.15));
+            border-color: var(--glass-border-hover);
+            color: white;
+        }
     </style>
 </head>
 <body>
     <div id="toast-container"></div>
-
-    <!-- modern header with toggle integrated -->
     <nav class="sticky-nav">
         <div class="nav-container">
             <div class="nav-left">
@@ -679,7 +774,7 @@
                         <line x1="12" y1="22.08" x2="12" y2="12" />
                     </svg>                        
                 </div>
-                <span class="gradient-text">Students Management</span>
+                <span class="gradient-text header-title">Users Management</span>
             </div>
             <div class="flex items-center gap-4">
                 <div class="last-updated">
@@ -691,7 +786,6 @@
         </div>
     </nav>
 
-    <!-- sidebar (unchanged structure, only visual) -->
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <h3 class="sidebar-title">Navigation</h3>
@@ -701,28 +795,62 @@
         </div>
         <div class="sidebar-content">
             <div class="nav-buttons-container">
-                <!-- keep all original buttons with same classes & onclick -->
-                <button class="btn btn-success" onclick="window.location.href='/konami/'"><i class="fas fa-gamepad"></i> Konami</button>
-                <button class="btn btn-phone" onclick="window.location.href='/admin/phone'"><i class="fas fa-mobile-alt"></i> Phones</button>
-                <button class="btn btn-events" onclick="window.location.href='/events/admin/events'"><i class="fas fa-calendar-alt"></i> Events</button>
+                <div class="sidebar-divider"></div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Main</div>
+                </div>
+                <div class="nav-item active">
+                    <i class="fas fa-chart-pie"></i>
+                    <span>User Mngmt</span>
+                </div>
+                <button class="btn btn-info" onclick="window.location.href='/admin/analytics'"><i class="fas fa-chart-bar"></i> Analytics</button>
                 <button class="btn btn-dashboard" onclick="window.location.href='/dashboard'"><i class="fas fa-tachometer-alt"></i> Dashboard</button>
+
+                <div class="sidebar-divider"></div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Management</div>
+                </div>
+                <button class="btn btn-money" onclick="window.location.href='/admin/4123/payment-monitor'"><i class="fas fa-money-bill-wave-alt"></i> Money</button>
+                <button class="btn btn-success" onclick="window.location.href='/konami/'"><i class="fas fa-gamepad"></i> Konami</button>
+                <button class="btn btn-events" onclick="window.location.href='/events/admin/events'"><i class="fas fa-calendar-alt"></i> Events</button>
                 <button class="btn btn-shares" onclick="window.location.href='/admin/shares'"><i class="fas fa-share-alt"></i> Shares</button>
                 <button class="btn btn-notify" onclick="window.location.href='/admin/notifications'"><i class="fas fa-bell"></i> Notification</button>
-                <button class="btn btn-ai" onclick="window.location.href='/ai-chat'"><i class="fas fa-robot"></i> AI Help</button>
-                <button class="btn btn-info" onclick="window.location.href='/admin/analytics'"><i class="fas fa-chart-bar"></i> Analytics</button>
-                <button class="btn btn-money" onclick="window.location.href='/admin/4123/payment-monitor'"><i class="fas fa-money-bill-wave-alt"></i> Money</button>
+
                 <div class="sidebar-divider"></div>
-                <button class="btn btn-secondary" onclick="window.location.href='/admin'"><i class="fas fa-arrow-left"></i> Back</button>
-                <button class="btn btn-danger" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Tools</div>
+                </div>
+                <button class="btn btn-ai" onclick="window.location.href='/ai-chat'"><i class="fas fa-robot"></i> AI Help</button>
+                <button class="btn btn-phone" onclick="window.location.href='/admin/phone'"><i class="fas fa-mobile-alt"></i> Phones</button>
+                <div class="sidebar-divider"></div>
             </div>
         </div>
         <div class="sidebar-footer">
-            <div class="user-info"><i class="fas fa-user-circle"></i> <span>Logged in as Admin</span></div>
+            <div class="user-info">
+                <div class="user-avatar">
+                    A
+                </div>
+                <div class="user-details">
+                    <h4>Admin User</h4>
+                    <p>administrator</p>
+                </div>
+            </div>
+            <div class="footer-buttons">
+                <button class="footer-btn" onclick="window.location.href='/admin'">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>Back</span>
+                </button>
+                <button class="footer-btn danger" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </button>
+            </div>
         </div>
     </div>
     <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
 
-    <!-- main content (all original IDs and classes preserved) -->
     <main class="main-container">
         <!-- header title -->
         <div class="mb-8">
