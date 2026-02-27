@@ -32,6 +32,7 @@ from flask_limiter.util import get_remote_address # Efficient Block of Specific 
 from flask import request
 from pywebpush import webpush, WebPushException # CHrome Notification Push Module
 from colorama import Fore # Coloring logs
+from sqlalchemy import func, or_
 import base64
 import flask
 #==========================================
@@ -739,7 +740,7 @@ class Share(db.Model):
 
     def is_expired(self):
         from datetime import timedelta, datetime
-        return (datetime.now(timezone.utc) + timedelta(hours=3)) > self.created_at + timedelta(hours=2)
+        return (datetime.now(timezone.utc) + timedelta(hours=3)) > func.timezone('UTC', self.created_at) + timedelta(hours=2)
 # =========================================
 # NOTIFICATION MODELS
 # =========================================
@@ -1089,7 +1090,6 @@ def ignore_bad_fd(record):
 logging.getLogger().addFilter(ignore_bad_fd)
 
 """Function to clean old data for user vsits(> a month)"""
-from sqlalchemy import func, or_
 
 def cleanup_old_visits(max_visits_per_user=15, days_old=30):
     try:
@@ -6099,7 +6099,7 @@ def access_share(share_id):
         ), 404
 
     # Check if link expired
-    if datetime.now(timezone.utc) > share.created_at + timedelta(hours=LINK_EXPIRY_HOURS):
+    if datetime.now(timezone.utc) > func.timezone('UTC', share.created_at) + timedelta(hours=LINK_EXPIRY_HOURS):
         db.session.delete(share)
         db.session.commit()
         return render_template(
@@ -10844,7 +10844,7 @@ def api_players():
     players_data = []
     
     for p in players:
-        has_active_code = p.challenge_code and p.code_expires_at and p.code_expires_at > get_now()
+        has_active_code = p.challenge_code and p.code_expires_at and func.timezone('UTC', p.code_expires_at) > get_now()
         players_data.append({
             'id': p.id,
             'konami_id': p.konami_id,
@@ -10931,7 +10931,7 @@ def api_use_code():
     # Find player with active code
     target = Player.query.filter(
         Player.challenge_code == code,
-        Player.code_expires_at > get_now()
+        func.timezone('UTC', Player.code_expires_at) > get_now()
     ).first()
     
     if not target:
