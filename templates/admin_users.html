@@ -1998,17 +1998,31 @@
         async function fetchUsers(page = 1) {
             try {
                 const params = new URLSearchParams({
-                    search: elements.searchInput.value,
-                    role: elements.roleFilter.value,
-                    payment_filter: elements.paymentFilter.value,
-                    activity_level: elements.activityFilter.value,
-                    status: elements.statusFilter.value,
-                    date_filter: elements.dateFilter.value
+                    page: page,
+                    per_page: usersPerPage
                 });
 
+                // Add search and filter parameters if they exist
+                const searchTerm = document.getElementById('search-input').value;
+                const roleFilter = document.getElementById('role-filter').value;
+                const paymentStatusFilter = document.getElementById('payment-status-filter').value;
+                const activityFilter = document.getElementById('activity-filter').value;
+                const statusFilter = document.getElementById('status-filter').value;
+                const dateFilter = document.getElementById('date-filter').value;
+
+                if (searchTerm) params.append('search', searchTerm);
+                if (roleFilter) params.append('role', roleFilter);
+                if (paymentStatusFilter) params.append('payment_filter', paymentStatusFilter);
+                if (activityFilter) params.append('activity_level', activityFilter);
+                if (statusFilter) params.append('status', statusFilter);
+                if (dateFilter) params.append('date_filter', dateFilter);
+
                 const response = await fetch(`${USERS_ENDPOINT}?${params}`);
-                if (!response.ok) throw new Error('Failed to fetch');
-                return await response.json();
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                return data;
             } catch (error) {
                 showToast('Failed to load users: ' + error.message, 'error');
                 return { users: [], pagination: null, stats: null, chart_data: null };
