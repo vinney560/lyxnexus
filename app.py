@@ -5236,6 +5236,10 @@ def home():
 def terms():
     return render_template('terms.html', year=_year())
 #--------------------------------------------------------------------
+@app.route('/contact')
+def contact_ln():
+    return render_template('contact.html', year=_year())
+#--------------------------------------------------------------------
 @app.route('/login-check')
 def check():
     if current_user.is_authenticated:
@@ -11529,9 +11533,8 @@ def grade_to_point(grade):
 
 @app.route('/exam-tracker')
 def exam_tracker():
-    return render_template('exam_tracker.html', year=_year)
+    return render_template('exam_tracker.html', year=_year())
 
-# API: Get all exams of current user
 @app.route('/api/exams')
 def get_exams():
     # Get filter parameters
@@ -11551,7 +11554,6 @@ def get_exams():
     # Get all results
     exams = query.all()
     
-    # Apply search filter (client-side or server-side)
     if search:
         exams = [e for e in exams if search in e.unit_code.lower() 
                  or search in e.unit_name.lower() 
@@ -11559,7 +11561,6 @@ def get_exams():
     
     return jsonify([e.to_dict() for e in exams])
 
-# API: Get GPA statistics
 @app.route('/api/gpa')
 def get_gpa():
     semester = request.args.get('semester')
@@ -11586,7 +11587,6 @@ def get_gpa():
         'year': year
     })
 
-# API: Add new exam
 @app.route('/api/exams', methods=['POST'])
 def add_exam_result():
     data = request.json

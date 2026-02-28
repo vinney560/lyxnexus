@@ -32,6 +32,14 @@
             --error-color: #EF4444;
             --till-color: #10B981;
             --stk-color: #3B82F6;
+            --text: #ffffff;
+            --text-secondary: #a0a0b0;
+            --border: rgba(99, 102, 241, 0.2);
+            --border-hover: rgba(99, 102, 241, 0.4);
+            --glow: rgba(99, 102, 241, 0.5);
+            --primary: #6366f1;
+            --secondary: #8b5cf6;
+            --text-secondary: #a0a0b0;
         }
         
         body {
@@ -43,7 +51,6 @@
             align-items: center;
             justify-content: center;
             overflow-x: hidden;
-            background-image: url('/uploads/OIP10.jpg');
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
@@ -71,6 +78,47 @@
         .glass-morph:hover {
             transform: translateY(-5px);
             box-shadow: 0 12px 40px rgba(0, 31, 135, 0.3);
+        }
+
+        .header {
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            right: 1rem;
+            z-index: 100;
+            display: flex;
+            justify-content: flex-end;
+            background: rgba(18, 18, 26, 0.564);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: 2rem;
+            padding: 0.5rem 1rem;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .nav-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-link:hover {
+            color: var(--text);
+            background: rgba(99, 102, 241, 0.1);
         }
         
         .payment-options {
@@ -676,21 +724,136 @@
         font-size: 0.9rem;
         line-height: 1.5;
     }
+
+    .main-container {
+        width: 100%;
+        max-width: 600px;
+        margin: 4rem auto 2rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .card {
+        background: rgba(46, 101, 190, 0.057);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid var(--border);
+        border-radius: 2rem;
+        padding: 2rem;
+        transition: all 0.3s ease;
+    }
+
+    .card:hover {
+        border-color: var(--border-hover);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    }
+
+    .status-section {
+        text-align: center;
+    }
+
+    .status-icon {
+        width: 120px;
+        height: 120px;
+        margin: 0 auto 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 4rem;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        box-shadow: 0 0 30px var(--glow);
+        animation: pulse 2s infinite;
+    }
+
+
+    @keyframes pulse {
+        0% { box-shadow: 0 0 0 0 var(--glow); }
+        70% { box-shadow: 0 0 0 20px rgba(99, 102, 241, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0); }
+    }
+
+    .status-title {
+        font-size: 2.5rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 0.5rem;
+    }
+
+    .status-message {
+        color: var(--text-secondary);
+        font-size: 1rem;
+    }
+
+    @media (max-width: 640px) {
+        body { padding: 0.75rem; }
+        
+        .header {
+            left: 0.75rem;
+            right: 0.75rem;
+            padding: 0.25rem;
+        }
+
+        .nav-link {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.8rem;
+        }
+
+        .card { padding: 1.5rem; }
+        
+        .status-icon {
+            width: 100px;
+            height: 100px;
+            font-size: 3rem;
+        }
+        
+        .status-title {
+            font-size: 2rem;
+        }
+
+        .toast-container {
+            left: 0.75rem;
+            right: 0.75rem;
+        }
+    }
+    .animate-slide-up {
+        animation: slideUp 0.5s ease forwards;
+    }
     </style>
 </head>
 <body>
     <div class="toast-container" id="toast-container"></div>
 
-    <div class="w-full max-w-3xl">
-        <div class="glass-morph rounded-2xl shadow-lg p-6 md: p-2">
-            <div class="text-center mb-8">
-                <div class="success-icon mx-auto mb-4">
-                    <i class="fas fa-lock"></i>
-                </div>
-                <h1 class="text-3xl font-bold gradient-text">Account Activation</h1>
-                <p class="text-gray-400 mt-2">Choose your preferred payment method</p>
+    <header class="header">
+        <div class="nav-links">
+            <a href="/terms" class="nav-link">
+                <i class="fas fa-file-alt"></i>
+                Terms
+            </a>
+            <a href="/contact" class="nav-link">
+                <i class="fas fa-envelope"></i>
+                Contact
+            </a>
+            <a href="/navigation-guide" class="nav-link">
+                <i class="fas fa-map-signs"></i>
+                Guide
+            </a>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <div class="card status-section animate-slide-up">
+            <div class="status-icon">
+                <i class="fas fa-lock"></i>
             </div>
-            
+            <h1 class="status-title">Account Activation</h1>
+            <p class="status-message">Choose your preferred payment method</p>
+        </div>
+        <div class="glass-morph rounded-2xl shadow-lg p-6 md: p-2">
             <div class="step-indicator">
                 <div class="step active" id="step1">
                     <div class="step-number">1</div>
@@ -876,7 +1039,7 @@
                     </button>
                 </div>
 
-                <button class="btn btn-stk btn-disabled mt-4" onclick="initiateStkPush()" id="stk-push-btn">
+                <button class="btn btn-stk mt-4" onclick="initiateStkPush()" id="stk-push-btn">
                     <i class="fas fa-paper-plane mr-2"></i>
                     Send STK Push
                 </button>
@@ -900,70 +1063,7 @@
             </div>
 
             <div id="verification-status" class="payment-status"></div>
-            
-            <div class="activation-explanation">
-                <h3 class="explanation-title">
-                    <i class="fas fa-hand-holding-usd"></i>
-                    Why a One-Time Activation Fee?
-                </h3>
-                
-                <div class="benefit-item">
-                    <div class="benefit-icon">
-                        <i class="fas fa-heart"></i>
-                    </div>
-                    <div class="benefit-content">
-                        <h4>Support Development & Founders</h4>
-                        <p>Your contribution directly supports our developers and founders who dedicate time and resources to build and improve LyxNexus. This ensures continued passion and commitment to the platform.</p>
-                    </div>
-                </div>
 
-                <div class="benefit-item">
-                    <div class="benefit-icon">
-                        <i class="fas fa-server"></i>
-                    </div>
-                    <div class="benefit-content">
-                        <h4>Server Maintenance & Uptime</h4>
-                        <p>Maintaining reliable servers, ensuring 24/7 uptime, and providing secure data storage requires ongoing investment. Your fee helps cover these essential infrastructure costs.</p>
-                    </div>
-                </div>
-
-                <div class="benefit-item">
-                    <div class="benefit-icon">
-                        <i class="fas fa-sync-alt"></i>
-                    </div>
-                    <div class="benefit-content">
-                        <h4>Continuous Updates & Improvements</h4>
-                        <p>We regularly release new features, security updates, and platform enhancements. The activation fee funds this continuous development cycle, keeping LyxNexus modern and efficient.</p>
-                    </div>
-                </div>
-
-                <div class="benefit-item">
-                    <div class="benefit-icon">
-                        <i class="fas fa-chart-line"></i>
-                    </div>
-                    <div class="benefit-content">
-                        <h4>Platform Integrity & User Management</h4>
-                        <p>A small fee helps us maintain platform integrity, prevent abuse, and ensure resources are allocated to genuine users who value the service.</p>
-                    </div>
-                </div>
-
-                <div class="platform-note">
-                    <h4><i class="fas fa-unlock"></i> Important Clarification</h4>
-                    <p>
-                        <strong>LyxNexus is a completely free platform.</strong> We do not charge for any services, features, or content access. 
-                        All our educational resources and tools are sourced from open-access materials. 
-                        This one-time activation fee <strong>is strictly for the reasons mentioned above</strong> and not for service charges.
-                    </p>
-                </div>
-
-                <div class="mt-5 p-4 bg-blue-900/20 border border-blue-800/30 rounded-lg flex items-start gap-3">
-                    <i class="fas fa-exclamation-circle text-blue-400 mt-0.5"></i>
-                    <div class="text-sm text-blue-300">
-                        This is a <strong class="text-blue-200 font-semibold">one-time only</strong> fee. After activation, you'll have 
-                        <strong class="text-blue-200 font-semibold">lifetime access</strong> to all LyxNexus features with no recurring charges.
-                    </div>
-                </div>
-            </div>
         </div>
         
         <div class="text-center mt-8 text-gray-500 text-sm">
@@ -1208,7 +1308,6 @@
         }
 
         function initiateStkPush() {
-            return;
             const phone = document.getElementById('stk-phone').value.trim();
             
             if (!validateStkPhone()) {
@@ -1468,7 +1567,6 @@
                 <p class="text-gray-400">Please wait...</p>
             `;
             
-            // Go back to payment method selection
             setTimeout(() => {
                 goBackToOptions();
             }, 1500);
@@ -1608,7 +1706,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             showToast('Choose your payment method to continue', 'info', 'Welcome');
             setTimeout(() => {
-                //selectOption('stk');
+                selectOption('stk');
             }, 1000);
         });
 

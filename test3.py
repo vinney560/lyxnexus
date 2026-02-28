@@ -775,6 +775,85 @@ def adsm():
 def adsa():
     return render_template('admin_users.html')    
 
+MOCK_VERIFICATION_DATA = {
+    'valid': {
+        'phone_valid': True,
+        'international_number': '+254712345678',
+        'country': 'Kenya',
+        'country_code': 'KE',
+        'carrier': 'Safaricom',
+        'local_format': '0712345678',
+        'location': 'Nairobi',
+        'line_type': 'mobile'
+    },
+    'invalid': {
+        'phone_valid': False,
+        'international_number': '+254712345678',
+        'country': 'Kenya',
+        'country_code': 'KE',
+        'carrier': 'Unknown',
+        'error': 'Invalid phone number'
+    }
+}
+
+# Mock payment configurations
+PAYMENT_CONFIG = {
+    'amount': 19.00,
+    'currency': 'KES',
+    'provider': 'M-PESA',
+    'callback_url': 'https://lyxnexus.onrender.com/payment/callback'
+}
+
+@app.route('/veri')
+def verification_complete():
+    """
+    Mock route for verification complete page
+    Query params: ?status=valid or ?status=invalid
+    """
+    # Get status from query parameter (default to valid)
+    status = request.args.get('status', 'valid')
+    
+    # Select mock data based on status
+    if status == 'invalid':
+        verification_data = MOCK_VERIFICATION_DATA['invalid']
+        # Store in session for tracking
+        session['verification_status'] = 'invalid'
+    else:
+        verification_data = MOCK_VERIFICATION_DATA['valid']
+        session['verification_status'] = 'valid'
+        session['verified_phone'] = verification_data['international_number']
+    
+    # Get current year for footer
+    current_year = datetime.now().year
+    
+    return render_template(
+        'verification.html',
+        verification_data=verification_data,
+        year=current_year
+    )
+
+@app.route('/payment')
+def payment_page():
+    """
+    Mock payment page - where the user is redirected after clicking "Proceed to Payment"
+    """
+    # Check if user is allowed to access payment
+    if session.get('verification_status') != 'valid':
+        flash('Please verify your phone number first', 'error')
+        return redirect(url_for('verification_complete', status='invalid'))
+    
+    return render_template(
+        'payment_stk.html',
+        phone=session.get('verified_phone'),
+        amount=PAYMENT_CONFIG['amount'],
+        currency=PAYMENT_CONFIG['currency'],
+        provider=PAYMENT_CONFIG['provider']
+    )
+
+@app.route('/contact')
+def contact():
+    return render_template('contact.html')
+
 @app.route('/api/user/profile')
 def user_profile():
     user_data = {

@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us | LyxNexus</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <meta name="keywords" content="Lyx Nexus, Kisii LyxNexus, kisii lyxnexus, kisii university lyxnexus, kisii university lyx nexus, lyx nexus, lyxnexus, contact lyxnexus" />
+    <meta name="author" content="Vincent Kipngetich" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://lyxnexus.onrender.com/contact" />
+    <link rel="icon" href="https://lyxnexus.onrender.com/uploads/favicon-1.png"/>
+        
+    <meta property="og:title" content="Contact Us | LyxNexus" />
+    <meta property="og:description" content="Get in touch with LyxNexus - We're here to help you" />
+    <meta property="og:image" content="https://lyxnexus.onrender.com/favicon.ico" />
+    <meta property="og:url" content="https://lyxnexus.onrender.com/contact" />
+        
+    <meta name="twitter:card" content="summary" />
+
+    <script src="/_0eXv3/tailwind.all.css"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    :root {
+        --primary: #6366f1;
+        --primary-dark: #4f46e5;
+        --secondary: #8b5cf6;
+        --success: #10b981;
+        --success-dark: #059669;
+        --error: #ef4444;
+        --error-dark: #dc2626;
+        --warning: #f59e0b;
+        --background: #0a0a0f;
+        --surface: #12121a;
+        --surface-light: #1e1e2a;
+        --text: #ffffff;
+        --text-secondary: #a0a0b0;
+        --text-tertiary: #6a6a7a;
+        --border: rgba(99, 102, 241, 0.2);
+        --border-hover: rgba(99, 102, 241, 0.4);
+        --glow: rgba(99, 102, 241, 0.5);
+    }
+
+    body {
+        font-family: 'Inter', sans-serif;
+        background: var(--background);
+        color: var(--text);
+        min-height: 100vh;
+        position: relative;
+        overflow-x: hidden;
+        padding: 1rem;
+    }
+
+    body::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: 
+            radial-gradient(circle at 20% 30%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
+            radial-gradient(circle at 80% 70%, rgba(139, 92, 246, 0.15) 0%, transparent 50%);
+        pointer-events: none;
+        z-index: -1;
+    }
+
+    .header {
+        position: fixed;
+        top: 1rem;
+        left: 1rem;
+        right: 1rem;
+        z-index: 100;
+        display: flex;
+        justify-content: flex-end;
+        background: rgba(18, 18, 26, 0.8);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid var(--border);
+        border-radius: 2rem;
+        padding: 0.5rem 1rem;
+        max-width: 500px;
+        margin: 0 auto;
+    }
+
+    .nav-links {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .nav-link {
+        color: var(--text-secondary);
+        text-decoration: none;
+        font-size: 0.9rem;
+        font-weight: 500;
+        padding: 0.5rem 1rem;
+        border-radius: 2rem;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .nav-link:hover {
+        color: var(--text);
+        background: rgba(99, 102, 241, 0.1);
+    }
+
+    .main-container {
+        width: 100%;
+        max-width: 1200px;
+        margin: 4rem auto 2rem;
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    .hero-section {
+        text-align: center;
+        margin-bottom: 2rem;
+        opacity: 0;
+        transform: translateY(30px);
+        animation: fadeInUp 0.8s ease forwards;
+    }
+
+    @keyframes fadeInUp {
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .hero-title {
+        font-size: 3.5rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 1rem;
+    }
+
+    .hero-subtitle {
+        color: var(--text-secondary);
+        font-size: 1.2rem;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .contact-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .contact-card {
+        background: rgba(18, 18, 26, 0.8);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid var(--border);
+        border-radius: 2rem;
+        padding: 2.5rem;
+        transition: all 0.3s ease;
+        opacity: 0;
+        transform: translateY(30px);
+        animation: fadeInUp 0.8s ease forwards;
+        animation-delay: var(--delay, 0s);
+    }
+
+    .contact-card:hover {
+        border-color: var(--border-hover);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+        transform: translateY(-5px);
+    }
+
+    .card-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .card-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 1.5rem;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        box-shadow: 0 8px 24px var(--glow);
+    }
+
+    .card-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text);
+    }
+
+    .hours-list {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .hours-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem;
+        background: rgba(30, 30, 42, 0.5);
+        border-radius: 1rem;
+        border: 1px solid transparent;
+        transition: all 0.3s ease;
+    }
+
+    .hours-item:hover {
+        border-color: var(--border-hover);
+        background: rgba(30, 30, 42, 0.8);
+    }
+
+    .day {
+        font-weight: 600;
+        color: var(--text);
+    }
+
+    .time {
+        color: var(--text-secondary);
+        font-weight: 500;
+    }
+
+    .contact-list {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .contact-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        background: rgba(30, 30, 42, 0.5);
+        border-radius: 1rem;
+        border: 1px solid transparent;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        color: var(--text);
+    }
+
+    .contact-item:hover {
+        border-color: var(--border-hover);
+        background: rgba(30, 30, 42, 0.8);
+        transform: translateX(5px);
+    }
+
+    .contact-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        flex-shrink: 0;
+    }
+
+    .contact-info {
+        flex: 1;
+    }
+
+    .contact-label {
+        font-size: 0.8rem;
+        color: var(--text-tertiary);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 0.25rem;
+    }
+
+    .contact-value {
+        font-weight: 600;
+        color: var(--text);
+    }
+
+    .whatsapp-badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        background: #25d366;
+        color: white;
+        border-radius: 2rem;
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-left: 0.5rem;
+    }
+
+    .email-card {
+        text-align: center;
+    }
+
+    .email-icon {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 1.5rem;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--success), var(--success-dark));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);
+    }
+
+    .email-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 1rem 2rem;
+        background: linear-gradient(135deg, var(--success), var(--success-dark));
+        color: white;
+        text-decoration: none;
+        border-radius: 2rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);
+    }
+
+    .email-link:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 32px rgba(16, 185, 129, 0.4);
+    }
+
+    .footer {
+        text-align: center;
+        color: var(--text-tertiary);
+        font-size: 0.9rem;
+        margin-top: 2rem;
+        opacity: 0;
+        animation: fadeInUp 0.8s ease forwards;
+        animation-delay: 1.2s;
+    }
+
+    @media (max-width: 768px) {
+        .hero-title {
+            font-size: 2.5rem;
+        }
+        
+        .contact-grid {
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+        
+        .contact-card {
+            padding: 2rem;
+        }
+        
+        .main-container {
+            margin-top: 5rem;
+        }
+    }
+
+    .pulse-animation {
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0% { box-shadow: 0 0 0 0 var(--glow); }
+        70% { box-shadow: 0 0 0 20px rgba(99, 102, 241, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0); }
+    }
+
+    .float-animation {
+        animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+    }
+</style>
+<body>
+    <header class="header">
+        <nav class="nav-links">
+            <a href="/" class="nav-link">
+                <i class="fas fa-home"></i>
+                Home
+            </a>
+            <a href="/terms" class="nav-link">
+                <i class="fas fa-envelope"></i>
+                Terms
+            </a>
+            <a href="/navigation-guide" class="nav-link">
+                <i class="fas fa-map-signs"></i>
+                Guide
+            </a>
+        </nav>
+    </header>
+
+    <main class="main-container">
+        <section class="hero-section">
+            <h1 class="hero-title">Get In Touch</h1>
+            <p class="hero-subtitle">We're here to help and ready to listen. Reach out to us through any of our channels below.</p>
+        </section>
+
+        <div class="contact-grid">
+            <div class="contact-card" style="--delay: 0.2s">
+                <div class="card-header">
+                    <div class="card-icon float-animation">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <h2 class="card-title">Business Hours</h2>
+                </div>
+                <ul class="hours-list">
+                    <li class="hours-item">
+                        <span class="day">Monday - Friday</span>
+                        <span class="time">9:00 AM - 9:00 PM</span>
+                    </li>
+                    <li class="hours-item">
+                        <span class="day">Saturday - Sunday</span>
+                        <span class="time">2:00 PM - 8:00 PM</span>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="contact-card" style="--delay: 0.4s">
+                <div class="card-header">
+                    <div class="card-icon float-animation">
+                        <i class="fas fa-phone"></i>
+                    </div>
+                    <h2 class="card-title">Direct Contact</h2>
+                </div>
+                <ul class="contact-list">
+                    <li>
+                        <a href="tel:+254112167195" class="contact-item">
+                            <div class="contact-icon">
+                                <i class="fas fa-phone-alt"></i>
+                            </div>
+                            <div class="contact-info">
+                                <div class="contact-label">Direct Call</div>
+                                <div class="contact-value">+254 112 167 195</div>
+                            </div>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="contact-card" style="--delay: 0.6s">
+                <div class="card-header">
+                    <div class="card-icon float-animation">
+                        <i class="fab fa-whatsapp"></i>
+                    </div>
+                    <h2 class="card-title">WhatsApp Support</h2>
+                </div>
+                <ul class="contact-list">
+                    <li>
+                        <a href="https://wa.me/254112167195" target="_blank" rel="noopener noreferrer" class="contact-item">
+                            <div class="contact-icon">
+                                <i class="fab fa-whatsapp"></i>
+                            </div>
+                            <div class="contact-info">
+                                <div class="contact-label">Secretary</div>
+                                <div class="contact-value">+254 112 167 195</div>
+                            </div>
+                            <span class="whatsapp-badge">Secretary</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://wa.me/254786807668" target="_blank" rel="noopener noreferrer" class="contact-item">
+                            <div class="contact-icon">
+                                <i class="fab fa-whatsapp"></i>
+                            </div>
+                            <div class="contact-info">
+                                <div class="contact-label">Admin 1</div>
+                                <div class="contact-value">+254 786 807 668</div>
+                            </div>
+                            <span class="whatsapp-badge">Admin</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://wa.me/254743482322" target="_blank" rel="noopener noreferrer" class="contact-item">
+                            <div class="contact-icon">
+                                <i class="fab fa-whatsapp"></i>
+                            </div>
+                            <div class="contact-info">
+                                <div class="contact-label">Admin 2</div>
+                                <div class="contact-value">+254 743 482 322</div>
+                            </div>
+                            <span class="whatsapp-badge">Gideon</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="contact-card email-card" style="--delay: 0.8s">
+                <div class="email-icon pulse-animation">
+                    <i class="fas fa-envelope"></i>
+                </div>
+                <h2 class="card-title">Email Us</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 2rem;">Send us an email and we'll get back to you as soon as possible.</p>
+                <a href="mailto:vincentkipngetich479@gmail.com" class="email-link">
+                    <i class="fas fa-paper-plane"></i>
+                    <span>Send Email</span>
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; {{ year }} LyxNexus. All rights reserved.</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver(function(entries) {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, observerOptions);
+
+            document.querySelectorAll('.contact-card').forEach(card => {
+                observer.observe(card);
+            });
+
+            document.querySelectorAll('.contact-item, .email-link').forEach(item => {
+                item.addEventListener('click', function(e) {
+                    const ripple = document.createElement('span');
+                    ripple.style.position = 'absolute';
+                    ripple.style.borderRadius = '50%';
+                    ripple.style.background = 'rgba(255, 255, 255, 0.3)';
+                    ripple.style.transform = 'scale(0)';
+                    ripple.style.animation = 'ripple 0.6s linear';
+                    ripple.style.left = '50%';
+                    ripple.style.top = '50%';
+                    ripple.style.width = '20px';
+                    ripple.style.height = '20px';
+                    ripple.style.marginLeft = '-10px';
+                    ripple.style.marginTop = '-10px';
+                    
+                    this.style.position = 'relative';
+                    this.appendChild(ripple);
+                    
+                    setTimeout(() => {
+                        ripple.remove();
+                    }, 600);
+                });
+            });
+
+            // Add ripple animation
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes ripple {
+                    to {
+                        transform: scale(4);
+                        opacity: 0;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+        });
+    </script>
+</body>
+</html>
