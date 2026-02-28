@@ -11115,7 +11115,6 @@ def pay_to_ln():
     db.session.add(pending)
     db.session.commit()
     
-    # M-Pesa credentials (from .env)
     consumer_key = os.getenv("MPESA_CONSUMER_KEY")
     consumer_secret = os.getenv("MPESA_CONSUMER_SECRET")
     passkey = os.getenv("MPESA_PASSKEY")
