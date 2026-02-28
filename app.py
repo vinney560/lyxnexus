@@ -21,7 +21,7 @@ from flask_compress import Compress
 from dotenv import load_dotenv # Loads environments where keys are safly stored 
 import traceback
 import uuid
-import logging # For under the Hood Error showing
+import logging
 import re # Handle large texts
 from flask_jwt_extended import JWTManager # Not used for now
 from functools import wraps # Wraps a function to a decorator
