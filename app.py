@@ -92,7 +92,6 @@ def database_url():
 
 app.config['SQLALCHEMY_DATABASE_URI'] = database_url()
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-# Read from Aiven connection max pooling for reuse pool
 app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
     'pool_size': 10,
     'max_overflow': 20,
@@ -116,7 +115,6 @@ CORS(app, resources={
     }
 })
 
-# Start Logging process for all Processess made --> easy retrieval and 'debug'
 app.logger.setLevel(logging.INFO)
 
 # Setup logging
@@ -129,10 +127,9 @@ logging.basicConfig(
     ]
 )
 
-# For Now we use Filesystem --> this is what i know how to use
 app.config["SESSION_TYPE"] = "filesystem"
 UPLOAD_FOLDER = os.path.join(app.root_path, 'uploads')
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER # Where to save files --> We moved to DB saving
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 app.config['MAX_CONTENT_LENGTH'] = 100 * 1024 * 1024  # 100MB max file size
 app.config['ALLOWED_EXTENSIONS'] = {'mp4', 'webm', 'mkv'}
@@ -180,9 +177,9 @@ limiter = Limiter(
     key_func=get_rate_limit_key,
     app=app,
     default_limits=[
-        "1000 per day",    # Normal users: ~30 visits/day is typical
-        "200 per hour",    # Burst protection
-        "10 per minute"    # Prevent rapid-fire requests
+        "1000 per day",
+        "200 per hour",
+        "10 per minute"
     ]
 )
 # ===============================
@@ -192,14 +189,14 @@ login_manager.login_view = 'login'
 login_manager.session_protection = "strong"  # Extra security
 login_manager.refresh_view = 'login'
 
-jwt = JWTManager(app) # Initialized but domant
+jwt = JWTManager(app)
 Compress(app)
 socketio = SocketIO(app,
                     cors_allowed_origins="*",
                     async_mode="eventlet",
                     manage_session=False,
                     ping_timeout=20,
-                    ping_interval=10) # because we are using socketIO for messaging and it must run on its on
+                    ping_interval=10)
 
 db = SQLAlchemy(app)
 Session(app)
@@ -285,7 +282,7 @@ class Announcement(db.Model):
         # For latest announcements
         db.Index('idx_announcement_created', 'created_at'),
         
-        # For highlighted/pinned announcements
+        # For highlighted announcements
         db.Index('idx_announcement_highlighted', 'highlighted'),
         
         # For author-based queries
@@ -303,9 +300,9 @@ class Announcement(db.Model):
     #Relationships
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
 
-    file_name = db.Column(db.String(255), nullable=True)       # Original filename
-    file_type = db.Column(db.String(100), nullable=True)       # MIME type
-    file_data = db.Column(db.LargeBinary, nullable=True)       # Actual file content (bytes)
+    file_name = db.Column(db.String(255), nullable=True)
+    file_type = db.Column(db.String(100), nullable=True)
+    file_data = db.Column(db.LargeBinary, nullable=True)
 
     def has_file(self):
         """Check if announcement has an attached file"""
