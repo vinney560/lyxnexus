@@ -1202,7 +1202,7 @@ def payment_required(f):
             if request.path.startswith('/api/') or request.is_json:
                 return jsonify({'error': 'Payment required to access this feature.'}), 402
             flash('Payment required to access this feature.', 'warning')
-            return redirect(url_for('lyx_payment_page'))
+            return redirect(url_for('ln_payment_page'))
         return f(*args, **kwargs)
     return pay_decor
 #------------------------------------------------------------------------------
@@ -2321,7 +2321,7 @@ def send_msg(mobile, msg):
 
     if response.status_code == 200:
         print(Fore.GREEN + "=" * 50)
-        print("Sent successfully!")
+        print("WhatsApp Msg Sent successfully!")
         h = response.headers
         print(f"Limit: {h.get('X-RateLimit-rapid-free-plans-hard-limit-Limit')}")
         print(f"Remaining: {h.get('X-RateLimit-rapid-free-plans-hard-limit-Remaining')}")
@@ -2331,6 +2331,7 @@ def send_msg(mobile, msg):
         print(Fore.GREEN + "=" * 50)
     else:
         print(Fore.RED + "=" * 50)
+        print("WhatsApp Msg NOT Sent!")
         print(f"Status Code: {response.status_code}")
         print(f"Response: {response.text}")
         print(Fore.RED + "=" * 50)
@@ -2828,7 +2829,7 @@ def handle_student_login(user, username, mobile, login_subtype, next_page, year)
             if user.paid is False:
                 login_user(user)
                 flash('Your account is inactive. Pay you registration Fee or contact Admin for assistance.', 'error')
-                return redirect(url_for('lyx_payment_page'))
+                return redirect(url_for('ln_payment_page'))
             
         if user.free_trial is True:
             if user.paid is False:
@@ -5249,7 +5250,7 @@ def check():
         else:
             if current_user.paid is False:
                 flash("Your account is inactive. Please complete the payment to activate your account.", 'error')
-                return redirect(url_for('lyx_payment_page'))
+                return redirect(url_for('ln_payment_page'))
             return redirect(url_for('main_page'))
     else:
         return redirect(url_for('login'))
