@@ -7519,11 +7519,19 @@ Admin: [ ID: {current_user.id} | USERNAME: {current_user.username} ]
         # ===========================
         # 9. Delete Notification Link
         # ===========================
-        db.session.query(NotificationSpecificUser).filter_by(user_id=user_id).delete(synchronize_session=False)
-        db.session.query(UserNotification).filter_by(user_id=user_id).delete(synchronize_session=False)
-            
+        db.session.query(NotificationSpecificUser).filter_by(user_id=user.id).delete(synchronize_session=False)
+        db.session.query(UserNotification).filter_by(user_id=user.id).delete(synchronize_session=False)
+
         # ===============================
-        # 10. Finally delete the user 😤
+        # 10. Delete Payment Records
+        # ===============================
+        db.session.query(Payment).filter_by(user_id=user.id).delete(synchronize_session=False)
+        # ===============================
+        # 11. Delete Exam Results
+        # ===============================
+        db.session.query(ExamResult).filter_by(user_id=user.id).delete(synchronize_session=False)
+        # ===============================
+        # 12. Finally delete the user 😤
         # ===============================
         db.session.delete(user)
         db.session.commit()
