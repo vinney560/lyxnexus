@@ -5396,6 +5396,10 @@ def sw():
 @app.route('/tailwind.all.css')
 def tailwindcss():
     return send_from_directory('static', 'css/tailwind.all.css', mimetype='application/javascript')
+# ------------------------------------------------------------------
+@app.route('/progressier.js')
+def progressier():
+    return send_from_directory('static', 'js/progressier.js', mimetype='application/javascript')
 #-------------------------------------------------------------------
 """
 _0eXv3 --> static/css
