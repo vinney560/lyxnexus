@@ -3086,7 +3086,7 @@
             loadInitialOnlineUsers();
             socket.emit('join_room', { room: currentRoom });
             processMessageQueue();
-        });
+        });        
         
         socket.on('disconnect', (reason) => {
             console.log('Disconnected from server:', reason);
@@ -3107,7 +3107,25 @@
         socket.on('reconnect', (attempt) => {
             console.log('Reconnected after', attempt, 'attempts');
             updateConnectionStatus('connected', 'Reconnected');
+            loadRecentMessages();
         });
+
+        function loadRecentMessages() {
+            lastMessageId = 0;
+            fetch(`/api/messages?room=${currentRoom}&since_id=${lastMessageId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.messages && data.messages.length > 0) {
+                        data.messages.forEach(message => {
+                            addMessage(message);
+                        });
+                        scrollToBottom();
+                    }
+                })
+                .catch(error => {
+                    console.error('Failed to load recent messages:', error);
+                });
+        }
         
         socket.on('reconnect_error', (error) => {
             console.log('Reconnection error:', error);
