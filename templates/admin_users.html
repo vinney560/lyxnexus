@@ -859,7 +859,7 @@
             <p class="text-gray-400">Manage system users and administrator privileges</p>
         </div>
 
-        <!-- quick stats (original IDs) -->
+        <!-- quick stats -->
         <div class="quick-stats-grid">
             <div class="quick-stat"><div class="stats-icon text-blue-400"><i class="fas fa-users"></i></div><div class="quick-stat-value" id="total-users">0</div><div class="quick-stat-label">Total Users</div></div>
             <div class="quick-stat"><div class="stats-icon text-purple-400"><i class="fas fa-user-shield"></i></div><div class="quick-stat-value" id="admin-users">0</div><div class="quick-stat-label">Administrators</div></div>
@@ -872,7 +872,7 @@
             <div class="quick-stat"><div class="stats-icon text-yellow-400"><i class="fas fa-bell"></i></div><div class="quick-stat-value" id="all-subs-users">0</div><div class="quick-stat-label">Enabled WebPush</div></div>
         </div>
 
-        <!-- online panel (original IDs) -->
+        <!-- online panel -->
         <div class="online-users-panel">
             <div class="card-header flex justify-between items-center">
                 <h3 class="section-title font-semibold"><i class="fas fa-circle mr-2 text-green-400"></i> Online Users <span id="online-count">(0)</span></h3>
@@ -883,7 +883,7 @@
             </div>
         </div>
 
-        <!-- charts grid (original IDs) -->
+        <!-- charts grid -->
         <div class="chart-grid">
             <div class="chart-container"><div class="chart-title">Registration Trend</div><div class="chart-wrapper"><canvas id="registration-chart"></canvas></div></div>
             <div class="chart-container"><div class="chart-title">Activity Distribution</div><div class="chart-wrapper"><canvas id="activity-chart"></canvas></div></div>
@@ -891,7 +891,7 @@
             <div class="chart-container"><div class="chart-title">Activity Timeline</div><div class="chart-wrapper"><canvas id="timeline-chart"></canvas></div></div>
         </div>
 
-        <!-- search/filter panel (original elements) -->
+        <!-- search/filter panel -->
         <div class="filters-panel">
             <div class="flex items-center gap-2 mb-4"><i class="fas fa-search text-blue-400"></i><span class="font-medium">User Search & Filters</span></div>
             <div class="search-container"><i class="fas fa-search search-icon"></i><input type="text" id="search-input" class="search-input" placeholder="Search by username, mobile, ID..."></div>
@@ -905,7 +905,7 @@
             </div>
         </div>
 
-        <!-- user table (original structure) -->
+        <!-- user table -->
         <div class="table-wrapper">
             <div class="flex flex-wrap justify-between items-center mb-6">
                 <h2 class="text-xl font-semibold">All Users <span id="user-count" class="text-gray-400">(0)</span></h2>
@@ -920,7 +920,7 @@
                     <tbody id="users-table-body"><tr><td colspan="11" class="text-center py-8"><div class="spinner"></div></td></tr></tbody>
                 </table>
             </div>
-            <!-- pagination (original) -->
+            <!-- pagination -->
             <div class="flex justify-between items-center mt-6">
                 <div class="text-sm text-gray-400">Showing <span id="showing-start">0</span> to <span id="showing-end">0</span> of <span id="showing-total">0</span></div>
                 <div class="flex gap-2"><button class="btn btn-secondary" id="prev-page" disabled><i class="fas fa-chevron-left mr-2"></i>Prev</button><button class="btn btn-secondary" id="next-page" disabled>Next<i class="fas fa-chevron-right ml-2"></i></button></div>
@@ -928,7 +928,7 @@
         </div>
     </main>
 
-    <!-- modals untouched -->
+    <!-- modals -->
     <div id="confirm-modal" class="modal"><div class="modal-content"><h3 class="text-xl font-bold mb-4" id="confirm-title">Confirm Action</h3><p id="confirm-message" class="text-gray-300 mb-6">Are you sure?</p><div class="flex justify-end gap-3"><button class="btn btn-secondary" onclick="closeModal('confirm-modal')">Cancel</button><button class="btn btn-danger" id="confirm-action-btn"><span class="btn-spinner"></span>Confirm</button></div></div></div>
 
     <script>

@@ -2821,17 +2821,6 @@ def handle_student_login(user, username, mobile, login_subtype, next_page, year)
         if user.killed:
             flash("Account Permanently deactivated!", 'error')
             return redirect(url_for("login"))
-        
-        if user.free_trial is False:
-            if user.paid is False:
-                login_user(user)
-                flash('Your account is inactive. Pay you registration Fee or contact Admin for assistance.', 'error')
-                return redirect(url_for('ln_payment_page'))
-            
-        if user.free_trial is True:
-            if user.paid is False:
-                flash('Welcome to LyxNexus Free Trial! Enjoy unlimited features.', 'info')
-                return redirect(next_page or url_for('main_page'))
 
         login_user(user)
         return redirect(next_page or url_for('main_page'))
@@ -5274,7 +5263,6 @@ def help_logout():
 #--------------------------------------------------------------------
 @app.route('/main-page')
 @login_required
-@payment_required
 def main_page():
     return render_template('main_page.html', year=_year())
 #-----------------------------------------------------------------
@@ -6877,7 +6865,6 @@ def handle_disconnect():
     except Exception as e:
         print(Fore.RED + f"⚠️ Disconnect error: {e}")
 
-# I'm not that good at this part
 @socketio.on('join_room')
 def handle_join_room(data):
     """Handle joining a room"""
