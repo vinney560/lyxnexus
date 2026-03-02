@@ -1568,17 +1568,15 @@ def get_timetable_and_notify():
     """Check for upcoming classes and send webpush notifications once per class."""
     with app.app_context():
         try:
-            now = datetime.now(timezone.utc) + timedelta(hours=3)  # Nairobi time (offset-aware)
+            now = datetime.utcnow() + timedelta(hours=3)  # Nairobi time
             current_day = now.strftime("%A")
 
             # Fetch today's timetable
             today_classes = Timetable.query.filter_by(day_of_week=current_day).all()
 
             for timetable in today_classes:
-                # Combine today's date with class start time and make it offset-aware
+                # Combine today's date with class start time
                 class_start = datetime.combine(now.date(), timetable.start_time)
-                # Make class_start offset-aware using the same timezone as now
-                class_start = class_start.replace(tzinfo=now.tzinfo)
                 time_diff = class_start - now
 
                 # Notify only if the class starts in <=30 mins & not already sent
